@@ -1,0 +1,17 @@
+{
+  "restartable": "rs",
+  "watch": ["src"],
+  "ext": "ts, js",
+  "delay": 2500,
+  "exec": "ts-node src/index.ts",
+  "env": {
+    "NODE_ENV": "development",
+    "PORT": 4000,
+    "GOOGLE_OAUTH_CLIENT_ID": "650706540645-lfagodh1ld38fmcfih6cjtre70n9bc4p.apps.googleusercontent.com",
+    "GOOGLE_OAUTH_CLIENT_SECRET": "AgEz4TnpqRG5vvdqiGqtaz4Q",
+    "GOOGLE_OAUTH_REDIRECT_URI": "/oauth/google/callback"
+  },
+  "events": {
+    "crash": "fuser -k 4000/tcp"
+  }
+}
