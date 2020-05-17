@@ -1,16 +1,5 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  BaseEntity,
-  UpdateDateColumn,
-  CreateDateColumn,
-  OneToMany,
-  ManyToOne,
-  JoinColumn,
-} from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, UpdateDateColumn, CreateDateColumn, OneToMany } from "typeorm";
 import { ContactDetails } from "./ContactDetails";
-import { AccountStatus } from "./AccountStatus";
 
 export enum personHonorificTitle {
   mr = "Mr",
@@ -38,13 +27,6 @@ export class Account extends BaseEntity {
 
   @Column({ name: "age", type: "smallint", nullable: true })
   age: number;
-
-  @Column({ name: "status_id", type: "integer", default: 1, nullable: true })
-  statusId: number;
-
-  @ManyToOne(() => AccountStatus, accountStatus => accountStatus.accounts)
-  @JoinColumn({ name: "status_id" })
-  status: AccountStatus;
 
   @Column({ name: "is_active", type: "boolean", nullable: true, default: false })
   isActive: boolean;

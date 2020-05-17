@@ -15,9 +15,7 @@ const startServer = async (): Promise<any> => {
 
   const server = new ApolloServer({
     schema,
-    context: ({ req, res }): MyContext => {
-      return { req, res };
-    },
+    context: ({ req, res }): MyContext => ({ req, res }),
   });
 
   await createDBConnection();

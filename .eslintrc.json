@@ -32,8 +32,9 @@
   },
   "rules": {
     "@typescript-eslint/no-explicit-any": 0,
-    "array-element-newline": ["error", { "minItems": 5 }],
-    "prettier/prettier": "error",
+    "array-bracket-newline": ["error", "consistent"],
+    "array-element-newline": ["error", "consistent"],
+    "prettier/prettier": "warn",
     "arrow-parens": ["error", "as-needed"],
     "@typescript-eslint/no-non-null-assertion": "off"
   }

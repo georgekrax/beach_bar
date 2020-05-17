@@ -12,8 +12,11 @@ export class User extends BaseEntity {
   @Column("varchar", { name: "email", length: 255, unique: true })
   email: string;
 
-  @Column({ name: "hashtag_id", type: "bigint", unique: true })
+  @Column({ name: "hashtag_id", type: "bigint", unique: true, nullable: true })
   hashtagId: bigint;
+
+  @Column({ name: "token_version", type: "integer", default: 0 })
+  tokenVersion: number;
 
   @Column({ name: "google_id", type: "bigint", unique: true, nullable: true })
   googleId: bigint;
