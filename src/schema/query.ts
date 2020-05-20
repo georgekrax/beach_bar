@@ -4,8 +4,12 @@ export const Query = queryType({
   description: "Query",
   definition(t) {
     t.string("hello", {
-      resolve: () => {
-        return `Hello world!`;
+      resolve: (_, __, { payload }) => {
+        console.log(payload);
+        if (payload) {
+          return `Hello world, ${payload.userId}!`;
+        }
+        return "Hello world!";
       },
     });
   },

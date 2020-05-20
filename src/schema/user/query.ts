@@ -11,7 +11,7 @@ export const UsersQuery = extendType({
       description: "Returns a list of all available users",
       resolve: async () => {
         const users = await User.find({
-          select: ["id", "username", "email", "firstName", "lastName", "accountId"],
+          select: ["id", "email", "firstName", "lastName", "accountId"],
         });
         return users;
       },
@@ -30,7 +30,7 @@ export const UsersQuery = extendType({
 
         const user = await User.findOne({
           ...args,
-          select: ["id", "username", "email", "firstName", "lastName", "accountId"],
+          select: ["id", "email", "firstName", "lastName", "accountId"],
         });
         return user;
       },

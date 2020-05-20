@@ -1,4 +1,17 @@
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, UpdateDateColumn, CreateDateColumn, OneToMany } from "typeorm";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  BaseEntity,
+  UpdateDateColumn,
+  CreateDateColumn,
+  OneToMany,
+  OneToOne,
+  JoinColumn,
+} from "typeorm";
+
+import { User } from "./User";
+import { LoginDetails } from "./LoginDetails";
 import { ContactDetails } from "./ContactDetails";
 
 export enum personHonorificTitle {
@@ -13,8 +26,15 @@ export enum personHonorificTitle {
 
 @Entity({ name: "account", schema: "public" })
 export class Account extends BaseEntity {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ type: "bigint" })
   id: bigint;
+
+  @Column({ name: "user_id", unique: true, type: "bigint" })
+  userId: bigint;
+
+  @OneToOne(() => User)
+  @JoinColumn({ name: "user_id" })
+  user: User;
 
   @Column({ name: "person_title", type: "enum", enum: personHonorificTitle, enumName: "person_honorific_title", nullable: true })
   personTitle: string;
@@ -39,4 +59,7 @@ export class Account extends BaseEntity {
 
   @OneToMany(() => ContactDetails, contactDetails => contactDetails.account)
   contactDetails: ContactDetails[];
+
+  @OneToMany(() => LoginDetails, loginDetails => loginDetails.account)
+  loginDetails: LoginDetails[];
 }

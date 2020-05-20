@@ -5,13 +5,12 @@ export const passwordNotLongEnough = "Password should be at least five (5) chara
 export const invalidEmail = "Email should be a valid one";
 
 export const userValidationSchema = yup.object().shape({
-  email: yup.string().min(5, emailNotLongEnough).max(85).email(invalidEmail).required(),
-  username: yup.string().max(30),
+  email: yup.string().min(5, emailNotLongEnough).max(255).email(invalidEmail).required(),
   password: yup.string().min(5, passwordNotLongEnough).max(60).required(),
 });
 
-export async function validateUserSchema(email: string, password: string, username?: string): Promise<any> {
-  await userValidationSchema.validate({ email, password, username }, { abortEarly: true }).catch(err => {
+export async function validateUserSchema(email: string, password: string): Promise<any> {
+  await userValidationSchema.validate({ email, password }, { abortEarly: true }).catch(err => {
     err.errors.forEach(err => {
       throw new Error(`Something went wrong: ${err}`);
     });

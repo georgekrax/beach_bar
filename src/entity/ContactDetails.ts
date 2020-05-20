@@ -5,7 +5,7 @@ import { Account } from "./Account";
 
 @Entity({ name: "contact_details", schema: "public" })
 export class ContactDetails extends BaseEntity {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ type: "bigint"})
   id: bigint;
 
   @Column({ name: "account_id", type: "bigint" })

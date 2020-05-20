@@ -1,13 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, OneToOne, JoinColumn } from "typeorm";
-import { Account } from "./Account";
+import { Entity, PrimaryGeneratedColumn, Column, BaseEntity } from "typeorm";
 
 @Entity({ name: "user", schema: "public" })
 export class User extends BaseEntity {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ type: "bigint" })
   id: bigint;
-
-  @Column("varchar", { name: "username", length: 30, unique: true })
-  username: string;
 
   @Column("varchar", { name: "email", length: 255, unique: true })
   email: string;
@@ -33,10 +29,6 @@ export class User extends BaseEntity {
   @Column("varchar", { name: "last_name", length: 255, nullable: true })
   lastName: string;
 
-  @Column({ name: "account_id", unique: true, type: "bigint" })
-  accountId: bigint;
-
-  @OneToOne(() => Account)
-  @JoinColumn({ name: "account_id" })
-  account: Account;
+  @Column({ name: "is_owner", type: "boolean", default: false })
+  isOwner: boolean;
 }
