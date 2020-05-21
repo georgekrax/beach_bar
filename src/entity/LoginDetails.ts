@@ -37,28 +37,28 @@ export class LoginDetails extends BaseEntity {
   @Column({ name: "os_id", nullable: true })
   osId: number;
 
-  @ManyToOne(() => ClientOs, clientOs => clientOs.loginDetails)
+  @ManyToOne(() => ClientOs, clientOs => clientOs.loginDetails, { nullable: true })
   @JoinColumn({ name: "os_id" })
   clientOs: ClientOs;
 
   @Column({ name: "browser_id", nullable: true })
   browserId: number;
 
-  @ManyToOne(() => ClientBrowser, clientBrowser => clientBrowser.loginDetails)
+  @ManyToOne(() => ClientBrowser, clientBrowser => clientBrowser.loginDetails, { nullable: true })
   @JoinColumn({ name: "browser_id" })
   clientBrowser: ClientBrowser;
 
   @Column({ name: "country_id", nullable: true })
   countryId: number;
 
-  @ManyToOne(() => Country, country => country.loginDetails)
+  @ManyToOne(() => Country, country => country.loginDetails, { nullable: true })
   @JoinColumn({ name: "country_id" })
   country: Country;
 
   @Column({ name: "city_id", nullable: true })
   cityId: number;
 
-  @ManyToOne(() => City, city => city.loginDetails)
+  @ManyToOne(() => City, city => city.loginDetails, { nullable: true })
   @JoinColumn({ name: "city_id" })
   city: City;
 

@@ -19,22 +19,32 @@ export const createUserLoginDetails = async (
   status: loginDetailStatus,
   platform: Platform,
   account: Account,
-  clientOs: ClientOs,
-  clientBrowser: ClientBrowser,
-  country: Country,
-  city: City,
-  ipAddr: string,
+  clientOs: ClientOs | null,
+  clientBrowser: ClientBrowser | null,
+  country: Country | null,
+  city: City | null,
+  ipAddr: string | null,
 ): Promise<void> => {
   const userLoginDetails = LoginDetails.create({
     status,
     platform,
     account,
-    clientOs,
-    clientBrowser,
-    country,
-    city,
-    ipAddr,
   });
+  if (clientOs) {
+    userLoginDetails.clientOs = clientOs;
+  }
+  if (clientBrowser) {
+    userLoginDetails.clientBrowser = clientBrowser;
+  }
+  if (country) {
+    userLoginDetails.country = country;
+  }
+  if (city) {
+    userLoginDetails.city = city;
+  }
+  if (ipAddr) {
+    userLoginDetails.ipAddr = ipAddr;
+  }
   await userLoginDetails.save();
 };
 

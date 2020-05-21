@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, OneToOne } from "typeorm";
+import { Account } from "./Account";
 
 @Entity({ name: "user", schema: "public" })
 export class User extends BaseEntity {
@@ -31,4 +32,7 @@ export class User extends BaseEntity {
 
   @Column({ name: "is_owner", type: "boolean", default: false })
   isOwner: boolean;
+
+  @OneToOne(() => Account, account => account.user) // specify inverse side as a second parameter
+  account: Account;
 }

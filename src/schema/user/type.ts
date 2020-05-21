@@ -48,8 +48,17 @@ export const UserLoginType = objectType({
   description: "User info to be returned on login",
   definition(t) {
     t.implements(UserInterface);
-    t.boolean("logined", { nullable: false, description: "A boolean that indicates if the user succefully logined" });
+    t.boolean("logined", { nullable: false, description: "A boolean that indicates if the user has succefully logined" });
     t.string("accessToken", { nullable: true, description: "The JWT access token to be returned upon successfull login" });
+    t.implements(ErrorInterface);
+  },
+});
+
+export const UserLogoutType = objectType({
+  name: "UserLogoutType",
+  description: "Info to be returned on successfull user logout",
+  definition(t) {
+    t.boolean("loggedOut", { nullable: false, description: "A boolean that indicates if the user has succefully logged out" });
     t.implements(ErrorInterface);
   },
 });

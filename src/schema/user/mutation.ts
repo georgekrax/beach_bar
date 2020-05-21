@@ -1,15 +1,20 @@
-import { Platform } from "./../../entity/Platform";
-import { extendType, arg } from "@nexus/schema";
+import fetch from "node-fetch";
+import { extendType, arg, stringArg } from "@nexus/schema";
 import { execute, makePromise } from "apollo-link";
 
 import { User } from "../../entity/User";
 import { gql } from "apollo-server-express";
 import { Account } from "../../entity/Account";
 import { link } from "../../config/apolloLink";
+import { MyContext } from "../../common/myContext";
+import { Platform } from "./../../entity/Platform";
 import { loginDetailStatus } from "../../entity/LoginDetails";
-import { generateAccessToken } from "../../utils/auth/generateAuthTokens";
-import { UserSignUpType, UserLoginType, UserSignUpCredentialsInput } from "./type";
+import { sendRefreshToken } from "../../utils/auth/sendRefreshToken";
+import { UserSignUpType, UserLoginType, UserSignUpCredentialsInput, UserLogoutType } from "./type";
+import { generateAccessToken, generateRefreshToken } from "../../utils/auth/generateAuthTokens";
 import { createUserLoginDetails, findOs, findBrowser, findCountry, findCity } from "../../utils/auth/userCommon";
+import { verify } from "jsonwebtoken";
+import { getConnection } from "typeorm";
 
 // --------------------------------------------------- //
 // Sign up mutation
@@ -20,6 +25,7 @@ export const UserSignUpMutation = extendType({
   definition(t) {
     t.field("signUp", {
       type: UserSignUpType,
+      description: "Sign up a user",
       nullable: false,
       args: {
         userCredentials: arg({ type: UserSignUpCredentialsInput, required: true, description: "Credential for signing up a user" }),
@@ -112,11 +118,16 @@ export const UserSignUpMutation = extendType({
   },
 });
 
+// --------------------------------------------------- //
+// Login mutation
+// --------------------------------------------------- //
+
 export const UserLoginMutation = extendType({
   type: "Mutation",
   definition(t) {
     t.field("login", {
       type: UserLoginType,
+      description: "Login a user",
       nullable: false,
       args: {
         userCredentials: arg({ type: UserSignUpCredentialsInput, required: true, description: "Credential for signing up a user" }),
@@ -124,7 +135,7 @@ export const UserLoginMutation = extendType({
       resolve: async (
         _,
         { userCredentials },
-        { req },
+        { res, redis, uaParser }: MyContext,
       ): Promise<{
         id: bigint | null;
         email: string;
@@ -135,39 +146,33 @@ export const UserLoginMutation = extendType({
       }> => {
         const { email, password } = userCredentials;
 
-        const unformattedIpAddr: string = req.ip;
-        const ipAddr: string = unformattedIpAddr.replace(/::ffff:/, "");
-
-        let os: any = null,
-          browser: any = null,
+        let os: any = uaParser.getOS().name,
+          browser: any = uaParser.getBrowser().name,
           country: any = null,
-          city: any = null;
+          city: any = null,
+          ipAddr: string | null = null;
+
+        await fetch("http://ip-api.com/json/")
+          .then(res => res.json())
+          .then(json => {
+            if (json.status === "success") {
+              country = json.country;
+              city = json.city;
+              ipAddr = json.query;
+            }
+          })
+          .catch(err => {
+            throw new Error(err);
+          });
 
         try {
-          os = await findOs("Windows");
-          browser = await findBrowser("Chrome");
-          country = await findCountry("Greece");
-          city = await findCity("Thessaloniki");
+          os = await findOs(os);
+          browser = await findBrowser(browser);
+          country = await findCountry(country);
+          city = await findCity(city);
         } catch (err) {
           throw new Error(err);
         }
-        console.log(password);
-        const operation = {
-          query: gql`
-            mutation LOGIN_USER($email: String!, $password: String!) {
-              login(userCredentials: { email: $email, password: $password }) {
-                id
-                email
-                logined
-                error
-              }
-            }
-          `,
-          variables: {
-            email,
-            password,
-          },
-        };
 
         // login user
         const user = await User.findOne({ where: { email }, select: ["id", "email", "hashtagId", "tokenVersion", "isOwner"] });
@@ -183,27 +188,58 @@ export const UserLoginMutation = extendType({
         }
 
         // find user's account
-        console.log(user);
-        console.log(user.id);
         const userAccount = await Account.findOne({
           where: { user: user, userId: user.id },
           select: ["id", "userId", "user", "isActive"],
         });
-        console.log(userAccount);
         if (!userAccount) {
           throw new Error("Something went wrong");
         }
 
+        const operation = {
+          query: gql`
+            mutation LOGIN_USER(
+              $email: String!
+              $password: String!
+              $os: String
+              $browser: String
+              $country: String
+              $city: String
+              $ipAddr: String
+            ) {
+              login(
+                userCredentials: { email: $email, password: $password }
+                loginDetails: { os: $os, browser: $browser, country: $country, city: $city, ipAddr: $ipAddr }
+              ) {
+                id
+                email
+                logined
+                error
+              }
+            }
+          `,
+          variables: {
+            email,
+            password,
+            os: os.name,
+            browser: browser.name,
+            country: country.name,
+            city: city.name,
+            ipAddr,
+          },
+        };
+
         let hashtagEmail: string | null = null,
+          hashtagId: bigint | null = null,
           logined: boolean | null = null,
           error: string | null = null;
 
         await makePromise(execute(link, operation))
           .then(res => {
             hashtagEmail = res.data?.login.email;
+            hashtagId = res.data?.login.id;
             logined = res.data?.login.logined;
             error = res.data?.login.error;
-            console.log(hashtagEmail, logined, error);
           })
           .catch(err => {
             throw new Error(err);
@@ -215,7 +251,11 @@ export const UserLoginMutation = extendType({
           throw new Error("Something went wrong");
         }
 
-        if (error !== null) {
+        if (BigInt(hashtagId) !== BigInt(user.hashtagId)) {
+          throw new Error("Something went wrong");
+        }
+
+        if (error !== null && logined == false) {
           if (error === "Invalid password") {
             await createUserLoginDetails(loginDetailStatus.invalidPassword, platform, userAccount, os, browser, country, city, ipAddr);
           }
@@ -237,24 +277,109 @@ export const UserLoginMutation = extendType({
         // create user login details
         await createUserLoginDetails(loginDetailStatus.loggedIn, platform, userAccount, os, browser, country, city, ipAddr);
 
-        // const refreshToken = await generateRefreshToken(user, req.hostname);
-        // sendRefreshToken(res, refreshToken);
+        const refreshToken = await generateRefreshToken(user);
+        sendRefreshToken(res, refreshToken.token);
 
-        // const payload: any = decode(refreshToken);
+        const tokenId = `${refreshToken.iat}-${refreshToken.jti}`;
+        await redis.set(tokenId, refreshToken.token, "ex", 75);
 
-        // if (payload === null) {
-        //   throw new Error("Something went wrong");
-        // }
-
-        // const tokenId = `${payload.iat}-${payload.jti}`;
-        // await redis.set(tokenId, refreshToken, "ex", 15552000);
+        try {
+          userAccount.isActive = true;
+          await userAccount.save();
+        } catch (err) {
+          throw new Error(err);
+        }
 
         return {
           id: BigInt(user.id),
           email: user.email,
           logined: true,
           accountId: BigInt(userAccount.id),
-          accessToken: generateAccessToken(user).accessToken,
+          accessToken: generateAccessToken(user).token,
+          error: null,
+        };
+      },
+    });
+  },
+});
+
+// --------------------------------------------------- //
+// Logout mutation
+// --------------------------------------------------- //
+
+export const UserLogoutMutation = extendType({
+  type: "Mutation",
+  definition(t) {
+    t.field("logout", {
+      type: UserLogoutType,
+      description: "Logout a user",
+      args: {
+        refreshToken: stringArg({ required: true }),
+      },
+      nullable: false,
+      resolve: async (
+        _,
+        { refreshToken },
+        { payload, redis }: MyContext,
+      ): Promise<{
+        loggedOut: boolean;
+        error: string | null;
+      }> => {
+        if (!refreshToken) {
+          return {
+            loggedOut: false,
+            error: "A refresh token should be provided",
+          };
+        }
+
+        if (!payload || payload.userId === null) {
+          return {
+            loggedOut: false,
+            error: "Not authenticated",
+          };
+        }
+
+        let tokenPayload: any = null;
+        try {
+          tokenPayload = verify(refreshToken, process.env.REFRESH_TOKEN_SECRET!, {
+            issuer: "www.beach_bar.com",
+          });
+        } catch (err) {
+          return {
+            loggedOut: false,
+            error: err,
+          };
+        }
+
+        if (payload.userId !== tokenPayload.userId) {
+          return {
+            loggedOut: false,
+            error: "You are not allowed to logout this user",
+          };
+        }
+
+        await getConnection().getRepository(User).increment({ id: payload.userId }, "tokenVersion", 1);
+
+        await getConnection()
+          .createQueryBuilder()
+          .update(Account)
+          .set({ isActive: false })
+          .where("userId = :userId", { userId: payload.userId })
+          .execute();
+
+        const tokenId = `${tokenPayload.iat}-${tokenPayload.jti}`;
+
+        try {
+          await redis.del(tokenId);
+        } catch (err) {
+          return {
+            loggedOut: false,
+            error: err,
+          };
+        }
+
+        return {
+          loggedOut: true,
           error: null,
         };
       },
