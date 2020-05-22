@@ -6,7 +6,7 @@ import { ContactDetails } from "./ContactDetails";
 
 @Entity({ name: "country", schema: "public" })
 export class Country extends BaseEntity {
-  @PrimaryGeneratedColumn({ type: "bigint"})
+  @PrimaryGeneratedColumn({ type: "bigint" })
   id: number;
 
   @Column("varchar", { length: 100, name: "name", unique: true })
@@ -14,6 +14,12 @@ export class Country extends BaseEntity {
 
   @Column("varchar", { length: 10, name: "calling_code", unique: true })
   callingCode: string;
+
+  @Column("varchar", { length: 5, name: "iso_code", unique: true })
+  isoCode: string;
+
+  @Column("varchar", { length: 5, name: "language_identifier", unique: false })
+  languageIdentifier: string;
 
   @OneToMany(() => City, city => city.country)
   cities: City[];

@@ -1,6 +1,8 @@
 import fetch from "node-fetch";
-import { extendType, arg, stringArg } from "@nexus/schema";
+import { verify } from "jsonwebtoken";
+import { getConnection } from "typeorm";
 import { execute, makePromise } from "apollo-link";
+import { extendType, arg, stringArg } from "@nexus/schema";
 
 import { User } from "../../entity/User";
 import { gql } from "apollo-server-express";
@@ -8,13 +10,12 @@ import { Account } from "../../entity/Account";
 import { link } from "../../config/apolloLink";
 import { MyContext } from "../../common/myContext";
 import { Platform } from "./../../entity/Platform";
+import { ContactDetails } from "../../entity/ContactDetails";
 import { loginDetailStatus } from "../../entity/LoginDetails";
 import { sendRefreshToken } from "../../utils/auth/sendRefreshToken";
-import { UserSignUpType, UserLoginType, UserSignUpCredentialsInput, UserLogoutType } from "./type";
 import { generateAccessToken, generateRefreshToken } from "../../utils/auth/generateAuthTokens";
+import { UserSignUpType, UserLoginType, UserSignUpCredentialsInput, UserLogoutType } from "./types";
 import { createUserLoginDetails, findOs, findBrowser, findCountry, findCity } from "../../utils/auth/userCommon";
-import { verify } from "jsonwebtoken";
-import { getConnection } from "typeorm";
 
 // --------------------------------------------------- //
 // Sign up mutation
@@ -37,7 +38,7 @@ export const UserSignUpMutation = extendType({
         id: bigint | null;
         email: string;
         signedUp: boolean;
-        accountId: bigint | null;
+        account: Account | null;
         error: string | null;
       }> => {
         const { email, password } = userCredentials;
@@ -67,13 +68,12 @@ export const UserSignUpMutation = extendType({
             hashtagEmail = res.data?.signUp.email;
             signedUp = res.data?.signUp.signedUp;
             error = res.data?.signUp.error;
-            console.log(hashtagEmail, hashtagId, signedUp, error);
           })
           .catch(err => {
             throw new Error(err);
           });
 
-        if (error !== "User already exists" && error !== null) {
+        if (error !== "User already exists" && error !== null && signedUp === false) {
           throw new Error(error);
         }
 
@@ -86,22 +86,22 @@ export const UserSignUpMutation = extendType({
           hashtagId: BigInt(hashtagId),
         });
 
-        const newUserAccount = await Account.create();
+        const newUserAccount = Account.create();
 
         try {
           await newUser.save();
           newUserAccount.user = newUser;
           await newUserAccount.save();
-
-          console.log(newUserAccount);
-          console.log(typeof newUser.id);
-          console.log(newUser);
+          const newUserContactDetails = ContactDetails.create({
+            account: newUserAccount,
+          });
+          await newUserContactDetails.save();
         } catch (err) {
           return {
             id: null,
             email: email,
             signedUp: false,
-            accountId: null,
+            account: null,
             error: "User already exists",
           };
         }
@@ -110,7 +110,7 @@ export const UserSignUpMutation = extendType({
           id: BigInt(newUser.id),
           email: newUser.email,
           signedUp: true,
-          accountId: BigInt(newUserAccount.id),
+          account: newUserAccount,
           error: null,
         };
       },
@@ -140,7 +140,7 @@ export const UserLoginMutation = extendType({
         id: bigint | null;
         email: string;
         logined: boolean;
-        accountId: bigint | null;
+        account: Account | null;
         accessToken: string | null;
         error: string | null;
       }> => {
@@ -175,25 +175,54 @@ export const UserLoginMutation = extendType({
         }
 
         // login user
-        const user = await User.findOne({ where: { email }, select: ["id", "email", "hashtagId", "tokenVersion", "isOwner"] });
+        const user = await User.findOne({
+          where: { email },
+          select: ["id", "email", "hashtagId", "tokenVersion", "isOwner", "googleId", "facebookId", "instagramId"],
+          relations: ["account"],
+        });
         if (!user) {
           return {
             id: null,
             email: email,
-            accountId: null,
+            account: null,
             logined: false,
             accessToken: null,
             error: "User does not exist",
           };
         }
 
-        // find user's account
-        const userAccount = await Account.findOne({
-          where: { user: user, userId: user.id },
-          select: ["id", "userId", "user", "isActive"],
-        });
-        if (!userAccount) {
+        // check user's account
+        if (!user.account) {
           throw new Error("Something went wrong");
+        }
+
+        if (user.googleId) {
+          return {
+            id: null,
+            email: email,
+            account: null,
+            logined: false,
+            accessToken: null,
+            error: "You have authenticated with Google",
+          };
+        } else if (user.facebookId) {
+          return {
+            id: null,
+            email: email,
+            account: null,
+            logined: false,
+            accessToken: null,
+            error: "You have authenticated with Facebook",
+          };
+        } else if (user.instagramId) {
+          return {
+            id: null,
+            email: email,
+            account: null,
+            logined: false,
+            accessToken: null,
+            error: "You have authenticated with Instagram",
+          };
         }
 
         const operation = {
@@ -257,12 +286,21 @@ export const UserLoginMutation = extendType({
 
         if (error !== null && logined == false) {
           if (error === "Invalid password") {
-            await createUserLoginDetails(loginDetailStatus.invalidPassword, platform, userAccount, os, browser, country, city, ipAddr);
+            await createUserLoginDetails(
+              loginDetailStatus.invalidPassword,
+              platform,
+              user.account,
+              os,
+              browser,
+              country,
+              city,
+              ipAddr,
+            );
           }
           return {
             id: null,
             email: email,
-            accountId: null,
+            account: null,
             logined: false,
             accessToken: null,
             error,
@@ -275,7 +313,7 @@ export const UserLoginMutation = extendType({
 
         // logined successfully
         // create user login details
-        await createUserLoginDetails(loginDetailStatus.loggedIn, platform, userAccount, os, browser, country, city, ipAddr);
+        await createUserLoginDetails(loginDetailStatus.loggedIn, platform, user.account, os, browser, country, city, ipAddr);
 
         const refreshToken = await generateRefreshToken(user);
         sendRefreshToken(res, refreshToken.token);
@@ -284,8 +322,8 @@ export const UserLoginMutation = extendType({
         await redis.set(tokenId, refreshToken.token, "ex", 75);
 
         try {
-          userAccount.isActive = true;
-          await userAccount.save();
+          user.account.isActive = true;
+          await user.account.save();
         } catch (err) {
           throw new Error(err);
         }
@@ -294,7 +332,7 @@ export const UserLoginMutation = extendType({
           id: BigInt(user.id),
           email: user.email,
           logined: true,
-          accountId: BigInt(userAccount.id),
+          account: user.account,
           accessToken: generateAccessToken(user).token,
           error: null,
         };
@@ -320,7 +358,7 @@ export const UserLogoutMutation = extendType({
       resolve: async (
         _,
         { refreshToken },
-        { payload, redis }: MyContext,
+        { res, payload, redis }: MyContext,
       ): Promise<{
         loggedOut: boolean;
         error: string | null;
@@ -378,6 +416,8 @@ export const UserLogoutMutation = extendType({
           };
         }
 
+        res.clearCookie("jid", { httpOnlye: true, maxAge: 15552000000 });
+
         return {
           loggedOut: true,
           error: null,
@@ -386,3 +426,11 @@ export const UserLogoutMutation = extendType({
     });
   },
 });
+
+// --------------------------------------------------- //
+// Forgot password mutation
+// --------------------------------------------------- //
+
+// --------------------------------------------------- //
+// Change password mutation
+// --------------------------------------------------- //

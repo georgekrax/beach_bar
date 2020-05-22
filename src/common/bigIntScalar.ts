@@ -19,8 +19,15 @@ function coerceBigInt(value: any): any {
   return int;
 }
 
+declare global {
+  interface BigInt {
+    toJSON(): string;
+  }
+}
+
 export const BigInt = scalarType({
   name: "BigInt",
+  asNexusMethod: "bigint",
   serialize(value) {
     return coerceBigInt(value);
   },

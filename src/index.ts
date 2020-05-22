@@ -2,14 +2,14 @@ import "reflect-metadata";
 import Redis from "ioredis";
 import * as express from "express";
 import { verify } from "jsonwebtoken";
+import { UAParser } from "ua-parser-js";
 import * as cookieParser from "cookie-parser";
 import { ApolloServer } from "apollo-server-express";
-import { UAParser } from "ua-parser-js";
 
-import "./config/passport";
 import { schema } from "./schema";
 import { router } from "./routes/authRoutes";
 import { MyContext } from "./common/myContext";
+import { googleOAuth2Client } from "./config/googleOAuth";
 import { createDBConnection } from "./utils/createDBConnection";
 
 export let redis;
@@ -17,6 +17,11 @@ export let redis;
 const startServer = async (): Promise<any> => {
   redis = new Redis({
     password: "george2016",
+  });
+
+  redis.on("error", (err: any) => {
+    console.log(err);
+    process.exit(0);
   });
 
   const app = express();
@@ -40,11 +45,13 @@ const startServer = async (): Promise<any> => {
       }
 
       const uaParser = new UAParser(req.headers["user-agent"]);
-      return { req, res, payload, redis, uaParser };
+      return { req, res, payload, redis, uaParser, googleOAuth2Client };
     },
   });
 
-  await createDBConnection();
+  createDBConnection().catch(err => {
+    throw new Error(err);
+  });
 
   server.applyMiddleware({ app });
 
