@@ -1,6 +1,6 @@
 import { stringArg, extendType, intArg } from "@nexus/schema";
 
-import { UserType } from "./type";
+import { UserType } from "./types";
 import { User } from "./../../entity/User";
 
 export const UsersQuery = extendType({
@@ -11,7 +11,8 @@ export const UsersQuery = extendType({
       description: "Returns a list of all available users",
       resolve: async () => {
         const users = await User.find({
-          select: ["id", "email", "firstName", "lastName", "accountId"],
+          select: ["id", "email", "firstName", "lastName"],
+          relations: ["account"],
         });
         return users;
       },
@@ -30,7 +31,8 @@ export const UsersQuery = extendType({
 
         const user = await User.findOne({
           ...args,
-          select: ["id", "email", "firstName", "lastName", "accountId"],
+          select: ["id", "email", "firstName", "lastName"],
+          relations: ["account"],
         });
         return user;
       },

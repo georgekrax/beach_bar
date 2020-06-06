@@ -11,7 +11,8 @@
     "REFRESH_TOKEN_SECRET": "dfcsknkEEfdkllsd5573WE5S5546dsknds5a5",
     "GOOGLE_OAUTH_CLIENT_ID": "650706540645-lfagodh1ld38fmcfih6cjtre70n9bc4p.apps.googleusercontent.com",
     "GOOGLE_OAUTH_CLIENT_SECRET": "AgEz4TnpqRG5vvdqiGqtaz4Q",
-    "GOOGLE_OAUTH_REDIRECT_URI": "/oauth/google/callback"
+    "GOOGLE_OAUTH_REDIRECT_URI": "http://127.0.0.1:4000/oauth/google/callback",
+    "HOSTNAME_WITH_HTTP": "http://127.0.0.1:4000"
   },
   "events": {
     "crash": "fuser -k 4000/tcp"

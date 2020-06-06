@@ -1,24 +1,24 @@
+/* eslint-disable @typescript-eslint/camelcase */
+import { URL } from "url";
 import * as express from "express";
-import * as passport from "passport";
 import { verify } from "jsonwebtoken";
 
 import { redis } from "../index";
 import { User } from "../entity/User";
-import { generateAccessToken, generateRefreshToken } from "../utils/auth/generateAuthTokens";
 import { sendRefreshToken } from "../utils/auth/sendRefreshToken";
+import { generateAccessToken, generateRefreshToken } from "../utils/auth/generateAuthTokens";
 
 export const router = express.Router();
 
-router.get("/google", passport.authenticate("google", { scope: ["profile"], session: false }), res => {
-  // handle with passport
-  console.log(res.url);
+router.get("/google/callback", async (req: express.Request, res: express.Response) => {
+  const qs = new URL(req.url, process.env.HOSTNAME_WITH_HTTP).searchParams;
+  console.log(qs);
+  const code = qs.get("code");
+  const state = qs.get("state");
+  res.send(`<h2>Redirected from Google</h2><p>${code}</p><br><p>${state}</p>`);
 });
 
-router.get("/google/callback", passport.authenticate("google", { session: false }), (_, res) => {
-  res.send("you reached the redirect URI");
-});
-
-router.post("/refresh_token", async (req, res) => {
+router.post("/refresh_token", async (req: express.Request, res: express.Response) => {
   const refreshToken = req.cookies.jid;
   if (!refreshToken) {
     return res.send({

@@ -1,13 +1,20 @@
 import { objectType, interfaceType, inputObjectType } from "@nexus/schema";
 
-import { BigInt } from "../../common/bigIntScalar";
+import { ErrorInterface } from "../../common/errorInterface";
 
-export const ErrorInterface = interfaceType({
-  name: "ErrorInterface",
-  description: "Adds error functionality ",
+export const UserAccountType = objectType({
+  name: "UserAccountType",
+  description: "Represents a user's account",
   definition(t) {
-    t.string("error", { nullable: true });
-    t.resolveType(() => null);
+    // @ts-ignore
+    t.bigint("id", { nullable: false }),
+      // @ts-ignore
+      t.bigint("userId", { nullable: false }),
+      t.string("personTitle", { nullable: true }),
+      t.string("imgUrl", { nullable: true }),
+      t.string("birthday", { nullable: true }),
+      t.int("age", { nullable: true }),
+      t.boolean("isActive", { nullable: false });
   },
 });
 
@@ -15,9 +22,17 @@ export const UserInterface = interfaceType({
   name: "UserInterface",
   description: "Represents the basic info about a user",
   definition(t) {
-    t.field("id", { type: BigInt, nullable: true }),
-      t.string("email", { nullable: false }),
-      t.field("accountId", { type: BigInt, nullable: true });
+    // @ts-ignore
+    t.bigint("id", { nullable: true }),
+      // @ts-ignore
+      t.email("email", { nullable: true }),
+      t.field("account", {
+        type: UserAccountType,
+        nullable: true,
+        resolve: o => {
+          return o.account;
+        },
+      });
     t.resolveType(() => null);
   },
 });
@@ -38,7 +53,7 @@ export const UserSignUpType = objectType({
   description: "User info to be returned on sign up",
   definition(t) {
     t.implements(UserInterface);
-    t.boolean("signedUp", { nullable: false });
+    t.boolean("signedUp", { nullable: false, description: "A boolean that indicates if the user has succefully signed up" });
     t.implements(ErrorInterface);
   },
 });
@@ -67,7 +82,8 @@ export const UserSignUpCredentialsInput = inputObjectType({
   name: "UserSignUpCredentialsInput",
   description: "Credential for signing up a user",
   definition(t) {
-    t.string("email", { required: true, description: "Email of user to sign up" });
+    // @ts-ignore
+    t.email("email", { required: true, description: "Email of user to sign up" });
     t.string("password", { required: true, description: "Password of user" });
   },
 });
@@ -76,7 +92,8 @@ export const UserLoginCredentialsInput = inputObjectType({
   name: "UserLoginCredentialsInput",
   description: "Credential for logging in a user",
   definition(t) {
-    t.string("email", { required: false, description: "Email of user to login" });
+    // @ts-ignore
+    t.email("email", { required: false, description: "Email of user to login" });
     t.string("password", { required: true, description: "Password of user" });
   },
 });

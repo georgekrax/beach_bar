@@ -15,14 +15,14 @@ export class User extends BaseEntity {
   @Column({ name: "token_version", type: "integer", default: 0 })
   tokenVersion: number;
 
-  @Column({ name: "google_id", type: "bigint", unique: true, nullable: true })
-  googleId: bigint;
+  @Column("varchar", { length: 255, name: "google_id", unique: true, nullable: true })
+  googleId: string;
 
-  @Column({ name: "facebook_id", type: "bigint", unique: true, nullable: true })
-  facebookId: bigint;
+  @Column("varchar", { length: 255, name: "facebook_id", unique: true, nullable: true })
+  facebookId: string;
 
-  @Column({ name: "instagram_id", type: "bigint", unique: true, nullable: true })
-  instagramId: bigint;
+  @Column("varchar", { length: 255, name: "instagram_id", unique: true, nullable: true })
+  instagramId: string;
 
   @Column("varchar", { name: "first_name", length: 255, nullable: true })
   firstName: string;
