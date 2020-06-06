@@ -6,7 +6,7 @@ import { ContactDetails } from "./ContactDetails";
 
 @Entity({ name: "country", schema: "public" })
 export class Country extends BaseEntity {
-  @PrimaryGeneratedColumn({ type: "bigint" })
+  @PrimaryGeneratedColumn()
   id: number;
 
   @Column("varchar", { length: 100, name: "name", unique: true })

@@ -4,7 +4,7 @@ import { LoginDetails } from "./LoginDetails";
 
 @Entity({ name: "client_os", schema: "public" })
 export class ClientOs extends BaseEntity {
-  @PrimaryGeneratedColumn({ type: "bigint" })
+  @PrimaryGeneratedColumn()
   id: number;
 
   @Column("varchar", { length: 50, name: "name", unique: true })
@@ -16,7 +16,7 @@ export class ClientOs extends BaseEntity {
 
 @Entity({ name: "client_browser", schema: "public" })
 export class ClientBrowser extends BaseEntity {
-  @PrimaryGeneratedColumn({ type: "bigint" })
+  @PrimaryGeneratedColumn()
   id: number;
 
   @Column("varchar", { length: 20, name: "name", unique: true })

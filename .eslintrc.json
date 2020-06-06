@@ -33,9 +33,9 @@
   "rules": {
     "@typescript-eslint/no-explicit-any": 0,
     "@typescript-eslint/ban-ts-ignore": "off",
-    "array-bracket-newline": ["error", "consistent"],
-    "array-element-newline": ["error", "consistent"],
-    "prettier/prettier": "warn",
+    "array-bracket-newline": "off",
+    "array-element-newline": "off",
+    "prettier/prettier": "error",
     "arrow-parens": ["error", "as-needed"],
     "@typescript-eslint/no-non-null-assertion": "off"
   }

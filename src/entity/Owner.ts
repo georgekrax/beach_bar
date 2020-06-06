@@ -1,11 +1,17 @@
-import { Entity, PrimaryGeneratedColumn, BaseEntity, ManyToMany, JoinTable } from "typeorm";
-
+import { BaseEntity, Entity, JoinTable, ManyToMany, OneToOne, PrimaryGeneratedColumn, Column } from "typeorm";
 import { BeachBar } from "./BeachBar";
+import { User } from "./User";
 
 @Entity({ name: "owner", schema: "public" })
 export class Owner extends BaseEntity {
-  @PrimaryGeneratedColumn({ type: "bigint" })
-  id: bigint;
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ type: "integer", name: "user_id", unique: true })
+  userId: number;
+
+  @OneToOne(() => User, user => user.owner)
+  user: User;
 
   @ManyToMany(() => BeachBar, beachBar => beachBar.owners)
   @JoinTable({

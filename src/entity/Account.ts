@@ -1,18 +1,18 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
   BaseEntity,
-  UpdateDateColumn,
+  Column,
   CreateDateColumn,
+  Entity,
+  JoinColumn,
   OneToMany,
   OneToOne,
-  JoinColumn,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
 } from "typeorm";
-
-import { User } from "./User";
-import { LoginDetails } from "./LoginDetails";
 import { ContactDetails } from "./ContactDetails";
+import { LoginDetails } from "./LoginDetails";
+import { User } from "./User";
 
 export enum personHonorificTitle {
   mr = "Mr",
@@ -26,15 +26,11 @@ export enum personHonorificTitle {
 
 @Entity({ name: "account", schema: "public" })
 export class Account extends BaseEntity {
-  @PrimaryGeneratedColumn({ type: "bigint" })
-  id: bigint;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-  @Column({ name: "user_id", unique: true, type: "bigint" })
-  userId: bigint;
-
-  @OneToOne(() => User)
-  @JoinColumn({ name: "user_id" })
-  user: User;
+  @Column({ name: "user_id", unique: true, type: "integer" })
+  userId: number;
 
   @Column({ name: "person_title", type: "enum", enum: personHonorificTitle, enumName: "person_honorific_title", nullable: true })
   personTitle: string;
@@ -48,7 +44,7 @@ export class Account extends BaseEntity {
   @Column({ name: "age", type: "smallint", nullable: true })
   age: number;
 
-  @Column({ name: "is_active", type: "boolean", nullable: true, default: false })
+  @Column({ name: "is_active", type: "boolean", nullable: true, default: () => false })
   isActive: boolean;
 
   @UpdateDateColumn({ name: "updated_at", type: "timestamptz", default: () => `NOW()` })
@@ -56,6 +52,13 @@ export class Account extends BaseEntity {
 
   @CreateDateColumn({ name: "timestamp", type: "timestamptz", default: () => `NOW()` })
   timestamp: Date;
+
+  @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
+  deletedAt: Date;
+
+  @OneToOne(() => User, { nullable: false })
+  @JoinColumn({ name: "user_id" })
+  user: User;
 
   @OneToMany(() => ContactDetails, contactDetails => contactDetails.account)
   contactDetails: ContactDetails[];

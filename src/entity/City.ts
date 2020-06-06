@@ -6,16 +6,16 @@ import { ContactDetails } from "./ContactDetails";
 
 @Entity({ name: "city", schema: "public" })
 export class City extends BaseEntity {
-  @PrimaryGeneratedColumn({ type: "bigint"})
+  @PrimaryGeneratedColumn()
   id: number;
 
   @Column("varchar", { length: 100, name: "name", unique: true })
   name: string;
 
-  @Column({ name: "country_id" })
+  @Column({ name: "country_id", type: "integer" })
   countryId: number;
 
-  @ManyToOne(() => Country, country => country.cities)
+  @ManyToOne(() => Country, country => country.cities, { nullable: false })
   @JoinColumn({ name: "country_id" })
   country: Country;
 
