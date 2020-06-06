@@ -56,7 +56,7 @@ export class Account extends BaseEntity {
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt: Date;
 
-  @OneToOne(() => User, { nullable: false })
+  @OneToOne(() => User, { nullable: false, cascade: ["soft-remove", "recover"] })
   @JoinColumn({ name: "user_id" })
   user: User;
 

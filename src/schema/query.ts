@@ -7,7 +7,7 @@ export const Query = queryType({
       resolve: (_, __, { payload }) => {
         console.log(payload);
         if (payload) {
-          return `Hello world, ${payload.userId}!`;
+          return `Hello world, ${payload.sub}!`;
         }
         return "Hello world!";
       },

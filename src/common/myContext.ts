@@ -6,7 +6,7 @@ import { OAuth2Client } from "google-auth-library";
 export interface MyContext {
   req: Request;
   res: Response;
-  payload?: { userId: bigint; isOwner: boolean };
+  payload?: { scope: string[]; iat: number; exp: number; aud: string; iss: string; sub: number; jti: string };
   redis: Redis;
   uaParser: UAParser;
   googleOAuth2Client: OAuth2Client;

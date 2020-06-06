@@ -14,7 +14,7 @@ import { ContactDetails } from "../../entity/ContactDetails";
 import { loginDetailStatus } from "../../entity/LoginDetails";
 import { sendRefreshToken } from "../../utils/auth/sendRefreshToken";
 import { generateAccessToken, generateRefreshToken } from "../../utils/auth/generateAuthTokens";
-import { UserSignUpType, UserLoginType, UserSignUpCredentialsInput, UserLogoutType } from "./types";
+import { UserSignUpType, UserLoginType, UserLogoutType, UserCredentialsInput } from "./userTypes";
 import { createUserLoginDetails, findOs, findBrowser, findCountry, findCity } from "../../utils/auth/userCommon";
 
 // --------------------------------------------------- //
@@ -29,7 +29,7 @@ export const UserSignUpMutation = extendType({
       description: "Sign up a user",
       nullable: false,
       args: {
-        userCredentials: arg({ type: UserSignUpCredentialsInput, required: true, description: "Credential for signing up a user" }),
+        userCredentials: arg({ type: UserCredentialsInput, required: true, description: "Credential for signing up a user" }),
       },
       resolve: async (
         _,
@@ -130,7 +130,11 @@ export const UserLoginMutation = extendType({
       description: "Login a user",
       nullable: false,
       args: {
-        userCredentials: arg({ type: UserSignUpCredentialsInput, required: true, description: "Credential for signing up a user" }),
+        userCredentials: arg({
+          type: UserCredentialsInput,
+          required: true,
+          description: "Credential for signing up a user",
+        }),
       },
       resolve: async (
         _,
@@ -370,7 +374,7 @@ export const UserLogoutMutation = extendType({
           };
         }
 
-        if (!payload || payload.userId === null) {
+        if (!payload || payload.sub === null) {
           return {
             loggedOut: false,
             error: "Not authenticated",
@@ -389,20 +393,20 @@ export const UserLogoutMutation = extendType({
           };
         }
 
-        if (payload.userId !== tokenPayload.userId) {
+        if (payload.sub !== tokenPayload.sub) {
           return {
             loggedOut: false,
             error: "You are not allowed to logout this user",
           };
         }
 
-        await getConnection().getRepository(User).increment({ id: payload.userId }, "tokenVersion", 1);
+        await getConnection().getRepository(User).increment({ id: payload.sub }, "tokenVersion", 1);
 
         await getConnection()
           .createQueryBuilder()
           .update(Account)
           .set({ isActive: false })
-          .where("userId = :userId", { userId: payload.userId })
+          .where("userId = :userId", { userId: payload.sub })
           .execute();
 
         const tokenId = `${tokenPayload.iat}-${tokenPayload.jti}`;

@@ -31,5 +31,5 @@
     "forceConsistentCasingInFileNames": true
   },
   "exclude": ["./node_modules/", "build"],
-  "include": ["./src/**/*.tsx", "./src/**/*.ts"]
+  "include": ["./src/**/*.tsx", "./src/**/*.ts", "src/schema/userDetails"]
 }

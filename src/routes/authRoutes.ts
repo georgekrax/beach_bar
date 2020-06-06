@@ -62,8 +62,8 @@ router.post("/refresh_token", async (req: express.Request, res: express.Response
   }
 
   // refreshToken is valid
-  //search for user with id === payload.userId
-  const user = await User.findOne({ where: { id: payload.userId }, select: ["id", "tokenVersion"] });
+  //search for user with id === payload.sub
+  const user = await User.findOne({ where: { id: payload.sub }, select: ["id", "tokenVersion"] });
 
   if (!user) {
     return res.send({

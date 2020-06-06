@@ -1,39 +1,43 @@
-import { stringArg, extendType, intArg } from "@nexus/schema";
-
-import { UserType } from "./types";
+import { extendType } from "@nexus/schema";
+import { MyContext } from "../../common/myContext";
+import errors from "../../constants/errors";
+import { ErrorType } from "../returnTypes";
 import { User } from "./../../entity/User";
+import { UserTypeResult } from "./userTypes";
 
 export const UsersQuery = extendType({
   type: "Query",
   definition(t) {
-    t.list.field("users", {
-      type: UserType,
-      description: "Returns a list of all available users",
-      resolve: async () => {
-        const users = await User.find({
-          select: ["id", "email", "firstName", "lastName"],
-          relations: ["account"],
-        });
-        return users;
-      },
-    });
-    t.field("user", {
-      type: UserType,
-      description: "Returns a single user",
-      args: {
-        id: intArg({ description: "A user's id " }),
-        email: stringArg({ description: "A user's email" }),
-      },
-      resolve: async (_, args) => {
-        if (!args.id && !args.email) {
-          throw new Error("Id or email of the user should be provided");
+    t.field("me", {
+      type: UserTypeResult,
+      description: "Returns current authenticated user",
+      resolve: async (_, __, { payload }: MyContext): Promise<User | ErrorType> => {
+        if (!payload || !payload.sub) {
+          return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
 
         const user = await User.findOne({
-          ...args,
-          select: ["id", "email", "firstName", "lastName"],
-          relations: ["account"],
+          where: { id: payload.sub },
+          relations: ["owner", "accounts", "accounts.contactDetails", "accounts.user", "owner.user", "owner.beachBars"],
         });
+
+        if (!user) {
+          return {
+            error: {
+              code: errors.NOT_FOUND,
+              message: "User does not exist",
+            },
+          };
+        }
+        if (payload.sub !== user.id) {
+          return {
+            error: {
+              code: errors.UNAUTHORIZED_CODE,
+              message: "You are not allowed to access 'this' user's info",
+            },
+          };
+        }
+
         return user;
       },
     });

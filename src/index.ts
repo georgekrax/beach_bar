@@ -49,7 +49,7 @@ const startServer = async (): Promise<any> => {
     },
   });
 
-  createDBConnection().catch(err => {
+  await createDBConnection().catch(err => {
     throw new Error(err);
   });
 
