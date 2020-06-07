@@ -3,7 +3,7 @@ import { MyContext } from "../../common/myContext";
 import errors from "../../constants/errors";
 import { ErrorType } from "../returnTypes";
 import { User } from "./../../entity/User";
-import { UserTypeResult } from "./userTypes";
+import { UserTypeResult } from "./types";
 
 export const UsersQuery = extendType({
   type: "Query",

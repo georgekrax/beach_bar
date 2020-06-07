@@ -2,13 +2,13 @@ import {
   BaseEntity,
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-  DeleteDateColumn,
 } from "typeorm";
 import { ContactDetails } from "./ContactDetails";
 import { LoginDetails } from "./LoginDetails";
@@ -60,7 +60,7 @@ export class Account extends BaseEntity {
   @JoinColumn({ name: "user_id" })
   user: User;
 
-  @OneToMany(() => ContactDetails, contactDetails => contactDetails.account)
+  @OneToMany(() => ContactDetails, contactDetails => contactDetails.account, { eager: true })
   contactDetails: ContactDetails[];
 
   @OneToMany(() => LoginDetails, loginDetails => loginDetails.account)

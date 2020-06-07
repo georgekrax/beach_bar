@@ -1,6 +1,6 @@
 import { inputObjectType, objectType, unionType } from "@nexus/schema";
-import { BeachBarReviewType } from "../beach_bar/beachBarReviewTypes";
-import { UserAccountType } from "./userAccountTypes";
+import { BeachBarReviewType } from "../beach_bar/reviewTypes";
+import { UserAccountType } from "./accountTypes";
 
 export const UserType = objectType({
   name: "User",
@@ -11,10 +11,6 @@ export const UserType = objectType({
     t.email("email", { nullable: false, description: "User's email address" });
     t.string("firstName", { nullable: true, description: "User's first (given) name" });
     t.string("lastName", { nullable: true, description: "User's last (family) name" });
-    t.boolean("isOwner", {
-      nullable: false,
-      description: "A boolean that indicates if the user is the original owner of a #beach_bar",
-    });
     // @ts-ignore
     t.datetime("updatedAt", {
       nullable: false,

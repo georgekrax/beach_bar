@@ -4,11 +4,11 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  Index,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-  OneToMany,
-  Index,
 } from "typeorm";
 import { Account } from "./Account";
 import { BeachBarReview } from "./BeachBarReview";
@@ -26,8 +26,8 @@ export class User extends BaseEntity {
   @Column({ name: "hashtag_id", type: "bigint", unique: true, nullable: true })
   hashtagId: bigint;
 
-  @Column({ name: "token_version", type: "integer", default: 0 })
-  tokenVersion: number;
+  // @Column({ name: "token_version", type: "integer", default: 0 })
+  // tokenVersion: number;
 
   @Column("varchar", { length: 255, name: "google_id", unique: true, nullable: true })
   googleId: string;
@@ -44,9 +44,6 @@ export class User extends BaseEntity {
   @Column("varchar", { name: "last_name", length: 255, nullable: true })
   lastName: string;
 
-  @Column({ name: "is_owner", type: "boolean", default: false })
-  isOwner: boolean;
-
   @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
   updatedAt: Date;
 
@@ -56,7 +53,7 @@ export class User extends BaseEntity {
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt: Date;
 
-  @OneToOne(() => Account, account => account.user) // specify inverse side as a second parameter
+  @OneToOne(() => Account, account => account.user, { eager: true }) // specify inverse side as a second parameter
   account: Account;
 
   @OneToOne(() => Owner, owner => owner.user) // specify inverse side as a second parameter

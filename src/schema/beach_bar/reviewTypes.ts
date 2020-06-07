@@ -1,5 +1,5 @@
 import { objectType } from "@nexus/schema";
-import { UserType } from "../user/userTypes";
+import { UserType } from "../user/types";
 
 export const ReviewVisitType = objectType({
   name: "ReviewVisitType",

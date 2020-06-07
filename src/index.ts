@@ -26,6 +26,7 @@ const startServer = async (): Promise<any> => {
 
   const app = express();
 
+  app.use(express.json());
   app.use(cookieParser());
   app.use("/oauth", router);
 

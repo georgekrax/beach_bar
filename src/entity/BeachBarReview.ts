@@ -7,14 +7,14 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-  OneToOne,
 } from "typeorm";
 import { BeachBar } from "./BeachBar";
+import { ReviewAnswer } from "./ReviewAnswer";
 import { ReviewVisitType } from "./ReviewVisitType";
 import { User } from "./User";
-import { ReviewAnswer } from "./ReviewAnswer";
 
 @Entity({ name: "beach_bar_review", schema: "public" })
 export class BeachBarReview extends BaseEntity {
@@ -62,7 +62,7 @@ export class BeachBarReview extends BaseEntity {
   @JoinColumn({ name: "beach_bar_id" })
   beachBar: BeachBar;
 
-  @ManyToOne(() => User, user => user.reviews, { nullable: false })
+  @ManyToOne(() => User, user => user.reviews, { nullable: false, eager: true })
   @JoinColumn({ name: "user_id" })
   user: User;
 
@@ -70,6 +70,6 @@ export class BeachBarReview extends BaseEntity {
   @JoinColumn({ name: "visit_type_id" })
   visitType: ReviewVisitType;
 
-  @OneToOne(() => ReviewAnswer, reviewAnswer => reviewAnswer.review)
+  @OneToOne(() => ReviewAnswer, reviewAnswer => reviewAnswer.review, { eager: true })
   answer: ReviewAnswer;
 }

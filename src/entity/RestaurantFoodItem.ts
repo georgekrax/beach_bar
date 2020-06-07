@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, ManyToOne, JoinColumn } from "typeorm";
+import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { BeachBarRestaurant } from "./BeachBarRestaurant";
 import { RestaurantMenuCategory } from "./RestaurantMenuCategory";
 
@@ -26,7 +26,10 @@ export class RestaurantFoodItem extends BaseEntity {
   @JoinColumn({ name: "restaurant_id" })
   restaurant: BeachBarRestaurant;
 
-  @ManyToOne(() => RestaurantMenuCategory, restaurantMenuCategory => restaurantMenuCategory.foodItems, { nullable: false })
+  @ManyToOne(() => RestaurantMenuCategory, restaurantMenuCategory => restaurantMenuCategory.foodItems, {
+    nullable: false,
+    eager: true,
+  })
   @JoinColumn({ name: "menu_category_id" })
   menuCategory: RestaurantMenuCategory;
 }

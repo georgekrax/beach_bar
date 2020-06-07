@@ -14,7 +14,7 @@ import { ContactDetails } from "../../entity/ContactDetails";
 import { loginDetailStatus } from "../../entity/LoginDetails";
 import { sendRefreshToken } from "../../utils/auth/sendRefreshToken";
 import { generateAccessToken, generateRefreshToken } from "../../utils/auth/generateAuthTokens";
-import { UserSignUpType, UserLoginType, UserLogoutType, UserCredentialsInput } from "./userTypes";
+import { UserSignUpType, UserLoginType, UserLogoutType, UserCredentialsInput } from "./types";
 import { createUserLoginDetails, findOs, findBrowser, findCountry, findCity } from "../../utils/auth/userCommon";
 
 // --------------------------------------------------- //
@@ -181,7 +181,7 @@ export const UserLoginMutation = extendType({
         // login user
         const user = await User.findOne({
           where: { email },
-          select: ["id", "email", "hashtagId", "tokenVersion", "isOwner", "googleId", "facebookId", "instagramId"],
+          select: ["id", "email", "hashtagId", "tokenVersion", "googleId", "facebookId", "instagramId"],
           relations: ["account"],
         });
         if (!user) {

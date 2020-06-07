@@ -1,5 +1,5 @@
 import { objectType } from "@nexus/schema";
-import { UserAccountType } from "../user/userAccountTypes";
+import { UserAccountType } from "../user/accountTypes";
 import { CityType } from "./cityTypes";
 import { CountryType } from "./countryTypes";
 

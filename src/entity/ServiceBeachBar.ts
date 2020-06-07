@@ -1,13 +1,13 @@
-import { Entity, Column, BaseEntity, ManyToOne, JoinColumn } from "typeorm";
+import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
 import { BeachBar } from "./BeachBar";
 import { BeachBarFeature } from "./BeachBarFeature";
 
 @Entity({ name: "service_beach_bar", schema: "public" })
 export class ServiceBeachBar extends BaseEntity {
-  @Column({ type: "integer", name: "beach_bar_id" })
+  @PrimaryColumn({ type: "integer", name: "beach_bar_id" })
   beachBarId: number;
 
-  @Column({ type: "integer", name: "service_id" })
+  @PrimaryColumn({ type: "integer", name: "service_id" })
   serviceId: number;
 
   @Column({ type: "smallint", name: "quantity", default: () => 1 })
@@ -20,6 +20,7 @@ export class ServiceBeachBar extends BaseEntity {
   @JoinColumn({ name: "beach_bar_id" })
   beachBar: BeachBar;
 
-  @ManyToOne(() => BeachBarFeature, beachBarFeature => beachBarFeature.serviceBeachBar, { nullable: false })
+  @ManyToOne(() => BeachBarFeature, beachBarFeature => beachBarFeature.serviceBeachBar, { nullable: false, eager: true })
+  @JoinColumn({ name: "service_id" })
   service: BeachBarFeature;
 }

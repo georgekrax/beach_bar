@@ -1,6 +1,6 @@
 import { objectType } from "@nexus/schema";
-import { UserType } from "./userTypes";
-import { UserAccountContactDetailsType } from "../userDetails/userAccountContactDetails";
+import { UserType } from "./types";
+import { UserAccountContactDetailsType } from "../userDetails/contactDetails";
 
 export const UserAccountType = objectType({
   name: "UserAccount",

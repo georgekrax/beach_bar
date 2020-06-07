@@ -1,4 +1,4 @@
-import { BaseEntity, Entity, JoinTable, ManyToMany, OneToOne, PrimaryGeneratedColumn, Column } from "typeorm";
+import { BaseEntity, Column, Entity, JoinColumn, JoinTable, ManyToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { BeachBar } from "./BeachBar";
 import { User } from "./User";
 
@@ -10,7 +10,11 @@ export class Owner extends BaseEntity {
   @Column({ type: "integer", name: "user_id", unique: true })
   userId: number;
 
-  @OneToOne(() => User, user => user.owner)
+  @Column({ name: "is_primary", type: "boolean", default: false })
+  isPrimary: boolean;
+
+  @OneToOne(() => User, user => user.owner, { nullable: false, eager: true })
+  @JoinColumn({ name: "user_id" })
   user: User;
 
   @ManyToMany(() => BeachBar, beachBar => beachBar.owners)
