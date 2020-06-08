@@ -1,6 +1,5 @@
+import { decode, sign } from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
-import { sign, decode } from "jsonwebtoken";
-
 import { User } from "./../../entity/User";
 
 export const generateAccessToken = (
@@ -13,10 +12,11 @@ export const generateAccessToken = (
   aud: string;
   iss: string;
 } => {
-  const accessToken = sign({ userId: user.id, isOwner: user.isOwner }, process.env.ACCESS_TOKEN_SECRET!, {
+  const accessToken = sign({}, process.env.ACCESS_TOKEN_SECRET!, {
     expiresIn: "17m",
-    audience: "www.beach_bar.com",
-    issuer: "www.beach_bar.com",
+    audience: process.env.TOKEN_AUDIENCE!.toString(),
+    issuer: process.env.TOKEN_ISSUER!.toString(),
+    subject: user.id.toString(),
     jwtid: uuidv4(),
   });
   const payload: any = decode(accessToken);
@@ -43,16 +43,13 @@ export const generateRefreshToken = (
   aud: string;
   iss: string;
 } => {
-  const refreshToken = sign(
-    { userId: user.id, isOwner: user.isOwner, tokenVersion: user.tokenVersion },
-    process.env.REFRESH_TOKEN_SECRET!,
-    {
-      expiresIn: "100 minutes",
-      audience: "www.beach_bar.com",
-      issuer: "www.beach_bar.com",
-      jwtid: uuidv4(),
-    },
-  );
+  const refreshToken = sign({ tokenVersion: user.tokenVersion }, process.env.REFRESH_TOKEN_SECRET!, {
+    expiresIn: "100 minutes",
+    audience: process.env.TOKEN_AUDIENCE!.toString(),
+    issuer: process.env.TOKEN_ISSUER!.toString(),
+    subject: user.id.toString(),
+    jwtid: uuidv4(),
+  });
   const payload: any = decode(refreshToken);
   if (payload === null) {
     throw new Error("Something went wrong");

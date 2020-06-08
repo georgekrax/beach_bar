@@ -1,6 +1,8 @@
 export default Object.freeze({
   NOT_FOUND: "not_found",
   NOT_ACTIVE: "not_active",
+  CONFLICT: "conflict",
+  USER_NOT_FOUND_MESSAGE: "User does not exist",
   INVALID_ARGUMENTS: "invalid_arguments",
   NOT_AUTHENTICATED_CODE: "not_authenticated",
   NOT_AUTHENTICATED_MESSAGE: "You are not authenticated",
@@ -11,4 +13,7 @@ export default Object.freeze({
   SCOPE_MISMATCH: "scope_mismatch",
   INVALID_PASSWORD_CODE: "invalid_password",
   INVALID_PASSWORD_MESSAGE: "Invalid password",
+  GOOGLE_AUTHENTICATED_CODE: "google_authenticated",
+  FACEBOOK_AUTHENTICATED_CODE: "facebook_authenticated",
+  INSTAGRAM_AUTHENTICATED_CODE: "instagram_authenticated",
 });

@@ -1,84 +1,90 @@
-import fetch from "node-fetch";
+import { arg, extendType, stringArg } from "@nexus/schema";
+import { execute, makePromise } from "apollo-link";
+import { createHash, randomBytes } from "crypto";
 import { verify } from "jsonwebtoken";
 import { getConnection } from "typeorm";
-import { execute, makePromise } from "apollo-link";
-import { extendType, arg, stringArg } from "@nexus/schema";
-
-import { User } from "../../entity/User";
-import { gql } from "apollo-server-express";
-import { Account } from "../../entity/Account";
-import { link } from "../../config/apolloLink";
 import { MyContext } from "../../common/myContext";
-import { Platform } from "./../../entity/Platform";
+import { link } from "../../config/apolloLink";
+import errors from "../../constants/errors";
+import { Account } from "../../entity/Account";
 import { ContactDetails } from "../../entity/ContactDetails";
+import { Country } from "../../entity/Country";
 import { loginDetailStatus } from "../../entity/LoginDetails";
-import { sendRefreshToken } from "../../utils/auth/sendRefreshToken";
+import { Platform } from "../../entity/Platform";
+import { User } from "../../entity/User";
+import authorizeWithHashtagQuery from "../../graphql/AUTHORIZE_WITH_HASHTAG";
+import exchangeCodeQuery from "../../graphql/EXCHANGE_CODE";
+import signUpUserQuery from "../../graphql/SIGN_UP_USER";
+import tokenInfoQuery from "../../graphql/TOKEN_INFO";
 import { generateAccessToken, generateRefreshToken } from "../../utils/auth/generateAuthTokens";
-import { UserSignUpType, UserLoginType, UserLogoutType, UserCredentialsInput } from "./types";
-import { createUserLoginDetails, findOs, findBrowser, findCountry, findCity } from "../../utils/auth/userCommon";
+import { sendRefreshToken } from "../../utils/auth/sendRefreshToken";
+import { createUserLoginDetails, findBrowser, findCity, findCountry, findOs } from "../../utils/auth/userCommon";
+import { ErrorType } from "../returnTypes";
+import { UserLoginType, UserSignUpType } from "./returnTypes";
+import { UserCredentialsInput, UserLoginDetailsInput, UserLoginResult, UserLogoutResult, UserSignUpResult } from "./types";
 
 // --------------------------------------------------- //
-// Sign up mutation
+// Sign up & login mutation
 // --------------------------------------------------- //
 
-export const UserSignUpMutation = extendType({
+export const UserSignUpAndLoginMutation = extendType({
   type: "Mutation",
   definition(t) {
-    t.field("signUp", {
-      type: UserSignUpType,
+    t.field("signUpUser", {
+      type: UserSignUpResult,
       description: "Sign up a user",
       nullable: false,
       args: {
         userCredentials: arg({ type: UserCredentialsInput, required: true, description: "Credential for signing up a user" }),
       },
-      resolve: async (
-        _,
-        { userCredentials },
-      ): Promise<{
-        id: bigint | null;
-        email: string;
-        signedUp: boolean;
-        account: Account | null;
-        error: string | null;
-      }> => {
+      resolve: async (_, { userCredentials }): Promise<UserSignUpType | ErrorType> => {
         const { email, password } = userCredentials;
 
+        if (!email || email === "" || email === " ") {
+          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid email address" } };
+        }
+        if (!password || password === "" || password === " ") {
+          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid password" } };
+        }
+
+        const user = await User.findOne({ where: { email } });
+        if (user) {
+          return { error: { code: errors.CONFLICT, message: "User already exists" } };
+        }
+
         const operation = {
-          query: gql`
-            mutation SIGN_UP_USER($email: String!, $password: String!) {
-              signUp(userCredentials: { email: $email, password: $password }) {
-                id
-                email
-                signedUp
-                error
-              }
-            }
-          `,
+          query: signUpUserQuery,
           variables: {
+            clientId: process.env.HASHTAG_CLIENT_ID!.toString(),
+            clientSecret: process.env.HASHTAG_CLIENT_SECRET!.toString(),
             email,
             password,
           },
         };
 
-        let hashtagId, hashtagEmail, signedUp, error;
+        let hashtagId, hashtagEmail, added, errorCode, errorMessage;
 
         await makePromise(execute(link, operation))
-          .then(res => {
-            hashtagId = res.data?.signUp.id;
-            hashtagEmail = res.data?.signUp.email;
-            signedUp = res.data?.signUp.signedUp;
-            error = res.data?.signUp.error;
+          .then(res => res.data?.signUpUser)
+          .then(data => {
+            console.log(data.user.code);
+            if (data.error) {
+              errorCode = data.error.code;
+              errorMessage = data.error.message;
+            }
+            hashtagId = data.user.id;
+            hashtagEmail = data.user.email;
+            added = data.added;
           })
           .catch(err => {
-            throw new Error(err);
+            return { error: { message: `Something went wrong. ${err}` } };
           });
 
-        if (error !== "User already exists" && error !== null && signedUp === false) {
-          throw new Error(error);
+        if ((errorCode || errorMessage) && errorCode !== errors.CONFLICT && errorMessage !== "User already exists" && !added) {
+          return { error: { code: errorCode, message: errorMessage } };
         }
-
-        if (email !== hashtagEmail) {
-          throw new Error("Something went wrong");
+        if (email !== hashtagEmail || hashtagId === "" || hashtagId === " ") {
+          return { error: { message: "Something went wrong" } };
         }
 
         const newUser = User.create({
@@ -97,39 +103,31 @@ export const UserSignUpMutation = extendType({
           });
           await newUserContactDetails.save();
         } catch (err) {
-          return {
-            id: null,
-            email: email,
-            signedUp: false,
-            account: null,
-            error: "User already exists",
-          };
+          return { error: { message: `Something went wrong. ${err}` } };
         }
 
         return {
-          id: BigInt(newUser.id),
-          email: newUser.email,
-          signedUp: true,
-          account: newUserAccount,
-          error: null,
+          user: newUser,
+          added: true,
         };
       },
     });
   },
 });
 
-// --------------------------------------------------- //
-// Login mutation
-// --------------------------------------------------- //
-
 export const UserLoginMutation = extendType({
   type: "Mutation",
   definition(t) {
     t.field("login", {
-      type: UserLoginType,
+      type: UserLoginResult,
       description: "Login a user",
       nullable: false,
       args: {
+        loginDetails: arg({
+          type: UserLoginDetailsInput,
+          required: false,
+          description: "User details in login",
+        }),
         userCredentials: arg({
           type: UserCredentialsInput,
           required: true,
@@ -138,17 +136,16 @@ export const UserLoginMutation = extendType({
       },
       resolve: async (
         _,
-        { userCredentials },
+        { loginDetails, userCredentials },
         { res, redis, uaParser }: MyContext,
-      ): Promise<{
-        id: bigint | null;
-        email: string;
-        logined: boolean;
-        account: Account | null;
-        accessToken: string | null;
-        error: string | null;
-      }> => {
+      ): Promise<UserLoginType | ErrorType> => {
         const { email, password } = userCredentials;
+        if (!email || email === "" || email === " ") {
+          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid email address" } };
+        }
+        if (!password || password === "" || password === " ") {
+          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid password" } };
+        }
 
         let os: any = uaParser.getOS().name,
           browser: any = uaParser.getBrowser().name,
@@ -156,18 +153,9 @@ export const UserLoginMutation = extendType({
           city: any = null,
           ipAddr: string | null = null;
 
-        await fetch("http://ip-api.com/json/")
-          .then(res => res.json())
-          .then(json => {
-            if (json.status === "success") {
-              country = json.country;
-              city = json.city;
-              ipAddr = json.query;
-            }
-          })
-          .catch(err => {
-            throw new Error(err);
-          });
+        if (loginDetails) {
+          ({ city, country, ipAddr } = loginDetails);
+        }
 
         try {
           os = await findOs(os);
@@ -175,121 +163,126 @@ export const UserLoginMutation = extendType({
           country = await findCountry(country);
           city = await findCity(city);
         } catch (err) {
-          throw new Error(err);
+          return { error: { message: `Something went wrong. ${err}` } };
         }
 
         // login user
         const user = await User.findOne({
           where: { email },
-          select: ["id", "email", "hashtagId", "tokenVersion", "googleId", "facebookId", "instagramId"],
           relations: ["account"],
         });
         if (!user) {
           return {
-            id: null,
-            email: email,
-            account: null,
-            logined: false,
-            accessToken: null,
-            error: "User does not exist",
+            error: {
+              code: errors.NOT_FOUND,
+              message: errors.USER_NOT_FOUND_MESSAGE,
+            },
           };
         }
 
         // check user's account
         if (!user.account) {
-          throw new Error("Something went wrong");
+          return {
+            error: {
+              message: "Something went wrong",
+            },
+          };
         }
 
         if (user.googleId) {
           return {
-            id: null,
-            email: email,
-            account: null,
-            logined: false,
-            accessToken: null,
-            error: "You have authenticated with Google",
+            error: { code: errors.GOOGLE_AUTHENTICATED_CODE, message: "You have authenticated with Google" },
           };
         } else if (user.facebookId) {
           return {
-            id: null,
-            email: email,
-            account: null,
-            logined: false,
-            accessToken: null,
-            error: "You have authenticated with Facebook",
+            error: { code: errors.FACEBOOK_AUTHENTICATED_CODE, message: "You have authenticated with Facebook" },
           };
         } else if (user.instagramId) {
           return {
-            id: null,
-            email: email,
-            account: null,
-            logined: false,
-            accessToken: null,
-            error: "You have authenticated with Instagram",
+            error: { code: errors.INSTAGRAM_AUTHENTICATED_CODE, message: "You have authenticated with Instagram" },
           };
         }
 
-        const operation = {
-          query: gql`
-            mutation LOGIN_USER(
-              $email: String!
-              $password: String!
-              $os: String
-              $browser: String
-              $country: String
-              $city: String
-              $ipAddr: String
-            ) {
-              login(
-                userCredentials: { email: $email, password: $password }
-                loginDetails: { os: $os, browser: $browser, country: $country, city: $city, ipAddr: $ipAddr }
-              ) {
-                id
-                email
-                logined
-                error
-              }
-            }
-          `,
+        const state = createHash("sha256").update(randomBytes(1024)).digest("hex");
+        const scope = ["profile", "email", "openid"];
+
+        const authorizeWithHashtagOperation = {
+          query: authorizeWithHashtagQuery,
           variables: {
+            clientId: process.env.HASHTAG_CLIENT_ID!.toString(),
+            scope,
+            redirectUri: process.env.HASHTAG_REDIRECT_URI!.toString(),
+            originUri: process.env.HASHTAG_ORIGIN_URI!.toString(),
+            state,
             email,
             password,
-            os: os.name,
-            browser: browser.name,
-            country: country.name,
-            city: city.name,
+            os: os ? os.name : null,
+            browser: browser ? browser.name : null,
+            country: country ? country.name : null,
+            city: city ? city.name : null,
             ipAddr,
           },
         };
 
-        let hashtagEmail: string | null = null,
-          hashtagId: bigint | null = null,
-          logined: boolean | null = null,
-          error: string | null = null;
+        let hashtagEmail: string | undefined = undefined,
+          hashtagId: bigint | undefined = undefined,
+          hashtagState: string | undefined = undefined,
+          hashtagScope: string[] | undefined = undefined,
+          hashtagClientId: string | undefined = undefined,
+          hashtagClientSecret: string | undefined = undefined,
+          code: string | undefined = undefined,
+          prompt: boolean | undefined = undefined,
+          authorized: boolean | undefined = undefined,
+          errorCode: string | undefined = undefined,
+          errorMessage: string | undefined = undefined;
 
-        await makePromise(execute(link, operation))
-          .then(res => {
-            hashtagEmail = res.data?.login.email;
-            hashtagId = res.data?.login.id;
-            logined = res.data?.login.logined;
-            error = res.data?.login.error;
+        await makePromise(execute(link, authorizeWithHashtagOperation))
+          .then(res => res.data?.authorizeWithHashtag)
+          .then(data => {
+            if (data.error) {
+              errorCode = data.error.code;
+              errorMessage = data.error.message;
+            }
+            hashtagEmail = data.user.email;
+            hashtagId = data.user.id;
+            hashtagState = data.state;
+            hashtagScope = data.scope;
+            hashtagClientId = data.oauthClient.clientId;
+            hashtagClientSecret = data.oauthClient.clientSecret;
+            code = data.code;
+            prompt = data.prompt.none;
+            authorized = data.authorized;
           })
           .catch(err => {
-            throw new Error(err);
+            return { error: { message: `Something went wrong. ${err}` } };
           });
 
+        if (
+          state !== hashtagState ||
+          !code ||
+          code === "" ||
+          code === " " ||
+          prompt !== true ||
+          !authorized ||
+          hashtagClientId !== process.env.HASHTAG_CLIENT_ID!.toString() ||
+          hashtagClientSecret !== process.env.HASHTAG_CLIENT_SECRET!.toString() ||
+          JSON.stringify(scope) !== JSON.stringify(hashtagScope)
+        ) {
+          return { error: { message: "Something went wrong" } };
+        }
+
         // pass beach_bar platform to user login details
-        const platform = await Platform.findOne({ where: { name: "beach_bar" }, select: ["id", "name", "urlHostname"] });
+        const platform = await Platform.findOne({ where: { name: "#beach_bar" } });
         if (!platform) {
-          throw new Error("Something went wrong");
+          return { error: { message: "Something went wrong" } };
         }
 
-        if (BigInt(hashtagId) !== BigInt(user.hashtagId)) {
-          throw new Error("Something went wrong");
+        if (String(hashtagId) !== String(user.hashtagId) || email !== hashtagEmail) {
+          return { error: { message: "Something went wrong" } };
         }
 
-        if (error !== null && logined == false) {
-          if (error === "Invalid password") {
+        if (errorCode !== undefined || errorMessage !== undefined) {
+          if (errorMessage === errors.INVALID_PASSWORD_MESSAGE || errorCode === errors.INVALID_PASSWORD_CODE) {
             await createUserLoginDetails(
               loginDetailStatus.invalidPassword,
               platform,
@@ -301,44 +294,132 @@ export const UserLoginMutation = extendType({
               ipAddr,
             );
           }
+          return { error: { code: errorCode, message: errorMessage as any } };
+        }
+
+        // exchange for ID & Access tokens
+        const exchangeCodeOperation = {
+          query: exchangeCodeQuery,
+          variables: {
+            clientId: process.env.HASHTAG_CLIENT_ID!.toString(),
+            clientSecret: process.env.HASHTAG_CLIENT_SECRET!.toString(),
+            code,
+          },
+        };
+
+        let hashtagAccessToken: object | undefined = undefined,
+          idToken: object | undefined = undefined;
+
+        await makePromise(execute(link, exchangeCodeOperation))
+          .then(res => res.data?.exchangeCode)
+          .then(data => {
+            if (data.error) {
+              errorCode = data.error.code;
+              errorMessage = data.error.message;
+            }
+            hashtagClientId = data.oauthClient.clientId;
+            hashtagClientSecret = data.oauthClient.clientSecret;
+            hashtagAccessToken = data.tokens[0];
+            idToken = data.tokens[1];
+          })
+          .catch(err => {
+            return { error: { message: `Something went wrong. ${err}` } };
+          });
+
+        if (
+          !hashtagAccessToken ||
+          !idToken ||
+          hashtagClientId !== process.env.HASHTAG_CLIENT_ID!.toString() ||
+          hashtagClientSecret !== process.env.HASHTAG_CLIENT_SECRET!.toString()
+        ) {
+          return { error: { message: "Something went wrong" } };
+        }
+
+        if (errorCode || errorMessage) {
           return {
-            id: null,
-            email: email,
-            account: null,
-            logined: false,
-            accessToken: null,
-            error,
+            error: { code: errorCode, message: errorMessage as any },
           };
         }
 
-        if (email !== hashtagEmail) {
-          throw new Error("Something went wrong");
+        // logined successfully
+        // get user info from ID token
+        const tokenInfoOperation = {
+          query: tokenInfoQuery,
+          variables: {
+            // @ts-ignore
+            token: idToken.token,
+          },
+        };
+
+        let tokenInfo: any = undefined;
+
+        await makePromise(execute(link, tokenInfoOperation))
+          .then(res => res.data?.tokenInfo)
+          .then(data => {
+            if (data.error) {
+              errorCode = data.error.code;
+              errorMessage = data.error.message;
+            }
+            tokenInfo = data;
+          })
+          .catch(err => {
+            return { error: { message: `Something went wrong. ${err}` } };
+          });
+
+        if (errorCode || errorMessage) {
+          return { error: { code: errorCode, message: errorMessage as any } };
         }
 
-        // logined successfully
+        if (
+          !tokenInfo ||
+          tokenInfo.email !== user.email ||
+          tokenInfo.sub !== user.hashtagId ||
+          tokenInfo.iss !== "https://www.hashtag.com" ||
+          tokenInfo.aud !== process.env.HASHTAG_CLIENT_ID!.toString()
+        ) {
+          return { error: { message: "Something went wrong" } };
+        }
+
+        if (tokenInfo.firstName || tokenInfo.lastName || tokenInfo.pictureUrl || tokenInfo.locale) {
+          if (tokenInfo.firstName && !user.firstName) {
+            user.firstName = tokenInfo.firstName;
+          }
+          if (tokenInfo.lastName && !user.lastName) {
+            user.lastName = tokenInfo.lastName;
+          }
+          if (tokenInfo.pictureUrl && !user.account.imgUrl) {
+            user.account.imgUrl = tokenInfo.pictureUrl;
+          }
+          if (tokenInfo.locale && !user.account.contactDetails[0].country) {
+            const country = await Country.findOne({ where: { languageIdentifier: tokenInfo.locale } });
+            if (country) {
+              user.account.contactDetails[0].country = country;
+              await user.account.contactDetails[0].save();
+            }
+          }
+        }
+
         // create user login details
         await createUserLoginDetails(loginDetailStatus.loggedIn, platform, user.account, os, browser, country, city, ipAddr);
 
-        const refreshToken = await generateRefreshToken(user);
+        const refreshToken = generateRefreshToken(user);
+        const accessToken = generateAccessToken(user);
         sendRefreshToken(res, refreshToken.token);
 
-        const tokenId = `${refreshToken.iat}-${refreshToken.jti}`;
-        await redis.set(tokenId, refreshToken.token, "ex", 75);
+        await redis.hset(user.id.toString(), "access_token", accessToken.token);
+        await redis.hset(user.id.toString(), "refresh_token", refreshToken.token);
 
         try {
           user.account.isActive = true;
-          await user.account.save();
+          await user.save();
         } catch (err) {
-          throw new Error(err);
+          return { error: { message: `Something went wrong. ${err}` } };
         }
 
         return {
-          id: BigInt(user.id),
-          email: user.email,
-          logined: true,
-          account: user.account,
-          accessToken: generateAccessToken(user).token,
-          error: null,
+          user,
+          accessToken: accessToken.token,
+          success: true,
         };
       },
     });
@@ -353,7 +434,7 @@ export const UserLogoutMutation = extendType({
   type: "Mutation",
   definition(t) {
     t.field("logout", {
-      type: UserLogoutType,
+      type: UserLogoutResult,
       description: "Logout a user",
       args: {
         refreshToken: stringArg({ required: true }),

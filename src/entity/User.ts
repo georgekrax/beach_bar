@@ -23,11 +23,11 @@ export class User extends BaseEntity {
   @Index({ where: `"deletedAt" IS NULL`, unique: true })
   email: string;
 
+  @Column({ name: "token_version", type: "integer", default: () => 0 })
+  tokenVersion: number;
+
   @Column({ name: "hashtag_id", type: "bigint", unique: true, nullable: true })
   hashtagId: bigint;
-
-  // @Column({ name: "token_version", type: "integer", default: 0 })
-  // tokenVersion: number;
 
   @Column("varchar", { length: 255, name: "google_id", unique: true, nullable: true })
   googleId: string;

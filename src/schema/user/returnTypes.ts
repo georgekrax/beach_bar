@@ -7,6 +7,11 @@ export type UserSignUpType = AddType & {
 
 export type UserLogoutType = SuccessType;
 
+export type UserLoginType = SuccessType & {
+  user: User;
+  accessToken: string;
+};
+
 export type UserForgotPasswordType = SuccessType & {
   user: User | User;
 };

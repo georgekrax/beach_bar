@@ -88,6 +88,7 @@ export const UserLoginType = objectType({
       nullable: false,
       resolve: o => o.user,
     });
+    t.string("accessToken", { nullable: false, description: "The access token to authenticate & authorize the user" });
     t.boolean("success", { nullable: false, description: "A boolean that indicates if the user has succefully logined" });
   },
 });

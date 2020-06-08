@@ -1,15 +1,14 @@
-import "reflect-metadata";
-import Redis from "ioredis";
-import * as express from "express";
-import { verify } from "jsonwebtoken";
-import { UAParser } from "ua-parser-js";
-import * as cookieParser from "cookie-parser";
 import { ApolloServer } from "apollo-server-express";
-
-import { schema } from "./schema";
-import { router } from "./routes/authRoutes";
+import * as cookieParser from "cookie-parser";
+import * as express from "express";
+import Redis from "ioredis";
+import { verify } from "jsonwebtoken";
+import "reflect-metadata";
+import { UAParser } from "ua-parser-js";
 import { MyContext } from "./common/myContext";
 import { googleOAuth2Client } from "./config/googleOAuth";
+import { router } from "./routes/authRoutes";
+import { schema } from "./schema";
 import { createDBConnection } from "./utils/createDBConnection";
 
 export let redis;
@@ -17,6 +16,7 @@ export let redis;
 const startServer = async (): Promise<any> => {
   redis = new Redis({
     password: "george2016",
+    db: 2,
   });
 
   redis.on("error", (err: any) => {
