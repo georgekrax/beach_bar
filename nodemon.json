@@ -9,6 +9,7 @@
     "PORT": 4000,
     "ACCESS_TOKEN_SECRET": "dfdkodkflLDSKDd56s6d6aadakdma575",
     "REFRESH_TOKEN_SECRET": "dfcsknkEEfdkllsd5573WE5S5546dsknds5a5",
+    "REFRESH_TOKEN_COOKIE_NAME": "jid",
     "TOKEN_AUDIENCE": "https://www.beachbar.com",
     "TOKEN_ISSUER": "https://www.beachbar.com",
     "GOOGLE_OAUTH_CLIENT_ID": "650706540645-lfagodh1ld38fmcfih6cjtre70n9bc4p.apps.googleusercontent.com",

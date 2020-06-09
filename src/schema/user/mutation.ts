@@ -1,7 +1,7 @@
-import { arg, extendType, stringArg } from "@nexus/schema";
+import { arg, extendType } from "@nexus/schema";
 import { execute, makePromise } from "apollo-link";
 import { createHash, randomBytes } from "crypto";
-import { verify } from "jsonwebtoken";
+import { KeyType } from "ioredis";
 import { getConnection } from "typeorm";
 import { MyContext } from "../../common/myContext";
 import { link } from "../../config/apolloLink";
@@ -14,23 +14,21 @@ import { Platform } from "../../entity/Platform";
 import { User } from "../../entity/User";
 import authorizeWithHashtagQuery from "../../graphql/AUTHORIZE_WITH_HASHTAG";
 import exchangeCodeQuery from "../../graphql/EXCHANGE_CODE";
+import logoutQuery from "../../graphql/LOGOUT_USER";
 import signUpUserQuery from "../../graphql/SIGN_UP_USER";
 import tokenInfoQuery from "../../graphql/TOKEN_INFO";
 import { generateAccessToken, generateRefreshToken } from "../../utils/auth/generateAuthTokens";
 import { sendRefreshToken } from "../../utils/auth/sendRefreshToken";
 import { createUserLoginDetails, findBrowser, findCity, findCountry, findOs } from "../../utils/auth/userCommon";
-import { ErrorType } from "../returnTypes";
+import { ErrorType, SuccessType } from "../returnTypes";
+import { SuccessResult } from "../types";
 import { UserLoginType, UserSignUpType } from "./returnTypes";
-import { UserCredentialsInput, UserLoginDetailsInput, UserLoginResult, UserLogoutResult, UserSignUpResult } from "./types";
-
-// --------------------------------------------------- //
-// Sign up & login mutation
-// --------------------------------------------------- //
+import { UserCredentialsInput, UserLoginDetailsInput, UserLoginResult, UserSignUpResult } from "./types";
 
 export const UserSignUpAndLoginMutation = extendType({
   type: "Mutation",
   definition(t) {
-    t.field("signUpUser", {
+    t.field("signUp", {
       type: UserSignUpResult,
       description: "Sign up a user",
       nullable: false,
@@ -67,7 +65,6 @@ export const UserSignUpAndLoginMutation = extendType({
         await makePromise(execute(link, operation))
           .then(res => res.data?.signUpUser)
           .then(data => {
-            console.log(data.user.code);
             if (data.error) {
               errorCode = data.error.code;
               errorMessage = data.error.message;
@@ -112,12 +109,6 @@ export const UserSignUpAndLoginMutation = extendType({
         };
       },
     });
-  },
-});
-
-export const UserLoginMutation = extendType({
-  type: "Mutation",
-  definition(t) {
     t.field("login", {
       type: UserLoginResult,
       description: "Login a user",
@@ -234,7 +225,7 @@ export const UserLoginMutation = extendType({
           prompt: boolean | undefined = undefined,
           authorized: boolean | undefined = undefined,
           errorCode: string | undefined = undefined,
-          errorMessage: string | undefined = undefined;
+          errorMessage: string | any = undefined;
 
         await makePromise(execute(link, authorizeWithHashtagOperation))
           .then(res => res.data?.authorizeWithHashtag)
@@ -281,7 +272,7 @@ export const UserLoginMutation = extendType({
           return { error: { message: "Something went wrong" } };
         }
 
-        if (errorCode !== undefined || errorMessage !== undefined) {
+        if (errorCode || errorMessage) {
           if (errorMessage === errors.INVALID_PASSWORD_MESSAGE || errorCode === errors.INVALID_PASSWORD_CODE) {
             await createUserLoginDetails(
               loginDetailStatus.invalidPassword,
@@ -294,7 +285,7 @@ export const UserLoginMutation = extendType({
               ipAddr,
             );
           }
-          return { error: { code: errorCode, message: errorMessage as any } };
+          return { error: { code: errorCode, message: errorMessage } };
         }
 
         // exchange for ID & Access tokens
@@ -307,8 +298,8 @@ export const UserLoginMutation = extendType({
           },
         };
 
-        let hashtagAccessToken: object | undefined = undefined,
-          idToken: object | undefined = undefined;
+        let hashtagAccessToken: object | any = undefined,
+          idToken: object | any = undefined;
 
         await makePromise(execute(link, exchangeCodeOperation))
           .then(res => res.data?.exchangeCode)
@@ -337,7 +328,7 @@ export const UserLoginMutation = extendType({
 
         if (errorCode || errorMessage) {
           return {
-            error: { code: errorCode, message: errorMessage as any },
+            error: { code: errorCode, message: errorMessage },
           };
         }
 
@@ -403,11 +394,12 @@ export const UserLoginMutation = extendType({
         await createUserLoginDetails(loginDetailStatus.loggedIn, platform, user.account, os, browser, country, city, ipAddr);
 
         const refreshToken = generateRefreshToken(user);
-        const accessToken = generateAccessToken(user);
+        const accessToken = generateAccessToken(user, scope);
         sendRefreshToken(res, refreshToken.token);
 
-        await redis.hset(user.id.toString(), "access_token", accessToken.token);
-        await redis.hset(user.id.toString(), "refresh_token", refreshToken.token);
+        await redis.hset(`${user.id.toString()}` as KeyType, "access_token", accessToken.token);
+        await redis.hset(`${user.id.toString()}` as KeyType, "refresh_token", refreshToken.token);
+        await redis.hset(`${user.id.toString()}` as KeyType, "hashtag_access_token", hashtagAccessToken.token);
 
         try {
           user.account.isActive = true;
@@ -434,78 +426,73 @@ export const UserLogoutMutation = extendType({
   type: "Mutation",
   definition(t) {
     t.field("logout", {
-      type: UserLogoutResult,
+      type: SuccessResult,
       description: "Logout a user",
-      args: {
-        refreshToken: stringArg({ required: true }),
-      },
       nullable: false,
-      resolve: async (
-        _,
-        { refreshToken },
-        { res, payload, redis }: MyContext,
-      ): Promise<{
-        loggedOut: boolean;
-        error: string | null;
-      }> => {
-        if (!refreshToken) {
-          return {
-            loggedOut: false,
-            error: "A refresh token should be provided",
-          };
+      resolve: async (_, __, { res, payload, redis }: MyContext): Promise<SuccessType> => {
+        if (!payload) {
+          return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
 
-        if (!payload || payload.sub === null) {
-          return {
-            loggedOut: false,
-            error: "Not authenticated",
-          };
+        const redisUser = await redis.hgetall(payload.sub.toString() as KeyType);
+        const hashtagAccessToken = redisUser.hashtag_access_token;
+        if (!redisUser || !hashtagAccessToken) {
+          return { error: { message: "Something went wrong" } };
         }
 
-        let tokenPayload: any = null;
-        try {
-          tokenPayload = verify(refreshToken, process.env.REFRESH_TOKEN_SECRET!, {
-            issuer: "www.beach_bar.com",
+        const logoutOperation = {
+          query: logoutQuery,
+          variables: {
+            clientId: process.env.HASHTAG_CLIENT_ID!.toString(),
+            clientSecret: process.env.HASHTAG_CLIENT_SECRET!.toString(),
+          },
+          context: {
+            headers: {
+              authorization: `Bearer ${hashtagAccessToken}`,
+            },
+          },
+        };
+
+        let success: boolean | undefined = undefined,
+          errorCode: string | undefined = undefined,
+          errorMessage: string | any = undefined;
+
+        await makePromise(execute(link, logoutOperation))
+          .then(res => res.data?.logoutUser)
+          .then(data => {
+            if (data.error) {
+              errorCode = data.error.code;
+              errorMessage = data.error.message;
+            }
+            success = data.success;
+          })
+          .catch(err => {
+            return { error: { message: `Something went wrong. ${err}` } };
           });
-        } catch (err) {
-          return {
-            loggedOut: false,
-            error: err,
-          };
+
+        if (errorCode || errorMessage) {
+          return { error: { code: errorCode, message: errorMessage } };
         }
-
-        if (payload.sub !== tokenPayload.sub) {
-          return {
-            loggedOut: false,
-            error: "You are not allowed to logout this user",
-          };
-        }
-
-        await getConnection().getRepository(User).increment({ id: payload.sub }, "tokenVersion", 1);
-
-        await getConnection()
-          .createQueryBuilder()
-          .update(Account)
-          .set({ isActive: false })
-          .where("userId = :userId", { userId: payload.sub })
-          .execute();
-
-        const tokenId = `${tokenPayload.iat}-${tokenPayload.jti}`;
 
         try {
-          await redis.del(tokenId);
+          await redis.del(payload.sub.toString() as KeyType);
+
+          await getConnection().getRepository(User).increment({ id: payload.sub }, "tokenVersion", 1);
+
+          await getConnection()
+            .createQueryBuilder()
+            .update(Account)
+            .set({ isActive: false })
+            .where("userId = :userId", { userId: payload.sub })
+            .execute();
         } catch (err) {
-          return {
-            loggedOut: false,
-            error: err,
-          };
+          return { error: { message: `Something went wrong. ${err}` } };
         }
 
-        res.clearCookie("jid", { httpOnlye: true, maxAge: 15552000000 });
+        res.clearCookie(process.env.REFRESH_TOKEN_COOKIE_NAME!.toString(), { httpOnlye: true });
 
         return {
-          loggedOut: true,
-          error: null,
+          success,
         };
       },
     });

@@ -1,16 +1,14 @@
-import fetch from "node-fetch";
 import { extendType, stringArg } from "@nexus/schema";
-
-import { User } from "../../entity/User";
-import { GoogleOAuthUserType } from "./types";
-import { Account } from "../../entity/Account";
-import { Platform } from "../../entity/Platform";
 import { MyContext } from "../../common/myContext";
+import { Account } from "../../entity/Account";
 import { ContactDetails } from "../../entity/ContactDetails";
 import { loginDetailStatus } from "../../entity/LoginDetails";
+import { Platform } from "../../entity/Platform";
+import { User } from "../../entity/User";
+import { generateAccessToken, generateRefreshToken } from "../../utils/auth/generateAuthTokens";
 import { sendRefreshToken } from "../../utils/auth/sendRefreshToken";
-import { generateRefreshToken, generateAccessToken } from "../../utils/auth/generateAuthTokens";
-import { findCountry, findOs, findBrowser, findCity, createUserLoginDetails } from "../../utils/auth/userCommon";
+import { createUserLoginDetails, findBrowser, findCity, findCountry, findOs } from "../../utils/auth/userCommon";
+import { GoogleOAuthUserType } from "./types";
 
 // --------------------------------------------------- //
 // Google authorize mutation
@@ -116,19 +114,6 @@ export const AuthorizeWithGoogle = extendType({
           city: any = null,
           ipAddr: string | null = null;
 
-        await fetch("http://ip-api.com/json/")
-          .then(res => res.json())
-          .then(json => {
-            if (json.status === "success") {
-              country = json.country;
-              city = json.city;
-              ipAddr = json.query;
-            }
-          })
-          .catch(err => {
-            throw new Error(err);
-          });
-
         try {
           os = await findOs(os);
           browser = await findBrowser(browser);
@@ -152,8 +137,7 @@ export const AuthorizeWithGoogle = extendType({
 
         const user: User | any = await User.findOne({
           where: { email },
-          select: ["id", "email", "hashtagId", "tokenVersion", "isOwner", "googleId", "facebookId", "instagramId"],
-          relations: ["account"],
+          select: ["id", "email", "hashtagId", "tokenVersion", "googleId", "facebookId", "instagramId"],
         });
         let signedUp = false;
         if (!user) {
@@ -227,6 +211,7 @@ export const AuthorizeWithGoogle = extendType({
 
         res.clearCookie("gstate", { httpOnly: true, maxAge: 150000 });
         res.clearCookie("gcode_verifier", { httpOnly: true, maxAge: 150000 });
+        googleOAuth2Client.revokeCredentials();
 
         return {
           id: BigInt(user.id),
@@ -234,7 +219,7 @@ export const AuthorizeWithGoogle = extendType({
           signedUp,
           logined: true,
           account: user.account,
-          accessToken: generateAccessToken(user).token,
+          accessToken: generateAccessToken(user, ).token,
           error: null,
         };
       },

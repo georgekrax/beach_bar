@@ -1,65 +1,62 @@
 import { decode, sign } from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
+import { GeneratedTokenType } from "../returnTypes";
 import { User } from "./../../entity/User";
 
-export const generateAccessToken = (
-  user: User,
-): {
-  token: string;
-  exp: Date;
-  iat: Date;
-  jti: string;
-  aud: string;
-  iss: string;
-} => {
-  const accessToken = sign({}, process.env.ACCESS_TOKEN_SECRET!, {
-    expiresIn: "17m",
-    audience: process.env.TOKEN_AUDIENCE!.toString(),
-    issuer: process.env.TOKEN_ISSUER!.toString(),
-    subject: user.id.toString(),
-    jwtid: uuidv4(),
-  });
-  const payload: any = decode(accessToken);
-  if (payload === null) {
+export const generateAccessToken = (user: User, scope: string[]): GeneratedTokenType => {
+  const token = sign(
+    {
+      scope,
+    },
+    process.env.ACCESS_TOKEN_SECRET!,
+    {
+      audience: process.env.TOKEN_AUDIENCE!.toString(),
+      issuer: process.env.TOKEN_ISSUER!.toString(),
+      subject: user.id.toString(),
+      expiresIn: "17 minutes",
+      jwtid: uuidv4(),
+    },
+  );
+
+  const tokenPayload: any = decode(token);
+  if (tokenPayload === null) {
     throw new Error("Something went wrong");
   }
   return {
-    token: accessToken,
-    exp: payload.exp,
-    iat: payload.iat,
-    jti: payload.jti,
-    aud: payload.aud,
-    iss: payload.iss,
+    token,
+    exp: tokenPayload.exp * 1000,
+    iat: tokenPayload.iat * 1000,
+    jti: tokenPayload.jti,
+    aud: tokenPayload.audience,
+    iss: tokenPayload.issuer,
   };
 };
 
-export const generateRefreshToken = (
-  user: User,
-): {
-  token: string;
-  exp: Date;
-  iat: Date;
-  jti: string;
-  aud: string;
-  iss: string;
-} => {
-  const refreshToken = sign({ tokenVersion: user.tokenVersion }, process.env.REFRESH_TOKEN_SECRET!, {
-    expiresIn: "100 minutes",
-    audience: process.env.TOKEN_AUDIENCE!.toString(),
-    issuer: process.env.TOKEN_ISSUER!.toString(),
-    subject: user.id.toString(),
-    jwtid: uuidv4(),
-  });
-  const payload: any = decode(refreshToken);
-  if (payload === null) {
+export const generateRefreshToken = (user: User): GeneratedTokenType => {
+  const token = sign(
+    {
+      tokenVersion: user.tokenVersion,
+    },
+    process.env.REFRESH_TOKEN_SECRET!,
+    {
+      audience: process.env.TOKEN_AUDIENCE!.toString(),
+      issuer: process.env.TOKEN_ISSUER!.toString(),
+      subject: user.id.toString(),
+      expiresIn: "180 days",
+      jwtid: uuidv4(),
+    },
+  );
+
+  const tokenPayload: any = decode(token);
+  if (tokenPayload === null) {
     throw new Error("Something went wrong");
   }
   return {
-    token: refreshToken,
-    exp: payload.exp,
-    iat: payload.iat,
-    jti: payload.jti,
-    aud: payload.aud,
-    iss: payload.iss,
+    token,
+    exp: tokenPayload.exp * 1000,
+    iat: tokenPayload.iat * 1000,
+    jti: tokenPayload.jti,
+    aud: tokenPayload.audience,
+    iss: tokenPayload.issuer,
   };
 };

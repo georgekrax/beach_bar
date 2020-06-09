@@ -107,28 +107,6 @@ export const UserLoginResult = unionType({
   },
 });
 
-export const UserLogoutType = objectType({
-  name: "UserLogout",
-  description: "Info to be returned on successfull user logout",
-  definition(t) {
-    t.boolean("success", { nullable: false, description: "A boolean that indicates if the user has succefully logged out" });
-  },
-});
-
-export const UserLogoutResult = unionType({
-  name: "UserLogoutResult",
-  definition(t) {
-    t.members("UserLogout", "Error");
-    t.resolveType(item => {
-      if (item.error) {
-        return "Error";
-      } else {
-        return "UserLogout";
-      }
-    });
-  },
-});
-
 export const UserCredentialsInput = inputObjectType({
   name: "UserCredentialsInput",
   description: "Credentials of user to sign up / login",

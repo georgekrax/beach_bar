@@ -13,7 +13,7 @@ export type UserLoginType = SuccessType & {
 };
 
 export type UserForgotPasswordType = SuccessType & {
-  user: User | User;
+  user: User;
 };
 
 export type UserUpdateType = UpdateType & {
