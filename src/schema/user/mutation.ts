@@ -1,8 +1,9 @@
-import { arg, booleanArg, extendType } from "@nexus/schema";
+import { arg, booleanArg, extendType, stringArg } from "@nexus/schema";
 import { execute, makePromise } from "apollo-link";
 import { createHash, randomBytes } from "crypto";
 import { KeyType } from "ioredis";
-import { getConnection } from "typeorm";
+import { getConnection, IsNull } from "typeorm";
+import { EmailAddress } from "../../common/emailScalar";
 import { MyContext } from "../../common/myContext";
 import { link } from "../../config/apolloLink";
 import errors from "../../constants/errors";
@@ -14,8 +15,10 @@ import { Owner } from "../../entity/Owner";
 import { Platform } from "../../entity/Platform";
 import { User } from "../../entity/User";
 import authorizeWithHashtagQuery from "../../graphql/AUTHORIZE_WITH_HASHTAG";
+import changeUserPasswordQuery from "../../graphql/CHANGE_USER_PASSWORD";
 import exchangeCodeQuery from "../../graphql/EXCHANGE_CODE";
 import logoutQuery from "../../graphql/LOGOUT_USER";
+import sendForgotPasswordLinkQuery from "../../graphql/SEND_FORGOT_PASSWORD_LINK";
 import signUpUserQuery from "../../graphql/SIGN_UP_USER";
 import tokenInfoQuery from "../../graphql/TOKEN_INFO";
 import { generateAccessToken, generateRefreshToken } from "../../utils/auth/generateAuthTokens";
@@ -23,8 +26,9 @@ import { sendRefreshToken } from "../../utils/auth/sendRefreshToken";
 import { createUserLoginDetails, findBrowser, findCity, findCountry, findOs } from "../../utils/auth/userCommon";
 import { ErrorType, SuccessType } from "../returnTypes";
 import { SuccessResult } from "../types";
-import { UserLoginType, UserSignUpType } from "./returnTypes";
-import { UserCredentialsInput, UserLoginDetailsInput, UserLoginResult, UserSignUpResult } from "./types";
+import { UserForgotPasswordType, UserLoginType, UserSignUpType } from "./returnTypes";
+// eslint-disable-next-line prettier/prettier
+import { UserCredentialsInput, UserForgotPasswordResult, UserLoginDetailsInput, UserLoginResult, UserSignUpResult } from "./types";
 
 export const UserSignUpAndLoginMutation = extendType({
   type: "Mutation",
@@ -168,10 +172,7 @@ export const UserSignUpAndLoginMutation = extendType({
         }
 
         // login user
-        const user = await User.findOne({
-          where: { email },
-          relations: ["account"],
-        });
+        const user = await User.findOne({ where: { email } });
         if (!user) {
           return {
             error: {
@@ -258,27 +259,9 @@ export const UserSignUpAndLoginMutation = extendType({
             return { error: { message: `Something went wrong. ${err}` } };
           });
 
-        if (
-          state !== hashtagState ||
-          !code ||
-          code === "" ||
-          code === " " ||
-          prompt !== true ||
-          !authorized ||
-          hashtagClientId !== process.env.HASHTAG_CLIENT_ID!.toString() ||
-          hashtagClientSecret !== process.env.HASHTAG_CLIENT_SECRET!.toString() ||
-          JSON.stringify(scope) !== JSON.stringify(hashtagScope)
-        ) {
-          return { error: { message: "Something went wrong" } };
-        }
-
         // pass beach_bar platform to user login details
         const platform = await Platform.findOne({ where: { name: "#beach_bar" } });
         if (!platform) {
-          return { error: { message: "Something went wrong" } };
-        }
-
-        if (String(hashtagId) !== String(user.hashtagId) || email !== hashtagEmail) {
           return { error: { message: "Something went wrong" } };
         }
 
@@ -296,6 +279,24 @@ export const UserSignUpAndLoginMutation = extendType({
             );
           }
           return { error: { code: errorCode, message: errorMessage } };
+        }
+
+        if (
+          state !== hashtagState ||
+          !code ||
+          code === "" ||
+          code === " " ||
+          prompt !== true ||
+          !authorized ||
+          hashtagClientId !== process.env.HASHTAG_CLIENT_ID!.toString() ||
+          hashtagClientSecret !== process.env.HASHTAG_CLIENT_SECRET!.toString() ||
+          JSON.stringify(scope) !== JSON.stringify(hashtagScope)
+        ) {
+          return { error: { message: "Something went wrong" } };
+        }
+
+        if (String(hashtagId) !== String(user.hashtagId) || email !== hashtagEmail) {
+          return { error: { message: "Something went wrong" } };
         }
 
         // exchange for ID & Access tokens
@@ -327,6 +328,12 @@ export const UserSignUpAndLoginMutation = extendType({
             return { error: { message: `Something went wrong. ${err}` } };
           });
 
+        if (errorCode || errorMessage) {
+          return {
+            error: { code: errorCode, message: errorMessage },
+          };
+        }
+
         if (
           !hashtagAccessToken ||
           !idToken ||
@@ -334,12 +341,6 @@ export const UserSignUpAndLoginMutation = extendType({
           hashtagClientSecret !== process.env.HASHTAG_CLIENT_SECRET!.toString()
         ) {
           return { error: { message: "Something went wrong" } };
-        }
-
-        if (errorCode || errorMessage) {
-          return {
-            error: { code: errorCode, message: errorMessage },
-          };
         }
 
         // logined successfully
@@ -428,10 +429,6 @@ export const UserSignUpAndLoginMutation = extendType({
   },
 });
 
-// --------------------------------------------------- //
-// Logout mutation
-// --------------------------------------------------- //
-
 export const UserLogoutMutation = extendType({
   type: "Mutation",
   definition(t) {
@@ -509,10 +506,155 @@ export const UserLogoutMutation = extendType({
   },
 });
 
-// --------------------------------------------------- //
-// Forgot password mutation
-// --------------------------------------------------- //
+export const UserForgotPasswordMutation = extendType({
+  type: "Mutation",
+  definition(t) {
+    t.field("sendForgotPasswordLink", {
+      type: UserForgotPasswordResult,
+      description: "Sends a link to the user's email address to change its password",
+      nullable: false,
+      args: {
+        email: arg({
+          type: EmailAddress,
+          required: true,
+          description: "The email address of user",
+        }),
+      },
+      resolve: async (_, { email }): Promise<UserForgotPasswordType | ErrorType> => {
+        if (!email || email === "" || email === " ") {
+          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid email address" } };
+        }
 
-// --------------------------------------------------- //
-// Change password mutation
-// --------------------------------------------------- //
+        const user = await User.findOne({
+          where: { email, deletedAt: IsNull() },
+          relations: ["owner", "owner.user", "owner.beachBars", "reviews", "reviews.visitType"],
+        });
+        if (!user) {
+          return {
+            error: { code: errors.NOT_FOUND, message: "User does not exist" },
+          };
+        }
+
+        const sendForgotPasswordLinkOperation = {
+          query: sendForgotPasswordLinkQuery,
+          variables: {
+            email,
+          },
+        };
+
+        let success: boolean | undefined = undefined,
+          hashtagUser: object | any = undefined,
+          errorCode: string | undefined = undefined,
+          errorMessage: string | any = undefined;
+
+        await makePromise(execute(link, sendForgotPasswordLinkOperation))
+          .then(res => res.data?.sendForgotPasswordLink)
+          .then(data => {
+            if (data.error) {
+              errorCode = data.error.code;
+              errorMessage = data.error.message;
+            }
+            success = data.success;
+            hashtagUser = data.user;
+          })
+          .catch(err => {
+            return { error: { message: `Something went wrong. ${err}` } };
+          });
+
+        if (errorCode || errorMessage) {
+          return { error: { code: errorCode, message: errorMessage } };
+        }
+
+        if (!success || !hashtagUser || String(hashtagUser.id) !== String(user.hashtagId) || hashtagUser.email !== email) {
+          return { error: { message: "Something went wrong" } };
+        }
+
+        return {
+          user,
+          success,
+        };
+      },
+    });
+    t.field("changeUserPassword", {
+      type: UserForgotPasswordResult,
+      description: "Change a user's password",
+      nullable: false,
+      args: {
+        email: arg({
+          type: EmailAddress,
+          required: true,
+          description: "Email of user to retrieve OAuth Client applications",
+        }),
+        key: stringArg({
+          required: true,
+          description: "The key in the URL to identify and verify user. Each key lasts 20 minutes",
+        }),
+        newPassword: stringArg({
+          required: true,
+          description: "User's new password",
+        }),
+      },
+      resolve: async (_, { email, key, newPassword }): Promise<UserForgotPasswordType | ErrorType> => {
+        if (!email || email === "" || email === " ") {
+          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid email address" } };
+        }
+        if (!newPassword || newPassword === "" || newPassword === " ") {
+          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid newPassword" } };
+        }
+        if (!key || key === "" || key === " ") {
+          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid key" } };
+        }
+
+        const user = await User.findOne({
+          where: { email, deletedAt: IsNull() },
+          relations: ["owner", "owner.user", "owner.beachBars", "reviews", "reviews.visitType"],
+        });
+        if (!user) {
+          return {
+            error: { code: errors.NOT_FOUND, message: "User does not exist" },
+          };
+        }
+
+        const changeUserPasswordOperation = {
+          query: changeUserPasswordQuery,
+          variables: {
+            email,
+            key,
+            newPassword,
+          },
+        };
+
+        let success: boolean | undefined = undefined,
+          hashtagUser: object | any = undefined,
+          errorCode: string | undefined = undefined,
+          errorMessage: string | any = undefined;
+
+        await makePromise(execute(link, changeUserPasswordOperation))
+          .then(res => res.data?.changeUserPassword)
+          .then(data => {
+            if (data.error) {
+              errorCode = data.error.code;
+              errorMessage = data.error.message;
+            }
+            success = data.success;
+            hashtagUser = data.user;
+          })
+          .catch(err => {
+            return { error: { message: `Something went wrong. ${err}` } };
+          });
+
+        if (errorCode || errorMessage) {
+          return { error: { code: errorCode, message: errorMessage } };
+        }
+        if (!success || !hashtagUser || String(hashtagUser.id) !== String(user.hashtagId) || hashtagUser.email !== email) {
+          return { error: { message: "Something went wrong" } };
+        }
+
+        return {
+          user,
+          success,
+        };
+      },
+    });
+  },
+});

@@ -5,14 +5,11 @@ import { ContactDetails } from "../../entity/ContactDetails";
 import { loginDetailStatus } from "../../entity/LoginDetails";
 import { Platform } from "../../entity/Platform";
 import { User } from "../../entity/User";
-import { generateAccessToken, generateRefreshToken } from "../../utils/auth/generateAuthTokens";
+import { generateRefreshToken } from "../../utils/auth/generateAuthTokens";
 import { sendRefreshToken } from "../../utils/auth/sendRefreshToken";
 import { createUserLoginDetails, findBrowser, findCity, findCountry, findOs } from "../../utils/auth/userCommon";
+import { AuthorizeWithGoogleType } from "./returnTypes";
 import { GoogleOAuthUserType } from "./types";
-
-// --------------------------------------------------- //
-// Google authorize mutation
-// --------------------------------------------------- //
 
 export const AuthorizeWithGoogle = extendType({
   type: "Mutation",
@@ -29,15 +26,7 @@ export const AuthorizeWithGoogle = extendType({
         _,
         { code, state },
         { req, res, googleOAuth2Client, uaParser, redis }: MyContext,
-      ): Promise<{
-        id: bigint | null;
-        email: string | null;
-        signedUp: boolean;
-        logined: boolean;
-        account: Account | null;
-        accessToken: string | null;
-        error: string | null;
-      }> => {
+      ): Promise<AuthorizeWithGoogleType | ErrorType> => {
         if (state !== req.cookies.gstate) {
           return {
             id: null,
@@ -214,13 +203,7 @@ export const AuthorizeWithGoogle = extendType({
         googleOAuth2Client.revokeCredentials();
 
         return {
-          id: BigInt(user.id),
-          email: user.email,
-          signedUp,
-          logined: true,
-          account: user.account,
-          accessToken: generateAccessToken(user).token,
-          error: null,
+          user,
         };
       },
     });
