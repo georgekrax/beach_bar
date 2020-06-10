@@ -219,7 +219,7 @@ export const AuthorizeWithGoogle = extendType({
           signedUp,
           logined: true,
           account: user.account,
-          accessToken: generateAccessToken(user, ).token,
+          accessToken: generateAccessToken(user).token,
           error: null,
         };
       },

@@ -12,15 +12,22 @@ export const UsersQuery = extendType({
       type: UserTypeResult,
       description: "Returns current authenticated user",
       resolve: async (_, __, { payload }: MyContext): Promise<User | ErrorType> => {
-        if (!payload || !payload.sub) {
+        if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
+        }
+        if (!payload.scope.some(scope => ["profile", "crud:user"].includes(scope)) || !payload.scope.includes("email")) {
+          return {
+            error: {
+              code: errors.UNAUTHORIZED_CODE,
+              message: "You are not allowed to access 'this' user's info",
+            },
+          };
         }
 
         const user = await User.findOne({
           where: { id: payload.sub },
-          relations: ["owner", "accounts", "accounts.contactDetails", "accounts.user", "owner.user", "owner.beachBars"],
+          relations: ["owner", "owner.user", "owner.beachBars", "reviews", "reviews.visitType"],
         });
-
         if (!user) {
           return {
             error: {
@@ -29,14 +36,8 @@ export const UsersQuery = extendType({
             },
           };
         }
-        if (payload.sub !== user.id) {
-          return {
-            error: {
-              code: errors.UNAUTHORIZED_CODE,
-              message: "You are not allowed to access 'this' user's info",
-            },
-          };
-        }
+
+        console.log(user);
 
         return user;
       },

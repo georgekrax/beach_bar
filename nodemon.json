@@ -19,7 +19,8 @@
     "HASHTAG_CLIENT_ID": "b4b136f3ec93ae2b5f1fa295ca0b301532ed780b3bb3607b16cfe473f19f743f",
     "HASHTAG_CLIENT_SECRET": "3d0a0c7cab21ef2eadbed839c193f882aff9c7db9dce4cc94c77c17a840db403",
     "HASHTAG_ORIGIN_URI": "https://www.beachbar.com/",
-    "HASHTAG_REDIRECT_URI": "https://www.beachbar.com/oauth/hashtag/callback/"
+    "HASHTAG_REDIRECT_URI": "https://www.beachbar.com/oauth/hashtag/callback/",
+    "HASHTAG_TOKEN_ISSUER": "https://www.hashtag.com"
   },
   "events": {
     "crash": "fuser -k 4000/tcp"

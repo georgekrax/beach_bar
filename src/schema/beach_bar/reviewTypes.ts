@@ -1,5 +1,6 @@
 import { objectType } from "@nexus/schema";
 import { UserType } from "../user/types";
+import { BeachBarType } from "./types";
 
 export const ReviewVisitType = objectType({
   name: "ReviewVisitType",
@@ -35,6 +36,12 @@ export const BeachBarReviewType = objectType({
     t.datetime("timestamp", {
       nullable: false,
       description: "The timestamp recorded, when the user's account was created",
+    });
+    t.field("beachBar", {
+      type: BeachBarType,
+      description: "The #beach_bar of the review",
+      nullable: false,
+      resolve: o => o.beachBar,
     });
     t.field("user", {
       type: UserType,

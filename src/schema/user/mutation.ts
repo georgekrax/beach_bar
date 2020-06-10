@@ -1,4 +1,4 @@
-import { arg, extendType } from "@nexus/schema";
+import { arg, booleanArg, extendType } from "@nexus/schema";
 import { execute, makePromise } from "apollo-link";
 import { createHash, randomBytes } from "crypto";
 import { KeyType } from "ioredis";
@@ -10,6 +10,7 @@ import { Account } from "../../entity/Account";
 import { ContactDetails } from "../../entity/ContactDetails";
 import { Country } from "../../entity/Country";
 import { loginDetailStatus } from "../../entity/LoginDetails";
+import { Owner } from "../../entity/Owner";
 import { Platform } from "../../entity/Platform";
 import { User } from "../../entity/User";
 import authorizeWithHashtagQuery from "../../graphql/AUTHORIZE_WITH_HASHTAG";
@@ -34,8 +35,13 @@ export const UserSignUpAndLoginMutation = extendType({
       nullable: false,
       args: {
         userCredentials: arg({ type: UserCredentialsInput, required: true, description: "Credential for signing up a user" }),
+        isPrimaryOwner: booleanArg({
+          required: false,
+          default: false,
+          description: "Set to true if you want to sign up an owner for a #beach_bar",
+        }),
       },
-      resolve: async (_, { userCredentials }): Promise<UserSignUpType | ErrorType> => {
+      resolve: async (_, { userCredentials, isPrimaryOwner }): Promise<UserSignUpType | ErrorType> => {
         const { email, password } = userCredentials;
 
         if (!email || email === "" || email === " ") {
@@ -99,6 +105,10 @@ export const UserSignUpAndLoginMutation = extendType({
             account: newUserAccount,
           });
           await newUserContactDetails.save();
+          if (isPrimaryOwner) {
+            const owner = Owner.create({ user: newUser, isPrimary: true });
+            await owner.save();
+          }
         } catch (err) {
           return { error: { message: `Something went wrong. ${err}` } };
         }

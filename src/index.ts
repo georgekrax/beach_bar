@@ -1,3 +1,4 @@
+import { execute, makePromise } from "apollo-link";
 import { ApolloServer } from "apollo-server-express";
 import * as cookieParser from "cookie-parser";
 import * as express from "express";
@@ -6,7 +7,10 @@ import { verify } from "jsonwebtoken";
 import "reflect-metadata";
 import { UAParser } from "ua-parser-js";
 import { MyContext } from "./common/myContext";
+import { link } from "./config/apolloLink";
 import { googleOAuth2Client } from "./config/googleOAuth";
+import { User } from "./entity/User";
+import verifyAccessTokenQuery from "./graphql/VERIFY_ACCESS_TOKEN";
 import { router } from "./routes/authRoutes";
 import { schema } from "./schema";
 import { createDBConnection } from "./utils/createDBConnection";
@@ -32,16 +36,88 @@ const startServer = async (): Promise<any> => {
 
   const server = new ApolloServer({
     schema,
-    context: ({ req, res }): MyContext => {
+    context: async ({ req, res }): Promise<MyContext> => {
       const authHeader = req.headers.authorization || "";
       const accessToken = authHeader.split(" ")[1];
 
       let payload: any = null;
       if (accessToken) {
         try {
-          payload = verify(accessToken, process.env.ACCESS_TOKEN_SECRET!);
+          payload = verify(accessToken, process.env.ACCESS_TOKEN_SECRET!, { issuer: process.env.TOKEN_ISSUER!.toString() });
+          if (payload && payload.sub && (payload.sub !== "" || " ")) {
+            const redisUser = await redis.hgetall(payload.sub.toString());
+            if (!redisUser) {
+              payload = null;
+            }
+          } else if (payload.sub === "" || payload.sub === " ") {
+            payload = null;
+          }
         } catch (err) {
-          throw new Error(err);
+          // check with the 'verifyAccessToken' query
+          if (err.message.toString() === "invalid signature") {
+            const verifyAccessTokenOperation = {
+              query: verifyAccessTokenQuery,
+              variables: {
+                token: accessToken,
+              },
+            };
+
+            let hashtagSub,
+              hashtagAud,
+              hashtagIss,
+              hashtagScope: string[] | any,
+              hashtagIat,
+              hashtagExp,
+              hashtagJti,
+              errorCode,
+              errorMessage;
+
+            await makePromise(execute(link, verifyAccessTokenOperation))
+              .then(res => res.data?.verifyAccessToken)
+              .then(data => {
+                if (data.error) {
+                  errorCode = data.error.code;
+                  errorMessage = data.error.message;
+                }
+                hashtagSub = data.sub;
+                hashtagAud = data.aud;
+                hashtagIss = data.iss;
+                hashtagScope = data.scope;
+                hashtagIat = data.iat;
+                hashtagExp = data.exp;
+                hashtagJti = data.jti;
+              })
+              .catch(err => {
+                return { error: { message: `Something went wrong. ${err}` } };
+              });
+
+            if (
+              errorCode ||
+              errorMessage ||
+              hashtagAud !== process.env.HASHTAG_CLIENT_ID!.toString() ||
+              hashtagIss !== process.env.HASHTAG_TOKEN_ISSUER!.toString()
+            ) {
+              payload = null;
+              throw new Error(errorMessage.toString());
+            } else if (hashtagSub && (hashtagSub !== "" || " ")) {
+              const user = await User.findOne({ where: { hashtagId: hashtagSub } });
+              if (!user) {
+                payload = null;
+              } else {
+                payload = {
+                  scope: hashtagScope,
+                  sub: user?.id.toString(),
+                  iat: hashtagIat,
+                  exp: hashtagExp,
+                  aud: hashtagAud,
+                  iss: hashtagIss,
+                  jti: hashtagJti,
+                };
+              }
+            }
+          } else {
+            payload = null;
+          }
         }
       }
 
@@ -56,7 +132,9 @@ const startServer = async (): Promise<any> => {
 
   server.applyMiddleware({ app });
 
-  app.listen({ port: process.env.PORT || 4000 }, () => console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`));
+  app.listen({ port: process.env.PORT || 4000 }, () =>
+    console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`),
+  );
 };
 
 startServer();

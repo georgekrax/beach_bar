@@ -58,7 +58,7 @@ export class BeachBarReview extends BaseEntity {
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt: Date;
 
-  @ManyToOne(() => BeachBar, beachBar => beachBar.reviews, { nullable: false })
+  @ManyToOne(() => BeachBar, beachBar => beachBar.reviews, { nullable: false, eager: true })
   @JoinColumn({ name: "beach_bar_id" })
   beachBar: BeachBar;
 
