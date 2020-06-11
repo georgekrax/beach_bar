@@ -1,5 +1,5 @@
-import { Kind, GraphQLError } from "graphql";
 import { scalarType } from "@nexus/schema";
+import { GraphQLError, Kind } from "graphql";
 
 const validate = (value: any): any => {
   const EMAIL_ADDRESS_REGEX = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
@@ -15,8 +15,8 @@ const validate = (value: any): any => {
   return value;
 };
 
-export const EmailAddress = scalarType({
-  name: "EmailAddress",
+export const EmailScalar = scalarType({
+  name: "Email",
   asNexusMethod: "email",
   description:
     "A field whose value conforms to the standard internet email address format as specified in RFC822: https://www.w3.org/Protocols/rfc822/.",

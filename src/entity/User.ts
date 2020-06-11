@@ -53,10 +53,10 @@ export class User extends BaseEntity {
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt: Date;
 
-  @OneToOne(() => Account, account => account.user, { eager: true }) // specify inverse side as a second parameter
+  @OneToOne(() => Account, account => account.user, { eager: true })
   account: Account;
 
-  @OneToOne(() => Owner, owner => owner.user) // specify inverse side as a second parameter
+  @OneToOne(() => Owner, owner => owner.user)
   owner: Owner;
 
   @OneToMany(() => BeachBarReview, beachBarReview => beachBarReview.user)

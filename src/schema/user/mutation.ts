@@ -3,8 +3,10 @@ import { execute, makePromise } from "apollo-link";
 import { createHash, randomBytes } from "crypto";
 import { KeyType } from "ioredis";
 import { getConnection, IsNull } from "typeorm";
-import { EmailAddress } from "../../common/emailScalar";
+import { DateScalar } from "../../common/dateScalar";
+import { EmailScalar } from "../../common/emailScalar";
 import { MyContext } from "../../common/myContext";
+import { UrlScalar } from "../../common/urlScalar";
 import { link } from "../../config/apolloLink";
 import errors from "../../constants/errors";
 import { Account } from "../../entity/Account";
@@ -16,6 +18,7 @@ import { Platform } from "../../entity/Platform";
 import { User } from "../../entity/User";
 import authorizeWithHashtagQuery from "../../graphql/AUTHORIZE_WITH_HASHTAG";
 import changeUserPasswordQuery from "../../graphql/CHANGE_USER_PASSWORD";
+import deleteUserAccountQuery from "../../graphql/DELETE_USER_ACCOUNT";
 import exchangeCodeQuery from "../../graphql/EXCHANGE_CODE";
 import logoutQuery from "../../graphql/LOGOUT_USER";
 import sendForgotPasswordLinkQuery from "../../graphql/SEND_FORGOT_PASSWORD_LINK";
@@ -24,11 +27,17 @@ import tokenInfoQuery from "../../graphql/TOKEN_INFO";
 import { generateAccessToken, generateRefreshToken } from "../../utils/auth/generateAuthTokens";
 import { sendRefreshToken } from "../../utils/auth/sendRefreshToken";
 import { createUserLoginDetails, findBrowser, findCity, findCountry, findOs } from "../../utils/auth/userCommon";
-import { ErrorType, SuccessType } from "../returnTypes";
-import { SuccessResult } from "../types";
-import { UserForgotPasswordType, UserLoginType, UserSignUpType } from "./returnTypes";
-// eslint-disable-next-line prettier/prettier
-import { UserCredentialsInput, UserForgotPasswordResult, UserLoginDetailsInput, UserLoginResult, UserSignUpResult } from "./types";
+import { DeleteType, ErrorType, SuccessType } from "../returnTypes";
+import { DeleteResult, SuccessResult } from "../types";
+import { UserForgotPasswordType, UserLoginType, UserSignUpType, UserUpdateType } from "./returnTypes";
+import {
+  UserCredentialsInput,
+  UserForgotPasswordResult,
+  UserLoginDetailsInput,
+  UserLoginResult,
+  UserSignUpResult,
+  UserUpdateResult
+} from "./types";
 
 export const UserSignUpAndLoginMutation = extendType({
   type: "Mutation",
@@ -442,43 +451,45 @@ export const UserLogoutMutation = extendType({
         }
 
         const redisUser = await redis.hgetall(payload.sub.toString() as KeyType);
-        const hashtagAccessToken = redisUser.hashtag_access_token;
-        if (!redisUser || !hashtagAccessToken) {
+        if (!redisUser) {
           return { error: { message: "Something went wrong" } };
         }
 
-        const logoutOperation = {
-          query: logoutQuery,
-          variables: {
-            clientId: process.env.HASHTAG_CLIENT_ID!.toString(),
-            clientSecret: process.env.HASHTAG_CLIENT_SECRET!.toString(),
-          },
-          context: {
-            headers: {
-              authorization: `Bearer ${hashtagAccessToken}`,
+        if (redisUser.hashtag_access_token && redisUser.hashtag_access_token !== "" && redisUser.hashtag_access_token !== " ") {
+          const hashtagAccessToken = redisUser.hashtag_access_token;
+          const logoutOperation = {
+            query: logoutQuery,
+            variables: {
+              clientId: process.env.HASHTAG_CLIENT_ID!.toString(),
+              clientSecret: process.env.HASHTAG_CLIENT_SECRET!.toString(),
             },
-          },
-        };
+            context: {
+              headers: {
+                authorization: `Bearer ${hashtagAccessToken}`,
+              },
+            },
+          };
 
-        let success: boolean | undefined = undefined,
-          errorCode: string | undefined = undefined,
-          errorMessage: string | any = undefined;
+          let success: boolean | undefined = undefined,
+            errorCode: string | undefined = undefined,
+            errorMessage: string | any = undefined;
 
-        await makePromise(execute(link, logoutOperation))
-          .then(res => res.data?.logoutUser)
-          .then(data => {
-            if (data.error) {
-              errorCode = data.error.code;
-              errorMessage = data.error.message;
-            }
-            success = data.success;
-          })
-          .catch(err => {
-            return { error: { message: `Something went wrong. ${err}` } };
-          });
+          await makePromise(execute(link, logoutOperation))
+            .then(res => res.data?.logoutUser)
+            .then(data => {
+              if (data.error) {
+                errorCode = data.error.code;
+                errorMessage = data.error.message;
+              }
+              success = data.success;
+            })
+            .catch(err => {
+              return { error: { message: `Something went wrong. ${err}` } };
+            });
 
-        if (errorCode || errorMessage) {
-          return { error: { code: errorCode, message: errorMessage } };
+          if ((errorCode || errorMessage) && !success) {
+            return { error: { code: errorCode, message: errorMessage } };
+          }
         }
 
         try {
@@ -499,7 +510,7 @@ export const UserLogoutMutation = extendType({
         res.clearCookie(process.env.REFRESH_TOKEN_COOKIE_NAME!.toString(), { httpOnlye: true });
 
         return {
-          success,
+          success: true,
         };
       },
     });
@@ -515,7 +526,7 @@ export const UserForgotPasswordMutation = extendType({
       nullable: false,
       args: {
         email: arg({
-          type: EmailAddress,
+          type: EmailScalar,
           required: true,
           description: "The email address of user",
         }),
@@ -532,6 +543,12 @@ export const UserForgotPasswordMutation = extendType({
         if (!user) {
           return {
             error: { code: errors.NOT_FOUND, message: "User does not exist" },
+          };
+        }
+
+        if (!user.hashtagId) {
+          return {
+            error: { code: errors.HASHTAG_NOT_AUTHENTICATED_CODE, message: "You have not authenticated with #hashtag" },
           };
         }
 
@@ -581,7 +598,7 @@ export const UserForgotPasswordMutation = extendType({
       nullable: false,
       args: {
         email: arg({
-          type: EmailAddress,
+          type: EmailScalar,
           required: true,
           description: "Email of user to retrieve OAuth Client applications",
         }),
@@ -612,6 +629,12 @@ export const UserForgotPasswordMutation = extendType({
         if (!user) {
           return {
             error: { code: errors.NOT_FOUND, message: "User does not exist" },
+          };
+        }
+
+        if (!user.hashtagId) {
+          return {
+            error: { code: errors.HASHTAG_NOT_AUTHENTICATED_CODE, message: "You have not authenticated with #hashtag" },
           };
         }
 
@@ -653,6 +676,207 @@ export const UserForgotPasswordMutation = extendType({
         return {
           user,
           success,
+        };
+      },
+    });
+  },
+});
+
+export const UserCrudMutation = extendType({
+  type: "Mutation",
+  definition(t) {
+    t.field("updateUser", {
+      type: UserUpdateResult,
+      description: "Update a user's info",
+      nullable: false,
+      args: {
+        email: arg({
+          type: EmailScalar,
+          required: false,
+        }),
+        firstName: stringArg({
+          required: false,
+        }),
+        lastName: stringArg({
+          required: false,
+        }),
+        imgUrl: arg({
+          type: UrlScalar,
+          required: false,
+        }),
+        personTitle: stringArg({
+          required: false,
+          description: "The honorific title of the user",
+        }),
+        birthday: arg({
+          type: DateScalar,
+          required: false,
+          description: "User's birthday in the date format",
+        }),
+      },
+      resolve: async (
+        _,
+        { email, firstName, lastName, imgUrl, personTitle, birthday },
+        { payload }: MyContext,
+      ): Promise<UserUpdateType | ErrorType> => {
+        if (!payload) {
+          return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
+        }
+        if (!payload.scope.some(scope => ["update:user", "crud:user"].includes(scope))) {
+          return {
+            error: {
+              code: errors.UNAUTHORIZED_CODE,
+              message: "You are not allowed to update 'this' user",
+            },
+          };
+        }
+
+        if (email && (email === "" || email === " ")) {
+          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid email address" } };
+        }
+        if (firstName && (firstName === "" || firstName === " ")) {
+          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid firstName" } };
+        }
+        if (lastName && (lastName === "" || lastName === " ")) {
+          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid lastName" } };
+        }
+        if (imgUrl && (imgUrl === "" || imgUrl === " ")) {
+          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid imgUrl" } };
+        }
+        if (personTitle && (personTitle === "" || personTitle === " ")) {
+          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid personTitle" } };
+        }
+        if (birthday && (birthday === "" || birthday === " ")) {
+          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid birthday" } };
+        }
+
+        const user = await User.findOne({
+          where: { id: payload.sub, deletedAt: IsNull() },
+          relations: ["owner", "owner.user", "owner.beachBars", "reviews", "reviews.visitType"],
+        });
+        if (!user) {
+          return { error: { code: errors.NOT_FOUND, message: "User does not exist" } };
+        }
+
+        try {
+          if (email) {
+            user.email = email;
+          }
+          if (firstName) {
+            user.firstName = firstName;
+          }
+          if (lastName) {
+            user.lastName = lastName;
+          }
+          if (imgUrl) {
+            user.account = imgUrl;
+          }
+          if (personTitle) {
+            user.account.personTitle = personTitle;
+          }
+          if (birthday) {
+            user.account.birthday = birthday;
+          }
+          await user.save();
+          await user.account.save();
+        } catch (err) {
+          return {
+            error: { message: `Something went wrong. ${err}` },
+          };
+        }
+
+        return {
+          user,
+          updated: true,
+        };
+      },
+    });
+    t.field("deleteUser", {
+      type: DeleteResult,
+      description: "Delete a user & its account",
+      nullable: false,
+      resolve: async (_, __, { payload, redis }: MyContext): Promise<DeleteType | ErrorType> => {
+        if (!payload) {
+          return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
+        }
+        if (!payload.scope.some(scope => ["delete:user_account", "crud:user"].includes(scope))) {
+          return {
+            error: {
+              code: errors.UNAUTHORIZED_CODE,
+              message: "You are not allowed to delete 'this' user's account",
+            },
+          };
+        }
+
+        const user = await User.findOne({ where: { id: payload.sub, deletedAt: IsNull() } });
+        if (!user) {
+          return { error: { code: errors.NOT_FOUND, message: "User does not exist" } };
+        }
+        if (!user.hashtagId) {
+          return {
+            error: { code: errors.HASHTAG_NOT_AUTHENTICATED_CODE, message: "You have not authenticated with #hashtag" },
+          };
+        }
+
+        // get user in Redis, to access its #hashtag's access token
+        const redisUser = await redis.hgetall(user.id.toString() as KeyType);
+        if (!redisUser || !redisUser.hashtag_access_token) {
+          return { error: { message: "Something went wrong" } };
+        }
+
+        const deleteUserAccountOperation = {
+          query: deleteUserAccountQuery,
+          variables: {
+            clientId: process.env.HASHTAG_CLIENT_ID!.toString(),
+            clientSecret: process.env.HASHTAG_CLIENT_SECRET!.toString(),
+          },
+          context: {
+            headers: {
+              authorization: `Bearer ${redisUser.hashtag_access_token}`,
+            },
+          },
+        };
+
+        let deleted: boolean | undefined = undefined,
+          errorCode: string | undefined = undefined,
+          errorMessage: string | any = undefined;
+
+        await makePromise(execute(link, deleteUserAccountOperation))
+          .then(res => res.data?.deleteUserAccount)
+          .then(data => {
+            if (data.error) {
+              errorCode = data.error.code;
+              errorMessage = data.error.message;
+            }
+            deleted = data.deleted;
+          })
+          .catch(err => {
+            return { error: { message: `Something went wrong. ${err}` } };
+          });
+
+        if ((errorCode || errorMessage) && !deleted) {
+          return { error: { code: errorCode, message: errorMessage } };
+        }
+
+        try {
+          // delete user in Redis too
+          redis.del(payload.sub.toString() as KeyType);
+
+          await getConnection()
+            .createQueryBuilder()
+            .update(Account)
+            .set({ isActive: false })
+            .where("deletedAt IS NULL")
+            .andWhere("userId = :userId", { userId: user.id })
+            .execute();
+
+          await getConnection().getRepository(User).softDelete(String(user.id));
+        } catch (err) {
+          return { error: { message: `Something went wrong. ${err}` } };
+        }
+
+        return {
+          deleted: true,
         };
       },
     });

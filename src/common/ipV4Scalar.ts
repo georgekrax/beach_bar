@@ -12,7 +12,7 @@ const validate = (value: any): any => {
   }
   return value;
 };
-export const IPv4 = scalarType({
+export const IPv4Scalar = scalarType({
   name: "IPv4",
   asNexusMethod: "ipV4",
   description: "A field whose value is a IPv4 address: https://en.wikipedia.org/wiki/IPv4.",

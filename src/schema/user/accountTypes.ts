@@ -1,6 +1,6 @@
 import { objectType } from "@nexus/schema";
-import { UserType } from "./types";
 import { UserAccountContactDetailsType } from "../userDetails/contactDetails";
+import { UserType } from "./types";
 
 export const UserAccountType = objectType({
   name: "UserAccount",
@@ -13,7 +13,7 @@ export const UserAccountType = objectType({
       }),
       t.string("imgUrl", { nullable: true, description: "The URL value of user's account profile picture" }),
       // @ts-ignore
-      t.datetime("birthday", { nullable: true, description: "User's birthday date" }),
+      t.date("birthday", { nullable: true, description: "User's birthday date" }),
       t.int("age", { nullable: true, description: "User's age" }),
       t.boolean("isActive", { nullable: false });
     // @ts-ignore

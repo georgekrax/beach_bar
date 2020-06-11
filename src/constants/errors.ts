@@ -16,4 +16,5 @@ export default Object.freeze({
   GOOGLE_AUTHENTICATED_CODE: "google_authenticated",
   FACEBOOK_AUTHENTICATED_CODE: "facebook_authenticated",
   INSTAGRAM_AUTHENTICATED_CODE: "instagram_authenticated",
+  HASHTAG_NOT_AUTHENTICATED_CODE: "hashtag_not_authenticated",
 });

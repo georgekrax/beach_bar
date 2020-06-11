@@ -1,7 +1,7 @@
-import { Kind, GraphQLError } from "graphql";
 import { scalarType } from "@nexus/schema";
+import { GraphQLError, Kind } from "graphql";
 
-export const DateTime = scalarType({
+export const DateTimeScalar = scalarType({
   name: "DateTime",
   asNexusMethod: "datetime",
   description: "Use JavaScript Date object for date/time fields.",

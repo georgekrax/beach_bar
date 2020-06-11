@@ -25,7 +25,7 @@ declare global {
   }
 }
 
-export const BigInt = scalarType({
+export const BigIntScalar = scalarType({
   name: "BigInt",
   asNexusMethod: "bigint",
   serialize(value) {

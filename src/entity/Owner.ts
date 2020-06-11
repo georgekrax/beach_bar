@@ -17,7 +17,7 @@ export class Owner extends BaseEntity {
   @JoinColumn({ name: "user_id" })
   user: User;
 
-  @ManyToMany(() => BeachBar, beachBar => beachBar.owners)
+  @ManyToMany(() => BeachBar, beachBar => beachBar.owners, { cascade: ["soft-remove", "recover"] })
   @JoinTable({
     name: "owner_beach_bar",
     joinColumn: {

@@ -1,5 +1,7 @@
 import {
   BaseEntity,
+  BeforeInsert,
+  BeforeUpdate,
   Column,
   CreateDateColumn,
   DeleteDateColumn,
@@ -56,7 +58,7 @@ export class Account extends BaseEntity {
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt: Date;
 
-  @OneToOne(() => User, { nullable: false, cascade: ["soft-remove", "recover"] })
+  @OneToOne(() => User, { nullable: false, cascade: ["soft-remove", "recover", "insert", "update"] })
   @JoinColumn({ name: "user_id" })
   user: User;
 
@@ -65,4 +67,13 @@ export class Account extends BaseEntity {
 
   @OneToMany(() => LoginDetails, loginDetails => loginDetails.account)
   loginDetails: LoginDetails[];
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  calculateUsersAge(): void {
+    const differenceMs = Date.now() - this.birthday.getTime();
+    const ageDifference = new Date(differenceMs);
+    const ageFormat = Math.abs(ageDifference.getUTCFullYear() - 1970);
+    this.age = ageFormat;
+  }
 }

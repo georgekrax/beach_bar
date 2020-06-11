@@ -5,8 +5,6 @@ export type UserSignUpType = AddType & {
   user: User;
 };
 
-export type UserLogoutType = SuccessType;
-
 export type UserLoginType = SuccessType & {
   user: User;
   accessToken: string;
