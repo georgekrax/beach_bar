@@ -71,9 +71,11 @@ export class Account extends BaseEntity {
   @BeforeInsert()
   @BeforeUpdate()
   calculateUsersAge(): void {
-    const differenceMs = Date.now() - this.birthday.getTime();
-    const ageDifference = new Date(differenceMs);
-    const ageFormat = Math.abs(ageDifference.getUTCFullYear() - 1970);
-    this.age = ageFormat;
+    if (this.birthday) {
+      const differenceMs = Date.now() - this.birthday.getTime();
+      const ageDifference = new Date(differenceMs);
+      const ageFormat = Math.abs(ageDifference.getUTCFullYear() - 1970);
+      this.age = ageFormat;
+    }
   }
 }

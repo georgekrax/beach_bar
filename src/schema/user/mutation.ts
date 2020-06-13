@@ -9,6 +9,7 @@ import { MyContext } from "../../common/myContext";
 import { UrlScalar } from "../../common/urlScalar";
 import { link } from "../../config/apolloLink";
 import errors from "../../constants/errors";
+import scopes from "../../constants/scopes";
 import { Account } from "../../entity/Account";
 import { ContactDetails } from "../../entity/ContactDetails";
 import { Country } from "../../entity/Country";
@@ -57,7 +58,7 @@ export const UserSignUpAndLoginMutation = extendType({
           description: "Set to true if you want to sign up an owner for a #beach_bar",
         }),
       },
-      resolve: async (_, { userCredentials, isPrimaryOwner }): Promise<UserSignUpType | ErrorType> => {
+      resolve: async (_, { userCredentials, isPrimaryOwner }, { redis }: MyContext): Promise<UserSignUpType | ErrorType> => {
         const { email, password } = userCredentials;
 
         if (!email || email === "" || email === " ") {
@@ -128,6 +129,8 @@ export const UserSignUpAndLoginMutation = extendType({
         } catch (err) {
           return { error: { message: `Something went wrong. ${err}` } };
         }
+
+        await redis.sadd(`scope:${newUser.id}` as KeyType, scopes.SIMPLE_USER);
 
         return {
           user: newUser,
@@ -218,7 +221,7 @@ export const UserSignUpAndLoginMutation = extendType({
         }
 
         const state = createHash("sha256").update(randomBytes(1024)).digest("hex");
-        const scope = ["profile", "email", "openid", "crud:user"];
+        const scope = await redis.smembers(`scope:${user.id}` as KeyType);
 
         const authorizeWithHashtagOperation = {
           query: authorizeWithHashtagQuery,
