@@ -25,7 +25,7 @@ const query = gql`
       loginDetails: { os: $os, browser: $browser, country: $country, city: $city, ipAddr: $ipAddr }
       getCode: true
       prompt: "none"
-      accessType: "online"
+      accessType: "offline"
     ) {
       ... on Authorize {
         state

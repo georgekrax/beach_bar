@@ -24,9 +24,11 @@ import logoutQuery from "../../graphql/LOGOUT_USER";
 import sendForgotPasswordLinkQuery from "../../graphql/SEND_FORGOT_PASSWORD_LINK";
 import signUpUserQuery from "../../graphql/SIGN_UP_USER";
 import tokenInfoQuery from "../../graphql/TOKEN_INFO";
+import updateUserQuery from "../../graphql/UPDATE_USER";
 import { generateAccessToken, generateRefreshToken } from "../../utils/auth/generateAuthTokens";
 import { sendRefreshToken } from "../../utils/auth/sendRefreshToken";
 import { createUserLoginDetails, findBrowser, findCity, findCountry, findOs } from "../../utils/auth/userCommon";
+import { removeUserSessions } from "../../utils/removeUserSessions";
 import { DeleteType, ErrorType, SuccessType } from "../returnTypes";
 import { DeleteResult, SuccessResult } from "../types";
 import { UserForgotPasswordType, UserLoginType, UserSignUpType, UserUpdateType } from "./returnTypes";
@@ -36,6 +38,7 @@ import {
   UserLoginDetailsInput,
   UserLoginResult,
   UserSignUpResult,
+  // eslint-disable-next-line prettier/prettier
   UserUpdateResult
 } from "./types";
 
@@ -215,7 +218,7 @@ export const UserSignUpAndLoginMutation = extendType({
         }
 
         const state = createHash("sha256").update(randomBytes(1024)).digest("hex");
-        const scope = ["profile", "email", "openid"];
+        const scope = ["profile", "email", "openid", "crud:user"];
 
         const authorizeWithHashtagOperation = {
           query: authorizeWithHashtagQuery,
@@ -319,6 +322,7 @@ export const UserSignUpAndLoginMutation = extendType({
         };
 
         let hashtagAccessToken: object | any = undefined,
+          hashtagRefreshToken: object | any = undefined,
           idToken: object | any = undefined;
 
         await makePromise(execute(link, exchangeCodeOperation))
@@ -331,7 +335,8 @@ export const UserSignUpAndLoginMutation = extendType({
             hashtagClientId = data.oauthClient.clientId;
             hashtagClientSecret = data.oauthClient.clientSecret;
             hashtagAccessToken = data.tokens[0];
-            idToken = data.tokens[1];
+            hashtagRefreshToken = data.tokens[1];
+            idToken = data.tokens[2];
           })
           .catch(err => {
             return { error: { message: `Something went wrong. ${err}` } };
@@ -345,6 +350,7 @@ export const UserSignUpAndLoginMutation = extendType({
 
         if (
           !hashtagAccessToken ||
+          !hashtagRefreshToken ||
           !idToken ||
           hashtagClientId !== process.env.HASHTAG_CLIENT_ID!.toString() ||
           hashtagClientSecret !== process.env.HASHTAG_CLIENT_SECRET!.toString()
@@ -385,7 +391,7 @@ export const UserSignUpAndLoginMutation = extendType({
           !tokenInfo ||
           tokenInfo.email !== user.email ||
           tokenInfo.sub !== user.hashtagId ||
-          tokenInfo.iss !== "https://www.hashtag.com" ||
+          tokenInfo.iss !== process.env.HASHTAG_TOKEN_ISSUER!.toString() ||
           tokenInfo.aud !== process.env.HASHTAG_CLIENT_ID!.toString()
         ) {
           return { error: { message: "Something went wrong" } };
@@ -420,6 +426,7 @@ export const UserSignUpAndLoginMutation = extendType({
         await redis.hset(`${user.id.toString()}` as KeyType, "access_token", accessToken.token);
         await redis.hset(`${user.id.toString()}` as KeyType, "refresh_token", refreshToken.token);
         await redis.hset(`${user.id.toString()}` as KeyType, "hashtag_access_token", hashtagAccessToken.token);
+        await redis.hset(`${user.id.toString()}` as KeyType, "hashtag_refresh_token", hashtagRefreshToken.token);
 
         try {
           user.account.isActive = true;
@@ -493,16 +500,7 @@ export const UserLogoutMutation = extendType({
         }
 
         try {
-          await redis.del(payload.sub.toString() as KeyType);
-
-          await getConnection().getRepository(User).increment({ id: payload.sub }, "tokenVersion", 1);
-
-          await getConnection()
-            .createQueryBuilder()
-            .update(Account)
-            .set({ isActive: false })
-            .where("userId = :userId", { userId: payload.sub })
-            .execute();
+          await removeUserSessions(payload.sub, redis);
         } catch (err) {
           return { error: { message: `Something went wrong. ${err}` } };
         }
@@ -531,7 +529,7 @@ export const UserForgotPasswordMutation = extendType({
           description: "The email address of user",
         }),
       },
-      resolve: async (_, { email }): Promise<UserForgotPasswordType | ErrorType> => {
+      resolve: async (_, { email }, { res, redis }): Promise<UserForgotPasswordType | ErrorType> => {
         if (!email || email === "" || email === " ") {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid email address" } };
         }
@@ -585,6 +583,14 @@ export const UserForgotPasswordMutation = extendType({
         if (!success || !hashtagUser || String(hashtagUser.id) !== String(user.hashtagId) || hashtagUser.email !== email) {
           return { error: { message: "Something went wrong" } };
         }
+
+        try {
+          await removeUserSessions(user.id, redis);
+        } catch (err) {
+          return { error: { message: `Something went wrong. ${err}` } };
+        }
+        console.log(process.env.REFRESH_TOKEN_COOKIE_NAME!.toString());
+        res.clearCookie(process.env.REFRESH_TOKEN_COOKIE_NAME!.toString(), { httpOnlye: true });
 
         return {
           user,
@@ -717,7 +723,7 @@ export const UserCrudMutation = extendType({
       resolve: async (
         _,
         { email, firstName, lastName, imgUrl, personTitle, birthday },
-        { payload }: MyContext,
+        { payload, redis }: MyContext,
       ): Promise<UserUpdateType | ErrorType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
@@ -783,6 +789,57 @@ export const UserCrudMutation = extendType({
           return {
             error: { message: `Something went wrong. ${err}` },
           };
+        }
+
+        const redisUser = await redis.hgetall(user.id.toString() as KeyType);
+        if (!redisUser) {
+          return { error: { message: "Something went wrong" } };
+        }
+
+        if (redisUser.hashtag_access_token && redisUser.hashtag_access_token !== "" && redisUser.hashtag_access_token !== " ") {
+          const hashtagAccessToken = redisUser.hashtag_access_token;
+          const updateUserOperation = {
+            query: updateUserQuery,
+            variables: {
+              email: user.email,
+              firstName: user.firstName,
+              lastName: user.lastName,
+              pictureUrl: user.account.imgUrl,
+              countryId: user.account.contactDetails[0].countryId,
+            },
+            context: {
+              headers: {
+                authorization: `Bearer ${hashtagAccessToken}`,
+              },
+            },
+          };
+
+          let hashtagUser: object | any = undefined,
+            updated: boolean | undefined = undefined,
+            errorCode: string | undefined = undefined,
+            errorMessage: string | any = undefined;
+
+          await makePromise(execute(link, updateUserOperation))
+            .then(res => res.data?.updateUser)
+            .then(data => {
+              if (data.error) {
+                errorCode = data.error.code;
+                errorMessage = data.error.message;
+              }
+              hashtagUser = data.user;
+              updated = data.updated;
+            })
+            .catch(err => {
+              return { error: { message: `Something went wrong. ${err}` } };
+            });
+
+          if (errorCode || errorMessage) {
+            return { error: { code: errorCode, message: errorMessage } };
+          }
+
+          if (!hashtagUser || String(hashtagUser.id) !== String(user.hashtagId) || !updated) {
+            return { error: { message: "Something went wrong" } };
+          }
         }
 
         return {
@@ -859,16 +916,8 @@ export const UserCrudMutation = extendType({
         }
 
         try {
-          // delete user in Redis too
-          redis.del(payload.sub.toString() as KeyType);
-
-          await getConnection()
-            .createQueryBuilder()
-            .update(Account)
-            .set({ isActive: false })
-            .where("deletedAt IS NULL")
-            .andWhere("userId = :userId", { userId: user.id })
-            .execute();
+          // delete the user in Redis too
+          await removeUserSessions(user.id, redis);
 
           await getConnection().getRepository(User).softDelete(String(user.id));
         } catch (err) {

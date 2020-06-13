@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/camelcase */
 import { execute, makePromise } from "apollo-link";
 import { ApolloServer } from "apollo-server-express";
 import * as cookieParser from "cookie-parser";
@@ -29,13 +30,25 @@ const startServer = async (): Promise<any> => {
   });
 
   const app = express();
-
   app.use(express.json());
   app.use(cookieParser());
   app.use("/oauth", router);
 
   const server = new ApolloServer({
     schema,
+    formatError: (err): any => {
+      if (
+        err.message == "Context creation failed: jwt expired" ||
+        err.message == "Context creation failed: Something went wrong. jwt expired"
+      ) {
+        return new Error("jwt expired");
+      } else if (err.message.startsWith("Context creation failed: ")) {
+        return new Error(err.message.replace("Context creation failed: ", ""));
+      } else if (err.message.startsWith("Something went wrong. ")) {
+        return new Error(err.message.replace("Something went wrong. ", ""));
+      }
+      return err;
+    },
     context: async ({ req, res }): Promise<MyContext> => {
       const authHeader = req.headers.authorization || "";
       const accessToken = authHeader.split(" ")[1];
@@ -53,6 +66,9 @@ const startServer = async (): Promise<any> => {
             payload = null;
           }
         } catch (err) {
+          if (err.message.toString() === "jwt expired") {
+            throw new Error("jwt expired");
+          }
           // check with the 'verifyAccessToken' query
           if (err.message.toString() === "invalid signature") {
             const verifyAccessTokenOperation = {
@@ -88,7 +104,7 @@ const startServer = async (): Promise<any> => {
                 hashtagJti = data.jti;
               })
               .catch(err => {
-                return { error: { message: `Something went wrong. ${err}` } };
+                throw new Error(`Something went wrong. ${err}`);
               });
 
             if (
@@ -97,7 +113,6 @@ const startServer = async (): Promise<any> => {
               hashtagAud !== process.env.HASHTAG_CLIENT_ID!.toString() ||
               hashtagIss !== process.env.HASHTAG_TOKEN_ISSUER!.toString()
             ) {
-              payload = null;
               throw new Error(errorMessage.toString());
             } else if (hashtagSub && (hashtagSub !== "" || " ")) {
               const user = await User.findOne({ where: { hashtagId: hashtagSub } });

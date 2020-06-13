@@ -15,10 +15,12 @@ export const OAuthQuery = extendType({
         const codes = await googleOAuth2Client.generateCodeVerifierAsync();
         res.cookie("gstate", state, {
           httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
           maxAge: 150000,
         });
         res.cookie("gcode_verifier", codes.codeVerifier, {
           httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
           maxAge: 150000,
         });
         const url: string = googleOAuth2Client.generateAuthUrl({
