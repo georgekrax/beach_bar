@@ -1,41 +1,56 @@
-import { extendType, stringArg } from "@nexus/schema";
+import { arg, booleanArg, extendType, stringArg } from "@nexus/schema";
 import { MyContext } from "../../common/myContext";
-import { Account } from "../../entity/Account";
-import { ContactDetails } from "../../entity/ContactDetails";
+import errors from "../../constants/errors";
 import { loginDetailStatus } from "../../entity/LoginDetails";
 import { Platform } from "../../entity/Platform";
 import { User } from "../../entity/User";
-import { generateRefreshToken } from "../../utils/auth/generateAuthTokens";
+import { generateAccessToken, generateRefreshToken } from "../../utils/auth/generateAuthTokens";
 import { sendRefreshToken } from "../../utils/auth/sendRefreshToken";
+import { signUpUser } from "../../utils/auth/signUpUser";
 import { createUserLoginDetails, findBrowser, findCity, findCountry, findOs } from "../../utils/auth/userCommon";
+import { ErrorType } from "../returnTypes";
+import { UserLoginDetailsInput } from "../user/types";
 import { AuthorizeWithGoogleType } from "./returnTypes";
-import { GoogleOAuthUserType } from "./types";
+import { GoogleOAuthUserResult } from "./types";
 
-export const AuthorizeWithGoogle = extendType({
+export const AuthorizeWithOAuthProviders = extendType({
   type: "Mutation",
   definition(t) {
     t.field("authorizeWithGoogle", {
-      type: GoogleOAuthUserType,
+      type: GoogleOAuthUserResult,
       description: "Authorize a user with Google",
       nullable: false,
       args: {
         code: stringArg({ required: true, description: "The response code from Google's OAuth callback" }),
         state: stringArg({ required: true, description: "The response state, to check if everything went corrent" }),
+        loginDetails: arg({
+          type: UserLoginDetailsInput,
+          required: false,
+          description: "User details in login",
+        }),
+        isPrimaryOwner: booleanArg({
+          required: false,
+          default: false,
+          description: "Set to true if you want to sign up an owner for a #beach_bar",
+        }),
       },
       resolve: async (
         _,
-        { code, state },
+        { code, state, loginDetails, isPrimaryOwner },
         { req, res, googleOAuth2Client, uaParser, redis }: MyContext,
       ): Promise<AuthorizeWithGoogleType | ErrorType> => {
+        if (!code || code === "" || code === " ") {
+          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid code" } };
+        }
+        if (!state || state === "" || state === " ") {
+          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid state" } };
+        }
         if (state !== req.cookies.gstate) {
           return {
-            id: null,
-            email: null,
-            signedUp: false,
-            logined: false,
-            account: null,
-            accessToken: null,
-            error: "Internal Server Error: Response states do not match",
+            error: {
+              code: errors.INTERNAL_SERVER_ERROR,
+              message: "Something went wrong: Response states do not match",
+            },
           };
         }
 
@@ -44,13 +59,10 @@ export const AuthorizeWithGoogle = extendType({
 
         if (!tokens) {
           return {
-            id: null,
-            email: null,
-            signedUp: false,
-            logined: false,
-            account: null,
-            accessToken: null,
-            error: "Something went wrong",
+            error: {
+              code: errors.INTERNAL_SERVER_ERROR,
+              message: "Something went wrong",
+            },
           };
         }
 
@@ -62,38 +74,24 @@ export const AuthorizeWithGoogle = extendType({
           response = await googleOAuth2Client.request({ url });
           if (!response.data) {
             return {
-              id: null,
-              email: null,
-              signedUp: false,
-              logined: false,
-              account: null,
-              accessToken: null,
-              error: "Internal Server Error: Something went wrong",
+              error: {
+                code: errors.INTERNAL_SERVER_ERROR,
+                message: "Something went wrong",
+              },
             };
           }
         } catch (err) {
-          return {
-            id: null,
-            email: null,
-            signedUp: false,
-            logined: false,
-            account: null,
-            accessToken: null,
-            error: err,
-          };
+          return { error: { message: `Something went wrong: ${err.message}` } };
         }
 
         const { sub: googleId, given_name: firstName, family_name: lastName, email, locale } = response.data;
 
         if (!googleId || !email) {
           return {
-            id: null,
-            email: null,
-            signedUp: false,
-            logined: false,
-            account: null,
-            accessToken: null,
-            error: "Internal Server Error: Something went wrong",
+            error: {
+              code: errors.INTERNAL_SERVER_ERROR,
+              message: "Something went wrong",
+            },
           };
         }
 
@@ -103,99 +101,94 @@ export const AuthorizeWithGoogle = extendType({
           city: any = null,
           ipAddr: string | null = null;
 
+        if (loginDetails) {
+          ({ city, country, ipAddr } = loginDetails);
+        }
+
         try {
           os = await findOs(os);
           browser = await findBrowser(browser);
           country = await findCountry(country);
           city = await findCity(city);
         } catch (err) {
-          throw new Error(err);
+          return { error: { message: `Something went wrong. ${err}` } };
         }
 
         if (country !== null && country.languageIdentifier !== locale) {
           return {
-            id: null,
-            email: null,
-            signedUp: false,
-            logined: false,
-            account: null,
-            accessToken: null,
-            error: "Internal Server Error: Something went wrong",
+            error: {
+              code: errors.INTERNAL_SERVER_ERROR,
+              message: "Something went wrong",
+            },
           };
         }
 
-        const user: User | any = await User.findOne({
-          where: { email },
-          select: ["id", "email", "hashtagId", "tokenVersion", "googleId", "facebookId", "instagramId"],
-        });
+        // search for user in DB
+        let user: User | undefined = await User.findOne({ email });
         let signedUp = false;
         if (!user) {
           signedUp = true;
-          try {
-            const newUser = User.create({
-              email,
-              googleId: googleId,
-              firstName,
-              lastName,
-            });
-
-            const newUserAccount = Account.create({});
-            await newUser.save();
-            newUserAccount.user = newUser;
-            await newUserAccount.save();
-
-            const newUserContactDetails = ContactDetails.create({
-              account: newUserAccount,
-            });
-            if (country !== null) {
-              newUserContactDetails.country = country;
-            }
-            await newUserContactDetails.save();
-          } catch (err) {
-            return {
-              id: null,
-              email: null,
-              signedUp: false,
-              logined: false,
-              account: null,
-              accessToken: null,
-              error: err,
-            };
+          const response = await signUpUser(
+            email,
+            isPrimaryOwner,
+            redis,
+            undefined,
+            googleId,
+            undefined,
+            undefined,
+            firstName,
+            lastName,
+            country,
+          );
+          // @ts-ignore
+          if (response.error && !response.user) {
+            // @ts-ignore
+            return { error: { code: response.error.code, message: response.error.message } };
           }
+          user = await User.findOne({ email });
         }
 
+        if (!user) {
+          return {
+            error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG },
+          };
+        }
+
+        // check user's account
         if (!user.account) {
-          throw new Error("Something went wrong");
+          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: "Something went wrong" } };
         }
-
         user.googleId = googleId;
         await user.save();
 
         // pass beach_bar platform to user login details
         const platform = await Platform.findOne({ where: { name: "google" }, select: ["id", "name", "urlHostname"] });
         if (!platform) {
-          throw new Error("Something went wrong");
+          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: "Something went wrong" } };
         }
 
         if (googleId !== String(user.googleId)) {
-          throw new Error("Something went wrong");
+          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: "Something went wrong" } };
         }
 
         // logined successfully
         // create user login details
         await createUserLoginDetails(loginDetailStatus.loggedIn, platform, user.account, os, browser, country, city, ipAddr);
 
-        const refreshToken = await generateRefreshToken(user);
+        // get user's scopes from Redis
+        const scope = await redis.smembers(`scope:${user.id}` as KeyType);
+        const refreshToken = generateRefreshToken(user);
+        const accessToken = generateAccessToken(user, scope);
         sendRefreshToken(res, refreshToken.token);
 
-        const tokenId = `${refreshToken.iat}-${refreshToken.jti}`;
-        await redis.set(tokenId, refreshToken.token, "ex", 75);
-
         try {
+          await redis.hset(`${user.id.toString()}` as KeyType, "access_token", accessToken.token);
+          await redis.hset(`${user.id.toString()}` as KeyType, "refresh_token", refreshToken.token);
+
           user.account.isActive = true;
-          await user.account.save();
+          await user.save();
         } catch (err) {
-          throw new Error(err);
+          return { error: { message: `Something went wrong. ${err}` } };
         }
 
         res.clearCookie("gstate", { httpOnly: true, maxAge: 150000 });
@@ -204,6 +197,9 @@ export const AuthorizeWithGoogle = extendType({
 
         return {
           user,
+          accessToken: accessToken.token,
+          signedUp,
+          logined: true,
         };
       },
     });

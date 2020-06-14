@@ -2,6 +2,8 @@ export default Object.freeze({
   NOT_FOUND: "not_found",
   NOT_ACTIVE: "not_active",
   CONFLICT: "conflict",
+  INTERNAL_SERVER_ERROR: "internal_server_error",
+  SOMETHING_WENT_WRONG: "Something went wrong",
   USER_NOT_FOUND_MESSAGE: "User does not exist",
   INVALID_ARGUMENTS: "invalid_arguments",
   NOT_AUTHENTICATED_CODE: "not_authenticated",

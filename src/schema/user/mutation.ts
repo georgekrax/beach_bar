@@ -9,12 +9,8 @@ import { MyContext } from "../../common/myContext";
 import { UrlScalar } from "../../common/urlScalar";
 import { link } from "../../config/apolloLink";
 import errors from "../../constants/errors";
-import scopes from "../../constants/scopes";
-import { Account } from "../../entity/Account";
-import { ContactDetails } from "../../entity/ContactDetails";
 import { Country } from "../../entity/Country";
 import { loginDetailStatus } from "../../entity/LoginDetails";
-import { Owner } from "../../entity/Owner";
 import { Platform } from "../../entity/Platform";
 import { User } from "../../entity/User";
 import authorizeWithHashtagQuery from "../../graphql/AUTHORIZE_WITH_HASHTAG";
@@ -28,6 +24,7 @@ import tokenInfoQuery from "../../graphql/TOKEN_INFO";
 import updateUserQuery from "../../graphql/UPDATE_USER";
 import { generateAccessToken, generateRefreshToken } from "../../utils/auth/generateAuthTokens";
 import { sendRefreshToken } from "../../utils/auth/sendRefreshToken";
+import { signUpUser } from "../../utils/auth/signUpUser";
 import { createUserLoginDetails, findBrowser, findCity, findCountry, findOs } from "../../utils/auth/userCommon";
 import { removeUserSessions } from "../../utils/removeUserSessions";
 import { DeleteType, ErrorType, SuccessType } from "../returnTypes";
@@ -40,7 +37,7 @@ import {
   UserLoginResult,
   UserSignUpResult,
   // eslint-disable-next-line prettier/prettier
-  UserUpdateResult
+  UserUpdateResult,
 } from "./types";
 
 export const UserSignUpAndLoginMutation = extendType({
@@ -51,7 +48,11 @@ export const UserSignUpAndLoginMutation = extendType({
       description: "Sign up a user",
       nullable: false,
       args: {
-        userCredentials: arg({ type: UserCredentialsInput, required: true, description: "Credential for signing up a user" }),
+        userCredentials: arg({
+          type: UserCredentialsInput,
+          required: true,
+          description: "Credential for signing up a user",
+        }),
         isPrimaryOwner: booleanArg({
           required: false,
           default: false,
@@ -107,33 +108,16 @@ export const UserSignUpAndLoginMutation = extendType({
           return { error: { message: "Something went wrong" } };
         }
 
-        const newUser = User.create({
-          email: hashtagEmail,
-          hashtagId: BigInt(hashtagId),
-        });
-
-        const newUserAccount = Account.create();
-
-        try {
-          await newUser.save();
-          newUserAccount.user = newUser;
-          await newUserAccount.save();
-          const newUserContactDetails = ContactDetails.create({
-            account: newUserAccount,
-          });
-          await newUserContactDetails.save();
-          if (isPrimaryOwner) {
-            const owner = Owner.create({ user: newUser, isPrimary: true });
-            await owner.save();
-          }
-        } catch (err) {
-          return { error: { message: `Something went wrong. ${err}` } };
+        const response = await signUpUser(hashtagEmail, isPrimaryOwner, redis, hashtagId);
+        // @ts-ignore
+        if (response.error && !response.user) {
+          // @ts-ignore
+          return { error: { code: response.error.code, message: response.error.message } };
         }
 
-        await redis.sadd(`scope:${newUser.id}` as KeyType, scopes.SIMPLE_USER);
-
         return {
-          user: newUser,
+          // @ts-ignore
+          user: response.user,
           added: true,
         };
       },
@@ -183,10 +167,10 @@ export const UserSignUpAndLoginMutation = extendType({
           country = await findCountry(country);
           city = await findCity(city);
         } catch (err) {
-          return { error: { message: `Something went wrong. ${err}` } };
+          return { error: { message: `Something went wrong: ${err.message}` } };
         }
 
-        // login user
+        // search for user in DB
         const user = await User.findOne({ where: { email } });
         if (!user) {
           return {
@@ -206,15 +190,15 @@ export const UserSignUpAndLoginMutation = extendType({
           };
         }
 
-        if (user.googleId) {
+        if (user.googleId && !user.hashtagId) {
           return {
             error: { code: errors.GOOGLE_AUTHENTICATED_CODE, message: "You have authenticated with Google" },
           };
-        } else if (user.facebookId) {
+        } else if (user.facebookId && !user.hashtagId) {
           return {
             error: { code: errors.FACEBOOK_AUTHENTICATED_CODE, message: "You have authenticated with Facebook" },
           };
-        } else if (user.instagramId) {
+        } else if (user.instagramId && !user.hashtagId) {
           return {
             error: { code: errors.INSTAGRAM_AUTHENTICATED_CODE, message: "You have authenticated with Instagram" },
           };
@@ -271,7 +255,7 @@ export const UserSignUpAndLoginMutation = extendType({
             authorized = data.authorized;
           })
           .catch(err => {
-            return { error: { message: `Something went wrong. ${err}` } };
+            return { error: { message: `Something went wrong: ${err.message}` } };
           });
 
         // pass beach_bar platform to user login details
@@ -342,7 +326,7 @@ export const UserSignUpAndLoginMutation = extendType({
             idToken = data.tokens[2];
           })
           .catch(err => {
-            return { error: { message: `Something went wrong. ${err}` } };
+            return { error: { message: `Something went wrong: ${err.message}` } };
           });
 
         if (errorCode || errorMessage) {
@@ -358,7 +342,7 @@ export const UserSignUpAndLoginMutation = extendType({
           hashtagClientId !== process.env.HASHTAG_CLIENT_ID!.toString() ||
           hashtagClientSecret !== process.env.HASHTAG_CLIENT_SECRET!.toString()
         ) {
-          return { error: { message: "Something went wrong" } };
+          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: "Something went wrong" } };
         }
 
         // logined successfully
@@ -383,7 +367,7 @@ export const UserSignUpAndLoginMutation = extendType({
             tokenInfo = data;
           })
           .catch(err => {
-            return { error: { message: `Something went wrong. ${err}` } };
+            return { error: { message: `Something went wrong: ${err.message}` } };
           });
 
         if (errorCode || errorMessage) {
@@ -397,7 +381,7 @@ export const UserSignUpAndLoginMutation = extendType({
           tokenInfo.iss !== process.env.HASHTAG_TOKEN_ISSUER!.toString() ||
           tokenInfo.aud !== process.env.HASHTAG_CLIENT_ID!.toString()
         ) {
-          return { error: { message: "Something went wrong" } };
+          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: "Something went wrong" } };
         }
 
         if (tokenInfo.firstName || tokenInfo.lastName || tokenInfo.pictureUrl || tokenInfo.locale) {
@@ -426,12 +410,12 @@ export const UserSignUpAndLoginMutation = extendType({
         const accessToken = generateAccessToken(user, scope);
         sendRefreshToken(res, refreshToken.token);
 
-        await redis.hset(`${user.id.toString()}` as KeyType, "access_token", accessToken.token);
-        await redis.hset(`${user.id.toString()}` as KeyType, "refresh_token", refreshToken.token);
-        await redis.hset(`${user.id.toString()}` as KeyType, "hashtag_access_token", hashtagAccessToken.token);
-        await redis.hset(`${user.id.toString()}` as KeyType, "hashtag_refresh_token", hashtagRefreshToken.token);
-
         try {
+          await redis.hset(`${user.id.toString()}` as KeyType, "access_token", accessToken.token);
+          await redis.hset(`${user.id.toString()}` as KeyType, "refresh_token", refreshToken.token);
+          await redis.hset(`${user.id.toString()}` as KeyType, "hashtag_access_token", hashtagAccessToken.token);
+          await redis.hset(`${user.id.toString()}` as KeyType, "hashtag_refresh_token", hashtagRefreshToken.token);
+
           user.account.isActive = true;
           await user.save();
         } catch (err) {
@@ -731,7 +715,7 @@ export const UserCrudMutation = extendType({
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
-        if (!payload.scope.some(scope => ["update:user", "crud:user"].includes(scope))) {
+        if (!payload.scope.some(scope => ["beach_bar@crud:user"].includes(scope))) {
           return {
             error: {
               code: errors.UNAUTHORIZED_CODE,
@@ -859,7 +843,7 @@ export const UserCrudMutation = extendType({
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
-        if (!payload.scope.some(scope => ["delete:user_account", "crud:user"].includes(scope))) {
+        if (!payload.scope.some(scope => ["hashtag@delete:user_account", "beach_bar@crud:user"].includes(scope))) {
           return {
             error: {
               code: errors.UNAUTHORIZED_CODE,
@@ -870,52 +854,48 @@ export const UserCrudMutation = extendType({
 
         const user = await User.findOne({ where: { id: payload.sub, deletedAt: IsNull() } });
         if (!user) {
-          return { error: { code: errors.NOT_FOUND, message: "User does not exist" } };
-        }
-        if (!user.hashtagId) {
-          return {
-            error: { code: errors.HASHTAG_NOT_AUTHENTICATED_CODE, message: "You have not authenticated with #hashtag" },
-          };
+          return { error: { code: errors.NOT_FOUND, message: errors.USER_NOT_FOUND_MESSAGE } };
         }
 
-        // get user in Redis, to access its #hashtag's access token
-        const redisUser = await redis.hgetall(user.id.toString() as KeyType);
-        if (!redisUser || !redisUser.hashtag_access_token) {
-          return { error: { message: "Something went wrong" } };
-        }
-
-        const deleteUserAccountOperation = {
-          query: deleteUserAccountQuery,
-          variables: {
-            clientId: process.env.HASHTAG_CLIENT_ID!.toString(),
-            clientSecret: process.env.HASHTAG_CLIENT_SECRET!.toString(),
-          },
-          context: {
-            headers: {
-              authorization: `Bearer ${redisUser.hashtag_access_token}`,
+        if (user.hashtagId) {
+          // get user in Redis, to access its #hashtag's access token
+          const redisUser = await redis.hgetall(user.id.toString() as KeyType);
+          if (!redisUser || !redisUser.hashtag_access_token) {
+            return { error: { message: errors.SOMETHING_WENT_WRONG } };
+          }
+          const deleteUserAccountOperation = {
+            query: deleteUserAccountQuery,
+            variables: {
+              clientId: process.env.HASHTAG_CLIENT_ID!.toString(),
+              clientSecret: process.env.HASHTAG_CLIENT_SECRET!.toString(),
             },
-          },
-        };
+            context: {
+              headers: {
+                authorization: `Bearer ${redisUser.hashtag_access_token}`,
+              },
+            },
+          };
 
-        let deleted: boolean | undefined = undefined,
-          errorCode: string | undefined = undefined,
-          errorMessage: string | any = undefined;
+          let deleted: boolean | undefined = undefined,
+            errorCode: string | undefined = undefined,
+            errorMessage: string | any = undefined;
 
-        await makePromise(execute(link, deleteUserAccountOperation))
-          .then(res => res.data?.deleteUserAccount)
-          .then(data => {
-            if (data.error) {
-              errorCode = data.error.code;
-              errorMessage = data.error.message;
-            }
-            deleted = data.deleted;
-          })
-          .catch(err => {
-            return { error: { message: `Something went wrong. ${err}` } };
-          });
+          await makePromise(execute(link, deleteUserAccountOperation))
+            .then(res => res.data?.deleteUserAccount)
+            .then(data => {
+              if (data.error) {
+                errorCode = data.error.code;
+                errorMessage = data.error.message;
+              }
+              deleted = data.deleted;
+            })
+            .catch(err => {
+              return { error: { message: `Something went wrong: ${err.message}` } };
+            });
 
-        if ((errorCode || errorMessage) && !deleted) {
-          return { error: { code: errorCode, message: errorMessage } };
+          if ((errorCode || errorMessage) && !deleted) {
+            return { error: { code: errorCode, message: errorMessage } };
+          }
         }
 
         try {
@@ -924,7 +904,7 @@ export const UserCrudMutation = extendType({
 
           await getConnection().getRepository(User).softDelete(String(user.id));
         } catch (err) {
-          return { error: { message: `Something went wrong. ${err}` } };
+          return { error: { message: `Something went wrong: ${err.message}` } };
         }
 
         return {
