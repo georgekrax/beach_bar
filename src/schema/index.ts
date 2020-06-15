@@ -25,8 +25,9 @@ export * from "./user/mutation";
 // user
 export * from "./user/query";
 export * from "./user/types";
-//userDetails
 export * from "./userDetails/cityTypes";
 export * from "./userDetails/contactDetails";
 export * from "./userDetails/countryTypes";
+//userDetails
+export * from "./userDetails/mutation";
 export * from "./userDetails/ownerTypes";

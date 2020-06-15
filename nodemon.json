@@ -22,8 +22,17 @@
     "HASHTAG_REDIRECT_URI": "https://www.beachbar.com/oauth/hashtag/callback/",
     "HASHTAG_TOKEN_ISSUER": "https://www.hashtag.com",
     "HASHTAG_HOSTNAME": "http://localhost:5000",
-    "FACEBOOK_CLIENT_ID": "256609988905258",
-    "FACEBOOK_REDIRECT_URI": "http://localhost:4000/oauth/facebook/callback"
+    "FACEBOOK_APP_ID": "256609988905258",
+    "FACEBOOK_APP_SECRET": "e2cacd857ac7f8bbe0809e564d1eb127",
+    "FACEBOOK_APP_ACCESS_TOKEN": "256609988905258|u0TPPRE9b_mLKYNpwcDwfJqqqI4",
+    "FACEBOOK_APP_NAME": "Test OAuth app",
+    "FACEBOOK_GRAPH_API_HOSTNAME": "https://graph.facebook.com",
+    "FACEBOOK_REDIRECT_URI": "http://localhost:4000/oauth/facebook/callback",
+    "INSTAGRAM_APP_ID": "2622276921358814",
+    "INSTAGRAM_APP_SECRET": "8dd79ea1bf0985a1cce99f6e7845f804",
+    "INSTAGRAM_REDIRECT_URI": "https://localhost:4000/oauth/instagram/callback",
+    "INSTAGRAM_API_HOSTNAME": "https://api.instagram.com",
+    "INSTAGRAN_GRAPH_API_HOSTNAME": "https://graph.instagram.com"
   },
   "events": {
     "crash": "fuser -k 4000/tcp"

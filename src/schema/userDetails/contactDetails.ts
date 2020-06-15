@@ -1,4 +1,4 @@
-import { objectType } from "@nexus/schema";
+import { objectType, unionType } from "@nexus/schema";
 import { UserAccountType } from "../user/accountTypes";
 import { CityType } from "./cityTypes";
 import { CountryType } from "./countryTypes";
@@ -22,5 +22,36 @@ export const UserAccountContactDetailsType = objectType({
       resolve: o => o.city,
     });
     t.string("phoneNumber", { nullable: true, description: "User's phone number" });
+  },
+});
+
+export const AddUserAccountContactDetailsType = objectType({
+  name: "AddUserAccountContactDetails",
+  description: "Info to be returned when added (assigned) contact details to a user",
+  definition(t) {
+    t.field("contactDetails", {
+      type: UserAccountContactDetailsType,
+      description: "The contact details of the user",
+      nullable: false,
+      resolve: o => o.contactDetails,
+    });
+    t.boolean("added", {
+      nullable: false,
+      description: "A boolean that indicates if the contact details have been successfully added (assigned) to the suer",
+    });
+  },
+});
+
+export const AddUserAccountContactDetailsResult = unionType({
+  name: "AddUserAccountContactDetailsResult",
+  definition(t) {
+    t.members("AddUserAccountContactDetails", "Error");
+    t.resolveType(item => {
+      if (item.error) {
+        return "Error";
+      } else {
+        return "AddUserAccountContactDetails";
+      }
+    });
   },
 });

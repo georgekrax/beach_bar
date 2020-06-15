@@ -15,7 +15,10 @@ export const UsersQuery = extendType({
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
-        if (!payload.scope.some(scope => ["profile", "crud:user"].includes(scope)) || !payload.scope.includes("email")) {
+        if (
+          !payload.scope.some(scope => ["profile", "beach_bar@crud:user", "beach_bar@read:user"].includes(scope)) ||
+          !payload.scope.includes("email")
+        ) {
           return {
             error: {
               code: errors.UNAUTHORIZED_CODE,
@@ -37,7 +40,34 @@ export const UsersQuery = extendType({
           };
         }
 
-        console.log(user);
+        // @ts-ignore
+        user.account = payload.scope.some(scope => ["beach_bar@crud:user", "beach_bar@read:user_account"].includes(scope))
+          ? user.account
+          : null;
+        // @ts-ignore
+        user.account.birthday = payload.scope.some(scope =>
+          ["beach_bar@crud:user", "beach_bar@read:user_account:birthday_and_age"].includes(scope),
+        )
+          ? user.account.birthday
+          : null;
+        // @ts-ignore
+        user.account.age = payload.scope.some(scope =>
+          ["beach_bar@crud:user", "beach_bar@read:user_account:birthday_and_age"].includes(scope),
+        )
+          ? user.account.age
+          : null;
+        // @ts-ignore
+        user.account.personTitle = payload.scope.some(scope =>
+          ["beach_bar@crud:user", "beach_bar@read:user_account:person_title"].includes(scope),
+        )
+          ? user.account.personTitle
+          : null;
+        // @ts-ignore
+        user.account.contactDetails = payload.scope.some(scope =>
+          ["beach_bar@crud:user", "beach_bar@read:user_contact_details"].includes(scope),
+        )
+          ? user.account.contactDetails
+          : null;
 
         return user;
       },

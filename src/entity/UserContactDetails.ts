@@ -1,10 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, ManyToOne, JoinColumn } from "typeorm";
+import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Account } from "./Account";
 import { City } from "./City";
 import { Country } from "./Country";
-import { Account } from "./Account";
 
-@Entity({ name: "contact_details", schema: "public" })
-export class ContactDetails extends BaseEntity {
+@Entity({ name: "user_contact_details", schema: "public" })
+export class UserContactDetails extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 

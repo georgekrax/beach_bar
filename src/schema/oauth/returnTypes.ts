@@ -1,6 +1,6 @@
 import { User } from "../../entity/User";
 
-export type AuthorizeWithGoogleType = {
+export type AuthorizeWithOAuthType = {
   user: User;
   accessToken: string;
   signedUp: boolean;

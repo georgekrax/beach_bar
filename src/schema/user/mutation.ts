@@ -61,7 +61,6 @@ export const UserSignUpAndLoginMutation = extendType({
       },
       resolve: async (_, { userCredentials, isPrimaryOwner }, { redis }: MyContext): Promise<UserSignUpType | ErrorType> => {
         const { email, password } = userCredentials;
-
         if (!email || email === "" || email === " ") {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid email address" } };
         }
@@ -98,14 +97,14 @@ export const UserSignUpAndLoginMutation = extendType({
             added = data.added;
           })
           .catch(err => {
-            return { error: { message: `Something went wrong. ${err}` } };
+            return { error: { message: `Something went wrong: ${err.message}` } };
           });
 
         if ((errorCode || errorMessage) && errorCode !== errors.CONFLICT && errorMessage !== "User already exists" && !added) {
           return { error: { code: errorCode, message: errorMessage } };
         }
         if (email !== hashtagEmail || hashtagId === "" || hashtagId === " ") {
-          return { error: { message: "Something went wrong" } };
+          return { error: { message: errors.SOMETHING_WENT_WRONG } };
         }
 
         const response = await signUpUser(hashtagEmail, isPrimaryOwner, redis, hashtagId);
@@ -418,6 +417,7 @@ export const UserSignUpAndLoginMutation = extendType({
 
           user.account.isActive = true;
           await user.save();
+          await user.account.save();
         } catch (err) {
           return { error: { message: `Something went wrong. ${err}` } };
         }
@@ -748,7 +748,7 @@ export const UserCrudMutation = extendType({
           relations: ["owner", "owner.user", "owner.beachBars", "reviews", "reviews.visitType"],
         });
         if (!user) {
-          return { error: { code: errors.NOT_FOUND, message: "User does not exist" } };
+          return { error: { code: errors.NOT_FOUND, message: errors.USER_NOT_FOUND_MESSAGE } };
         }
 
         try {

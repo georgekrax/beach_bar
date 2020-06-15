@@ -23,6 +23,9 @@ export class User extends BaseEntity {
   @Index({ where: `"deletedAt" IS NULL`, unique: true })
   email: string;
 
+  @Column("varchar", { length: 35, name: "username", unique: true })
+  username: string;
+
   @Column({ name: "token_version", type: "integer", default: () => 0 })
   tokenVersion: number;
 

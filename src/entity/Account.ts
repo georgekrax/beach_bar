@@ -12,10 +12,9 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { ContactDetails } from "./ContactDetails";
-import { LoginDetails } from "./LoginDetails";
+import { LoginDetails } from "././LoginDetails";
 import { User } from "./User";
-
+import { UserContactDetails } from "./UserContactDetails";
 export enum personHonorificTitle {
   mr = "Mr",
   mrs = "Mrs",
@@ -62,8 +61,8 @@ export class Account extends BaseEntity {
   @JoinColumn({ name: "user_id" })
   user: User;
 
-  @OneToMany(() => ContactDetails, contactDetails => contactDetails.account, { eager: true })
-  contactDetails: ContactDetails[];
+  @OneToMany(() => UserContactDetails, userContactDetails => userContactDetails.account, { eager: true })
+  contactDetails: UserContactDetails[];
 
   @OneToMany(() => LoginDetails, loginDetails => loginDetails.account)
   loginDetails: LoginDetails[];

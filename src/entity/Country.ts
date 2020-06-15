@@ -1,8 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, OneToMany } from "typeorm";
-
+import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { City } from "./City";
 import { LoginDetails } from "./LoginDetails";
-import { ContactDetails } from "./ContactDetails";
+import { UserContactDetails } from "./UserContactDetails";
 
 @Entity({ name: "country", schema: "public" })
 export class Country extends BaseEntity {
@@ -24,8 +23,8 @@ export class Country extends BaseEntity {
   @OneToMany(() => City, city => city.country)
   cities: City[];
 
-  @OneToMany(() => ContactDetails, contactDetails => contactDetails.country)
-  contactDetails: ContactDetails[];
+  @OneToMany(() => UserContactDetails, userContactDetails => userContactDetails.country)
+  userContactDetails: UserContactDetails[];
 
   @OneToMany(() => LoginDetails, loginDetails => loginDetails.country)
   loginDetails: LoginDetails[];

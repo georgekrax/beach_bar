@@ -13,7 +13,6 @@ export const router = express.Router();
 
 router.get("/google/callback", async (req: express.Request, res: express.Response) => {
   const qs = new URL(req.url, process.env.HOSTNAME_WITH_HTTP).searchParams;
-  console.log(qs);
   const code = qs.get("code");
   const state = qs.get("state");
   res.send(`<h2>Redirected from Google</h2><p>Code: ${code}</p><br><p>State:${state}</p>`);
@@ -21,10 +20,16 @@ router.get("/google/callback", async (req: express.Request, res: express.Respons
 
 router.get("/facebook/callback", async (req: express.Request, res: express.Response) => {
   const qs = new URL(req.url, process.env.HOSTNAME_WITH_HTTP).searchParams;
-  console.log(qs);
   const code = qs.get("code");
   const state = qs.get("state");
   res.send(`<h2>Redirected from Facebook</h2><p>Code: ${code}</p><br><p>State: ${state}</p>`);
+});
+
+router.get("/instagram/callback", async (req: express.Request, res: express.Response) => {
+  const qs = new URL(req.url, process.env.HOSTNAME_WITH_HTTP).searchParams;
+  const code = qs.get("code");
+  const state = qs.get("state");
+  res.send(`<h2>Redirected from Instagram</h2><p>Code: ${code}</p><br><p>State: ${state}</p>`);
 });
 
 router.post("/refresh_token", async (req: express.Request, res: express.Response) => {

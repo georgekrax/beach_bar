@@ -9,6 +9,7 @@ export const UserType = objectType({
     t.int("id", { nullable: false, description: "User's ID value" });
     // @ts-ignore
     t.email("email", { nullable: false, description: "User's email address" });
+    t.string("username", { nullable: true, description: "Username of the user. It can be null" });
     t.string("firstName", { nullable: true, description: "User's first (given) name" });
     t.string("lastName", { nullable: true, description: "User's last (family) name" });
     // @ts-ignore
@@ -24,13 +25,13 @@ export const UserType = objectType({
     t.field("account", {
       type: UserAccountType,
       description: "User's account info",
-      nullable: false,
+      nullable: true,
       resolve: o => o.account,
     });
     t.list.field("reviews", {
       type: BeachBarReviewType,
       description: "A user's review on a #beach_bar",
-      nullable: false,
+      nullable: true,
       resolve: o => o.reviews,
     });
   },
