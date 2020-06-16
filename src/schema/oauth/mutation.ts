@@ -127,7 +127,7 @@ export const AuthorizeWithOAuthProviders = extendType({
         }
 
         // search for user in DB
-        let user: User | undefined = await User.findOne({ email });
+        let user: User | undefined = await User.findOne({ where: { email }, relations: ["account"] });
         let signedUp = false;
         if (!user) {
           signedUp = true;
@@ -143,13 +143,14 @@ export const AuthorizeWithOAuthProviders = extendType({
             firstName,
             lastName,
             country,
+            city,
           );
           // @ts-ignore
           if (response.error && !response.user) {
             // @ts-ignore
             return { error: { code: response.error.code, message: response.error.message } };
           }
-          user = await User.findOne({ email });
+          user = await User.findOne({ where: { email }, relations: ["account"] });
         }
 
         if (!user) {
@@ -373,7 +374,7 @@ export const AuthorizeWithOAuthProviders = extendType({
         }
 
         // search for user in DB
-        let user: User | undefined = await User.findOne({ email: facebookEmail });
+        let user: User | undefined = await User.findOne({ where: { email: facebookEmail }, relations: ["account"] });
         let signedUp = false;
         if (!user) {
           signedUp = true;
@@ -389,13 +390,14 @@ export const AuthorizeWithOAuthProviders = extendType({
             firstName,
             lastName,
             country,
+            city,
           );
           // @ts-ignore
           if (response.error && !response.user) {
             // @ts-ignore
             return { error: { code: response.error.code, message: response.error.message } };
           }
-          user = await User.findOne({ email: facebookEmail });
+          user = await User.findOne({ where: { email: facebookEmail }, relations: ["account"] });
         }
 
         if (!user) {
@@ -589,7 +591,10 @@ export const AuthorizeWithOAuthProviders = extendType({
         }
 
         // search for user in DB
-        let user: User | undefined = await User.findOne({ where: [{ username: instagramUsername }, { email }] });
+        let user: User | undefined = await User.findOne({
+          where: [{ username: instagramUsername }, { email }],
+          relations: ["account"],
+        });
         let signedUp = false;
         if (!user) {
           signedUp = true;
@@ -605,6 +610,7 @@ export const AuthorizeWithOAuthProviders = extendType({
             undefined,
             undefined,
             country,
+            city,
           );
 
           // @ts-ignore
@@ -613,7 +619,7 @@ export const AuthorizeWithOAuthProviders = extendType({
             // @ts-ignore
             return { error: { code: response.error.code, message: response.error.message } };
           }
-          user = await User.findOne({ email, username: instagramUsername });
+          user = await User.findOne({ where: { email, username: instagramUsername }, relations: ["account"] });
         }
 
         if (!user) {

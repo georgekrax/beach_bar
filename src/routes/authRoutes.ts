@@ -58,6 +58,7 @@ router.post("/refresh_token", async (req: express.Request, res: express.Response
       const user = await User.findOne({
         where: { id: decodedRefreshTokenPayload.sub },
         select: ["id", "email", "tokenVersion"],
+        relations: ["account"],
       });
       if (!user) {
         return res.status(500).send({

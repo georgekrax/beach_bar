@@ -1,5 +1,7 @@
 import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Account } from "./Account";
 import { City } from "./City";
+import { CountryFlagIcon } from "./CountryFlagIcon";
 import { LoginDetails } from "./LoginDetails";
 import { UserContactDetails } from "./UserContactDetails";
 
@@ -22,6 +24,12 @@ export class Country extends BaseEntity {
 
   @OneToMany(() => City, city => city.country)
   cities: City[];
+
+  @OneToMany(() => Account, account => account.country)
+  accounts: Country[];
+
+  @OneToMany(() => CountryFlagIcon, countryFlagIcon => countryFlagIcon.country, { eager: true, nullable: false })
+  flagIcons: CountryFlagIcon[];
 
   @OneToMany(() => UserContactDetails, userContactDetails => userContactDetails.country)
   userContactDetails: UserContactDetails[];

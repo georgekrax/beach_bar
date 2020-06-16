@@ -19,4 +19,6 @@ export default Object.freeze({
   FACEBOOK_AUTHENTICATED_CODE: "facebook_authenticated",
   INSTAGRAM_AUTHENTICATED_CODE: "instagram_authenticated",
   HASHTAG_NOT_AUTHENTICATED_CODE: "hashtag_not_authenticated",
+  INVALID_EMAIL_ADDRESS: "Please provide a valid email address",
+  EMPTY_VALUES: "Please provide some values",
 });

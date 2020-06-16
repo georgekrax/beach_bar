@@ -7,14 +7,18 @@ import {
   DeleteDateColumn,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
 import { LoginDetails } from "././LoginDetails";
+import { City } from "./City";
+import { Country } from "./Country";
 import { User } from "./User";
 import { UserContactDetails } from "./UserContactDetails";
+
 export enum personHonorificTitle {
   mr = "Mr",
   mrs = "Mrs",
@@ -45,6 +49,18 @@ export class Account extends BaseEntity {
   @Column({ name: "age", type: "smallint", nullable: true })
   age: number;
 
+  @Column({ name: "country_id", type: "integer", nullable: true })
+  countryId: number;
+
+  @Column({ name: "city_id", type: "integer", nullable: true })
+  cityId: number;
+
+  @Column("varchar", { length: 100, name: "address", nullable: true })
+  address: string;
+
+  @Column("varchar", { length: 12, name: "zip_code", nullable: true })
+  zipCode: string;
+
   @Column({ name: "is_active", type: "boolean", nullable: true, default: () => false })
   isActive: boolean;
 
@@ -61,7 +77,15 @@ export class Account extends BaseEntity {
   @JoinColumn({ name: "user_id" })
   user: User;
 
-  @OneToMany(() => UserContactDetails, userContactDetails => userContactDetails.account, { eager: true })
+  @ManyToOne(() => Country, country => country.accounts, { nullable: true })
+  @JoinColumn({ name: "country_id" })
+  country: Country;
+
+  @ManyToOne(() => City, city => city.accounts, { nullable: true })
+  @JoinColumn({ name: "city_id" })
+  city: City;
+
+  @OneToMany(() => UserContactDetails, userContactDetails => userContactDetails.account, { nullable: true })
   contactDetails: UserContactDetails[];
 
   @OneToMany(() => LoginDetails, loginDetails => loginDetails.account)

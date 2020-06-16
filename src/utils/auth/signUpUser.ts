@@ -2,11 +2,11 @@ import { Redis } from "ioredis";
 import errors from "../../constants/errors";
 import scopes from "../../constants/scopes";
 import { Account } from "../../entity/Account";
+import { City } from "../../entity/City";
 import { Country } from "../../entity/Country";
 import { Owner } from "../../entity/Owner";
 import { User } from "../../entity/User";
 import { ErrorType } from "../../schema/returnTypes";
-import { UserContactDetails } from "../../entity/UserContactDetails";
 
 export const signUpUser = async (
   email: string,
@@ -19,7 +19,8 @@ export const signUpUser = async (
   username?: string,
   firstName?: string,
   lastName?: string,
-  country?: Country | undefined,
+  country?: Country,
+  city?: City,
 ): Promise<{ user: User } | ErrorType> => {
   const newUser = User.create({
     email,
@@ -32,17 +33,18 @@ export const signUpUser = async (
     lastName,
   });
 
-  const newUserAccount = Account.create();
+  const newUserAccount = Account.create({ country, city });
 
   try {
     await newUser.save();
     newUserAccount.user = newUser;
+    if (country) {
+      newUserAccount.country = country;
+    }
+    if (city) {
+      newUserAccount.city = city;
+    }
     await newUserAccount.save();
-    const newUserContactDetails = UserContactDetails.create({
-      account: newUserAccount,
-      country,
-    });
-    await newUserContactDetails.save();
     if (isPrimaryOwner) {
       const owner = Owner.create({ user: newUser, isPrimary: true });
       await owner.save();

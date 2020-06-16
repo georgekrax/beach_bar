@@ -37,7 +37,7 @@ import {
   UserLoginResult,
   UserSignUpResult,
   // eslint-disable-next-line prettier/prettier
-  UserUpdateResult,
+  UserUpdateResult
 } from "./types";
 
 export const UserSignUpAndLoginMutation = extendType({
@@ -68,7 +68,7 @@ export const UserSignUpAndLoginMutation = extendType({
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid password" } };
         }
 
-        const user = await User.findOne({ where: { email } });
+        const user = await User.findOne({ where: { email }, relations: ["account"] });
         if (user) {
           return { error: { code: errors.CONFLICT, message: "User already exists" } };
         }
@@ -170,7 +170,7 @@ export const UserSignUpAndLoginMutation = extendType({
         }
 
         // search for user in DB
-        const user = await User.findOne({ where: { email } });
+        const user = await User.findOne({ where: { email }, relations: ["account"] });
         if (!user) {
           return {
             error: {
@@ -393,11 +393,10 @@ export const UserSignUpAndLoginMutation = extendType({
           if (tokenInfo.pictureUrl && !user.account.imgUrl) {
             user.account.imgUrl = tokenInfo.pictureUrl;
           }
-          if (tokenInfo.locale && !user.account.contactDetails[0].country) {
+          if (tokenInfo.locale && !user.account.country) {
             const country = await Country.findOne({ where: { languageIdentifier: tokenInfo.locale } });
             if (country) {
-              user.account.contactDetails[0].country = country;
-              await user.account.contactDetails[0].save();
+              user.account.country = country;
             }
           }
         }
@@ -523,7 +522,7 @@ export const UserForgotPasswordMutation = extendType({
 
         const user = await User.findOne({
           where: { email, deletedAt: IsNull() },
-          relations: ["owner", "owner.user", "owner.beachBars", "reviews", "reviews.visitType"],
+          relations: ["account", "owner", "owner.user", "owner.beachBars", "reviews", "reviews.visitType"],
         });
         if (!user) {
           return {
@@ -617,7 +616,7 @@ export const UserForgotPasswordMutation = extendType({
 
         const user = await User.findOne({
           where: { email, deletedAt: IsNull() },
-          relations: ["owner", "owner.user", "owner.beachBars", "reviews", "reviews.visitType"],
+          relations: ["account", "owner", "owner.user", "owner.beachBars", "reviews", "reviews.visitType"],
         });
         if (!user) {
           return {
@@ -745,7 +744,7 @@ export const UserCrudMutation = extendType({
 
         const user = await User.findOne({
           where: { id: payload.sub, deletedAt: IsNull() },
-          relations: ["owner", "owner.user", "owner.beachBars", "reviews", "reviews.visitType"],
+          relations: ["account", "owner", "owner.user", "owner.beachBars", "reviews", "reviews.visitType"],
         });
         if (!user) {
           return { error: { code: errors.NOT_FOUND, message: errors.USER_NOT_FOUND_MESSAGE } };
@@ -792,7 +791,7 @@ export const UserCrudMutation = extendType({
               firstName: user.firstName,
               lastName: user.lastName,
               pictureUrl: user.account.imgUrl,
-              countryId: user.account.contactDetails[0].countryId,
+              countryId: user.account.countryId,
             },
             context: {
               headers: {

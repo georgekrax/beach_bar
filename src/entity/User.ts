@@ -8,7 +8,8 @@ import {
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
+  // eslint-disable-next-line prettier/prettier
+  UpdateDateColumn
 } from "typeorm";
 import { Account } from "./Account";
 import { BeachBarReview } from "./BeachBarReview";
@@ -47,16 +48,16 @@ export class User extends BaseEntity {
   @Column("varchar", { name: "last_name", length: 255, nullable: true })
   lastName: string;
 
+  @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
+  deletedAt: Date;
+
   @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
   updatedAt: Date;
 
   @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
   timestamp: Date;
 
-  @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
-  deletedAt: Date;
-
-  @OneToOne(() => Account, account => account.user, { eager: true })
+  @OneToOne(() => Account, account => account.user, { eager: false })
   account: Account;
 
   @OneToOne(() => Owner, owner => owner.user)

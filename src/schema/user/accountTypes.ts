@@ -1,5 +1,7 @@
 import { objectType } from "@nexus/schema";
-import { UserAccountContactDetailsType } from "../userDetails/contactDetails";
+import { CityType } from "../userDetails/cityTypes";
+import { UserContactDetailsType } from "../userDetails/contactDetails";
+import { CountryType } from "../userDetails/countryTypes";
 import { UserType } from "./types";
 
 export const UserAccountType = objectType({
@@ -15,7 +17,21 @@ export const UserAccountType = objectType({
       // @ts-ignore
       t.date("birthday", { nullable: true, description: "User's birthday date" }),
       t.int("age", { nullable: true, description: "User's age" }),
-      t.boolean("isActive", { nullable: false });
+      t.field("country", {
+        type: CountryType,
+        description: "The country of the user",
+        nullable: true,
+        resolve: o => o.country,
+      });
+    t.field("city", {
+      type: CityType,
+      description: "The city or hometown of the user",
+      nullable: true,
+      resolve: o => o.city,
+    });
+    t.string("address", { nullable: true, description: "The address of user" });
+    t.string("zipCode", { nullable: true, description: "The zip code of the address of the user" });
+    t.boolean("isActive", { nullable: false });
     // @ts-ignore
     t.datetime("updatedAt", {
       nullable: false,
@@ -30,7 +46,7 @@ export const UserAccountType = objectType({
       resolve: o => o.user,
     });
     t.list.field("contactDetails", {
-      type: UserAccountContactDetailsType,
+      type: UserContactDetailsType,
       description: "User contact details",
       nullable: true,
       resolve: o => o.contactDetails,

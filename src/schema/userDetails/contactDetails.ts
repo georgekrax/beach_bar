@@ -1,10 +1,9 @@
 import { objectType, unionType } from "@nexus/schema";
 import { UserAccountType } from "../user/accountTypes";
-import { CityType } from "./cityTypes";
 import { CountryType } from "./countryTypes";
 
-export const UserAccountContactDetailsType = objectType({
-  name: "UserAccountContactDetails",
+export const UserContactDetailsType = objectType({
+  name: "UserContactDetails",
   description: "Represents the contact details info of a user",
   definition(t) {
     t.int("id", { nullable: false, description: "The ID value of user's account contact details" });
@@ -15,42 +14,69 @@ export const UserAccountContactDetailsType = objectType({
       description: "The country origin of a user",
       resolve: o => o.country,
     });
-    t.field("city", {
-      type: CityType,
-      nullable: true,
-      description: "The city of the user",
-      resolve: o => o.city,
-    });
+    // @ts-ignore
+    t.email("secondaryEmail", { nullable: true, description: "A secondary email address to contact the user" });
     t.string("phoneNumber", { nullable: true, description: "User's phone number" });
   },
 });
 
-export const AddUserAccountContactDetailsType = objectType({
-  name: "AddUserAccountContactDetails",
-  description: "Info to be returned when added (assigned) contact details to a user",
+export const AddUserContactDetailsType = objectType({
+  name: "AddUserContactDetails",
+  description: "Info to be returned when contact details are added (assigned) to a user",
   definition(t) {
     t.field("contactDetails", {
-      type: UserAccountContactDetailsType,
+      type: UserContactDetailsType,
       description: "The contact details of the user",
       nullable: false,
       resolve: o => o.contactDetails,
     });
     t.boolean("added", {
       nullable: false,
-      description: "A boolean that indicates if the contact details have been successfully added (assigned) to the suer",
+      description: "A boolean that indicates if the contact details have been successfully added (assigned) to the user",
     });
   },
 });
 
-export const AddUserAccountContactDetailsResult = unionType({
-  name: "AddUserAccountContactDetailsResult",
+export const AddUserContactDetailsResult = unionType({
+  name: "AddUserContactDetailsResult",
   definition(t) {
-    t.members("AddUserAccountContactDetails", "Error");
+    t.members("AddUserContactDetails", "Error");
     t.resolveType(item => {
       if (item.error) {
         return "Error";
       } else {
-        return "AddUserAccountContactDetails";
+        return "AddUserContactDetails";
+      }
+    });
+  },
+});
+
+export const UpdateUserContactDetailsType = objectType({
+  name: "UpdateUserContactDetails",
+  description: "Info to be returned when contact details of a user are updated",
+  definition(t) {
+    t.field("contactDetails", {
+      type: UserContactDetailsType,
+      description: "The contact details of the user",
+      nullable: false,
+      resolve: o => o.contactDetails,
+    });
+    t.boolean("updated", {
+      nullable: false,
+      description: "A boolean that indicates if the contact details of the user have been successfully updated",
+    });
+  },
+});
+
+export const UpdateUserContactDetailsResult = unionType({
+  name: "UpdateUserContactDetailsResult",
+  definition(t) {
+    t.members("UpdateUserContactDetails", "Error");
+    t.resolveType(item => {
+      if (item.error) {
+        return "Error";
+      } else {
+        return "UpdateUserContactDetails";
       }
     });
   },

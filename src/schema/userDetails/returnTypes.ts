@@ -1,6 +1,10 @@
 import { UserContactDetails } from "../../entity/UserContactDetails";
-import { AddType } from "../returnTypes";
+import { AddType, UpdateType } from "../returnTypes";
 
-export type AddAccountContactDetailsType = AddType & {
+export type AddUserContactDetailsType = AddType & {
+  contactDetails: UserContactDetails;
+};
+
+export type UpdateUserContactDetailsType = UpdateType & {
   contactDetails: UserContactDetails;
 };

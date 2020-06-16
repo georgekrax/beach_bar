@@ -29,7 +29,7 @@ export const UsersQuery = extendType({
 
         const user = await User.findOne({
           where: { id: payload.sub },
-          relations: ["owner", "owner.user", "owner.beachBars", "reviews", "reviews.visitType"],
+          relations: ["account", "owner", "owner.user", "owner.beachBars", "reviews", "reviews.visitType"],
         });
         if (!user) {
           return {
