@@ -12,16 +12,6 @@ export const UserType = objectType({
     t.string("username", { nullable: true, description: "Username of the user. It can be null" });
     t.string("firstName", { nullable: true, description: "User's first (given) name" });
     t.string("lastName", { nullable: true, description: "User's last (family) name" });
-    // @ts-ignore
-    t.datetime("updatedAt", {
-      nullable: false,
-      description: "The last time user's account was updated, in the format of a timestamp",
-    });
-    // @ts-ignore
-    t.datetime("timestamp", {
-      nullable: false,
-      description: "The timestamp recorded, when the user's account was created",
-    });
     t.field("account", {
       type: UserAccountType,
       description: "User's account info",

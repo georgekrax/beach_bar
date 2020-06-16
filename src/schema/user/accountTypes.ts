@@ -8,42 +8,34 @@ export const UserAccountType = objectType({
   name: "UserAccount",
   description: "Represents a user's account",
   definition(t) {
-    t.int("id", { nullable: false, description: "The ID value of the user's account" }),
-      t.string("personTitle", {
-        nullable: true,
-        description: "The user's honorific title. Its value can be null or 'Mr', 'Mrs', 'Ms', 'Miss', 'Sr', 'Dr', 'Lady'",
-      }),
-      t.string("imgUrl", { nullable: true, description: "The URL value of user's account profile picture" }),
-      // @ts-ignore
-      t.date("birthday", { nullable: true, description: "User's birthday date" }),
-      t.int("age", { nullable: true, description: "User's age" }),
-      t.field("country", {
-        type: CountryType,
-        description: "The country of the user",
-        nullable: true,
-        resolve: o => o.country,
-      });
-    t.field("city", {
-      type: CityType,
-      description: "The city or hometown of the user",
+    t.int("id", { nullable: false, description: "The ID value of the user's account" });
+    t.string("personTitle", {
       nullable: true,
-      resolve: o => o.city,
+      description: "The user's honorific title. Its value can be null or 'Mr', 'Mrs', 'Ms', 'Miss', 'Sr', 'Dr', 'Lady'",
     });
+    t.string("imgUrl", { nullable: true, description: "The URL value of user's account profile picture" });
+    // @ts-ignore
+    t.date("birthday", { nullable: true, description: "User's birthday date" });
+    t.int("age", { nullable: true, description: "User's age" });
     t.string("address", { nullable: true, description: "The address of user" });
     t.string("zipCode", { nullable: true, description: "The zip code of the address of the user" });
-    t.boolean("isActive", { nullable: false });
-    // @ts-ignore
-    t.datetime("updatedAt", {
-      nullable: false,
-      description: "The last time user's account was updated, in the format of a timestamp",
-    });
-    // @ts-ignore
-    t.datetime("timestamp", { nullable: false, description: "The timestamp recorded, when the user's account was created" });
     t.field("user", {
       type: UserType,
       description: "The user info of the particular account",
       nullable: false,
       resolve: o => o.user,
+    });
+    t.field("country", {
+      type: CountryType,
+      description: "The country of the user",
+      nullable: true,
+      resolve: o => o.country,
+    });
+    t.field("city", {
+      type: CityType,
+      description: "The city or hometown of the user",
+      nullable: true,
+      resolve: o => o.city,
     });
     t.list.field("contactDetails", {
       type: UserContactDetailsType,

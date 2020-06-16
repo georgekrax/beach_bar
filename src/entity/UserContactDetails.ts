@@ -8,7 +8,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
   Unique,
-  UpdateDateColumn,
+  UpdateDateColumn
 } from "typeorm";
 import { Account } from "./Account";
 import { Country } from "./Country";
@@ -42,7 +42,11 @@ export class UserContactDetails extends BaseEntity {
   @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
   timestamp: Date;
 
-  @ManyToOne(() => Account, account => account.contactDetails, { eager: true, nullable: false })
+  @ManyToOne(() => Account, account => account.contactDetails, {
+    eager: true,
+    nullable: false,
+    cascade: ["soft-remove", "remove", "recover"],
+  })
   @JoinColumn({ name: "account_id" })
   account: Account;
 

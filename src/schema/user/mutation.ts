@@ -37,7 +37,7 @@ import {
   UserLoginResult,
   UserSignUpResult,
   // eslint-disable-next-line prettier/prettier
-  UserUpdateResult
+  UserUpdateResult,
 } from "./types";
 
 export const UserSignUpAndLoginMutation = extendType({
@@ -902,6 +902,7 @@ export const UserCrudMutation = extendType({
           await removeUserSessions(user.id, redis);
 
           await getConnection().getRepository(User).softDelete(String(user.id));
+          await getConnection().getRepository(Account).softDelete(String(user.account.id));
         } catch (err) {
           return { error: { message: `Something went wrong: ${err.message}` } };
         }

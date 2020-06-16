@@ -9,7 +9,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
   // eslint-disable-next-line prettier/prettier
-  UpdateDateColumn
+  UpdateDateColumn,
 } from "typeorm";
 import { Account } from "./Account";
 import { BeachBarReview } from "./BeachBarReview";
@@ -28,7 +28,7 @@ export class User extends BaseEntity {
   username: string;
 
   @Column({ name: "token_version", type: "integer", default: () => 0 })
-  tokenVersion: number;
+  tokenVersion?: number;
 
   @Column({ name: "hashtag_id", type: "bigint", unique: true, nullable: true })
   hashtagId: bigint;
@@ -49,7 +49,7 @@ export class User extends BaseEntity {
   lastName: string;
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
-  deletedAt: Date;
+  deletedAt?: Date;
 
   @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
   updatedAt: Date;
@@ -61,7 +61,7 @@ export class User extends BaseEntity {
   account: Account;
 
   @OneToOne(() => Owner, owner => owner.user)
-  owner: Owner;
+  owner?: Owner;
 
   @OneToMany(() => BeachBarReview, beachBarReview => beachBarReview.user)
   reviews: BeachBarReview[];
