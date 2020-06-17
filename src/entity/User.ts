@@ -13,7 +13,7 @@ import {
 } from "typeorm";
 import { Account } from "./Account";
 import { BeachBarReview } from "./BeachBarReview";
-import { Owner } from "./Owner";
+import { BeachBarOwner } from "./BeachBarOwner";
 
 @Entity({ name: "user", schema: "public" })
 export class User extends BaseEntity {
@@ -63,9 +63,9 @@ export class User extends BaseEntity {
   @OneToOne(() => Account, account => account.user, { eager: false })
   account: Account;
 
-  @OneToOne(() => Owner, owner => owner.user)
-  owner?: Owner;
-
   @OneToMany(() => BeachBarReview, beachBarReview => beachBarReview.user)
   reviews?: BeachBarReview[];
+
+  @OneToMany(() => BeachBarOwner, beachBarOwner => beachBarOwner.user, { nullable: true })
+  beachBars: BeachBarOwner[];
 }

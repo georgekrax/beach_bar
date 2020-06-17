@@ -18,6 +18,8 @@ export * from "./oauth/mutation";
 // oauth
 export * from "./oauth/query";
 export * from "./oauth/types";
+export * from "./owner/mutation";
+export * from "./owner/types";
 export * from "./query";
 export * from "./types";
 export * from "./user/accountTypes";
@@ -30,4 +32,3 @@ export * from "./userDetails/contactDetails";
 export * from "./userDetails/countryTypes";
 //userDetails
 export * from "./userDetails/mutation";
-export * from "./userDetails/ownerTypes";

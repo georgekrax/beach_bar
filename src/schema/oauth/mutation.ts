@@ -31,15 +31,10 @@ export const AuthorizeWithOAuthProviders = extendType({
           required: false,
           description: "User details in login",
         }),
-        isPrimaryOwner: booleanArg({
-          required: false,
-          default: false,
-          description: "Set to true if you want to sign up an owner for a #beach_bar",
-        }),
       },
       resolve: async (
         _,
-        { code, state, loginDetails, isPrimaryOwner },
+        { code, state, loginDetails },
         { req, res, googleOAuth2Client, uaParser, redis }: MyContext,
       ): Promise<AuthorizeWithOAuthType | ErrorType> => {
         if (!code || code === "" || code === " ") {
@@ -133,7 +128,6 @@ export const AuthorizeWithOAuthProviders = extendType({
           signedUp = true;
           const response = await signUpUser(
             email,
-            isPrimaryOwner,
             redis,
             undefined,
             googleId,
@@ -221,15 +215,10 @@ export const AuthorizeWithOAuthProviders = extendType({
           required: false,
           description: "User details in login",
         }),
-        isPrimaryOwner: booleanArg({
-          required: false,
-          default: false,
-          description: "Set to true if you want to sign up an owner for a #beach_bar",
-        }),
       },
       resolve: async (
         _,
-        { code, state, loginDetails, isPrimaryOwner },
+        { code, state, loginDetails },
         { req, res, uaParser, redis }: MyContext,
       ): Promise<AuthorizeWithOAuthType | ErrorType> => {
         if (!code || code === "" || code === " ") {
@@ -381,7 +370,6 @@ export const AuthorizeWithOAuthProviders = extendType({
           signedUp = true;
           const response = await signUpUser(
             facebookEmail,
-            isPrimaryOwner,
             redis,
             undefined,
             undefined,
@@ -474,15 +462,10 @@ export const AuthorizeWithOAuthProviders = extendType({
           required: false,
           description: "User details in login",
         }),
-        isPrimaryOwner: booleanArg({
-          required: false,
-          default: false,
-          description: "Set to true if you want to sign up an owner for a #beach_bar",
-        }),
       },
       resolve: async (
         _,
-        { email, code, state, loginDetails, isPrimaryOwner },
+        { email, code, state, loginDetails },
         { req, res, uaParser, redis }: MyContext,
       ): Promise<AuthorizeWithOAuthType | ErrorType> => {
         if (!email || email === "" || email === " ") {
@@ -603,7 +586,6 @@ export const AuthorizeWithOAuthProviders = extendType({
           signedUp = true;
           const response = await signUpUser(
             email,
-            isPrimaryOwner,
             redis,
             undefined,
             undefined,

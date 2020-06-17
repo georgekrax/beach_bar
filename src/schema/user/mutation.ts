@@ -55,13 +55,8 @@ export const UserSignUpAndLoginMutation = extendType({
           required: true,
           description: "Credential for signing up a user",
         }),
-        isPrimaryOwner: booleanArg({
-          required: false,
-          default: false,
-          description: "Set to true if you want to sign up an owner for a #beach_bar",
-        }),
       },
-      resolve: async (_, { userCredentials, isPrimaryOwner }, { redis }: MyContext): Promise<UserSignUpType | ErrorType> => {
+      resolve: async (_, { userCredentials }, { redis }: MyContext): Promise<UserSignUpType | ErrorType> => {
         const { email, password } = userCredentials;
         if (!email || email === "" || email === " ") {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid email address" } };
@@ -124,7 +119,6 @@ export const UserSignUpAndLoginMutation = extendType({
 
         const response = await signUpUser(
           hashtagUser.email,
-          isPrimaryOwner,
           redis,
           hashtagUser.id,
           undefined,
@@ -552,7 +546,7 @@ export const UserForgotPasswordMutation = extendType({
 
         const user = await User.findOne({
           where: { email, deletedAt: IsNull() },
-          relations: ["account", "owner", "owner.user", "owner.beachBars", "reviews", "reviews.visitType"],
+          relations: ["account", "reviews", "reviews.visitType"],
         });
         if (!user) {
           return {
@@ -646,7 +640,7 @@ export const UserForgotPasswordMutation = extendType({
 
         const user = await User.findOne({
           where: { email, deletedAt: IsNull() },
-          relations: ["account", "owner", "owner.user", "owner.beachBars", "reviews", "reviews.visitType"],
+          relations: ["account", "reviews", "reviews.visitType"],
         });
         if (!user) {
           return {
@@ -781,7 +775,7 @@ export const UserCrudMutation = extendType({
 
         const user = await User.findOne({
           where: { id: payload.sub, deletedAt: IsNull() },
-          relations: ["account", "owner", "owner.user", "owner.beachBars", "reviews", "reviews.visitType"],
+          relations: ["account", "reviews", "reviews.visitType"],
         });
         if (!user) {
           return { error: { code: errors.NOT_FOUND, message: errors.USER_NOT_FOUND_MESSAGE } };

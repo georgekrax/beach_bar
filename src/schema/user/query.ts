@@ -35,9 +35,9 @@ export const UsersQuery = extendType({
             "account.contactDetails",
             "account.country",
             "account.city",
-            "owner",
-            "owner.user",
-            "owner.beachBars",
+            "beachBars",
+            "beachBars.user",
+            "beachBars.beachBar",
             "reviews",
             "reviews.visitType",
           ],
@@ -91,7 +91,7 @@ export const UsersQuery = extendType({
                 countryId: payload.scope.some(
                   scope => ["beach_bar@crud:user", "hashtag@read:user_account:country"].includes(scope) && user.account.country,
                 )
-                  ? user.account.country.id
+                  ? user.account.country?.id
                   : undefined,
                 city: payload.scope.some(
                   scope => ["beach_bar@crud:user", "hashtag@read:user_account:city"].includes(scope) && user.account.city,
@@ -101,7 +101,7 @@ export const UsersQuery = extendType({
                 cityId: payload.scope.some(
                   scope => ["beach_bar@crud:user", "hashtag@read:user_account:city"].includes(scope) && user.account.city,
                 )
-                  ? user.account.city.id
+                  ? user.account.city?.id
                   : undefined,
                 address: payload.scope.some(
                   scope => ["beach_bar@crud:user", "beach_bar@read:user_account:address"].includes(scope) && user.account.address,

@@ -4,13 +4,11 @@ import scopes from "../../constants/scopes";
 import { Account } from "../../entity/Account";
 import { City } from "../../entity/City";
 import { Country } from "../../entity/Country";
-import { Owner } from "../../entity/Owner";
 import { User } from "../../entity/User";
 import { ErrorType } from "../../schema/returnTypes";
 
 export const signUpUser = async (
   email: string,
-  isPrimaryOwner: boolean,
   redis: Redis,
   hashtagId?: bigint,
   googleId?: any,
@@ -48,10 +46,6 @@ export const signUpUser = async (
       newUserAccount.city = city;
     }
     await newUserAccount.save();
-    if (isPrimaryOwner) {
-      const owner = Owner.create({ user: newUser, isPrimary: true });
-      await owner.save();
-    }
   } catch (err) {
     return { error: { code: errors.INTERNAL_SERVER_ERROR, message: `Something went wrong: ${err.message}` } };
   }

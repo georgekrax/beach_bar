@@ -69,7 +69,7 @@ export const UserContactDetailsCrudMutation = extendType({
           return {
             error: {
               code: errors.CONFLICT,
-              message: `Contact details with the phone number of { ${phoneNumber} } & secondary email address of { ${secondaryEmail} } already exist`,
+              message: `Contact details with the phone number of '${phoneNumber}' & secondary email address of '${secondaryEmail}' already exist`,
             },
           };
         }
@@ -93,14 +93,14 @@ export const UserContactDetailsCrudMutation = extendType({
             return {
               error: {
                 code: errors.CONFLICT,
-                message: `Contact details with phone number of { ${phoneNumber.toString()} }, without a secondary email, already exist`,
+                message: `Contact details with phone number of '${phoneNumber.toString()}', without a secondary email, already exist`,
               },
             };
           } else if (err.message === 'duplicate key value violates unique constraint "contact_details_secondary_email_key"') {
             return {
               error: {
                 code: errors.CONFLICT,
-                message: `Contact details with secondary email of { ${secondaryEmail} }, without a phone number, already exist`,
+                message: `Contact details with secondary email of '${secondaryEmail}', without a phone number, already exist`,
               },
             };
           } else {
@@ -190,14 +190,14 @@ export const UserContactDetailsCrudMutation = extendType({
             return {
               error: {
                 code: errors.CONFLICT,
-                message: `Contact details with phone number of { ${phoneNumber.toString()} }, without a secondary email, already exist`,
+                message: `Contact details with phone number of '${phoneNumber.toString()}', without a secondary email, already exist`,
               },
             };
           } else if (err.message === 'duplicate key value violates unique constraint "contact_details_secondary_email_key"') {
             return {
               error: {
                 code: errors.CONFLICT,
-                message: `Contact details with secondary email of { ${secondaryEmail} }, without a phone number, already exist`,
+                message: `Contact details with secondary email of '${secondaryEmail}', without a phone number, already exist`,
               },
             };
           } else {

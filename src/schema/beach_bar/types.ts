@@ -1,5 +1,5 @@
 import { objectType } from "@nexus/schema";
-import { OwnerType } from "../userDetails/ownerTypes";
+import { BeachBarOwnerType } from "../owner/types";
 import { BeachBarRestaurantType } from "./restaurantTypes";
 import { BeachBarReviewType } from "./reviewTypes";
 import { BeachBarFeatureType } from "./serviceTypes";
@@ -27,7 +27,7 @@ export const BeachBarType = objectType({
       description: "The timestamp recorded, when the #beach_bar was created",
     });
     t.list.field("owners", {
-      type: OwnerType,
+      type: BeachBarOwnerType,
       description: "A list of all the owners of the #beach_bar",
       nullable: false,
       resolve: o => o.owners,

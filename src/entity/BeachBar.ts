@@ -5,15 +5,14 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { Owner } from "./Owner";
-import { ServiceBeachBar } from "./ServiceBeachBar";
-import { BeachBarReview } from "./BeachBarReview";
 import { BeachBarRestaurant } from "./BeachBarRestaurant";
+import { BeachBarReview } from "./BeachBarReview";
+import { BeachBarOwner } from "./BeachBarOwner";
+import { ServiceBeachBar } from "./ServiceBeachBar";
 
 @Entity({ name: "beach_bar", schema: "public" })
 export class BeachBar extends BaseEntity {
@@ -42,8 +41,8 @@ export class BeachBar extends BaseEntity {
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt: Date;
 
-  @ManyToMany(() => Owner, owner => owner.beachBars, { nullable: false })
-  owners: Owner[];
+  @OneToMany(() => BeachBarOwner, beachBarOwner => beachBarOwner.beachBar, { nullable: false })
+  owners: BeachBarOwner[];
 
   @OneToMany(() => ServiceBeachBar, serviceBeachBar => serviceBeachBar.beachBar)
   serviceBeachBar: ServiceBeachBar[];
