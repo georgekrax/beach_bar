@@ -140,10 +140,12 @@ export const AuthorizeWithOAuthProviders = extendType({
             undefined,
             undefined,
             undefined,
+            undefined,
             firstName,
             lastName,
             country,
             city,
+            undefined,
           );
           // @ts-ignore
           if (response.error && !response.user) {
@@ -339,7 +341,6 @@ export const AuthorizeWithOAuthProviders = extendType({
               if (data.birthday) {
                 birthday = new Date(data.birthday);
               }
-              console.log(data.picture.is_silhouette);
               if (data.picture && !data.picture.is_silhouette) {
                 pictureUrl = data.picture.data.url;
               }
@@ -387,10 +388,12 @@ export const AuthorizeWithOAuthProviders = extendType({
             facebookId,
             undefined,
             undefined,
+            undefined,
             firstName,
             lastName,
             country,
             city,
+            birthday,
           );
           // @ts-ignore
           if (response.error && !response.user) {
@@ -592,7 +595,7 @@ export const AuthorizeWithOAuthProviders = extendType({
 
         // search for user in DB
         let user: User | undefined = await User.findOne({
-          where: [{ username: instagramUsername }, { email }],
+          where: { email },
           relations: ["account"],
         });
         let signedUp = false;
@@ -609,28 +612,25 @@ export const AuthorizeWithOAuthProviders = extendType({
             instagramUsername,
             undefined,
             undefined,
+            undefined,
             country,
             city,
+            undefined,
           );
 
           // @ts-ignore
           if (response.error && !response.user) {
-            console.log(response);
             // @ts-ignore
             return { error: { code: response.error.code, message: response.error.message } };
           }
-          user = await User.findOne({ where: { email, username: instagramUsername }, relations: ["account"] });
+          user = await User.findOne({ where: { email, instagramUsername }, relations: ["account"] });
         }
 
-        if (!user) {
+        // check again for user & its account
+        if (!user || !user.account) {
           return {
             error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG },
           };
-        }
-
-        // check user's account
-        if (!user.account) {
-          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: "Something went wrong" } };
         }
 
         // pass beach_bar platform to user login details
@@ -656,7 +656,7 @@ export const AuthorizeWithOAuthProviders = extendType({
           user.instagramId = instagramId;
           user.account.isActive = true;
           if (instagramUsername) {
-            user.username = instagramUsername;
+            user.instagramUsername = instagramUsername;
           }
           await user.save();
           await user.account.save();

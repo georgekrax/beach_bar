@@ -1,4 +1,4 @@
-import { arg, booleanArg, extendType, stringArg } from "@nexus/schema";
+import { arg, booleanArg, extendType, intArg, stringArg } from "@nexus/schema";
 import { execute, makePromise } from "apollo-link";
 import { createHash, randomBytes } from "crypto";
 import { KeyType } from "ioredis";
@@ -9,6 +9,8 @@ import { MyContext } from "../../common/myContext";
 import { UrlScalar } from "../../common/urlScalar";
 import { link } from "../../config/apolloLink";
 import errors from "../../constants/errors";
+import { Account } from "../../entity/Account";
+import { City } from "../../entity/City";
 import { Country } from "../../entity/Country";
 import { loginDetailStatus } from "../../entity/LoginDetails";
 import { Platform } from "../../entity/Platform";
@@ -37,7 +39,7 @@ import {
   UserLoginResult,
   UserSignUpResult,
   // eslint-disable-next-line prettier/prettier
-  UserUpdateResult,
+  UserUpdateResult
 } from "./types";
 
 export const UserSignUpAndLoginMutation = extendType({
@@ -83,7 +85,7 @@ export const UserSignUpAndLoginMutation = extendType({
           },
         };
 
-        let hashtagId, hashtagEmail, added, errorCode, errorMessage;
+        let hashtagUser, added, errorCode, errorMessage;
 
         await makePromise(execute(link, operation))
           .then(res => res.data?.signUpUser)
@@ -92,22 +94,50 @@ export const UserSignUpAndLoginMutation = extendType({
               errorCode = data.error.code;
               errorMessage = data.error.message;
             }
-            hashtagId = data.user.id;
-            hashtagEmail = data.user.email;
+            hashtagUser = data.user;
             added = data.added;
           })
           .catch(err => {
             return { error: { message: `Something went wrong: ${err.message}` } };
           });
 
-        if ((errorCode || errorMessage) && errorCode !== errors.CONFLICT && errorMessage !== "User already exists" && !added) {
+        if (
+          (errorCode || errorMessage) &&
+          errorCode !== errors.CONFLICT &&
+          errorMessage !== "User already exists" &&
+          !added &&
+          !hashtagUser
+        ) {
           return { error: { code: errorCode, message: errorMessage } };
         }
-        if (email !== hashtagEmail || hashtagId === "" || hashtagId === " ") {
+        if (email !== hashtagUser.email || hashtagUser.id === "" || hashtagUser.id === " ") {
           return { error: { message: errors.SOMETHING_WENT_WRONG } };
         }
 
-        const response = await signUpUser(hashtagEmail, isPrimaryOwner, redis, hashtagId);
+        let country, city;
+        if (hashtagUser.country && hashtagUser.country.id) {
+          country = await Country.findOne(hashtagUser.country.id);
+        }
+        if (hashtagUser.city && hashtagUser.city.id) {
+          city = await City.findOne(hashtagUser.city.id);
+        }
+
+        const response = await signUpUser(
+          hashtagUser.email,
+          isPrimaryOwner,
+          redis,
+          hashtagUser.id,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          country,
+          city,
+          hashtagUser.birthday,
+        );
         // @ts-ignore
         if (response.error && !response.user) {
           // @ts-ignore
@@ -686,6 +716,9 @@ export const UserCrudMutation = extendType({
           type: EmailScalar,
           required: false,
         }),
+        username: stringArg({
+          required: false,
+        }),
         firstName: stringArg({
           required: false,
         }),
@@ -705,10 +738,26 @@ export const UserCrudMutation = extendType({
           required: false,
           description: "User's birthday in the date format",
         }),
+        countryId: intArg({
+          required: false,
+          description: "The country of user",
+        }),
+        cityId: intArg({
+          required: false,
+          description: "The city or hometown of user",
+        }),
+        address: stringArg({
+          required: false,
+          description: "User's house or office street address",
+        }),
+        zipCode: stringArg({
+          required: false,
+          description: "User's house or office zip code",
+        }),
       },
       resolve: async (
         _,
-        { email, firstName, lastName, imgUrl, personTitle, birthday },
+        { email, username, firstName, lastName, imgUrl, personTitle, birthday, countryId, cityId, address, zipCode },
         { payload, redis }: MyContext,
       ): Promise<UserUpdateType | ErrorType> => {
         if (!payload) {
@@ -726,20 +775,8 @@ export const UserCrudMutation = extendType({
         if (email && (email === "" || email === " ")) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid email address" } };
         }
-        if (firstName && (firstName === "" || firstName === " ")) {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid firstName" } };
-        }
-        if (lastName && (lastName === "" || lastName === " ")) {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid lastName" } };
-        }
         if (imgUrl && (imgUrl === "" || imgUrl === " ")) {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid imgUrl" } };
-        }
-        if (personTitle && (personTitle === "" || personTitle === " ")) {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid personTitle" } };
-        }
-        if (birthday && (birthday === "" || birthday === " ")) {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid birthday" } };
+          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid image (URL)" } };
         }
 
         const user = await User.findOne({
@@ -750,39 +787,104 @@ export const UserCrudMutation = extendType({
           return { error: { code: errors.NOT_FOUND, message: errors.USER_NOT_FOUND_MESSAGE } };
         }
 
+        let isNew = false;
+        if (
+          email !== user.email ||
+          username !== user.username ||
+          firstName !== user.firstName ||
+          lastName !== user.lastName ||
+          imgUrl !== user.account.imgUrl ||
+          personTitle !== user.account.personTitle ||
+          birthday !== user.account.birthday ||
+          countryId !== user.account.countryId ||
+          cityId !== user.account.cityId ||
+          address !== user.account.address ||
+          zipCode !== user.account.zipCode
+        ) {
+          isNew = true;
+        }
+
         try {
-          if (email) {
+          if (email && email.trim().length !== 0) {
             user.email = email;
           }
-          if (firstName) {
+          if (username && username.trim().length === 0) {
+            user.username = undefined;
+          } else if (username) {
+            user.username = username;
+          }
+          if (firstName && firstName.trim().length === 0) {
+            user.firstName = undefined;
+          } else if (firstName) {
             user.firstName = firstName;
           }
-          if (lastName) {
+          if (lastName && lastName.trim().length === 0) {
+            user.lastName = undefined;
+          } else if (lastName) {
             user.lastName = lastName;
           }
-          if (imgUrl) {
-            user.account = imgUrl;
+          if (imgUrl && imgUrl.toString().trim().length === 0) {
+            user.account.imgUrl = undefined;
+          } else if (imgUrl) {
+            user.account.imgUrl = imgUrl;
           }
-          if (personTitle) {
+          if (personTitle && personTitle.trim().length === 0) {
+            user.account.personTitle = undefined;
+          } else if (personTitle) {
             user.account.personTitle = personTitle;
           }
-          if (birthday) {
+          if (birthday && birthday.toString().trim().length === 0) {
+            user.account.birthday = undefined;
+          } else if (birthday) {
             user.account.birthday = birthday;
           }
-          await user.save();
-          await user.account.save();
+          if (address && address.trim().length === 0) {
+            user.account.address = undefined;
+          } else if (address) {
+            user.account.address = address;
+          }
+          if (zipCode && zipCode.trim().length === 0) {
+            user.account.zipCode = undefined;
+          } else if (zipCode) {
+            user.account.zipCode = zipCode;
+          }
+          if (countryId && countryId.toString().trim().length === 0) {
+            user.account.country = undefined;
+          } else if (countryId) {
+            const country = await Country.findOne(countryId);
+            if (country) {
+              user.account.country = country;
+            }
+          }
+          if (cityId && cityId.toString().trim().length === 0) {
+            user.account.city = undefined;
+          } else if (cityId) {
+            const city = await City.findOne(cityId);
+            if (city) {
+              user.account.city = city;
+            }
+          }
+          if (isNew) {
+            await user.save();
+            await user.account.save();
+          }
         } catch (err) {
           return {
-            error: { message: `Something went wrong. ${err}` },
+            error: { message: `Something went wrong: ${err.message}` },
           };
         }
 
         const redisUser = await redis.hgetall(user.id.toString() as KeyType);
         if (!redisUser) {
-          return { error: { message: "Something went wrong" } };
+          return { error: { message: errors.SOMETHING_WENT_WRONG } };
         }
 
-        if (redisUser.hashtag_access_token && redisUser.hashtag_access_token !== "" && redisUser.hashtag_access_token !== " ") {
+        if (
+          redisUser.hashtag_access_token &&
+          redisUser.hashtag_access_token !== "" &&
+          redisUser.hashtag_access_token !== " " &&
+          isNew
+        ) {
           const hashtagAccessToken = redisUser.hashtag_access_token;
           const updateUserOperation = {
             query: updateUserQuery,
@@ -792,6 +894,8 @@ export const UserCrudMutation = extendType({
               lastName: user.lastName,
               pictureUrl: user.account.imgUrl,
               countryId: user.account.countryId,
+              cityId: user.account.cityId,
+              birthday: user.account.birthday,
             },
             context: {
               headers: {
@@ -808,6 +912,7 @@ export const UserCrudMutation = extendType({
           await makePromise(execute(link, updateUserOperation))
             .then(res => res.data?.updateUser)
             .then(data => {
+              console.log(data);
               if (data.error) {
                 errorCode = data.error.code;
                 errorMessage = data.error.message;
@@ -824,7 +929,7 @@ export const UserCrudMutation = extendType({
           }
 
           if (!hashtagUser || String(hashtagUser.id) !== String(user.hashtagId) || !updated) {
-            return { error: { message: "Something went wrong" } };
+            return { error: { message: errors.SOMETHING_WENT_WRONG } };
           }
         }
 
@@ -851,7 +956,7 @@ export const UserCrudMutation = extendType({
           };
         }
 
-        const user = await User.findOne({ where: { id: payload.sub, deletedAt: IsNull() } });
+        const user = await User.findOne({ where: { id: payload.sub, deletedAt: IsNull() }, relations: ["account"] });
         if (!user) {
           return { error: { code: errors.NOT_FOUND, message: errors.USER_NOT_FOUND_MESSAGE } };
         }
@@ -898,11 +1003,11 @@ export const UserCrudMutation = extendType({
         }
 
         try {
+          await getConnection().getRepository(Account).softDelete(String(user.account.id));
+          await getConnection().getRepository(User).softDelete(String(user.id));
+
           // delete the user in Redis too
           await removeUserSessions(user.id, redis);
-
-          await getConnection().getRepository(User).softDelete(String(user.id));
-          await getConnection().getRepository(Account).softDelete(String(user.account.id));
         } catch (err) {
           return { error: { message: `Something went wrong: ${err.message}` } };
         }

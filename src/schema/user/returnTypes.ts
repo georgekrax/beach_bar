@@ -8,20 +8,16 @@ import { AddType, SuccessType, UpdateType } from "../returnTypes";
 export type UserType = {
   id: number;
   email: string;
-  username: string;
-  hashtagId: bigint;
-  googleId: string;
-  facebookId: string;
-  instagramId: string;
-  firstName: string;
-  lastName: string;
-  reviews: BeachBarReview[];
+  username?: string;
+  firstName?: string;
+  lastName?: string;
+  reviews?: BeachBarReview[];
   account?: {
     id: number;
     user: User;
     userId: number;
     personTitle?: string;
-    imgUrl: string;
+    imgUrl?: string;
     birthday?: Date;
     age?: number;
     country?: Country;

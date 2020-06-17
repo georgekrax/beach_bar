@@ -38,28 +38,28 @@ export class Account extends BaseEntity {
   userId: number;
 
   @Column({ name: "person_title", type: "enum", enum: personHonorificTitle, enumName: "person_honorific_title", nullable: true })
-  personTitle: string;
+  personTitle?: string;
 
   @Column({ name: "img_url", type: "text", nullable: true })
-  imgUrl: string;
+  imgUrl?: string;
 
   @Column({ name: "birthday", type: "date", nullable: true })
-  birthday: Date;
+  birthday?: Date;
 
   @Column({ name: "age", type: "smallint", nullable: true })
-  age: number;
+  age?: number;
 
   @Column({ name: "country_id", type: "integer", nullable: true })
-  countryId: number;
+  countryId?: number;
 
   @Column({ name: "city_id", type: "integer", nullable: true })
-  cityId: number;
+  cityId?: number;
 
   @Column("varchar", { length: 100, name: "address", nullable: true })
-  address: string;
+  address?: string;
 
   @Column("varchar", { length: 12, name: "zip_code", nullable: true })
-  zipCode: string;
+  zipCode?: string;
 
   @Column({ name: "is_active", type: "boolean", nullable: true, default: () => false })
   isActive: boolean;
@@ -71,7 +71,7 @@ export class Account extends BaseEntity {
   timestamp: Date;
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
-  deletedAt: Date;
+  deletedAt?: Date;
 
   @OneToOne(() => User, { nullable: false, cascade: ["soft-remove", "recover", "insert", "update"] })
   @JoinColumn({ name: "user_id" })
@@ -79,14 +79,14 @@ export class Account extends BaseEntity {
 
   @ManyToOne(() => Country, country => country.accounts, { nullable: true })
   @JoinColumn({ name: "country_id" })
-  country: Country;
+  country?: Country;
 
   @ManyToOne(() => City, city => city.accounts, { nullable: true })
   @JoinColumn({ name: "city_id" })
-  city: City;
+  city?: City;
 
   @OneToMany(() => UserContactDetails, userContactDetails => userContactDetails.account, { nullable: true })
-  contactDetails: UserContactDetails[];
+  contactDetails?: UserContactDetails[];
 
   @OneToMany(() => LoginDetails, loginDetails => loginDetails.account)
   loginDetails: LoginDetails[];

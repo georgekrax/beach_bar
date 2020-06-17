@@ -6,6 +6,14 @@ const query = gql`
       user {
         id
         email
+        country {
+          id
+        }
+        city {
+          id
+        }
+        birthday
+        age
       }
       added
       error {

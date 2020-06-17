@@ -17,8 +17,8 @@ export const UserAccountType = objectType({
     // @ts-ignore
     t.date("birthday", { nullable: true, description: "User's birthday date" });
     t.int("age", { nullable: true, description: "User's age" });
-    t.string("address", { nullable: true, description: "The address of user" });
-    t.string("zipCode", { nullable: true, description: "The zip code of the address of the user" });
+    t.string("address", { nullable: true, description: "The house of office street address of the user" });
+    t.string("zipCode", { nullable: true, description: "The zip code of the house or office street address of the user" });
     t.field("user", {
       type: UserType,
       description: "The user info of the particular account",

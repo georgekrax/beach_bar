@@ -25,28 +25,31 @@ export class User extends BaseEntity {
   email: string;
 
   @Column("varchar", { length: 35, name: "username", unique: true })
-  username: string;
+  username?: string;
 
   @Column({ name: "token_version", type: "integer", default: () => 0 })
-  tokenVersion?: number;
+  tokenVersion: number;
 
-  @Column({ name: "hashtag_id", type: "bigint", unique: true, nullable: true })
-  hashtagId: bigint;
+  @Column({ name: "hashtag_id", type: "bigint", nullable: true })
+  hashtagId?: bigint;
 
-  @Column("varchar", { length: 255, name: "google_id", unique: true, nullable: true })
-  googleId: string;
+  @Column("varchar", { length: 255, name: "google_id", nullable: true })
+  googleId?: string;
 
-  @Column("varchar", { length: 255, name: "facebook_id", unique: true, nullable: true })
-  facebookId: string;
+  @Column("varchar", { length: 255, name: "facebook_id", nullable: true })
+  facebookId?: string;
 
-  @Column("varchar", { length: 255, name: "instagram_id", unique: true, nullable: true })
-  instagramId: string;
+  @Column("varchar", { length: 255, name: "instagram_id", nullable: true })
+  instagramId?: string;
+
+  @Column("varchar", { length: 35, name: "instagram_username", nullable: true })
+  instagramUsername?: string;
 
   @Column("varchar", { name: "first_name", length: 255, nullable: true })
-  firstName: string;
+  firstName?: string;
 
   @Column("varchar", { name: "last_name", length: 255, nullable: true })
-  lastName: string;
+  lastName?: string;
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Date;
@@ -64,5 +67,5 @@ export class User extends BaseEntity {
   owner?: Owner;
 
   @OneToMany(() => BeachBarReview, beachBarReview => beachBarReview.user)
-  reviews: BeachBarReview[];
+  reviews?: BeachBarReview[];
 }

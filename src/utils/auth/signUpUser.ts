@@ -16,11 +16,13 @@ export const signUpUser = async (
   googleId?: any,
   facebookId?: any,
   instagramId?: any,
+  instagramUsername?: string | any,
   username?: string,
   firstName?: string,
   lastName?: string,
   country?: Country,
   city?: City,
+  birthday?: Date,
 ): Promise<{ user: User } | ErrorType> => {
   const newUser = User.create({
     email,
@@ -28,12 +30,13 @@ export const signUpUser = async (
     googleId,
     facebookId,
     instagramId,
+    instagramUsername,
     username,
     firstName,
     lastName,
   });
 
-  const newUserAccount = Account.create({ country, city });
+  const newUserAccount = Account.create({ country, city, birthday });
 
   try {
     await newUser.save();
