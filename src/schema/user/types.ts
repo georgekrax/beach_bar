@@ -1,6 +1,6 @@
 import { inputObjectType, objectType, unionType } from "@nexus/schema";
-import { BeachBarReviewType } from "../beach_bar/reviewTypes";
-import { UserAccountType } from "./accountTypes";
+import { BeachBarReviewType } from "../beach_bar/review/types";
+import { UserAccountType } from "./account/types";
 
 export const UserType = objectType({
   name: "User",

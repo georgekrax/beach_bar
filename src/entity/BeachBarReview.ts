@@ -17,6 +17,7 @@ import { ReviewVisitType } from "./ReviewVisitType";
 import { User } from "./User";
 
 @Entity({ name: "beach_bar_review", schema: "public" })
+@Check(`"ratingValue" >= 0 AND "ratingValue" <= 10`)
 export class BeachBarReview extends BaseEntity {
   @PrimaryGeneratedColumn({ type: "bigint" })
   id: bigint;
@@ -28,7 +29,6 @@ export class BeachBarReview extends BaseEntity {
   userId: number;
 
   @Column({ type: "smallint", name: "rating_value" })
-  @Check(`"ratingValue" >= 0 AND "ratingValue" <= 10`)
   ratingValue: number;
 
   @Column({ type: "integer", name: "visit_type_id", nullable: true })

@@ -6,15 +6,18 @@ import {
   DeleteDateColumn,
   Entity,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { BeachBarLocation } from "./BeachBarLocation";
+import { BeachBarOwner } from "./BeachBarOwner";
 import { BeachBarRestaurant } from "./BeachBarRestaurant";
 import { BeachBarReview } from "./BeachBarReview";
-import { BeachBarOwner } from "./BeachBarOwner";
 import { ServiceBeachBar } from "./ServiceBeachBar";
 
 @Entity({ name: "beach_bar", schema: "public" })
+@Check(`"avgRating" >= 0 AND "avgRating" <= 10`)
 export class BeachBar extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -26,7 +29,6 @@ export class BeachBar extends BaseEntity {
   description: string;
 
   @Column({ type: "decimal", precision: 3, scale: 1, name: "avg_rating" })
-  @Check(`"avgRating" >= 0 AND "avgRating" <= 10`)
   avgRating: number;
 
   @Column({ type: "boolean", name: "is_active", default: () => false })
@@ -40,6 +42,9 @@ export class BeachBar extends BaseEntity {
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt: Date;
+
+  @OneToOne(() => BeachBarLocation, location => location.beachBar)
+  location: Location;
 
   @OneToMany(() => BeachBarOwner, beachBarOwner => beachBarOwner.beachBar, { nullable: false })
   owners: BeachBarOwner[];

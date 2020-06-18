@@ -1,6 +1,6 @@
 import { objectType } from "@nexus/schema";
 import { UserType } from "../user/types";
-import { BeachBarType } from "./types";
+import { BeachBarType } from "../types";
 
 export const ReviewVisitType = objectType({
   name: "ReviewVisitType",

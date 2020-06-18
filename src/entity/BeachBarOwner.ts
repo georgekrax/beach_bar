@@ -1,24 +1,13 @@
-import {
-  BaseEntity,
-  Column,
-  CreateDateColumn,
-  DeleteDateColumn,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryColumn,
-  Unique,
-  UpdateDateColumn,
-} from "typeorm";
+import { BaseEntity, Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, UpdateDateColumn } from "typeorm";
 import { BeachBar } from "./BeachBar";
 import { User } from "./User";
 
 @Entity({ name: "beach_bar_owner", schema: "public" })
 export class BeachBarOwner extends BaseEntity {
-  @PrimaryColumn({ type: "integer", name: "beach_bar_id" })
+  @Column({ type: "integer", name: "beach_bar_id" })
   beachBarId: number;
 
-  @PrimaryColumn({ type: "integer", name: "user_id" })
+  @Column({ type: "integer", name: "user_id" })
   userId: number;
 
   @Column({ type: "boolean", name: "is_primary", default: () => false })

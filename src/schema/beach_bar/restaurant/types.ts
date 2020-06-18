@@ -1,5 +1,5 @@
 import { objectType } from "@nexus/schema";
-import { BeachBarType } from "./types";
+import { BeachBarType } from "../types";
 
 export const RestaurantMenuCategoryType = objectType({
   name: "RestaurantMenuCategory",

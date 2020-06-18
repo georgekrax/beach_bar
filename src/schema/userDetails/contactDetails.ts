@@ -1,5 +1,5 @@
 import { objectType, unionType } from "@nexus/schema";
-import { UserAccountType } from "../user/accountTypes";
+import { UserAccountType } from "../user/account/types";
 import { CountryType } from "./countryTypes";
 
 export const UserContactDetailsType = objectType({

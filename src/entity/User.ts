@@ -12,8 +12,9 @@ import {
   UpdateDateColumn,
 } from "typeorm";
 import { Account } from "./Account";
-import { BeachBarReview } from "./BeachBarReview";
 import { BeachBarOwner } from "./BeachBarOwner";
+import { BeachBarReview } from "./BeachBarReview";
+import { UserSearch } from "./UserSearch";
 
 @Entity({ name: "user", schema: "public" })
 export class User extends BaseEntity {
@@ -65,6 +66,9 @@ export class User extends BaseEntity {
 
   @OneToMany(() => BeachBarReview, beachBarReview => beachBarReview.user)
   reviews?: BeachBarReview[];
+
+  @OneToMany(() => UserSearch, userSearch => userSearch.user)
+  searches?: UserSearch[];
 
   @OneToMany(() => BeachBarOwner, beachBarOwner => beachBarOwner.user, { nullable: true })
   beachBars: BeachBarOwner[];

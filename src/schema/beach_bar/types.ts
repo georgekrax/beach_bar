@@ -1,8 +1,8 @@
 import { objectType } from "@nexus/schema";
 import { BeachBarOwnerType } from "../owner/types";
-import { BeachBarRestaurantType } from "./restaurantTypes";
-import { BeachBarReviewType } from "./reviewTypes";
-import { BeachBarFeatureType } from "./serviceTypes";
+import { BeachBarRestaurantType } from "./restaurant/types";
+import { BeachBarReviewType } from "./review/types";
+import { BeachBarFeatureType } from "./service/types";
 
 export const BeachBarType = objectType({
   name: "BeachBar",

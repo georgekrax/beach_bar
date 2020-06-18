@@ -1,7 +1,10 @@
 import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Account } from "./Account";
+import { BeachBarLocation } from "./BeachBarLocation";
 import { Country } from "./Country";
 import { LoginDetails } from "./LoginDetails";
+import { Region } from "./Region";
+import { UserSearch } from "./UserSearch";
 
 @Entity({ name: "city", schema: "public" })
 export class City extends BaseEntity {
@@ -20,6 +23,15 @@ export class City extends BaseEntity {
 
   @OneToMany(() => Account, account => account.city)
   accounts: Account[];
+
+  @OneToMany(() => Region, region => region.city)
+  regions: Region[];
+
+  @OneToMany(() => BeachBarLocation, beachBarLocation => beachBarLocation.city)
+  beachBarLocations: BeachBarLocation[];
+
+  @OneToMany(() => UserSearch, userSearch => userSearch.city)
+  userSearches?: UserSearch[];
 
   @OneToMany(() => LoginDetails, loginDetails => loginDetails.city)
   loginDetails: LoginDetails[];
