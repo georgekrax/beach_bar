@@ -50,11 +50,7 @@ export const signUpUser = async (
     return { error: { code: errors.INTERNAL_SERVER_ERROR, message: `Something went wrong: ${err.message}` } };
   }
 
-  if (isPrimaryOwner) {
-    await redis.sadd(`scope:${newUser.id}` as KeyType, scopes.PRIMARY_OWNER);
-  } else {
-    await redis.sadd(`scope:${newUser.id}` as KeyType, scopes.SIMPLE_USER);
-  }
+  await redis.sadd(`scope:${newUser.id}` as KeyType, scopes.SIMPLE_USER);
 
   return { user: newUser };
 };

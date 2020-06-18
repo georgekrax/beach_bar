@@ -135,17 +135,10 @@ router.post("/refresh_token", async (req: express.Request, res: express.Response
     await refreshTokenForHashtagUser(res, user, redis);
   }
 
-  // decode Redis user access_token to get its scopes
-  const decodedAccessTokenPayload: any = decode(redisUser.access_token);
-  if (!decodedAccessTokenPayload) {
-    return res.status(500).send({
-      success: false,
-      accessToken: null,
-      error: "Something went wrong",
-    });
-  }
+  // get user (new) scopes from Redis
+  const scope = await redis.smembers(`scope:${user.id}` as KeyType);
 
-  const newAccessToken = generateAccessToken(user, decodedAccessTokenPayload.scope);
+  const newAccessToken = generateAccessToken(user, scope);
 
   await redis.hset(user.id.toString() as KeyType, "access_token", newAccessToken.token);
 

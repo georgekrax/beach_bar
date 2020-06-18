@@ -1,5 +1,6 @@
 import { decode, sign } from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
+import errors from "../../constants/errors";
 import { GeneratedTokenType } from "../returnTypes";
 import { User } from "./../../entity/User";
 
@@ -13,14 +14,14 @@ export const generateAccessToken = (user: User, scope: string[]): GeneratedToken
       audience: process.env.TOKEN_AUDIENCE!.toString(),
       issuer: process.env.TOKEN_ISSUER!.toString(),
       subject: user.id.toString(),
-      expiresIn: "17 minutes",
+      expiresIn: process.env.ACCESS_TOKEN_EXPIRATION!.toString(),
       jwtid: uuidv4(),
     },
   );
 
   const tokenPayload: any = decode(token);
   if (tokenPayload === null) {
-    throw new Error("Something went wrong");
+    throw new Error(errors.SOMETHING_WENT_WRONG);
   }
   return {
     token,
@@ -42,14 +43,14 @@ export const generateRefreshToken = (user: User): GeneratedTokenType => {
       audience: process.env.TOKEN_AUDIENCE!.toString(),
       issuer: process.env.TOKEN_ISSUER!.toString(),
       subject: user.id.toString(),
-      expiresIn: "180 days",
+      expiresIn: process.env.REFRESH_TOKEN_EXPIRATION!.toString(),
       jwtid: uuidv4(),
     },
   );
 
   const tokenPayload: any = decode(token);
   if (tokenPayload === null) {
-    throw new Error("Something went wrong");
+    throw new Error(errors.SOMETHING_WENT_WRONG);
   }
   return {
     token,

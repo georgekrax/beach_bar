@@ -1,4 +1,4 @@
-import { arg, booleanArg, extendType, intArg, stringArg } from "@nexus/schema";
+import { arg, extendType, intArg, stringArg } from "@nexus/schema";
 import { execute, makePromise } from "apollo-link";
 import { createHash, randomBytes } from "crypto";
 import { KeyType } from "ioredis";
@@ -768,9 +768,6 @@ export const UserCrudMutation = extendType({
 
         if (email && (email === "" || email === " ")) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid email address" } };
-        }
-        if (imgUrl && (imgUrl === "" || imgUrl === " ")) {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid image (URL)" } };
         }
 
         const user = await User.findOne({

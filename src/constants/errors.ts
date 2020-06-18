@@ -21,4 +21,6 @@ export default Object.freeze({
   HASHTAG_NOT_AUTHENTICATED_CODE: "hashtag_not_authenticated",
   INVALID_EMAIL_ADDRESS: "Please provide a valid email address",
   EMPTY_VALUES: "Please provide some values",
+  BEACH_BAR_DOES_NOT_EXIST: "Specified #beach_bar does not exist",
+  USER_DOES_NOT_EXIST: "Specified user does not exist",
 });

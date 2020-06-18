@@ -10,6 +10,10 @@ export const BeachBarOwnerType = objectType({
       nullable: false,
       description: "A boolean that indicates if the owner is the user that also created the #beach_bar & can make modifications",
     });
+    t.boolean("publicInfo", {
+      nullable: false,
+      description: "A boolean that indicates if the owner info (contact details) are allowed to be presented to the public",
+    });
     t.field("beachBar", {
       type: BeachBarType,
       description: "The #beach_bar the user is assigned to as an owner, either as a primary one or not",
@@ -22,6 +26,8 @@ export const BeachBarOwnerType = objectType({
       nullable: false,
       resolve: o => o.user,
     });
+    // @ts-ignore
+    t.datetime("timestamp", { nullable: false, description: "The date and time the owner was added (assigned) to the #beach_bar"})
   },
 });
 
@@ -51,6 +57,37 @@ export const AddBeachBarOwnerResult = unionType({
         return "Error";
       } else {
         return "AddBeachBarOwner";
+      }
+    });
+  },
+});
+
+export const UpdateBeachBarOwnerType = objectType({
+  name: "UpdateBeachBarOwner",
+  description: "Info to be returned when the info of owner of a #beach_bar, are updated",
+  definition(t) {
+    t.field("owner", {
+      type: BeachBarOwnerType,
+      description: "The owner being added & its info",
+      nullable: false,
+      resolve: o => o.owner,
+    });
+    t.boolean("updated", {
+      nullable: false,
+      description: "A boolean that indicates if the owner info have been successfully being updated",
+    });
+  },
+});
+
+export const UpdateBeachBarOwnerResult = unionType({
+  name: "UpdateBeachBarOwnerResult",
+  definition(t) {
+    t.members("UpdateBeachBarOwner", "Error");
+    t.resolveType(item => {
+      if (item.error) {
+        return "Error";
+      } else {
+        return "UpdateBeachBarOwner";
       }
     });
   },

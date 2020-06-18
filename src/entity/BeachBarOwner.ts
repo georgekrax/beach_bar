@@ -13,8 +13,7 @@ import {
 import { BeachBar } from "./BeachBar";
 import { User } from "./User";
 
-@Entity({ name: "owner_beach_bar", schema: "public" })
-@Unique("owner_beach_bar_beach_bar_id_user_id_key", ["beachBarId", "userId"])
+@Entity({ name: "beach_bar_owner", schema: "public" })
 export class BeachBarOwner extends BaseEntity {
   @PrimaryColumn({ type: "integer", name: "beach_bar_id" })
   beachBarId: number;
@@ -24,6 +23,9 @@ export class BeachBarOwner extends BaseEntity {
 
   @Column({ type: "boolean", name: "is_primary", default: () => false })
   isPrimary: boolean;
+
+  @Column({ type: "boolean", name: "public_info", default: () => true })
+  publicInfo: boolean;
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Date;
@@ -39,6 +41,6 @@ export class BeachBarOwner extends BaseEntity {
   beachBar: BeachBar;
 
   @ManyToOne(() => User, user => user.beachBars, { nullable: false })
-  @JoinColumn({ name: "beach_bar_id" })
+  @JoinColumn({ name: "user_id" })
   user: User;
 }
