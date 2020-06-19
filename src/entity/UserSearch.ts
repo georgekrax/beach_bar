@@ -9,6 +9,7 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from "typeorm";
 import { City } from "./City";
 import { Country } from "./Country";
@@ -51,9 +52,6 @@ export class UserSearch extends BaseEntity {
   @Column({ type: "integer", name: "region_id", nullable: true })
   regionId?: number;
 
-  @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
-  timestamp: Date;
-
   @ManyToOne(() => User, user => user.searches, { nullable: false })
   @JoinColumn({ name: "user_id" })
   user: User;
@@ -69,6 +67,12 @@ export class UserSearch extends BaseEntity {
   @ManyToOne(() => Region, region => region.userSearches, { nullable: true })
   @JoinColumn({ name: "region_id" })
   region?: Region;
+
+  @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
+  updatedAt: Date;
+
+  @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
+  timestamp: Date;
 
   @BeforeInsert()
   @BeforeUpdate()

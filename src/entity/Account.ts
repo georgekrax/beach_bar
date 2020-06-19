@@ -64,15 +64,6 @@ export class Account extends BaseEntity {
   @Column({ name: "is_active", type: "boolean", nullable: true, default: () => false })
   isActive: boolean;
 
-  @UpdateDateColumn({ name: "updated_at", type: "timestamptz", default: () => `NOW()` })
-  updatedAt: Date;
-
-  @CreateDateColumn({ name: "timestamp", type: "timestamptz", default: () => `NOW()` })
-  timestamp: Date;
-
-  @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
-  deletedAt?: Date;
-
   @OneToOne(() => User, { nullable: false, cascade: ["soft-remove", "recover", "insert", "update"] })
   @JoinColumn({ name: "user_id" })
   user: User;
@@ -90,6 +81,15 @@ export class Account extends BaseEntity {
 
   @OneToMany(() => LoginDetails, loginDetails => loginDetails.account)
   loginDetails: LoginDetails[];
+
+  @UpdateDateColumn({ name: "updated_at", type: "timestamptz", default: () => `NOW()` })
+  updatedAt: Date;
+
+  @CreateDateColumn({ name: "timestamp", type: "timestamptz", default: () => `NOW()` })
+  timestamp: Date;
+
+  @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
+  deletedAt?: Date;
 
   @BeforeInsert()
   @BeforeUpdate()

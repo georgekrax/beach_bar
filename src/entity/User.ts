@@ -52,15 +52,6 @@ export class User extends BaseEntity {
   @Column("varchar", { name: "last_name", length: 255, nullable: true })
   lastName?: string;
 
-  @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
-  deletedAt?: Date;
-
-  @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
-  updatedAt: Date;
-
-  @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
-  timestamp: Date;
-
   @OneToOne(() => Account, account => account.user, { eager: false })
   account: Account;
 
@@ -72,4 +63,13 @@ export class User extends BaseEntity {
 
   @OneToMany(() => BeachBarOwner, beachBarOwner => beachBarOwner.user, { nullable: true })
   beachBars: BeachBarOwner[];
+
+  @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
+  updatedAt: Date;
+
+  @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
+  timestamp: Date;
+
+  @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
+  deletedAt?: Date;
 }

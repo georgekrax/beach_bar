@@ -8,7 +8,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
   Unique,
-  UpdateDateColumn
+  UpdateDateColumn,
 } from "typeorm";
 import { Account } from "./Account";
 import { Country } from "./Country";
@@ -33,15 +33,6 @@ export class UserContactDetails extends BaseEntity {
   @Column("varchar", { name: "phone_number", length: 20, unique: true, nullable: true })
   phoneNumber: string;
 
-  @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
-  deletedAt: Date;
-
-  @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
-  updatedAt: Date;
-
-  @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
-  timestamp: Date;
-
   @ManyToOne(() => Account, account => account.contactDetails, {
     eager: true,
     nullable: false,
@@ -53,4 +44,13 @@ export class UserContactDetails extends BaseEntity {
   @ManyToOne(() => Country, country => country.userContactDetails, { eager: true, nullable: true })
   @JoinColumn({ name: "country_id" })
   country: Country;
+
+  @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
+  updatedAt: Date;
+
+  @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
+  timestamp: Date;
+
+  @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
+  deletedAt?: Date;
 }

@@ -1,16 +1,17 @@
 import { booleanArg, extendType, intArg } from "@nexus/schema";
 import { KeyType } from "ioredis";
-import { getConnection } from "typeorm";
 import { MyContext } from "../../common/myContext";
 import errors from "../../constants/errors";
 import scopes from "../../constants/scopes";
 import { BeachBar } from "../../entity/BeachBar";
 import { BeachBarOwner } from "../../entity/BeachBarOwner";
 import { User } from "../../entity/User";
+import { arrDiff } from "../../utils/arrDiff";
 import { DeleteType, ErrorType } from "../returnTypes";
 import { DeleteResult } from "../types";
 import { AddBeachBarOwnerType, UpdateBeachBarOwnerType } from "./returnTypes";
 import { AddBeachBarOwnerResult, UpdateBeachBarOwnerResult } from "./types";
+import { getConnection } from "typeorm";
 
 export const OwnerCrudMutation = extendType({
   type: "Mutation",
@@ -242,7 +243,7 @@ export const OwnerCrudMutation = extendType({
             "The user to delete (remove) from the #beach_bar. It should be set to true if a primary owner wants to update another primary owner",
         }),
       },
-      resolve: async (_, { beachBarId, userId }, { payload }: MyContext): Promise<DeleteType | ErrorType | any> => {
+      resolve: async (_, { beachBarId, userId }, { payload, redis }: MyContext): Promise<DeleteType | ErrorType | any> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
@@ -287,6 +288,9 @@ export const OwnerCrudMutation = extendType({
         }
 
         try {
+          const ownerScopes = await redis.smembers(`scope:${owner.userId}` as KeyType);
+          const diff = arrDiff(scopes.SIMPLE_USER, ownerScopes);
+          await redis.srem(`scope:${owner.userId}` as KeyType, diff);
           await getConnection().getRepository(BeachBarOwner).softDelete({ userId: owner.userId, beachBarId });
         } catch (err) {
           return { error: { message: `Something went wrong: ${err.message}` } };

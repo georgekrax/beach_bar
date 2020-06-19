@@ -1,4 +1,14 @@
-import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
+import {
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+  UpdateDateColumn,
+} from "typeorm";
 import { BeachBar } from "./BeachBar";
 import { BeachBarService } from "./BeachBarService";
 
@@ -23,4 +33,13 @@ export class BeachBarFeature extends BaseEntity {
   @ManyToOne(() => BeachBarService, beachBarService => beachBarService.beachBars, { nullable: false })
   @JoinColumn({ name: "service_id" })
   service: BeachBarService;
+
+  @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
+  updatedAt: Date;
+
+  @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
+  timestamp: Date;
+
+  @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
+  deletedAt?: Date;
 }

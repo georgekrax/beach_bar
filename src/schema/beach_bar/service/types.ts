@@ -43,6 +43,8 @@ export const BeachBarFeatureType = objectType({
       description: "A short description about the service",
       resolve: o => o.description,
     });
+    t.datetime("updatedAt", { nullable: false });
+    t.datetime("timestamp", { nullable: false });
   },
 });
 
@@ -72,6 +74,37 @@ export const AddBeachBarFeatureResult = unionType({
         return "Error";
       } else {
         return "AddBeachBarFeature";
+      }
+    });
+  },
+});
+
+export const UpdateBeachBarFeatureType = objectType({
+  name: "UpdateBeachBarFeature",
+  description: "Info to be returned when the info of a feature of a #beach_bar, are updated",
+  definition(t) {
+    t.field("feature", {
+      type: BeachBarFeatureType,
+      description: "The feature that will be updated",
+      nullable: false,
+      resolve: o => o.feature,
+    });
+    t.boolean("updated", {
+      nullable: false,
+      description: "A boolean that indicates if the feature has been successfully updated",
+    });
+  },
+});
+
+export const UpdateBeachBarFeatureResult = unionType({
+  name: "UpdateBeachBarFeatureResult",
+  definition(t) {
+    t.members("UpdateBeachBarFeature", "Error");
+    t.resolveType(item => {
+      if (item.error) {
+        return "Error";
+      } else {
+        return "UpdateBeachBarFeature";
       }
     });
   },

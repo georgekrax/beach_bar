@@ -34,17 +34,8 @@ export class BeachBar extends BaseEntity {
   @Column({ type: "boolean", name: "is_active", default: () => false })
   isActive: boolean;
 
-  @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
-  updatedAt: Date;
-
-  @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
-  timestamp: Date;
-
-  @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
-  deletedAt: Date;
-
   @OneToOne(() => BeachBarLocation, location => location.beachBar)
-  location: Location;
+  location: BeachBarLocation;
 
   @OneToMany(() => BeachBarOwner, beachBarOwner => beachBarOwner.beachBar, { nullable: false })
   owners: BeachBarOwner[];
@@ -57,4 +48,13 @@ export class BeachBar extends BaseEntity {
 
   @OneToMany(() => BeachBarRestaurant, beachBarRestaurant => beachBarRestaurant.beachBar)
   restaurants: BeachBarReview[];
+
+  @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
+  updatedAt: Date;
+
+  @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
+  timestamp: Date;
+
+  @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
+  deletedAt?: Date;
 }

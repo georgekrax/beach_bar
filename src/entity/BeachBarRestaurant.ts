@@ -30,6 +30,13 @@ export class BeachBarRestaurant extends BaseEntity {
   @Column({ type: "boolean", name: "is_active", default: () => false })
   isActive: boolean;
 
+  @ManyToOne(() => BeachBar, beachBar => beachBar.restaurants, { nullable: false })
+  @JoinColumn({ name: "beach_bar_id" })
+  beachBar: BeachBar;
+
+  @OneToMany(() => RestaurantFoodItem, restaurantFoodItem => restaurantFoodItem.restaurant)
+  foodItems: RestaurantFoodItem[];
+
   @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
   updatedAt: Date;
 
@@ -37,12 +44,5 @@ export class BeachBarRestaurant extends BaseEntity {
   timestamp: Date;
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
-  deletedAt: Date;
-
-  @ManyToOne(() => BeachBar, beachBar => beachBar.restaurants, { nullable: false })
-  @JoinColumn({ name: "beach_bar_id" })
-  beachBar: BeachBar;
-
-  @OneToMany(() => RestaurantFoodItem, restaurantFoodItem => restaurantFoodItem.restaurant)
-  foodItems: RestaurantFoodItem[];
+  deletedAt?: Date;
 }

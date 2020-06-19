@@ -26,15 +26,6 @@ export class BeachBarOwner extends BaseEntity {
   @Column({ type: "boolean", name: "public_info", default: () => true })
   publicInfo: boolean;
 
-  @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
-  deletedAt?: Date;
-
-  @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
-  updatedAt: Date;
-
-  @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
-  timestamp: Date;
-
   @ManyToOne(() => BeachBar, beachBar => beachBar.owners, { nullable: false })
   @JoinColumn({ name: "beach_bar_id" })
   beachBar: BeachBar;
@@ -42,4 +33,13 @@ export class BeachBarOwner extends BaseEntity {
   @ManyToOne(() => User, user => user.beachBars, { nullable: false })
   @JoinColumn({ name: "user_id" })
   user: User;
+
+  @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
+  updatedAt: Date;
+
+  @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
+  timestamp: Date;
+
+  @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
+  deletedAt?: Date;
 }

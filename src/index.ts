@@ -136,6 +136,10 @@ const startServer = async (): Promise<any> => {
         }
       }
 
+      if (payload && payload.sub) {
+        payload.sub = parseInt(payload.sub);
+      }
+
       const uaParser = new UAParser(req.headers["user-agent"]);
       return { req, res, payload, redis, uaParser, googleOAuth2Client };
     },
@@ -147,9 +151,7 @@ const startServer = async (): Promise<any> => {
 
   server.applyMiddleware({ app });
 
-  app.listen({ port: process.env.PORT || 4000 }, () =>
-    console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`),
-  );
+  app.listen({ port: process.env.PORT || 4000 }, () => console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`));
 };
 
 startServer();

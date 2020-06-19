@@ -6,7 +6,7 @@ import { UAParser } from "ua-parser-js";
 export interface MyContext {
   req: Request;
   res: Response;
-  payload?: { scope: string[]; iat: number; exp: number; aud: string; iss: string; sub: string; jti: string };
+  payload?: { scope: string[]; iat: number; exp: number; aud: string; iss: string; sub: number; jti: string };
   redis: Redis;
   uaParser: UAParser;
   googleOAuth2Client: OAuth2Client;

@@ -49,15 +49,6 @@ export class BeachBarReview extends BaseEntity {
   @Column({ type: "text", name: "bad_comment", nullable: true })
   badComment: string;
 
-  @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
-  updatedAt: Date;
-
-  @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
-  timestamp: Date;
-
-  @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
-  deletedAt: Date;
-
   @ManyToOne(() => BeachBar, beachBar => beachBar.reviews, { nullable: false, eager: true })
   @JoinColumn({ name: "beach_bar_id" })
   beachBar: BeachBar;
@@ -72,4 +63,13 @@ export class BeachBarReview extends BaseEntity {
 
   @OneToOne(() => ReviewAnswer, reviewAnswer => reviewAnswer.review, { eager: true })
   answer: ReviewAnswer;
+
+  @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
+  updatedAt: Date;
+
+  @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
+  timestamp: Date;
+
+  @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
+  deletedAt: Date;
 }

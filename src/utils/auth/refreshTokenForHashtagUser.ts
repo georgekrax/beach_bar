@@ -84,11 +84,19 @@ export const refreshTokenForHashtagUser = async (res: Response, user: User, redi
     })
     .catch(err => {
       success = false;
-      return res.status(requestStatus as number).send({
-        success: false,
-        accessToken: null,
-        error: `Something went wrong. ${err.message.toString()}`,
-      });
+      if (requestStatus) {
+        return res.status(requestStatus).send({
+          success: false,
+          accessToken: null,
+          error: `Something went wrong. ${err.message.toString()}`,
+        });
+      } else {
+        return res.send({
+          success: false,
+          accessToken: null,
+          error: `Something went wrong. ${err.message.toString()}`,
+        });
+      }
     });
 
   if (!success) {
