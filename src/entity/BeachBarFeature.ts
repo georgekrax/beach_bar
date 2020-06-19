@@ -1,17 +1,26 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, OneToMany } from "typeorm";
-import { ServiceBeachBar } from "./ServiceBeachBar";
+import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
+import { BeachBar } from "./BeachBar";
+import { BeachBarService } from "./BeachBarService";
 
 @Entity({ name: "beach_bar_feature", schema: "public" })
 export class BeachBarFeature extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryColumn({ type: "integer", name: "beach_bar_id" })
+  beachBarId: number;
 
-  @Column("varchar", { length: 255, unique: true, name: "name" })
-  name: string;
+  @PrimaryColumn({ type: "integer", name: "service_id" })
+  serviceId: number;
 
-  @Column({ type: "text", name: "icon_url" })
-  iconUrl: string;
+  @Column({ type: "smallint", name: "quantity", default: () => 1 })
+  quantity: number;
 
-  @OneToMany(() => ServiceBeachBar, serviceBeachBar => serviceBeachBar.beachBar)
-  serviceBeachBar: ServiceBeachBar[];
+  @Column({ type: "text", name: "description", nullable: true })
+  description?: string;
+
+  @ManyToOne(() => BeachBar, beachBar => beachBar.features, { nullable: false })
+  @JoinColumn({ name: "beach_bar_id" })
+  beachBar: BeachBar;
+
+  @ManyToOne(() => BeachBarService, beachBarService => beachBarService.beachBars, { nullable: false })
+  @JoinColumn({ name: "service_id" })
+  service: BeachBarService;
 }

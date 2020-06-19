@@ -37,5 +37,3 @@ export * from "./userDetails/contactDetails";
 export * from "./userDetails/countryTypes";
 //userDetails
 export * from "./userDetails/mutation";
-
-export * from "./userDetails/mutation";

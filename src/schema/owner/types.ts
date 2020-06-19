@@ -26,8 +26,7 @@ export const BeachBarOwnerType = objectType({
       nullable: false,
       resolve: o => o.user,
     });
-    // @ts-ignore
-    t.datetime("timestamp", { nullable: false, description: "The date and time the owner was added (assigned) to the #beach_bar"})
+    t.datetime("timestamp", { nullable: false, description: "The date and time the owner was added (assigned) to the #beach_bar" });
   },
 });
 

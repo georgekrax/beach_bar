@@ -1,19 +1,37 @@
 import { objectType, unionType } from "@nexus/schema";
+import { BeachBarType } from "../types";
 
-export const BeachBarFeatureType = objectType({
-  name: "BeachBarFeature",
-  description: "Represents a #beach_bar's feature (service)",
+export const BeachBarServiceType = objectType({
+  name: "BeachBarService",
+  description: "Represents a service (feature), which a #beach_bar can provide",
   definition(t) {
     t.int("id", {
       nullable: false,
       description: "The ID value of the feature",
-      resolve: o => o.service.id,
     });
-    t.string("name", { nullable: false, description: "The name of the feature", resolve: o => o.service.name });
+    t.string("name", { nullable: false, description: "The name of the feature" });
     t.string("iconUrl", {
       nullable: false,
       description: "The URL value of the icon image of the feature",
-      resolve: o => o.service.iconUrl,
+    });
+  },
+});
+
+export const BeachBarFeatureType = objectType({
+  name: "BeachBarFeature",
+  description: "Represents a #beach_bar's feature (service) & its details",
+  definition(t) {
+    t.field("service", {
+      type: BeachBarServiceType,
+      description: "The feature (service) the #beach_bar provides",
+      nullable: false,
+      resolve: o => o.service,
+    });
+    t.field("beachBar", {
+      type: BeachBarType,
+      description: "The #beach_bar that provides the feature (service)",
+      nullable: false,
+      resolve: o => o.beachBar,
     });
     t.int("quantity", {
       nullable: false,

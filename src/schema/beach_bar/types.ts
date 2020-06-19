@@ -38,11 +38,11 @@ export const BeachBarType = objectType({
       nullable: true,
       resolve: o => o.reviews,
     });
-    t.list.field("services", {
+    t.list.field("features", {
       type: BeachBarFeatureType,
       description: "A list of all the #beach_bar's features",
       nullable: true,
-      resolve: o => o.serviceBeachBar,
+      resolve: o => o.features,
     });
     t.list.field("restaurants", {
       type: BeachBarRestaurantType,

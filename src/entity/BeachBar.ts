@@ -10,11 +10,11 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { BeachBarFeature } from "./BeachBarFeature";
 import { BeachBarLocation } from "./BeachBarLocation";
 import { BeachBarOwner } from "./BeachBarOwner";
 import { BeachBarRestaurant } from "./BeachBarRestaurant";
 import { BeachBarReview } from "./BeachBarReview";
-import { ServiceBeachBar } from "./ServiceBeachBar";
 
 @Entity({ name: "beach_bar", schema: "public" })
 @Check(`"avgRating" >= 0 AND "avgRating" <= 10`)
@@ -49,8 +49,8 @@ export class BeachBar extends BaseEntity {
   @OneToMany(() => BeachBarOwner, beachBarOwner => beachBarOwner.beachBar, { nullable: false })
   owners: BeachBarOwner[];
 
-  @OneToMany(() => ServiceBeachBar, serviceBeachBar => serviceBeachBar.beachBar)
-  serviceBeachBar: ServiceBeachBar[];
+  @OneToMany(() => BeachBarFeature, beachBarFeature => beachBarFeature.beachBar)
+  features: BeachBarFeature[];
 
   @OneToMany(() => BeachBarReview, beachBarReview => beachBarReview.beachBar)
   reviews: BeachBarReview[];

@@ -1,5 +1,5 @@
-import { BeachBarFeature } from "../../../entity/BeachBarFeature";
 import { AddType } from "../../returnTypes";
+import { BeachBarFeature } from "../../../entity/BeachBarFeature";
 
 export type BeachBarFeatureType = {
   feature: BeachBarFeature;
