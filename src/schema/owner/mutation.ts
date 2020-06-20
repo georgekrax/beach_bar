@@ -1,17 +1,17 @@
 import { booleanArg, extendType, intArg } from "@nexus/schema";
 import { KeyType } from "ioredis";
+import { getConnection } from "typeorm";
 import { MyContext } from "../../common/myContext";
 import errors from "../../constants/errors";
 import scopes from "../../constants/scopes";
 import { BeachBar } from "../../entity/BeachBar";
 import { BeachBarOwner } from "../../entity/BeachBarOwner";
-import { User } from "../../entity/User";
+import { Owner } from "../../entity/Owner";
 import { arrDiff } from "../../utils/arrDiff";
 import { DeleteType, ErrorType } from "../returnTypes";
 import { DeleteResult } from "../types";
 import { AddBeachBarOwnerType, UpdateBeachBarOwnerType } from "./returnTypes";
 import { AddBeachBarOwnerResult, UpdateBeachBarOwnerResult } from "./types";
-import { getConnection } from "typeorm";
 
 export const OwnerCrudMutation = extendType({
   type: "Mutation",
@@ -21,13 +21,13 @@ export const OwnerCrudMutation = extendType({
       description: "Add (assign) another owner to a #beach_bar too. Only available for the primary owner of a #beach_bar",
       nullable: false,
       args: {
-        userId: intArg({
-          required: true,
-          description: "The user to add (assign) to the #beach_bar, to become one of its owners",
-        }),
         beachBarId: intArg({
           required: true,
           description: "The ID value of the #beach_bar the owner will be added (assigned) to",
+        }),
+        userId: intArg({
+          required: false,
+          description: "The user to add (assign) to the #beach_bar, to become one of its owners",
         }),
         isPrimary: booleanArg({
           required: false,
@@ -44,81 +44,92 @@ export const OwnerCrudMutation = extendType({
           return {
             error: {
               code: errors.UNAUTHORIZED_CODE,
-              message: "You are not allowed to add 'this' user as an owner of the #beach_bar",
+              message: "You are not allowed to add 'this' owner to the #beach_bar",
             },
           };
         }
-        if (!userId || userId.toString() === ("" || " ")) {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid owner" } };
-        }
-        if (!beachBarId || beachBarId.toString() === ("" || " ")) {
+
+        if (!beachBarId || beachBarId.toString().trim().length === 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid #beach_bar" } };
         }
+        if (userId && userId.toString().trim().length === 0) {
+          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid user" } };
+        }
 
-        const beachBar = await BeachBar.findOne({
-          where: { id: beachBarId },
-          relations: ["owners", "owners.user", "owners.user.account"],
-        });
+        const beachBar = await BeachBar.findOne(beachBarId);
         if (!beachBar) {
-          return {
-            error: { code: errors.CONFLICT, message: errors.BEACH_BAR_DOES_NOT_EXIST },
-          };
+          return { error: { code: errors.CONFLICT, message: errors.BEACH_BAR_DOES_NOT_EXIST } };
         }
 
-        let owner = await BeachBarOwner.findOne({
-          where: { userId: payload.sub, beachBar },
-          relations: ["user", "user.account", "beachBar"],
-        });
-        if (!owner && !payload.scope.includes("beach_bar@crud:beach_bar")) {
-          return { error: { code: errors.CONFLICT, message: errors.SOMETHING_WENT_WRONG } };
-        } else if (!owner && payload.scope.includes("beach_bar@crud:beach_bar")) {
-          const user = await User.findOne({ where: { id: payload.sub }, relations: ["account", "reviews"] });
-          if (!user) {
-            return { error: { code: errors.CONFLICT, message: errors.SOMETHING_WENT_WRONG } };
+        if (!userId) {
+          const owner = await Owner.findOne({
+            where: { userId: payload.sub },
+            relations: ["user", "beachBars", "beachBars.beachBar"],
+          });
+          if (!owner) {
+            return { error: { code: errors.UNAUTHORIZED_CODE, message: errors.YOU_ARE_NOT_AN_OWNER } };
           }
-          owner = await BeachBarOwner.create({
+          const isOwner = await BeachBarOwner.findOne({ owner, beachBar });
+          if (isOwner) {
+            return { error: { code: errors.CONFLICT, message: "User is already an owner of this #beach_bar" } };
+          }
+          const newOwner = BeachBarOwner.create({
             beachBar,
-            user,
-            isPrimary: true,
-          }).save();
+            owner,
+            isPrimary: isPrimary && payload.scope.includes("beach_bar@crud:beach_bar") ? true : false,
+          });
+          try {
+            await newOwner.save();
+            newOwner.timestamp = new Date(Date.now());
+            return {
+              owner: newOwner,
+              added: true,
+            };
+          } catch (err) {
+            return { error: { message: `Something went wrong: ${err.message}` } };
+          }
+        } else if (userId && payload.scope.includes("beach_bar@crud:owner_beach_bar")) {
+          const primaryOwner = await Owner.findOne({
+            where: { userId: payload.sub },
+            relations: ["beachBars", "beachBars.beachBar"],
+          });
+          if (!primaryOwner) {
+            return { error: { code: errors.UNAUTHORIZED_CODE, message: errors.YOU_ARE_NOT_AN_OWNER } };
+          }
+          const primaryBeachBarOwner = await BeachBarOwner.findOne({ owner: primaryOwner, beachBar });
+          if (!primaryBeachBarOwner) {
+            return { error: { code: errors.UNAUTHORIZED_CODE, message: errors.YOU_ARE_NOT_BEACH_BAR_OWNER } };
+          }
+          if (!primaryBeachBarOwner.isPrimary) {
+            return {
+              error: { code: errors.UNAUTHORIZED_CODE, message: "You are not a primary owner, to add a new owner to the #beach_bar" },
+            };
+          }
+          const owner = await Owner.findOne({ where: { userId }, relations: ["user"] });
+          if (!owner) {
+            return { error: { code: errors.CONFLICT, message: errors.USER_OWNER_DOES_NOT_EXIST } };
+          }
+          const isOwner = await BeachBarOwner.findOne({ owner, beachBar });
+          if (isOwner) {
+            return { error: { code: errors.CONFLICT, message: "User is already an owner of this #beach_bar" } };
+          }
+          const newOwner = BeachBarOwner.create({
+            beachBar,
+            owner,
+            isPrimary: isPrimary && payload.scope.includes("beach_bar@crud:beach_bar") ? true : false,
+          });
+          try {
+            await newOwner.save();
+            newOwner.timestamp = new Date(Date.now());
+            return {
+              owner: newOwner,
+              added: true,
+            };
+          } catch (err) {
+            return { error: { message: `Something went wrong: ${err.message}` } };
+          }
         }
-
-        if (!owner || !owner.isPrimary) {
-          return {
-            error: { code: errors.CONFLICT, message: "You are not a primary owner of this #beach_bar" },
-          };
-        }
-
-        const user = await User.findOne({
-          where: { id: userId },
-          relations: ["account", "beachBars", "beachBars.user", "beachBars.beachBar"],
-        });
-        if (!user) {
-          return {
-            error: { code: errors.CONFLICT, message: errors.USER_DOES_NOT_EXIST },
-          };
-        }
-
-        if (user.beachBars && user.beachBars.map(beachBar => beachBar.beachBar.id).includes(beachBar.id)) {
-          return { error: { code: errors.CONFLICT, message: "User is already an owner on 'this' #beach_bar" } };
-        }
-
-        const newOwner = BeachBarOwner.create({
-          beachBar,
-          user,
-          isPrimary: owner.isPrimary && (isPrimary !== undefined || null ? isPrimary : false) ? true : false,
-        });
-
-        try {
-          await newOwner.save();
-        } catch (err) {
-          return { error: { message: `Something went wrong: ${err.message}` } };
-        }
-
-        return {
-          owner: newOwner,
-          added: true,
-        };
+        return { error: { message: errors.SOMETHING_WENT_WRONG } };
       },
     });
     t.field("updateBeachBarOwner", {
@@ -132,7 +143,7 @@ export const OwnerCrudMutation = extendType({
         }),
         userId: intArg({
           required: false,
-          description: "The user to update its info. It should not be null if a primary owner wants to update another owner",
+          description: "The user to update its info. It should not be null or 0, if a primary owner wants to update another owner",
         }),
         publicInfo: booleanArg({
           required: false,
@@ -162,38 +173,55 @@ export const OwnerCrudMutation = extendType({
           };
         }
 
-        if (!beachBarId || beachBarId.toString() === ("" || " ")) {
+        if (!beachBarId || beachBarId.toString().trim().length === 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid #beach_bar" } };
         }
-        if (userId && userId.toString() === ("" || " ")) {
+        if (userId && userId.toString().trim().length === 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid owner" } };
         }
 
-        let owner: BeachBarOwner | undefined;
-        let primaryOwner: BeachBarOwner | undefined;
+        let beachBarOwner: BeachBarOwner | undefined;
+        let primaryBeachBarOwner: BeachBarOwner | undefined;
         if (!userId) {
-          owner = await BeachBarOwner.findOne({
-            where: { userId: payload.sub, beachBarId },
-            relations: ["user", "user.account", "beachBar"],
-          });
+          const owner = await Owner.findOne({ where: { userId: payload.sub }, relations: ["user"] });
           if (!owner) {
+            return { error: { code: errors.CONFLICT, message: "You are not an owner" } };
+          }
+          beachBarOwner = await BeachBarOwner.findOne({
+            where: { owner, beachBarId },
+            relations: ["owner", "owner.user", "beachBar"],
+          });
+          if (!beachBarOwner) {
             return { error: { code: errors.CONFLICT, message: "You are not an owner at this #beach_bar" } };
           }
         } else if (userId) {
-          primaryOwner = await BeachBarOwner.findOne({ userId: payload.sub, beachBarId });
+          const primaryOwner = await Owner.findOne({
+            where: { userId: payload.sub },
+            relations: ["beachBars", "beachBars.beachBar"],
+          });
           if (!primaryOwner) {
+            return { error: { code: errors.CONFLICT, message: "You are not an owner" } };
+          }
+          primaryBeachBarOwner = primaryOwner.beachBars.find(
+            beachBar => beachBar.beachBar.id === beachBarId && (beachBar.deletedAt === null || beachBar.deletedAt === undefined),
+          );
+          if (!primaryBeachBarOwner) {
             return { error: { code: errors.CONFLICT, message: "You are not an owner at this #beach_bar" } };
           }
-          if (!primaryOwner.isPrimary) {
+          if (!primaryBeachBarOwner.isPrimary) {
             return { error: { code: errors.UNAUTHORIZED_CODE, message: "You are not allowed to update 'this' owner info" } };
           }
-          owner = await BeachBarOwner.findOne({
-            where: { userId, beachBarId },
-            relations: ["user", "user.account", "beachBar"],
+          const owner = await Owner.findOne({ userId });
+          if (!owner) {
+            return { error: { code: errors.CONFLICT, message: errors.USER_OWNER_DOES_NOT_EXIST } };
+          }
+          beachBarOwner = await BeachBarOwner.findOne({
+            where: { owner, beachBarId },
+            relations: ["owner", "owner.user", "beachBar"],
           });
         }
 
-        if (!owner) {
+        if (!beachBarOwner) {
           return { error: { message: errors.SOMETHING_WENT_WRONG } };
         }
 
@@ -201,29 +229,29 @@ export const OwnerCrudMutation = extendType({
           if (isPrimary && !payload.scope.includes("beach_bar@crud:beach_bar")) {
             return { error: { code: errors.UNAUTHORIZED_CODE, message: "You are not allowed to make this owner a primary one" } };
           } else if (isPrimary && payload.scope.includes("beach_bar@crud:beach_bar")) {
-            owner.isPrimary = true;
-            await redis.sadd(`scope:${owner.user.id}` as KeyType, [scopes.CRUD_OWNER_BEACH_BAR, scopes.CRUD_BEACH_BAR]);
+            beachBarOwner.isPrimary = true;
+            await redis.sadd(`scope:${beachBarOwner.owner.user.id}` as KeyType, [scopes.CRUD_OWNER_BEACH_BAR, scopes.CRUD_BEACH_BAR]);
           } else {
-            owner.isPrimary = false;
-            await redis.srem(`scope:${owner.user.id}` as KeyType, [scopes.CRUD_OWNER_BEACH_BAR, scopes.CRUD_BEACH_BAR]);
+            beachBarOwner.isPrimary = false;
+            await redis.srem(`scope:${beachBarOwner.owner.user.id}` as KeyType, [scopes.CRUD_OWNER_BEACH_BAR, scopes.CRUD_BEACH_BAR]);
           }
-          if ((publicInfo !== undefined || null) && primaryOwner) {
+          if ((publicInfo !== undefined || null) && primaryBeachBarOwner) {
             return {
               error: {
                 code: errors.UNAUTHORIZED_CODE,
                 message: "You are not allowed to update 'this' owner's public info",
               },
             };
-          } else if ((publicInfo !== undefined || null) && !primaryOwner) {
-            owner.publicInfo = publicInfo;
+          } else if ((publicInfo !== undefined || null) && !primaryBeachBarOwner) {
+            beachBarOwner.publicInfo = publicInfo;
           }
-          await owner.save();
+          await beachBarOwner.save();
         } catch (err) {
           return { error: { message: `Something went wrong: ${err.message}` } };
         }
 
         return {
-          owner,
+          owner: beachBarOwner,
           updated: true,
         };
       },
@@ -240,7 +268,7 @@ export const OwnerCrudMutation = extendType({
         userId: intArg({
           required: false,
           description:
-            "The user to delete (remove) from the #beach_bar. It should be set to true if a primary owner wants to update another primary owner",
+            "The owner with its userId to delete (remove) from the #beach_bar. Its value should not be null or 0, if a primary owner wants to update another primary owner",
         }),
       },
       resolve: async (_, { beachBarId, userId }, { payload, redis }: MyContext): Promise<DeleteType | ErrorType | any> => {
@@ -256,42 +284,59 @@ export const OwnerCrudMutation = extendType({
           };
         }
 
-        if (userId && userId.toString() === ("" || " ")) {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid owner" } };
-        }
-        if (!beachBarId || beachBarId.toString() === ("" || " ")) {
+        if (!beachBarId || beachBarId.toString().trim().length === 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid #beach_bar" } };
         }
+        if (userId && userId.toString().trim().length === 0) {
+          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid owner" } };
+        }
 
-        let owner: BeachBarOwner | undefined;
+        let beachBarOwner: any;
         if (!userId) {
-          owner = await BeachBarOwner.findOne({ userId: payload.sub, beachBarId });
+          const owner = await Owner.findOne({ userId: payload.sub });
           if (!owner) {
+            return { error: { code: errors.CONFLICT, message: "You are not an owner" } };
+          }
+          beachBarOwner = await BeachBarOwner.findOne({ where: { owner, beachBarId }, relations: ["owner", "owner.user"] });
+          if (!beachBarOwner) {
             return { error: { code: errors.CONFLICT, message: "You are not an owner at this #beach_bar" } };
           }
         } else if (userId) {
-          const primaryOwner = await BeachBarOwner.findOne({ userId: payload.sub, beachBarId });
+          const primaryOwner: Owner | undefined = await Owner.findOne({ userId: payload.sub });
           if (!primaryOwner) {
+            return { error: { code: errors.CONFLICT, message: "You are not an owner" } };
+          }
+          const primaryBeachBarOwner = await BeachBarOwner.findOne({
+            owner: primaryOwner,
+            beachBarId,
+          });
+          if (!primaryBeachBarOwner) {
             return { error: { code: errors.CONFLICT, message: "You are not an owner at this #beach_bar" } };
           }
-          if (!primaryOwner.isPrimary) {
+          if (!primaryBeachBarOwner.isPrimary) {
             return { error: { code: errors.UNAUTHORIZED_CODE, message: "You are not allowed to delete 'this' owner" } };
           }
-          owner = await BeachBarOwner.findOne({
-            where: { userId, beachBarId },
-            relations: ["user"],
-          });
+          const owner = await Owner.findOne({ userId });
+          if (!owner) {
+            return { error: { code: errors.CONFLICT, message: errors.USER_OWNER_DOES_NOT_EXIST } };
+          }
+          beachBarOwner = await BeachBarOwner.findOne({ where: { owner, beachBarId }, relations: ["owner", "owner.user"] });
+          if (!beachBarOwner) {
+            return { error: { code: errors.CONFLICT, message: errors.USER_OWNER_DOES_NOT_EXIST } };
+          }
         }
 
-        if (!owner) {
+        if (!beachBarOwner) {
           return { error: { message: errors.SOMETHING_WENT_WRONG } };
         }
 
         try {
-          const ownerScopes = await redis.smembers(`scope:${owner.userId}` as KeyType);
+          const ownerScopes = await redis.smembers(`scope:${beachBarOwner.owner.user.id}` as KeyType);
           const diff = arrDiff(scopes.SIMPLE_USER, ownerScopes);
-          await redis.srem(`scope:${owner.userId}` as KeyType, diff);
-          await getConnection().getRepository(BeachBarOwner).softDelete({ userId: owner.userId, beachBarId });
+          if (diff.length > 0) {
+            await redis.srem(`scope:${beachBarOwner.owner.user.id}` as KeyType, diff);
+          }
+          await getConnection().getRepository(BeachBarOwner).softDelete({ ownerId: beachBarOwner.owner.id, beachBarId });
         } catch (err) {
           return { error: { message: `Something went wrong: ${err.message}` } };
         }

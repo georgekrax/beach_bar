@@ -12,8 +12,8 @@ import {
   UpdateDateColumn,
 } from "typeorm";
 import { Account } from "./Account";
-import { BeachBarOwner } from "./BeachBarOwner";
 import { BeachBarReview } from "./BeachBarReview";
+import { Owner } from "./Owner";
 import { UserSearch } from "./UserSearch";
 
 @Entity({ name: "user", schema: "public" })
@@ -61,8 +61,8 @@ export class User extends BaseEntity {
   @OneToMany(() => UserSearch, userSearch => userSearch.user)
   searches?: UserSearch[];
 
-  @OneToMany(() => BeachBarOwner, beachBarOwner => beachBarOwner.user, { nullable: true })
-  beachBars: BeachBarOwner[];
+  @OneToOne(() => Owner, owner => owner.user)
+  owner: Owner;
 
   @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
   updatedAt: Date;

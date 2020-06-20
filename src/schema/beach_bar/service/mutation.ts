@@ -71,11 +71,15 @@ export const BeachBarFeatureMutation = extendType({
           return { error: { code: errors.CONFLICT, message: errors.BEACH_BAR_DOES_NOT_EXIST } };
         }
 
-        if (beachBar.features.map(feature => feature.service.id).includes(featureId)) {
+        if (
+          beachBar.features.find(
+            feature => feature.service.id === featureId && (feature.deletedAt === null || feature.deletedAt === undefined),
+          )
+        ) {
           return { error: { code: errors.CONFLICT, message: "Feature already exists" } };
         }
 
-        const owner = beachBar.owners.find(owner => owner.user.id === payload.sub);
+        const owner = beachBar.owners.find(owner => owner.owner.user.id === payload.sub);
         if (!owner) {
           return { error: { code: errors.CONFLICT, message: errors.SOMETHING_WENT_WRONG } };
         }
@@ -88,7 +92,7 @@ export const BeachBarFeatureMutation = extendType({
           return { error: { code: errors.CONFLICT, message: "Specified feature does not exist" } };
         }
 
-        const service = await BeachBarFeature.create({
+        const service = BeachBarFeature.create({
           beachBar,
           service: feature,
           quantity,
@@ -99,7 +103,7 @@ export const BeachBarFeatureMutation = extendType({
         } catch (err) {
           return { error: { message: `Something went wrong: ${err.message}` } };
         }
-
+        console.log(service);
         return {
           feature: service,
           added: true,
@@ -165,7 +169,7 @@ export const BeachBarFeatureMutation = extendType({
           return { error: { code: errors.CONFLICT, message: "Specified feature does not exist" } };
         }
 
-        const owner = feature.beachBar.owners.find(owner => owner.user.id === payload.sub);
+        const owner = feature.beachBar.owners.find(owner => owner.owner.user.id === payload.sub);
         if (!owner) {
           return { error: { code: errors.CONFLICT, message: errors.SOMETHING_WENT_WRONG } };
         }
@@ -237,7 +241,7 @@ export const BeachBarFeatureMutation = extendType({
           return { error: { code: errors.CONFLICT, message: "Specified feature does not exist" } };
         }
 
-        const owner = feature.beachBar.owners.find(owner => owner.user.id === payload.sub);
+        const owner = feature.beachBar.owners.find(owner => owner.owner.user.id === payload.sub);
         if (!owner) {
           return { error: { code: errors.CONFLICT, message: errors.SOMETHING_WENT_WRONG } };
         }

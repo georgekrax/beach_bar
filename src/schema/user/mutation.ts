@@ -1,4 +1,4 @@
-import { arg, extendType, intArg, stringArg } from "@nexus/schema";
+import { arg, extendType, intArg, stringArg, booleanArg } from "@nexus/schema";
 import { execute, makePromise } from "apollo-link";
 import { createHash, randomBytes } from "crypto";
 import { KeyType } from "ioredis";
@@ -55,8 +55,13 @@ export const UserSignUpAndLoginMutation = extendType({
           required: true,
           description: "Credential for signing up a user",
         }),
+        isPrimaryOwner: booleanArg({
+          required: false,
+          default: false,
+          description: "Set to true if you want to sign up an owner for a #beach_bar",
+        }),
       },
-      resolve: async (_, { userCredentials }, { redis }: MyContext): Promise<UserSignUpType | ErrorType> => {
+      resolve: async (_, { userCredentials, isPrimaryOwner }, { redis }: MyContext): Promise<UserSignUpType | ErrorType> => {
         const { email, password } = userCredentials;
         if (!email || email === "" || email === " ") {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid email address" } };
@@ -120,6 +125,7 @@ export const UserSignUpAndLoginMutation = extendType({
         const response = await signUpUser(
           hashtagUser.email,
           redis,
+          isPrimaryOwner,
           hashtagUser.id,
           undefined,
           undefined,

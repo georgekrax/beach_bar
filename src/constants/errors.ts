@@ -23,4 +23,7 @@ export default Object.freeze({
   EMPTY_VALUES: "Please provide some values",
   BEACH_BAR_DOES_NOT_EXIST: "Specified #beach_bar does not exist",
   USER_DOES_NOT_EXIST: "Specified user does not exist",
+  USER_OWNER_DOES_NOT_EXIST: "Specified user is not an owner",
+  YOU_ARE_NOT_AN_OWNER: "You are not an owner",
+  YOU_ARE_NOT_BEACH_BAR_OWNER: "You are not an owner at this #beach_bar",
 });

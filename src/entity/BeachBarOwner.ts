@@ -6,19 +6,22 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
 import { BeachBar } from "./BeachBar";
-import { User } from "./User";
+import { Owner } from "./Owner";
 
 @Entity({ name: "beach_bar_owner", schema: "public" })
 export class BeachBarOwner extends BaseEntity {
-  @PrimaryColumn({ type: "integer", name: "beach_bar_id" })
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ type: "integer", name: "beach_bar_id" })
   beachBarId: number;
 
-  @PrimaryColumn({ type: "integer", name: "user_id" })
-  userId: number;
+  @Column({ type: "integer", name: "owner_id" })
+  ownerId: number;
 
   @Column({ type: "boolean", name: "is_primary", default: () => false })
   isPrimary: boolean;
@@ -30,9 +33,9 @@ export class BeachBarOwner extends BaseEntity {
   @JoinColumn({ name: "beach_bar_id" })
   beachBar: BeachBar;
 
-  @ManyToOne(() => User, user => user.beachBars, { nullable: false })
-  @JoinColumn({ name: "user_id" })
-  user: User;
+  @ManyToOne(() => Owner, owner => owner.beachBars, { nullable: false })
+  @JoinColumn({ name: "owner_id" })
+  owner: Owner;
 
   @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
   updatedAt: Date;

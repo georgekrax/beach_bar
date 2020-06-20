@@ -4,12 +4,14 @@ import scopes from "../../constants/scopes";
 import { Account } from "../../entity/Account";
 import { City } from "../../entity/City";
 import { Country } from "../../entity/Country";
+import { Owner } from "../../entity/Owner";
 import { User } from "../../entity/User";
 import { ErrorType } from "../../schema/returnTypes";
 
 export const signUpUser = async (
   email: string,
   redis: Redis,
+  isPrimaryOwner: boolean,
   hashtagId?: bigint,
   googleId?: any,
   facebookId?: any,
@@ -46,11 +48,18 @@ export const signUpUser = async (
       newUserAccount.city = city;
     }
     await newUserAccount.save();
+    if (isPrimaryOwner) {
+      await Owner.create({ user: newUser }).save();
+    }
   } catch (err) {
     return { error: { code: errors.INTERNAL_SERVER_ERROR, message: `Something went wrong: ${err.message}` } };
   }
 
-  await redis.sadd(`scope:${newUser.id}` as KeyType, scopes.SIMPLE_USER);
+  if (isPrimaryOwner) {
+    await redis.sadd(`scope:${newUser.id}` as KeyType, scopes.PRIMARY_OWNER);
+  } else {
+    await redis.sadd(`scope:${newUser.id}` as KeyType, scopes.SIMPLE_USER);
+  }
 
   return { user: newUser };
 };
