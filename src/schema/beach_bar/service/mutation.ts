@@ -1,5 +1,5 @@
 import { extendType, intArg, stringArg } from "@nexus/schema";
-import { getConnection } from "typeorm";
+import { getConnection, getRepository } from "typeorm";
 import { MyContext } from "../../../common/myContext";
 import errors from "../../../constants/errors";
 import { BeachBar } from "../../../entity/BeachBar";
@@ -65,18 +65,30 @@ export const BeachBarFeatureMutation = extendType({
 
         const beachBar = await BeachBar.findOne({
           where: { id: beachBarId },
-          relations: ["owners", "owners.user", "features", "features.service"],
+          relations: ["owners", "owners.owner", "owners.owner.user", "features", "features.service"],
         });
         if (!beachBar) {
           return { error: { code: errors.CONFLICT, message: errors.BEACH_BAR_DOES_NOT_EXIST } };
         }
-
-        if (
-          beachBar.features.find(
-            feature => feature.service.id === featureId && (feature.deletedAt === null || feature.deletedAt === undefined),
-          )
-        ) {
-          return { error: { code: errors.CONFLICT, message: "Feature already exists" } };
+        const feature = beachBar.features.find(feature => feature.service.id === featureId);
+        if (feature) {
+          if (feature.deletedAt) {
+            const result = await getConnection().getRepository(BeachBarFeature).restore({ beachBar, service: feature.service });
+            console.log(result);
+            const beachBarFeature = await BeachBarFeature.findOne({
+              where: { beachBar, service: feature.service },
+              relations: ["beachBar", "service"],
+            });
+            if (!beachBarFeature) {
+              return { error: { message: errors.SOMETHING_WENT_WRONG } };
+            }
+            return {
+              feature: beachBarFeature,
+              added: true,
+            };
+          } else {
+            return { error: { code: errors.CONFLICT, message: "Feature already exists" } };
+          }
         }
 
         const owner = beachBar.owners.find(owner => owner.owner.user.id === payload.sub);
@@ -87,18 +99,19 @@ export const BeachBarFeatureMutation = extendType({
           return { error: { code: errors.UNAUTHORIZED_CODE, message: "You are not allowed to add 'this' feature to the #beach_bar" } };
         }
 
-        const feature = await BeachBarService.findOne(featureId);
-        if (!feature) {
+        const beachBarFeature = await BeachBarService.findOne(featureId);
+        if (!beachBarFeature) {
           return { error: { code: errors.CONFLICT, message: "Specified feature does not exist" } };
         }
 
         const service = BeachBarFeature.create({
           beachBar,
-          service: feature,
+          service: beachBarFeature,
           quantity,
           description,
         });
         try {
+          console.log(service);
           await service.save();
         } catch (err) {
           return { error: { message: `Something went wrong: ${err.message}` } };
@@ -163,7 +176,7 @@ export const BeachBarFeatureMutation = extendType({
 
         const feature = await BeachBarFeature.findOne({
           where: { beachBarId, serviceId: featureId },
-          relations: ["beachBar", "beachBar.owners", "beachBar.owners.user", "service"],
+          relations: ["beachBar", "beachBar.owners", "beachBar.owners.owner", "beachBar.owners.owner.user", "service"],
         });
         if (!feature) {
           return { error: { code: errors.CONFLICT, message: "Specified feature does not exist" } };
@@ -235,7 +248,7 @@ export const BeachBarFeatureMutation = extendType({
 
         const feature = await BeachBarFeature.findOne({
           where: { beachBarId, serviceId: featureId },
-          relations: ["beachBar", "beachBar.owners", "beachBar.owners.user", "service"],
+          relations: ["beachBar", "beachBar.owners", "beachBar.owners.owner", "beachBar.owners.owner.user", "service"],
         });
         if (!feature) {
           return { error: { code: errors.CONFLICT, message: "Specified feature does not exist" } };
@@ -255,9 +268,7 @@ export const BeachBarFeatureMutation = extendType({
         }
 
         try {
-          await getConnection()
-            .getRepository(BeachBarFeature)
-            .softDelete({ beachBarId: feature.beachBarId, serviceId: feature.serviceId });
+          await getRepository(BeachBarFeature).softRemove({ beachBarId, serviceId: featureId });
         } catch (err) {
           return { error: { message: `Something went wrong: ${err.message}` } };
         }

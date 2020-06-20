@@ -1,7 +1,17 @@
-import { BaseEntity, Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn, CreateDateColumn, DeleteDateColumn, OneToMany } from "typeorm";
-import { BeachBar } from "./BeachBar";
-import { User } from "./User";
+import {
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  JoinColumn,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from "typeorm";
 import { BeachBarOwner } from "./BeachBarOwner";
+import { User } from "./User";
 
 @Entity({ name: "owner", schema: "public" })
 export class Owner extends BaseEntity {
