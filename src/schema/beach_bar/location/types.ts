@@ -1,7 +1,7 @@
 import { objectType } from "@nexus/schema";
-import { CountryType } from "../../userDetails/countryTypes";
-import { CityType } from "../../userDetails/cityTypes";
-import { RegionType } from "../../userDetails/regionTypes";
+import { CityType } from "../../details/cityTypes";
+import { CountryType } from "../../details/countryTypes";
+import { RegionType } from "../../details/regionTypes";
 
 export const BeachBarLocationType = objectType({
   name: "BeachBarLocation",

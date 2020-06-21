@@ -34,6 +34,7 @@ export const UsersQuery = extendType({
             "account",
             "account.contactDetails",
             "account.country",
+            "account.country.currency",
             "account.city",
             "beachBars",
             "beachBars.user",

@@ -71,7 +71,7 @@ export const OwnerCrudMutation = extendType({
           }
           const isOwner = await BeachBarOwner.findOne({ owner, beachBar });
           if (isOwner) {
-            return { error: { code: errors.CONFLICT, message: "User is already an owner of this #beach_bar" } };
+            return { error: { code: errors.CONFLICT, message: "You are already an owner at this #beach_bar" } };
           }
           const newOwner = BeachBarOwner.create({
             beachBar,
@@ -185,14 +185,14 @@ export const OwnerCrudMutation = extendType({
         if (!userId) {
           const owner = await Owner.findOne({ where: { userId: payload.sub }, relations: ["user"] });
           if (!owner) {
-            return { error: { code: errors.CONFLICT, message: "You are not an owner" } };
+            return { error: { code: errors.CONFLICT, message: errors.YOU_ARE_NOT_AN_OWNER } };
           }
           beachBarOwner = await BeachBarOwner.findOne({
             where: { owner, beachBarId },
             relations: ["owner", "owner.user", "beachBar"],
           });
           if (!beachBarOwner) {
-            return { error: { code: errors.CONFLICT, message: "You are not an owner at this #beach_bar" } };
+            return { error: { code: errors.CONFLICT, message: errors.YOU_ARE_NOT_BEACH_BAR_OWNER } };
           }
         } else if (userId) {
           const primaryOwner = await Owner.findOne({
@@ -200,13 +200,13 @@ export const OwnerCrudMutation = extendType({
             relations: ["beachBars", "beachBars.beachBar"],
           });
           if (!primaryOwner) {
-            return { error: { code: errors.CONFLICT, message: "You are not an owner" } };
+            return { error: { code: errors.CONFLICT, message: errors.YOU_ARE_NOT_AN_OWNER } };
           }
           primaryBeachBarOwner = primaryOwner.beachBars.find(
             beachBar => beachBar.beachBar.id === beachBarId && (beachBar.deletedAt === null || beachBar.deletedAt === undefined),
           );
           if (!primaryBeachBarOwner) {
-            return { error: { code: errors.CONFLICT, message: "You are not an owner at this #beach_bar" } };
+            return { error: { code: errors.CONFLICT, message: errors.YOU_ARE_NOT_BEACH_BAR_OWNER } };
           }
           if (!primaryBeachBarOwner.isPrimary) {
             return { error: { code: errors.UNAUTHORIZED_CODE, message: "You are not allowed to update 'this' owner info" } };
@@ -295,23 +295,23 @@ export const OwnerCrudMutation = extendType({
         if (!userId) {
           const owner = await Owner.findOne({ userId: payload.sub });
           if (!owner) {
-            return { error: { code: errors.CONFLICT, message: "You are not an owner" } };
+            return { error: { code: errors.CONFLICT, message: errors.YOU_ARE_NOT_AN_OWNER } };
           }
           beachBarOwner = await BeachBarOwner.findOne({ where: { owner, beachBarId }, relations: ["owner", "owner.user"] });
           if (!beachBarOwner) {
-            return { error: { code: errors.CONFLICT, message: "You are not an owner at this #beach_bar" } };
+            return { error: { code: errors.CONFLICT, message: errors.YOU_ARE_NOT_BEACH_BAR_OWNER } };
           }
         } else if (userId) {
           const primaryOwner: Owner | undefined = await Owner.findOne({ userId: payload.sub });
           if (!primaryOwner) {
-            return { error: { code: errors.CONFLICT, message: "You are not an owner" } };
+            return { error: { code: errors.CONFLICT, message: errors.YOU_ARE_NOT_AN_OWNER } };
           }
           const primaryBeachBarOwner = await BeachBarOwner.findOne({
             owner: primaryOwner,
             beachBarId,
           });
           if (!primaryBeachBarOwner) {
-            return { error: { code: errors.CONFLICT, message: "You are not an owner at this #beach_bar" } };
+            return { error: { code: errors.CONFLICT, message: errors.YOU_ARE_NOT_BEACH_BAR_OWNER } };
           }
           if (!primaryBeachBarOwner.isPrimary) {
             return { error: { code: errors.UNAUTHORIZED_CODE, message: "You are not allowed to delete 'this' owner" } };
@@ -322,7 +322,7 @@ export const OwnerCrudMutation = extendType({
           }
           beachBarOwner = await BeachBarOwner.findOne({ where: { owner, beachBarId }, relations: ["owner", "owner.user"] });
           if (!beachBarOwner) {
-            return { error: { code: errors.CONFLICT, message: errors.USER_OWNER_DOES_NOT_EXIST } };
+            return { error: { code: errors.CONFLICT, message: "Specified user is not an owner at this #beach_bar" } };
           }
         }
 

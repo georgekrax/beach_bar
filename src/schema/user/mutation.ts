@@ -1,4 +1,4 @@
-import { arg, extendType, intArg, stringArg, booleanArg } from "@nexus/schema";
+import { arg, booleanArg, extendType, intArg, stringArg } from "@nexus/schema";
 import { execute, makePromise } from "apollo-link";
 import { createHash, randomBytes } from "crypto";
 import { KeyType } from "ioredis";

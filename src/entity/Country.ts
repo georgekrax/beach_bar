@@ -1,4 +1,4 @@
-import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from "typeorm";
 import { Account } from "./Account";
 import { BeachBarLocation } from "./BeachBarLocation";
 import { City } from "./City";
@@ -7,6 +7,7 @@ import { LoginDetails } from "./LoginDetails";
 import { Region } from "./Region";
 import { UserContactDetails } from "./UserContactDetails";
 import { UserSearch } from "./UserSearch";
+import { Currency } from "./Currency";
 
 @Entity({ name: "country", schema: "public" })
 export class Country extends BaseEntity {
@@ -24,6 +25,9 @@ export class Country extends BaseEntity {
 
   @Column("varchar", { length: 5, name: "language_identifier", unique: false })
   languageIdentifier: string;
+
+  @Column({ type: "integer", name: "currency_id" })
+  currencyId: number;
 
   @OneToMany(() => City, city => city.country)
   cities?: City[];
@@ -45,6 +49,10 @@ export class Country extends BaseEntity {
 
   @OneToMany(() => UserSearch, userSearch => userSearch.country)
   userSearches?: UserSearch[];
+
+  @ManyToOne(() => Currency, currency => currency.countries, { nullable: false })
+  @JoinColumn({ name: "currency_id" })
+  currency: Currency;
 
   @OneToMany(() => LoginDetails, loginDetails => loginDetails.country)
   loginDetails?: LoginDetails[];

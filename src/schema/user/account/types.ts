@@ -1,8 +1,8 @@
 import { objectType } from "@nexus/schema";
+import { CityType } from "../../details/cityTypes";
+import { UserContactDetailsType } from "../../details/contactDetails";
+import { CountryType } from "../../details/countryTypes";
 import { UserType } from "../types";
-import { CityType } from "../../userDetails/cityTypes";
-import { UserContactDetailsType } from "../../userDetails/contactDetails";
-import { CountryType } from "../../userDetails/countryTypes";
 
 export const UserAccountType = objectType({
   name: "UserAccount",

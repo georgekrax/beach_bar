@@ -12,7 +12,16 @@ export const BeachBarQuery = extendType({
       resolve: async () => {
         const beachBars = await BeachBar.find({
           where: { isActive: true },
-          relations: ["owners", "reviews", "restaurants", "restaurants.foodItems", "serviceBeachBar"],
+          relations: [
+            "owners",
+            "owners.owner",
+            "owners.owner.user",
+            "owners.owner.user.account",
+            "reviews",
+            "restaurants",
+            "restaurants.foodItems",
+            "serviceBeachBar",
+          ],
         });
         return beachBars;
       },

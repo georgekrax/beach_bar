@@ -17,6 +17,11 @@ export * from "./beach_bar/review/types";
 export * from "./beach_bar/service/mutation";
 export * from "./beach_bar/service/types";
 export * from "./beach_bar/types";
+export * from "./details/cityTypes";
+export * from "./details/contactDetails";
+export * from "./details/countryTypes";
+//details
+export * from "./details/mutation";
 export * from "./mutation";
 export * from "./oauth/mutation";
 // oauth
@@ -32,8 +37,3 @@ export * from "./user/mutation";
 export * from "./user/query";
 export * from "./user/search/types";
 export * from "./user/types";
-export * from "./userDetails/cityTypes";
-export * from "./userDetails/contactDetails";
-export * from "./userDetails/countryTypes";
-//userDetails
-export * from "./userDetails/mutation";

@@ -1,7 +1,7 @@
 import { objectType } from "@nexus/schema";
-import { CityType } from "../../userDetails/cityTypes";
-import { CountryType } from "../../userDetails/countryTypes";
-import { RegionType } from "../../userDetails/regionTypes";
+import { CityType } from "../../details/cityTypes";
+import { CountryType } from "../../details/countryTypes";
+import { RegionType } from "../../details/regionTypes";
 import { UserType } from "../types";
 
 export const UserSearchType = objectType({

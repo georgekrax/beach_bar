@@ -15,6 +15,7 @@ import { BeachBarLocation } from "./BeachBarLocation";
 import { BeachBarOwner } from "./BeachBarOwner";
 import { BeachBarRestaurant } from "./BeachBarRestaurant";
 import { BeachBarReview } from "./BeachBarReview";
+import { Product } from "./Product";
 
 @Entity({ name: "beach_bar", schema: "public" })
 @Check(`"avgRating" >= 0 AND "avgRating" <= 10`)
@@ -45,6 +46,9 @@ export class BeachBar extends BaseEntity {
 
   @OneToMany(() => BeachBarReview, beachBarReview => beachBarReview.beachBar)
   reviews: BeachBarReview[];
+
+  @OneToMany(() => Product, product => product.beachBar)
+  products: Product[];
 
   @OneToMany(() => BeachBarRestaurant, beachBarRestaurant => beachBarRestaurant.beachBar)
   restaurants: BeachBarReview[];

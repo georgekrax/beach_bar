@@ -13,6 +13,7 @@ import {
 } from "typeorm";
 import { Account } from "./Account";
 import { BeachBarReview } from "./BeachBarReview";
+import { Cart } from "./Cart";
 import { Owner } from "./Owner";
 import { UserSearch } from "./UserSearch";
 
@@ -60,6 +61,9 @@ export class User extends BaseEntity {
 
   @OneToMany(() => UserSearch, userSearch => userSearch.user)
   searches?: UserSearch[];
+
+  @OneToMany(() => Cart, cart => cart.user)
+  carts?: Cart[];
 
   @OneToOne(() => Owner, owner => owner.user)
   owner: Owner;
