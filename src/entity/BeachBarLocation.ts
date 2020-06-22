@@ -1,7 +1,7 @@
-import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, JoinColumn, ManyToOne, OneToOne } from "typeorm";
+import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { BeachBar } from "./BeachBar";
-import { Country } from "./Country";
 import { City } from "./City";
+import { Country } from "./Country";
 import { Region } from "./Region";
 
 @Entity({ name: "beach_bar_location", schema: "public" })
@@ -37,6 +37,7 @@ export class BeachBarLocation extends BaseEntity {
   beachBarId: number;
 
   @OneToOne(() => BeachBar, beachBar => beachBar.location, { nullable: false })
+  @JoinColumn({ name: "beach_bar_id" })
   beachBar: BeachBar;
 
   @ManyToOne(() => Country, country => country.beachBarLocations, { nullable: false })

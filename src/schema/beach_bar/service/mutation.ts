@@ -73,8 +73,7 @@ export const BeachBarFeatureMutation = extendType({
         const feature = beachBar.features.find(feature => feature.service.id === featureId);
         if (feature) {
           if (feature.deletedAt) {
-            const result = await getConnection().getRepository(BeachBarFeature).restore({ beachBar, service: feature.service });
-            console.log(result);
+            await getConnection().getRepository(BeachBarFeature).restore({ beachBar, service: feature.service });
             const beachBarFeature = await BeachBarFeature.findOne({
               where: { beachBar, service: feature.service },
               relations: ["beachBar", "service"],

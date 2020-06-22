@@ -49,11 +49,11 @@ export class BeachBarReview extends BaseEntity {
   @Column({ type: "text", name: "bad_comment", nullable: true })
   badComment: string;
 
-  @ManyToOne(() => BeachBar, beachBar => beachBar.reviews, { nullable: false, eager: true })
+  @ManyToOne(() => BeachBar, beachBar => beachBar.reviews, { nullable: false, cascade: ["soft-remove", "recover"] })
   @JoinColumn({ name: "beach_bar_id" })
   beachBar: BeachBar;
 
-  @ManyToOne(() => User, user => user.reviews, { nullable: false, eager: true })
+  @ManyToOne(() => User, user => user.reviews, { nullable: false, cascade: ["soft-remove", "recover"] })
   @JoinColumn({ name: "user_id" })
   user: User;
 
@@ -61,7 +61,7 @@ export class BeachBarReview extends BaseEntity {
   @JoinColumn({ name: "visit_type_id" })
   visitType: ReviewVisitType;
 
-  @OneToOne(() => ReviewAnswer, reviewAnswer => reviewAnswer.review, { eager: true })
+  @OneToOne(() => ReviewAnswer, reviewAnswer => reviewAnswer.review)
   answer: ReviewAnswer;
 
   @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })

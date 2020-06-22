@@ -51,7 +51,7 @@ export class UserSearch extends BaseEntity {
   @Column({ type: "integer", name: "region_id", nullable: true })
   regionId?: number;
 
-  @ManyToOne(() => User, user => user.searches, { nullable: false })
+  @ManyToOne(() => User, user => user.searches, { nullable: false, cascade: ["soft-remove", "recover"] })
   @JoinColumn({ name: "user_id" })
   user: User;
 

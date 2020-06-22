@@ -29,11 +29,11 @@ export class BeachBarOwner extends BaseEntity {
   @Column({ type: "boolean", name: "public_info", default: () => true })
   publicInfo: boolean;
 
-  @ManyToOne(() => BeachBar, beachBar => beachBar.owners, { nullable: false })
+  @ManyToOne(() => BeachBar, beachBar => beachBar.owners, { nullable: false, cascade: ["soft-remove", "recover"] })
   @JoinColumn({ name: "beach_bar_id" })
   beachBar: BeachBar;
 
-  @ManyToOne(() => Owner, owner => owner.beachBars, { nullable: false })
+  @ManyToOne(() => Owner, owner => owner.beachBars, { nullable: false, cascade: ["soft-remove", "recover"] })
   @JoinColumn({ name: "owner_id" })
   owner: Owner;
 

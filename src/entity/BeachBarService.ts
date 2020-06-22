@@ -12,6 +12,6 @@ export class BeachBarService extends BaseEntity {
   @Column({ type: "text", name: "icon_url" })
   iconUrl: string;
 
-  @OneToMany(() => BeachBarFeature, beachBarFeature => beachBarFeature.service)
-  beachBars: BeachBarFeature[];
+  @OneToMany(() => BeachBarFeature, beachBarFeature => beachBarFeature.service, { nullable: true })
+  beachBars?: BeachBarFeature[];
 }

@@ -19,9 +19,9 @@ export class Currency extends BaseEntity {
   @Column("varchar", { length: 10, name: "second_symbol", nullable: true })
   secondSymbol: string;
 
-  @OneToMany(() => Country, country => country.currency)
-  countries: Country[];
+  @OneToMany(() => Country, country => country.currency, { nullable: true })
+  countries?: Country[];
 
-  @OneToMany(() => Product, product => product.currency)
-  products: Product[];
+  @OneToMany(() => Product, product => product.currency, { nullable: true })
+  products?: Product[];
 }

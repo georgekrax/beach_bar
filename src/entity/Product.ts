@@ -8,14 +8,16 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  // eslint-disable-next-line prettier/prettier
   UpdateDateColumn,
 } from "typeorm";
 import { BeachBar } from "./BeachBar";
+import { BundleProductComponent } from "./BundleProductComponent";
 import { CartProduct } from "./CartProduct";
 import { Currency } from "./Currency";
 import { ProductCouponCode } from "./ProductCouponCode";
-import { ProductType } from "./ProductType";
 import { ProductVoucherCampaign } from "./ProductVoucherCampaign";
+import { ProductCategory } from "./ProductCategory";
 
 @Entity({ name: "product", schema: "public" })
 export class Product extends BaseEntity {
@@ -25,11 +27,14 @@ export class Product extends BaseEntity {
   @Column("varchar", { length: 120, name: "name" })
   name: string;
 
-  @Column({ type: "integer", name: "type_id" })
-  typeId: number;
+  @Column({ type: "integer", name: "category_id" })
+  categoryId: number;
 
   @Column({ type: "integer", name: "beach_bar_id" })
   beachBarId: number;
+
+  @Column({ type: "text", name: "description", nullable: true })
+  description?: string;
 
   @Column({ type: "decimal", precision: 5, scale: 2 })
   price: number;
@@ -40,17 +45,23 @@ export class Product extends BaseEntity {
   @Column({ type: "boolean", name: "is_active", default: () => true })
   isActive: boolean;
 
+  @Column({ type: "boolean", name: "is_individual" })
+  isIndividual: boolean;
+
   @ManyToOne(() => Currency, currency => currency.products, { nullable: false })
   @JoinColumn({ name: "currency_id" })
   currency: Currency;
 
-  @ManyToOne(() => BeachBar, beachBar => beachBar.products, { nullable: false })
+  @ManyToOne(() => BeachBar, beachBar => beachBar.products, { nullable: false, cascade: ["soft-remove", "recover"] })
   @JoinColumn({ name: "beach_bar_id" })
   beachBar: BeachBar;
 
-  @ManyToOne(() => ProductType, productType => productType.products, { nullable: false })
-  @JoinColumn({ name: "type_id" })
-  type: ProductType;
+  @ManyToOne(() => ProductCategory, productCategory => productCategory.products, { nullable: false })
+  @JoinColumn({ name: "category_id" })
+  category: ProductCategory;
+
+  @OneToMany(() => BundleProductComponent, bundleProductComponent => bundleProductComponent.product)
+  components: BundleProductComponent[];
 
   @OneToMany(() => CartProduct, cartProduct => cartProduct.product, { nullable: true })
   carts?: CartProduct[];

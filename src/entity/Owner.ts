@@ -21,7 +21,7 @@ export class Owner extends BaseEntity {
   @Column({ type: "integer", name: "user_id" })
   userId: number;
 
-  @OneToOne(() => User, user => user.owner, { nullable: false })
+  @OneToOne(() => User, user => user.owner, { nullable: false, cascade: ["soft-remove", "recover"] })
   @JoinColumn({ name: "user_id" })
   user: User;
 

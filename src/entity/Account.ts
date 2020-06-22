@@ -64,7 +64,7 @@ export class Account extends BaseEntity {
   @Column({ name: "is_active", type: "boolean", nullable: true, default: () => false })
   isActive: boolean;
 
-  @OneToOne(() => User, { nullable: false, cascade: ["soft-remove", "recover", "insert", "update"] })
+  @OneToOne(() => User, { nullable: false, cascade: ["soft-remove", "recover"] })
   @JoinColumn({ name: "user_id" })
   user: User;
 
@@ -79,8 +79,8 @@ export class Account extends BaseEntity {
   @OneToMany(() => UserContactDetails, userContactDetails => userContactDetails.account, { nullable: true })
   contactDetails?: UserContactDetails[];
 
-  @OneToMany(() => LoginDetails, loginDetails => loginDetails.account)
-  loginDetails: LoginDetails[];
+  @OneToMany(() => LoginDetails, loginDetails => loginDetails.account, { nullable: true })
+  loginDetails?: LoginDetails[];
 
   @UpdateDateColumn({ name: "updated_at", type: "timestamptz", default: () => `NOW()` })
   updatedAt: Date;

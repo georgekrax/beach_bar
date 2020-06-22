@@ -38,7 +38,7 @@ export class BeachBar extends BaseEntity {
   @OneToOne(() => BeachBarLocation, location => location.beachBar)
   location: BeachBarLocation;
 
-  @OneToMany(() => BeachBarOwner, beachBarOwner => beachBarOwner.beachBar, { nullable: false })
+  @OneToMany(() => BeachBarOwner, beachBarOwner => beachBarOwner.beachBar)
   owners: BeachBarOwner[];
 
   @OneToMany(() => BeachBarFeature, beachBarFeature => beachBarFeature.beachBar)

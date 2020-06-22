@@ -24,7 +24,7 @@ export class Cart extends BaseEntity {
   @Column({ type: "decimal", precision: 12, scale: 2 })
   total: number;
 
-  @ManyToOne(() => User, user => user.carts)
+  @ManyToOne(() => User, user => user.carts, { nullable: true, cascade: ["soft-remove", "recover"] })
   @JoinColumn({ name: "user_id" })
   user?: User;
 

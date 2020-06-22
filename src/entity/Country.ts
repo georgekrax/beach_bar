@@ -1,13 +1,14 @@
-import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from "typeorm";
+import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Account } from "./Account";
 import { BeachBarLocation } from "./BeachBarLocation";
+import { Card } from "./Card";
 import { City } from "./City";
 import { CountryFlagIcon } from "./CountryFlagIcon";
+import { Currency } from "./Currency";
 import { LoginDetails } from "./LoginDetails";
 import { Region } from "./Region";
 import { UserContactDetails } from "./UserContactDetails";
 import { UserSearch } from "./UserSearch";
-import { Currency } from "./Currency";
 
 @Entity({ name: "country", schema: "public" })
 export class Country extends BaseEntity {
@@ -35,7 +36,7 @@ export class Country extends BaseEntity {
   @OneToMany(() => Account, account => account.country)
   accounts?: Account[];
 
-  @OneToMany(() => CountryFlagIcon, countryFlagIcon => countryFlagIcon.country, { eager: true, nullable: false })
+  @OneToMany(() => CountryFlagIcon, countryFlagIcon => countryFlagIcon.country, { nullable: false })
   flagIcons: CountryFlagIcon[];
 
   @OneToMany(() => UserContactDetails, userContactDetails => userContactDetails.country)
@@ -49,6 +50,9 @@ export class Country extends BaseEntity {
 
   @OneToMany(() => UserSearch, userSearch => userSearch.country)
   userSearches?: UserSearch[];
+
+  @OneToMany(() => Card, card => card.country, { nullable: true })
+  cards?: Card[];
 
   @ManyToOne(() => Currency, currency => currency.countries, { nullable: false })
   @JoinColumn({ name: "currency_id" })

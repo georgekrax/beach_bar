@@ -26,4 +26,5 @@ export default Object.freeze({
   USER_OWNER_DOES_NOT_EXIST: "Specified user is not an owner",
   YOU_ARE_NOT_AN_OWNER: "You are not an owner",
   YOU_ARE_NOT_BEACH_BAR_OWNER: "You are not an owner at this #beach_bar",
+  YOU_ARE_NOT_BEACH_BAR_PRIMARY_OWNER: "You are not a primary owner at this #beach_bar",
 });

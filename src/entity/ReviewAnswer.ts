@@ -1,4 +1,14 @@
-import { BaseEntity, Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn, CreateDateColumn, DeleteDateColumn } from "typeorm";
+import {
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from "typeorm";
 import { BeachBarReview } from "./BeachBarReview";
 
 @Entity({ name: "review_answer", schema: "public" })
@@ -12,7 +22,7 @@ export class ReviewAnswer extends BaseEntity {
   @Column({ type: "text", name: "body" })
   body: string;
 
-  @OneToOne(() => BeachBarReview, beachBarReview => beachBarReview.answer, { nullable: false })
+  @OneToOne(() => BeachBarReview, beachBarReview => beachBarReview.answer, { nullable: false, cascade: ["soft-remove", "recover"] })
   @JoinColumn({ name: "review_id" })
   review: BeachBarReview;
 

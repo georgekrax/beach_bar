@@ -1,4 +1,14 @@
-import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn, CreateDateColumn, DeleteDateColumn } from "typeorm";
+import {
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from "typeorm";
 import { BeachBarRestaurant } from "./BeachBarRestaurant";
 import { RestaurantMenuCategory } from "./RestaurantMenuCategory";
 
@@ -22,13 +32,15 @@ export class RestaurantFoodItem extends BaseEntity {
   @Column({ type: "integer", name: "restaurant_id" })
   restaurantId: number;
 
-  @ManyToOne(() => BeachBarRestaurant, beachBarRestaurant => beachBarRestaurant.foodItems, { nullable: false })
+  @ManyToOne(() => BeachBarRestaurant, beachBarRestaurant => beachBarRestaurant.foodItems, {
+    nullable: false,
+    cascade: ["soft-remove", "recover"],
+  })
   @JoinColumn({ name: "restaurant_id" })
   restaurant: BeachBarRestaurant;
 
   @ManyToOne(() => RestaurantMenuCategory, restaurantMenuCategory => restaurantMenuCategory.foodItems, {
     nullable: false,
-    eager: true,
   })
   @JoinColumn({ name: "menu_category_id" })
   menuCategory: RestaurantMenuCategory;

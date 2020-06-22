@@ -23,11 +23,11 @@ export class CartProduct extends BaseEntity {
   @Column({ type: "smallint", name: "quantity", default: () => 1 })
   quantity: number;
 
-  @ManyToOne(() => Cart, cart => cart.products)
+  @ManyToOne(() => Cart, cart => cart.products, { nullable: false, cascade: ["soft-remove", "recover"] })
   @JoinColumn({ name: "cart_id" })
   cart: Cart;
 
-  @ManyToOne(() => Product, product => product.carts)
+  @ManyToOne(() => Product, product => product.carts, { nullable: false, cascade: ["soft-remove", "recover"] })
   @JoinColumn({ name: "product_id" })
   product: Product;
 

@@ -21,18 +21,18 @@ export class City extends BaseEntity {
   @JoinColumn({ name: "country_id" })
   country: Country;
 
-  @OneToMany(() => Account, account => account.city)
-  accounts: Account[];
+  @OneToMany(() => Account, account => account.city, { nullable: true })
+  accounts?: Account[];
 
-  @OneToMany(() => Region, region => region.city)
-  regions: Region[];
+  @OneToMany(() => Region, region => region.city, { nullable: true })
+  regions?: Region[];
 
-  @OneToMany(() => BeachBarLocation, beachBarLocation => beachBarLocation.city)
-  beachBarLocations: BeachBarLocation[];
+  @OneToMany(() => BeachBarLocation, beachBarLocation => beachBarLocation.city, { nullable: true })
+  beachBarLocations?: BeachBarLocation[];
 
-  @OneToMany(() => UserSearch, userSearch => userSearch.city)
+  @OneToMany(() => UserSearch, userSearch => userSearch.city, { nullable: true })
   userSearches?: UserSearch[];
 
-  @OneToMany(() => LoginDetails, loginDetails => loginDetails.city)
+  @OneToMany(() => LoginDetails, loginDetails => loginDetails.city, { nullable: true })
   loginDetails: LoginDetails[];
 }

@@ -80,7 +80,7 @@ export const OwnerCrudMutation = extendType({
           });
           try {
             await newOwner.save();
-            newOwner.timestamp = new Date(Date.now());
+
             return {
               owner: newOwner,
               added: true,
@@ -120,7 +120,7 @@ export const OwnerCrudMutation = extendType({
           });
           try {
             await newOwner.save();
-            newOwner.timestamp = new Date(Date.now());
+
             return {
               owner: newOwner,
               added: true,

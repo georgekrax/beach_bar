@@ -4,7 +4,6 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  Index,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -14,6 +13,7 @@ import {
 import { Account } from "./Account";
 import { BeachBarReview } from "./BeachBarReview";
 import { Cart } from "./Cart";
+import { Customer } from "./Customer";
 import { Owner } from "./Owner";
 import { UserSearch } from "./UserSearch";
 
@@ -23,7 +23,6 @@ export class User extends BaseEntity {
   id: number;
 
   @Column("varchar", { name: "email", length: 255 })
-  @Index({ where: `"deletedAt" IS NULL`, unique: true })
   email: string;
 
   @Column("varchar", { length: 35, name: "username", unique: true })
@@ -53,7 +52,7 @@ export class User extends BaseEntity {
   @Column("varchar", { name: "last_name", length: 255, nullable: true })
   lastName?: string;
 
-  @OneToOne(() => Account, account => account.user, { eager: false })
+  @OneToOne(() => Account, account => account.user)
   account: Account;
 
   @OneToMany(() => BeachBarReview, beachBarReview => beachBarReview.user)
@@ -67,6 +66,9 @@ export class User extends BaseEntity {
 
   @OneToOne(() => Owner, owner => owner.user)
   owner: Owner;
+
+  @OneToOne(() => Customer, customer => customer.user)
+  customer?: Customer;
 
   @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
   updatedAt: Date;

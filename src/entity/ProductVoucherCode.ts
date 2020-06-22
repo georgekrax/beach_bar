@@ -21,7 +21,10 @@ export class ProductVoucherCode extends BaseEntity {
   @Column({ type: "integer", name: "campaign_id" })
   campaignId: number;
 
-  @ManyToOne(() => ProductVoucherCampaign, productVoucherCampaign => productVoucherCampaign.voucherCodes, { nullable: false })
+  @ManyToOne(() => ProductVoucherCampaign, productVoucherCampaign => productVoucherCampaign.voucherCodes, {
+    nullable: false,
+    cascade: ["soft-remove", "recover"],
+  })
   @JoinColumn({ name: "campaign_id" })
   campaign: ProductVoucherCampaign;
 

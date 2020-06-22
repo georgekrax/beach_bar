@@ -18,7 +18,7 @@ export class VoteTag extends BaseEntity {
   @Column({ type: "integer", name: "total_votes", nullable: true })
   totalVotes: number;
 
-  @OneToOne(() => VoteCategory, voteCategory => voteCategory.voteTag, { nullable: false })
+  @OneToOne(() => VoteCategory, voteCategory => voteCategory.voteTag, { nullable: false, cascade: ["soft-remove", "recover"] })
   @JoinColumn({ name: "category_id" })
   category: VoteCategory;
 }

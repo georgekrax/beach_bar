@@ -30,7 +30,7 @@ export class BeachBarRestaurant extends BaseEntity {
   @Column({ type: "boolean", name: "is_active", default: () => false })
   isActive: boolean;
 
-  @ManyToOne(() => BeachBar, beachBar => beachBar.restaurants, { nullable: false })
+  @ManyToOne(() => BeachBar, beachBar => beachBar.restaurants, { nullable: false, cascade: ["soft-remove", "recover"] })
   @JoinColumn({ name: "beach_bar_id" })
   beachBar: BeachBar;
 

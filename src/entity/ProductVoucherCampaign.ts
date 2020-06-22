@@ -39,7 +39,7 @@ export class ProductVoucherCampaign extends BaseEntity {
   @Column({ type: "timestamptz", name: "valid_until", nullable: true })
   validUntil?: Date;
 
-  @ManyToOne(() => Product, product => product.voucherCampaigns, { nullable: false })
+  @ManyToOne(() => Product, product => product.voucherCampaigns, { nullable: false, cascade: ["soft-remove", "recover"] })
   @JoinColumn({ name: "product_id" })
   product: Product;
 

@@ -34,14 +34,13 @@ export class UserContactDetails extends BaseEntity {
   phoneNumber: string;
 
   @ManyToOne(() => Account, account => account.contactDetails, {
-    eager: true,
     nullable: false,
-    cascade: ["soft-remove", "remove", "recover"],
+    cascade: ["soft-remove", "recover"],
   })
   @JoinColumn({ name: "account_id" })
   account: Account;
 
-  @ManyToOne(() => Country, country => country.userContactDetails, { eager: true, nullable: true })
+  @ManyToOne(() => Country, country => country.userContactDetails, { nullable: true })
   @JoinColumn({ name: "country_id" })
   country: Country;
 

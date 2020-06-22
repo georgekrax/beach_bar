@@ -26,7 +26,7 @@ export class BeachBarFeature extends BaseEntity {
   @Column({ type: "text", name: "description", nullable: true })
   description?: string;
 
-  @ManyToOne(() => BeachBar, beachBar => beachBar.features, { nullable: false })
+  @ManyToOne(() => BeachBar, beachBar => beachBar.features, { nullable: false, cascade: ["soft-remove", "recover"] })
   @JoinColumn({ name: "beach_bar_id" })
   beachBar: BeachBar;
 
