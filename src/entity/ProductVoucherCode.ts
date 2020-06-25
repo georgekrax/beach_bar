@@ -8,6 +8,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";
+import { softRemove } from "../utils/softRemove";
 import { ProductVoucherCampaign } from "./ProductVoucherCampaign";
 
 @Entity({ name: "product_voucher_code", schema: "public" })
@@ -33,4 +34,8 @@ export class ProductVoucherCode extends BaseEntity {
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Date;
+
+  async softRemove(): Promise<any> {
+    await softRemove(ProductVoucherCode, { id: this.id });
+  }
 }

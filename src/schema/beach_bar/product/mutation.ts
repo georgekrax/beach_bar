@@ -4,12 +4,15 @@ import { MyContext } from "../../../common/myContext";
 import errors from "../../../constants/errors";
 import { BeachBar } from "../../../entity/BeachBar";
 import { BeachBarOwner } from "../../../entity/BeachBarOwner";
-import { BundleProductComponent } from "../../../entity/BundleProductComponent";
 import { Currency } from "../../../entity/Currency";
 import { Product } from "../../../entity/Product";
 import { ProductCategory } from "../../../entity/ProductCategory";
+import { ProductPriceHistory } from "../../../entity/ProductPriceHistory";
+import { checkMinimumProductPrice } from "../../../utils/beach_bar/checkMinimumProductPrice";
+import { createProductComponents } from "../../../utils/beach_bar/createProductComponents";
 import { checkScopes } from "../../../utils/checkScopes";
-import { ErrorType } from "../../returnTypes";
+import { DeleteType, ErrorType } from "../../returnTypes";
+import { DeleteResult } from "../../types";
 import { AddProductType, UpdateProductType } from "./returnTypes";
 import { AddProductResult, UpdateProductResult } from "./types";
 
@@ -31,7 +34,7 @@ export const ProductCrudMutation = extendType({
         }),
         categoryId: intArg({ required: true, description: "The ID value of the category of the product" }),
         price: floatArg({ required: true, description: "The price of the product" }),
-        currencyId: intArg({ required: false, description: "The ID value of the currency of the product's price", default: 1 }),
+        currencyId: intArg({ required: true, description: "The ID value of the currency of the product's price", default: 1 }),
         isActive: booleanArg({
           required: false,
           description: "A boolean that indicates if the product is active & can be purchased by a user or a customer",
@@ -64,16 +67,16 @@ export const ProductCrudMutation = extendType({
         if (!categoryId || categoryId.toString().trim().length === 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid product category" } };
         }
-        if (!price || price.toString().trim().length === 0) {
+        if (price === null || price === undefined || price.toString().trim().length === 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid price" } };
         }
-        if (currencyId && currencyId.toString().trim().length === 0) {
+        if (!currencyId || currencyId.toString().trim().length === 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid currency" } };
         }
 
         const beachBar = await BeachBar.findOne({
           where: { id: beachBarId },
-          relations: ["products"],
+          relations: ["entryFees"],
         });
         if (!beachBar) {
           return { error: { code: errors.CONFLICT, message: errors.BEACH_BAR_DOES_NOT_EXIST } };
@@ -101,6 +104,12 @@ export const ProductCrudMutation = extendType({
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provided a valid product category" } };
         }
 
+        try {
+          await checkMinimumProductPrice(price, productCategory, beachBar, currencyId);
+        } catch (err) {
+          return { error: { code: errors.INVALID_ARGUMENTS, message: err.message } };
+        }
+
         const newProduct = Product.create({
           name,
           beachBar,
@@ -113,10 +122,9 @@ export const ProductCrudMutation = extendType({
 
         try {
           await newProduct.save();
+          await createProductComponents(newProduct, newProduct.category, false);
 
-          productCategory.productComponents.forEach(async productComponent => {
-            await BundleProductComponent.create({ product: newProduct, component: productComponent }).save();
-          });
+          await ProductPriceHistory.create({ product: newProduct, owner: owner.owner, newPrice: newProduct.price }).save();
         } catch (err) {
           if (err.message === 'duplicate key value violates unique constraint "product_name_beach_bar_id_key"') {
             const product = await Product.findOne({
@@ -190,7 +198,7 @@ export const ProductCrudMutation = extendType({
 
         const product = await Product.findOne({
           where: { id: productId },
-          relations: ["beachBar", "currency", "category", "category.productComponents", "components"],
+          relations: ["beachBar", "beachBar.entryFees", "currency", "category", "category.productComponents"],
         });
         if (!product) {
           return { error: { code: errors.CONFLICT, message: "Specified product does not exist" } };
@@ -214,41 +222,120 @@ export const ProductCrudMutation = extendType({
         }
 
         try {
-          if (price && price >= 0.5 && product.currency.isoCode === "EUR" && currencyId === 1) {
+          if (
+            (price !== null || price !== undefined) &&
+            price.toString().trim().length !== 0 &&
+            checkScopes(payload, ["beach_bar@crud:beach_bar", "beach_bar@crud:product"])
+          ) {
+            try {
+              await checkMinimumProductPrice(price, product.category, product.beachBar, currencyId ? currencyId : product.currencyId);
+            } catch (err) {
+              throw new Error(err.message);
+            }
             product.price = price;
-          } else if (price && price <= 0.5) {
-            return { error: { code: errors.INVALID_ARGUMENTS, message: "You should provide a price greater than 0.50 EUR" } };
+            await ProductPriceHistory.create({ product, owner: owner.owner, newPrice: price }).save();
           }
           if (currencyId && currencyId !== product.currencyId && currencyId.toString().trim().length !== 0) {
-            const currency = await Currency.findOne(currencyId);
-            if (currency) {
-              product.currency = currency;
-            } else {
-              return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid currency" } };
+            const currency = await Currency.findOne(this.currencyId);
+            if (!currency) {
+              throw new Error("Please provide a valid currency");
             }
+            product.currency = currency;
           }
           if (categoryId && categoryId !== product.categoryId && categoryId.toString().trim().length !== 0) {
             const category = await ProductCategory.findOne({ where: { id: categoryId }, relations: ["productComponents"] });
             if (category) {
               product.category = category;
-              category.productComponents.forEach(async productComponent => {
-                const bundleProductComponents = await BundleProductComponent.find({ product, component})
-                await BundleProductComponent.remove([]);
-              });
+              await createProductComponents(product, category, true);
             } else {
               return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid product category" } };
             }
           }
-          if (isActive !== null || isActive !== undefined) {
+          if (isActive !== null && isActive !== undefined) {
             product.isActive = isActive;
           }
           await product.save();
+        } catch (err) {
+          if (err.message === errors.SOMETHING_WENT_WRONG) {
+            return { error: { message: errors.SOMETHING_WENT_WRONG } };
+          }
+          return { error: { message: `Something went wrong: ${err.message}` } };
+        }
+
+        return {
+          product,
+          updated: true,
+        };
+      },
+    });
+    t.field("deleteBeachBarProduct", {
+      type: DeleteResult,
+      description: "Delete (remove) a product from a #beach_bar",
+      nullable: false,
+      args: {
+        beachBarId: intArg({
+          required: true,
+          description: "The ID value of the #beach_bar",
+        }),
+        productId: intArg({
+          required: true,
+          description: "The ID value of the product",
+        }),
+      },
+      resolve: async (_, { beachBarId, productId }, { payload }: MyContext): Promise<DeleteType | ErrorType> => {
+        if (!payload) {
+          return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
+        }
+        if (!payload.scope.includes("beach_bar@crud:beach_bar")) {
+          return {
+            error: {
+              code: errors.UNAUTHORIZED_CODE,
+              message: "You are not allowed to delete (remove) a product from this #beach_bar",
+            },
+          };
+        }
+
+        if (!beachBarId || beachBarId.toString().trim().length === 0) {
+          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid #beach_bar" } };
+        }
+        if (!productId || productId.toString().trim().length === 0) {
+          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid product" } };
+        }
+
+        const product = await Product.findOne({
+          where: { id: productId },
+          relations: ["beachBar"],
+          select: ["id", "name"],
+        });
+        if (!product) {
+          return { error: { code: errors.CONFLICT, message: "Specified product does not exist" } };
+        }
+        if (product.beachBar.id !== beachBarId) {
+          return { error: { code: errors.CONFLICT, message: "Specified product does not exist on this #beach_bar" } };
+        }
+
+        const owners = await BeachBarOwner.find({ where: { beachBarId }, relations: ["owner", "owner.user"] });
+        if (!owners) {
+          return { error: { code: errors.CONFLICT, message: errors.SOMETHING_WENT_WRONG } };
+        }
+        const owner = owners.find(beachBarOwner => beachBarOwner.owner.user.id === payload.sub);
+        if (!owner) {
+          return { error: { code: errors.UNAUTHORIZED_CODE, message: errors.YOU_ARE_NOT_BEACH_BAR_OWNER } };
+        }
+        if (!owner.isPrimary) {
+          return {
+            error: { code: errors.UNAUTHORIZED_CODE, message: errors.YOU_ARE_NOT_BEACH_BAR_PRIMARY_OWNER },
+          };
+        }
+
+        try {
+          await product.softRemove();
         } catch (err) {
           return { error: { message: `Something went wrong: ${err.message}` } };
         }
 
         return {
-          error: { message: "Success" },
+          deleted: true,
         };
       },
     });

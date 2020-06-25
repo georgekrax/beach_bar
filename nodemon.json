@@ -34,7 +34,13 @@
     "INSTAGRAM_APP_SECRET": "8dd79ea1bf0985a1cce99f6e7845f804",
     "INSTAGRAM_REDIRECT_URI": "https://localhost:4000/oauth/instagram/callback",
     "INSTAGRAM_API_HOSTNAME": "https://api.instagram.com",
-    "INSTAGRAN_GRAPH_API_HOSTNAME": "https://graph.instagram.com"
+    "INSTAGRAN_GRAPH_API_HOSTNAME": "https://graph.instagram.com",
+    "EXCHANGE_RATES_API_HOSTNAME": "https://api.exchangeratesapi.io",
+    "MINIMUM_PRODUCT_PRICE": 0.5,
+    "SENDGRID_API_KEY": "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",
+    "SENDGRID_EMAIL_ADDRESS": "georgekraxt@gmail.com",
+    "STRIPE_PUBLIC_KEY": "pk_test_J6ApRf7LRZpKzkCWmTOdALIC00R0kXI0RG",
+    "STRIPE_SECRET_KEY": "sk_test_FnNEVSMoCjZ8sTwtexvzNa7V00rKq6TKN8"
   },
   "events": {
     "crash": "fuser -k 4000/tcp"

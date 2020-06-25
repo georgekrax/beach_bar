@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/camelcase */
+import * as sgMail from "@sendgrid/mail";
 import { execute, makePromise } from "apollo-link";
 import { ApolloServer } from "apollo-server-express";
 import * as cookieParser from "cookie-parser";
@@ -6,6 +7,7 @@ import * as express from "express";
 import Redis from "ioredis";
 import { verify } from "jsonwebtoken";
 import "reflect-metadata";
+import Stripe from "stripe";
 import { UAParser } from "ua-parser-js";
 import { MyContext } from "./common/myContext";
 import { link } from "./config/apolloLink";
@@ -22,6 +24,8 @@ const startServer = async (): Promise<any> => {
   redis = new Redis({
     password: "george2016",
     db: 2,
+    connectTimeout: 10000,
+    reconnectOnError: (): boolean => true,
   });
 
   redis.on("error", (err: any) => {
@@ -33,6 +37,10 @@ const startServer = async (): Promise<any> => {
   app.use(express.json());
   app.use(cookieParser());
   app.use("/oauth", router);
+
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY!.toString());
+
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!.toString(), { apiVersion: "2020-03-02", typescript: true });
 
   const server = new ApolloServer({
     schema,
@@ -141,7 +149,7 @@ const startServer = async (): Promise<any> => {
       }
 
       const uaParser = new UAParser(req.headers["user-agent"]);
-      return { req, res, payload, redis, uaParser, googleOAuth2Client };
+      return { req, res, payload, redis, sgMail, stripe, uaParser, googleOAuth2Client };
     },
   });
 
@@ -151,7 +159,9 @@ const startServer = async (): Promise<any> => {
 
   server.applyMiddleware({ app });
 
-  app.listen({ port: process.env.PORT || 4000 }, () => console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`));
+  app.listen({ port: parseInt(process.env.PORT!) || 4000 }, () =>
+    console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`),
+  );
 };
 
 startServer();

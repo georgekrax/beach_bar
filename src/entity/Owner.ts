@@ -10,7 +10,9 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { softRemove } from "../utils/softRemove";
 import { BeachBarOwner } from "./BeachBarOwner";
+import { ProductPriceHistory } from "./ProductPriceHistory";
 import { User } from "./User";
 
 @Entity({ name: "owner", schema: "public" })
@@ -28,6 +30,9 @@ export class Owner extends BaseEntity {
   @OneToMany(() => BeachBarOwner, beachBarOwner => beachBarOwner.owner)
   beachBars: BeachBarOwner[];
 
+  @OneToMany(() => ProductPriceHistory, productPriceHistory => productPriceHistory.owner)
+  priceHistory: ProductPriceHistory[];
+
   @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
   updatedAt: Date;
 
@@ -36,4 +41,9 @@ export class Owner extends BaseEntity {
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Date;
+
+  async softRemove(): Promise<any> {
+    const findOptions: any = { ownerId: this.id };
+    await softRemove(Owner, { id: this.id }, [BeachBarOwner], findOptions);
+  }
 }

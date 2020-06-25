@@ -10,6 +10,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { softRemove } from "../utils/softRemove";
 import { CartProduct } from "./CartProduct";
 import { User } from "./User";
 
@@ -39,4 +40,9 @@ export class Cart extends BaseEntity {
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Date;
+
+  async softRemove(): Promise<any> {
+    const findOptions: any = { cartId: this.id };
+    await softRemove(Cart, { id: this.id }, [CartProduct], findOptions);
+  }
 }

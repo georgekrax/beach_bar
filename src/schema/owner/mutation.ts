@@ -1,6 +1,5 @@
 import { booleanArg, extendType, intArg } from "@nexus/schema";
 import { KeyType } from "ioredis";
-import { getConnection } from "typeorm";
 import { MyContext } from "../../common/myContext";
 import errors from "../../constants/errors";
 import scopes from "../../constants/scopes";
@@ -336,7 +335,7 @@ export const OwnerCrudMutation = extendType({
           if (diff.length > 0) {
             await redis.srem(`scope:${beachBarOwner.owner.user.id}` as KeyType, diff);
           }
-          await getConnection().getRepository(BeachBarOwner).softDelete({ ownerId: beachBarOwner.owner.id, beachBarId });
+          await beachBarOwner.softRemove();
         } catch (err) {
           return { error: { message: `Something went wrong: ${err.message}` } };
         }

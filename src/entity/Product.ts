@@ -8,16 +8,17 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
-  // eslint-disable-next-line prettier/prettier
   UpdateDateColumn,
 } from "typeorm";
+import { softRemove } from "../utils/softRemove";
 import { BeachBar } from "./BeachBar";
 import { BundleProductComponent } from "./BundleProductComponent";
 import { CartProduct } from "./CartProduct";
 import { Currency } from "./Currency";
-import { ProductCouponCode } from "./ProductCouponCode";
-import { ProductVoucherCampaign } from "./ProductVoucherCampaign";
 import { ProductCategory } from "./ProductCategory";
+import { ProductCouponCode } from "./ProductCouponCode";
+import { ProductPriceHistory } from "./ProductPriceHistory";
+import { ProductVoucherCampaign } from "./ProductVoucherCampaign";
 
 @Entity({ name: "product", schema: "public" })
 export class Product extends BaseEntity {
@@ -63,6 +64,9 @@ export class Product extends BaseEntity {
   @OneToMany(() => BundleProductComponent, bundleProductComponent => bundleProductComponent.product)
   components: BundleProductComponent[];
 
+  @OneToMany(() => ProductPriceHistory, productPriceHistrory => productPriceHistrory.product, { nullable: true })
+  priceHistory?: ProductPriceHistory[];
+
   @OneToMany(() => CartProduct, cartProduct => cartProduct.product, { nullable: true })
   carts?: CartProduct[];
 
@@ -80,4 +84,14 @@ export class Product extends BaseEntity {
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Date;
+
+  async softRemove(): Promise<any> {
+    const findOptions: any = { productId: this.id };
+    await softRemove(
+      Product,
+      { id: this.id, name: this.name, beachBarId: this.beachBarId },
+      [BundleProductComponent, CartProduct, ProductCouponCode, ProductCouponCode],
+      findOptions,
+    );
+  }
 }

@@ -44,6 +44,7 @@
   },
   "dependencies": {
     "@nexus/schema": "^0.13.1",
+    "@sendgrid/mail": "^7.2.0",
     "apollo-boost": "^0.4.9",
     "apollo-link": "^1.2.14",
     "apollo-link-http": "^1.5.17",
@@ -58,6 +59,7 @@
     "node-fetch": "^2.6.0",
     "pg": "^8.2.1",
     "reflect-metadata": "^0.1.13",
+    "stripe": "^8.66.0",
     "typeorm": "^0.2.24",
     "ua-parser-js": "^0.7.21",
     "uuid": "^8.0.0",

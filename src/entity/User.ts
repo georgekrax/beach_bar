@@ -10,6 +10,7 @@ import {
   // eslint-disable-next-line prettier/prettier
   UpdateDateColumn,
 } from "typeorm";
+import { softRemove } from "../utils/softRemove";
 import { Account } from "./Account";
 import { BeachBarReview } from "./BeachBarReview";
 import { Cart } from "./Cart";
@@ -58,6 +59,7 @@ export class User extends BaseEntity {
   @OneToMany(() => BeachBarReview, beachBarReview => beachBarReview.user)
   reviews?: BeachBarReview[];
 
+  // ! excluded in softRemove
   @OneToMany(() => UserSearch, userSearch => userSearch.user)
   searches?: UserSearch[];
 
@@ -78,4 +80,9 @@ export class User extends BaseEntity {
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Date;
+
+  async softRemove(): Promise<any> {
+    const findOptions: any = { userId: this.id };
+    await softRemove([Account, BeachBarReview, Cart, Owner, Customer], findOptions, User, this.id);
+  }
 }

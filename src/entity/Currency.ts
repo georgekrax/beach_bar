@@ -1,6 +1,7 @@
-import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn, OneToOne } from "typeorm";
 import { Country } from "./Country";
 import { Product } from "./Product";
+import { CurrencyProductPrice } from "./CurrencyProductPrice";
 
 @Entity({ name: "currency", schema: "public" })
 export class Currency extends BaseEntity {
@@ -24,4 +25,7 @@ export class Currency extends BaseEntity {
 
   @OneToMany(() => Product, product => product.currency, { nullable: true })
   products?: Product[];
+
+  @OneToOne(() => CurrencyProductPrice, currencyProductPrice => currencyProductPrice.currency)
+  productPrice: CurrencyProductPrice;
 }

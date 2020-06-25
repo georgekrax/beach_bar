@@ -13,6 +13,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { softRemove } from "../utils/softRemove";
 import { LoginDetails } from "././LoginDetails";
 import { City } from "./City";
 import { Country } from "./Country";
@@ -91,11 +92,16 @@ export class Account extends BaseEntity {
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Date;
 
+  async softRemove(): Promise<any> {
+    const findOptions: any = { accountId: this.id };
+    await softRemove(Account, { id: this.id }, [UserContactDetails], findOptions);
+  }
+
   @BeforeInsert()
   @BeforeUpdate()
   calculateUsersAge(): void {
     if (this.birthday) {
-      const differenceMs = Date.now() - this.birthday.getTime();
+      const differenceMs = Date.now() - new Date(this.birthday).getTime();
       const ageDifference = new Date(differenceMs);
       const ageFormat = Math.abs(ageDifference.getUTCFullYear() - 1970);
       this.age = ageFormat;

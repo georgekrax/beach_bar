@@ -10,6 +10,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { softRemove } from "../utils/softRemove";
 import { CardBrand } from "./CardBrand";
 import { Country } from "./Country";
 import { Customer } from "./Customer";
@@ -77,4 +78,8 @@ export class Card extends BaseEntity {
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Date;
+
+  async softRemove(): Promise<any> {
+    await softRemove(Card, { id: this.id });
+  }
 }

@@ -3,6 +3,7 @@ import { Response } from "express";
 import { Redis } from "ioredis";
 import fetch from "node-fetch";
 import { User } from "../../entity/User";
+import errors from "../../constants/errors";
 
 export const refreshTokenForHashtagUser = async (res: Response, user: User, redis: Redis): Promise<void | Response> => {
   const redisUser = await redis.hgetall(user.id.toString() as KeyType);
@@ -10,7 +11,7 @@ export const refreshTokenForHashtagUser = async (res: Response, user: User, redi
     return res.status(422).send({
       success: false,
       accessToken: null,
-      error: "Invalid refresh token",
+      error: errors.INVALID_REFRESH_TOKEN,
     });
   }
   if (
@@ -22,7 +23,7 @@ export const refreshTokenForHashtagUser = async (res: Response, user: User, redi
     return res.status(404).send({
       success: false,
       accessToken: null,
-      error: "Something went wrong",
+      error: errors.SOMETHING_WENT_WRONG,
     });
   }
   const { hashtag_refresh_token: hashtagRefreshToken } = redisUser;
@@ -103,7 +104,7 @@ export const refreshTokenForHashtagUser = async (res: Response, user: User, redi
     return res.status(500).send({
       success: false,
       accessToken: null,
-      error: "Something went wrong",
+      error: errors.SOMETHING_WENT_WRONG,
     });
   }
 };

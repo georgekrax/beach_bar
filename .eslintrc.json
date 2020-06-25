@@ -35,7 +35,13 @@
     "@typescript-eslint/ban-ts-ignore": "off",
     "array-bracket-newline": "off",
     "array-element-newline": "off",
-    "prettier/prettier": "error",
+    "prettier/prettier": [
+      "error",
+      {},
+      {
+        "usePrettierrc": true
+      }
+    ],
     "arrow-parens": ["error", "as-needed"],
     "@typescript-eslint/no-non-null-assertion": "off"
   }

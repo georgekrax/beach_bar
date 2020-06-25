@@ -10,6 +10,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { softRemove } from "../utils/softRemove";
 import { Product } from "./Product";
 import { ProductVoucherCode } from "./ProductVoucherCode";
 
@@ -39,7 +40,7 @@ export class ProductVoucherCampaign extends BaseEntity {
   @Column({ type: "timestamptz", name: "valid_until", nullable: true })
   validUntil?: Date;
 
-  @ManyToOne(() => Product, product => product.voucherCampaigns, { nullable: false, cascade: ["soft-remove", "recover"] })
+  @ManyToOne(() => Product, product => product.voucherCampaigns, { nullable: false, cascade: ["soft-remove", "recover", "update"] })
   @JoinColumn({ name: "product_id" })
   product: Product;
 
@@ -54,4 +55,9 @@ export class ProductVoucherCampaign extends BaseEntity {
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Date;
+
+  async softRemove(): Promise<any> {
+    const findOptions: any = { campaignId: this.id };
+    await softRemove(ProductVoucherCampaign, { id: this.id }, [ProductVoucherCode], findOptions);
+  }
 }

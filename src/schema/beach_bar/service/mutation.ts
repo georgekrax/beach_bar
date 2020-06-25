@@ -1,5 +1,5 @@
 import { extendType, intArg, stringArg } from "@nexus/schema";
-import { getConnection, getRepository } from "typeorm";
+import { getConnection } from "typeorm";
 import { MyContext } from "../../../common/myContext";
 import errors from "../../../constants/errors";
 import { BeachBar } from "../../../entity/BeachBar";
@@ -229,7 +229,7 @@ export const BeachBarFeatureMutation = extendType({
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
-        if (!payload.scope.some(scope => ["beach_bar@crud:beach_bar"].includes(scope))) {
+        if (!payload.scope.includes("beach_bar@crud:beach_bar")) {
           return {
             error: {
               code: errors.UNAUTHORIZED_CODE,
@@ -261,13 +261,13 @@ export const BeachBarFeatureMutation = extendType({
           return {
             error: {
               code: errors.UNAUTHORIZED_CODE,
-              message: "You are not allowed to delete (remove) 'this' feature from the #beach_bar",
+              message: errors.YOU_ARE_NOT_BEACH_BAR_PRIMARY_OWNER,
             },
           };
         }
 
         try {
-          await getRepository(BeachBarFeature).softRemove({ beachBarId, serviceId: featureId });
+          await feature.softRemove(featureId);
         } catch (err) {
           return { error: { message: `Something went wrong: ${err.message}` } };
         }

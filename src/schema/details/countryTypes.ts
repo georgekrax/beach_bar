@@ -32,6 +32,7 @@ export const CountryType = objectType({
     t.string("callingCode", { nullable: false, description: "The calling code of the country" });
     t.string("isoCode", { nullable: false, description: "The ISO registered code of the country" });
     t.string("languageId", { nullable: false, description: "The language identifier (locale) of the country" });
+    t.boolean("isEu", { nullable: false, description: "A boolean that indicates if the country is part of European Union (EU)" });
     t.list.field("cities", {
       type: CityType,
       description: "The cities of the country",

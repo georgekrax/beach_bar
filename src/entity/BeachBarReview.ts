@@ -11,6 +11,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { softRemove } from "../utils/softRemove";
 import { BeachBar } from "./BeachBar";
 import { ReviewAnswer } from "./ReviewAnswer";
 import { ReviewVisitType } from "./ReviewVisitType";
@@ -72,4 +73,9 @@ export class BeachBarReview extends BaseEntity {
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt: Date;
+
+  async softRemove(): Promise<any> {
+    const findOptions: any = { reviewId: this.id };
+    await softRemove(BeachBarReview, { id: this.id }, [ReviewAnswer], findOptions);
+  }
 }

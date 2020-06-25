@@ -24,6 +24,6 @@ export class BundleProductComponent extends BaseEntity {
   @CreateDateColumn({ name: "timestamp", type: "timestamptz", default: () => `NOW()` })
   timestamp: Date;
 
-  @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
+  @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true, primary: true })
   deletedAt?: Date;
 }

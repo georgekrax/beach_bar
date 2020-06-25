@@ -2,14 +2,13 @@ import { arg, booleanArg, extendType, intArg, stringArg } from "@nexus/schema";
 import { execute, makePromise } from "apollo-link";
 import { createHash, randomBytes } from "crypto";
 import { KeyType } from "ioredis";
-import { getConnection, IsNull } from "typeorm";
+import { IsNull } from "typeorm";
 import { DateScalar } from "../../common/dateScalar";
 import { EmailScalar } from "../../common/emailScalar";
 import { MyContext } from "../../common/myContext";
 import { UrlScalar } from "../../common/urlScalar";
 import { link } from "../../config/apolloLink";
 import errors from "../../constants/errors";
-import { Account } from "../../entity/Account";
 import { City } from "../../entity/City";
 import { Country } from "../../entity/Country";
 import { loginDetailStatus } from "../../entity/LoginDetails";
@@ -31,10 +30,9 @@ import { createUserLoginDetails, findBrowser, findCity, findCountry, findOs } fr
 import { removeUserSessions } from "../../utils/removeUserSessions";
 import { DeleteType, ErrorType, SuccessType } from "../returnTypes";
 import { DeleteResult, SuccessResult } from "../types";
-import { UserForgotPasswordType, UserLoginType, UserSignUpType, UserUpdateType } from "./returnTypes";
+import { UserLoginType, UserSignUpType, UserUpdateType } from "./returnTypes";
 import {
   UserCredentialsInput,
-  UserForgotPasswordResult,
   UserLoginDetailsInput,
   UserLoginResult,
   UserSignUpResult,
@@ -535,7 +533,7 @@ export const UserForgotPasswordMutation = extendType({
   type: "Mutation",
   definition(t) {
     t.field("sendForgotPasswordLink", {
-      type: UserForgotPasswordResult,
+      type: SuccessResult,
       description: "Sends a link to the user's email address to change its password",
       nullable: false,
       args: {
@@ -545,14 +543,14 @@ export const UserForgotPasswordMutation = extendType({
           description: "The email address of user",
         }),
       },
-      resolve: async (_, { email }, { res, redis }): Promise<UserForgotPasswordType | ErrorType> => {
+      resolve: async (_, { email }, { res, redis }): Promise<SuccessType | ErrorType> => {
         if (!email || email === "" || email === " ") {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid email address" } };
         }
 
         const user = await User.findOne({
           where: { email, deletedAt: IsNull() },
-          relations: ["account", "reviews", "reviews.visitType"],
+          relations: ["account"],
         });
         if (!user) {
           return {
@@ -574,7 +572,6 @@ export const UserForgotPasswordMutation = extendType({
         };
 
         let success: boolean | undefined = undefined,
-          hashtagUser: object | any = undefined,
           errorCode: string | undefined = undefined,
           errorMessage: string | any = undefined;
 
@@ -586,7 +583,6 @@ export const UserForgotPasswordMutation = extendType({
               errorMessage = data.error.message;
             }
             success = data.success;
-            hashtagUser = data.user;
           })
           .catch(err => {
             return { error: { message: `Something went wrong. ${err}` } };
@@ -596,7 +592,7 @@ export const UserForgotPasswordMutation = extendType({
           return { error: { code: errorCode, message: errorMessage } };
         }
 
-        if (!success || !hashtagUser || String(hashtagUser.id) !== String(user.hashtagId) || hashtagUser.email !== email) {
+        if (!success) {
           return { error: { message: "Something went wrong" } };
         }
 
@@ -605,17 +601,15 @@ export const UserForgotPasswordMutation = extendType({
         } catch (err) {
           return { error: { message: `Something went wrong. ${err}` } };
         }
-        console.log(process.env.REFRESH_TOKEN_COOKIE_NAME!.toString());
         res.clearCookie(process.env.REFRESH_TOKEN_COOKIE_NAME!.toString(), { httpOnlye: true });
 
         return {
-          user,
           success,
         };
       },
     });
     t.field("changeUserPassword", {
-      type: UserForgotPasswordResult,
+      type: SuccessResult,
       description: "Change a user's password",
       nullable: false,
       args: {
@@ -633,7 +627,7 @@ export const UserForgotPasswordMutation = extendType({
           description: "User's new password",
         }),
       },
-      resolve: async (_, { email, key, newPassword }): Promise<UserForgotPasswordType | ErrorType> => {
+      resolve: async (_, { email, key, newPassword }): Promise<SuccessType | ErrorType> => {
         if (!email || email === "" || email === " ") {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid email address" } };
         }
@@ -646,7 +640,7 @@ export const UserForgotPasswordMutation = extendType({
 
         const user = await User.findOne({
           where: { email, deletedAt: IsNull() },
-          relations: ["account", "reviews", "reviews.visitType"],
+          relations: ["account"],
         });
         if (!user) {
           return {
@@ -670,7 +664,6 @@ export const UserForgotPasswordMutation = extendType({
         };
 
         let success: boolean | undefined = undefined,
-          hashtagUser: object | any = undefined,
           errorCode: string | undefined = undefined,
           errorMessage: string | any = undefined;
 
@@ -682,7 +675,6 @@ export const UserForgotPasswordMutation = extendType({
               errorMessage = data.error.message;
             }
             success = data.success;
-            hashtagUser = data.user;
           })
           .catch(err => {
             return { error: { message: `Something went wrong. ${err}` } };
@@ -691,12 +683,11 @@ export const UserForgotPasswordMutation = extendType({
         if (errorCode || errorMessage) {
           return { error: { code: errorCode, message: errorMessage } };
         }
-        if (!success || !hashtagUser || String(hashtagUser.id) !== String(user.hashtagId) || hashtagUser.email !== email) {
+        if (!success) {
           return { error: { message: "Something went wrong" } };
         }
 
         return {
-          user,
           success,
         };
       },
@@ -1000,8 +991,7 @@ export const UserCrudMutation = extendType({
         }
 
         try {
-          await getConnection().getRepository(Account).softDelete(String(user.account.id));
-          await getConnection().getRepository(User).softDelete(String(user.id));
+          await user.softRemove();
 
           // delete the user in Redis too
           await removeUserSessions(user.id, redis);

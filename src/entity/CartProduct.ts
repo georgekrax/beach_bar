@@ -9,6 +9,7 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { softRemove } from "../utils/softRemove";
 import { Cart } from "./Cart";
 import { Product } from "./Product";
 
@@ -39,4 +40,8 @@ export class CartProduct extends BaseEntity {
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Date;
+
+  async softRemove(): Promise<any> {
+    await softRemove(CartProduct, { cartId: this.cartId, productId: this.productId });
+  }
 }

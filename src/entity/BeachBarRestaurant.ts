@@ -10,6 +10,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { softRemove } from "../utils/softRemove";
 import { BeachBar } from "./BeachBar";
 import { RestaurantFoodItem } from "./RestaurantFoodItem";
 
@@ -45,4 +46,9 @@ export class BeachBarRestaurant extends BaseEntity {
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Date;
+
+  async softRemove(): Promise<any> {
+    const findOptions: any = { restaurantId: this.id };
+    await softRemove(BeachBarRestaurant, { id: this.id }, [RestaurantFoodItem], findOptions);
+  }
 }

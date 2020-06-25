@@ -34,7 +34,7 @@ export const BundleProductComponentType = objectType({
 
 export const ProductCategoryType = objectType({
   name: "ProductCategory",
-  description: "Represents a #beahc_bar's product category",
+  description: "Represents a #beach_bar's product category",
   definition(t) {
     t.int("int", { nullable: false });
     t.string("name", { nullable: false });

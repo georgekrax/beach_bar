@@ -240,7 +240,7 @@ export const UserContactDetailsCrudMutation = extendType({
           where: { id: payload.sub },
           relations: ["account", "account.contactDetails"],
         });
-        if (!user) {
+        if (!user || !user.account || !user.account.contactDetails) {
           return { error: { code: errors.NOT_FOUND, message: errors.SOMETHING_WENT_WRONG } };
         }
 

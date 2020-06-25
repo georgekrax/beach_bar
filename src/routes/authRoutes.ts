@@ -3,6 +3,7 @@ import * as express from "express";
 import { KeyType } from "ioredis";
 import { decode, verify } from "jsonwebtoken";
 import { URL } from "url";
+import errors from "../constants/errors";
 import { User } from "../entity/User";
 import { redis } from "../index";
 import { generateAccessToken, generateRefreshToken } from "../utils/auth/generateAuthTokens";
@@ -97,7 +98,7 @@ router.post("/refresh_token", async (req: express.Request, res: express.Response
     }
   }
 
-  if (!payload || payload.jti === null || payload.sub === "" || payload.sub === " ") {
+  if (!payload || payload.jti === null || payload.sub === "") {
     return res.send({
       success: false,
       accessToken: null,
@@ -110,25 +111,25 @@ router.post("/refresh_token", async (req: express.Request, res: express.Response
     return res.status(422).send({
       success: false,
       accessToken: null,
-      error: "Invalid refresh token",
+      error: errors.INVALID_REFRESH_TOKEN,
     });
   }
 
   // refreshToken is valid
   //search for user with id === payload.sub
-  const user = await User.findOne({ id: payload.sub });
+  const user = await User.findOne(payload.sub);
   if (!user) {
-    return res.send({
+    return res.status(404).send({
       success: false,
       accessToken: null,
-      error: "Something went wrong",
+      error: errors.USER_DOES_NOT_EXIST,
     });
   }
   if (user.tokenVersion !== payload.tokenVersion) {
-    return res.send({
+    return res.status(422).send({
       success: false,
       accessToken: null,
-      error: "Invalid refresh token",
+      error: errors.INVALID_REFRESH_TOKEN,
     });
   }
   if (user.hashtagId) {

@@ -3,11 +3,7 @@ import { gql } from "apollo-server-express";
 const query = gql`
   mutation sendForgotPasswordLink($email: EmailAddress!) {
     sendForgotPasswordLink(email: $email) {
-      ... on UserForgotPassword {
-        user {
-          id
-          email
-        }
+      ... on Success {
         success
       }
 

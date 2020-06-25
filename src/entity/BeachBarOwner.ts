@@ -9,6 +9,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { softRemove } from "../utils/softRemove";
 import { BeachBar } from "./BeachBar";
 import { Owner } from "./Owner";
 
@@ -45,4 +46,8 @@ export class BeachBarOwner extends BaseEntity {
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Date;
+
+  async softRemove(): Promise<any> {
+    await softRemove(BeachBarOwner, { ownerId: this.owner.id, beachBarId: this.beachBar.id });
+  }
 }

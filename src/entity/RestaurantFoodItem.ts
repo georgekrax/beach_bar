@@ -9,6 +9,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { softRemove } from "../utils/softRemove";
 import { BeachBarRestaurant } from "./BeachBarRestaurant";
 import { RestaurantMenuCategory } from "./RestaurantMenuCategory";
 
@@ -20,7 +21,7 @@ export class RestaurantFoodItem extends BaseEntity {
   @Column("varchar", { length: 255, name: "name" })
   name: string;
 
-  @Column({ type: "decimal", precision: 5, scale: 2, name: "price" })
+  @Column({ type: "decimal", precision: 7, scale: 2, name: "price" })
   price: number;
 
   @Column({ type: "text", name: "img_url", nullable: true })
@@ -53,4 +54,8 @@ export class RestaurantFoodItem extends BaseEntity {
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Date;
+
+  async softRemove(): Promise<any> {
+    await softRemove(RestaurantFoodItem, { id: this.id });
+  }
 }

@@ -146,34 +146,3 @@ export const UserUpdateResult = unionType({
     });
   },
 });
-
-export const UserForgotPasswordType = objectType({
-  name: "UserForgotPassword",
-  description: "User info to be returned when the user resets his / her password",
-  definition(t) {
-    t.field("user", {
-      type: UserType,
-      description: "The user that resets his / her password",
-      nullable: false,
-      resolve: o => o.user,
-    });
-    t.boolean("success", {
-      nullable: false,
-      description: "A boolean that indicates if the user has successfully reseted his / her password",
-    });
-  },
-});
-
-export const UserForgotPasswordResult = unionType({
-  name: "UserUpdatePasswordResult",
-  definition(t) {
-    t.members("UserForgotPassword", "Error");
-    t.resolveType(item => {
-      if (item.error) {
-        return "Error";
-      } else {
-        return "UserForgotPassword";
-      }
-    });
-  },
-});

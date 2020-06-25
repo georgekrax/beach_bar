@@ -13,6 +13,12 @@ export class ProductCategory extends BaseEntity {
   @Column("varchar", { length: 50, name: "underscored_name", unique: true })
   underscoredName: string;
 
+  @Column({ type: "boolean", name: "zero_price" })
+  zeroPrice: boolean;
+
+  @Column({ type: "boolean", name: "whitelist" })
+  whitelist: boolean;
+
   @Column({ type: "text", name: "description", nullable: true })
   description?: string;
 

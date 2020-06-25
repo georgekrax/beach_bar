@@ -10,6 +10,7 @@ import {
   Unique,
   UpdateDateColumn,
 } from "typeorm";
+import { softRemove } from "../utils/softRemove";
 import { Account } from "./Account";
 import { Country } from "./Country";
 
@@ -52,4 +53,8 @@ export class UserContactDetails extends BaseEntity {
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Date;
+
+  async softRemove(): Promise<any> {
+    await softRemove(UserContactDetails, { id: this.id });
+  }
 }

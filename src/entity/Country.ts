@@ -24,6 +24,9 @@ export class Country extends BaseEntity {
   @Column("varchar", { length: 5, name: "iso_code", unique: true })
   isoCode: string;
 
+  @Column({ type: "boolean", name: "is_eu" })
+  isEu: boolean;
+
   @Column("varchar", { length: 5, name: "language_identifier", unique: false })
   languageIdentifier: string;
 

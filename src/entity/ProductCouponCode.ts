@@ -7,9 +7,11 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  // eslint-disable-next-line prettier/prettier
   UpdateDateColumn,
 } from "typeorm";
 import { Product } from "./Product";
+import { softRemove } from "../utils/softRemove";
 
 @Entity({ name: "product_coupon_code", schema: "public" })
 export class ProductCouponCode extends BaseEntity {
@@ -40,7 +42,10 @@ export class ProductCouponCode extends BaseEntity {
   @Column({ type: "timestamptz", name: "valid_until", nullable: true })
   validUntil?: Date;
 
-  @ManyToOne(() => Product, product => product.coupons, { nullable: false, cascade: ["soft-remove", "recover"] })
+  @ManyToOne(() => Product, product => product.coupons, {
+    nullable: false,
+    cascade: ["soft-remove", "recover", "update"],
+  })
   @JoinColumn({ name: "product_id" })
   product: Product;
 
@@ -52,4 +57,8 @@ export class ProductCouponCode extends BaseEntity {
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Date;
+
+  async softRemove(): Promise<any> {
+    await softRemove(ProductCouponCode, { id: this.id });
+  }
 }

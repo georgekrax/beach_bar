@@ -39,10 +39,6 @@ export type UserLoginType = SuccessType & {
   accessToken: string;
 };
 
-export type UserForgotPasswordType = SuccessType & {
-  user: User;
-};
-
 export type UserUpdateType = UpdateType & {
   user: User;
 };

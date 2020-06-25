@@ -10,6 +10,8 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { softRemove } from "../utils/softRemove";
+import { BeachBarEntryFee } from "./BeachBarEntryFee";
 import { BeachBarFeature } from "./BeachBarFeature";
 import { BeachBarLocation } from "./BeachBarLocation";
 import { BeachBarOwner } from "./BeachBarOwner";
@@ -50,8 +52,11 @@ export class BeachBar extends BaseEntity {
   @OneToMany(() => Product, product => product.beachBar)
   products: Product[];
 
+  @OneToMany(() => BeachBarEntryFee, beachBarEntryFee => beachBarEntryFee.beachBar)
+  entryFees: BeachBarEntryFee[];
+
   @OneToMany(() => BeachBarRestaurant, beachBarRestaurant => beachBarRestaurant.beachBar)
-  restaurants: BeachBarReview[];
+  restaurants: BeachBarRestaurant[];
 
   @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
   updatedAt: Date;
@@ -61,4 +66,14 @@ export class BeachBar extends BaseEntity {
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Date;
+
+  async softRemove(): Promise<any> {
+    const findOptions: any = { beachBarId: this.id };
+    await softRemove(
+      BeachBar,
+      { id: this.id },
+      [BeachBarLocation, BeachBarOwner, BeachBarFeature, BeachBarReview, Product, BeachBarEntryFee, BeachBarRestaurant],
+      findOptions,
+    );
+  }
 }
