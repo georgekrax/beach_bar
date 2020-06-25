@@ -8,7 +8,6 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
 } from "typeorm";
 import { softRemove } from "../utils/softRemove";
 import { CartProduct } from "./CartProduct";
@@ -31,9 +30,6 @@ export class Cart extends BaseEntity {
 
   @OneToMany(() => CartProduct, cartProduct => cartProduct.cart)
   products: CartProduct[];
-
-  @UpdateDateColumn({ name: "updated_at", type: "timestamptz", default: () => `NOW()` })
-  updatedAt: Date;
 
   @CreateDateColumn({ name: "timestamp", type: "timestamptz", default: () => `NOW()` })
   timestamp: Date;

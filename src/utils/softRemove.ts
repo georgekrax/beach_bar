@@ -11,5 +11,9 @@ export const softRemove = async (
       await getConnection().getRepository(repository).softDelete(findOptions);
     });
   }
-  await getConnection().getRepository(primaryRepo).softDelete(primaryOptions);
+  if (primaryRepo.toString() !== "Product") {
+    await getConnection().getRepository(primaryRepo).softDelete(primaryOptions);
+  } else {
+    await primaryRepo.update(primaryOptions, { deletedAt: Date.now() });
+  }
 };

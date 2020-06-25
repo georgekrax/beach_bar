@@ -2,7 +2,6 @@ import {
   BaseEntity,
   Column,
   CreateDateColumn,
-  DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -82,7 +81,7 @@ export class Product extends BaseEntity {
   @CreateDateColumn({ name: "timestamp", type: "timestamptz", default: () => `NOW()` })
   timestamp: Date;
 
-  @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
+  @Column({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Date;
 
   async softRemove(): Promise<any> {

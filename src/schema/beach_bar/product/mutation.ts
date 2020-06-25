@@ -1,5 +1,5 @@
 import { booleanArg, extendType, floatArg, intArg, stringArg } from "@nexus/schema";
-import { getConnection } from "typeorm";
+import { getConnection, IsNull } from "typeorm";
 import { MyContext } from "../../../common/myContext";
 import errors from "../../../constants/errors";
 import { BeachBar } from "../../../entity/BeachBar";
@@ -128,7 +128,7 @@ export const ProductCrudMutation = extendType({
         } catch (err) {
           if (err.message === 'duplicate key value violates unique constraint "product_name_beach_bar_id_key"') {
             const product = await Product.findOne({
-              where: { beachBar, name },
+              where: { beachBar, name, deletedAt: IsNull() },
               relations: ["beachBar", "category", "category.productComponents", "currency"],
             });
             if (product && product.deletedAt) {
@@ -197,7 +197,7 @@ export const ProductCrudMutation = extendType({
         }
 
         const product = await Product.findOne({
-          where: { id: productId },
+          where: { id: productId, deletedAt: IsNull() },
           relations: ["beachBar", "beachBar.entryFees", "currency", "category", "category.productComponents"],
         });
         if (!product) {
@@ -303,7 +303,7 @@ export const ProductCrudMutation = extendType({
         }
 
         const product = await Product.findOne({
-          where: { id: productId },
+          where: { id: productId, deletedAt: IsNull() },
           relations: ["beachBar"],
           select: ["id", "name"],
         });
