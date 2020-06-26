@@ -3,6 +3,7 @@ import { BeachBarOwnerType } from "../owner/types";
 import { BeachBarRestaurantType } from "./restaurant/types";
 import { BeachBarReviewType } from "./review/types";
 import { BeachBarFeatureType } from "./service/types";
+import { DateTimeScalar } from "../../common/dateTimeScalar";
 
 export const BeachBarType = objectType({
   name: "BeachBar",
@@ -16,13 +17,13 @@ export const BeachBarType = objectType({
       nullable: false,
       description: "A boolean that indicates if the #beach_bar is active or not, setted by its owner",
     });
-    // @ts-ignore
-    t.datetime("updatedAt", {
+    t.field("updatedAt", {
+      type: DateTimeScalar,
       nullable: false,
       description: "The last time the #beach_bar was updated, in the format of a timestamp",
     });
-    // @ts-ignore
-    t.datetime("timestamp", {
+    t.field("timestamp", {
+      type: DateTimeScalar,
       nullable: false,
       description: "The timestamp recorded, when the #beach_bar was created",
     });

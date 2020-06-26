@@ -1,18 +1,13 @@
 /* eslint-disable @typescript-eslint/camelcase */
-import { Response } from "express";
 import { Redis } from "ioredis";
 import fetch from "node-fetch";
-import { User } from "../../entity/User";
 import errors from "../../constants/errors";
+import { User } from "../../entity/User";
 
-export const refreshTokenForHashtagUser = async (res: Response, user: User, redis: Redis): Promise<void | Response> => {
+export const refreshTokenForHashtagUser = async (user: User, redis: Redis): Promise<void | Error> => {
   const redisUser = await redis.hgetall(user.id.toString() as KeyType);
   if (!redisUser || !redisUser.refresh_token) {
-    return res.status(422).send({
-      success: false,
-      accessToken: null,
-      error: errors.INVALID_REFRESH_TOKEN,
-    });
+    throw new Error(errors.INVALID_REFRESH_TOKEN);
   }
   if (
     !redisUser ||
@@ -20,11 +15,7 @@ export const refreshTokenForHashtagUser = async (res: Response, user: User, redi
     redisUser.hashtag_refresh_token == "" ||
     redisUser.hashtag_refresh_token === ""
   ) {
-    return res.status(404).send({
-      success: false,
-      accessToken: null,
-      error: errors.SOMETHING_WENT_WRONG,
-    });
+    throw new Error(errors.SOMETHING_WENT_WRONG);
   }
   const { hashtag_refresh_token: hashtagRefreshToken } = redisUser;
 
@@ -34,10 +25,10 @@ export const refreshTokenForHashtagUser = async (res: Response, user: User, redi
     client_secret: process.env.HASHTAG_CLIENT_SECRET!.toString(),
     refresh_token: hashtagRefreshToken,
   };
-  let requestStatus: number | undefined = undefined,
-    success = false;
 
-  await fetch(`${process.env.HASHTAG_HOSTNAME}/oauth/refresh_token`, {
+  let success = false;
+
+  await fetch(`${process.env.HASHTAG_API_HOSTNAME}/oauth/refresh_token`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -45,7 +36,6 @@ export const refreshTokenForHashtagUser = async (res: Response, user: User, redi
     body: JSON.stringify(requestBody),
   })
     .then(res => {
-      requestStatus = res.status;
       return res.json();
     })
     .then(async data => {
@@ -55,7 +45,7 @@ export const refreshTokenForHashtagUser = async (res: Response, user: User, redi
       } else if (data.success && data.refreshToken && !data.accessToken) {
         await redis.hset(user.id.toString(), "hashtag_refresh_token", data.refreshToken);
         const newRequestBody = { ...requestBody, refresh_token: data.refreshToken };
-        fetch(`${process.env.HASHTAG_HOSTNAME}/oauth/refresh_token`, {
+        fetch(`${process.env.HASHTAG_API_HOSTNAME}/oauth/refresh_token`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -63,7 +53,6 @@ export const refreshTokenForHashtagUser = async (res: Response, user: User, redi
           body: JSON.stringify(newRequestBody),
         })
           .then(res => {
-            requestStatus = res.status;
             return res.json();
           })
           .then(async data => {
@@ -73,11 +62,7 @@ export const refreshTokenForHashtagUser = async (res: Response, user: User, redi
             }
           })
           .catch(err => {
-            return res.status(requestStatus as number).send({
-              success: false,
-              accessToken: null,
-              error: `Something went wrong. ${err.message.toString()}`,
-            });
+            throw new Error(`${errors.SOMETHING_WENT_WRONG}: ${err.message}`);
           });
       } else {
         success = false;
@@ -85,26 +70,10 @@ export const refreshTokenForHashtagUser = async (res: Response, user: User, redi
     })
     .catch(err => {
       success = false;
-      if (requestStatus) {
-        return res.status(requestStatus).send({
-          success: false,
-          accessToken: null,
-          error: `Something went wrong. ${err.message.toString()}`,
-        });
-      } else {
-        return res.send({
-          success: false,
-          accessToken: null,
-          error: `Something went wrong. ${err.message.toString()}`,
-        });
-      }
+      throw new Error(`${errors.SOMETHING_WENT_WRONG}: ${err.message}`);
     });
 
   if (!success) {
-    return res.status(500).send({
-      success: false,
-      accessToken: null,
-      error: errors.SOMETHING_WENT_WRONG,
-    });
+    throw new Error(errors.SOMETHING_WENT_WRONG);
   }
 };

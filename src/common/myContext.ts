@@ -11,6 +11,7 @@ export interface MyContext {
   payload?: { scope: string[]; iat: number; exp: number; aud: string; iss: string; sub: number; jti: string };
   redis: Redis;
   sgMail: MailService;
+  sgClient: object;
   stripe: Stripe;
   uaParser: UAParser;
   googleOAuth2Client: OAuth2Client;

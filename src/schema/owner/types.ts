@@ -1,6 +1,7 @@
 import { objectType, unionType } from "@nexus/schema";
 import { BeachBarType } from "../beach_bar/types";
 import { UserType } from "../user/types";
+import { DateTimeScalar } from "../../common/dateTimeScalar";
 
 export const OwnerType = objectType({
   name: "Owner",
@@ -40,7 +41,11 @@ export const BeachBarOwnerType = objectType({
       nullable: false,
       resolve: o => o.owner,
     });
-    t.datetime("timestamp", { nullable: false, description: "The date and time the owner was added (assigned) to the #beach_bar" });
+    t.field("timestamp", {
+      type: DateTimeScalar,
+      nullable: false,
+      description: "The date and time the owner was added (assigned) to the #beach_bar",
+    });
   },
 });
 

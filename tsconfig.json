@@ -9,7 +9,7 @@
     "outDir": "./build",
     "rootDir": "./src",
 
-    "strict": true,
+    "strict": false,
     "noImplicitAny": false,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
@@ -26,7 +26,6 @@
     "moduleResolution": "node",
     "esModuleInterop": false,
     "allowSyntheticDefaultImports": true,
-    "types": [],
 
     "forceConsistentCasingInFileNames": true
   },

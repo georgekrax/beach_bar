@@ -1,5 +1,7 @@
 import { objectType } from "@nexus/schema";
 import { ProductType } from "../types";
+import { DateTimeScalar } from "../../../../common/dateTimeScalar";
+import { BigIntScalar } from "../../../../common/bigIntScalar";
 
 export const ProductCouponCodeType = objectType({
   name: "ProductCouponCode",
@@ -12,7 +14,7 @@ export const ProductCouponCodeType = objectType({
     t.float("discountPercentage", { nullable: false });
     t.boolean("beachBarOffer", { nullable: false });
     t.boolean("isActive", { nullable: false });
-    t.datetime("validUntil", { nullable: true });
+    t.field("validUntil", { type: DateTimeScalar, nullable: true });
     t.field("product", {
       type: ProductType,
       description: "The product that is discounted via the coupon code",
@@ -32,7 +34,7 @@ export const ProductVoucherCampaign = objectType({
     t.float("discountPercentage", { nullable: false });
     t.boolean("beachBarOffer", { nullable: false });
     t.boolean("isActive", { nullable: false });
-    t.datetime("validUntil", { nullable: true });
+    t.field("validUntil", { type: DateTimeScalar, nullable: true });
     t.field("product", {
       type: ProductType,
       description: "The product that is discounted via the campaign",
@@ -46,10 +48,10 @@ export const ProductVoucherCode = objectType({
   name: "ProductVoucherCode",
   description: "Represents a voucher code for a campaign of a product",
   definition(t) {
-    t.bigint("id", { nullable: false });
+    t.field("id", { type: BigIntScalar, nullable: false });
     t.string("refCode", { nullable: false });
-    t.datetime("timestamp", { nullable: false });
-    t.datetime("deletedAt", { nullable: true });
+    t.field("timestamp", { type: DateTimeScalar, nullable: false });
+    t.field("deletedAt", { type: DateTimeScalar, nullable: true });
     t.field("campaign", {
       type: ProductVoucherCampaign,
       description: "The campaign the voucher code is assigned to",

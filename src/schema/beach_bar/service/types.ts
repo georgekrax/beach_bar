@@ -1,4 +1,5 @@
 import { objectType, unionType } from "@nexus/schema";
+import { DateTimeScalar } from "../../../common/dateTimeScalar";
 import { BeachBarType } from "../types";
 
 export const BeachBarServiceType = objectType({
@@ -43,8 +44,8 @@ export const BeachBarFeatureType = objectType({
       description: "A short description about the service",
       resolve: o => o.description,
     });
-    t.datetime("updatedAt", { nullable: false });
-    t.datetime("timestamp", { nullable: false });
+    t.field("updatedAt", { type: DateTimeScalar, nullable: false });
+    t.field("timestamp", { type: DateTimeScalar, nullable: false });
   },
 });
 

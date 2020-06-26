@@ -2,12 +2,13 @@ import { objectType } from "@nexus/schema";
 import { CardBrandType } from "../../details/cardBrandTypes";
 import { CountryType } from "../../details/countryTypes";
 import { CustomerType } from "../types";
+import { BigIntScalar } from "../../../common/bigIntScalar";
 
 export const CardType = objectType({
   name: "Card",
   description: "Represents a customer's credit or debit card",
   definition(t) {
-    t.bigint("id", { nullable: false });
+    t.field("id", { type: BigIntScalar, nullable: false });
     t.string("type", { nullable: false });
     t.int("expMonth", { nullable: true });
     t.int("expYear", { nullable: true });

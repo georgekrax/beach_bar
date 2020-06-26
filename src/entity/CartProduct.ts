@@ -1,5 +1,6 @@
 import {
   BaseEntity,
+  Check,
   Column,
   CreateDateColumn,
   DeleteDateColumn,
@@ -14,6 +15,7 @@ import { Cart } from "./Cart";
 import { Product } from "./Product";
 
 @Entity({ name: "cart_product", schema: "public" })
+@Check(`"quantity" >= 0 AND "quantity" <= 20`)
 export class CartProduct extends BaseEntity {
   @PrimaryColumn({ type: "bigint", name: "cart_id" })
   cartId: bigint;

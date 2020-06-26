@@ -1,12 +1,13 @@
 import { objectType } from "@nexus/schema";
 import { UserType } from "../user/types";
 import { CartProductType } from "./product/types";
+import { BigIntScalar } from "../../common/bigIntScalar";
 
 export const CartType = objectType({
   name: "Cart",
   description: "Represents a shoppping cart",
   definition(t) {
-    t.bigint("id", { nullable: false });
+    t.field("id", { type: BigIntScalar, nullable: false });
     t.float("total", { nullable: false });
     t.field("user", {
       type: UserType,

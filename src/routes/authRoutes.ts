@@ -80,11 +80,19 @@ router.post("/refresh_token", async (req: express.Request, res: express.Response
         return res.status(404).send({
           success: false,
           accessToken: null,
-          error: "Something went wrong",
+          error: errors.SOMETHING_WENT_WRONG,
         });
       }
       if (user.hashtagId) {
-        await refreshTokenForHashtagUser(res, user, redis);
+        try {
+          await refreshTokenForHashtagUser(user, redis);
+        } catch (err) {
+          return res.send({
+            success: false,
+            accessToken: null,
+            error: err.message,
+          });
+        }
       }
       const newRefreshToken = generateRefreshToken(user);
       await redis.hset(user.id.toString() as KeyType, "refresh_token", newRefreshToken.token);
@@ -107,7 +115,7 @@ router.post("/refresh_token", async (req: express.Request, res: express.Response
   }
 
   const redisUser = await redis.hgetall(payload.sub.toString() as KeyType);
-  if (!redisUser || !redisUser.refresh_token || redisUser.refresh_token !== refreshToken) {
+  if (!redisUser || !redisUser.refresh_token) {
     return res.status(422).send({
       success: false,
       accessToken: null,
@@ -133,7 +141,15 @@ router.post("/refresh_token", async (req: express.Request, res: express.Response
     });
   }
   if (user.hashtagId) {
-    await refreshTokenForHashtagUser(res, user, redis);
+    try {
+      await refreshTokenForHashtagUser(user, redis);
+    } catch (err) {
+      return res.send({
+        success: false,
+        accessToken: null,
+        error: err.message,
+      });
+    }
   }
 
   // get user (new) scopes from Redis

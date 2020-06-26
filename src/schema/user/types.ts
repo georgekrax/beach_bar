@@ -1,4 +1,6 @@
 import { inputObjectType, objectType, unionType } from "@nexus/schema";
+import { EmailScalar } from "../../common/emailScalar";
+import { IPv4Scalar } from "../../common/ipV4Scalar";
 import { BeachBarReviewType } from "../beach_bar/review/types";
 import { UserAccountType } from "./account/types";
 
@@ -7,8 +9,7 @@ export const UserType = objectType({
   description: "Represents a user",
   definition(t) {
     t.int("id", { nullable: false, description: "User's ID value" });
-    // @ts-ignore
-    t.email("email", { nullable: false, description: "User's email address" });
+    t.field("email", { type: EmailScalar, nullable: false, description: "User's email address" });
     t.string("username", { nullable: true, description: "Username of the user. It can be null" });
     t.string("firstName", { nullable: true, description: "User's first (given) name" });
     t.string("lastName", { nullable: true, description: "User's last (family) name" });
@@ -102,8 +103,7 @@ export const UserCredentialsInput = inputObjectType({
   name: "UserCredentialsInput",
   description: "Credentials of user to sign up / login",
   definition(t) {
-    // @ts-ignore
-    t.email("email", { required: true, description: "Email of user to sign up" });
+    t.field("email", { type: EmailScalar, required: true, description: "Email of user to sign up" });
     t.string("password", { required: true, description: "Password of user" });
   },
 });
@@ -114,8 +114,7 @@ export const UserLoginDetailsInput = inputObjectType({
   definition(t) {
     t.string("country", { required: false, description: "Country from where user logins" });
     t.string("city", { required: false, description: "City from where user logins" });
-    // @ts-ignore
-    t.ipV4("ipAddr", { required: false, description: "Internet Protocol (IP) address of user to login" });
+    t.field("ipAddr", { type: IPv4Scalar, required: false, description: "Internet Protocol (IP) address of user to login" });
   },
 });
 

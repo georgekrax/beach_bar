@@ -9,7 +9,6 @@ import { Product } from "../../../entity/Product";
 import { ProductCategory } from "../../../entity/ProductCategory";
 import { ProductPriceHistory } from "../../../entity/ProductPriceHistory";
 import { checkMinimumProductPrice } from "../../../utils/beach_bar/checkMinimumProductPrice";
-import { createProductComponents } from "../../../utils/beach_bar/createProductComponents";
 import { checkScopes } from "../../../utils/checkScopes";
 import { DeleteType, ErrorType } from "../../returnTypes";
 import { DeleteResult } from "../../types";
@@ -58,19 +57,19 @@ export const ProductCrudMutation = extendType({
           };
         }
 
-        if (!beachBarId || beachBarId.toString().trim().length === 0) {
+        if (!beachBarId || beachBarId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid #beach_bar" } };
         }
         if (!name || name.trim().length === 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid name" } };
         }
-        if (!categoryId || categoryId.toString().trim().length === 0) {
+        if (!categoryId || categoryId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid product category" } };
         }
-        if (price === null || price === undefined || price.toString().trim().length === 0) {
+        if (price === null || price === undefined || price <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid price" } };
         }
-        if (!currencyId || currencyId.toString().trim().length === 0) {
+        if (!currencyId || currencyId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid currency" } };
         }
 
@@ -122,7 +121,7 @@ export const ProductCrudMutation = extendType({
 
         try {
           await newProduct.save();
-          await createProductComponents(newProduct, newProduct.category, false);
+          await newProduct.createProductComponents(false);
 
           await ProductPriceHistory.create({ product: newProduct, owner: owner.owner, newPrice: newProduct.price }).save();
         } catch (err) {
@@ -189,10 +188,10 @@ export const ProductCrudMutation = extendType({
           };
         }
 
-        if (!beachBarId || beachBarId.toString().trim().length === 0) {
+        if (!beachBarId || beachBarId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid #beach_bar" } };
         }
-        if (!productId || productId.toString().trim().length === 0) {
+        if (!productId || productId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid product" } };
         }
 
@@ -224,7 +223,7 @@ export const ProductCrudMutation = extendType({
         try {
           if (
             (price !== null || price !== undefined) &&
-            price.toString().trim().length !== 0 &&
+            price < 0 &&
             checkScopes(payload, ["beach_bar@crud:beach_bar", "beach_bar@crud:product"])
           ) {
             try {
@@ -235,18 +234,18 @@ export const ProductCrudMutation = extendType({
             product.price = price;
             await ProductPriceHistory.create({ product, owner: owner.owner, newPrice: price }).save();
           }
-          if (currencyId && currencyId !== product.currencyId && currencyId.toString().trim().length !== 0) {
+          if (currencyId && currencyId !== product.currencyId && currencyId <= 0) {
             const currency = await Currency.findOne(this.currencyId);
             if (!currency) {
               throw new Error("Please provide a valid currency");
             }
             product.currency = currency;
           }
-          if (categoryId && categoryId !== product.categoryId && categoryId.toString().trim().length !== 0) {
+          if (categoryId && categoryId !== product.categoryId && categoryId <= 0) {
             const category = await ProductCategory.findOne({ where: { id: categoryId }, relations: ["productComponents"] });
             if (category) {
               product.category = category;
-              await createProductComponents(product, category, true);
+              await product.createProductComponents(true);
             } else {
               return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid product category" } };
             }
@@ -295,10 +294,10 @@ export const ProductCrudMutation = extendType({
           };
         }
 
-        if (!beachBarId || beachBarId.toString().trim().length === 0) {
+        if (!beachBarId || beachBarId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid #beach_bar" } };
         }
-        if (!productId || productId.toString().trim().length === 0) {
+        if (!productId || productId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid product" } };
         }
 

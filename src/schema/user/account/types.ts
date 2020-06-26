@@ -3,6 +3,7 @@ import { CityType } from "../../details/cityTypes";
 import { UserContactDetailsType } from "../../details/contactDetails";
 import { CountryType } from "../../details/countryTypes";
 import { UserType } from "../types";
+import { DateScalar } from "../../../common/dateScalar";
 
 export const UserAccountType = objectType({
   name: "UserAccount",
@@ -14,8 +15,7 @@ export const UserAccountType = objectType({
       description: "The user's honorific title. Its value can be null or 'Mr', 'Mrs', 'Ms', 'Miss', 'Sr', 'Dr', 'Lady'",
     });
     t.string("imgUrl", { nullable: true, description: "The URL value of user's account profile picture" });
-    // @ts-ignore
-    t.date("birthday", { nullable: true, description: "User's birthday date" });
+    t.field("birthday", { type: DateScalar, nullable: true, description: "User's birthday date" });
     t.int("age", { nullable: true, description: "User's age" });
     t.string("address", { nullable: true, description: "The house of office street address of the user" });
     t.string("zipCode", { nullable: true, description: "The zip code of the house or office street address of the user" });

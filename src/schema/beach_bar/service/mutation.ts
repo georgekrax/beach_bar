@@ -163,13 +163,13 @@ export const BeachBarFeatureMutation = extendType({
           };
         }
 
-        if (!beachBarId || beachBarId.toString().trim().length === 0 || beachBarId <= 0) {
+        if (!beachBarId || beachBarId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid #beach_bar" } };
         }
-        if (!featureId || featureId.toString().trim().length === 0 || featureId <= 0) {
+        if (!featureId || featureId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid feature" } };
         }
-        if (quantity && (quantity.toString().trim().length === 0 || quantity <= 0)) {
+        if (quantity && quantity <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid quantity number" } };
         }
 
@@ -238,10 +238,10 @@ export const BeachBarFeatureMutation = extendType({
           };
         }
 
-        if (!beachBarId || beachBarId.toString().trim().length === 0 || beachBarId <= 0) {
+        if (!beachBarId || beachBarId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid #beach_bar" } };
         }
-        if (!featureId || featureId.toString().trim().length === 0 || featureId <= 0) {
+        if (!featureId || featureId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid feature" } };
         }
 

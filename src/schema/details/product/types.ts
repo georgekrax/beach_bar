@@ -1,5 +1,6 @@
 import { objectType } from "@nexus/schema";
 import { ProductType } from "../../beach_bar/product/types";
+import { UrlScalar } from "../../../common/urlScalar";
 
 export const ProductComponentType = objectType({
   name: "ProductComponent",
@@ -8,7 +9,7 @@ export const ProductComponentType = objectType({
     t.int("id", { nullable: false });
     t.string("title", { nullable: false });
     t.string("description", { nullable: false });
-    t.url("description", { nullable: false });
+    t.field("iconUrl", { type: UrlScalar, nullable: false });
   },
 });
 

@@ -3,6 +3,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  getRepository,
   JoinColumn,
   ManyToOne,
   OneToMany,
@@ -83,6 +84,17 @@ export class Product extends BaseEntity {
 
   @Column({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Date;
+
+  async createProductComponents(update: boolean): Promise<void> {
+    if (update) {
+      const bundleProducts = await BundleProductComponent.find({ product: this });
+      await getRepository(BundleProductComponent).softRemove(bundleProducts);
+    }
+
+    this.category.productComponents.forEach(async productComponent => {
+      await BundleProductComponent.create({ product: this, component: productComponent, deletedAt: undefined }).save();
+    });
+  }
 
   async softRemove(): Promise<any> {
     const findOptions: any = { productId: this.id };

@@ -48,10 +48,10 @@ export const OwnerCrudMutation = extendType({
           };
         }
 
-        if (!beachBarId || beachBarId.toString().trim().length === 0) {
+        if (!beachBarId || beachBarId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid #beach_bar" } };
         }
-        if (userId && userId.toString().trim().length === 0) {
+        if (userId && userId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid user" } };
         }
 
@@ -172,10 +172,10 @@ export const OwnerCrudMutation = extendType({
           };
         }
 
-        if (!beachBarId || beachBarId.toString().trim().length === 0) {
+        if (!beachBarId || beachBarId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid #beach_bar" } };
         }
-        if (userId && userId.toString().trim().length === 0) {
+        if (userId && userId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid owner" } };
         }
 
@@ -283,10 +283,10 @@ export const OwnerCrudMutation = extendType({
           };
         }
 
-        if (!beachBarId || beachBarId.toString().trim().length === 0) {
+        if (!beachBarId || beachBarId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid #beach_bar" } };
         }
-        if (userId && userId.toString().trim().length === 0) {
+        if (userId && userId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid owner" } };
         }
 
@@ -333,7 +333,7 @@ export const OwnerCrudMutation = extendType({
           const ownerScopes = await redis.smembers(`scope:${beachBarOwner.owner.user.id}` as KeyType);
           const diff = arrDiff(scopes.SIMPLE_USER, ownerScopes);
           if (diff.length > 0) {
-            await redis.srem(`scope:${beachBarOwner.owner.user.id}` as KeyType, diff);
+            await redis.srem(`scope:${beachBarOwner.owner.user.id}` as KeyType, ...diff);
           }
           await beachBarOwner.softRemove();
         } catch (err) {

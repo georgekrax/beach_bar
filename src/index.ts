@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/camelcase */
+import * as sgClient from "@sendgrid/client";
 import * as sgMail from "@sendgrid/mail";
 import { execute, makePromise } from "apollo-link";
 import { ApolloServer } from "apollo-server-express";
@@ -38,7 +39,22 @@ const startServer = async (): Promise<any> => {
   app.use(cookieParser());
   app.use("/oauth", router);
 
+  sgClient.setApiKey(process.env.SENDGRID_API_KEY!.toString());
   sgMail.setApiKey(process.env.SENDGRID_API_KEY!.toString());
+
+  // sgClient
+  //   .request({
+  //     method: "POST",
+  //     url: "v3/asm/suppressions/global",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       authorization: `Bearer ${process.env.SENDGRID_API_KEY!.toString()}`,
+  //     },
+  //     body: { recipient_emails: ["me@example.com"] },
+  //   })
+  //   .then(([res, body]) => {
+  //     console.log(body);
+  //   });
 
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!.toString(), { apiVersion: "2020-03-02", typescript: true });
 
@@ -149,7 +165,7 @@ const startServer = async (): Promise<any> => {
       }
 
       const uaParser = new UAParser(req.headers["user-agent"]);
-      return { req, res, payload, redis, sgMail, stripe, uaParser, googleOAuth2Client };
+      return { req, res, payload, redis, sgMail, sgClient, stripe, uaParser, googleOAuth2Client };
     },
   });
 

@@ -3,12 +3,13 @@ import { extendType } from "@nexus/schema";
 import { createHash, randomBytes } from "crypto";
 import { CodeChallengeMethod } from "google-auth-library";
 import { MyContext } from "../../common/myContext";
+import { UrlScalar } from "../../common/urlScalar";
 
 export const OAuthQuery = extendType({
   type: "Query",
   definition(t) {
-    // @ts-ignore
-    t.url("googleOAuthUrl", {
+    t.field("googleOAuthUrl", {
+      type: UrlScalar,
       nullable: false,
       description: "Returns the URL where the user will be redirected to login with Google",
       resolve: async (_, __, { res, googleOAuth2Client }: MyContext): Promise<string> => {
@@ -35,8 +36,8 @@ export const OAuthQuery = extendType({
         return url;
       },
     });
-    // @ts-ignore
-    t.url("facebookOAuthUrl", {
+    t.field("facebookOAuthUrl", {
+      type: UrlScalar,
       nullable: false,
       description: "Returns the URL where the user will be redirected to login with Facebook",
       resolve: async (_, __, { res }: MyContext): Promise<string> => {
@@ -50,8 +51,8 @@ export const OAuthQuery = extendType({
         return url;
       },
     });
-    // @ts-ignore
-    t.url("instagramOAuthUrl", {
+    t.field("instagramOAuthUrl", {
+      type: UrlScalar,
       nullable: false,
       description: "Returns the URL where the user will be redirected to login with Instagram",
       resolve: async (_, __, { res }: MyContext): Promise<string> => {

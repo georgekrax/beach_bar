@@ -1,4 +1,5 @@
 import { objectType, unionType } from "@nexus/schema";
+import { DateTimeScalar } from "../../../common/dateTimeScalar";
 import { CurrencyType } from "../../details/countryTypes";
 import { ProductCategoryType } from "../../details/product/types";
 import { BeachBarType } from "../types";
@@ -31,8 +32,8 @@ export const ProductType = objectType({
       nullable: false,
       resolve: o => o.currency,
     });
-    t.datetime("updatedAt", { nullable: false });
-    t.datetime("deletedAt", { nullable: true });
+    t.field("updatedAt", { type: DateTimeScalar, nullable: false });
+    t.field("deletedAt", { type: DateTimeScalar, nullable: true });
   },
 });
 

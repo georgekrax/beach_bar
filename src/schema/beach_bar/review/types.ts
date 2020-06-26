@@ -1,4 +1,6 @@
 import { objectType } from "@nexus/schema";
+import { BigIntScalar } from "../../../common/bigIntScalar";
+import { DateTimeScalar } from "../../../common/dateTimeScalar";
 import { UserType } from "../../user/types";
 import { BeachBarType } from "../types";
 
@@ -15,11 +17,13 @@ export const BeachBarReviewType = objectType({
   name: "BeachBarReview",
   description: "Represents a #beach_bar's review, by a signed up user",
   definition(t) {
-    // @ts-ignore
-    t.bigint("id", { nullable: false, description: "The ID value of the review" });
+    t.field("id", { type: BigIntScalar, nullable: false, description: "The ID value of the review" });
     t.int("ratingValue", { nullable: false, description: "The user's rating, between 0 and 10" });
-    // @ts-ignore
-    t.datetime("visitTime", { nullable: false, description: "The date when the user visited the reviewed #beach_bar" });
+    t.field("visitTime", {
+      type: DateTimeScalar,
+      nullable: false,
+      description: "The date when the user visited the reviewed #beach_bar",
+    });
     t.int("upvotes", { nullable: true, description: "The time the paticular review was voted to be helpful, by other users" });
     t.int("downvotes", {
       nullable: true,
@@ -27,13 +31,13 @@ export const BeachBarReviewType = objectType({
     });
     t.string("niceComment", { nullable: true, description: "A nice comment by the user for the reviewed #beach_bar" });
     t.string("badComment", { nullable: true, description: "A bad comment by the user for the reviewed #beach_bar" });
-    // @ts-ignore
-    t.datetime("updatedAt", {
+    t.field("updatedAt", {
+      type: DateTimeScalar,
       nullable: false,
       description: "The last time user's account was updated, in the format of a timestamp",
     });
-    // @ts-ignore
-    t.datetime("timestamp", {
+    t.field("timestamp", {
+      type: DateTimeScalar,
       nullable: false,
       description: "The timestamp recorded, when the user's account was created",
     });
@@ -62,8 +66,7 @@ export const ReviewAnswerType = objectType({
   name: "ReviewAnswer",
   description: "Represents an answer for a review of a #beach_bar, by the owner",
   definition(t) {
-    // @ts-ignore
-    t.bigint("id", { nullable: false, description: "The ID value of the particular review answer" });
+    t.field("id", { type: BigIntScalar, nullable: false, description: "The ID value of the particular review answer" });
     t.string("body", {
       nullable: false,
       description: "The body (content) of the review answer, written by the reviewed #beach_bar's owner",

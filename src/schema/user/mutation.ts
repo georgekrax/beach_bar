@@ -1,4 +1,5 @@
 import { arg, booleanArg, extendType, intArg, stringArg } from "@nexus/schema";
+import { DeleteResult } from "../types";
 import { execute, makePromise } from "apollo-link";
 import { createHash, randomBytes } from "crypto";
 import { KeyType } from "ioredis";
@@ -16,7 +17,6 @@ import { Platform } from "../../entity/Platform";
 import { User } from "../../entity/User";
 import authorizeWithHashtagQuery from "../../graphql/AUTHORIZE_WITH_HASHTAG";
 import changeUserPasswordQuery from "../../graphql/CHANGE_USER_PASSWORD";
-import deleteUserAccountQuery from "../../graphql/DELETE_USER_ACCOUNT";
 import exchangeCodeQuery from "../../graphql/EXCHANGE_CODE";
 import logoutQuery from "../../graphql/LOGOUT_USER";
 import sendForgotPasswordLinkQuery from "../../graphql/SEND_FORGOT_PASSWORD_LINK";
@@ -29,7 +29,7 @@ import { signUpUser } from "../../utils/auth/signUpUser";
 import { createUserLoginDetails, findBrowser, findCity, findCountry, findOs } from "../../utils/auth/userCommon";
 import { removeUserSessions } from "../../utils/removeUserSessions";
 import { DeleteType, ErrorType, SuccessType } from "../returnTypes";
-import { DeleteResult, SuccessResult } from "../types";
+import { SuccessResult } from "../types";
 import { UserLoginType, UserSignUpType, UserUpdateType } from "./returnTypes";
 import {
   UserCredentialsInput,
@@ -66,11 +66,6 @@ export const UserSignUpAndLoginMutation = extendType({
         }
         if (!password || password === "" || password === " ") {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid password" } };
-        }
-
-        const user = await User.findOne({ where: { email }, relations: ["account"] });
-        if (user) {
-          return { error: { code: errors.CONFLICT, message: "User already exists" } };
         }
 
         const operation = {
@@ -836,7 +831,7 @@ export const UserCrudMutation = extendType({
           } else if (zipCode) {
             user.account.zipCode = zipCode;
           }
-          if (countryId && countryId.toString().trim().length === 0) {
+          if (countryId && countryId <= 0) {
             user.account.country = undefined;
           } else if (countryId) {
             const country = await Country.findOne(countryId);
@@ -844,7 +839,7 @@ export const UserCrudMutation = extendType({
               user.account.country = country;
             }
           }
-          if (cityId && cityId.toString().trim().length === 0) {
+          if (cityId && cityId <= 0) {
             user.account.city = undefined;
           } else if (cityId) {
             const city = await City.findOne(cityId);
@@ -900,7 +895,6 @@ export const UserCrudMutation = extendType({
           await makePromise(execute(link, updateUserOperation))
             .then(res => res.data?.updateUser)
             .then(data => {
-              console.log(data);
               if (data.error) {
                 errorCode = data.error.code;
                 errorMessage = data.error.message;
@@ -947,47 +941,6 @@ export const UserCrudMutation = extendType({
         const user = await User.findOne({ where: { id: payload.sub, deletedAt: IsNull() }, relations: ["account"] });
         if (!user) {
           return { error: { code: errors.NOT_FOUND, message: errors.USER_NOT_FOUND_MESSAGE } };
-        }
-
-        if (user.hashtagId) {
-          // get user in Redis, to access its #hashtag's access token
-          const redisUser = await redis.hgetall(user.id.toString() as KeyType);
-          if (!redisUser || !redisUser.hashtag_access_token) {
-            return { error: { message: errors.SOMETHING_WENT_WRONG } };
-          }
-          const deleteUserAccountOperation = {
-            query: deleteUserAccountQuery,
-            variables: {
-              clientId: process.env.HASHTAG_CLIENT_ID!.toString(),
-              clientSecret: process.env.HASHTAG_CLIENT_SECRET!.toString(),
-            },
-            context: {
-              headers: {
-                authorization: `Bearer ${redisUser.hashtag_access_token}`,
-              },
-            },
-          };
-
-          let deleted: boolean | undefined = undefined,
-            errorCode: string | undefined = undefined,
-            errorMessage: string | any = undefined;
-
-          await makePromise(execute(link, deleteUserAccountOperation))
-            .then(res => res.data?.deleteUserAccount)
-            .then(data => {
-              if (data.error) {
-                errorCode = data.error.code;
-                errorMessage = data.error.message;
-              }
-              deleted = data.deleted;
-            })
-            .catch(err => {
-              return { error: { message: `Something went wrong: ${err.message}` } };
-            });
-
-          if ((errorCode || errorMessage) && !deleted) {
-            return { error: { code: errorCode, message: errorMessage } };
-          }
         }
 
         try {

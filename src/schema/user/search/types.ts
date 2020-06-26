@@ -1,22 +1,23 @@
 import { objectType } from "@nexus/schema";
+import { BigIntScalar } from "../../../common/bigIntScalar";
+import { DateScalar } from "../../../common/dateScalar";
+import { DateTimeScalar } from "../../../common/dateTimeScalar";
 import { CityType } from "../../details/cityTypes";
 import { CountryType } from "../../details/countryTypes";
 import { RegionType } from "../../details/regionTypes";
 import { UserType } from "../types";
+import { JsonScalar } from "../../../common/jsonScalar";
 
 export const UserSearchType = objectType({
   name: "UserSearch",
   description: "Represents a user search",
   definition(t) {
-    // @ts-ignore
-    t.bigint("id", { nullable: false });
+    t.field("id", { type: BigIntScalar, nullable: false });
     t.string("searchValue", { nullable: false });
-    // @ts-ignore
-    t.date("searchDate", { nullable: true });
+    t.field("searchDate", { type: DateScalar, nullable: true });
     t.int("searchAdults", { nullable: true });
     t.int("searchChildren", { nullable: true });
-    // @ts-ignore
-    t.json("extraFilters", { nullable: true, description: "Extra filters added by the user during the search" });
+    t.field("extraFilters", { type: JsonScalar, nullable: true, description: "Extra filters added by the user during the search" });
     t.field("user", {
       type: UserType,
       description: "The user that made the search",
@@ -41,7 +42,6 @@ export const UserSearchType = objectType({
       nullable: true,
       resolve: o => o.region,
     });
-    // @ts-ignore
-    t.datetime("timestamp", { nullable: false });
+    t.field("timestamp", { type: DateTimeScalar, nullable: false });
   },
 });

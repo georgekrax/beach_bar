@@ -24,6 +24,10 @@ export const signUpUser = async (
   city?: City,
   birthday?: Date,
 ): Promise<{ user: User } | ErrorType> => {
+  const user = await User.findOne({ where: { email }, relations: ["account"] });
+  if (user) {
+    return { error: { code: errors.CONFLICT, message: "User already exists" } };
+  }
   const newUser = User.create({
     email,
     hashtagId,

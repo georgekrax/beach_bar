@@ -26,7 +26,7 @@ export const ProductCrudQuery = extendType({
         }),
       },
       resolve: async (_, { beachBarId, isActive, isDeleted }, { payload }: MyContext): Promise<Product[] | null> => {
-        if (!beachBarId || beachBarId.toString().trim().length === 0) {
+        if (!beachBarId || beachBarId <= 0) {
           return null;
         }
         if (payload && checkScopes(payload, ["beach_bar@crud:beach_bar", "beach_bar@crud:product"])) {

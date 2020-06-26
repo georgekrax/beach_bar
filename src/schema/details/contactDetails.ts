@@ -1,4 +1,5 @@
 import { objectType, unionType } from "@nexus/schema";
+import { EmailScalar } from "../../common/emailScalar";
 import { UserAccountType } from "../user/account/types";
 import { CountryType } from "./countryTypes";
 
@@ -14,8 +15,7 @@ export const UserContactDetailsType = objectType({
       description: "The country origin of a user",
       resolve: o => o.country,
     });
-    // @ts-ignore
-    t.email("secondaryEmail", { nullable: true, description: "A secondary email address to contact the user" });
+    t.field("secondaryEmail", { type: EmailScalar, nullable: true, description: "A secondary email address to contact the user" });
     t.string("phoneNumber", { nullable: true, description: "User's phone number" });
   },
 });

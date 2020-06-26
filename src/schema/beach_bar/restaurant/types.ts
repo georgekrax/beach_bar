@@ -1,5 +1,6 @@
 import { objectType } from "@nexus/schema";
 import { BeachBarType } from "../types";
+import { BigIntScalar } from "../../../common/bigIntScalar";
 
 export const RestaurantMenuCategoryType = objectType({
   name: "RestaurantMenuCategory",
@@ -14,8 +15,7 @@ export const RestaurantFoodItemType = objectType({
   name: "RestaurantFoodItem",
   description: "Represents 2 #beach_bar's restaurant food item (product) in its menu catalog",
   definition(t) {
-    // @ts-ignore
-    t.bigint("id", { nullable: false, description: "The ID value of the food item" });
+    t.field("id", { type: BigIntScalar, nullable: false, description: "The ID value of the food item" });
     t.string("name", { nullable: false, description: "The name of the food item" });
     t.float("price", {
       nullable: false,

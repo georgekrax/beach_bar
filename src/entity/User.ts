@@ -83,6 +83,6 @@ export class User extends BaseEntity {
 
   async softRemove(): Promise<any> {
     const findOptions: any = { userId: this.id };
-    await softRemove([Account, BeachBarReview, Cart, Owner, Customer], findOptions, User, this.id);
+    await softRemove(User, { id: this.id }, [Account, BeachBarReview, Cart, Owner, Customer], findOptions);
   }
 }

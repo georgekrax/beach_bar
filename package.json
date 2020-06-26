@@ -5,7 +5,7 @@
   "main": "src/index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon -L"
+    "start": "nodemon -L --inspect ts-node src/index.ts"
   },
   "keywords": [
     "graphql",
@@ -44,6 +44,7 @@
   },
   "dependencies": {
     "@nexus/schema": "^0.13.1",
+    "@sendgrid/client": "^7.2.1",
     "@sendgrid/mail": "^7.2.0",
     "apollo-boost": "^0.4.9",
     "apollo-link": "^1.2.14",
