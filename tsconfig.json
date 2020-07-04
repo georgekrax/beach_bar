@@ -1,20 +1,16 @@
 {
   "compilerOptions": {
     "lib": ["DOM", "es5", "es6", "ESNext"],
-    "target": "ES2018",
-    "sourceMap": true,
     "removeComments": true,
-    "noEmit": true,
-    "module": "CommonJS",
-    "outDir": "./build",
-    "rootDir": "./src",
-
+    "noEmit": false,
+    
     "strict": false,
     "noImplicitAny": false,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
     "strictBindCallApply": false,
     "strictPropertyInitialization": false,
+    "skipLibCheck": true,
     "noImplicitThis": false,
     "alwaysStrict": false,
     "noUnusedLocals": true,
@@ -23,12 +19,10 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
 
-    "moduleResolution": "node",
     "esModuleInterop": false,
     "allowSyntheticDefaultImports": true,
 
+    "preserveConstEnums": true,
     "forceConsistentCasingInFileNames": true
-  },
-  "exclude": ["./node_modules/", "build"],
-  "include": ["./src/**/*.tsx", "./src/**/*.ts"]
+  }
 }

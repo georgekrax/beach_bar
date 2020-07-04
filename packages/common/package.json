@@ -1,0 +1,27 @@
+{
+  "name": "@beach_bar/common",
+  "version": "1.0.0",
+  "license": "UNLICENSED",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "scripts": {
+    "build": "rm -rf ./build && tsc",
+    "build:watch": "rm -rf ./build && tsc"
+  },
+  "devDependencies": {
+    "@types/node": "^14.0.14",
+    "@types/yup": "^0.29.3",
+    "typescript": "^3.9.5"
+  },
+  "dependencies": {
+    "@nexus/schema": "^0.14.0",
+    "@sendgrid/mail": "^7.2.1",
+    "express": "^4.17.1",
+    "google-auth-library": "^6.0.2",
+    "graphql": "14.6.0",
+    "ioredis": "^4.17.3",
+    "stripe": "^8.67.0",
+    "ua-parser-js": "^0.7.21",
+    "yup": "^0.29.1"
+  }
+}

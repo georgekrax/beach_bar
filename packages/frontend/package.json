@@ -1,0 +1,7 @@
+{
+  "name": "@beach_bar/frontend",
+  "version": "1.0.0",
+  "dependencies": {
+    "@beach_bar/common": "1.0.0"
+  }
+}

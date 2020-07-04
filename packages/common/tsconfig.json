@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "sourceMap": true,
+    "target": "ES6",
+    "module": "CommonJS",
+    "outDir": "build",
+    "rootDir": "./src",
+    "moduleResolution": "node",
+    "declaration": true
+  },
+  "exclude": ["node_modules"],
+  "include": ["./src/**/*.ts", "./src/**/*.tsx"]
+}
