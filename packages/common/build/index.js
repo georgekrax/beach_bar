@@ -18,7 +18,8 @@ __exportStar(require("./scalars/datetimeScalar"), exports);
 __exportStar(require("./scalars/emailScalar"), exports);
 __exportStar(require("./scalars/ipV4Scalar"), exports);
 __exportStar(require("./scalars/jsonScalar"), exports);
-__exportStar(require("./scalars/urlScalar"), exports);
 __exportStar(require("./scalars/timeScalar"), exports);
+__exportStar(require("./scalars/urlScalar"), exports);
+__exportStar(require("./utils/generateID"), exports);
 __exportStar(require("./yup/userSchema"), exports);
 //# sourceMappingURL=index.js.map
