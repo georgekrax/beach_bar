@@ -1,7 +1,8 @@
-import { BaseEntity, Entity, PrimaryGeneratedColumn, Column, Check, OneToMany } from "typeorm";
-import { ProductReservationLimit } from "./ProductReservationLimit";
+import { BaseEntity, Check, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { CartProduct } from "./CartProduct";
+import { ProductReservationLimit } from "./ProductReservationLimit";
 import { ReservedProduct } from "./ReservedProduct";
+import { BeachBarReview } from "./BeachBarReview";
 
 @Entity({ name: "hour_time", schema: "public" })
 @Check(`length("value") = 8`)
@@ -27,4 +28,19 @@ export class HourTime extends BaseEntity {
 
   @OneToMany(() => ReservedProduct, reservedProduct => reservedProduct.time, { nullable: true })
   reservedProductTimes?: ReservedProduct[];
+}
+
+@Entity({ name: "month_time", schema: "public" })
+export class MonthTime extends BaseEntity {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column("varchar", { length: 9, name: "utc_value", unique: true })
+  value: string;
+
+  @Column({ type: "integer", name: "days" })
+  days: number;
+
+  @OneToMany(() => BeachBarReview, beachBarReview => beachBarReview.monthTime, { nullable: true })
+  reviews?: BeachBarReview[];
 }

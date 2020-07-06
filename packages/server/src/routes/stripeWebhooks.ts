@@ -1,21 +1,22 @@
 /* eslint-disable no-case-declarations */
-import * as bodyParser from "body-parser";
 import * as express from "express";
 import { getCustomRepository } from "typeorm";
+import errors from "../constants/errors";
 import { webhook } from "../constants/stripe";
 import { Card, CardRepository } from "../entity/Card";
 import { Customer, CustomerRepository } from "../entity/Customer";
+import { Payment } from "../entity/Payment";
 import { stripe } from "../index";
 
 export const router = express.Router();
 
-router.post("/webhooks", bodyParser.raw({ type: "application/json" }), async (req, res) => {
+router.post("/webhooks/customer_and_cards", async (req, res) => {
   const sig: any = req.headers["stripe-signature"];
 
   let event: any;
 
   try {
-    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET!.toString());
+    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOKS_SECRET!.toString());
   } catch (err) {
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
@@ -96,6 +97,46 @@ router.post("/webhooks", bodyParser.raw({ type: "application/json" }), async (re
       if (expiredCard) {
         try {
           await expiredCard.expireCard();
+        } catch (err) {
+          return res.status(400).send({ error: err.message }).end();
+        }
+      }
+      break;
+
+    default:
+      // Unexpected event type
+      return res.status(400).end();
+  }
+
+  return res.json({ received: true });
+});
+
+router.post("/webhooks/payment", async (req, res) => {
+  const sig: any = req.headers["stripe-signature"];
+
+  let event: any;
+
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_PAYMENT_WEBHOOKS_SECRET!.toString());
+  } catch (err) {
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  // Handle the event
+  switch (event.type) {
+    case webhook.PAYMENT_INTENT_SUCCEEDED:
+      const successfulPaymentIntent = event.data.object;
+      if (successfulPaymentIntent) {
+        try {
+          const payment = await Payment.findOne({
+            where: { stripeId: successfulPaymentIntent.id },
+            relations: ["cart", "cart.products", "cart.products.product", "cart.products.time"],
+          });
+          if (!payment) {
+            return res.status(400).send({ error: errors.SOMETHING_WENT_WRONG }).end();
+          }
+          await payment.createReservedProducts();
+          await payment.cart.customSoftRemove(false);
         } catch (err) {
           return res.status(400).send({ error: err.message }).end();
         }

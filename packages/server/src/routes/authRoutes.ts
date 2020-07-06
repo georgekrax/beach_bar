@@ -12,28 +12,28 @@ import { sendRefreshToken } from "../utils/auth/sendRefreshToken";
 
 export const router = express.Router();
 
-router.get("/google/callback", express.json(), async (req: express.Request, res: express.Response) => {
+router.get("/google/callback", async (req: express.Request, res: express.Response) => {
   const qs = new URL(req.url, process.env.HOSTNAME_WITH_HTTP).searchParams;
   const code = qs.get("code");
   const state = qs.get("state");
   res.send(`<h2>Redirected from Google</h2><p>Code: ${code}</p><br><p>State:${state}</p>`);
 });
 
-router.get("/facebook/callback", express.json(), async (req: express.Request, res: express.Response) => {
+router.get("/facebook/callback", async (req: express.Request, res: express.Response) => {
   const qs = new URL(req.url, process.env.HOSTNAME_WITH_HTTP).searchParams;
   const code = qs.get("code");
   const state = qs.get("state");
   res.send(`<h2>Redirected from Facebook</h2><p>Code: ${code}</p><br><p>State: ${state}</p>`);
 });
 
-router.get("/instagram/callback", express.json(), async (req: express.Request, res: express.Response) => {
+router.get("/instagram/callback", async (req: express.Request, res: express.Response) => {
   const qs = new URL(req.url, process.env.HOSTNAME_WITH_HTTP).searchParams;
   const code = qs.get("code");
   const state = qs.get("state");
   res.send(`<h2>Redirected from Instagram</h2><p>Code: ${code}</p><br><p>State: ${state}</p>`);
 });
 
-router.post("/refresh_token", express.json(), async (req: express.Request, res: express.Response) => {
+router.post("/refresh_token", async (req: express.Request, res: express.Response) => {
   const refreshToken = req.cookies.me;
   if (!refreshToken) {
     return res.status(422).send({

@@ -34,13 +34,13 @@ export const AddBeachBarRestaurantType = objectType({
   definition(t) {
     t.field("restaurant", {
       type: BeachBarRestaurantType,
-      description: "The restaurant being added & its info",
+      description: "The restaurant that is added & its info",
       nullable: false,
       resolve: o => o.restaurant,
     });
     t.boolean("added", {
       nullable: false,
-      description: "A boolean that indicates if the restaurant has been successfully being added to a #beach_bar",
+      description: "A boolean that indicates if the restaurant has been successfully being added to the #beach_bar",
     });
   },
 });
@@ -65,7 +65,7 @@ export const UpdateBeachBarRestaurantType = objectType({
   definition(t) {
     t.field("restaurant", {
       type: BeachBarRestaurantType,
-      description: "The restaurant being updated",
+      description: "The restaurant that is updated",
       nullable: false,
       resolve: o => o.restaurant,
     });

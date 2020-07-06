@@ -8,11 +8,17 @@ export const softRemove = async (
 ): Promise<void> => {
   if (repositories && findOptions) {
     repositories.forEach(async repository => {
-      await getConnection().getRepository(repository).softDelete(findOptions);
+      if (["Product", "RestaurantFoodItem", "Payment", "ReservedProduct"].includes(getConnection().getMetadata(repository).name)) {
+        await repository.update(findOptions, { deletedAt: new Date().toISOString() });
+      } else {
+        await getConnection().getRepository(repository).softDelete(findOptions);
+      }
     });
   }
-  if (["Product", "RestaurantFoodItem"].includes(primaryRepo.toString())) {
-    await primaryRepo.update(primaryOptions, { deletedAt: Date.now() });
+  if (["Product", "RestaurantFoodItem", "ReservedProduct"].includes(getConnection().getMetadata(primaryRepo).name)) {
+    await primaryRepo.update(primaryOptions, { deletedAt: new Date().toISOString() });
+  } else if (getConnection().getMetadata(primaryRepo).name === "Payment") {
+    await primaryRepo.update(primaryOptions, { isRefunded: true });
   } else {
     await getConnection().getRepository(primaryRepo).softDelete(primaryOptions);
   }

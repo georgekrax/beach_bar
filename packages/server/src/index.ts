@@ -37,27 +37,20 @@ const startServer = async (): Promise<any> => {
 
   const app = express();
 
-  // every route uses its own middleware parser
+  // Stripe webhooks routes have to use the "express.raw()", to work
+  app.use((req, res, next) => {
+    if (req.originalUrl.includes(process.env.STRIPE_WEBHOOK_ORIGIN_URL!.toString())) {
+      express.raw({ type: "application/json" })(req, res, next);
+    } else {
+      express.json()(req, res, next);
+    }
+  });
   app.use(cookieParser());
   app.use("/stripe", stripeRouter);
   app.use("/oauth", oauthRouter);
 
   sgClient.setApiKey(process.env.SENDGRID_API_KEY!.toString());
   sgMail.setApiKey(process.env.SENDGRID_API_KEY!.toString());
-
-  // sgClient
-  //   .request({
-  //     method: "POST",
-  //     url: "v3/asm/suppressions/global",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //       authorization: `Bearer ${process.env.SENDGRID_API_KEY!.toString()}`,
-  //     },
-  //     body: { recipient_emails: ["me@example.com"] },
-  //   })
-  //   .then(([res, body]) => {
-  //     console.log(body);
-  //   });
 
   stripe = new Stripe(process.env.STRIPE_SECRET_KEY!.toString(), { apiVersion: "2020-03-02", typescript: true });
 

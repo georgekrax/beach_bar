@@ -1,6 +1,5 @@
 import { BaseEntity, Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Vote } from "./Vote";
-import { VotingFeedbackPathname } from "./VotingFeedbackPathname";
 import { VotingResult } from "./VotingResult";
 
 @Entity({ name: "voting_feedback", schema: "public" })
@@ -22,9 +21,6 @@ export class VotingFeedback extends BaseEntity {
 
   @OneToMany(() => Vote, vote => vote.feedback, { nullable: true })
   votes?: Vote[];
-
-  @OneToMany(() => VotingFeedbackPathname, votingFeedbackPathname => votingFeedbackPathname.feedback, { nullable: false })
-  pathnames: VotingFeedbackPathname[];
 
   @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
   timestamp: Date;

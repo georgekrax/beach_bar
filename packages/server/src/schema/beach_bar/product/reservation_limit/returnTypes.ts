@@ -1,5 +1,5 @@
 import { ProductReservationLimit } from "../../../../entity/ProductReservationLimit";
-import { HourTime } from "../../../../entity/HourTime";
+import { HourTime } from "../../../../entity/Time";
 import { AddType, UpdateType } from "../../../returnTypes";
 
 type ProductReservationLimitType = {

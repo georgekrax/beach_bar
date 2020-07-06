@@ -1,4 +1,5 @@
 export const webhook = Object.freeze({
+  PAYMENT_INTENT_SUCCEEDED: "payment_intent.succeeded",
   CUSTOMER_SOURCE_CREATED: "customer.source.created",
   CUSTOMER_SOURCE_UPDATED: "customer.source.updated",
   CUSTOMER_SOURCE_EXPIRING: "customer.source.expiring",

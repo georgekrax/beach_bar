@@ -1,6 +1,6 @@
 import { BigIntScalar, DateScalar } from "@beach_bar/common";
 import { objectType, unionType } from "@nexus/schema";
-import { HourTimeType } from "../../../details/hourTimeTypes";
+import { HourTimeType } from "../../../details/time/types";
 import { ProductType } from "../types";
 
 export const ProductReservationLimitType = objectType({

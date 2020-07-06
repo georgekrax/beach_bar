@@ -1,6 +1,6 @@
 import { DateScalar } from "@beach_bar/common";
 import { arg, extendType, intArg } from "@nexus/schema";
-import { HourTime } from "../../../../entity/HourTime";
+import { HourTime } from "../../../../entity/Time";
 import { Product } from "../../../../entity/Product";
 import { AvailableProductReturnType } from "./returnTypes";
 import { AvailableProductType } from "./types";

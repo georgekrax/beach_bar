@@ -1,8 +1,8 @@
 import { DateScalar, DateTimeScalar } from "@beach_bar/common";
 import { objectType, unionType } from "@nexus/schema";
 import { ProductType } from "../../beach_bar/product/types";
+import { HourTimeType } from "../../details/time/types";
 import { CartType } from "../types";
-import { HourTimeType } from "../../details/hourTimeTypes";
 
 export const CartProductType = objectType({
   name: "CartProduct",

@@ -39,7 +39,9 @@
     "SENDGRID_EMAIL_ADDRESS": "georgekraxt@gmail.com",
     "STRIPE_PUBLIC_KEY": "pk_test_J6ApRf7LRZpKzkCWmTOdALIC00R0kXI0RG",
     "STRIPE_SECRET_KEY": "sk_test_FnNEVSMoCjZ8sTwtexvzNa7V00rKq6TKN8",
-    "STRIPE_WEBHOOK_SECRET": "whsec_LlbTyS7qvc9VKKVloOU980z32s3Kr2k4"
+    "STRIPE_WEBHOOKS_SECRET": "whsec_LlbTyS7qvc9VKKVloOU980z32s3Kr2k4",
+    "STRIPE_PAYMENT_WEBHOOKS_SECRET": "whsec_13NSeIuMLu3mDIjjbhbLgK5miakcczgW",
+    "STRIPE_WEBHOOK_ORIGIN_URL": "/stripe/webhooks"
   },
   "events": {
     "crash": "fuser -k 4000/tcp"

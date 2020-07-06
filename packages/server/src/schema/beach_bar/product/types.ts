@@ -1,8 +1,7 @@
+import { DateTimeScalar } from "@beach_bar/common";
 import { objectType, unionType } from "@nexus/schema";
-import { CurrencyType } from "../../details/countryTypes";
 import { ProductCategoryType } from "../../details/product/types";
 import { BeachBarType } from "../types";
-import { DateTimeScalar } from "@beach_bar/common";
 
 export const ProductType = objectType({
   name: "Product",
@@ -26,12 +25,6 @@ export const ProductType = objectType({
       description: "The category of the product",
       nullable: false,
       resolve: o => o.category,
-    });
-    t.field("currency", {
-      type: CurrencyType,
-      description: "The currency the product's price is assigned",
-      nullable: false,
-      resolve: o => o.currency,
     });
     t.field("updatedAt", { type: DateTimeScalar, nullable: false });
     t.field("deletedAt", { type: DateTimeScalar, nullable: true });

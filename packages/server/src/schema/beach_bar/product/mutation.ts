@@ -4,7 +4,6 @@ import { getConnection, IsNull } from "typeorm";
 import errors from "../../../constants/errors";
 import { BeachBar } from "../../../entity/BeachBar";
 import { BeachBarOwner } from "../../../entity/BeachBarOwner";
-import { Currency } from "../../../entity/Currency";
 import { Product } from "../../../entity/Product";
 import { ProductCategory } from "../../../entity/ProductCategory";
 import { ProductPriceHistory } from "../../../entity/ProductPriceHistory";
@@ -31,18 +30,25 @@ export const ProductCrudMutation = extendType({
           required: true,
           description: "The name of the product",
         }),
+        description: stringArg({
+          required: false,
+          description: "A short description of the product",
+        }),
         categoryId: intArg({ required: true, description: "The ID value of the category of the product" }),
         price: floatArg({ required: true, description: "The price of the product" }),
-        currencyId: intArg({ required: false, description: "The ID value of the currency of the product's price" }),
         isActive: booleanArg({
           required: false,
           description: "A boolean that indicates if the product is active & can be purchased by a user or a customer",
           default: false,
         }),
+        maxPeople: intArg({
+          required: true,
+          description: "How many people can use this specific product",
+        }),
       },
       resolve: async (
         _,
-        { beachBarId, name, categoryId, price, currencyId, isActive },
+        { beachBarId, name, description, categoryId, price, isActive, maxPeople },
         { payload }: MyContext,
       ): Promise<AddProductType | ErrorType> => {
         if (!payload) {
@@ -66,11 +72,16 @@ export const ProductCrudMutation = extendType({
         if (!categoryId || categoryId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid product category" } };
         }
-        if (price === null || price === undefined || price <= 0) {
+        if (price === null || price === undefined || price < 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid price" } };
         }
-        if (currencyId && currencyId <= 0) {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid currency" } };
+        if (maxPeople === null || maxPeople === undefined || maxPeople <= 0) {
+          return {
+            error: {
+              code: errors.INVALID_ARGUMENTS,
+              message: "Please provide a valid number for maximum people, that can use the product simultaneously",
+            },
+          };
         }
 
         const beachBar = await BeachBar.findOne({
@@ -93,23 +104,13 @@ export const ProductCrudMutation = extendType({
           return { error: { code: errors.UNAUTHORIZED_CODE, message: errors.YOU_ARE_NOT_BEACH_BAR_PRIMARY_OWNER } };
         }
 
-        let currency: Currency | undefined = undefined;
-        if (currencyId) {
-          currency = await Currency.findOne(currencyId);
-          if (!currency) {
-            return { error: { code: errors.INVALID_ARGUMENTS, message: "Invalid currency value" } };
-          }
-        } else {
-          currency = beachBar.defaultCurrency;
-        }
-
         const productCategory = await ProductCategory.findOne({ where: { id: categoryId }, relations: ["productComponents"] });
         if (!productCategory) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provided a valid product category" } };
         }
 
         try {
-          await checkMinimumProductPrice(price, productCategory, beachBar, currency.id);
+          await checkMinimumProductPrice(price, productCategory, beachBar, beachBar.defaultCurrencyId);
         } catch (err) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: err.message } };
         }
@@ -120,7 +121,8 @@ export const ProductCrudMutation = extendType({
           category: productCategory,
           isIndividual: productCategory.productComponents.length === 1 ? true : false,
           price,
-          currency,
+          description,
+          maxPeople,
           isActive,
         });
 
@@ -160,25 +162,32 @@ export const ProductCrudMutation = extendType({
       description: "Update a #beach_bar's product info",
       nullable: false,
       args: {
-        beachBarId: intArg({
-          required: true,
-          description: "The ID value of the #beach_bar",
-        }),
         productId: intArg({
           required: true,
           description: "The ID value of the product",
         }),
+        name: stringArg({
+          required: true,
+          description: "The name of the product",
+        }),
+        description: stringArg({
+          required: false,
+          description: "A short description of the product",
+        }),
         categoryId: intArg({ required: false, description: "The ID value of the category of the product" }),
         price: floatArg({ required: false, description: "The price of the product" }),
-        currencyId: intArg({ required: false, description: "The ID value of the currency of the product's price", default: 1 }),
         isActive: booleanArg({
           required: false,
           description: "A boolean that indicates if the product is active & can be purchased by a user or a customer",
         }),
+        maxPeople: intArg({
+          required: true,
+          description: "How many people can use this specific product",
+        }),
       },
       resolve: async (
         _,
-        { beachBarId, productId, categoryId, price, currencyId, isActive },
+        { productId, name, description, categoryId, price, isActive, maxPeople },
         { payload }: MyContext,
       ): Promise<UpdateProductType | ErrorType> => {
         if (!payload) {
@@ -193,9 +202,6 @@ export const ProductCrudMutation = extendType({
           };
         }
 
-        if (!beachBarId || beachBarId <= 0) {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid #beach_bar" } };
-        }
         if (!productId || productId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid product" } };
         }
@@ -207,11 +213,8 @@ export const ProductCrudMutation = extendType({
         if (!product) {
           return { error: { code: errors.CONFLICT, message: "Specified product does not exist" } };
         }
-        if (product.beachBar.id !== beachBarId) {
-          return { error: { code: errors.CONFLICT, message: "Specified product does not exist on this #beach_bar" } };
-        }
 
-        const owners = await BeachBarOwner.find({ where: { beachBarId }, relations: ["owner", "owner.user"] });
+        const owners = await BeachBarOwner.find({ where: { beachBarId: product.beachBarId }, relations: ["owner", "owner.user"] });
         if (!owners) {
           return { error: { code: errors.CONFLICT, message: errors.SOMETHING_WENT_WRONG } };
         }
@@ -228,23 +231,16 @@ export const ProductCrudMutation = extendType({
         try {
           if (
             (price !== null || price !== undefined) &&
-            price < 0 &&
+            price >= 0 &&
             checkScopes(payload, ["beach_bar@crud:beach_bar", "beach_bar@crud:product"])
           ) {
             try {
-              await checkMinimumProductPrice(price, product.category, product.beachBar, currencyId ? currencyId : product.currencyId);
+              await checkMinimumProductPrice(price, product.category, product.beachBar, product.beachBar.defaultCurrencyId);
             } catch (err) {
               throw new Error(err.message);
             }
             product.price = price;
             await ProductPriceHistory.create({ product, owner: owner.owner, newPrice: price }).save();
-          }
-          if (currencyId && currencyId !== product.currencyId && currencyId <= 0) {
-            const currency = await Currency.findOne(this.currencyId);
-            if (!currency) {
-              throw new Error("Please provide a valid currency");
-            }
-            product.currency = currency;
           }
           if (categoryId && categoryId !== product.categoryId && categoryId <= 0) {
             const category = await ProductCategory.findOne({ where: { id: categoryId }, relations: ["productComponents"] });
@@ -257,6 +253,15 @@ export const ProductCrudMutation = extendType({
           }
           if (isActive !== null && isActive !== undefined) {
             product.isActive = isActive;
+          }
+          if (name && name !== product.name) {
+            product.name = name;
+          }
+          if (description && description !== product.description) {
+            product.description = description;
+          }
+          if (maxPeople && maxPeople !== product.maxPeople && maxPeople > 0) {
+            product.maxPeople = maxPeople;
           }
           await product.save();
         } catch (err) {

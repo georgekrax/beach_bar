@@ -2,7 +2,7 @@ import { BigIntScalar, DateScalar, MyContext } from "@beach_bar/common";
 import { arg, extendType, intArg } from "@nexus/schema";
 import { In } from "typeorm";
 import errors from "../../../../constants/errors";
-import { HourTime } from "../../../../entity/HourTime";
+import { HourTime } from "../../../../entity/Time";
 import { Product } from "../../../../entity/Product";
 import { ProductReservationLimit } from "../../../../entity/ProductReservationLimit";
 import { checkScopes } from "../../../../utils/checkScopes";

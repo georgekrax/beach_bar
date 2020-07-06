@@ -14,8 +14,8 @@ import {
 } from "typeorm";
 import { softRemove } from "../utils/softRemove";
 import { CartProduct } from "./CartProduct";
-import { User } from "./User";
 import { Payment } from "./Payment";
+import { User } from "./User";
 
 @Entity({ name: "cart", schema: "public" })
 export class Cart extends BaseEntity {
@@ -35,6 +35,8 @@ export class Cart extends BaseEntity {
   @OneToMany(() => CartProduct, cartProduct => cartProduct.cart, { nullable: true })
   products?: CartProduct[];
 
+  // ! Payments of "this" card are not deleted, so to be retrieved later.
+  // ! But cart should be deleted so that it can not be used again for charging
   @OneToMany(() => Payment, payment => payment.cart, { nullable: true })
   payments?: Payment[];
 
@@ -55,9 +57,41 @@ export class Cart extends BaseEntity {
     return undefined;
   }
 
-  async softRemove(): Promise<any> {
+  async getBeachBarTotalPrice(beachBarId: number): Promise<number | undefined> {
+    if (this.products) {
+      const products = this.products.filter(product => product.product.beachBarId === beachBarId && !product.product.deletedAt);
+      if (products) {
+        const total = products.reduce((sum, i) => {
+          return sum + i.product.price * i.quantity;
+        }, 0);
+        return total;
+      }
+      return undefined;
+    }
+    return undefined;
+  }
+
+  async getProductTotalPrice(productId: number): Promise<number | undefined> {
+    if (this.products) {
+      const product = this.products.filter(product => product.product.id === productId);
+      if (product) {
+        const total = product.reduce((sum, i) => {
+          return sum + i.product.price * i.quantity;
+        }, 0);
+        return total;
+      }
+      return undefined;
+    }
+    return undefined;
+  }
+
+  async customSoftRemove(deleteTotal = true): Promise<any> {
     const findOptions: any = { cartId: this.id };
-    await softRemove(Cart, { id: this.id }, [CartProduct, Payment], findOptions);
+    if (deleteTotal) {
+      await softRemove(Cart, { id: this.id }, [CartProduct], findOptions);
+    } else {
+      await softRemove(Cart, { id: this.id });
+    }
   }
 }
 

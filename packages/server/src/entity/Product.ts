@@ -15,7 +15,6 @@ import { softRemove } from "../utils/softRemove";
 import { BeachBar } from "./BeachBar";
 import { BundleProductComponent } from "./BundleProductComponent";
 import { CartProduct } from "./CartProduct";
-import { Currency } from "./Currency";
 import { ProductCategory } from "./ProductCategory";
 import { ProductCouponCode } from "./ProductCouponCode";
 import { ProductPriceHistory } from "./ProductPriceHistory";
@@ -43,9 +42,6 @@ export class Product extends BaseEntity {
   @Column({ type: "decimal", precision: 5, scale: 2 })
   price: number;
 
-  @Column({ type: "integer", name: "currency_id", default: () => 1 })
-  currencyId: number;
-
   @Column({ type: "integer", name: "max_people" })
   maxPeople: number;
 
@@ -54,10 +50,6 @@ export class Product extends BaseEntity {
 
   @Column({ type: "boolean", name: "is_individual" })
   isIndividual: boolean;
-
-  @ManyToOne(() => Currency, currency => currency.products, { nullable: false })
-  @JoinColumn({ name: "currency_id" })
-  currency: Currency;
 
   @ManyToOne(() => BeachBar, beachBar => beachBar.products, { nullable: false, cascade: ["soft-remove", "recover"] })
   @JoinColumn({ name: "beach_bar_id" })
@@ -136,16 +128,6 @@ export class Product extends BaseEntity {
       return true;
     }
   }
-
-  // async checkAvailableTime(timeId: number, date?: Date): Promise<boolean> {
-  //   const formattedDate = date ? date.toISOString().slice(0, 40) : new Date().toISOString().slice(0, 10);
-  //   const reservationLimit = await ProductReservationLimit.find({ product: this, date: formattedDate });
-  //   if (reservationLimit) {
-  //     const limit =
-  //   } else {
-  //     return false;
-  //   }
-  // }
 
   async createProductComponents(update: boolean): Promise<void> {
     if (update) {

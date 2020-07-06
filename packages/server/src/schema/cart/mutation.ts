@@ -50,7 +50,7 @@ export const CartCrudMutation = extendType({
         }
 
         try {
-          await cart.softRemove();
+          await cart.customSoftRemove();
         } catch (err) {
           return { error: { message: `Something went wrong: ${err.message}` } };
         }

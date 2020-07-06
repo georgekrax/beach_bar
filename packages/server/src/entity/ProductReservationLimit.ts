@@ -11,7 +11,7 @@ import {
   UpdateDateColumn,
 } from "typeorm";
 import { softRemove } from "../utils/softRemove";
-import { HourTime } from "./HourTime";
+import { HourTime } from "./Time";
 import { Product } from "./Product";
 
 @Entity({ name: "product_reservation_limit", schema: "public" })

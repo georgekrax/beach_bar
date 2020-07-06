@@ -4,6 +4,7 @@ import { BeachBarFeeCurrency } from "./BeachBarFeeCurrency";
 import { Country } from "./Country";
 import { CurrencyProductPrice } from "./CurrencyProductPrice";
 import { Product } from "./Product";
+import { StripeFee } from "./StripeFee";
 
 @Entity({ name: "currency", schema: "public" })
 export class Currency extends BaseEntity {
@@ -25,15 +26,15 @@ export class Currency extends BaseEntity {
   @OneToMany(() => Country, country => country.currency, { nullable: true })
   countries?: Country[];
 
-  @OneToMany(() => Product, product => product.currency, { nullable: true })
-  products?: Product[];
-
   @OneToOne(() => CurrencyProductPrice, currencyProductPrice => currencyProductPrice.currency)
   productPrice: CurrencyProductPrice;
 
   @OneToMany(() => BeachBar, beachBar => beachBar.defaultCurrency, { nullable: true })
   beachBars?: Product[];
 
-  @OneToMany(() => BeachBarFeeCurrency, beachBarFeeCurrency => beachBarFeeCurrency.currency)
-  beachBarFees: BeachBarFeeCurrency[];
+  @OneToMany(() => BeachBarFeeCurrency, beachBarFeeCurrency => beachBarFeeCurrency.currency, { nullable: true })
+  beachBarFees?: BeachBarFeeCurrency[];
+
+  @OneToMany(() => StripeFee, stripeFee => stripeFee.currency, { nullable: true })
+  stripeFees?: StripeFee[];
 }

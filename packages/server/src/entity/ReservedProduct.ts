@@ -2,7 +2,6 @@ import {
   BaseEntity,
   Column,
   CreateDateColumn,
-  DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -12,7 +11,7 @@ import {
 import { softRemove } from "../utils/softRemove";
 import { Payment } from "./Payment";
 import { Product } from "./Product";
-import { HourTime } from "./HourTime";
+import { HourTime } from "./Time";
 
 @Entity({ name: "reserved_product", schema: "public" })
 export class ReservedProduct extends BaseEntity {
@@ -52,8 +51,12 @@ export class ReservedProduct extends BaseEntity {
   @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
   timestamp: Date;
 
-  @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
+  @Column({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Date;
+
+  async getPrice(): Promise<number | undefined> {
+    return this.payment.cart.getProductTotalPrice(this.productId);
+  }
 
   async softRemove(): Promise<any> {
     await softRemove(ReservedProduct, { id: this.id });

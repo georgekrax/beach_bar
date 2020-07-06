@@ -4,7 +4,7 @@ import { getCustomRepository } from "typeorm";
 import errors from "../../../constants/errors";
 import { CartRepository } from "../../../entity/Cart";
 import { CartProduct } from "../../../entity/CartProduct";
-import { HourTime } from "../../../entity/HourTime";
+import { HourTime } from "../../../entity/Time";
 import { Product } from "../../../entity/Product";
 import { DeleteType, ErrorType } from "../../returnTypes";
 import { DeleteResult } from "../../types";

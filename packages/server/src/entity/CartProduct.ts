@@ -13,7 +13,7 @@ import {
 import { softRemove } from "../utils/softRemove";
 import { Cart } from "./Cart";
 import { Product } from "./Product";
-import { HourTime } from "./HourTime";
+import { HourTime } from "./Time";
 
 @Entity({ name: "cart_product", schema: "public" })
 @Check(`"quantity" >= 0 AND "quantity" <= 20`)

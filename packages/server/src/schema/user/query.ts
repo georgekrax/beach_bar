@@ -39,8 +39,9 @@ export const UsersQuery = extendType({
             "beachBars",
             "beachBars.user",
             "beachBars.beachBar",
-            "reviews",
-            "reviews.visitType",
+            "customer",
+            "customer.reviews",
+            "customer.reviews.visitType",
           ],
         });
         if (!user) {
@@ -58,10 +59,10 @@ export const UsersQuery = extendType({
           username: user.username,
           firstName: user.firstName,
           lastName: user.lastName,
-          reviews: payload.scope.some(
-            scope => ["beach_bar@crud:user", "beach_bar@crud:user_review", "hashtag@read:user_review"].includes(scope) && user.reviews,
+          reviews: payload.scope.some(scope =>
+            ["beach_bar@crud:user", "beach_bar@crud:user_review", "hashtag@read:user_review"].includes(scope),
           )
-            ? user.reviews
+            ? user.customer && user.customer.reviews
             : undefined,
           account: payload.scope.some(scope => ["beach_bar@crud:user", "beach_bar@read:user_account"].includes(scope))
             ? {

@@ -20,6 +20,7 @@ import { AddCustomerType } from "../schema/customer/returnTypes";
 import { ErrorType } from "../schema/returnTypes";
 import { softRemove } from "../utils/softRemove";
 import { Account } from "./Account";
+import { BeachBarReview } from "./BeachBarReview";
 import { Card } from "./Card";
 import { City } from "./City";
 import { Country } from "./Country";
@@ -55,6 +56,9 @@ export class Customer extends BaseEntity {
 
   @OneToMany(() => Card, card => card.customer, { nullable: true })
   cards?: Card[];
+
+  @OneToMany(() => BeachBarReview, beachBarReview => beachBarReview.customer, { nullable: true })
+  reviews?: BeachBarReview[];
 
   @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
   updatedAt: Date;

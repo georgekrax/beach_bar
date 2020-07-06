@@ -60,9 +60,6 @@ export class User extends BaseEntity {
   @OneToOne(() => Account, account => account.user)
   account: Account;
 
-  @OneToMany(() => BeachBarReview, beachBarReview => beachBarReview.user)
-  reviews?: BeachBarReview[];
-
   // * excluded in softRemove
   @OneToMany(() => UserSearch, userSearch => userSearch.user)
   searches?: UserSearch[];

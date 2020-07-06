@@ -13,7 +13,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import errors from "../constants/errors";
 import { softRemove } from "../utils/softRemove";
 import { BeachBarEntryFee } from "./BeachBarEntryFee";
 import { BeachBarFeature } from "./BeachBarFeature";
@@ -25,6 +24,18 @@ import { BeachBarRestaurant } from "./BeachBarRestaurant";
 import { BeachBarReview } from "./BeachBarReview";
 import { Currency } from "./Currency";
 import { Product } from "./Product";
+import { StripeFee } from "./StripeFee";
+
+interface GetFullPricingReturnType {
+  pricingFee: BeachBarPricingFee;
+  currencyFee: BeachBarFeeCurrency;
+}
+
+interface GetBeachBarPaymentFee {
+  total: number;
+  transferAmount: number;
+  beachBarAppFee: number;
+}
 
 @Entity({ name: "beach_bar", schema: "public" })
 @Check(`"avgRating" >= 0 AND "avgRating" <= 10`)
@@ -32,7 +43,7 @@ export class BeachBar extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column("varchar", { length: 255, unique: true })
+  @Column("varchar", { length: 255, name: "name", unique: true })
   name: string;
 
   @Column({ type: "text", name: "description", nullable: true })
@@ -52,6 +63,9 @@ export class BeachBar extends BaseEntity {
 
   @Column({ type: "boolean", name: "is_active", default: () => false })
   isActive: boolean;
+
+  @Column("varchar", { length: 255, name: "stripe_connect_id", unique: true })
+  stripeConnectId: string;
 
   @ManyToOne(() => BeachBarPricingFee, beachBarPricingFee => beachBarPricingFee.beachBars)
   @JoinColumn({ name: "fee_id" })
@@ -109,13 +123,18 @@ export class BeachBar extends BaseEntity {
     return undefined;
   }
 
-  async getPricingFee(): Promise<BeachBarPricingFee> {
+  async getPricingFee(): Promise<BeachBarPricingFee | undefined> {
     const entryFees = await BeachBarEntryFee.find({ beachBarId: this.id });
-    const entryFeesValues = entryFees.map(entryFee => entryFee.fee);
-    const minEntryFee = entryFeesValues.reduce((a, b) => Math.min(a, b));
+    let minEntryFee: number;
+    if (entryFees.length === 0) {
+      minEntryFee = 0;
+    } else {
+      const entryFeesValues = entryFees.map(entryFee => entryFee.fee);
+      minEntryFee = entryFeesValues.reduce((a, b) => Math.min(a, b));
+    }
     const pricingFee = await BeachBarPricingFee.findOne({ entryFeeLimit: LessThanOrEqual(minEntryFee) });
     if (!pricingFee) {
-      throw new Error(errors.SOMETHING_WENT_WRONG);
+      return undefined;
     }
     return pricingFee;
   }
@@ -128,7 +147,7 @@ export class BeachBar extends BaseEntity {
     }
   }
 
-  async getFullPricingFee(): Promise<{ pricingFee: BeachBarPricingFee; currencyFee: BeachBarFeeCurrency } | undefined> {
+  async getFullPricingFee(): Promise<GetFullPricingReturnType | undefined> {
     const pricingFee = await this.getPricingFee();
     const currencyFee = await BeachBarFeeCurrency.findOne({ fee: pricingFee, currency: this.defaultCurrency });
     if (!pricingFee || !currencyFee) {
@@ -137,6 +156,29 @@ export class BeachBar extends BaseEntity {
     return {
       pricingFee,
       currencyFee,
+    };
+  }
+
+  async getBeachBarPaymentFee(cardProcessingFee: StripeFee, total: number): Promise<GetBeachBarPaymentFee | undefined> {
+    const beachBarPricingFee = await this.getFullPricingFee();
+    if (!beachBarPricingFee) {
+      return undefined;
+    }
+    const { pricingFee, currencyFee } = beachBarPricingFee;
+    const percentageFee = (total * parseInt(pricingFee.percentageValue.toString())) / 100;
+    const beachBarAppFee = percentageFee + parseFloat(currencyFee.pricingValue.toString());
+    const totalPricingFeeWithoutStripe = Math.trunc(total - beachBarAppFee);
+    const stripeTotalFee: number = parseFloat(
+      (
+        total * (parseFloat(cardProcessingFee.percentageValue.toString()) / 100) +
+        parseFloat(cardProcessingFee.pricingFee.toString())
+      ).toFixed(2),
+    );
+    const transferAmount = Math.trunc(totalPricingFeeWithoutStripe - stripeTotalFee);
+    return {
+      total,
+      transferAmount,
+      beachBarAppFee,
     };
   }
 
