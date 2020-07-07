@@ -16,7 +16,7 @@ export class ProductVoucherCode extends BaseEntity {
   @PrimaryGeneratedColumn({ type: "bigint" })
   id: bigint;
 
-  @Column("varchar", { length: 7, name: "ref_code" })
+  @Column("varchar", { length: 23, name: "ref_code" })
   refCode: string;
 
   @Column({ type: "integer", name: "campaign_id" })

@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { BeachBar } from "../../entity/BeachBar";
 import { CurrencyProductPrice } from "../../entity/CurrencyProductPrice";
 import { ProductCategory } from "../../entity/ProductCategory";
@@ -17,7 +18,7 @@ export const checkMinimumProductPrice = async (
   }
   if (
     !category.whitelist &&
-    !beachBar.entryFees.map(entryFee => entryFee.date).some(date => date.getTime() > Date.now()) &&
+    !beachBar.entryFees.map(entryFee => entryFee.date).some(date => dayjs(date).isAfter(dayjs())) &&
     price > productPrice.price
   ) {
     throw new Error("You should set an entry fee for the next days, to have 0 as a price for this type of product");

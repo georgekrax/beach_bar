@@ -16,6 +16,8 @@ export * from "./beach_bar/restaurant/food_item/types";
 export * from "./beach_bar/restaurant/mutation";
 export * from "./beach_bar/restaurant/types";
 export * from "./beach_bar/review/answer/types";
+export * from "./beach_bar/review/query";
+export * from "./beach_bar/review/mutation";
 export * from "./beach_bar/review/types";
 export * from "./beach_bar/service/mutation";
 export * from "./beach_bar/service/types";

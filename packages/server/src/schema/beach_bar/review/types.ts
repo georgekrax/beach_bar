@@ -1,9 +1,9 @@
 import { BigIntScalar, DateTimeScalar } from "@beach_bar/common";
 import { objectType, unionType } from "@nexus/schema";
-import { BeachBarType } from "../types";
 import { CustomerType } from "../../customer/types";
-import { MonthTimeType } from "../../details/time/types";
 import { ReviewVisitType } from "../../details/review/types";
+import { MonthTimeType } from "../../details/time/types";
+import { BeachBarType } from "../types";
 
 export const BeachBarReviewType = objectType({
   name: "BeachBarReview",
@@ -28,11 +28,6 @@ export const BeachBarReviewType = objectType({
       nullable: false,
       description: "The timestamp recorded, when the user's account was created",
     });
-    t.field("visitTime", {
-      type: DateTimeScalar,
-      nullable: false,
-      description: "The date when the user visited the reviewed #beach_bar",
-    });
     t.field("beachBar", {
       type: BeachBarType,
       description: "The #beach_bar of the review",
@@ -41,7 +36,7 @@ export const BeachBarReviewType = objectType({
     });
     t.field("customer", {
       type: CustomerType,
-      description: "The customer submitted the particular review for the #beach_bar",
+      description: "The customer that submitted the particular review for the #beach_bar",
       nullable: false,
       resolve: o => o.customer,
     });
@@ -54,7 +49,7 @@ export const BeachBarReviewType = objectType({
     t.field("month", {
       type: MonthTimeType,
       description: "The visited month of the customer visited the #beach_bar",
-      nullable: false,
+      nullable: true,
       resolve: o => o.monthTime,
     });
   },

@@ -1,8 +1,8 @@
 import { BaseEntity, Check, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BeachBarReview } from "./BeachBarReview";
 import { CartProduct } from "./CartProduct";
 import { ProductReservationLimit } from "./ProductReservationLimit";
 import { ReservedProduct } from "./ReservedProduct";
-import { BeachBarReview } from "./BeachBarReview";
 
 @Entity({ name: "hour_time", schema: "public" })
 @Check(`length("value") = 8`)
@@ -35,7 +35,7 @@ export class MonthTime extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column("varchar", { length: 9, name: "utc_value", unique: true })
+  @Column("varchar", { length: 9, name: "value", unique: true })
   value: string;
 
   @Column({ type: "integer", name: "days" })

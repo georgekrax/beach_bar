@@ -95,7 +95,7 @@ export const PaymentCrudMutation = extendType({
         try {
           const newPayments: Payment[] = [];
           for (let i = 0; i < uniqueBeachBars.length; i++) {
-            const refCode = generateID(10);
+            const refCode = generateID(16);
             const beachBarId = uniqueBeachBars[i].id;
             const products = cart.products.filter(product => product.product.beachBarId === beachBarId);
             const total = await cart.getBeachBarTotalPrice(beachBarId);

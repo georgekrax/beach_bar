@@ -1,10 +1,10 @@
 import { MyContext } from "@beach_bar/common";
-import * as sgClient from "@sendgrid/client";
-import * as sgMail from "@sendgrid/mail";
+import sgClient from "@sendgrid/client";
+import sgMail from "@sendgrid/mail";
 import { execute, makePromise } from "apollo-link";
 import { ApolloServer } from "apollo-server-express";
-import * as cookieParser from "cookie-parser";
-import * as express from "express";
+import cookieParser from "cookie-parser";
+import express from "express";
 import Redis from "ioredis";
 import { verify } from "jsonwebtoken";
 import "reflect-metadata";

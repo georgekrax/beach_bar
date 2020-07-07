@@ -40,8 +40,8 @@ export class BeachBarReview extends BaseEntity {
   @Column({ type: "integer", name: "visit_type_id", nullable: true })
   visitTypeId?: number;
 
-  @Column({ type: "integer", name: "month_time_id" })
-  monthTimeId: number;
+  @Column({ type: "integer", name: "month_time_id", nullable: true })
+  monthTimeId?: number;
 
   @Column({ type: "integer", name: "upvotes", nullable: true, default: () => 0 })
   upvotes: number;
@@ -71,9 +71,9 @@ export class BeachBarReview extends BaseEntity {
   @JoinColumn({ name: "visit_type_id" })
   visitType?: ReviewVisitType;
 
-  @ManyToOne(() => MonthTime, monthTime => monthTime.reviews, { nullable: false })
+  @ManyToOne(() => MonthTime, monthTime => monthTime.reviews, { nullable: true })
   @JoinColumn({ name: "month_time_id" })
-  monthTime: MonthTime;
+  monthTime?: MonthTime;
 
   @OneToOne(() => ReviewAnswer, reviewAnswer => reviewAnswer.review)
   answer: ReviewAnswer;
@@ -86,6 +86,44 @@ export class BeachBarReview extends BaseEntity {
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt: Date;
+
+  async update(
+    ratingValue?: number,
+    visitTypeId?: number,
+    monthTimeId?: number,
+    niceComment?: string,
+    badComment?: string,
+  ): Promise<BeachBarReview | undefined> {
+    try {
+      if (ratingValue && ratingValue !== this.ratingValue && ratingValue >= 1 && ratingValue <= 10) {
+        this.ratingValue = ratingValue;
+      }
+      if (visitTypeId && visitTypeId !== this.visitTypeId) {
+        const visitType = await ReviewVisitType.findOne(visitTypeId);
+        if (!visitType) {
+          throw new Error();
+        }
+        this.visitType = visitType;
+      }
+      if (monthTimeId && monthTimeId !== this.monthTimeId) {
+        const monthTime = await MonthTime.findOne(monthTimeId);
+        if (!monthTime) {
+          throw new Error();
+        }
+        this.monthTime = monthTime;
+      }
+      if (niceComment && niceComment !== this.niceComment && niceComment.trim().length > 0) {
+        this.niceComment = niceComment;
+      }
+      if (badComment && badComment !== this.badComment && badComment.trim().length > 0) {
+        this.badComment = badComment;
+      }
+      await this.save();
+      return this;
+    } catch (err) {
+      throw new Error(err.message);
+    }
+  }
 
   async softRemove(): Promise<any> {
     const findOptions: any = { reviewId: this.id };

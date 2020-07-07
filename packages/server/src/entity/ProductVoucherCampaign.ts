@@ -4,8 +4,8 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  JoinColumn,
-  ManyToOne,
+  JoinTable,
+  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -22,9 +22,6 @@ export class ProductVoucherCampaign extends BaseEntity {
   @Column("varchar", { length: 75, name: "title" })
   title: string;
 
-  @Column({ type: "integer", name: "product_id" })
-  productId: number;
-
   @Column({ type: "decimal", precision: 5, scale: 2, name: "discount_amount" })
   discountAmount: number;
 
@@ -40,9 +37,19 @@ export class ProductVoucherCampaign extends BaseEntity {
   @Column({ type: "timestamptz", name: "valid_until", nullable: true })
   validUntil?: Date;
 
-  @ManyToOne(() => Product, product => product.voucherCampaigns, { nullable: false, cascade: ["soft-remove", "recover", "update"] })
-  @JoinColumn({ name: "product_id" })
-  product: Product;
+  @ManyToMany(() => Product, product => product.voucherCampaigns, { nullable: false })
+  @JoinTable({
+    name: "voucher_campaign_offer_product",
+    joinColumn: {
+      name: "voucher_campaign_id",
+      referencedColumnName: "id",
+    },
+    inverseJoinColumn: {
+      name: "product_id",
+      referencedColumnName: "id",
+    },
+  })
+  products: Product[];
 
   @OneToMany(() => ProductVoucherCode, productVoucherCode => productVoucherCode.campaign, { nullable: true })
   voucherCodes?: ProductVoucherCode[];

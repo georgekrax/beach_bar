@@ -1,3 +1,5 @@
+import dayjs from "dayjs";
+import minMax from "dayjs/plugin/minMax";
 import {
   BaseEntity,
   Column,
@@ -7,6 +9,7 @@ import {
   ManyToOne,
   MoreThanOrEqual,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
@@ -17,6 +20,7 @@ import { BeachBarReview } from "./BeachBarReview";
 import { Card } from "./Card";
 import { Cart } from "./Cart";
 import { PaymentStatus } from "./PaymentStatus";
+import { Product } from "./Product";
 import { RefundPercentage } from "./RefundPercentage";
 import { ReservedProduct } from "./ReservedProduct";
 
@@ -36,7 +40,7 @@ export class Payment extends BaseEntity {
   @Column({ type: "bigint", name: "card_id" })
   cardId: bigint;
 
-  @Column("varchar", { length: 10, name: "ref_code", unique: true })
+  @Column("varchar", { length: 16, name: "ref_code", unique: true })
   refCode: string;
 
   @Column({ type: "integer", name: "status_id", default: () => 1 })
@@ -54,11 +58,11 @@ export class Payment extends BaseEntity {
   @Column({ type: "integer", name: "transfer_amount" })
   transferAmount: number;
 
-  @ManyToOne(() => Cart, cart => cart.payments, { nullable: false })
+  @ManyToOne(() => Cart, cart => cart.payment, { nullable: false })
   @JoinColumn({ name: "cart_id" })
   cart: Cart;
 
-  @ManyToOne(() => Card, card => card.payments, { nullable: false })
+  @OneToOne(() => Card, card => card.payments, { nullable: false })
   @JoinColumn({ name: "card_id" })
   card: Card;
 
@@ -113,16 +117,14 @@ export class Payment extends BaseEntity {
   }
 
   async getRefundPercentage(): Promise<GetRefundPercentage | undefined> {
+    dayjs.extend(minMax);
+
     const products = this.cart.products;
     if (!products) {
       return undefined;
     }
-    const minDate = products
-      .map(product => product.date)
-      .reduce(function (a, b) {
-        return a < b ? a : b;
-      });
-    const daysDiff = new Date().getTime() - new Date(minDate.toString()).getTime();
+    const minDate = dayjs.min(products.map(product => dayjs(product.date)));
+    const daysDiff = dayjs().toDate().getTime() - dayjs(minDate).toDate().getTime();
     const refundPercentage = await RefundPercentage.findOne({ daysMilliseconds: MoreThanOrEqual(daysDiff) });
     if (!refundPercentage) {
       return undefined;
@@ -132,6 +134,32 @@ export class Payment extends BaseEntity {
       refundPercentage,
       daysDiff,
     };
+  }
+
+  hasBeachBarProduct(beachBarId: number): boolean {
+    if (this.cart.products) {
+      return this.cart.products.some(product => product.product.beachBarId === beachBarId && !product.product.deletedAt);
+    } else {
+      return false;
+    }
+  }
+
+  getProductsMonth(beachBarId: number): number[] | undefined {
+    if (!this.cart.products) {
+      return undefined;
+    }
+    return this.cart.products
+      .filter(product => product.product.beachBarId === beachBarId)
+      .map(product => dayjs(product.date).month() + 1);
+  }
+
+  getBeachBarProducts(beachBarId: number): Product[] | undefined {
+    if (!this.hasBeachBarProduct(beachBarId) || !this.cart.products) {
+      return undefined;
+    }
+    const beachBarProducts = this.cart.products.map(product => product.product).filter(product => product.beachBarId === beachBarId);
+    console.log(beachBarProducts);
+    return beachBarProducts;
   }
 
   async softRemove(): Promise<any> {

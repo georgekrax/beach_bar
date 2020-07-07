@@ -9,6 +9,7 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   Repository,
 } from "typeorm";
@@ -37,8 +38,8 @@ export class Cart extends BaseEntity {
 
   // ! Payments of "this" card are not deleted, so to be retrieved later.
   // ! But cart should be deleted so that it can not be used again for charging
-  @OneToMany(() => Payment, payment => payment.cart, { nullable: true })
-  payments?: Payment[];
+  @OneToOne(() => Payment, payment => payment.cart, { nullable: true })
+  payment?: Payment;
 
   @CreateDateColumn({ name: "timestamp", type: "timestamptz", default: () => `NOW()` })
   timestamp: Date;

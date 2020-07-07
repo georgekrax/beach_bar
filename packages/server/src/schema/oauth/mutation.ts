@@ -1,4 +1,6 @@
+import { EmailScalar, MyContext } from "@beach_bar/common";
 import { arg, booleanArg, extendType, stringArg } from "@nexus/schema";
+import dayjs from "dayjs";
 import fetch from "node-fetch";
 import errors from "../../constants/errors";
 import { loginDetailStatus } from "../../entity/LoginDetails";
@@ -12,7 +14,6 @@ import { ErrorType } from "../returnTypes";
 import { UserLoginDetailsInput } from "../user/types";
 import { AuthorizeWithOAuthType } from "./returnTypes";
 import { OAuthAuthorizationResult } from "./types";
-import { MyContext, EmailScalar } from "@beach_bar/common";
 
 export const AuthorizeWithOAuthProviders = extendType({
   type: "Mutation",
@@ -337,7 +338,7 @@ export const AuthorizeWithOAuthProviders = extendType({
               firstName = data.first_name;
               lastName = data.last_name;
               if (data.birthday) {
-                birthday = new Date(data.birthday);
+                birthday = dayjs(data.birthday).toDate();
               }
               if (data.picture && !data.picture.is_silhouette) {
                 pictureUrl = data.picture.data.url;

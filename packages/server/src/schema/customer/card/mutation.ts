@@ -1,4 +1,6 @@
+import { BigIntScalar, MyContext } from "@beach_bar/common";
 import { arg, booleanArg, extendType, intArg, stringArg } from "@nexus/schema";
+import dayjs from "dayjs";
 import { getCustomRepository } from "typeorm";
 import errors from "../../../constants/errors";
 import { Card, CardRepository } from "../../../entity/Card";
@@ -9,7 +11,6 @@ import { DeleteType, ErrorType } from "../../returnTypes";
 import { DeleteResult } from "../../types";
 import { AddCardType, UpdateCardType } from "./returnTypes";
 import { AddCardResult, UpdateCardResult } from "./types";
-import { BigIntScalar, MyContext } from "@beach_bar/common";
 
 export const CardCrudMutation = extendType({
   type: "Mutation",
@@ -134,10 +135,10 @@ export const CardCrudMutation = extendType({
         if (cardholderName && cardholderName.trim().length === 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid name" } };
         }
-        if (expMonth && (expMonth < new Date().getMonth() || expMonth < 1 || expMonth > 12)) {
+        if (expMonth && (expMonth < dayjs().month() + 1 || expMonth < 1 || expMonth > 12)) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid expiration month" } };
         }
-        if (expYear && (expYear < new Date().getFullYear || expYear.toString().length !== 4)) {
+        if (expYear && (expYear < dayjs().year() || expYear.toString().length !== 4)) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid expiration year" } };
         }
 

@@ -4,14 +4,14 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  JoinColumn,
-  ManyToOne,
+  JoinTable,
+  ManyToMany,
   PrimaryGeneratedColumn,
   // eslint-disable-next-line prettier/prettier
   UpdateDateColumn,
 } from "typeorm";
-import { Product } from "./Product";
 import { softRemove } from "../utils/softRemove";
+import { Product } from "./Product";
 
 @Entity({ name: "product_coupon_code", schema: "public" })
 export class ProductCouponCode extends BaseEntity {
@@ -21,11 +21,8 @@ export class ProductCouponCode extends BaseEntity {
   @Column("varchar", { length: 75, name: "title" })
   title: string;
 
-  @Column("varchar", { length: 10, name: "ref_code", unique: true })
+  @Column("varchar", { length: 18, name: "ref_code", unique: true })
   refCode: string;
-
-  @Column({ type: "integer", name: "product_id" })
-  productId: number;
 
   @Column({ type: "decimal", precision: 5, scale: 2, name: "discount_amount" })
   discountAmount: number;
@@ -42,12 +39,19 @@ export class ProductCouponCode extends BaseEntity {
   @Column({ type: "timestamptz", name: "valid_until", nullable: true })
   validUntil?: Date;
 
-  @ManyToOne(() => Product, product => product.coupons, {
-    nullable: false,
-    cascade: ["soft-remove", "recover", "update"],
+  @ManyToMany(() => Product, product => product.coupons, { nullable: false })
+  @JoinTable({
+    name: "coupon_code_offer_product",
+    joinColumn: {
+      name: "coupon_code_id",
+      referencedColumnName: "id",
+    },
+    inverseJoinColumn: {
+      name: "product_id",
+      referencedColumnName: "id",
+    },
   })
-  @JoinColumn({ name: "product_id" })
-  product: Product;
+  products: Product[];
 
   @UpdateDateColumn({ name: "updated_at", type: "timestamptz", default: () => `NOW()` })
   updatedAt: Date;

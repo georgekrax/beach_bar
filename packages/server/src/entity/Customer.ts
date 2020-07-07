@@ -24,6 +24,7 @@ import { BeachBarReview } from "./BeachBarReview";
 import { Card } from "./Card";
 import { City } from "./City";
 import { Country } from "./Country";
+import { Payment } from "./Payment";
 import { User } from "./User";
 
 @Entity({ name: "customer", schema: "public" })
@@ -68,6 +69,21 @@ export class Customer extends BaseEntity {
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Date;
+
+  checkReviewsQuantity(beachBarId: number, payment: Payment): boolean {
+    if (this.reviews) {
+      const customerBeachBarReviews = this.reviews.filter(review => review.beachBarId === beachBarId && !review.deletedAt);
+      if (customerBeachBarReviews && customerBeachBarReviews.length >= 1) {
+        const paymentBeachBarProducts = payment.getBeachBarProducts(beachBarId);
+        if (paymentBeachBarProducts && paymentBeachBarProducts.length <= customerBeachBarReviews.length) {
+          return false;
+        }
+        return true;
+      }
+      return true;
+    }
+    return true;
+  }
 
   async update(phoneNumber?: string, countryIsoCode?: string): Promise<Customer | any> {
     try {

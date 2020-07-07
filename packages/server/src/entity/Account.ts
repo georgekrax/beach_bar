@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import {
   BaseEntity,
   BeforeInsert,
@@ -101,9 +102,8 @@ export class Account extends BaseEntity {
   @BeforeUpdate()
   calculateUsersAge(): void {
     if (this.birthday) {
-      const differenceMs = Date.now() - new Date(this.birthday).getTime();
-      const ageDifference = new Date(differenceMs);
-      const ageFormat = Math.abs(ageDifference.getUTCFullYear() - 1970);
+      const differenceMs = dayjs().subtract(+dayjs(this.birthday), "millisecond");
+      const ageFormat = Math.abs(dayjs(differenceMs).year() - 1970);
       this.age = ageFormat;
     }
   }

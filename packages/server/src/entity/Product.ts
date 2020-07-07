@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import {
   BaseEntity,
   Column,
@@ -10,7 +11,9 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  ManyToMany,
 } from "typeorm";
+import { dayjsFormat } from "../constants/dayjs";
 import { softRemove } from "../utils/softRemove";
 import { BeachBar } from "./BeachBar";
 import { BundleProductComponent } from "./BundleProductComponent";
@@ -74,10 +77,10 @@ export class Product extends BaseEntity {
   @OneToMany(() => ReservedProduct, reservedProduct => reservedProduct.product, { nullable: true })
   reservedProducts?: ReservedProduct[];
 
-  @OneToMany(() => ProductCouponCode, productCouponCode => productCouponCode.product, { nullable: true })
+  @ManyToMany(() => ProductCouponCode, productCouponCode => productCouponCode.products, { nullable: true })
   coupons?: ProductCouponCode[];
 
-  @OneToMany(() => ProductVoucherCampaign, productCouponCode => productCouponCode.product, { nullable: true })
+  @ManyToMany(() => ProductVoucherCampaign, productCouponCode => productCouponCode.products, { nullable: true })
   voucherCampaigns?: ProductCouponCode[];
 
   @UpdateDateColumn({ name: "updated_at", type: "timestamptz", default: () => `NOW()` })
@@ -90,7 +93,7 @@ export class Product extends BaseEntity {
   deletedAt?: Date;
 
   async getReservationLimit(timeId: number, date?: Date): Promise<number | undefined> {
-    const formattedDate = date ? new Date(date).toISOString().slice(0, 40) : new Date().toISOString().slice(0, 10);
+    const formattedDate = date ? dayjs(date).format(dayjsFormat.ISO_STRING) : dayjs().format(dayjsFormat.ISO_STRING);
     const reservationLimit = await ProductReservationLimit.find({ product: this, date: formattedDate });
     if (reservationLimit) {
       const limitNumber = reservationLimit.find(limit => timeId >= limit.startTimeId && timeId <= limit.endTimeId);
@@ -108,7 +111,7 @@ export class Product extends BaseEntity {
     const reservedProductsNumber = await getManager()
       .createQueryBuilder(ReservedProduct, "reservedProduct")
       .select("COUNT(*)", "count")
-      .where("reservedProduct.date = :date", { date: date ? date : new Date() })
+      .where("reservedProduct.date = :date", { date: date ? date : dayjs().format(dayjsFormat.ISO_STRING) })
       .andWhere("reservedProduct.timeId = :timeId", { timeId })
       .getRawOne();
 

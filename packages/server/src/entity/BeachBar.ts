@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import {
   BaseEntity,
   Check,
@@ -116,7 +117,7 @@ export class BeachBar extends BaseEntity {
         return undefined;
       }
     }
-    const entryFees = await BeachBarEntryFee.findOne({ beachBar: this, date: date ? date : new Date() });
+    const entryFees = await BeachBarEntryFee.findOne({ beachBar: this, date: date ? date : dayjs() });
     if (entryFees) {
       return entryFees;
     }
