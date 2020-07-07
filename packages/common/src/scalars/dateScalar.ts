@@ -1,4 +1,5 @@
 import { scalarType } from "@nexus/schema";
+import dayjs from "dayjs";
 import { Kind } from "graphql";
 
 export const DateScalar = scalarType({
@@ -6,14 +7,14 @@ export const DateScalar = scalarType({
   asNexusMethod: "date",
   description: "Use JavaScript Date object for date-only fields.",
   serialize(value) {
-    return value;
+    return dayjs(value).format("DD-MM-YYYY");
   },
   parseValue(value) {
-    return new Date(value);
+    return dayjs(value);
   },
   parseLiteral(ast) {
     if (ast.kind === Kind.STRING) {
-      return new Date(ast.value);
+      return dayjs(ast.value);
     }
     return null;
   },

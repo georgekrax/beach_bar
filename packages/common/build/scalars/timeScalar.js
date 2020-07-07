@@ -1,7 +1,11 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TimeScalar = exports.serializeTimeString = exports.serializeTime = exports.parseTime = exports.validateTime = exports.validateJSDate = void 0;
 const schema_1 = require("@nexus/schema");
+const dayjs_1 = __importDefault(require("dayjs"));
 const graphql_1 = require("graphql");
 exports.validateJSDate = (date) => {
     const time = date.getTime();
@@ -12,8 +16,8 @@ exports.validateTime = (time) => {
     return TIME_REGEX.test(time);
 };
 exports.parseTime = (time) => {
-    const currentDateString = new Date().toISOString();
-    return new Date(currentDateString.substr(0, currentDateString.indexOf("T") + 1) + time);
+    const currentDateString = dayjs_1.default().toISOString();
+    return dayjs_1.default(currentDateString.substr(0, currentDateString.indexOf("T") + 1) + time).toDate();
 };
 exports.serializeTime = (date) => {
     const dateTimeString = date.toISOString();

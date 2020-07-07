@@ -1,4 +1,5 @@
 import { scalarType } from "@nexus/schema";
+import dayjs from "dayjs";
 import { GraphQLError, Kind } from "graphql";
 
 export const DateTimeScalar = scalarType({
@@ -8,16 +9,24 @@ export const DateTimeScalar = scalarType({
   serialize(value) {
     let v = value;
 
-    if (!(v instanceof Date) && typeof v !== "string" && typeof v !== "number") {
-      throw new TypeError(`Value is not an instance of Date, Date string or number: ${JSON.stringify(v)}`);
+    if (
+      !(v instanceof Date) &&
+      typeof v !== "string" &&
+      typeof v !== "number"
+    ) {
+      throw new TypeError(
+        `Value is not an instance of Date, Date string or number: ${JSON.stringify(
+          v
+        )}`
+      );
     }
 
     if (typeof v === "string") {
-      v = new Date();
+      v = dayjs();
 
       v.setTime(Date.parse(value));
     } else if (typeof v === "number") {
-      v = new Date(v);
+      v = dayjs(v);
     }
 
     if (Number.isNaN(v.getTime())) {
@@ -27,7 +36,7 @@ export const DateTimeScalar = scalarType({
     return v.toJSON();
   },
   parseValue(value) {
-    const date = new Date(value);
+    const date: any = dayjs(value);
 
     // eslint-disable-next-line no-restricted-globals
     if (Number.isNaN(date.getTime())) {
@@ -38,10 +47,14 @@ export const DateTimeScalar = scalarType({
   },
   parseLiteral(ast) {
     if (ast.kind !== Kind.STRING && ast.kind !== Kind.INT) {
-      throw new GraphQLError(`Can only parse strings & integers to dates but got a: ${ast.kind}`);
+      throw new GraphQLError(
+        `Can only parse strings & integers to dates but got a: ${ast.kind}`
+      );
     }
 
-    const result = new Date(ast.kind === Kind.INT ? Number(ast.value) : ast.value);
+    const result: any = dayjs(
+      ast.kind === Kind.INT ? Number(ast.value) : ast.value
+    );
 
     // eslint-disable-next-line no-restricted-globals
     if (Number.isNaN(result.getTime())) {

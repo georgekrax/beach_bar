@@ -1,4 +1,5 @@
 import { scalarType } from "@nexus/schema";
+import dayjs from "dayjs";
 import { Kind } from "graphql";
 
 export const validateJSDate = (date: Date): boolean => {
@@ -12,10 +13,10 @@ export const validateTime = (time: string): boolean => {
 };
 
 export const parseTime = (time: string): Date => {
-  const currentDateString = new Date().toISOString();
-  return new Date(
+  const currentDateString = dayjs().toISOString();
+  return dayjs(
     currentDateString.substr(0, currentDateString.indexOf("T") + 1) + time
-  );
+  ).toDate();
 };
 
 export const serializeTime = (date: Date): string => {
