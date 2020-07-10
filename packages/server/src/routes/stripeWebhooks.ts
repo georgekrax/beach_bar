@@ -1,5 +1,5 @@
 /* eslint-disable no-case-declarations */
-import * as express from "express";
+import { Request, Response, Router } from "express";
 import { getCustomRepository } from "typeorm";
 import errors from "../constants/errors";
 import { webhook } from "../constants/stripe";
@@ -8,7 +8,14 @@ import { Customer, CustomerRepository } from "../entity/Customer";
 import { Payment } from "../entity/Payment";
 import { stripe } from "../index";
 
-export const router = express.Router();
+export const router = Router();
+
+router.get("/connect/callback", async (req: Request, res: Response) => {
+  const qs = new URL(req.url, process.env.HOSTNAME_WITH_HTTP).searchParams;
+  const code = qs.get("code");
+  const state = qs.get("state");
+  return res.send(`<h2>Redirected from Stripe</h2><p>Code: ${code}</p><br><p>State: ${state}</p>`);
+});
 
 router.post("/webhooks/customer_and_cards", async (req, res) => {
   const sig: any = req.headers["stripe-signature"];

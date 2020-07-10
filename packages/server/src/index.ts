@@ -52,7 +52,10 @@ const startServer = async (): Promise<any> => {
   sgClient.setApiKey(process.env.SENDGRID_API_KEY!.toString());
   sgMail.setApiKey(process.env.SENDGRID_API_KEY!.toString());
 
-  stripe = new Stripe(process.env.STRIPE_SECRET_KEY!.toString(), { apiVersion: "2020-03-02", typescript: true });
+  stripe = new Stripe(
+    process.env.NODE_ENV === "production" ? process.env.STRIPE_SECRET_LIVE_KEY!.toString() : process.env.STRIPE_SECRET_KEY!.toString(),
+    { apiVersion: "2020-03-02", typescript: true },
+  );
 
   const server = new ApolloServer({
     schema,

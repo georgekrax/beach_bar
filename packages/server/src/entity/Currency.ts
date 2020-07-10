@@ -5,6 +5,7 @@ import { Country } from "./Country";
 import { CurrencyProductPrice } from "./CurrencyProductPrice";
 import { Product } from "./Product";
 import { StripeFee } from "./StripeFee";
+import { StripeMinimumCurrency } from "./StripeMinimumCurrency";
 
 @Entity({ name: "currency", schema: "public" })
 export class Currency extends BaseEntity {
@@ -37,4 +38,7 @@ export class Currency extends BaseEntity {
 
   @OneToMany(() => StripeFee, stripeFee => stripeFee.currency, { nullable: true })
   stripeFees?: StripeFee[];
+
+  @OneToOne(() => StripeMinimumCurrency, stripeMinimumCurrency => stripeMinimumCurrency.currency)
+  stripeMinimumCurrency: StripeMinimumCurrency;
 }

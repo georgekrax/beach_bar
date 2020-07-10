@@ -38,7 +38,11 @@
     "SENDGRID_API_KEY": "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",
     "SENDGRID_EMAIL_ADDRESS": "georgekraxt@gmail.com",
     "STRIPE_PUBLIC_KEY": "pk_test_J6ApRf7LRZpKzkCWmTOdALIC00R0kXI0RG",
+    "STRIPE_PUBLIC_LIVE_KEY": "pk_live_BADrIMil7ABGIBHwNFadYpgH001HRZQhm8",
     "STRIPE_SECRET_KEY": "sk_test_FnNEVSMoCjZ8sTwtexvzNa7V00rKq6TKN8",
+    "STRIPE_SECRET_LIVE_KEY": "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",
+    "STRIPE_OAUTH_CLIENT_ID": "ca_GT8iLkbWDbc7jOwsCBgroRhxT5Y49nuC",
+    "STRIPE_CONNECT_OAUTH_REDIRECT_URI": "http://localhost:4000/stripe/connect/callback",
     "STRIPE_WEBHOOKS_SECRET": "whsec_LlbTyS7qvc9VKKVloOU980z32s3Kr2k4",
     "STRIPE_PAYMENT_WEBHOOKS_SECRET": "whsec_13NSeIuMLu3mDIjjbhbLgK5miakcczgW",
     "STRIPE_WEBHOOK_ORIGIN_URL": "/stripe/webhooks"

@@ -43,10 +43,10 @@ export class BeachBarReview extends BaseEntity {
   @Column({ type: "integer", name: "month_time_id", nullable: true })
   monthTimeId?: number;
 
-  @Column({ type: "integer", name: "upvotes", nullable: true, default: () => 0 })
+  @Column({ type: "integer", name: "upvotes", default: () => 0 })
   upvotes: number;
 
-  @Column({ type: "integer", name: "downvotes", nullable: true, default: () => 0 })
+  @Column({ type: "integer", name: "downvotes", default: () => 0 })
   downvotes: number;
 
   @Column({ type: "text", name: "nice_comment", nullable: true })
@@ -93,7 +93,7 @@ export class BeachBarReview extends BaseEntity {
     monthTimeId?: number,
     niceComment?: string,
     badComment?: string,
-  ): Promise<BeachBarReview | undefined> {
+  ): Promise<BeachBarReview | any> {
     try {
       if (ratingValue && ratingValue !== this.ratingValue && ratingValue >= 1 && ratingValue <= 10) {
         this.ratingValue = ratingValue;
@@ -119,6 +119,23 @@ export class BeachBarReview extends BaseEntity {
         this.badComment = badComment;
       }
       await this.save();
+      return this;
+    } catch (err) {
+      throw new Error(err.message);
+    }
+  }
+
+  async vote(upvote?: boolean, downvote?: boolean): Promise<BeachBarReview | any> {
+    try {
+      if (upvote) {
+        this.upvotes = this.upvotes + 1;
+        await this.save();
+      } else if (downvote) {
+        console.log(downvote);
+        console.log(this.downvotes + 1);
+        this.downvotes = this.downvotes + 1;
+        await this.save();
+      }
       return this;
     } catch (err) {
       throw new Error(err.message);

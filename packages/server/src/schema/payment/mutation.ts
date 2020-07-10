@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { BigIntScalar, MyContext } from "@beach_bar/common";
+import { BigIntScalar, generateID, MyContext } from "@beach_bar/common";
 import { arg, extendType } from "@nexus/schema";
 import errors from "../../constants/errors";
 import { payment as paymentStatus } from "../../constants/status";
@@ -7,7 +7,6 @@ import { Card } from "../../entity/Card";
 import { Cart } from "../../entity/Cart";
 import { Payment } from "../../entity/Payment";
 import { PaymentStatus } from "../../entity/PaymentStatus";
-import { generateID } from "@beach_bar/common";
 import { StripeFee } from "../../entity/StripeFee";
 import { DeleteType, ErrorType } from "../returnTypes";
 import { DeleteResult } from "../types";
@@ -98,10 +97,11 @@ export const PaymentCrudMutation = extendType({
             const refCode = generateID(16);
             const beachBarId = uniqueBeachBars[i].id;
             const products = cart.products.filter(product => product.product.beachBarId === beachBarId);
-            const total = await cart.getBeachBarTotalPrice(beachBarId);
-            if (total == undefined || total === null) {
+            const totalPrice = await cart.getBeachBarTotalPrice(beachBarId);
+            if (totalPrice == undefined || totalPrice === null) {
               return { error: { message: errors.SOMETHING_WENT_WRONG } };
             }
+            const { totalWithEntryFees: total } = totalPrice;
             const beachBarPricingFee = await uniqueBeachBars[i].getBeachBarPaymentFee(cardProcessingFee, total * 100);
             if (!beachBarPricingFee) {
               return { error: { message: errors.SOMETHING_WENT_WRONG } };

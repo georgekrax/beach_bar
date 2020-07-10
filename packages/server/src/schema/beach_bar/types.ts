@@ -1,10 +1,10 @@
-import { objectType } from "@nexus/schema";
+import { DateTimeScalar, UrlScalar } from "@beach_bar/common";
+import { objectType, unionType } from "@nexus/schema";
 import { CurrencyType } from "../details/countryTypes";
 import { BeachBarOwnerType } from "../owner/types";
 import { BeachBarRestaurantType } from "./restaurant/types";
 import { BeachBarReviewType } from "./review/types";
 import { BeachBarFeatureType } from "./service/types";
-import { DateTimeScalar } from "@beach_bar/common";
 
 export const BeachBarType = objectType({
   name: "BeachBar",
@@ -17,6 +17,10 @@ export const BeachBarType = objectType({
     t.boolean("isActive", {
       nullable: false,
       description: "A boolean that indicates if the #beach_bar is active or not, configured by its owner",
+    });
+    t.field("thumbnailUrl", {
+      type: UrlScalar,
+      nullable: true,
     });
     t.field("updatedAt", {
       type: DateTimeScalar,
@@ -57,6 +61,68 @@ export const BeachBarType = objectType({
       description: "The default currency of the #beach_bar",
       nullable: false,
       resolve: o => o.defaultCurrency,
+    });
+  },
+});
+
+export const AddBeachBarType = objectType({
+  name: "AddBeachBar",
+  description: "Info to be returned when a #beach_bar is added (registered) to the platform",
+  definition(t) {
+    t.field("beachBar", {
+      type: BeachBarType,
+      description: "The #beach_bar that is added",
+      nullable: false,
+      resolve: o => o.beachBar,
+    });
+    t.boolean("added", {
+      nullable: false,
+      description: "A boolean that indicates if the #beach_bar has been successfully being registered",
+    });
+  },
+});
+
+export const AddBeachBarResult = unionType({
+  name: "AddBeachBarResult",
+  definition(t) {
+    t.members("AddBeachBar", "Error");
+    t.resolveType(item => {
+      if (item.error) {
+        return "Error";
+      } else {
+        return "AddBeachBar";
+      }
+    });
+  },
+});
+
+export const UpdateBeachBarType = objectType({
+  name: "UpdateBeachBar",
+  description: "Info to be returned when the details of #beach_bar are updated",
+  definition(t) {
+    t.field("beachBar", {
+      type: BeachBarType,
+      description: "The #beach_bar that is updated",
+      nullable: false,
+      resolve: o => o.beachBar,
+    });
+    t.boolean("updated", {
+      nullable: false,
+      description: "A boolean that indicates if the #beach_bar details have been successfully updated",
+    });
+  },
+});
+
+export const UpdateBeachBarResult = unionType({
+  name: "UpdateBeachBarResult",
+  definition(t) {
+    t.members("UpdateBeachBar", "Error");
+    t.resolveType(item => {
+      if (item.error) {
+        return "Error";
+      } else {
+        return "UpdateBeachBar";
+      }
     });
   },
 });

@@ -1,4 +1,4 @@
-import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn, CreateDateColumn, DeleteDateColumn } from "typeorm";
 import { BeachBar } from "./BeachBar";
 import { City } from "./City";
 import { Country } from "./Country";
@@ -18,8 +18,8 @@ export class BeachBarLocation extends BaseEntity {
   @Column({ type: "decimal", precision: 10, scale: 6, name: "latitude" })
   latitude: number;
 
-  @Column({ type: "decimal", precision: 10, scale: 6, name: "longtitude" })
-  longtitude: number;
+  @Column({ type: "decimal", precision: 10, scale: 6, name: "longitude" })
+  longitude: number;
 
   @Column({ type: "geography", name: "where_is" })
   whereIs: string;
@@ -51,4 +51,13 @@ export class BeachBarLocation extends BaseEntity {
   @ManyToOne(() => Region, region => region.beachBarLocations, { nullable: true })
   @JoinColumn({ name: "region_id" })
   region?: Region;
+
+  @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
+  updatedAt: Date;
+
+  @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
+  timestamp: Date;
+
+  @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
+  deletedAt?: Date;
 }

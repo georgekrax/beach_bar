@@ -42,16 +42,16 @@ export const AuthorizeWithOAuthProviders = extendType({
         { req, res, googleOAuth2Client, uaParser, redis }: MyContext,
       ): Promise<AuthorizeWithOAuthType | ErrorType> => {
         if (!code || code === "" || code === " ") {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid code" } };
+          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
         }
         if (!state || state === "" || state === " ") {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid state" } };
+          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
         }
         if (state !== req.cookies.gstate) {
           return {
             error: {
               code: errors.INTERNAL_SERVER_ERROR,
-              message: "Something went wrong. Please try again",
+              message: `${errors.SOMETHING_WENT_WRONG}. Please try again`,
             },
           };
         }
@@ -231,17 +231,17 @@ export const AuthorizeWithOAuthProviders = extendType({
         { code, state, loginDetails, isPrimaryOwner },
         { req, res, uaParser, redis }: MyContext,
       ): Promise<AuthorizeWithOAuthType | ErrorType> => {
-        if (!code || code === "" || code === " ") {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid code" } };
+        if (!code || code.trim().length === 0) {
+          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
         }
-        if (!state || state === "" || state === " ") {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid state" } };
+        if (!state || state.trim().length === 0) {
+          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
         }
         if (state !== req.cookies.fbstate) {
           return {
             error: {
               code: errors.INTERNAL_SERVER_ERROR,
-              message: "Something went wrong. Please try again",
+              message: `${errors.SOMETHING_WENT_WRONG}. Please try again`,
             },
           };
         }
@@ -488,16 +488,16 @@ export const AuthorizeWithOAuthProviders = extendType({
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid email address" } };
         }
         if (!code || code === "" || code === " ") {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid code" } };
+          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
         }
         if (!state || state === "" || state === " ") {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid state" } };
+          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
         }
         if (state !== req.cookies.instastate) {
           return {
             error: {
               code: errors.INTERNAL_SERVER_ERROR,
-              message: "Something went wrong. Please try again",
+              message: `${errors.SOMETHING_WENT_WRONG}. Please try again`,
             },
           };
         }

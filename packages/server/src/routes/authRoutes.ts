@@ -16,7 +16,7 @@ router.get("/google/callback", async (req: express.Request, res: express.Respons
   const qs = new URL(req.url, process.env.HOSTNAME_WITH_HTTP).searchParams;
   const code = qs.get("code");
   const state = qs.get("state");
-  res.send(`<h2>Redirected from Google</h2><p>Code: ${code}</p><br><p>State:${state}</p>`);
+  return res.send(`<h2>Redirected from Google</h2><p>Code: ${code}</p><br><p>State: ${state}</p>`);
 });
 
 router.get("/facebook/callback", async (req: express.Request, res: express.Response) => {

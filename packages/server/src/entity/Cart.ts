@@ -14,9 +14,16 @@ import {
   Repository,
 } from "typeorm";
 import { softRemove } from "../utils/softRemove";
+import { BeachBarEntryFee } from "./BeachBarEntryFee";
 import { CartProduct } from "./CartProduct";
 import { Payment } from "./Payment";
 import { User } from "./User";
+
+interface GetBeachBarTotalPrice {
+  entryFees: BeachBarEntryFee[];
+  totalWithoutEntryFees: number;
+  totalWithEntryFees: number;
+}
 
 @Entity({ name: "cart", schema: "public" })
 export class Cart extends BaseEntity {
@@ -58,14 +65,36 @@ export class Cart extends BaseEntity {
     return undefined;
   }
 
-  async getBeachBarTotalPrice(beachBarId: number): Promise<number | undefined> {
+  async getBeachBarTotalPrice(beachBarId: number): Promise<GetBeachBarTotalPrice | undefined> {
     if (this.products) {
       const products = this.products.filter(product => product.product.beachBarId === beachBarId && !product.product.deletedAt);
       if (products) {
         const total = products.reduce((sum, i) => {
           return sum + i.product.price * i.quantity;
         }, 0);
-        return total;
+        const entryFees: BeachBarEntryFee[] = [];
+        products
+          .map(product => product.date)
+          .filter((v, i, s) => {
+            return s.indexOf(v) === i;
+          })
+          .forEach(async date => {
+            const entryFee = await BeachBarEntryFee.findOne({ beachBarId, date });
+            if (entryFee) {
+              entryFees.push(entryFee);
+            }
+          });
+        if (!entryFees || entryFees.length <= 0) {
+          return undefined;
+        }
+        const totalEntryFees = entryFees.reduce((sum, i) => {
+          return sum + i.fee;
+        }, 0);
+        return {
+          entryFees,
+          totalWithoutEntryFees: total,
+          totalWithEntryFees: total + totalEntryFees,
+        };
       }
       return undefined;
     }

@@ -16,7 +16,7 @@ export class BeachBarPricingFee extends BaseEntity {
   @Column({ type: "decimal", precision: 4, scale: 2, name: "entry_fee_limit" })
   entryFeeLimit: number;
 
-  @OneToMany(() => BeachBar, beachBar => beachBar.pricingFee)
+  @OneToMany(() => BeachBar, beachBar => beachBar.fee)
   beachBars: BeachBar[];
 
   @OneToMany(() => BeachBarFeeCurrency, beachBarFeeCurrency => beachBarFeeCurrency.fee)

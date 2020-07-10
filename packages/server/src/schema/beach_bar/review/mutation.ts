@@ -1,5 +1,5 @@
 import { BigIntScalar, MyContext } from "@beach_bar/common";
-import { arg, extendType, intArg, stringArg } from "@nexus/schema";
+import { arg, booleanArg, extendType, intArg, stringArg } from "@nexus/schema";
 import errors from "../../../constants/errors";
 import { BeachBar } from "../../../entity/BeachBar";
 import { BeachBarReview } from "../../../entity/BeachBarReview";
@@ -16,7 +16,7 @@ export const BeachBarReviewCrudMutation = extendType({
   definition(t) {
     t.field("addBeachBarReview", {
       type: AddBeachBarReviewResult,
-      description: "Add a customer's review to a #beach_bar",
+      description: "Add a customer's review on a #beach_bar",
       nullable: false,
       args: {
         beachBarId: intArg({
@@ -84,7 +84,7 @@ export const BeachBarReviewCrudMutation = extendType({
           };
         }
 
-        const beachBar = await BeachBar.findOne(beachBarId);
+        const beachBar = await BeachBar.findOne({ id: beachBarId, isActive: true });
         if (!beachBar) {
           return { error: { code: errors.CONFLICT, message: errors.BEACH_BAR_DOES_NOT_EXIST } };
         }
@@ -133,7 +133,7 @@ export const BeachBarReviewCrudMutation = extendType({
     });
     t.field("updateBeachBarReview", {
       type: UpdateBeachBarReviewResult,
-      description: "Update a customer's review of a #beach_bar",
+      description: "Update a customer's review on a #beach_bar",
       nullable: false,
       args: {
         reviewId: arg({
@@ -201,7 +201,7 @@ export const BeachBarReviewCrudMutation = extendType({
     });
     t.field("deleteBeachBarReview", {
       type: DeleteResult,
-      description: "Delete a customer's review of a #beach_bar",
+      description: "Delete a customer's review on a #beach_bar",
       nullable: false,
       args: {
         reviewId: arg({
@@ -229,6 +229,64 @@ export const BeachBarReviewCrudMutation = extendType({
         return {
           deleted: true,
         };
+      },
+    });
+  },
+});
+
+export const BeachBarReviewVoteMutation = extendType({
+  type: "Mutation",
+  definition(t) {
+    t.field("voteBeachBarReview", {
+      type: UpdateBeachBarReviewResult,
+      description: "Upvote or downvote a customer's review on a #beach_bar",
+      nullable: false,
+      args: {
+        reviewId: arg({
+          type: BigIntScalar,
+          required: true,
+          description: "The ID value of the customer's review",
+        }),
+        upvote: booleanArg({
+          required: false,
+          description: "Set to true if to increment the review's votes",
+        }),
+        downvote: booleanArg({
+          required: false,
+          description: "Set to true if to decrement the review's votes",
+        }),
+      },
+      resolve: async (_, { reviewId, upvote, downvote }): Promise<UpdateBeachBarReviewType | ErrorType> => {
+        if (!reviewId || reviewId <= 0) {
+          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid customer's review" } };
+        }
+        if (upvote !== undefined && downvote !== undefined) {
+          return {
+            error: { code: errors.INVALID_ARGUMENTS, message: "You cannot upvote and downvote a customer's review simultaneously" },
+          };
+        }
+        if (upvote === false || downvote === false) {
+          return { error: { code: errors.INVALID_ARGUMENTS, message: errors.SOMETHING_WENT_WRONG } };
+        }
+
+        const review = await BeachBarReview.findOne({ where: { id: reviewId }, relations: ["beachBar", "customer"] });
+        if (!review) {
+          return { error: { code: errors.CONFLICT, message: "Specified review does not exist" } };
+        }
+
+        try {
+          const updatedReview = await review.vote(upvote, downvote);
+          if (!updatedReview) {
+            return { error: { message: errors.SOMETHING_WENT_WRONG } };
+          }
+
+          return {
+            review: updatedReview,
+            updated: true,
+          };
+        } catch (err) {
+          return { error: { message: `${errors.SOMETHING_WENT_WRONG}${err.message.trim().length > 0 ? `: ${err.message}` : ""} ` } };
+        }
       },
     });
   },

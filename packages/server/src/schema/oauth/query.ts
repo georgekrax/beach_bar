@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/camelcase */
+import { MyContext, UrlScalar } from "@beach_bar/common";
 import { extendType } from "@nexus/schema";
 import { createHash, randomBytes } from "crypto";
 import { CodeChallengeMethod } from "google-auth-library";
-import { UrlScalar, MyContext } from "@beach_bar/common";
 
 export const OAuthQuery = extendType({
   type: "Query",
   definition(t) {
-    t.field("googleOAuthUrl", {
+    t.field("getGoogleOAuthUrl", {
       type: UrlScalar,
       nullable: false,
       description: "Returns the URL where the user will be redirected to login with Google",
@@ -35,7 +35,7 @@ export const OAuthQuery = extendType({
         return url;
       },
     });
-    t.field("facebookOAuthUrl", {
+    t.field("getFacebookOAuthUrl", {
       type: UrlScalar,
       nullable: false,
       description: "Returns the URL where the user will be redirected to login with Facebook",
@@ -50,7 +50,7 @@ export const OAuthQuery = extendType({
         return url;
       },
     });
-    t.field("instagramOAuthUrl", {
+    t.field("getInstagramOAuthUrl", {
       type: UrlScalar,
       nullable: false,
       description: "Returns the URL where the user will be redirected to login with Instagram",

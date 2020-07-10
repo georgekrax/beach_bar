@@ -26,6 +26,7 @@ import { BeachBarReview } from "./BeachBarReview";
 import { Currency } from "./Currency";
 import { Product } from "./Product";
 import { StripeFee } from "./StripeFee";
+import { StripeMinimumCurrency } from "./StripeMinimumCurrency";
 
 interface GetFullPricingReturnType {
   pricingFee: BeachBarPricingFee;
@@ -65,12 +66,15 @@ export class BeachBar extends BaseEntity {
   @Column({ type: "boolean", name: "is_active", default: () => false })
   isActive: boolean;
 
+  @Column({ type: "boolean", name: "zero_cart_total" })
+  zeroCartTotal: boolean;
+
   @Column("varchar", { length: 255, name: "stripe_connect_id", unique: true })
   stripeConnectId: string;
 
   @ManyToOne(() => BeachBarPricingFee, beachBarPricingFee => beachBarPricingFee.beachBars)
   @JoinColumn({ name: "fee_id" })
-  pricingFee: BeachBarPricingFee;
+  fee: BeachBarPricingFee;
 
   @ManyToOne(() => Currency, currency => currency.beachBars)
   @JoinColumn({ name: "default_currency_id" })
@@ -106,6 +110,27 @@ export class BeachBar extends BaseEntity {
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Date;
 
+  async update(name?: string, description?: string, thumbnailUrl?: string, zeroCartTotal?: boolean): Promise<BeachBar | any> {
+    try {
+      if (name && name !== this.name) {
+        this.name = name;
+      }
+      if (description && description !== this.description) {
+        this.description = description;
+      }
+      if (thumbnailUrl && thumbnailUrl !== thumbnailUrl) {
+        this.thumbnailUrl = thumbnailUrl;
+      }
+      if (zeroCartTotal !== null && zeroCartTotal !== undefined && zeroCartTotal !== this.zeroCartTotal) {
+        this.zeroCartTotal = zeroCartTotal;
+      }
+      await this.save();
+      return this;
+    } catch (err) {
+      throw new Error(err.message);
+    }
+  }
+
   async getEntryFee(date?: Date, getAvg = false): Promise<BeachBarEntryFee | number | undefined> {
     if (getAvg) {
       const entryFees = await BeachBarEntryFee.find({ beachBar: this });
@@ -125,27 +150,23 @@ export class BeachBar extends BaseEntity {
   }
 
   async getPricingFee(): Promise<BeachBarPricingFee | undefined> {
-    const entryFees = await BeachBarEntryFee.find({ beachBarId: this.id });
     let minEntryFee: number;
-    if (entryFees.length === 0) {
-      minEntryFee = 0;
+    if (this.id) {
+      const entryFees = await BeachBarEntryFee.find({ beachBarId: this.id });
+      if (entryFees.length === 0) {
+        minEntryFee = 0;
+      } else {
+        const entryFeesValues = entryFees.map(entryFee => entryFee.fee);
+        minEntryFee = entryFeesValues.reduce((a, b) => Math.min(a, b));
+      }
     } else {
-      const entryFeesValues = entryFees.map(entryFee => entryFee.fee);
-      minEntryFee = entryFeesValues.reduce((a, b) => Math.min(a, b));
+      minEntryFee = 0;
     }
     const pricingFee = await BeachBarPricingFee.findOne({ entryFeeLimit: LessThanOrEqual(minEntryFee) });
     if (!pricingFee) {
       return undefined;
     }
     return pricingFee;
-  }
-
-  async setPricingFee(): Promise<void> {
-    const pricingFee = await this.getPricingFee();
-    if (pricingFee) {
-      this.pricingFee = pricingFee;
-      await this.save();
-    }
   }
 
   async getFullPricingFee(): Promise<GetFullPricingReturnType | undefined> {
@@ -181,6 +202,27 @@ export class BeachBar extends BaseEntity {
       transferAmount,
       beachBarAppFee,
     };
+  }
+
+  async getMinimumCurrency(): Promise<StripeMinimumCurrency | undefined> {
+    const minimumCurrency = await StripeMinimumCurrency.findOne({ currencyId: this.defaultCurrencyId });
+    if (!minimumCurrency) {
+      return undefined;
+    } else {
+      return minimumCurrency;
+    }
+  }
+
+  async checkMinimumCurrency(total: number): Promise<boolean | undefined> {
+    const minimumCurrency = await this.getMinimumCurrency();
+    if (!minimumCurrency) {
+      return undefined;
+    }
+    if (total <= minimumCurrency.chargeAmount) {
+      return false;
+    } else {
+      return true;
+    }
   }
 
   async softRemove(): Promise<any> {

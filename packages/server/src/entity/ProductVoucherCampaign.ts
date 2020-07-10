@@ -22,13 +22,10 @@ export class ProductVoucherCampaign extends BaseEntity {
   @Column("varchar", { length: 75, name: "title" })
   title: string;
 
-  @Column({ type: "decimal", precision: 5, scale: 2, name: "discount_amount" })
-  discountAmount: number;
-
   @Column({ type: "decimal", precision: 3, scale: 0, name: "discount_percentage" })
   discountPercentage: number;
 
-  @Column({ type: "boolean", name: "beach_bar_offer", default: () => true })
+  @Column({ type: "boolean", name: "beach_bar_offer", default: () => false })
   beachBarOffer: boolean;
 
   @Column({ type: "boolean", name: "is_active", default: () => false })
@@ -62,6 +59,15 @@ export class ProductVoucherCampaign extends BaseEntity {
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Date;
+
+  calculateTotalProductPrice(): number | undefined {
+    if (this.products) {
+      return this.products.reduce((sum, i) => {
+        return parseFloat(sum.toString()) + parseFloat(i.price.toString());
+      }, 0);
+    }
+    return undefined;
+  }
 
   async softRemove(): Promise<any> {
     const findOptions: any = { campaignId: this.id };
