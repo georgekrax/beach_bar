@@ -1,4 +1,17 @@
-import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn, CreateDateColumn, DeleteDateColumn } from "typeorm";
+import { Redis } from "ioredis";
+import {
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from "typeorm";
+import errors from "../constants/errors";
 import { BeachBar } from "./BeachBar";
 import { City } from "./City";
 import { Country } from "./Country";
@@ -16,10 +29,10 @@ export class BeachBarLocation extends BaseEntity {
   zipCode?: string;
 
   @Column({ type: "decimal", precision: 10, scale: 6, name: "latitude" })
-  latitude: number;
+  latitude: string;
 
   @Column({ type: "decimal", precision: 10, scale: 6, name: "longitude" })
-  longitude: number;
+  longitude: string;
 
   @Column({ type: "geography", name: "where_is" })
   whereIs: string;
@@ -60,4 +73,63 @@ export class BeachBarLocation extends BaseEntity {
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Date;
+
+  async update(
+    redis: Redis,
+    address?: string,
+    zipCode?: string,
+    latitude?: string,
+    longitude?: string,
+    countryId?: number,
+    cityId?: number,
+    regionId?: number,
+  ): Promise<BeachBarLocation | any> {
+    try {
+      if (address && address !== this.address) {
+        this.address = address;
+      }
+      if (zipCode && zipCode !== this.zipCode) {
+        this.zipCode = zipCode;
+      }
+      if (latitude && latitude !== this.latitude) {
+        if (latitude.length > 16) {
+          throw new Error();
+        }
+        this.latitude = latitude;
+      }
+      if (longitude && longitude !== this.longitude) {
+        if (longitude.length > 16) {
+          throw new Error(errors.SOMETHING_WENT_WRONG);
+        }
+        this.longitude = longitude;
+      }
+      if (countryId && countryId !== this.countryId) {
+        const country = await Country.findOne(countryId);
+        if (!country) {
+          throw new Error("Invalid country");
+        }
+        this.country = country;
+      }
+      if (cityId && cityId !== this.cityId) {
+        const city = await City.findOne(cityId);
+        if (!city) {
+          throw new Error("Invalid city");
+        }
+        this.city = city;
+      }
+      if (regionId && regionId !== this.regionId) {
+        const region = await Region.findOne(regionId);
+        if (!region) {
+          throw new Error("Invalid region");
+        }
+        this.region = region;
+      }
+
+      await this.save();
+      await this.beachBar.updateRedis(redis);
+      return this;
+    } catch (err) {
+      throw new Error(err.message);
+    }
+  }
 }

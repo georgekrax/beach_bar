@@ -124,6 +124,7 @@ export const BeachBarCrudMutation = extendType({
           newBeachBar.fee = pricingFee;
           await newBeachBar.save();
 
+          // cache #beach_bar in Redis
           await redis.set(`${redisKeys.BEACH_BAR_CACHE_KEY}:${newBeachBar.id}`, JSON.stringify(newBeachBar));
 
           res.clearCookie("scstate", { httpOnly: true, maxAge: 310000 });
@@ -192,16 +193,14 @@ export const BeachBarCrudMutation = extendType({
 
         const beachBar = await BeachBar.findOne({
           where: { id: beachBarId },
-          relations: ["fee", "defaultCurrency", "owners", "location", "reviews", "features", "products", "entryFees", "restaurants"],
+          relations: ["location", "reviews", "features", "products", "entryFees", "restaurants"],
         });
         if (!beachBar) {
           return { error: { code: errors.CONFLICT, message: errors.BEACH_BAR_DOES_NOT_EXIST } };
         }
 
         try {
-          const updatedBeachBar = await beachBar.update(name, description, thumbnailUrl, zeroCartTotal);
-
-          await redis.set(`${redisKeys.BEACH_BAR_CACHE_KEY}:${beachBar.id}`, JSON.stringify(beachBar));
+          const updatedBeachBar = await beachBar.update(redis, name, description, thumbnailUrl, zeroCartTotal);
 
           return {
             beachBar: updatedBeachBar,
@@ -259,10 +258,7 @@ export const BeachBarCrudMutation = extendType({
             await stripe.accounts.reject(beachBar.stripeConnectId, { reason: "other" });
           }
 
-          // delete #beach_bar in Redis too
-          await redis.del(`${redisKeys.BEACH_BAR_CACHE_KEY}:${beachBar.id}`);
-
-          await beachBar.softRemove();
+          await beachBar.customSoftRemove(redis);
         } catch (err) {
           return { error: { message: `${errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
         }
@@ -270,6 +266,63 @@ export const BeachBarCrudMutation = extendType({
         return {
           deleted: true,
         };
+      },
+    });
+  },
+});
+
+export const BeachBarUpdateStatusMutation = extendType({
+  type: "Mutation",
+  definition(t) {
+    t.field("updateBeachBarStatus", {
+      type: UpdateBeachBarResult,
+      description: "Update the status of a #beach_bar. If it is active or not",
+      nullable: false,
+      args: {
+        beachBarId: intArg({
+          required: true,
+          description: "The ID value of the #beach_bar",
+        }),
+        isActive: booleanArg({
+          required: true,
+          description: "Set to true if the #beach_bar is active",
+        }),
+      },
+      resolve: async (_, { beachBarId, isActive }, { payload, redis }: MyContext): Promise<UpdateBeachBarType | ErrorType> => {
+        if (!payload) {
+          return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
+        }
+        if (!checkScopes(payload, ["beach_bar@crud:beach_bar"])) {
+          return {
+            error: { code: errors.UNAUTHORIZED_CODE, message: "You are not allowed to update 'this' #beach_bar status" },
+          };
+        }
+
+        if (!beachBarId || beachBarId <= 0) {
+          return { error: { code: errors.INVALID_ARGUMENTS, message: errors.SOMETHING_WENT_WRONG } };
+        }
+
+        const beachBar = await BeachBar.findOne({
+          where: { id: beachBarId },
+          relations: ["fee", "location", "reviews", "features", "products", "entryFees", "restaurants"],
+        });
+        if (!beachBar) {
+          return { error: { code: errors.CONFLICT, message: errors.BEACH_BAR_DOES_NOT_EXIST } };
+        }
+
+        try {
+          const updatedBeachBar = await beachBar.setIsActive(redis, isActive);
+
+          return {
+            beachBar: updatedBeachBar,
+            updated: true,
+          };
+        } catch (err) {
+          if (err.message === 'duplicate key value violates unique constraint "beach_bar_name_key"') {
+            return { error: { code: errors.CONFLICT, message: "A #beach_bar with this name already exists" } };
+          }
+          return { error: { message: `${errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
+        }
       },
     });
   },

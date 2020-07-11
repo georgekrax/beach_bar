@@ -1,4 +1,5 @@
 import dayjs from "dayjs";
+import { Redis } from "ioredis";
 import {
   BaseEntity,
   Check,
@@ -14,6 +15,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import redisKeys from "../constants/redisKeys";
 import { softRemove } from "../utils/softRemove";
 import { BeachBarEntryFee } from "./BeachBarEntryFee";
 import { BeachBarFeature } from "./BeachBarFeature";
@@ -110,7 +112,13 @@ export class BeachBar extends BaseEntity {
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Date;
 
-  async update(name?: string, description?: string, thumbnailUrl?: string, zeroCartTotal?: boolean): Promise<BeachBar | any> {
+  async update(
+    redis: Redis,
+    name?: string,
+    description?: string,
+    thumbnailUrl?: string,
+    zeroCartTotal?: boolean,
+  ): Promise<BeachBar | any> {
     try {
       if (name && name !== this.name) {
         this.name = name;
@@ -125,7 +133,16 @@ export class BeachBar extends BaseEntity {
         this.zeroCartTotal = zeroCartTotal;
       }
       await this.save();
+      await this.updateRedis(redis);
       return this;
+    } catch (err) {
+      throw new Error(err.message);
+    }
+  }
+
+  async updateRedis(redis: Redis): Promise<void | any> {
+    try {
+      await redis.set(`${redisKeys.BEACH_BAR_CACHE_KEY}:${this.id}`, JSON.stringify(this));
     } catch (err) {
       throw new Error(err.message);
     }
@@ -225,7 +242,22 @@ export class BeachBar extends BaseEntity {
     }
   }
 
-  async softRemove(): Promise<any> {
+  async setIsActive(redis: Redis, isActive?: boolean): Promise<BeachBar | any> {
+    try {
+      if (isActive !== null && isActive !== undefined && isActive !== this.isActive) {
+        this.isActive = isActive;
+      }
+      await this.save();
+      await this.updateRedis(redis);
+      return this;
+    } catch (err) {
+      throw new Error(err.message);
+    }
+  }
+
+  async customSoftRemove(redis: Redis): Promise<any> {
+    // delete #beach_bar in Redis too
+    await redis.del(`${redisKeys.BEACH_BAR_CACHE_KEY}:${this.id}`);
     const findOptions: any = { beachBarId: this.id };
     await softRemove(
       BeachBar,

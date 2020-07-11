@@ -1,6 +1,7 @@
 export * from "@beach_bar/common";
 export * from "./beach_bar/entry_fee/mutation";
 export * from "./beach_bar/entry_fee/types";
+export * from "./beach_bar/location/mutation";
 export * from "./beach_bar/location/types";
 export * from "./beach_bar/mutation";
 export * from "./beach_bar/product/mutation";
