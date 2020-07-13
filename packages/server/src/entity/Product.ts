@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import {
   BaseEntity,
   Column,
@@ -7,11 +7,14 @@ import {
   getManager,
   getRepository,
   JoinColumn,
-  ManyToOne,
+
+
+
+
+  ManyToMany, ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
-  ManyToMany,
+  UpdateDateColumn
 } from "typeorm";
 import { dayjsFormat } from "../constants/dayjs";
 import { softRemove } from "../utils/softRemove";
@@ -84,15 +87,15 @@ export class Product extends BaseEntity {
   voucherCampaigns?: ProductCouponCode[];
 
   @UpdateDateColumn({ name: "updated_at", type: "timestamptz", default: () => `NOW()` })
-  updatedAt: Date;
+  updatedAt: Dayjs;
 
   @CreateDateColumn({ name: "timestamp", type: "timestamptz", default: () => `NOW()` })
-  timestamp: Date;
+  timestamp: Dayjs;
 
   @Column({ type: "timestamptz", name: "deleted_at", nullable: true })
-  deletedAt?: Date;
+  deletedAt?: Dayjs;
 
-  async getReservationLimit(timeId: number, date?: Date): Promise<number | undefined> {
+  async getReservationLimit(timeId: number, date?: Date | Dayjs): Promise<number | undefined> {
     const formattedDate = date ? dayjs(date).format(dayjsFormat.ISO_STRING) : dayjs().format(dayjsFormat.ISO_STRING);
     const reservationLimit = await ProductReservationLimit.find({ product: this, date: formattedDate });
     if (reservationLimit) {
@@ -107,11 +110,11 @@ export class Product extends BaseEntity {
     }
   }
 
-  async getReservedProducts(timeId: number, date?: Date): Promise<number | undefined> {
+  async getReservedProducts(timeId: number, date?: Date | Dayjs): Promise<number | undefined> {
     const reservedProductsNumber = await getManager()
       .createQueryBuilder(ReservedProduct, "reservedProduct")
       .select("COUNT(*)", "count")
-      .where("reservedProduct.date = :date", { date: date ? date : dayjs().format(dayjsFormat.ISO_STRING) })
+      .where("reservedProduct.date = :date", { date: date ? date : dayjs() })
       .andWhere("reservedProduct.timeId = :timeId", { timeId })
       .getRawOne();
 
@@ -122,7 +125,7 @@ export class Product extends BaseEntity {
     }
   }
 
-  async checkIfAvailable(timeId: number, date?: Date, elevator = 0): Promise<boolean | undefined> {
+  async checkIfAvailable(timeId: number, date?: Date | Dayjs, elevator = 0): Promise<boolean | undefined> {
     const limit = await this.getReservationLimit(timeId, date);
     const reservedProductsNumber = await this.getReservedProducts(timeId, date);
     if (limit && reservedProductsNumber && reservedProductsNumber + elevator >= limit) {

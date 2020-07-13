@@ -208,6 +208,7 @@ export const BeachBarLocationCrudMutation = extendType({
         if (!location) {
           return { error: { code: errors.CONFLICT, message: errors.SOMETHING_WENT_WRONG } };
         }
+        location.beachBar.features = location.beachBar.features.filter(feature => !feature.deletedAt);
 
         try {
           const updatedLocation = await location.update(redis, address, zipCode, latitude, longitude, countryId, cityId, regionId);

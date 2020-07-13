@@ -2,6 +2,7 @@ import { BeachBarReview } from "../../entity/BeachBarReview";
 import { City } from "../../entity/City";
 import { Country } from "../../entity/Country";
 import { User } from "../../entity/User";
+import { Dayjs } from "dayjs";
 import { UserContactDetails } from "../../entity/UserContactDetails";
 import { AddType, SuccessType, UpdateType } from "../returnTypes";
 
@@ -18,7 +19,7 @@ export type UserType = {
     userId: number;
     personTitle?: string;
     imgUrl?: string;
-    birthday?: Date;
+    birthday?: Dayjs;
     age?: number;
     country?: Country;
     countryId?: number;
@@ -37,7 +38,7 @@ export interface UpdateUser {
   lastName?: string;
   imgUrl?: string;
   personTitle?: string;
-  birthday?: Date;
+  birthday?: Dayjs;
   address?: string;
   zipCode?: string;
   countryId?: number;

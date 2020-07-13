@@ -2,7 +2,7 @@ import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGe
 import { BeachBarLocation } from "./BeachBarLocation";
 import { City } from "./City";
 import { Country } from "./Country";
-import { UserSearch } from "./UserSearch";
+import { SearchInputValue } from "./SearchInputValue";
 
 @Entity({ name: "region", schema: "public" })
 export class Region extends BaseEntity {
@@ -29,6 +29,6 @@ export class Region extends BaseEntity {
   @OneToMany(() => BeachBarLocation, beachBarLocation => beachBarLocation.region)
   beachBarLocations?: BeachBarLocation[];
 
-  @OneToMany(() => UserSearch, userSearch => userSearch.region)
-  userSearches?: UserSearch[];
+  @OneToMany(() => SearchInputValue, searchInputValue => searchInputValue.region, { nullable: true })
+  searchInputValues?: SearchInputValue[];
 }

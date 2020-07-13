@@ -184,9 +184,6 @@ export const RestaurantFoodItemCrudMutation = extendType({
         if (menuCategoryId && menuCategoryId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid menu category" } };
         }
-        if (imgUrl && imgUrl.trim().length === 0) {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid image" } };
-        }
 
         const foodItem = await RestaurantFoodItem.findOne({
           where: { id: foodItemId, deletedAt: IsNull() },

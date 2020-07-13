@@ -1,6 +1,7 @@
-import { BaseEntity, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from "typeorm";
-import { Product } from "./Product";
+import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Owner } from "./Owner";
+import { Product } from "./Product";
+import { Dayjs } from "dayjs";
 
 @Entity({ name: "product_price_history", schema: "public" })
 export class ProductPriceHistory extends BaseEntity {
@@ -28,5 +29,5 @@ export class ProductPriceHistory extends BaseEntity {
   owner: Owner;
 
   @CreateDateColumn({ name: "timestamp", type: "timestamptz", default: () => `NOW()` })
-  timestamp: Date;
+  timestamp: Dayjs;
 }

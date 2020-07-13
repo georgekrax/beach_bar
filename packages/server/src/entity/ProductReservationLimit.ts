@@ -11,8 +11,9 @@ import {
   UpdateDateColumn,
 } from "typeorm";
 import { softRemove } from "../utils/softRemove";
-import { HourTime } from "./Time";
 import { Product } from "./Product";
+import { HourTime } from "./Time";
+import { Dayjs } from "dayjs";
 
 @Entity({ name: "product_reservation_limit", schema: "public" })
 @Check(`"limitNumber" > 0`)
@@ -28,7 +29,7 @@ export class ProductReservationLimit extends BaseEntity {
   productId: number;
 
   @Column({ type: "date", name: "date" })
-  date: Date;
+  date: Dayjs;
 
   @Column({ type: "integer", name: "start_time_id" })
   startTimeId: number;
@@ -49,13 +50,13 @@ export class ProductReservationLimit extends BaseEntity {
   endTime: HourTime;
 
   @UpdateDateColumn({ name: "updated_at", type: "timestamptz", default: () => `NOW()` })
-  updatedAt: Date;
+  updatedAt: Dayjs;
 
   @CreateDateColumn({ name: "timestamp", type: "timestamptz", default: () => `NOW()` })
-  timestamp: Date;
+  timestamp: Dayjs;
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
-  deletedAt?: Date;
+  deletedAt?: Dayjs;
 
   async update(limit?: number, startTimeId?: number, endTimeId?: number): Promise<ProductReservationLimit | any> {
     try {

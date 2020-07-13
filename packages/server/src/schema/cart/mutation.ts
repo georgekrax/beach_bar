@@ -1,5 +1,5 @@
-import { MyContext } from "@beach_bar/common";
-import { extendType, intArg } from "@nexus/schema";
+import { BigIntScalar, MyContext } from "@beach_bar/common";
+import { arg, extendType } from "@nexus/schema";
 import { getCustomRepository } from "typeorm";
 import errors from "../../constants/errors";
 import { Cart, CartRepository } from "../../entity/Cart";
@@ -15,7 +15,11 @@ export const CartCrudMutation = extendType({
       description: "Get the latest cart of an authenticated user or create one",
       nullable: false,
       args: {
-        cartId: intArg({ required: false, description: "The ID values of the shopping cart, if it is created previously" }),
+        cartId: arg({
+          type: BigIntScalar,
+          required: false,
+          description: "The ID values of the shopping cart, if it is created previously",
+        }),
       },
       resolve: async (_, { cartId }, { payload }: MyContext): Promise<Cart | undefined> => {
         // ! order the products by timestamp in the frontend
@@ -32,7 +36,7 @@ export const CartCrudMutation = extendType({
         "Delete a cart after a transition. This mutation is also called if the user is not authenticated & closes the browser tab",
       nullable: false,
       args: {
-        cartId: intArg({ required: true, description: "The ID values of the shopping cart" }),
+        cartId: arg({ type: BigIntScalar, required: true, description: "The ID values of the shopping cart" }),
       },
       resolve: async (_, { cartId }, { payload }: MyContext): Promise<DeleteType | ErrorType> => {
         if (!cartId || cartId <= 0) {
@@ -41,7 +45,12 @@ export const CartCrudMutation = extendType({
 
         let cart: Cart | undefined = undefined;
         if (payload) {
-          cart = await Cart.findOne({ userId: payload.sub });
+          cart = await Cart.findOne({
+            where: { userId: payload.sub },
+            order: {
+              timestamp: "DESC",
+            },
+          });
         } else {
           cart = await Cart.findOne(cartId);
         }

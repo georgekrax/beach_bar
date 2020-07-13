@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import minMax from "dayjs/plugin/minMax";
 import {
   BaseEntity,
@@ -11,7 +11,7 @@ import {
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
+  UpdateDateColumn
 } from "typeorm";
 import errors from "../constants/errors";
 import { payment } from "../constants/status";
@@ -52,10 +52,10 @@ export class Payment extends BaseEntity {
   @Column({ type: "boolean", name: "is_refunded", default: () => false })
   isRefunded: boolean;
 
-  @Column({ type: "decimal", precision: 12, scale: 2, name: "app_fee" })
+  @Column({ type: "decimal", precision: 12, scale: 2, name: "app_fee", nullable: true })
   appFee: number;
 
-  @Column({ type: "integer", name: "transfer_amount" })
+  @Column({ type: "integer", name: "transfer_amount", nullable: true })
   transferAmount: number;
 
   @ManyToOne(() => Cart, cart => cart.payment, { nullable: false })
@@ -77,10 +77,10 @@ export class Payment extends BaseEntity {
   reservedProducts?: ReservedProduct[];
 
   @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
-  updatedAt: Date;
+  updatedAt: Dayjs;
 
   @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
-  timestamp: Date;
+  timestamp: Dayjs;
 
   async createReservedProducts(): Promise<ReservedProduct[] | any> {
     const cartProducts = this.cart.products;

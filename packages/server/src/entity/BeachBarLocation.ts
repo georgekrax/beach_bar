@@ -1,3 +1,4 @@
+import { Dayjs } from "dayjs";
 import { Redis } from "ioredis";
 import {
   BaseEntity,
@@ -66,13 +67,13 @@ export class BeachBarLocation extends BaseEntity {
   region?: Region;
 
   @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
-  updatedAt: Date;
+  updatedAt: Dayjs;
 
   @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
-  timestamp: Date;
+  timestamp: Dayjs;
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
-  deletedAt?: Date;
+  deletedAt?: Dayjs;
 
   async update(
     redis: Redis,

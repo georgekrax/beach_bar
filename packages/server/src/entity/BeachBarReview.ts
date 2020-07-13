@@ -1,3 +1,4 @@
+import { Dayjs } from "dayjs";
 import {
   BaseEntity,
   Check,
@@ -9,7 +10,7 @@ import {
   ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
+  UpdateDateColumn
 } from "typeorm";
 import { softRemove } from "../utils/softRemove";
 import { BeachBar } from "./BeachBar";
@@ -79,13 +80,13 @@ export class BeachBarReview extends BaseEntity {
   answer: ReviewAnswer;
 
   @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
-  updatedAt: Date;
+  updatedAt: Dayjs;
 
   @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
-  timestamp: Date;
+  timestamp: Dayjs;
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
-  deletedAt: Date;
+  deletedAt: Dayjs;
 
   async update(
     ratingValue?: number,

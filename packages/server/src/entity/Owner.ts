@@ -1,3 +1,4 @@
+import { Dayjs } from "dayjs";
 import {
   BaseEntity,
   Column,
@@ -8,7 +9,7 @@ import {
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
+  UpdateDateColumn
 } from "typeorm";
 import { softRemove } from "../utils/softRemove";
 import { BeachBarOwner } from "./BeachBarOwner";
@@ -34,13 +35,13 @@ export class Owner extends BaseEntity {
   priceHistory: ProductPriceHistory[];
 
   @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
-  updatedAt: Date;
+  updatedAt: Dayjs;
 
   @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
-  timestamp: Date;
+  timestamp: Dayjs;
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
-  deletedAt?: Date;
+  deletedAt?: Dayjs;
 
   async softRemove(): Promise<any> {
     const findOptions: any = { ownerId: this.id };

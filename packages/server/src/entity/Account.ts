@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import {
   BaseEntity,
   BeforeInsert,
@@ -46,7 +46,7 @@ export class Account extends BaseEntity {
   imgUrl?: string;
 
   @Column({ name: "birthday", type: "date", nullable: true })
-  birthday?: Date;
+  birthday?: Dayjs;
 
   @Column({ name: "age", type: "smallint", nullable: true })
   age?: number;
@@ -85,13 +85,13 @@ export class Account extends BaseEntity {
   loginDetails?: LoginDetails[];
 
   @UpdateDateColumn({ name: "updated_at", type: "timestamptz", default: () => `NOW()` })
-  updatedAt: Date;
+  updatedAt: Dayjs;
 
   @CreateDateColumn({ name: "timestamp", type: "timestamptz", default: () => `NOW()` })
-  timestamp: Date;
+  timestamp: Dayjs;
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
-  deletedAt?: Date;
+  deletedAt?: Dayjs;
 
   async softRemove(): Promise<any> {
     const findOptions: any = { accountId: this.id };

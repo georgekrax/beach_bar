@@ -1,3 +1,4 @@
+import { Dayjs } from "dayjs";
 import { Stripe } from "stripe";
 import {
   BaseEntity,
@@ -12,7 +13,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
   Repository,
-  UpdateDateColumn,
+  UpdateDateColumn
 } from "typeorm";
 import { stripe } from "..";
 import { softRemove } from "../utils/softRemove";
@@ -94,13 +95,13 @@ export class Card extends BaseEntity {
   payments?: Payment[];
 
   @UpdateDateColumn({ name: "updated_at", type: "timestamptz", default: () => `NOW()` })
-  updatedAt: Date;
+  updatedAt: Dayjs;
 
   @CreateDateColumn({ name: "timestamp", type: "timestamptz", default: () => `NOW()` })
-  timestamp: Date;
+  timestamp: Dayjs;
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
-  deletedAt?: Date;
+  deletedAt?: Dayjs;
 
   async updateCard(
     cardholderName?: string,

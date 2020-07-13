@@ -12,6 +12,7 @@ import { softRemove } from "../utils/softRemove";
 import { Payment } from "./Payment";
 import { Product } from "./Product";
 import { HourTime } from "./Time";
+import { Dayjs } from "dayjs";
 
 @Entity({ name: "reserved_product", schema: "public" })
 export class ReservedProduct extends BaseEntity {
@@ -25,7 +26,7 @@ export class ReservedProduct extends BaseEntity {
   paymentId: bigint;
 
   @Column({ type: "date", name: "date" })
-  date: Date;
+  date: Dayjs;
 
   @Column({ type: "integer", name: "time_id" })
   timeId: number;
@@ -46,13 +47,13 @@ export class ReservedProduct extends BaseEntity {
   time: HourTime;
 
   @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
-  updatedAt: Date;
+  updatedAt: Dayjs;
 
   @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
-  timestamp: Date;
+  timestamp: Dayjs;
 
   @Column({ type: "timestamptz", name: "deleted_at", nullable: true })
-  deletedAt?: Date;
+  deletedAt?: Dayjs;
 
   async getPrice(): Promise<number | undefined> {
     return this.payment.cart.getProductTotalPrice(this.productId);

@@ -13,6 +13,7 @@ import {
 import { softRemove } from "../utils/softRemove";
 import { Account } from "./Account";
 import { Country } from "./Country";
+import { Dayjs } from "dayjs";
 
 @Entity({ name: "user_contact_details", schema: "public" })
 @Unique("contact_details_phone_number_key", ["accountId", "phoneNumber"])
@@ -46,13 +47,13 @@ export class UserContactDetails extends BaseEntity {
   country: Country;
 
   @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
-  updatedAt: Date;
+  updatedAt: Dayjs;
 
   @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
-  timestamp: Date;
+  timestamp: Dayjs;
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
-  deletedAt?: Date;
+  deletedAt?: Dayjs;
 
   async softRemove(): Promise<any> {
     await softRemove(UserContactDetails, { id: this.id });

@@ -1,10 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, ManyToOne, JoinColumn, CreateDateColumn } from "typeorm";
-
-import { City } from "./City";
+import { Dayjs } from "dayjs";
+import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Account } from "./Account";
+import { City } from "./City";
+import { ClientBrowser, ClientOs } from "./ClientOs&Browser";
 import { Country } from "./Country";
 import { Platform } from "./Platform";
-import { ClientOs, ClientBrowser } from "./ClientOs&Browser";
+
 
 export enum loginDetailStatus {
   loggedIn = "logged_in",
@@ -46,7 +47,7 @@ export class LoginDetails extends BaseEntity {
   ipAddr: string;
 
   @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => "NOW()" })
-  timestamp: Date;
+  timestamp: Dayjs;
 
   @ManyToOne(() => Account, account => account.loginDetails, { nullable: false })
   @JoinColumn({ name: "account_id" })

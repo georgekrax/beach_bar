@@ -16,7 +16,11 @@ export const softRemove = async (
       }
     });
   }
-  if (["Product", "RestaurantFoodItem", "ReservedProduct"].includes(getConnection().getMetadata(primaryRepo).name)) {
+  if (
+    ["Product", "RestaurantFoodItem", "ReservedProduct", "BeachBarFeature", "ProductCouponCode", "ProductVoucherCampaign"].includes(
+      getConnection().getMetadata(primaryRepo).name,
+    )
+  ) {
     await primaryRepo.update(primaryOptions, { deletedAt: dayjs().toISOString() });
   } else if (getConnection().getMetadata(primaryRepo).name === "Payment") {
     await primaryRepo.update(primaryOptions, { isRefunded: true });

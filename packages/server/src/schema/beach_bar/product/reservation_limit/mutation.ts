@@ -139,13 +139,14 @@ export const ProductReservationLimitCrudMutation = extendType({
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a or some valid reservation limit(s)" } };
         }
 
-        const reservationLimits = await ProductReservationLimit.find({
+        let reservationLimits = await ProductReservationLimit.find({
           where: { id: In(reservationLimitIds) },
           relations: ["startTime", "endTime", "product"],
         });
-        if (!reservationLimits) {
+        if (!reservationLimits || reservationLimits.filter(limit => !limit.product.deletedAt).length === 0) {
           return { error: { code: errors.CONFLICT, message: "Specified reservation limit(s) do not exist" } };
         }
+        reservationLimits = reservationLimits.filter(limit => !limit.product.deletedAt);
 
         try {
           const updatedReservationLimits: ProductReservationLimit[] = [];

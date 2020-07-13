@@ -1,4 +1,5 @@
 import { validateEmailSchema } from "@beach_bar/common";
+import { Dayjs } from "dayjs";
 import { Stripe } from "stripe";
 import {
   BaseEntity,
@@ -13,7 +14,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
   Repository,
-  UpdateDateColumn,
+  UpdateDateColumn
 } from "typeorm";
 import errors from "../constants/errors";
 import { AddCustomerType } from "../schema/customer/returnTypes";
@@ -62,13 +63,13 @@ export class Customer extends BaseEntity {
   reviews?: BeachBarReview[];
 
   @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
-  updatedAt: Date;
+  updatedAt: Dayjs;
 
   @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
-  timestamp: Date;
+  timestamp: Dayjs;
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
-  deletedAt?: Date;
+  deletedAt?: Dayjs;
 
   checkReviewsQuantity(beachBarId: number, payment: Payment): boolean {
     if (this.reviews) {

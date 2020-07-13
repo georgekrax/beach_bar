@@ -1,6 +1,7 @@
 import { BaseEntity, Check, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { User } from "./User";
 import { VotingFeedback } from "./VotingFeedback";
+import { Dayjs } from "dayjs";
 
 @Entity({ name: "vote", schema: "public" })
 @Check(`"rating" IN ('y', 'n')`)
@@ -26,5 +27,5 @@ export class Vote extends BaseEntity {
   user: User;
 
   @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
-  timestamp: Date;
+  timestamp: Dayjs;
 }

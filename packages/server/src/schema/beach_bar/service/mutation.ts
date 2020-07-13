@@ -1,6 +1,5 @@
 import { MyContext } from "@beach_bar/common";
 import { extendType, intArg, stringArg } from "@nexus/schema";
-import { getConnection } from "typeorm";
 import errors from "../../../constants/errors";
 import { BeachBar } from "../../../entity/BeachBar";
 import { BeachBarFeature } from "../../../entity/BeachBarFeature";
@@ -9,6 +8,7 @@ import { DeleteType, ErrorType } from "../../returnTypes";
 import { DeleteResult } from "../../types";
 import { AddBeachBarFeatureType, UpdateBeachBarFeatureType } from "./returnTypes";
 import { AddBeachBarFeatureResult, UpdateBeachBarFeatureResult } from "./types";
+import { IsNull } from "typeorm";
 
 export const BeachBarFeatureMutation = extendType({
   type: "Mutation",
@@ -53,14 +53,11 @@ export const BeachBarFeatureMutation = extendType({
           };
         }
 
-        if (!beachBarId || beachBarId.toString() === ("" || " ")) {
+        if (!beachBarId || beachBarId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid #beach_bar" } };
         }
-        if (!featureId || featureId.toString() === ("" || " ")) {
+        if (!featureId || featureId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid feature" } };
-        }
-        if (!quantity || quantity.toString() === ("" || " ")) {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid quantity number" } };
         }
 
         const beachBar = await BeachBar.findOne({
@@ -73,9 +70,10 @@ export const BeachBarFeatureMutation = extendType({
         const feature = beachBar.features.find(feature => feature.service.id === featureId);
         if (feature) {
           if (feature.deletedAt) {
-            await getConnection().getRepository(BeachBarFeature).restore({ beachBar, service: feature.service });
+            feature.deletedAt = undefined;
+            await feature.save();
             const beachBarFeature = await BeachBarFeature.findOne({
-              where: { beachBar, service: feature.service },
+              where: { beachBar, service: feature.service, deletedAt: IsNull() },
               relations: ["beachBar", "service"],
             });
             if (!beachBarFeature) {
@@ -169,12 +167,9 @@ export const BeachBarFeatureMutation = extendType({
         if (!featureId || featureId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid feature" } };
         }
-        if (quantity && quantity <= 0) {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid quantity number" } };
-        }
 
         const feature = await BeachBarFeature.findOne({
-          where: { beachBarId, serviceId: featureId },
+          where: { beachBarId, serviceId: featureId, deletedAt: IsNull() },
           relations: ["beachBar", "beachBar.owners", "beachBar.owners.owner", "beachBar.owners.owner.user", "service"],
         });
         if (!feature) {
@@ -246,7 +241,7 @@ export const BeachBarFeatureMutation = extendType({
         }
 
         const feature = await BeachBarFeature.findOne({
-          where: { beachBarId, serviceId: featureId },
+          where: { beachBarId, serviceId: featureId, deletedAt: IsNull() },
           relations: ["beachBar", "beachBar.owners", "beachBar.owners.owner", "beachBar.owners.owner.user", "service"],
         });
         if (!feature) {

@@ -1,3 +1,4 @@
+import { Dayjs } from "dayjs";
 import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn, UpdateDateColumn } from "typeorm";
 import { BeachBarPricingFee } from "./BeachBarPricingFee";
 import { Currency } from "./Currency";
@@ -22,8 +23,8 @@ export class BeachBarFeeCurrency extends BaseEntity {
   currency: Currency;
 
   @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
-  updatedAt: Date;
+  updatedAt: Dayjs;
 
   @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
-  timestamp: Date;
+  timestamp: Dayjs;
 }

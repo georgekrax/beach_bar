@@ -1,3 +1,4 @@
+import { Dayjs } from "dayjs";
 import { BaseEntity, Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
 import { Product } from "./Product";
 import { ProductComponent } from "./ProductComponent";
@@ -22,8 +23,8 @@ export class BundleProductComponent extends BaseEntity {
   component: ProductComponent;
 
   @CreateDateColumn({ name: "timestamp", type: "timestamptz", default: () => `NOW()` })
-  timestamp: Date;
+  timestamp: Dayjs;
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true, primary: true })
-  deletedAt?: Date;
+  deletedAt?: Dayjs;
 }

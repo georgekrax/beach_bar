@@ -11,6 +11,7 @@ import {
 } from "typeorm";
 import { softRemove } from "../utils/softRemove";
 import { BeachBarReview } from "./BeachBarReview";
+import { Dayjs } from "dayjs";
 
 @Entity({ name: "review_answer", schema: "public" })
 export class ReviewAnswer extends BaseEntity {
@@ -28,13 +29,13 @@ export class ReviewAnswer extends BaseEntity {
   review: BeachBarReview;
 
   @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
-  updatedAt: Date;
+  updatedAt: Dayjs;
 
   @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
-  timestamp: Date;
+  timestamp: Dayjs;
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
-  deletedAt?: Date;
+  deletedAt?: Dayjs;
 
   async softRemove(): Promise<any> {
     await softRemove(ReviewAnswer, { id: this.id });

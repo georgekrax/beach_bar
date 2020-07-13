@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import { Redis } from "ioredis";
 import {
   BaseEntity,
@@ -13,7 +13,7 @@ import {
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
+  UpdateDateColumn
 } from "typeorm";
 import redisKeys from "../constants/redisKeys";
 import { softRemove } from "../utils/softRemove";
@@ -27,6 +27,7 @@ import { BeachBarRestaurant } from "./BeachBarRestaurant";
 import { BeachBarReview } from "./BeachBarReview";
 import { Currency } from "./Currency";
 import { Product } from "./Product";
+import { SearchInputValue } from "./SearchInputValue";
 import { StripeFee } from "./StripeFee";
 import { StripeMinimumCurrency } from "./StripeMinimumCurrency";
 
@@ -78,6 +79,9 @@ export class BeachBar extends BaseEntity {
   @JoinColumn({ name: "fee_id" })
   fee: BeachBarPricingFee;
 
+  @OneToMany(() => SearchInputValue, searchInputValue => searchInputValue.city, { nullable: true })
+  searchInputValues?: SearchInputValue[];
+
   @ManyToOne(() => Currency, currency => currency.beachBars)
   @JoinColumn({ name: "default_currency_id" })
   defaultCurrency: Currency;
@@ -104,13 +108,13 @@ export class BeachBar extends BaseEntity {
   restaurants: BeachBarRestaurant[];
 
   @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
-  updatedAt: Date;
+  updatedAt: Dayjs;
 
   @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
-  timestamp: Date;
+  timestamp: Dayjs;
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
-  deletedAt?: Date;
+  deletedAt?: Dayjs;
 
   async update(
     redis: Redis,
@@ -148,7 +152,7 @@ export class BeachBar extends BaseEntity {
     }
   }
 
-  async getEntryFee(date?: Date, getAvg = false): Promise<BeachBarEntryFee | number | undefined> {
+  async getEntryFee(date?: Date | Dayjs, getAvg = false): Promise<BeachBarEntryFee | number | undefined> {
     if (getAvg) {
       const entryFees = await BeachBarEntryFee.find({ beachBar: this });
       if (entryFees) {
@@ -262,7 +266,16 @@ export class BeachBar extends BaseEntity {
     await softRemove(
       BeachBar,
       { id: this.id },
-      [BeachBarLocation, BeachBarOwner, BeachBarFeature, BeachBarReview, Product, BeachBarEntryFee, BeachBarRestaurant],
+      [
+        BeachBarLocation,
+        BeachBarOwner,
+        BeachBarFeature,
+        BeachBarReview,
+        Product,
+        BeachBarEntryFee,
+        BeachBarRestaurant,
+        SearchInputValue,
+      ],
       findOptions,
     );
   }

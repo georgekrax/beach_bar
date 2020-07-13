@@ -1,3 +1,4 @@
+import { Dayjs } from "dayjs";
 import {
   BaseEntity,
   Check,
@@ -8,7 +9,7 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryColumn,
-  UpdateDateColumn,
+  UpdateDateColumn
 } from "typeorm";
 import { softRemove } from "../utils/softRemove";
 import { Cart } from "./Cart";
@@ -28,7 +29,7 @@ export class CartProduct extends BaseEntity {
   quantity: number;
 
   @Column({ type: "date", name: "date", default: () => `CURRENT_DATE` })
-  date: Date;
+  date: Dayjs;
 
   @Column({ type: "integer", name: "time_id" })
   timeId: number;
@@ -46,13 +47,13 @@ export class CartProduct extends BaseEntity {
   time: HourTime;
 
   @UpdateDateColumn({ name: "updated_at", type: "timestamptz", default: () => `NOW()` })
-  updatedAt: Date;
+  updatedAt: Dayjs;
 
   @CreateDateColumn({ name: "timestamp", type: "timestamptz", default: () => `NOW()` })
-  timestamp: Date;
+  timestamp: Dayjs;
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
-  deletedAt?: Date;
+  deletedAt?: Dayjs;
 
   async softRemove(): Promise<any> {
     await softRemove(CartProduct, { cartId: this.cartId, productId: this.productId });

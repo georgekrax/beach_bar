@@ -1,4 +1,4 @@
-import { BaseEntity, Column, Entity, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Currency } from "./Currency";
 
 @Entity({ name: "stripe_minimum_currency", schema: "public" })
@@ -13,5 +13,6 @@ export class StripeMinimumCurrency extends BaseEntity {
   currencyId: number;
 
   @OneToOne(() => Currency, currency => currency.stripeMinimumCurrency, { nullable: false })
+  @JoinColumn({ name: "currency_id" })
   currency: Currency;
 }

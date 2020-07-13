@@ -21,6 +21,7 @@ import { Customer } from "./Customer";
 import { Owner } from "./Owner";
 import { UserSearch } from "./UserSearch";
 import { Vote } from "./Vote";
+import { Dayjs } from "dayjs";
 
 @Entity({ name: "user", schema: "public" })
 export class User extends BaseEntity {
@@ -78,13 +79,13 @@ export class User extends BaseEntity {
   customer?: Customer;
 
   @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
-  updatedAt: Date;
+  updatedAt: Dayjs;
 
   @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
-  timestamp: Date;
+  timestamp: Dayjs;
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
-  deletedAt?: Date;
+  deletedAt?: Dayjs;
 
   getFullName(): string {
     return `${this.firstName ? this.firstName : ""}${this.firstName && this.lastName ? " " : ""}${this.lastName ? this.lastName : ""}`;

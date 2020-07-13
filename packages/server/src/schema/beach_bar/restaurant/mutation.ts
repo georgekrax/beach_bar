@@ -138,17 +138,12 @@ export const BeachBarRestaurantCrudMutation = extendType({
         if (!restaurantId || restaurantId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid #beach_bar restaurant" } };
         }
-        if (name && name.trim().length === 0) {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid name" } };
-        }
-        if (description && description.trim().length === 0) {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid description text" } };
-        }
 
-        const restaurant = await BeachBarRestaurant.findOne({ where: { id: restaurantId }, relations: ["beachBar"] });
+        const restaurant = await BeachBarRestaurant.findOne({ where: { id: restaurantId }, relations: ["beachBar", "foodItems"] });
         if (!restaurant) {
           return { error: { code: errors.CONFLICT, message: "Specified restaurant does not exist" } };
         }
+        restaurant.foodItems = restaurant.foodItems.filter(item => !item.deletedAt);
 
         try {
           const updatedRestaurant = await restaurant.update(name, description, isActive);

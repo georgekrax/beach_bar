@@ -1,3 +1,4 @@
+import { Dayjs } from "dayjs";
 import {
   BaseEntity,
   Column,
@@ -24,20 +25,20 @@ export class BeachBarEntryFee extends BaseEntity {
   beachBarId: number;
 
   @Column({ type: "date", name: "date" })
-  date: Date;
+  date: Dayjs;
 
   @ManyToOne(() => BeachBar, beachBar => beachBar.entryFees)
   @JoinColumn({ name: "beach_bar_id" })
   beachBar: BeachBar;
 
   @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
-  updatedAt: Date;
+  updatedAt: Dayjs;
 
   @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
-  timestamp: Date;
+  timestamp: Dayjs;
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
-  deletedAt?: Date;
+  deletedAt?: Dayjs;
 
   async update(fee?: number): Promise<BeachBarEntryFee | any> {
     try {

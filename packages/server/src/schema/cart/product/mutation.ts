@@ -127,7 +127,7 @@ export const CartProductCrudMutation = extendType({
           where: { cartId, productId },
           relations: ["cart", "product", "time"],
         });
-        if (!cartProduct) {
+        if (!cartProduct || cartProduct.product.deletedAt) {
           return { error: { code: errors.CONFLICT, message: "Specified product does not exist in this shopping cart" } };
         }
 

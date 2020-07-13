@@ -1,6 +1,6 @@
 import { MyContext } from "@beach_bar/common";
 import { booleanArg, extendType, floatArg, intArg, stringArg } from "@nexus/schema";
-import { getConnection, IsNull } from "typeorm";
+import { IsNull } from "typeorm";
 import errors from "../../../constants/errors";
 import { BeachBar } from "../../../entity/BeachBar";
 import { BeachBarOwner } from "../../../entity/BeachBarOwner";
@@ -138,7 +138,8 @@ export const ProductCrudMutation = extendType({
               relations: ["beachBar", "category", "category.productComponents", "currency"],
             });
             if (product && product.deletedAt) {
-              await getConnection().getRepository(Product).restore({ beachBar, name });
+              product.deletedAt = undefined;
+              await product.save();
               return {
                 product,
                 added: true,

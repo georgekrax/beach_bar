@@ -12,6 +12,7 @@ import { checkScopes } from "../utils/checkScopes";
 import { softRemove } from "../utils/softRemove";
 import { BeachBarRestaurant } from "./BeachBarRestaurant";
 import { RestaurantMenuCategory } from "./RestaurantMenuCategory";
+import { Dayjs } from "dayjs";
 
 @Entity({ name: "restaurant_food_item", schema: "public" })
 export class RestaurantFoodItem extends BaseEntity {
@@ -47,13 +48,13 @@ export class RestaurantFoodItem extends BaseEntity {
   menuCategory: RestaurantMenuCategory;
 
   @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
-  updatedAt: Date;
+  updatedAt: Dayjs;
 
   @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
-  timestamp: Date;
+  timestamp: Dayjs;
 
   @Column({ type: "timestamptz", name: "deleted_at", nullable: true })
-  deletedAt?: Date;
+  deletedAt?: Dayjs;
 
   async update(
     payload: any,

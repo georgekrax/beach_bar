@@ -5,11 +5,11 @@ import { Card } from "./Card";
 import { City } from "./City";
 import { CountryFlagIcon } from "./CountryFlagIcon";
 import { Currency } from "./Currency";
+import { Customer } from "./Customer";
 import { LoginDetails } from "./LoginDetails";
 import { Region } from "./Region";
+import { SearchInputValue } from "./SearchInputValue";
 import { UserContactDetails } from "./UserContactDetails";
-import { UserSearch } from "./UserSearch";
-import { Customer } from "./Customer";
 
 @Entity({ name: "country", schema: "public" })
 export class Country extends BaseEntity {
@@ -37,6 +37,10 @@ export class Country extends BaseEntity {
   @Column({ type: "integer", name: "currency_id" })
   currencyId: number;
 
+  @ManyToOne(() => Currency, currency => currency.countries, { nullable: false })
+  @JoinColumn({ name: "currency_id" })
+  currency: Currency;
+
   @OneToMany(() => City, city => city.country)
   cities?: City[];
 
@@ -55,19 +59,15 @@ export class Country extends BaseEntity {
   @OneToMany(() => BeachBarLocation, beachBarLocation => beachBarLocation.country)
   beachBarLocations?: BeachBarLocation[];
 
-  @OneToMany(() => UserSearch, userSearch => userSearch.country)
-  userSearches?: UserSearch[];
-
   @OneToMany(() => Card, card => card.country, { nullable: true })
   cards?: Card[];
 
-  @OneToMany(() => Customer, customer => customer.country)
+  @OneToMany(() => Customer, customer => customer.country, { nullable: true })
   customers?: Customer[];
 
-  @ManyToOne(() => Currency, currency => currency.countries, { nullable: false })
-  @JoinColumn({ name: "currency_id" })
-  currency: Currency;
+  @OneToMany(() => SearchInputValue, searchInputValue => searchInputValue.country, { nullable: true })
+  searchInputValues?: SearchInputValue[];
 
-  @OneToMany(() => LoginDetails, loginDetails => loginDetails.country)
+  @OneToMany(() => LoginDetails, loginDetails => loginDetails.country, { nullable: true })
   loginDetails?: LoginDetails[];
 }

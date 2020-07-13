@@ -58,6 +58,7 @@ const startServer = async (): Promise<any> => {
   );
 
   const server = new ApolloServer({
+    tracing: !(process.env.NODE_ENV === "production"),
     schema,
     formatError: (err): any => {
       if (

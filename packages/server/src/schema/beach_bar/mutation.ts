@@ -198,6 +198,8 @@ export const BeachBarCrudMutation = extendType({
         if (!beachBar) {
           return { error: { code: errors.CONFLICT, message: errors.BEACH_BAR_DOES_NOT_EXIST } };
         }
+        beachBar.features = beachBar.features.filter(feature => !feature.deletedAt);
+        beachBar.products = beachBar.products.filter(product => !product.deletedAt);
 
         try {
           const updatedBeachBar = await beachBar.update(redis, name, description, thumbnailUrl, zeroCartTotal);

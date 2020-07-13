@@ -4,7 +4,7 @@ import { BeachBarLocation } from "./BeachBarLocation";
 import { Country } from "./Country";
 import { LoginDetails } from "./LoginDetails";
 import { Region } from "./Region";
-import { UserSearch } from "./UserSearch";
+import { SearchInputValue } from "./SearchInputValue";
 
 @Entity({ name: "city", schema: "public" })
 export class City extends BaseEntity {
@@ -30,8 +30,8 @@ export class City extends BaseEntity {
   @OneToMany(() => BeachBarLocation, beachBarLocation => beachBarLocation.city, { nullable: true })
   beachBarLocations?: BeachBarLocation[];
 
-  @OneToMany(() => UserSearch, userSearch => userSearch.city, { nullable: true })
-  userSearches?: UserSearch[];
+  @OneToMany(() => SearchInputValue, searchInputValue => searchInputValue.city, { nullable: true })
+  searchInputValues?: SearchInputValue[];
 
   @OneToMany(() => LoginDetails, loginDetails => loginDetails.city, { nullable: true })
   loginDetails: LoginDetails[];

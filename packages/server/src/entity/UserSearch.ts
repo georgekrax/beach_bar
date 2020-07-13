@@ -1,3 +1,4 @@
+import { Dayjs } from "dayjs";
 import {
   BaseEntity,
   BeforeInsert,
@@ -12,9 +13,7 @@ import {
   UpdateDateColumn,
 } from "typeorm";
 import { BeachBarService } from "./BeachBarService";
-import { City } from "./City";
-import { Country } from "./Country";
-import { Region } from "./Region";
+import { SearchInputValue } from "./SearchInputValue";
 import { User } from "./User";
 
 @Entity({ name: "user_search", schema: "public" })
@@ -24,11 +23,8 @@ export class UserSearch extends BaseEntity {
   @PrimaryGeneratedColumn({ type: "bigint" })
   id: bigint;
 
-  @Column("varchar", { length: 255, name: "search_value" })
-  searchValue: string;
-
   @Column({ type: "date", name: "search_date", nullable: true })
-  searchDate?: Date;
+  searchDate?: Dayjs;
 
   @Column({ type: "smallint", name: "search_adults", nullable: true })
   searchAdults?: number;
@@ -37,41 +33,27 @@ export class UserSearch extends BaseEntity {
   searchChildren?: number;
 
   @Column({ type: "json", name: "extra_filters", nullable: true })
-  extraFilters?: string | object | any;
+  extraFilters?: string | Record<string, unknown> | any;
 
-  @Column({ type: "integer", name: "user_id" })
+  @Column({ type: "integer", name: "user_id", nullable: true })
   userId: number;
 
-  @Column({ type: "integer", name: "country_id", nullable: true })
-  countryId?: number;
+  @Column({ type: "bigint", name: "input_value_id" })
+  inputValueId: bigint;
 
-  @Column({ type: "integer", name: "city_id", nullable: true })
-  cityId?: number;
-
-  @Column({ type: "integer", name: "region_id", nullable: true })
-  regionId?: number;
-
-  @ManyToOne(() => User, user => user.searches, { nullable: false, cascade: ["soft-remove", "recover"] })
+  @ManyToOne(() => User, user => user.searches, { nullable: true, cascade: ["soft-remove", "recover"] })
   @JoinColumn({ name: "user_id" })
   user: User;
 
-  @ManyToOne(() => Country, country => country.userSearches, { nullable: true })
-  @JoinColumn({ name: "country_id" })
-  country?: Country;
-
-  @ManyToOne(() => City, city => city.userSearches, { nullable: true })
-  @JoinColumn({ name: "city_id" })
-  city?: City;
-
-  @ManyToOne(() => Region, region => region.userSearches, { nullable: true })
-  @JoinColumn({ name: "region_id" })
-  region?: Region;
+  @ManyToOne(() => SearchInputValue, searchInputValue => searchInputValue.searches, { nullable: false })
+  @JoinColumn({ name: "input_value_id" })
+  inputValue: SearchInputValue;
 
   @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
-  updatedAt: Date;
+  updatedAt: Dayjs;
 
   @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
-  timestamp: Date;
+  timestamp: Dayjs;
 
   @BeforeInsert()
   @BeforeUpdate()
