@@ -1,8 +1,7 @@
-import { EmailScalar, MyContext } from "@beach_bar/common";
+import { EmailScalar, errors, MyContext } from "@beach_bar/common";
 import { arg, booleanArg, extendType, stringArg } from "@nexus/schema";
 import dayjs from "dayjs";
 import fetch from "node-fetch";
-import errors from "../../constants/errors";
 import { loginDetailStatus } from "../../entity/LoginDetails";
 import { Platform } from "../../entity/Platform";
 import { User } from "../../entity/User";

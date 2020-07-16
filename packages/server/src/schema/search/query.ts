@@ -1,10 +1,8 @@
-import { DateScalar, filterSearch, MyContext } from "@beach_bar/common";
-import { arg, extendType, intArg, stringArg } from "@nexus/schema";
+import { dayjsFormat, errors, filterSearch, MyContext } from "@beach_bar/common";
+import { arg, extendType, stringArg } from "@nexus/schema";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { In } from "typeorm";
-import { dayjsFormat } from "../../constants/dayjs";
-import errors from "../../constants/errors";
 import redisKeys from "../../constants/redisKeys";
 import { BeachBar } from "../../entity/BeachBar";
 import { BeachBarFeature } from "../../entity/BeachBarFeature";
@@ -15,7 +13,7 @@ import { UserSearch } from "../../entity/UserSearch";
 import { checkAvailability } from "../../utils/beach_bar/checkAvailability";
 import { ErrorType } from "../returnTypes";
 import { SearchResultReturnType, SearchReturnType } from "./returnTypes";
-import { FormattedSearchInputValueType, SearchResult, UserSearchType } from "./types";
+import { FormattedSearchInputValueType, SearchInputType, SearchResult, UserSearchType } from "./types";
 
 export const SearchQuery = extendType({
   type: "Query",
@@ -70,22 +68,9 @@ export const SearchQuery = extendType({
           required: false,
           description: "The search input value, found in the documentation",
         }),
-        date: arg({
-          type: DateScalar,
+        availability: arg({
+          type: SearchInputType,
           required: false,
-          description: "The date to search availability at #beach_bars",
-        }),
-        timeId: intArg({
-          required: false,
-          description: "The ID value of the hour time to search availability for",
-        }),
-        adults: intArg({
-          required: false,
-          description: "The number of adults to search availability at #beach_bars. Its value should be less or equal to 12 adults",
-        }),
-        children: intArg({
-          required: false,
-          description: "The number of children to search availability at #beach_bars. Its value should be less or equal to 8 children",
         }),
         filterIds: stringArg({
           required: false,
@@ -95,7 +80,7 @@ export const SearchQuery = extendType({
       },
       resolve: async (
         _,
-        { inputId, inputValue, date, timeId, adults, children, filterIds },
+        { inputId, inputValue, availability, filterIds },
         { payload, redis }: MyContext,
       ): Promise<SearchReturnType | ErrorType> => {
         dayjs.extend(utc);
@@ -110,14 +95,18 @@ export const SearchQuery = extendType({
         if (inputValue && inputValue.trim().length === 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Invalid inputValue" } };
         }
-        if (date && date.add(1, "day") < dayjs()) {
-          return { error: { code: errors.LATER_DATE_ERROR_CODE, message: "Please provide a date later or equal to today" } };
-        }
-        if (adults !== undefined && adults > 12) {
-          return { error: { code: errors.MAX_ADULTS_ERROR_CODE, message: "You cannot search for more than 12 adults" } };
-        }
-        if (children !== undefined && children > 8) {
-          return { error: { code: errors.MAX_CHILDREN_ERROR_CODE, message: "You cannot search for more than 8 children" } };
+        const { date, timeId } = availability;
+        let { adults, children } = availability;
+        if (availability) {
+          if (date && date.add(1, "day") < dayjs()) {
+            return { error: { code: errors.LATER_DATE_ERROR_CODE, message: "Please provide a date later or equal to today" } };
+          }
+          if (adults !== undefined && adults > 12) {
+            return { error: { code: errors.MAX_ADULTS_ERROR_CODE, message: "You cannot search for more than 12 adults" } };
+          }
+          if (children !== undefined && children > 8) {
+            return { error: { code: errors.MAX_CHILDREN_ERROR_CODE, message: "You cannot search for more than 8 children" } };
+          }
         }
 
         let searchInput: SearchInputValue | undefined;
@@ -154,7 +143,7 @@ export const SearchQuery = extendType({
         }
 
         let results: SearchResultReturnType[] = beachBars.map(bar => {
-          return { beachBar: bar, hasAvailability: undefined, hasCapacity: undefined };
+          return { beachBar: bar, availability: { hasAvailability: undefined, hasCapacity: undefined } };
         });
         if (date) {
           adults = adults || 0;
@@ -166,8 +155,10 @@ export const SearchQuery = extendType({
             const { hasAvailability, hasCapacity } = await checkAvailability(redis, beachBars[i], date, timeId, totalPeople);
             results.push({
               beachBar: beachBars[i],
-              hasAvailability,
-              hasCapacity,
+              availability: {
+                hasAvailability,
+                hasCapacity,
+              },
             });
           }
         }

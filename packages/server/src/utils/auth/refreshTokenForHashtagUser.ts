@@ -1,6 +1,6 @@
+import { errors } from "@beach_bar/common";
 import { Redis } from "ioredis";
 import fetch from "node-fetch";
-import errors from "../../constants/errors";
 import { User } from "../../entity/User";
 
 export const refreshTokenForHashtagUser = async (user: User, redis: Redis): Promise<void | Error> => {

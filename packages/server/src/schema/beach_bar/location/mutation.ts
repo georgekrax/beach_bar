@@ -1,6 +1,5 @@
-import { MyContext } from "@beach_bar/common";
+import { MyContext, errors } from "@beach_bar/common";
 import { extendType, intArg, stringArg } from "@nexus/schema";
-import errors from "../../../constants/errors";
 import { BeachBar } from "../../../entity/BeachBar";
 import { BeachBarLocation } from "../../../entity/BeachBarLocation";
 import { Country } from "../../../entity/Country";

@@ -1,12 +1,12 @@
 /* eslint-disable no-case-declarations */
 import { Request, Response, Router } from "express";
 import { getCustomRepository } from "typeorm";
-import errors from "../constants/errors";
 import { webhook } from "../constants/stripe";
 import { Card, CardRepository } from "../entity/Card";
 import { Customer, CustomerRepository } from "../entity/Customer";
 import { Payment } from "../entity/Payment";
 import { stripe } from "../index";
+import { errors } from "@beach_bar/common";
 
 export const router = Router();
 

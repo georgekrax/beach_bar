@@ -8,3 +8,8 @@ type BeachBarType = {
 export type AddBeachBarType = AddType & BeachBarType;
 
 export type UpdateBeachBarType = UpdateType & BeachBarType;
+
+export type BeachBarAvailabilityReturnType = {
+  hasAvailability?: boolean;
+  hasCapacity?: boolean;
+};

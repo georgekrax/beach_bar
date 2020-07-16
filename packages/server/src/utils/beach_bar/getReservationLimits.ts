@@ -1,5 +1,5 @@
+import { dayjsFormat } from "@beach_bar/common";
 import dayjs, { Dayjs } from "dayjs";
-import { dayjsFormat } from "../../constants/dayjs";
 import { BeachBar } from "../../entity/BeachBar";
 import { ProductReservationLimit } from "../../entity/ProductReservationLimit";
 

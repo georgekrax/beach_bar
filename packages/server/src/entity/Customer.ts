@@ -1,4 +1,4 @@
-import { validateEmailSchema } from "@beach_bar/common";
+import { validateEmailSchema, errors } from "@beach_bar/common";
 import { Dayjs } from "dayjs";
 import { Stripe } from "stripe";
 import {
@@ -16,7 +16,6 @@ import {
   Repository,
   UpdateDateColumn
 } from "typeorm";
-import errors from "../constants/errors";
 import { AddCustomerType } from "../schema/customer/returnTypes";
 import { ErrorType } from "../schema/returnTypes";
 import { softRemove } from "../utils/softRemove";

@@ -1,7 +1,6 @@
-import { BigIntScalar, DateScalar, MyContext } from "@beach_bar/common";
+import { BigIntScalar, DateScalar, errors, MyContext } from "@beach_bar/common";
 import { arg, extendType, floatArg, intArg } from "@nexus/schema";
 import { In } from "typeorm";
-import errors from "../../../constants/errors";
 import { BeachBar } from "../../../entity/BeachBar";
 import { BeachBarEntryFee } from "../../../entity/BeachBarEntryFee";
 import { checkScopes } from "../../../utils/checkScopes";

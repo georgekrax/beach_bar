@@ -1,6 +1,6 @@
+import { EmailScalar, errors, MyContext } from "@beach_bar/common";
 import { arg, extendType, intArg, stringArg } from "@nexus/schema";
 import { getConnection } from "typeorm";
-import errors from "../../constants/errors";
 import { Country } from "../../entity/Country";
 import { User } from "../../entity/User";
 import { UserContactDetails } from "../../entity/UserContactDetails";
@@ -8,7 +8,6 @@ import { DeleteType, ErrorType } from "../returnTypes";
 import { DeleteResult } from "../types";
 import { AddUserContactDetailsResult, UpdateUserContactDetailsResult } from "./contactDetails";
 import { AddUserContactDetailsType, UpdateUserContactDetailsType } from "./returnTypes";
-import { EmailScalar, MyContext } from "@beach_bar/common";
 
 export const UserContactDetailsCrudMutation = extendType({
   type: "Mutation",

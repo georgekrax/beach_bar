@@ -1,7 +1,6 @@
 /* eslint-disable prettier/prettier */
-import { BigIntScalar, generateID, MyContext } from "@beach_bar/common";
+import { BigIntScalar, errors, generateID, MyContext } from "@beach_bar/common";
 import { arg, extendType } from "@nexus/schema";
-import errors from "../../constants/errors";
 import { payment as paymentStatus } from "../../constants/status";
 import { Card } from "../../entity/Card";
 import { Cart } from "../../entity/Cart";

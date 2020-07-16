@@ -13,7 +13,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import errors from "../constants/errors";
 import { payment } from "../constants/status";
 import { softRemove } from "../utils/softRemove";
 import { BeachBarReview } from "./BeachBarReview";
@@ -23,6 +22,7 @@ import { PaymentStatus } from "./PaymentStatus";
 import { Product } from "./Product";
 import { RefundPercentage } from "./RefundPercentage";
 import { ReservedProduct } from "./ReservedProduct";
+import { errors } from "@beach_bar/common";
 
 interface GetRefundPercentage {
   refundPercentage: RefundPercentage;

@@ -1,6 +1,7 @@
 import { DateTimeScalar, UrlScalar } from "@beach_bar/common";
 import { objectType, unionType } from "@nexus/schema";
 import { CurrencyType } from "../details/countryTypes";
+import { QuarterTimeType } from "../details/time/types";
 import { BeachBarOwnerType } from "../owner/types";
 import { BeachBarLocationType } from "./location/types";
 import { BeachBarRestaurantType } from "./restaurant/types";
@@ -72,6 +73,18 @@ export const BeachBarType = objectType({
       description: "The default currency of the #beach_bar",
       nullable: false,
       resolve: o => o.defaultCurrency,
+    });
+    t.field("openingTime", {
+      type: QuarterTimeType,
+      description: "The opening quarter time of the #beach_bar, in the time zone of its country",
+      nullable: false,
+      resolve: o => o.openingTime,
+    });
+    t.field("closingTime", {
+      type: QuarterTimeType,
+      description: "The closing quarter time of the #beach_bar, in the time zone of its country",
+      nullable: false,
+      resolve: o => o.closingTime,
     });
   },
 });
@@ -148,6 +161,21 @@ export const UpdateBeachBarResult = unionType({
       } else {
         return "UpdateBeachBar";
       }
+    });
+  },
+});
+
+export const BeachBarAvailabilityType = objectType({
+  name: "BeachBarAvailability",
+  description: "Boolean values to show if the #beach_bar is available",
+  definition(t) {
+    t.boolean("hasAvailability", {
+      nullable: true,
+      description: "A boolean that indicates if the #beach_bar has availability for the dates selected",
+    });
+    t.boolean("hasCapacity", {
+      nullable: true,
+      description: "A boolean that indicates if the #beach_bar has availability for the people selected",
     });
   },
 });

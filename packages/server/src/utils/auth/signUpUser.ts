@@ -1,5 +1,5 @@
+import { errors } from "@beach_bar/common";
 import { Redis } from "ioredis";
-import errors from "../../constants/errors";
 import { user as userScopes } from "../../constants/scopes";
 import { Account } from "../../entity/Account";
 import { City } from "../../entity/City";

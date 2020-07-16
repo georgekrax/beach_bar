@@ -1,6 +1,5 @@
-import { BigIntScalar, MyContext } from "@beach_bar/common";
+import { BigIntScalar, errors, MyContext } from "@beach_bar/common";
 import { arg, extendType } from "@nexus/schema";
-import errors from "../../../constants/errors";
 import { ReservedProduct } from "../../../entity/ReservedProduct";
 import { DeleteType, ErrorType } from "../../returnTypes";
 import { DeleteResult } from "../../types";

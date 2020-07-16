@@ -2,6 +2,7 @@ import { DateTimeScalar } from "@beach_bar/common";
 import { objectType, unionType } from "@nexus/schema";
 import { ProductCategoryType } from "../../details/product/types";
 import { BeachBarType } from "../types";
+import { HourTimeType } from "../../details/time/types";
 
 export const ProductType = objectType({
   name: "Product",
@@ -89,3 +90,17 @@ export const UpdateProductResult = unionType({
     });
   },
 });
+
+export const ProductAvailabilityHourType = objectType({
+  name: "ProductAvailabilityHour",
+  description: "The info to be returned when checking for a #beach_bar product's availability hour times",
+  definition(t) {
+    t.field("hourTime", {
+      type: HourTimeType,
+      description: "The hour time of a day",
+      nullable: false,
+      resolve: o => o.hourTime,
+    });
+    t.boolean("isAvailable", { nullable: false });
+  }
+})

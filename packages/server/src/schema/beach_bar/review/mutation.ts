@@ -1,6 +1,5 @@
-import { BigIntScalar, MyContext } from "@beach_bar/common";
+import { BigIntScalar, errors, MyContext } from "@beach_bar/common";
 import { arg, booleanArg, extendType, intArg, stringArg } from "@nexus/schema";
-import errors from "../../../constants/errors";
 import { BeachBar } from "../../../entity/BeachBar";
 import { BeachBarReview } from "../../../entity/BeachBarReview";
 import { ReviewVisitType } from "../../../entity/ReviewVisitType";

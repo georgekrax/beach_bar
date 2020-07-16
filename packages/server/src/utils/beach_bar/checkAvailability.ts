@@ -3,11 +3,7 @@ import { Redis } from "ioredis";
 import { BeachBar } from "../../entity/BeachBar";
 import { getReservationLimits } from "./getReservationLimits";
 import { getReservedProducts } from "./getReservedProducts";
-
-export interface BeachBarCheckAvailability {
-  hasAvailability?: boolean;
-  hasCapacity?: boolean;
-}
+import { BeachBarAvailabilityReturnType } from "../../schema/beach_bar/returnTypes";
 
 export const checkAvailability = async (
   redis: Redis,
@@ -15,7 +11,7 @@ export const checkAvailability = async (
   date: Dayjs,
   timeId?: number,
   totalPeople?: number,
-): Promise<BeachBarCheckAvailability> => {
+): Promise<BeachBarAvailabilityReturnType> => {
   const reservedProducts = await getReservedProducts(redis, beachBar, date, timeId);
   const reservationLimits = getReservationLimits(beachBar, date, timeId);
   if (!reservationLimits || reservationLimits.length === 0) {

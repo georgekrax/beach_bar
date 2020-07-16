@@ -1,4 +1,4 @@
-import { generateID } from "@beach_bar/common";
+import { dayjsFormat, generateID } from "@beach_bar/common";
 import dayjs, { Dayjs } from "dayjs";
 import { Redis } from "ioredis";
 import {
@@ -21,11 +21,12 @@ import {
   Repository,
   UpdateDateColumn,
 } from "typeorm";
-import { dayjsFormat } from "../constants/dayjs";
 import redisKeys from "../constants/redisKeys";
-import { checkAvailability, BeachBarCheckAvailability } from "../utils/beach_bar/checkAvailability";
+import { BeachBarAvailabilityReturnType } from "../schema/beach_bar/returnTypes";
+import { checkAvailability } from "../utils/beach_bar/checkAvailability";
 import { getReservationLimits } from "../utils/beach_bar/getReservationLimits";
 import { getReservedProducts } from "../utils/beach_bar/getReservedProducts";
+import { softRemove } from "../utils/softRemove";
 import { BeachBarEntryFee } from "./BeachBarEntryFee";
 import { BeachBarFeature } from "./BeachBarFeature";
 import { BeachBarFeeCurrency } from "./BeachBarFeeCurrency";
@@ -41,7 +42,7 @@ import { ReservedProduct } from "./ReservedProduct";
 import { SearchInputValue } from "./SearchInputValue";
 import { StripeFee } from "./StripeFee";
 import { StripeMinimumCurrency } from "./StripeMinimumCurrency";
-import { softRemove } from "../utils/softRemove";
+import { QuarterTime } from "./Time";
 
 interface GetFullPricingReturnType {
   pricingFee: BeachBarPricingFee;
@@ -87,6 +88,12 @@ export class BeachBar extends BaseEntity {
   @Column({ type: "boolean", name: "zero_cart_total" })
   zeroCartTotal: boolean;
 
+  @Column({ type: "integer", name: "opening_time_id" })
+  openingTimeId: number;
+
+  @Column({ type: "integer", name: "closing_time_id" })
+  closingTimeId: number;
+
   @Column("varchar", { length: 255, name: "stripe_connect_id", unique: true })
   stripeConnectId: string;
 
@@ -97,6 +104,14 @@ export class BeachBar extends BaseEntity {
   @ManyToOne(() => Currency, currency => currency.beachBars)
   @JoinColumn({ name: "default_currency_id" })
   defaultCurrency: Currency;
+
+  @ManyToOne(() => QuarterTime, quarterTime => quarterTime.beachBarsOpeningTime, { nullable: false })
+  @JoinColumn({ name: "opening_time_id" })
+  openingTime: QuarterTime;
+
+  @ManyToOne(() => QuarterTime, quarterTime => quarterTime.beachBarsClosingTime, { nullable: false })
+  @JoinColumn({ name: "closing_time_id" })
+  closingTime: QuarterTime;
 
   @OneToMany(() => SearchInputValue, searchInputValue => searchInputValue.city, { nullable: true })
   searchInputValues?: SearchInputValue[];
@@ -176,6 +191,8 @@ export class BeachBar extends BaseEntity {
     thumbnailUrl?: string,
     zeroCartTotal?: boolean,
     isAvailable?: boolean,
+    openingTimeId?: number,
+    closingTimeId?: number,
   ): Promise<BeachBar | any> {
     try {
       if (name && name !== this.name) {
@@ -192,6 +209,18 @@ export class BeachBar extends BaseEntity {
       }
       if (isAvailable !== null && isAvailable !== undefined && isAvailable !== this.isAvailable) {
         this.isAvailable = isAvailable;
+      }
+      if (openingTimeId && openingTimeId !== this.openingTimeId) {
+        const quarterTime = await QuarterTime.findOne(openingTimeId);
+        if (quarterTime) {
+          this.openingTime = quarterTime;
+        }
+      }
+      if (closingTimeId && closingTimeId !== this.closingTimeId) {
+        const quarterTime = await QuarterTime.findOne(closingTimeId);
+        if (quarterTime) {
+          this.closingTime = quarterTime;
+        }
       }
       await this.save();
       await this.updateRedis(redis);
@@ -249,7 +278,7 @@ export class BeachBar extends BaseEntity {
     }
   }
 
-  async getEntryFee(date?: Date | Dayjs, getAvg = false): Promise<BeachBarEntryFee | number | undefined> {
+  async getEntryFee(date?: Dayjs, getAvg = false): Promise<BeachBarEntryFee | number | undefined> {
     if (getAvg) {
       const entryFees = await BeachBarEntryFee.find({ beachBar: this });
       if (entryFees) {
@@ -356,7 +385,7 @@ export class BeachBar extends BaseEntity {
     }
   }
 
-  async checkAvailability(redis: Redis, date: Dayjs, timeId?: number, totalPeople?: number): Promise<BeachBarCheckAvailability> {
+  async checkAvailability(redis: Redis, date: Dayjs, timeId?: number, totalPeople?: number): Promise<BeachBarAvailabilityReturnType> {
     const res = await checkAvailability(redis, this, date, timeId, totalPeople);
     return res;
   }

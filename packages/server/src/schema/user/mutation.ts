@@ -1,8 +1,8 @@
+import { DateScalar, EmailScalar, errors, MyContext, UrlScalar } from "@beach_bar/common";
 import { arg, booleanArg, extendType, intArg, stringArg } from "@nexus/schema";
 import { execute, makePromise } from "apollo-link";
 import { createHash, randomBytes } from "crypto";
 import { KeyType } from "ioredis";
-import errors from "../../constants/errors";
 import { link } from "../../config/apolloLink";
 import { City } from "../../entity/City";
 import { Country } from "../../entity/Country";
@@ -33,7 +33,6 @@ import {
   // eslint-disable-next-line prettier/prettier
   UserUpdateResult,
 } from "./types";
-import { MyContext, EmailScalar, UrlScalar, DateScalar } from "@beach_bar/common";
 
 export const UserSignUpAndLoginMutation = extendType({
   type: "Mutation",

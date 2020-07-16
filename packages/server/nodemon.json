@@ -14,6 +14,7 @@
     "TOKEN_AUDIENCE": "https://www.beachbar.com",
     "TOKEN_ISSUER": "https://www.beachbar.com",
     "REFRESH_TOKEN_COOKIE_NAME": "me",
+    "MAX_PRODUCT_QUANTITY": 20,
     "GOOGLE_OAUTH_CLIENT_ID": "650706540645-lfagodh1ld38fmcfih6cjtre70n9bc4p.apps.googleusercontent.com",
     "GOOGLE_OAUTH_CLIENT_SECRET": "AgEz4TnpqRG5vvdqiGqtaz4Q",
     "GOOGLE_OAUTH_REDIRECT_URI": "http://127.0.0.1:4000/oauth/google/callback",

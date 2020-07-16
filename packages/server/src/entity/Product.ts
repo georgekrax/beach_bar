@@ -1,23 +1,22 @@
+import { dayjsFormat } from "@beach_bar/common";
 import dayjs, { Dayjs } from "dayjs";
 import {
   BaseEntity,
+  Between,
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   getManager,
   getRepository,
   JoinColumn,
-
-
-
-
-  ManyToMany, ManyToOne,
+  ManyToMany,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-  DeleteDateColumn
 } from "typeorm";
-import { dayjsFormat } from "../constants/dayjs";
+import { ProductAvailabilityHourReturnType } from "../schema/beach_bar/product/returnTypes";
 import { softRemove } from "../utils/softRemove";
 import { BeachBar } from "./BeachBar";
 import { BundleProductComponent } from "./BundleProductComponent";
@@ -28,6 +27,7 @@ import { ProductPriceHistory } from "./ProductPriceHistory";
 import { ProductReservationLimit } from "./ProductReservationLimit";
 import { ProductVoucherCampaign } from "./ProductVoucherCampaign";
 import { ReservedProduct } from "./ReservedProduct";
+import { HourTime } from "./Time";
 
 @Entity({ name: "product", schema: "public" })
 export class Product extends BaseEntity {
@@ -96,7 +96,7 @@ export class Product extends BaseEntity {
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Dayjs;
 
-  async getReservationLimit(timeId: number, date?: Date | Dayjs): Promise<number | undefined> {
+  async getReservationLimit(timeId: number, date?: Dayjs): Promise<number> {
     const formattedDate = date ? dayjs(date).format(dayjsFormat.ISO_STRING) : dayjs().format(dayjsFormat.ISO_STRING);
     const reservationLimit = await ProductReservationLimit.find({ product: this, date: formattedDate });
     if (reservationLimit) {
@@ -104,35 +104,68 @@ export class Product extends BaseEntity {
       if (limitNumber) {
         return limitNumber.limitNumber;
       } else {
-        return undefined;
+        return 0;
       }
     } else {
-      return undefined;
+      return 0;
     }
   }
 
-  async getReservedProducts(timeId: number, date?: Date | Dayjs): Promise<number | undefined> {
+  async getReservedProducts(timeId: number, date?: Dayjs): Promise<number> {
     const reservedProductsNumber = await getManager()
       .createQueryBuilder(ReservedProduct, "reservedProduct")
       .select("COUNT(*)", "count")
-      .where("reservedProduct.date = :date", { date: date ? date : dayjs() })
+      .where("reservedProduct.date = :date", {
+        date: date ? date.format(dayjsFormat.ISO_STRING) : dayjs().format(dayjsFormat.ISO_STRING),
+      })
       .andWhere("reservedProduct.timeId = :timeId", { timeId })
       .getRawOne();
 
     if (reservedProductsNumber) {
       return parseInt(reservedProductsNumber.count);
     } else {
-      return undefined;
+      return 0;
     }
   }
 
-  async checkIfAvailable(timeId: number, date?: Date | Dayjs, elevator = 0): Promise<boolean | undefined> {
+  async checkIfAvailable(timeId: number, date?: Dayjs, elevator = 0): Promise<boolean> {
     const limit = await this.getReservationLimit(timeId, date);
     const reservedProductsNumber = await this.getReservedProducts(timeId, date);
-    if (limit && reservedProductsNumber && reservedProductsNumber + elevator >= limit) {
+    if (limit !== 0 && reservedProductsNumber !== 0 && reservedProductsNumber + elevator >= limit) {
       return false;
     } else {
       return true;
+    }
+  }
+
+  async getHoursAvailability(date: Dayjs): Promise<ProductAvailabilityHourReturnType[] | undefined> {
+    const openingTime = this.beachBar.openingTime.value.split(":")[0] + ":00:00";
+    const closingTime = this.beachBar.closingTime.value.startsWith("00:")
+      ? "24:00:00"
+      : this.beachBar.closingTime.value.split(":")[0] + ":00:00";
+    const hourTimes = await HourTime.find({ value: Between(openingTime, closingTime) });
+
+    const results: ProductAvailabilityHourReturnType[] = [];
+    for (let i = 0; i < hourTimes.length; i++) {
+      const element = hourTimes[i];
+      const res = await this.checkIfAvailable(element.id, date);
+      results.push({
+        hourTime: element,
+        isAvailable: res,
+      });
+    }
+    return results;
+  }
+
+  async getQuantityAvailability(date: Dayjs, timeId: number): Promise<number | null> {
+    const limit = await this.getReservationLimit(timeId, date);
+    const reservedProductsCount = await this.getReservedProducts(timeId, date);
+    if (limit !== 0 && reservedProductsCount !== 0 && limit === reservedProductsCount) {
+      return null;
+    } else if (limit - reservedProductsCount === 0 || limit - reservedProductsCount >= parseInt(process.env.MAX_PRODUCT_QUANTITY!)) {
+      return 0;
+    } else {
+      return limit - reservedProductsCount;
     }
   }
 

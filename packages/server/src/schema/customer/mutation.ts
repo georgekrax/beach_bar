@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { BigIntScalar, EmailScalar, MyContext } from "@beach_bar/common";
+import { BigIntScalar, EmailScalar, errors, MyContext } from "@beach_bar/common";
 import { arg, extendType, stringArg } from "@nexus/schema";
 import { getCustomRepository, IsNull } from "typeorm";
-import errors from "../../constants/errors";
 import { Customer, CustomerRepository } from "../../entity/Customer";
 import { User } from "../../entity/User";
 import { DeleteType, ErrorType } from "../returnTypes";

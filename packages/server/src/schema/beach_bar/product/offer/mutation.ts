@@ -1,8 +1,7 @@
-import { BigIntScalar, DateTimeScalar, MyContext } from "@beach_bar/common";
+import { BigIntScalar, DateTimeScalar, errors, MyContext } from "@beach_bar/common";
 import { arg, booleanArg, extendType, floatArg, intArg, stringArg } from "@nexus/schema";
 import dayjs from "dayjs";
 import { In } from "typeorm";
-import errors from "../../../../constants/errors";
 import { Product } from "../../../../entity/Product";
 import { ProductCouponCode } from "../../../../entity/ProductCouponCode";
 import { ProductVoucherCampaign } from "../../../../entity/ProductVoucherCampaign";

@@ -1,6 +1,5 @@
-import { MyContext } from "@beach_bar/common";
+import { MyContext, errors } from "@beach_bar/common";
 import { booleanArg, extendType, intArg, stringArg } from "@nexus/schema";
-import errors from "../../constants/errors";
 import { BeachBar } from "../../entity/BeachBar";
 import { Currency } from "../../entity/Currency";
 import { User } from "../../entity/User";
@@ -35,12 +34,20 @@ export const BeachBarCrudMutation = extendType({
           description:
             "Set to true if the #beach_bar accepts for a customer / user to have less than the #beach_bar minimum currency price",
         }),
+        openingTimeId: intArg({
+          required: true,
+          description: "The ID value of the opening quarter time of the #beach_bar, in its country time zone",
+        }),
+        closingTimeId: intArg({
+          required: true,
+          description: "The ID value of the closing quarter time of the #beach_bar, in its country time zone",
+        }),
         code: stringArg({ required: true, description: "The response code from Google's OAuth callback" }),
         state: stringArg({ required: true, description: "The response state, to check if everything went correct" }),
       },
       resolve: async (
         _,
-        { name, description, thumbnailUrl, code, state, zeroCartTotal },
+        { name, description, thumbnailUrl, zeroCartTotal, openingTimeId, closingTimeId, code, state },
         { payload, req, res, redis, stripe }: MyContext,
       ): Promise<AddBeachBarType | ErrorType> => {
         if (!payload) {
@@ -74,6 +81,9 @@ export const BeachBarCrudMutation = extendType({
                 "Please provide if you allow your customers to purchase products and have zero (0) as their total price in cart",
             },
           };
+        }
+        if (!openingTimeId || openingTimeId <= 0 || !closingTimeId || closingTimeId <= 0) {
+          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
         }
 
         const user = await User.findOne({ where: { id: payload.sub }, relations: ["owner"] });
@@ -114,6 +124,8 @@ export const BeachBarCrudMutation = extendType({
             defaultCurrency: currency,
             stripeConnectId: stripeUserId,
             zeroCartTotal,
+            openingTimeId,
+            closingTimeId,
           });
 
           const pricingFee = await newBeachBar.getPricingFee();
@@ -175,10 +187,18 @@ export const BeachBarCrudMutation = extendType({
           required: false,
           description: "Set to true, if to show #beach_bar in the search results, even if it has no availability",
         }),
+        openingTimeId: intArg({
+          required: true,
+          description: "The ID value of the opening quarter time of the #beach_bar, in its country time zone",
+        }),
+        closingTimeId: intArg({
+          required: true,
+          description: "The ID value of the closing quarter time of the #beach_bar, in its country time zone",
+        }),
       },
       resolve: async (
         _,
-        { beachBarId, name, description, thumbnailUrl, zeroCartTotal, isAvailable },
+        { beachBarId, name, description, thumbnailUrl, zeroCartTotal, isAvailable, openingTimeId, closingTimeId },
         { payload, redis }: MyContext,
       ): Promise<UpdateBeachBarType | ErrorType> => {
         if (!payload) {
@@ -202,7 +222,16 @@ export const BeachBarCrudMutation = extendType({
         }
 
         try {
-          const updatedBeachBar = await beachBar.update(redis, name, description, thumbnailUrl, zeroCartTotal, isAvailable);
+          const updatedBeachBar = await beachBar.update(
+            redis,
+            name,
+            description,
+            thumbnailUrl,
+            zeroCartTotal,
+            isAvailable,
+            openingTimeId,
+            closingTimeId,
+          );
           return {
             beachBar: updatedBeachBar,
             updated: true,
@@ -305,7 +334,7 @@ export const BeachBarUpdateStatusMutation = extendType({
 
         const beachBar = await BeachBar.findOne({
           where: { id: beachBarId },
-          relations: ["fee", "location", "reviews", "features", "products", "entryFees", "restaurants"],
+          relations: ["fee", "location", "reviews", "features", "products", "entryFees", "restaurants", "openingTime", "closingTime"],
         });
         if (!beachBar) {
           return { error: { code: errors.CONFLICT, message: errors.BEACH_BAR_DOES_NOT_EXIST } };

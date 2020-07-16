@@ -1,6 +1,6 @@
+import { errors } from "@beach_bar/common";
 import { decode, sign } from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
-import errors from "../../constants/errors";
 import { GeneratedTokenType } from "../returnTypes";
 import { User } from "./../../entity/User";
 

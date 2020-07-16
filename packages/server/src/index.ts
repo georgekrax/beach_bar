@@ -1,4 +1,4 @@
-import { MyContext } from "@beach_bar/common";
+import { errors, MyContext } from "@beach_bar/common";
 import sgClient from "@sendgrid/client";
 import sgMail from "@sendgrid/mail";
 import { execute, makePromise } from "apollo-link";
@@ -18,7 +18,6 @@ import { router as oauthRouter } from "./routes/authRoutes";
 import { router as stripeRouter } from "./routes/stripeWebhooks";
 import { schema } from "./schema";
 import { createDBConnection } from "./utils/createDBConnection";
-import errors from "./constants/errors";
 
 export let redis;
 export let stripe: Stripe;

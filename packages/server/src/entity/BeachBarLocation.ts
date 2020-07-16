@@ -12,7 +12,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import errors from "../constants/errors";
+import { errors } from "@beach_bar/common";
 import { BeachBar } from "./BeachBar";
 import { City } from "./City";
 import { Country } from "./Country";

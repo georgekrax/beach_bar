@@ -1,8 +1,10 @@
-import { booleanArg, extendType, intArg } from "@nexus/schema";
+import { DateScalar, MyContext } from "@beach_bar/common";
+import { arg, booleanArg, extendType, intArg } from "@nexus/schema";
+import dayjs from "dayjs";
 import { Product } from "../../../entity/Product";
 import { checkScopes } from "../../../utils/checkScopes";
-import { ProductType } from "./types";
-import { MyContext } from "@beach_bar/common";
+import { ProductAvailabilityHourReturnType } from "./returnTypes";
+import { ProductAvailabilityHourType, ProductType } from "./types";
 
 export const ProductCrudQuery = extendType({
   type: "Query",
@@ -50,6 +52,79 @@ export const ProductCrudQuery = extendType({
           return null;
         }
         return null;
+      },
+    });
+    t.list.field("getProductAvailabilityHours", {
+      type: ProductAvailabilityHourType,
+      description: "Retrieve (get) a list with all the available hour times of a product",
+      nullable: true,
+      args: {
+        productId: intArg({
+          required: true,
+          description: "The ID value of the #beach_bar product",
+        }),
+        date: arg({
+          type: DateScalar,
+          required: true,
+          description: "The date to search availability for",
+        }),
+      },
+      resolve: async (_, { productId, date }): Promise<ProductAvailabilityHourReturnType[] | null> => {
+        if (!productId || productId <= 0 || !date || date.add(1, "day") <= dayjs()) {
+          return null;
+        }
+
+        const product = await Product.findOne({
+          where: { id: productId },
+          relations: ["beachBar", "beachBar.openingTime", "beachBar.closingTime"],
+        });
+        if (!product) {
+          return null;
+        }
+
+        const res = await product.getHoursAvailability(date);
+        if (!res) {
+          return null;
+        }
+
+        return res;
+      },
+    });
+    t.int("getProductAvailabilityQuantity", {
+      nullable: true,
+      args: {
+        productId: intArg({
+          required: true,
+          description: "The ID value of the #beach_bar product",
+        }),
+        date: arg({
+          type: DateScalar,
+          required: true,
+          description: "The date to search availability for",
+        }),
+        timeId: intArg({
+          required: true,
+          description: "The ID value of the hour time to search availability for",
+        }),
+      },
+      resolve: async (_, { productId, date, timeId }): Promise<number | null> => {
+        if (!productId || productId <= 0 || !date || date.add(1, "day") <= dayjs() || !timeId || timeId <= 0) {
+          return null;
+        }
+
+        const product = await Product.findOne({
+          where: { id: productId },
+          relations: ["beachBar", "beachBar.openingTime", "beachBar.closingTime"],
+        });
+        if (!product) {
+          return null;
+        }
+
+        const res = await product.getQuantityAvailability(date, timeId);
+        if (res === null) {
+          return null;
+        }
+        return res;
       },
     });
   },

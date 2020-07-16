@@ -15,6 +15,20 @@ export const HourTimeType = objectType({
   },
 });
 
+export const QuarterTimeType = objectType({
+  name: "QuarterTime",
+  description: "Represents each quarter of the day",
+  definition(t) {
+    t.int("id", { nullable: false });
+    t.string("value", { nullable: false });
+    t.field("utcValue", {
+      type: TimeScalar,
+      nullable: false,
+      description: "The time value in the UTC format and corresponding value",
+    });
+  },
+});
+
 export const MonthTimeType = objectType({
   name: "MonthTime",
   description: "Represents each month of the year",

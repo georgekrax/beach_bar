@@ -2,12 +2,12 @@ import * as express from "express";
 import { KeyType } from "ioredis";
 import { decode, verify } from "jsonwebtoken";
 import { URL } from "url";
-import errors from "../constants/errors";
 import { User } from "../entity/User";
 import { redis } from "../index";
 import { generateAccessToken, generateRefreshToken } from "../utils/auth/generateAuthTokens";
 import { refreshTokenForHashtagUser } from "../utils/auth/refreshTokenForHashtagUser";
 import { sendRefreshToken } from "../utils/auth/sendRefreshToken";
+import { errors } from "@beach_bar/common";
 
 export const router = express.Router();
 

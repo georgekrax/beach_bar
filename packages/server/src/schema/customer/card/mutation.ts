@@ -1,8 +1,7 @@
-import { BigIntScalar, MyContext } from "@beach_bar/common";
+import { BigIntScalar, errors, MyContext } from "@beach_bar/common";
 import { arg, booleanArg, extendType, intArg, stringArg } from "@nexus/schema";
 import dayjs from "dayjs";
 import { getCustomRepository } from "typeorm";
-import errors from "../../../constants/errors";
 import { Card, CardRepository } from "../../../entity/Card";
 import { CardBrand } from "../../../entity/CardBrand";
 import { Country } from "../../../entity/Country";

@@ -1,6 +1,6 @@
 import { BigIntScalar, DateScalar, DateTimeScalar, UrlScalar } from "@beach_bar/common";
-import { objectType, unionType } from "@nexus/schema";
-import { BeachBarType } from "../beach_bar/types";
+import { inputObjectType, objectType, unionType } from "@nexus/schema";
+import { BeachBarAvailabilityType, BeachBarType } from "../beach_bar/types";
 import { CityType } from "../details/cityTypes";
 import { CountryType } from "../details/countryTypes";
 import { RegionType } from "../details/regionTypes";
@@ -47,13 +47,10 @@ export const SearchResultType = objectType({
       nullable: false,
       resolve: o => o.beachBar,
     });
-    t.boolean("hasAvailability", {
-      nullable: true,
-      description: "A boolean that indicates if the #beach_bar has availability for the dates selected",
-    });
-    t.boolean("hasCapacity", {
-      nullable: true,
-      description: "A boolean that indicates if the #beach_bar has availability for the people selected",
+    t.field("availability", {
+      type: BeachBarAvailabilityType,
+      nullable: false,
+      resolve: o => o.availability,
     });
   },
 });
@@ -82,6 +79,23 @@ export const SearchResult = unionType({
       } else {
         return "Search";
       }
+    });
+  },
+});
+
+export const SearchInputType = inputObjectType({
+  name: "SearchInput",
+  description: "The arguments (args) used at #beach_bar search or availability",
+  definition(t) {
+    t.field("date", { type: DateScalar, required: false, description: "The date to search availability at #beach_bars" });
+    t.int("timeId", { required: false, description: "The ID value of the hour time to search availability for" });
+    t.int("adults", {
+      required: false,
+      description: "The number of adults to search availability at #beach_bars. Its value should be less or equal to 12 adults",
+    });
+    t.int("children", {
+      required: false,
+      description: "The number of children to search availability at #beach_bars. Its value should be less or equal to 8 children",
     });
   },
 });
