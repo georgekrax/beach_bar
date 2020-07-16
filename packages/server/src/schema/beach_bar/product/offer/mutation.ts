@@ -1,7 +1,7 @@
 import { BigIntScalar, DateTimeScalar, MyContext } from "@beach_bar/common";
 import { arg, booleanArg, extendType, floatArg, intArg, stringArg } from "@nexus/schema";
 import dayjs from "dayjs";
-import { In, IsNull } from "typeorm";
+import { In } from "typeorm";
 import errors from "../../../../constants/errors";
 import { Product } from "../../../../entity/Product";
 import { ProductCouponCode } from "../../../../entity/ProductCouponCode";
@@ -85,7 +85,7 @@ export const ProductCouponCodeCrudMutation = extendType({
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a or some discount percentage" } };
         }
 
-        const products = await Product.find({ where: { id: In(productIds), deletedAt: IsNull() } });
+        const products = await Product.find({ where: { id: In(productIds) } });
         if (products.some(product => !product.isActive)) {
           return { error: { message: "All the products should be active, in order to be applied for a coupon code" } };
         }
@@ -303,7 +303,7 @@ export const ProductVoucherCampaignCrudMutation = extendType({
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a or some discount percentage" } };
         }
 
-        const products = await Product.find({ where: { id: In(productIds), deletedAt: IsNull() } });
+        const products = await Product.find({ where: { id: In(productIds) } });
         if (products.some(product => !product.isActive)) {
           return { error: { message: "All the products should be active, in order to be applied for a voucher campaign" } };
         }

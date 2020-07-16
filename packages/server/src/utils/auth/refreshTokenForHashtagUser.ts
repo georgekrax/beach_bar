@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/camelcase */
 import { Redis } from "ioredis";
 import fetch from "node-fetch";
 import errors from "../../constants/errors";
@@ -70,6 +69,16 @@ export const refreshTokenForHashtagUser = async (user: User, redis: Redis): Prom
     })
     .catch(err => {
       success = false;
+      if (
+        err.message ===
+        `request to ${
+          process.env.HASHTAG_API_HOSTNAME
+        }/oauth/refresh_token failed, reason: connect ECONNREFUSED ${process.env
+          .HASHTAG_API_HOSTNAME!.replace("https://", "")
+          .replace("http://", "")}`
+      ) {
+        throw new Error(errors.SOMETHING_WENT_WRONG);
+      }
       throw new Error(`${errors.SOMETHING_WENT_WRONG}: ${err.message}`);
     });
 

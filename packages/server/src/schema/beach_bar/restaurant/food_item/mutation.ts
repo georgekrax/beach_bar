@@ -1,6 +1,5 @@
 import { BigIntScalar, MyContext } from "@beach_bar/common";
 import { arg, extendType, floatArg, intArg, stringArg } from "@nexus/schema";
-import { IsNull } from "typeorm";
 import errors from "../../../../constants/errors";
 import { BeachBarRestaurant } from "../../../../entity/BeachBarRestaurant";
 import { RestaurantFoodItem } from "../../../../entity/RestaurantFoodItem";
@@ -186,7 +185,7 @@ export const RestaurantFoodItemCrudMutation = extendType({
         }
 
         const foodItem = await RestaurantFoodItem.findOne({
-          where: { id: foodItemId, deletedAt: IsNull() },
+          where: { id: foodItemId },
           relations: ["restaurant", "menuCategory"],
         });
         if (!foodItem) {
@@ -240,7 +239,7 @@ export const RestaurantFoodItemCrudMutation = extendType({
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid food item" } };
         }
 
-        const foodItem = await RestaurantFoodItem.findOne({ id: foodItemId, deletedAt: IsNull() });
+        const foodItem = await RestaurantFoodItem.findOne({ id: foodItemId });
         if (!foodItem) {
           return { error: { code: errors.CONFLICT, message: "Specified food item does not exist" } };
         }

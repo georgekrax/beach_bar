@@ -19,14 +19,14 @@ export const ReserveProductCrudMutation = extendType({
           description: "The ID value of the reserved product",
         }),
       },
-      resolve: async (_, { reservedProductId }, { stripe }: MyContext): Promise<DeleteType | ErrorType> => {
+      resolve: async (_, { reservedProductId }, { stripe, redis }: MyContext): Promise<DeleteType | ErrorType> => {
         if (!reservedProductId || reservedProductId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid reserved product" } };
         }
 
         const reservedProduct = await ReservedProduct.findOne({
           where: { id: reservedProductId },
-          relations: ["payment", "payment.cart", "payment.cart.products", "payment.cart.products.product"],
+          relations: ["product", "payment", "payment.cart", "payment.cart.products", "payment.cart.products.product"],
         });
         if (!reservedProduct) {
           return { error: { code: errors.CONFLICT, message: "Specified reserved product does not exist" } };
@@ -42,8 +42,10 @@ export const ReserveProductCrudMutation = extendType({
           }
           const { refundPercentage, daysDiff } = refund;
           const productTotal = await reservedProduct.getPrice();
-          if (!productTotal) {
+          if (productTotal === undefined) {
             return { error: { message: errors.SOMETHING_WENT_WRONG } };
+          } else if (productTotal === 0) {
+            return { error: { message: "You shopping cart total was 0" } };
           }
           // ! Do not divide by 100, because Stipe processes cents, and the number will be automatically in cents
           const refundedAmount = productTotal * parseInt(refundPercentage.percentageValue.toString());
@@ -58,9 +60,8 @@ export const ReserveProductCrudMutation = extendType({
             if (!stripeRefund) {
               return { error: { message: errors.SOMETHING_WENT_WRONG } };
             }
-            console.log(stripeRefund);
           }
-          await reservedProduct.softRemove();
+          await reservedProduct.customSoftRemove(redis, daysDiff >= 86400000);
         } catch (err) {
           return { error: { message: `${errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
         }

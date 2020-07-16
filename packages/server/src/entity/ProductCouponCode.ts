@@ -6,9 +6,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  getConnection,
   In,
-  IsNull,
   JoinTable,
   ManyToMany,
   PrimaryGeneratedColumn,
@@ -65,12 +63,7 @@ export class ProductCouponCode extends BaseEntity {
 
   @BeforeInsert()
   generateRefCode(): void {
-    const column = getConnection()
-      .getMetadata(ProductCouponCode)
-      .columns.find(column => (column.propertyName = "refCode"));
-    if (column) {
-      this.refCode = generateID(parseInt(column.length));
-    }
+    this.refCode = generateID(18);
   }
 
   async update(
@@ -83,7 +76,7 @@ export class ProductCouponCode extends BaseEntity {
   ): Promise<ProductCouponCode[] | any> {
     try {
       if (productIds && productIds.length >= 1) {
-        const products = await Product.find({ where: { id: In(productIds), deletedAt: IsNull() } });
+        const products = await Product.find({ where: { id: In(productIds) } });
         if (products.some(product => !product.isActive)) {
           throw new Error("All the products should be active, in order to be applied for a coupon code");
         }

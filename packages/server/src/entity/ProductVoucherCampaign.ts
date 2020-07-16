@@ -5,7 +5,6 @@ import {
   CreateDateColumn,
   Entity,
   In,
-  IsNull,
   JoinTable,
   ManyToMany,
   OneToMany,
@@ -72,7 +71,7 @@ export class ProductVoucherCampaign extends BaseEntity {
   ): Promise<ProductVoucherCampaign | any> {
     try {
       if (productIds && productIds.length >= 1) {
-        const products = await Product.find({ where: { id: In(productIds), deletedAt: IsNull() } });
+        const products = await Product.find({ where: { id: In(productIds) } });
         if (products.some(product => !product.isActive)) {
           throw new Error("All the products should be active, in order to be applied for a voucher campaign");
         }

@@ -2,6 +2,7 @@ import { DateTimeScalar, UrlScalar } from "@beach_bar/common";
 import { objectType, unionType } from "@nexus/schema";
 import { CurrencyType } from "../details/countryTypes";
 import { BeachBarOwnerType } from "../owner/types";
+import { BeachBarLocationType } from "./location/types";
 import { BeachBarRestaurantType } from "./restaurant/types";
 import { BeachBarReviewType } from "./review/types";
 import { BeachBarFeatureType } from "./service/types";
@@ -16,7 +17,11 @@ export const BeachBarType = objectType({
     t.float("avgRating", { nullable: true, description: "The average rating of all the user reviews for this #beach_bar" });
     t.boolean("isActive", {
       nullable: false,
-      description: "A boolean that indicates if the #beach_bar is active or not, configured by its owner",
+      description: "A boolean that indicates if the #beach_bar is active or not",
+    });
+    t.boolean("isAvailable", {
+      nullable: false,
+      description: "A boolean that indicates if the #beach_bar is shown in the search results, even if it has no availability",
     });
     t.field("thumbnailUrl", {
       type: UrlScalar,
@@ -31,6 +36,12 @@ export const BeachBarType = objectType({
       type: DateTimeScalar,
       nullable: false,
       description: "The timestamp recorded, when the #beach_bar was created",
+    });
+    t.field("location", {
+      type: BeachBarLocationType,
+      description: "The location of the #beach_bar",
+      nullable: false,
+      resolve: o => o.location,
     });
     t.list.field("owners", {
       type: BeachBarOwnerType,
@@ -61,6 +72,20 @@ export const BeachBarType = objectType({
       description: "The default currency of the #beach_bar",
       nullable: false,
       resolve: o => o.defaultCurrency,
+    });
+  },
+});
+
+export const BeachBarResult = unionType({
+  name: "BeachBarResult",
+  definition(t) {
+    t.members("BeachBar", "Error");
+    t.resolveType(item => {
+      if (item.error) {
+        return "Error";
+      } else {
+        return "BeachBar";
+      }
     });
   },
 });

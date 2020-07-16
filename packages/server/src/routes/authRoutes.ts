@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/camelcase */
 import * as express from "express";
 import { KeyType } from "ioredis";
 import { decode, verify } from "jsonwebtoken";
@@ -101,7 +100,7 @@ router.post("/refresh_token", async (req: express.Request, res: express.Response
       return res.send({
         success: false,
         accessToken: null,
-        error: `Something went wrong. ${err.message.toString()}`,
+        error: `Something went wrong. ${err.message}`,
       });
     }
   }

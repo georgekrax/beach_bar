@@ -11,7 +11,7 @@ import {
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn
+  UpdateDateColumn,
 } from "typeorm";
 import errors from "../constants/errors";
 import { payment } from "../constants/status";

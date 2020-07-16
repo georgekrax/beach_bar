@@ -198,7 +198,7 @@ export const PaymentCrudMutation = extendType({
 
         const payment = await Payment.findOne({
           where: { id: paymentId },
-          relations: ["cart", "cart.products"],
+          relations: ["cart", "cart.products", "cart.products.product", "cart.products.product.beachBar"],
         });
         if (!payment) {
           return { error: { code: errors.CONFLICT, message: "Specified payment does not exist" } };
@@ -213,9 +213,17 @@ export const PaymentCrudMutation = extendType({
             return { error: { message: errors.SOMETHING_WENT_WRONG } };
           }
           const { refundPercentage, daysDiff } = refund;
-          const cartTotal = await payment.cart.getTotalPrice();
-          if (!cartTotal) {
+          let cartTotal = await payment.cart.getTotalPrice();
+          if (cartTotal === undefined) {
             return { error: { message: errors.SOMETHING_WENT_WRONG } };
+          }
+          const entryFeeTotal = await payment.cart.getBeachBarsEntryFeeTotal();
+          if (entryFeeTotal === undefined) {
+            return { error: { message: errors.SOMETHING_WENT_WRONG } };
+          }
+          cartTotal = cartTotal + entryFeeTotal;
+          if (cartTotal === 0) {
+            return { error: { message: "You shopping cart total was 0" } };
           }
           // ! Do not divide by 100, because Stipe processes cents, and the number will be automatically in cents
           const refundedAmount = cartTotal * parseInt(refundPercentage.percentageValue.toString());

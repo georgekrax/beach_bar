@@ -8,7 +8,6 @@ import { DeleteType, ErrorType } from "../../returnTypes";
 import { DeleteResult } from "../../types";
 import { AddBeachBarFeatureType, UpdateBeachBarFeatureType } from "./returnTypes";
 import { AddBeachBarFeatureResult, UpdateBeachBarFeatureResult } from "./types";
-import { IsNull } from "typeorm";
 
 export const BeachBarFeatureMutation = extendType({
   type: "Mutation",
@@ -73,7 +72,7 @@ export const BeachBarFeatureMutation = extendType({
             feature.deletedAt = undefined;
             await feature.save();
             const beachBarFeature = await BeachBarFeature.findOne({
-              where: { beachBar, service: feature.service, deletedAt: IsNull() },
+              where: { beachBar, service: feature.service },
               relations: ["beachBar", "service"],
             });
             if (!beachBarFeature) {
@@ -169,7 +168,7 @@ export const BeachBarFeatureMutation = extendType({
         }
 
         const feature = await BeachBarFeature.findOne({
-          where: { beachBarId, serviceId: featureId, deletedAt: IsNull() },
+          where: { beachBarId, serviceId: featureId },
           relations: ["beachBar", "beachBar.owners", "beachBar.owners.owner", "beachBar.owners.owner.user", "service"],
         });
         if (!feature) {
@@ -241,7 +240,7 @@ export const BeachBarFeatureMutation = extendType({
         }
 
         const feature = await BeachBarFeature.findOne({
-          where: { beachBarId, serviceId: featureId, deletedAt: IsNull() },
+          where: { beachBarId, serviceId: featureId },
           relations: ["beachBar", "beachBar.owners", "beachBar.owners.owner", "beachBar.owners.owner.user", "service"],
         });
         if (!feature) {

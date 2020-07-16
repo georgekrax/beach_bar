@@ -14,7 +14,8 @@ import {
   ManyToMany, ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
-  UpdateDateColumn
+  UpdateDateColumn,
+  DeleteDateColumn
 } from "typeorm";
 import { dayjsFormat } from "../constants/dayjs";
 import { softRemove } from "../utils/softRemove";
@@ -92,7 +93,7 @@ export class Product extends BaseEntity {
   @CreateDateColumn({ name: "timestamp", type: "timestamptz", default: () => `NOW()` })
   timestamp: Dayjs;
 
-  @Column({ type: "timestamptz", name: "deleted_at", nullable: true })
+  @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Dayjs;
 
   async getReservationLimit(timeId: number, date?: Date | Dayjs): Promise<number | undefined> {

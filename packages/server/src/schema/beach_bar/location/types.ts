@@ -16,7 +16,13 @@ export const BeachBarLocationType = objectType({
     t.list.float("whereIs", {
       nullable: true,
       description: "The 'point' value generated from latitude & longitude, provided by the PostGIS PostgreSQL extension",
-      resolve: o => o.whereIs.coordinates,
+      resolve: o => {
+        if (o.whereIs.coordinates) {
+          return o.whereIs.coordinates;
+        } else {
+          return null;
+        }
+      },
     });
     t.field("country", {
       type: CountryType,

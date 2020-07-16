@@ -2,7 +2,6 @@ import { arg, booleanArg, extendType, intArg, stringArg } from "@nexus/schema";
 import { execute, makePromise } from "apollo-link";
 import { createHash, randomBytes } from "crypto";
 import { KeyType } from "ioredis";
-import { IsNull } from "typeorm";
 import errors from "../../constants/errors";
 import { link } from "../../config/apolloLink";
 import { City } from "../../entity/City";
@@ -540,7 +539,7 @@ export const UserForgotPasswordMutation = extendType({
         }
 
         const user = await User.findOne({
-          where: { email, deletedAt: IsNull() },
+          where: { email },
           relations: ["account"],
         });
         if (!user) {
@@ -630,7 +629,7 @@ export const UserForgotPasswordMutation = extendType({
         }
 
         const user = await User.findOne({
-          where: { email, deletedAt: IsNull() },
+          where: { email },
           relations: ["account"],
         });
         if (!user) {
@@ -759,7 +758,7 @@ export const UserCrudMutation = extendType({
         }
 
         const user = await User.findOne({
-          where: { id: payload.sub, deletedAt: IsNull() },
+          where: { id: payload.sub },
           relations: ["account", "account.country", "account.city", "customer", "reviews", "reviews.visitType"],
         });
         if (!user) {
@@ -890,7 +889,7 @@ export const UserCrudMutation = extendType({
           };
         }
 
-        const user = await User.findOne({ where: { id: payload.sub, deletedAt: IsNull() }, relations: ["account", "customer"] });
+        const user = await User.findOne({ where: { id: payload.sub }, relations: ["account", "customer"] });
         if (!user) {
           return { error: { code: errors.NOT_FOUND, message: errors.USER_NOT_FOUND_MESSAGE } };
         }

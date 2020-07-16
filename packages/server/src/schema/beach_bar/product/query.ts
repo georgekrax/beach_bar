@@ -1,5 +1,4 @@
 import { booleanArg, extendType, intArg } from "@nexus/schema";
-import { IsNull, Raw } from "typeorm";
 import { Product } from "../../../entity/Product";
 import { checkScopes } from "../../../utils/checkScopes";
 import { ProductType } from "./types";
@@ -21,7 +20,7 @@ export const ProductCrudQuery = extendType({
         }),
         isDeleted: booleanArg({
           required: false,
-          description: "A boolean that indicates to retrieve deleted products too",
+          description: "A boolean that indicates to retrieve deleted products too. Its default value is set to false",
           default: false,
         }),
       },
@@ -34,9 +33,9 @@ export const ProductCrudQuery = extendType({
             where: {
               beachBarId,
               isActive,
-              deletedAt: isDeleted ? Raw(alias => `${alias} IS NOT NULL`) : IsNull(),
             },
             relations: ["beachBar", "category", "category.productComponents", "currency"],
+            withDeleted: isDeleted,
           });
           if (!products) {
             return null;
@@ -44,7 +43,7 @@ export const ProductCrudQuery = extendType({
           return products;
         }
         const products = await Product.find({
-          where: { beachBarId, isActive: true, deletedAt: IsNull() },
+          where: { beachBarId, isActive: true },
           relations: ["beachBar", "category", "category.productComponents", "currency"],
         });
         if (!products) {

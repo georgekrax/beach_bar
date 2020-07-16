@@ -1,18 +1,18 @@
 import { Dayjs } from "dayjs";
 import {
   BaseEntity,
-  BeforeInsert,
-  BeforeUpdate,
   Check,
   Column,
   CreateDateColumn,
   Entity,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { BeachBarService } from "./BeachBarService";
+import { SearchFilter } from "./SearchFilter";
 import { SearchInputValue } from "./SearchInputValue";
 import { User } from "./User";
 
@@ -32,9 +32,6 @@ export class UserSearch extends BaseEntity {
   @Column({ type: "smallint", name: "search_children", nullable: true })
   searchChildren?: number;
 
-  @Column({ type: "json", name: "extra_filters", nullable: true })
-  extraFilters?: string | Record<string, unknown> | any;
-
   @Column({ type: "integer", name: "user_id", nullable: true })
   userId: number;
 
@@ -49,25 +46,23 @@ export class UserSearch extends BaseEntity {
   @JoinColumn({ name: "input_value_id" })
   inputValue: SearchInputValue;
 
+  @ManyToMany(() => SearchFilter, searchFilter => searchFilter.userSearches, { nullable: true })
+  @JoinTable({
+    name: "user_search_filter",
+    joinColumn: {
+      name: "search_id",
+      referencedColumnName: "id",
+    },
+    inverseJoinColumn: {
+      name: "filter_id",
+      referencedColumnName: "id",
+    },
+  })
+  filters?: SearchFilter[];
+
   @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
   updatedAt: Dayjs;
 
   @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
   timestamp: Dayjs;
-
-  @BeforeInsert()
-  @BeforeUpdate()
-  async checkJsonFilters(): Promise<Error | void> {
-    const validFeatures = await BeachBarService.find();
-    if (this.extraFilters && Object.keys(this.extraFilters).length === 0 && this.extraFilters.constructor === Object) {
-      Object.entries(this.extraFilters).forEach(([key, value]) => {
-        if (typeof key !== "object" && !validFeatures.map(feature => feature.name).includes(key)) {
-          throw new Error("Something went wrong");
-        }
-        if (typeof value !== "boolean" || typeof value !== "object") {
-          throw new Error("Something went wrong");
-        }
-      });
-    }
-  }
 }

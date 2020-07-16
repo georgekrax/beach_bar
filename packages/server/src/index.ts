@@ -18,6 +18,7 @@ import { router as oauthRouter } from "./routes/authRoutes";
 import { router as stripeRouter } from "./routes/stripeWebhooks";
 import { schema } from "./schema";
 import { createDBConnection } from "./utils/createDBConnection";
+import errors from "./constants/errors";
 
 export let redis;
 export let stripe: Stripe;
@@ -65,7 +66,7 @@ const startServer = async (): Promise<any> => {
         err.message == "Context creation failed: jwt expired" ||
         err.message == "Context creation failed: Something went wrong. jwt expired"
       ) {
-        return new Error("jwt expired");
+        return new Error(errors.JWT_EXPIRED);
       } else if (err.message.startsWith("Context creation failed: ")) {
         return new Error(err.message.replace("Context creation failed: ", ""));
       } else if (err.message.startsWith("Something went wrong. ")) {
@@ -91,7 +92,7 @@ const startServer = async (): Promise<any> => {
           }
         } catch (err) {
           if (err.message.toString() === "jwt expired") {
-            throw new Error("jwt expired");
+            throw new Error(errors.JWT_EXPIRED);
           }
           // check with the 'verifyAccessToken' query
           if (err.message.toString() === "invalid signature") {

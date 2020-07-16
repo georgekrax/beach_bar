@@ -30,4 +30,7 @@ export default Object.freeze({
   INVALID_REFRESH_TOKEN: "Invalid refresh token",
   NOT_REGISTERED_PRIMARY_OWNER: "You are not registered as a primary owner",
   ZERO_CART_TOTAL_ERROR_CODE: "zero_cart_total_error",
+  LATER_DATE_ERROR_CODE: "later_date",
+  MAX_ADULTS_ERROR_CODE: "max_adults",
+  MAX_CHILDREN_ERROR_CODE: "max_children",
 });

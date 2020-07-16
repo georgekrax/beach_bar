@@ -1,4 +1,5 @@
 import { generateID } from "@beach_bar/common";
+import { Dayjs } from "dayjs";
 import {
   BaseEntity,
   BeforeInsert,
@@ -6,14 +7,12 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  getConnection,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { softRemove } from "../utils/softRemove";
 import { ProductVoucherCampaign } from "./ProductVoucherCampaign";
-import { Dayjs } from "dayjs";
 
 @Entity({ name: "product_voucher_code", schema: "public" })
 export class ProductVoucherCode extends BaseEntity {
@@ -41,12 +40,7 @@ export class ProductVoucherCode extends BaseEntity {
 
   @BeforeInsert()
   generateRefCode(): void {
-    const column = getConnection()
-      .getMetadata(ProductVoucherCampaign)
-      .columns.find(column => (column.propertyName = "refCode"));
-    if (column) {
-      this.refCode = generateID(parseInt(column.length));
-    }
+    this.refCode = generateID(23);
   }
 
   async softRemove(): Promise<any> {

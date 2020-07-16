@@ -1,6 +1,5 @@
 import { MyContext } from "@beach_bar/common";
 import { booleanArg, extendType, floatArg, intArg, stringArg } from "@nexus/schema";
-import { IsNull } from "typeorm";
 import errors from "../../../constants/errors";
 import { BeachBar } from "../../../entity/BeachBar";
 import { BeachBarOwner } from "../../../entity/BeachBarOwner";
@@ -17,7 +16,7 @@ import { AddProductResult, UpdateProductResult } from "./types";
 export const ProductCrudMutation = extendType({
   type: "Mutation",
   definition(t) {
-    t.field("addBeachBarProduct", {
+    t.field("addProduct", {
       type: AddProductResult,
       description: "Add a product to a #beach_bar",
       nullable: false,
@@ -54,11 +53,11 @@ export const ProductCrudMutation = extendType({
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
-        if (!checkScopes(payload, ["beach_bar@crud:beach_bar", "beach_bar@crud:product"])) {
+        if (!checkScopes(payload, ["beach_bar@crud:product"])) {
           return {
             error: {
               code: errors.UNAUTHORIZED_CODE,
-              message: "You are not allowed to add this product to the #beach_bar",
+              message: "You are not allowed to add this product to a #beach_bar",
             },
           };
         }
@@ -134,7 +133,7 @@ export const ProductCrudMutation = extendType({
         } catch (err) {
           if (err.message === 'duplicate key value violates unique constraint "product_name_beach_bar_id_key"') {
             const product = await Product.findOne({
-              where: { beachBar, name, deletedAt: IsNull() },
+              where: { beachBar, name },
               relations: ["beachBar", "category", "category.productComponents", "currency"],
             });
             if (product && product.deletedAt) {
@@ -158,7 +157,7 @@ export const ProductCrudMutation = extendType({
         };
       },
     });
-    t.field("updateBeachBarProduct", {
+    t.field("updateProduct", {
       type: UpdateProductResult,
       description: "Update a #beach_bar's product info",
       nullable: false,
@@ -194,11 +193,11 @@ export const ProductCrudMutation = extendType({
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
-        if (!checkScopes(payload, ["beach_bar@crud:beach_bar", "beach_bar@crud:product", "beach_bar@update:product"])) {
+        if (!checkScopes(payload, ["beach_bar@crud:product", "beach_bar@update:product"])) {
           return {
             error: {
               code: errors.UNAUTHORIZED_CODE,
-              message: "You are not allowed to update this product of the #beach_bar",
+              message: "You are not allowed to update this product of a #beach_bar",
             },
           };
         }
@@ -208,7 +207,7 @@ export const ProductCrudMutation = extendType({
         }
 
         const product = await Product.findOne({
-          where: { id: productId, deletedAt: IsNull() },
+          where: { id: productId },
           relations: ["beachBar", "beachBar.entryFees", "currency", "category", "category.productComponents"],
         });
         if (!product) {
@@ -278,64 +277,36 @@ export const ProductCrudMutation = extendType({
         };
       },
     });
-    t.field("deleteBeachBarProduct", {
+    t.field("deleteProduct", {
       type: DeleteResult,
       description: "Delete (remove) a product from a #beach_bar",
       nullable: false,
       args: {
-        beachBarId: intArg({
-          required: true,
-          description: "The ID value of the #beach_bar",
-        }),
         productId: intArg({
           required: true,
           description: "The ID value of the product",
         }),
       },
-      resolve: async (_, { beachBarId, productId }, { payload }: MyContext): Promise<DeleteType | ErrorType> => {
+      resolve: async (_, { productId }, { payload }: MyContext): Promise<DeleteType | ErrorType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
-        if (!payload.scope.includes("beach_bar@crud:beach_bar")) {
+        if (!payload.scope.includes("beach_bar@crud:product")) {
           return {
             error: {
               code: errors.UNAUTHORIZED_CODE,
-              message: "You are not allowed to delete (remove) a product from this #beach_bar",
+              message: "You are not allowed to delete (remove) a product from a #beach_bar",
             },
           };
         }
 
-        if (!beachBarId || beachBarId <= 0) {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid #beach_bar" } };
-        }
         if (!productId || productId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid product" } };
         }
 
-        const product = await Product.findOne({
-          where: { id: productId, deletedAt: IsNull() },
-          relations: ["beachBar"],
-          select: ["id", "name"],
-        });
+        const product = await Product.findOne({ id: productId });
         if (!product) {
           return { error: { code: errors.CONFLICT, message: "Specified product does not exist" } };
-        }
-        if (product.beachBar.id !== beachBarId) {
-          return { error: { code: errors.CONFLICT, message: "Specified product does not exist on this #beach_bar" } };
-        }
-
-        const owners = await BeachBarOwner.find({ where: { beachBarId }, relations: ["owner", "owner.user"] });
-        if (!owners) {
-          return { error: { code: errors.CONFLICT, message: errors.SOMETHING_WENT_WRONG } };
-        }
-        const owner = owners.find(beachBarOwner => beachBarOwner.owner.user.id === payload.sub);
-        if (!owner) {
-          return { error: { code: errors.UNAUTHORIZED_CODE, message: errors.YOU_ARE_NOT_BEACH_BAR_OWNER } };
-        }
-        if (!owner.isPrimary) {
-          return {
-            error: { code: errors.UNAUTHORIZED_CODE, message: errors.YOU_ARE_NOT_BEACH_BAR_PRIMARY_OWNER },
-          };
         }
 
         try {
@@ -346,6 +317,60 @@ export const ProductCrudMutation = extendType({
 
         return {
           deleted: true,
+        };
+      },
+    });
+  },
+});
+
+export const ProductRestoreMutation = extendType({
+  type: "Mutation",
+  definition(t) {
+    t.field("restoreBeachBarProduct", {
+      type: UpdateProductResult,
+      description: "Restore a (soft) deleted #beach_bar product",
+      nullable: false,
+      args: {
+        productId: intArg({
+          required: true,
+          description: "The ID value of the product",
+        }),
+      },
+      resolve: async (_, { productId }, { payload }: MyContext): Promise<UpdateProductType | ErrorType> => {
+        if (!payload) {
+          return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
+        }
+        if (!payload.scope.includes("beach_bar@crud:product")) {
+          return {
+            error: {
+              code: errors.UNAUTHORIZED_CODE,
+              message: "You are not allowed to restore a deleted product of a #beach_bar",
+            },
+          };
+        }
+
+        if (!productId || productId <= 0) {
+          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid product" } };
+        }
+
+        const product = await Product.findOne({
+          where: { id: productId },
+          relations: ["beachBar", "category", "components"],
+        });
+        if (!product) {
+          return { error: { code: errors.CONFLICT, message: "Specified product does not exist" } };
+        }
+
+        try {
+          product.deletedAt = undefined;
+          await product.save();
+        } catch (err) {
+          return { error: { message: `Something went wrong: ${err.message}` } };
+        }
+
+        return {
+          product,
+          updated: true,
         };
       },
     });

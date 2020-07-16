@@ -7,6 +7,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  DeleteDateColumn,
 } from "typeorm";
 import { checkScopes } from "../utils/checkScopes";
 import { softRemove } from "../utils/softRemove";
@@ -53,7 +54,7 @@ export class RestaurantFoodItem extends BaseEntity {
   @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
   timestamp: Dayjs;
 
-  @Column({ type: "timestamptz", name: "deleted_at", nullable: true })
+  @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Dayjs;
 
   async update(

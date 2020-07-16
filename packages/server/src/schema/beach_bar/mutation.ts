@@ -1,7 +1,6 @@
 import { MyContext } from "@beach_bar/common";
 import { booleanArg, extendType, intArg, stringArg } from "@nexus/schema";
 import errors from "../../constants/errors";
-import redisKeys from "../../constants/redisKeys";
 import { BeachBar } from "../../entity/BeachBar";
 import { Currency } from "../../entity/Currency";
 import { User } from "../../entity/User";
@@ -125,7 +124,7 @@ export const BeachBarCrudMutation = extendType({
           await newBeachBar.save();
 
           // cache #beach_bar in Redis
-          await redis.set(`${redisKeys.BEACH_BAR_CACHE_KEY}:${newBeachBar.id}`, JSON.stringify(newBeachBar));
+          await redis.lpush(newBeachBar.getRedisKey(), JSON.stringify(newBeachBar));
 
           res.clearCookie("scstate", { httpOnly: true, maxAge: 310000 });
 
@@ -172,10 +171,14 @@ export const BeachBarCrudMutation = extendType({
           description:
             "Set to true if the #beach_bar accepts for a customer / user to have less than the #beach_bar minimum currency price",
         }),
+        isAvailable: booleanArg({
+          required: false,
+          description: "Set to true, if to show #beach_bar in the search results, even if it has no availability",
+        }),
       },
       resolve: async (
         _,
-        { beachBarId, name, description, thumbnailUrl, zeroCartTotal },
+        { beachBarId, name, description, thumbnailUrl, zeroCartTotal, isAvailable },
         { payload, redis }: MyContext,
       ): Promise<UpdateBeachBarType | ErrorType> => {
         if (!payload) {
@@ -193,17 +196,13 @@ export const BeachBarCrudMutation = extendType({
 
         const beachBar = await BeachBar.findOne({
           where: { id: beachBarId },
-          relations: ["location", "reviews", "features", "products", "entryFees", "restaurants"],
         });
         if (!beachBar) {
           return { error: { code: errors.CONFLICT, message: errors.BEACH_BAR_DOES_NOT_EXIST } };
         }
-        beachBar.features = beachBar.features.filter(feature => !feature.deletedAt);
-        beachBar.products = beachBar.products.filter(product => !product.deletedAt);
 
         try {
-          const updatedBeachBar = await beachBar.update(redis, name, description, thumbnailUrl, zeroCartTotal);
-
+          const updatedBeachBar = await beachBar.update(redis, name, description, thumbnailUrl, zeroCartTotal, isAvailable);
           return {
             beachBar: updatedBeachBar,
             updated: true,

@@ -1,4 +1,7 @@
+import { Dayjs } from "dayjs";
+import { Redis } from "ioredis";
 import {
+  AfterInsert,
   BaseEntity,
   Column,
   CreateDateColumn,
@@ -7,12 +10,14 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  DeleteDateColumn,
 } from "typeorm";
+import redisKeys from "../constants/redisKeys";
+import { redis } from "../index";
 import { softRemove } from "../utils/softRemove";
 import { Payment } from "./Payment";
 import { Product } from "./Product";
 import { HourTime } from "./Time";
-import { Dayjs } from "dayjs";
 
 @Entity({ name: "reserved_product", schema: "public" })
 export class ReservedProduct extends BaseEntity {
@@ -52,14 +57,75 @@ export class ReservedProduct extends BaseEntity {
   @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
   timestamp: Dayjs;
 
-  @Column({ type: "timestamptz", name: "deleted_at", nullable: true })
+  @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Dayjs;
 
-  async getPrice(): Promise<number | undefined> {
-    return this.payment.cart.getProductTotalPrice(this.productId);
+  @AfterInsert()
+  async updateAlsoInRedis(): Promise<void | any> {
+    try {
+      await this.updateRedis(redis, true);
+    } catch (err) {
+      throw new Error(err.message);
+    }
   }
 
-  async softRemove(): Promise<any> {
+  getRedisKey(): string {
+    return `${redisKeys.BEACH_BAR_CACHE_KEY}:${this.product.beachBarId}:${redisKeys.RESERVED_PRODUCT_CACHE_KEY}`;
+  }
+
+  async getPrice(): Promise<number | undefined> {
+    const entryFee = await this.payment.cart.getBeachBarEntryFee(this.product.beachBarId);
+    if (entryFee === undefined) {
+      return undefined;
+    }
+    const productTotal = await this.payment.cart.getProductTotalPrice(this.productId);
+    if (productTotal === undefined) {
+      return undefined;
+    }
+    return productTotal + entryFee;
+  }
+
+  async getRedisIdx(redis: Redis): Promise<number> {
+    const reservedProducts = await redis.lrange(this.getRedisKey(), 0, -1);
+    const idx = reservedProducts.findIndex((x: string) => JSON.parse(x).id === this.id);
+    return idx;
+  }
+
+  async updateRedis(redis: Redis, create = false): Promise<void | any> {
+    try {
+      const reservedProduct = await ReservedProduct.findOne({
+        where: { id: this.id },
+        relations: ["product", "product.beachBar", "product.category", "product.components", "time", "payment"],
+      });
+      if (!reservedProduct) {
+        throw new Error();
+      }
+      if (create) {
+        await redis.lpush(this.getRedisKey(), JSON.stringify(this));
+      } else {
+        const idx = await reservedProduct.getRedisIdx(redis);
+        await redis.lset(reservedProduct.getRedisKey(), idx, JSON.stringify(reservedProduct));
+      }
+    } catch (err) {
+      throw new Error(err.message);
+    }
+  }
+
+  async customSoftRemove(redis: Redis, daysDiff: boolean): Promise<any> {
+    if (daysDiff) {
+      this.isRefunded = true;
+      await this.save();
+    }
+
+    // delete in Redis too
+    try {
+      const idx = await this.getRedisIdx(redis);
+      await redis.lset(this.getRedisKey(), idx, "");
+      await redis.lrem(this.getRedisKey(), 0, "");
+    } catch (err) {
+      throw new Error(err.message);
+    }
+
     await softRemove(ReservedProduct, { id: this.id });
   }
 }

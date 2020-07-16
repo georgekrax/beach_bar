@@ -11,6 +11,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { softRemove } from "../utils/softRemove";
 import { BeachBar } from "./BeachBar";
 import { City } from "./City";
 import { Country } from "./Country";
@@ -53,6 +54,7 @@ export class SearchInputValue extends BaseEntity {
   @JoinColumn({ name: "beach_bar_id" })
   beachBar: BeachBar;
 
+  // * excluded in softRemove, as it does not have a deletedAt column
   @OneToMany(() => UserSearch, userSearch => userSearch.inputValue, { nullable: true })
   searches?: UserSearch[];
 
@@ -96,5 +98,9 @@ export class SearchInputValue extends BaseEntity {
       }
     }
     return formattedString;
+  }
+
+  async softRemove(): Promise<any> {
+    await softRemove(SearchInputValue, { id: this.id });
   }
 }
