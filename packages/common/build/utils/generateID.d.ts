@@ -1,1 +1,1 @@
-export declare const generateID: (length: number) => string;
+export declare const generateID: (length: number, numbersOnly?: boolean) => string;

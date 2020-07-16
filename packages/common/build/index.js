@@ -21,5 +21,6 @@ __exportStar(require("./scalars/jsonScalar"), exports);
 __exportStar(require("./scalars/timeScalar"), exports);
 __exportStar(require("./scalars/urlScalar"), exports);
 __exportStar(require("./utils/generateID"), exports);
+__exportStar(require("./utils/filterSearch"), exports);
 __exportStar(require("./yup/userSchema"), exports);
 //# sourceMappingURL=index.js.map
