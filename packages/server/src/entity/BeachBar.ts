@@ -20,7 +20,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
   Repository,
-  UpdateDateColumn,
+  UpdateDateColumn
 } from "typeorm";
 import redisKeys from "../constants/redisKeys";
 import relations from "../constants/relations";
@@ -159,27 +159,6 @@ export class BeachBar extends BaseEntity {
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Dayjs;
 
-  // cache #beach_bar in Redis
-  @AfterInsert()
-  async createAlsoInRedis(): Promise<void | Error> {
-    try {
-      await redis.lpush(this.getRedisKey(), JSON.stringify(this));
-    } catch (err) {
-      throw new Error(err.message);
-    }
-  }
-
-  @AfterUpdate()
-  async updateAlsoInRedis(): Promise<void | Error> {
-    if (!this.deletedAt) {
-      try {
-        await this.updateRedis();
-      } catch (err) {
-        throw new Error(err.message);
-      }
-    }
-  }
-
   @AfterInsert()
   @AfterUpdate()
   async updateSearchInputValue(): Promise<void> {
@@ -264,6 +243,7 @@ export class BeachBar extends BaseEntity {
         }
       }
       await this.save();
+      await this.updateRedis();
       return this;
     } catch (err) {
       throw new Error(err.message);

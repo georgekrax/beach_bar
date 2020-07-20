@@ -8,6 +8,7 @@ import { DeleteType, ErrorType } from "../returnTypes";
 import { DeleteResult } from "../types";
 import { AddBeachBarType, UpdateBeachBarType } from "./returnTypes";
 import { AddBeachBarResult, UpdateBeachBarResult } from "./types";
+import redisKeys from "../../constants/redisKeys";
 
 export const BeachBarCrudMutation = extendType({
   type: "Mutation",
@@ -69,7 +70,7 @@ export const BeachBarCrudMutation = extendType({
           code,
           state,
         },
-        { payload, req, res, stripe }: MyContext
+        { payload, req, res, stripe, redis }: MyContext
       ): Promise<AddBeachBarType | ErrorType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
@@ -157,6 +158,8 @@ export const BeachBarCrudMutation = extendType({
           }
           newBeachBar.fee = pricingFee;
           await newBeachBar.save();
+
+          await redis.lpush(redisKeys.BEACH_BAR_CACHE_KEY, JSON.stringify(newBeachBar));
 
           res.clearCookie("scstate", { httpOnly: true, maxAge: 310000 });
 
