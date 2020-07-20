@@ -37,7 +37,21 @@ export class ReviewAnswer extends BaseEntity {
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Dayjs;
 
+  async update(body?: string): Promise<ReviewAnswer | any> {
+    try {
+      if (body && body !== this.body) {
+        this.body = body;
+        await this.save()
+        await this.review.beachBar.updateRedis();
+      }
+      return this;
+    } catch (err) {
+      throw new Error(err.message);
+    }
+  }
+
   async softRemove(): Promise<any> {
     await softRemove(ReviewAnswer, { id: this.id });
+    await this.review.beachBar.updateRedis();
   }
 }

@@ -34,11 +34,11 @@ export const AddReviewAnswerType = objectType({
   name: "AddReviewAnswer",
   description: "Info to be returned when an answer is added to a customer's review",
   definition(t) {
-    t.field("review", {
-      type: BeachBarReviewType,
+    t.field("answer", {
+      type: ReviewAnswerType,
       description: "The answer that is added to the review",
       nullable: false,
-      resolve: o => o.review,
+      resolve: o => o.answer,
     });
     t.boolean("added", {
       nullable: false,
@@ -65,11 +65,11 @@ export const UpdateReviewAnswerType = objectType({
   name: "UpdateReviewAnswer",
   description: "Info to be returned when the answer of a customer's review is updated",
   definition(t) {
-    t.field("review", {
-      type: BeachBarReviewType,
+    t.field("answer", {
+      type: ReviewAnswerType,
       description: "The review answer that is updated",
       nullable: false,
-      resolve: o => o.review,
+      resolve: o => o.answer,
     });
     t.boolean("updated", {
       nullable: false,

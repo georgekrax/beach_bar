@@ -1,6 +1,6 @@
+import { UrlScalar } from "@beach_bar/common";
 import { objectType } from "@nexus/schema";
 import { ProductType } from "../../beach_bar/product/types";
-import { UrlScalar } from "@beach_bar/common";
 
 export const ProductComponentType = objectType({
   name: "ProductComponent",
@@ -37,7 +37,7 @@ export const ProductCategoryType = objectType({
   name: "ProductCategory",
   description: "Represents a #beach_bar's product category",
   definition(t) {
-    t.int("int", { nullable: false });
+    t.int("id", { nullable: false });
     t.string("name", { nullable: false });
     t.string("underscoredName", { nullable: false });
     t.string("description", { nullable: true });

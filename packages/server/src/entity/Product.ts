@@ -14,7 +14,7 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
+  UpdateDateColumn
 } from "typeorm";
 import { ProductAvailabilityHourReturnType } from "../schema/beach_bar/product/returnTypes";
 import { softRemove } from "../utils/softRemove";
@@ -186,7 +186,8 @@ export class Product extends BaseEntity {
       Product,
       { id: this.id, name: this.name, beachBarId: this.beachBarId },
       [BundleProductComponent, CartProduct, ProductCouponCode, ProductCouponCode, ReservedProduct, ProductReservationLimit],
-      findOptions,
+      findOptions
     );
+    await this.beachBar.updateRedis();
   }
 }

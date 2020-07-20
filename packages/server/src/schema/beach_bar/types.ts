@@ -16,6 +16,20 @@ export const BeachBarType = objectType({
     t.string("name", { nullable: false, description: "The name of the #beach_bar" });
     t.string("description", { nullable: true, description: "A description text about the #beach_bar" });
     t.float("avgRating", { nullable: true, description: "The average rating of all the user reviews for this #beach_bar" });
+    t.field("thumbnailUrl", {
+      type: UrlScalar,
+      nullable: true,
+    });
+    t.string("contactPhoneNumber", { nullable: false, description: "A phone number to contact the #beach_bar directly" });
+    t.boolean("hidePhoneNumber", {
+      nullable: false,
+      description: "A boolean that indicates if to NOT display the #beach_bar contact phone number",
+    });
+    t.field("updatedAt", {
+      type: DateTimeScalar,
+      nullable: false,
+      description: "The last time the #beach_bar was updated, in the format of a timestamp",
+    });
     t.boolean("isActive", {
       nullable: false,
       description: "A boolean that indicates if the #beach_bar is active or not",
@@ -23,15 +37,6 @@ export const BeachBarType = objectType({
     t.boolean("isAvailable", {
       nullable: false,
       description: "A boolean that indicates if the #beach_bar is shown in the search results, even if it has no availability",
-    });
-    t.field("thumbnailUrl", {
-      type: UrlScalar,
-      nullable: true,
-    });
-    t.field("updatedAt", {
-      type: DateTimeScalar,
-      nullable: false,
-      description: "The last time the #beach_bar was updated, in the format of a timestamp",
     });
     t.field("timestamp", {
       type: DateTimeScalar,

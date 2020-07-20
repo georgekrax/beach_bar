@@ -1,19 +1,19 @@
+import { Dayjs } from "dayjs";
 import {
   BaseEntity,
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-  DeleteDateColumn,
 } from "typeorm";
 import { checkScopes } from "../utils/checkScopes";
 import { softRemove } from "../utils/softRemove";
 import { BeachBarRestaurant } from "./BeachBarRestaurant";
 import { RestaurantMenuCategory } from "./RestaurantMenuCategory";
-import { Dayjs } from "dayjs";
 
 @Entity({ name: "restaurant_food_item", schema: "public" })
 export class RestaurantFoodItem extends BaseEntity {
@@ -62,8 +62,8 @@ export class RestaurantFoodItem extends BaseEntity {
     name?: string,
     price?: number,
     menuCategoryId?: number,
-    imgUrl?: string,
-  ): Promise<RestaurantFoodItem | undefined> {
+    imgUrl?: string
+  ): Promise<RestaurantFoodItem | any> {
     try {
       if (name && name !== this.name && name.trim().length !== 0) {
         this.name = name;
@@ -85,6 +85,7 @@ export class RestaurantFoodItem extends BaseEntity {
         this.imgUrl = imgUrl;
       }
       await this.save();
+      await this.restaurant.beachBar.updateRedis();
       return this;
     } catch (err) {
       throw new Error(err.message);
@@ -93,5 +94,6 @@ export class RestaurantFoodItem extends BaseEntity {
 
   async softRemove(): Promise<any> {
     await softRemove(RestaurantFoodItem, { id: this.id });
+    await this.restaurant.beachBar.updateRedis();
   }
 }

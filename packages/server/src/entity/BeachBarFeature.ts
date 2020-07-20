@@ -37,5 +37,6 @@ export class BeachBarFeature extends BaseEntity {
 
   async customSoftRemove(featureId: number): Promise<any> {
     await softRemove(BeachBarFeature, { beachBarId: this.beachBarId, serviceId: featureId });
+    await this.beachBar.updateRedis();
   }
 }

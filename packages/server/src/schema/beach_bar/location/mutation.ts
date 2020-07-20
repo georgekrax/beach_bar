@@ -1,4 +1,4 @@
-import { MyContext, errors } from "@beach_bar/common";
+import { errors, MyContext } from "@beach_bar/common";
 import { extendType, intArg, stringArg } from "@nexus/schema";
 import { BeachBar } from "../../../entity/BeachBar";
 import { BeachBarLocation } from "../../../entity/BeachBarLocation";
@@ -53,7 +53,7 @@ export const BeachBarLocationCrudMutation = extendType({
       resolve: async (
         _,
         { beachBarId, address, zipCode, latitude, longitude, countryId, cityId, regionId },
-        { payload, redis }: MyContext,
+        { payload }: MyContext
       ): Promise<AddBeachBarLocationType | ErrorType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
@@ -119,7 +119,7 @@ export const BeachBarLocationCrudMutation = extendType({
 
         try {
           await newLocation.save();
-          await beachBar.updateRedis(redis);
+          await beachBar.updateRedis();
         } catch (err) {
           if (err.message === 'duplicate key value violates unique constraint "beach_bar_location_beach_bar_id_key"') {
             return { error: { code: errors.CONFLICT, message: "You have already set the location of this #beach_bar" } };
@@ -174,7 +174,7 @@ export const BeachBarLocationCrudMutation = extendType({
       resolve: async (
         _,
         { locationId, address, zipCode, latitude, longitude, countryId, cityId, regionId },
-        { payload, redis }: MyContext,
+        { payload }: MyContext
       ): Promise<UpdateBeachBarLocationType | ErrorType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
@@ -191,26 +191,14 @@ export const BeachBarLocationCrudMutation = extendType({
 
         const location = await BeachBarLocation.findOne({
           where: { id: locationId },
-          relations: [
-            "beachBar",
-            "beachBar.location",
-            "beachBar.reviews",
-            "beachBar.features",
-            "beachBar.products",
-            "beachBar.entryFees",
-            "beachBar.restaurants",
-            "country",
-            "city",
-            "region",
-          ],
+          relations: ["beachBar", "country", "city", "region"],
         });
         if (!location) {
           return { error: { code: errors.CONFLICT, message: errors.SOMETHING_WENT_WRONG } };
         }
-        location.beachBar.features = location.beachBar.features.filter(feature => !feature.deletedAt);
 
         try {
-          const updatedLocation = await location.update(redis, address, zipCode, latitude, longitude, countryId, cityId, regionId);
+          const updatedLocation = await location.update(address, zipCode, latitude, longitude, countryId, cityId, regionId);
 
           return {
             location: updatedLocation,

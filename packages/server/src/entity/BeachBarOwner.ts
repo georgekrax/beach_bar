@@ -8,7 +8,7 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn
+  UpdateDateColumn,
 } from "typeorm";
 import { softRemove } from "../utils/softRemove";
 import { BeachBar } from "./BeachBar";
@@ -50,5 +50,6 @@ export class BeachBarOwner extends BaseEntity {
 
   async softRemove(): Promise<any> {
     await softRemove(BeachBarOwner, { ownerId: this.owner.id, beachBarId: this.beachBar.id });
+    await this.beachBar.updateRedis();
   }
 }

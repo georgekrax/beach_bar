@@ -1,6 +1,6 @@
 import { BaseEntity, Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { BeachBar } from "./BeachBar";
-import { BeachBarFeeCurrency } from "./BeachBarFeeCurrency";
+import { PricingFeeCurrency } from "./PricingFeeCurrency";
 import { Country } from "./Country";
 import { CurrencyProductPrice } from "./CurrencyProductPrice";
 import { Product } from "./Product";
@@ -33,8 +33,8 @@ export class Currency extends BaseEntity {
   @OneToMany(() => BeachBar, beachBar => beachBar.defaultCurrency, { nullable: true })
   beachBars?: Product[];
 
-  @OneToMany(() => BeachBarFeeCurrency, beachBarFeeCurrency => beachBarFeeCurrency.currency, { nullable: true })
-  beachBarFees?: BeachBarFeeCurrency[];
+  @OneToMany(() => PricingFeeCurrency, pricingFeeCurrency => pricingFeeCurrency.currency, { nullable: true })
+  beachBarFees?: PricingFeeCurrency[];
 
   @OneToMany(() => StripeFee, stripeFee => stripeFee.currency, { nullable: true })
   stripeFees?: StripeFee[];

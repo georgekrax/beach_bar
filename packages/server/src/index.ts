@@ -21,6 +21,7 @@ import { createDBConnection } from "./utils/createDBConnection";
 
 export let redis;
 export let stripe: Stripe;
+export * from "./schema";
 
 const startServer = async (): Promise<any> => {
   redis = new Redis({
@@ -54,7 +55,7 @@ const startServer = async (): Promise<any> => {
 
   stripe = new Stripe(
     process.env.NODE_ENV === "production" ? process.env.STRIPE_SECRET_LIVE_KEY!.toString() : process.env.STRIPE_SECRET_KEY!.toString(),
-    { apiVersion: "2020-03-02", typescript: true },
+    { apiVersion: "2020-03-02", typescript: true }
   );
 
   const server = new ApolloServer({
@@ -174,10 +175,10 @@ const startServer = async (): Promise<any> => {
     process.exit(0);
   });
 
-  server.applyMiddleware({ app });
+  server.applyMiddleware({ app, cors: false });
 
   app.listen({ port: parseInt(process.env.PORT!) || 4000 }, () =>
-    console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`),
+    console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`)
   );
 };
 

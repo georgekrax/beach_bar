@@ -41,7 +41,7 @@ export const RestaurantFoodItemCrudMutation = extendType({
       resolve: async (
         _,
         { restaurantId, name, price, menuCategoryId, imgUrl },
-        { payload }: MyContext,
+        { payload }: MyContext
       ): Promise<AddRestaurantFoodItemType | ErrorType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
@@ -79,7 +79,7 @@ export const RestaurantFoodItemCrudMutation = extendType({
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid image" } };
         }
 
-        const restaurant = await BeachBarRestaurant.findOne(restaurantId);
+        const restaurant = await BeachBarRestaurant.findOne({ where: { id: restaurantId }, relations: ["beachBar"] });
         if (!restaurant) {
           return { error: { code: errors.CONFLICT, message: "Specified restaurant does not exist" } };
         }
@@ -99,6 +99,7 @@ export const RestaurantFoodItemCrudMutation = extendType({
 
         try {
           await newFoodItem.save();
+          await restaurant.beachBar.updateRedis();
         } catch (err) {
           if (err.message === 'duplicate key value violates unique constraint "restaurant_food_item_restaurant_id_name_key"') {
             return {
@@ -147,7 +148,7 @@ export const RestaurantFoodItemCrudMutation = extendType({
       resolve: async (
         _,
         { foodItemId, name, price, menuCategoryId, imgUrl },
-        { payload }: MyContext,
+        { payload }: MyContext
       ): Promise<UpdateRestaurantFoodItemType | ErrorType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
@@ -185,7 +186,7 @@ export const RestaurantFoodItemCrudMutation = extendType({
 
         const foodItem = await RestaurantFoodItem.findOne({
           where: { id: foodItemId },
-          relations: ["restaurant", "menuCategory"],
+          relations: ["restaurant", "restaurant.beachBar", "menuCategory"],
         });
         if (!foodItem) {
           return { error: { code: errors.CONFLICT, message: "Specified food item does not exist" } };
@@ -238,7 +239,10 @@ export const RestaurantFoodItemCrudMutation = extendType({
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid food item" } };
         }
 
-        const foodItem = await RestaurantFoodItem.findOne({ id: foodItemId });
+        const foodItem = await RestaurantFoodItem.findOne({
+          where: { id: foodItemId },
+          relations: ["restaurant", "restaurant.beachBar"],
+        });
         if (!foodItem) {
           return { error: { code: errors.CONFLICT, message: "Specified food item does not exist" } };
         }

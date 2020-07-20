@@ -66,6 +66,7 @@ export const BeachBarEntryFeeCrudMutation = extendType({
           if (newEntryFees.length === 0) {
             return { error: { message: errors.SOMETHING_WENT_WRONG } };
           }
+          await beachBar.updateRedis();
         } catch (err) {
           if (err.message === 'duplicate key value violates unique constraint "beach_bar_entry_fee_beach_bar_id_date_key"') {
             const entryFees = await BeachBarEntryFee.find({ where: { date: In(dates) }, relations: ["beachBar"] });
@@ -183,7 +184,7 @@ export const BeachBarEntryFeeCrudMutation = extendType({
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a or some valid entry fee(s)" } };
         }
 
-        const entryFees = await BeachBarEntryFee.find({ id: In(entryFeeIds) });
+        const entryFees = await BeachBarEntryFee.find({ where: { id: In(entryFeeIds) }, relations: ["beachBar"] });
         if (!entryFees) {
           return { error: { code: errors.CONFLICT, message: "Specified entry fee(s) do not exist" } };
         }

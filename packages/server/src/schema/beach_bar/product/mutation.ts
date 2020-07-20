@@ -129,6 +129,7 @@ export const ProductCrudMutation = extendType({
           await newProduct.createProductComponents(false);
 
           await ProductPriceHistory.create({ product: newProduct, owner: owner.owner, newPrice: newProduct.price }).save();
+          await beachBar.updateRedis();
         } catch (err) {
           if (err.message === 'duplicate key value violates unique constraint "product_name_beach_bar_id_key"') {
             const product = await Product.findOne({
@@ -263,6 +264,7 @@ export const ProductCrudMutation = extendType({
             product.maxPeople = maxPeople;
           }
           await product.save();
+          await product.beachBar.updateRedis();
         } catch (err) {
           if (err.message === errors.SOMETHING_WENT_WRONG) {
             return { error: { message: errors.SOMETHING_WENT_WRONG } };
@@ -303,7 +305,7 @@ export const ProductCrudMutation = extendType({
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid product" } };
         }
 
-        const product = await Product.findOne({ id: productId });
+        const product = await Product.findOne({ where: { id: productId }, relations: ["beachBar"] });
         if (!product) {
           return { error: { code: errors.CONFLICT, message: "Specified product does not exist" } };
         }
@@ -363,6 +365,7 @@ export const ProductRestoreMutation = extendType({
         try {
           product.deletedAt = undefined;
           await product.save();
+          await product.beachBar.updateRedis();
         } catch (err) {
           return { error: { message: `Something went wrong: ${err.message}` } };
         }

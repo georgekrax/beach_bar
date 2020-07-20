@@ -1,4 +1,4 @@
-import { MyContext, errors } from "@beach_bar/common";
+import { errors, MyContext } from "@beach_bar/common";
 import { booleanArg, extendType, intArg, stringArg } from "@nexus/schema";
 import { BeachBar } from "../../../entity/BeachBar";
 import { BeachBarRestaurant } from "../../../entity/BeachBarRestaurant";
@@ -36,7 +36,7 @@ export const BeachBarRestaurantCrudMutation = extendType({
       resolve: async (
         _,
         { beachBarId, name, description, isActive },
-        { payload }: MyContext,
+        { payload }: MyContext
       ): Promise<AddBeachBarRestaurantType | ErrorType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
@@ -74,6 +74,7 @@ export const BeachBarRestaurantCrudMutation = extendType({
 
         try {
           await newRestaurant.save();
+          await beachBar.updateRedis();
         } catch (err) {
           if (err.message === 'duplicate key value violates unique constraint "beach_bar_restaurant_beach_bar_id_name_key"') {
             return {
@@ -114,7 +115,7 @@ export const BeachBarRestaurantCrudMutation = extendType({
       resolve: async (
         _,
         { restaurantId, name, description, isActive },
-        { payload }: MyContext,
+        { payload }: MyContext
       ): Promise<UpdateBeachBarRestaurantType | ErrorType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
@@ -122,8 +123,8 @@ export const BeachBarRestaurantCrudMutation = extendType({
         if (
           !payload.scope.some(scope =>
             ["beach_bar@crud:beach_bar", "beach_bar@crud:beach_bar_restaurant", "beach_bar@update:beach_bar_restaurant"].includes(
-              scope,
-            ),
+              scope
+            )
           )
         ) {
           return {
@@ -185,7 +186,7 @@ export const BeachBarRestaurantCrudMutation = extendType({
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid #beach_bar restaurant" } };
         }
 
-        const restaurant = await BeachBarRestaurant.findOne(restaurantId);
+        const restaurant = await BeachBarRestaurant.findOne({ where: { id: restaurantId }, relations: ["beachBar"] });
         if (!restaurant) {
           return { error: { code: errors.CONFLICT, message: "Specified restaurant does not exist" } };
         }

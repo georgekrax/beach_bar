@@ -2,9 +2,8 @@ import { dayjsFormat, errors, filterSearch, MyContext } from "@beach_bar/common"
 import { arg, extendType, stringArg } from "@nexus/schema";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
-import { In } from "typeorm";
-import redisKeys from "../../constants/redisKeys";
-import { BeachBar } from "../../entity/BeachBar";
+import { getCustomRepository, In } from "typeorm";
+import { BeachBar, BeachBarRepository } from "../../entity/BeachBar";
 import { BeachBarFeature } from "../../entity/BeachBarFeature";
 import { Product } from "../../entity/Product";
 import { SearchFilter } from "../../entity/SearchFilter";
@@ -81,7 +80,7 @@ export const SearchQuery = extendType({
       resolve: async (
         _,
         { inputId, inputValue, availability, filterIds },
-        { payload, redis }: MyContext,
+        { payload, redis }: MyContext
       ): Promise<SearchReturnType | ErrorType> => {
         dayjs.extend(utc);
 
@@ -95,16 +94,15 @@ export const SearchQuery = extendType({
         if (inputValue && inputValue.trim().length === 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Invalid inputValue" } };
         }
-        const { date, timeId } = availability;
-        let { adults, children } = availability;
+
         if (availability) {
-          if (date && date.add(1, "day") < dayjs()) {
+          if (availability.date && availability.date.add(1, "day") < dayjs()) {
             return { error: { code: errors.LATER_DATE_ERROR_CODE, message: "Please provide a date later or equal to today" } };
           }
-          if (adults !== undefined && adults > 12) {
+          if (availability.adults !== undefined && availability.adults > 12) {
             return { error: { code: errors.MAX_ADULTS_ERROR_CODE, message: "You cannot search for more than 12 adults" } };
           }
-          if (children !== undefined && children > 8) {
+          if (availability.children !== undefined && availability.children > 8) {
             return { error: { code: errors.MAX_CHILDREN_ERROR_CODE, message: "You cannot search for more than 8 children" } };
           }
         }
@@ -120,10 +118,9 @@ export const SearchQuery = extendType({
           return { error: { code: errors.CONFLICT, message: "Invalid search input" } };
         }
 
-        const redisList = await redis.lrange(redisKeys.BEACH_BAR_CACHE_KEY, 0, -1);
-        const redisResults = redisList.map(x => JSON.parse(x)).filter(bar => bar.isActive);
+        const redisResults: BeachBar[] = (await getCustomRepository(BeachBarRepository).findInRedis()).filter(bar => bar.isActive);
         redisResults.forEach(
-          beachBar => (beachBar.features = beachBar.features.filter((feature: BeachBarFeature) => !feature.deletedAt)),
+          beachBar => (beachBar.features = beachBar.features.filter((feature: BeachBarFeature) => !feature.deletedAt))
         );
         redisResults.forEach(beachBar => (beachBar.products = beachBar.products.filter((product: Product) => !product.deletedAt)));
         let beachBars: BeachBar[] = [];
@@ -145,9 +142,11 @@ export const SearchQuery = extendType({
         let results: SearchResultReturnType[] = beachBars.map(bar => {
           return { beachBar: bar, availability: { hasAvailability: undefined, hasCapacity: undefined } };
         });
-        if (date) {
-          adults = adults || 0;
-          children = children || 0;
+        if (availability && availability.date) {
+          const { date } = availability;
+          const timeId = availability.timeId ? availability.timeId : undefined;
+          const adults = availability.adults || 0;
+          const children = availability.children || 0;
           results = [];
           const totalPeople = adults + children !== 0 ? adults + children : undefined;
 
@@ -170,9 +169,9 @@ export const SearchQuery = extendType({
         }
 
         const userSearch = UserSearch.create({
-          searchDate: date ? date.format(dayjsFormat.ISO_STRING) : undefined,
-          searchAdults: adults,
-          searchChildren: children,
+          searchDate: availability && availability.date ? availability.date.format(dayjsFormat.ISO_STRING) : undefined,
+          searchAdults: availability && availability.adults,
+          searchChildren: availability && availability.children,
           userId: payload ? payload.sub : undefined,
           inputValue: searchInput,
           filters,

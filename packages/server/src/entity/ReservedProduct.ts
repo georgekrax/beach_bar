@@ -5,12 +5,12 @@ import {
   BaseEntity,
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
-  DeleteDateColumn,
+  UpdateDateColumn
 } from "typeorm";
 import redisKeys from "../constants/redisKeys";
 import { redis } from "../index";
@@ -106,6 +106,7 @@ export class ReservedProduct extends BaseEntity {
         const idx = await reservedProduct.getRedisIdx(redis);
         await redis.lset(reservedProduct.getRedisKey(), idx, JSON.stringify(reservedProduct));
       }
+      await reservedProduct.product.beachBar.updateRedis();
     } catch (err) {
       throw new Error(err.message);
     }
@@ -127,5 +128,7 @@ export class ReservedProduct extends BaseEntity {
     }
 
     await softRemove(ReservedProduct, { id: this.id });
+    // update #beach_bar Redis cache
+    await this.product.beachBar.updateRedis();
   }
 }

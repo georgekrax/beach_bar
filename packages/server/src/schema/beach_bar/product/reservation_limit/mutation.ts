@@ -33,7 +33,7 @@ export const ProductReservationLimitCrudMutation = extendType({
       resolve: async (
         _,
         { productId, limit, dates, startTimeId, endTimeId },
-        { payload }: MyContext,
+        { payload }: MyContext
       ): Promise<AddProductReservationLimitType | ErrorType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
@@ -51,7 +51,7 @@ export const ProductReservationLimitCrudMutation = extendType({
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provided a valid limit date" } };
         }
 
-        const product = await Product.findOne(productId);
+        const product = await Product.findOne({ where: { id: productId }, relations: ["beachBar"] });
         if (!product) {
           return { error: { code: errors.CONFLICT, message: "Specified product does not exist" } };
         }
@@ -80,6 +80,7 @@ export const ProductReservationLimitCrudMutation = extendType({
             await newReservationLimit.save();
             returnResults.push(newReservationLimit);
           }
+          await product.beachBar.updateRedis();
         } catch (err) {
           return { error: { message: `${errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
         }
@@ -114,7 +115,7 @@ export const ProductReservationLimitCrudMutation = extendType({
       resolve: async (
         _,
         { reservationLimitIds, limit, startTimeId, endTimeId },
-        { payload }: MyContext,
+        { payload }: MyContext
       ): Promise<UpdateProductReservationLimitType | ErrorType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
@@ -138,21 +139,17 @@ export const ProductReservationLimitCrudMutation = extendType({
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a or some valid reservation limit(s)" } };
         }
 
-        let reservationLimits = await ProductReservationLimit.find({
+        const reservationLimits = await ProductReservationLimit.find({
           where: { id: In(reservationLimitIds) },
-          relations: ["startTime", "endTime", "product"],
+          relations: ["startTime", "endTime", "product", "product.beachBar"],
         });
         if (!reservationLimits || reservationLimits.filter(limit => !limit.product.deletedAt).length === 0) {
           return { error: { code: errors.CONFLICT, message: "Specified reservation limit(s) do not exist" } };
         }
-        reservationLimits = reservationLimits.filter(limit => !limit.product.deletedAt);
 
         try {
           const updatedReservationLimits: ProductReservationLimit[] = [];
           for (let i = 0; i < reservationLimits.length; i++) {
-            console.log(i);
-            console.log(reservationLimits);
-            console.log(reservationLimits.length);
             const updatedReservationLimit = await reservationLimits[i].update(limit, startTimeId, endTimeId);
             updatedReservationLimits.push(updatedReservationLimit);
           }
@@ -197,7 +194,10 @@ export const ProductReservationLimitCrudMutation = extendType({
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a or some valid reservation limit(s)" } };
         }
 
-        const reservationLimits = await ProductReservationLimit.find({ id: In(reservationLimitIds) });
+        const reservationLimits = await ProductReservationLimit.find({
+          where: { id: In(reservationLimitIds) },
+          relations: ["product", "product.beachBar"],
+        });
         if (!reservationLimits) {
           return { error: { code: errors.CONFLICT, message: "Specified reservation limit(s) do not exist" } };
         }

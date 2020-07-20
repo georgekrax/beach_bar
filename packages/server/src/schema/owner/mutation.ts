@@ -78,7 +78,7 @@ export const OwnerCrudMutation = extendType({
           });
           try {
             await newOwner.save();
-
+            await beachBar.updateRedis();
             return {
               owner: newOwner,
               added: true,
@@ -118,7 +118,7 @@ export const OwnerCrudMutation = extendType({
           });
           try {
             await newOwner.save();
-
+            await beachBar.updateRedis();
             return {
               owner: newOwner,
               added: true,
@@ -157,7 +157,7 @@ export const OwnerCrudMutation = extendType({
       resolve: async (
         _,
         { beachBarId, userId, publicInfo, isPrimary },
-        { payload, redis }: MyContext,
+        { payload, redis }: MyContext
       ): Promise<UpdateBeachBarOwnerType | ErrorType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
@@ -187,7 +187,7 @@ export const OwnerCrudMutation = extendType({
           }
           beachBarOwner = await BeachBarOwner.findOne({
             where: { owner, beachBarId },
-            relations: ["owner", "owner.user", "beachBar"],
+            relations: ["beachBar", "owner", "owner.user", "beachBar"],
           });
           if (!beachBarOwner) {
             return { error: { code: errors.CONFLICT, message: errors.YOU_ARE_NOT_BEACH_BAR_OWNER } };
@@ -201,7 +201,7 @@ export const OwnerCrudMutation = extendType({
             return { error: { code: errors.CONFLICT, message: errors.YOU_ARE_NOT_AN_OWNER } };
           }
           primaryBeachBarOwner = primaryOwner.beachBars.find(
-            beachBar => beachBar.beachBar.id === beachBarId && (beachBar.deletedAt === null || beachBar.deletedAt === undefined),
+            beachBar => beachBar.beachBar.id === beachBarId && (beachBar.deletedAt === null || beachBar.deletedAt === undefined)
           );
           if (!primaryBeachBarOwner) {
             return { error: { code: errors.CONFLICT, message: errors.YOU_ARE_NOT_BEACH_BAR_OWNER } };
@@ -215,7 +215,7 @@ export const OwnerCrudMutation = extendType({
           }
           beachBarOwner = await BeachBarOwner.findOne({
             where: { owner, beachBarId },
-            relations: ["owner", "owner.user", "beachBar"],
+            relations: ["beachBar", "owner", "owner.user", "beachBar"],
           });
         }
 
@@ -244,6 +244,7 @@ export const OwnerCrudMutation = extendType({
             beachBarOwner.publicInfo = publicInfo;
           }
           await beachBarOwner.save();
+          await beachBarOwner.beachBar.updateRedis();
         } catch (err) {
           return { error: { message: `Something went wrong: ${err.message}` } };
         }
@@ -295,7 +296,10 @@ export const OwnerCrudMutation = extendType({
           if (!owner) {
             return { error: { code: errors.CONFLICT, message: errors.YOU_ARE_NOT_AN_OWNER } };
           }
-          beachBarOwner = await BeachBarOwner.findOne({ where: { owner, beachBarId }, relations: ["owner", "owner.user"] });
+          beachBarOwner = await BeachBarOwner.findOne({
+            where: { owner, beachBarId },
+            relations: ["beachBar", "owner", "owner.user"],
+          });
           if (!beachBarOwner) {
             return { error: { code: errors.CONFLICT, message: errors.YOU_ARE_NOT_BEACH_BAR_OWNER } };
           }
@@ -318,7 +322,10 @@ export const OwnerCrudMutation = extendType({
           if (!owner) {
             return { error: { code: errors.CONFLICT, message: errors.USER_OWNER_DOES_NOT_EXIST } };
           }
-          beachBarOwner = await BeachBarOwner.findOne({ where: { owner, beachBarId }, relations: ["owner", "owner.user"] });
+          beachBarOwner = await BeachBarOwner.findOne({
+            where: { owner, beachBarId },
+            relations: ["beachBar", "owner", "owner.user"],
+          });
           if (!beachBarOwner) {
             return { error: { code: errors.CONFLICT, message: "Specified user is not an owner at this #beach_bar" } };
           }

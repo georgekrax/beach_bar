@@ -1,4 +1,4 @@
-import { MyContext, errors } from "@beach_bar/common";
+import { errors, MyContext } from "@beach_bar/common";
 import { booleanArg, extendType, intArg, stringArg } from "@nexus/schema";
 import { BeachBar } from "../../entity/BeachBar";
 import { Currency } from "../../entity/Currency";
@@ -29,6 +29,16 @@ export const BeachBarCrudMutation = extendType({
           required: false,
           description: "A thumbnail URL value of the #beach_bar's image to show in search results",
         }),
+        contactPhoneNumber: stringArg({
+          required: true,
+          description: "A phone number to contact the #beach_bar directly",
+        }),
+        hidePhoneNumber: booleanArg({
+          required: true,
+          description:
+            "A boolean that indicates if to NOT display the phone number when retrieving #beach_bar info. Its default value is set to false",
+          default: false,
+        }),
         zeroCartTotal: booleanArg({
           required: true,
           description:
@@ -47,8 +57,19 @@ export const BeachBarCrudMutation = extendType({
       },
       resolve: async (
         _,
-        { name, description, thumbnailUrl, zeroCartTotal, openingTimeId, closingTimeId, code, state },
-        { payload, req, res, redis, stripe }: MyContext,
+        {
+          name,
+          description,
+          thumbnailUrl,
+          contactPhoneNumber,
+          hidePhoneNumber,
+          zeroCartTotal,
+          openingTimeId,
+          closingTimeId,
+          code,
+          state,
+        },
+        { payload, req, res, stripe }: MyContext
       ): Promise<AddBeachBarType | ErrorType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
@@ -121,6 +142,8 @@ export const BeachBarCrudMutation = extendType({
             name,
             description,
             thumbnailUrl,
+            contactPhoneNumber,
+            hidePhoneNumber,
             defaultCurrency: currency,
             stripeConnectId: stripeUserId,
             zeroCartTotal,
@@ -134,9 +157,6 @@ export const BeachBarCrudMutation = extendType({
           }
           newBeachBar.fee = pricingFee;
           await newBeachBar.save();
-
-          // cache #beach_bar in Redis
-          await redis.lpush(newBeachBar.getRedisKey(), JSON.stringify(newBeachBar));
 
           res.clearCookie("scstate", { httpOnly: true, maxAge: 310000 });
 
@@ -178,6 +198,15 @@ export const BeachBarCrudMutation = extendType({
           required: false,
           description: "A thumbnail URL value of the #beach_bar's image to show in search results",
         }),
+        contactPhoneNumber: stringArg({
+          required: false,
+          description: "A phone number to contact the #beach_bar directly",
+        }),
+        hidePhoneNumber: booleanArg({
+          required: false,
+          description:
+            "A boolean that indicates if to NOT display the phone number when retrieving #beach_bar info. Its default value is set to false",
+        }),
         zeroCartTotal: booleanArg({
           required: false,
           description:
@@ -188,18 +217,29 @@ export const BeachBarCrudMutation = extendType({
           description: "Set to true, if to show #beach_bar in the search results, even if it has no availability",
         }),
         openingTimeId: intArg({
-          required: true,
+          required: false,
           description: "The ID value of the opening quarter time of the #beach_bar, in its country time zone",
         }),
         closingTimeId: intArg({
-          required: true,
+          required: false,
           description: "The ID value of the closing quarter time of the #beach_bar, in its country time zone",
         }),
       },
       resolve: async (
         _,
-        { beachBarId, name, description, thumbnailUrl, zeroCartTotal, isAvailable, openingTimeId, closingTimeId },
-        { payload, redis }: MyContext,
+        {
+          beachBarId,
+          name,
+          description,
+          thumbnailUrl,
+          contactPhoneNumber,
+          hidePhoneNumber,
+          zeroCartTotal,
+          isAvailable,
+          openingTimeId,
+          closingTimeId,
+        },
+        { payload }: MyContext
       ): Promise<UpdateBeachBarType | ErrorType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
@@ -223,14 +263,15 @@ export const BeachBarCrudMutation = extendType({
 
         try {
           const updatedBeachBar = await beachBar.update(
-            redis,
             name,
             description,
             thumbnailUrl,
+            contactPhoneNumber,
+            hidePhoneNumber,
             zeroCartTotal,
             isAvailable,
             openingTimeId,
-            closingTimeId,
+            closingTimeId
           );
           return {
             beachBar: updatedBeachBar,
@@ -318,7 +359,7 @@ export const BeachBarUpdateStatusMutation = extendType({
           description: "Set to true if the #beach_bar is active",
         }),
       },
-      resolve: async (_, { beachBarId, isActive }, { payload, redis }: MyContext): Promise<UpdateBeachBarType | ErrorType> => {
+      resolve: async (_, { beachBarId, isActive }, { payload }: MyContext): Promise<UpdateBeachBarType | ErrorType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
@@ -341,7 +382,7 @@ export const BeachBarUpdateStatusMutation = extendType({
         }
 
         try {
-          const updatedBeachBar = await beachBar.setIsActive(redis, isActive);
+          const updatedBeachBar = await beachBar.setIsActive(isActive);
 
           return {
             beachBar: updatedBeachBar,

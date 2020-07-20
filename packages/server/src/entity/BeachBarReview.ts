@@ -10,7 +10,7 @@ import {
   ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn
+  UpdateDateColumn,
 } from "typeorm";
 import { softRemove } from "../utils/softRemove";
 import { BeachBar } from "./BeachBar";
@@ -93,7 +93,7 @@ export class BeachBarReview extends BaseEntity {
     visitTypeId?: number,
     monthTimeId?: number,
     niceComment?: string,
-    badComment?: string,
+    badComment?: string
   ): Promise<BeachBarReview | any> {
     try {
       if (ratingValue && ratingValue !== this.ratingValue && ratingValue >= 1 && ratingValue <= 10) {
@@ -120,6 +120,7 @@ export class BeachBarReview extends BaseEntity {
         this.badComment = badComment;
       }
       await this.save();
+      await this.beachBar.updateRedis();
       return this;
     } catch (err) {
       throw new Error(err.message);
@@ -132,11 +133,10 @@ export class BeachBarReview extends BaseEntity {
         this.upvotes = this.upvotes + 1;
         await this.save();
       } else if (downvote) {
-        console.log(downvote);
-        console.log(this.downvotes + 1);
         this.downvotes = this.downvotes + 1;
         await this.save();
       }
+      await this.beachBar.updateRedis();
       return this;
     } catch (err) {
       throw new Error(err.message);
@@ -146,5 +146,6 @@ export class BeachBarReview extends BaseEntity {
   async softRemove(): Promise<any> {
     const findOptions: any = { reviewId: this.id };
     await softRemove(BeachBarReview, { id: this.id }, [ReviewAnswer], findOptions);
+    await this.beachBar.updateRedis();
   }
 }

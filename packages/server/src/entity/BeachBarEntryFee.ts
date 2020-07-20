@@ -45,6 +45,7 @@ export class BeachBarEntryFee extends BaseEntity {
       if (fee && fee > 0) {
         this.fee = fee;
         await this.save();
+        await this.beachBar.updateRedis();
       }
       return this;
     } catch (err) {
@@ -54,5 +55,6 @@ export class BeachBarEntryFee extends BaseEntity {
 
   async softRemove(): Promise<any> {
     await softRemove(BeachBarEntryFee, { id: this.id });
+    await this.beachBar.updateRedis();
   }
 }

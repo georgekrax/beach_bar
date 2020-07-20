@@ -120,6 +120,7 @@ export const BeachBarReviewCrudMutation = extendType({
 
         try {
           await newReview.save();
+          await beachBar.updateRedis();
         } catch (err) {
           return { error: { message: `${errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
         }
@@ -214,7 +215,7 @@ export const BeachBarReviewCrudMutation = extendType({
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid customer's review" } };
         }
 
-        const review = await BeachBarReview.findOne(reviewId);
+        const review = await BeachBarReview.findOne({ where: { id: reviewId }, relations: ["beachBar"] });
         if (!review) {
           return { error: { code: errors.CONFLICT, message: "Specified review does not exist" } };
         }

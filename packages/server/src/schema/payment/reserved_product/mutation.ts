@@ -25,7 +25,14 @@ export const ReserveProductCrudMutation = extendType({
 
         const reservedProduct = await ReservedProduct.findOne({
           where: { id: reservedProductId },
-          relations: ["product", "payment", "payment.cart", "payment.cart.products", "payment.cart.products.product"],
+          relations: [
+            "product",
+            "product.beachBar",
+            "payment",
+            "payment.cart",
+            "payment.cart.products",
+            "payment.cart.products.product",
+          ],
         });
         if (!reservedProduct) {
           return { error: { code: errors.CONFLICT, message: "Specified reserved product does not exist" } };

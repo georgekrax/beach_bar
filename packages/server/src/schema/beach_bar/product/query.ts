@@ -36,7 +36,7 @@ export const ProductCrudQuery = extendType({
               beachBarId,
               isActive,
             },
-            relations: ["beachBar", "category", "category.productComponents", "currency"],
+            relations: ["beachBar", "category", "category.productComponents"],
             withDeleted: isDeleted,
           });
           if (!products) {
@@ -46,12 +46,9 @@ export const ProductCrudQuery = extendType({
         }
         const products = await Product.find({
           where: { beachBarId, isActive: true },
-          relations: ["beachBar", "category", "category.productComponents", "currency"],
+          relations: ["beachBar", "category", "category.productComponents"],
         });
-        if (!products) {
-          return null;
-        }
-        return null;
+        return products;
       },
     });
     t.list.field("getProductAvailabilityHours", {

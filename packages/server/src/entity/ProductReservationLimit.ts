@@ -78,6 +78,7 @@ export class ProductReservationLimit extends BaseEntity {
         this.limitNumber = limit;
       }
       await this.save();
+      await this.product.beachBar.updateRedis();
       return this;
     } catch (err) {
       throw new Error(err.message);
@@ -86,5 +87,6 @@ export class ProductReservationLimit extends BaseEntity {
 
   async softRemove(): Promise<any> {
     await softRemove(ProductReservationLimit, { id: this.id });
+    await this.product.beachBar.updateRedis();
   }
 }

@@ -1,6 +1,6 @@
 import { objectType } from "@nexus/schema";
 import { CityType } from "../../details/cityTypes";
-import { UserContactDetailsType } from "../../details/contactDetails";
+import { UserContactDetailsType } from "../contact_details.ts/types";
 import { CountryType } from "../../details/countryTypes";
 import { UserType } from "../types";
 import { DateScalar } from "@beach_bar/common";

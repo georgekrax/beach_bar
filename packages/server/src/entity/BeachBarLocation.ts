@@ -1,5 +1,5 @@
+import { errors } from "@beach_bar/common";
 import { Dayjs } from "dayjs";
-import { Redis } from "ioredis";
 import {
   BaseEntity,
   Column,
@@ -12,7 +12,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { errors } from "@beach_bar/common";
 import { BeachBar } from "./BeachBar";
 import { City } from "./City";
 import { Country } from "./Country";
@@ -76,14 +75,13 @@ export class BeachBarLocation extends BaseEntity {
   deletedAt?: Dayjs;
 
   async update(
-    redis: Redis,
     address?: string,
     zipCode?: string,
     latitude?: string,
     longitude?: string,
     countryId?: number,
     cityId?: number,
-    regionId?: number,
+    regionId?: number
   ): Promise<BeachBarLocation | any> {
     try {
       if (address && address !== this.address) {
@@ -127,7 +125,7 @@ export class BeachBarLocation extends BaseEntity {
       }
 
       await this.save();
-      await this.beachBar.updateRedis(redis);
+      await this.beachBar.updateRedis();
       return this;
     } catch (err) {
       throw new Error(err.message);

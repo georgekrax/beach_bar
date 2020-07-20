@@ -9,7 +9,7 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
-  UpdateDateColumn
+  UpdateDateColumn,
 } from "typeorm";
 import { softRemove } from "../utils/softRemove";
 import { BeachBar } from "./BeachBar";
@@ -60,6 +60,7 @@ export class BeachBarRestaurant extends BaseEntity {
         this.isActive = isActive;
       }
       await this.save();
+      await this.beachBar.updateRedis();
       return this;
     } catch (err) {
       throw new Error(err.message);
@@ -69,5 +70,6 @@ export class BeachBarRestaurant extends BaseEntity {
   async softRemove(): Promise<any> {
     const findOptions: any = { restaurantId: this.id };
     await softRemove(BeachBarRestaurant, { id: this.id }, [RestaurantFoodItem], findOptions);
+    await this.beachBar.updateRedis();
   }
 }

@@ -77,6 +77,7 @@ export const BeachBarFeatureMutation = extendType({
             if (!beachBarFeature) {
               return { error: { message: errors.SOMETHING_WENT_WRONG } };
             }
+            await beachBar.updateRedis();
             return {
               feature: beachBarFeature,
               added: true,
@@ -106,12 +107,11 @@ export const BeachBarFeatureMutation = extendType({
           description,
         });
         try {
-          console.log(service);
           await service.save();
+          await beachBar.updateRedis();
         } catch (err) {
           return { error: { message: `Something went wrong: ${err.message}` } };
         }
-        console.log(service);
         return {
           feature: service,
           added: true,
@@ -194,6 +194,7 @@ export const BeachBarFeatureMutation = extendType({
             feature.description = description;
           }
           await feature.save();
+          await feature.beachBar.updateRedis();
         } catch (err) {
           return { error: { message: `Something went wrong: ${err.message}` } };
         }

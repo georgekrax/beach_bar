@@ -1,13 +1,13 @@
 import { EmailScalar, errors, MyContext } from "@beach_bar/common";
 import { arg, extendType, intArg, stringArg } from "@nexus/schema";
 import { getConnection } from "typeorm";
-import { Country } from "../../entity/Country";
-import { User } from "../../entity/User";
-import { UserContactDetails } from "../../entity/UserContactDetails";
-import { DeleteType, ErrorType } from "../returnTypes";
-import { DeleteResult } from "../types";
-import { AddUserContactDetailsResult, UpdateUserContactDetailsResult } from "./contactDetails";
+import { Country } from "../../../entity/Country";
+import { User } from "../../../entity/User";
+import { UserContactDetails } from "../../../entity/UserContactDetails";
+import { DeleteType, ErrorType } from "../../returnTypes";
+import { DeleteResult } from "../../types";
 import { AddUserContactDetailsType, UpdateUserContactDetailsType } from "./returnTypes";
+import { AddUserContactDetailsResult, UpdateUserContactDetailsResult } from "./types";
 
 export const UserContactDetailsCrudMutation = extendType({
   type: "Mutation",
@@ -28,7 +28,7 @@ export const UserContactDetailsCrudMutation = extendType({
       resolve: async (
         _,
         { countryId, secondaryEmail, phoneNumber },
-        { payload }: MyContext,
+        { payload }: MyContext
       ): Promise<AddUserContactDetailsType | ErrorType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
@@ -133,7 +133,7 @@ export const UserContactDetailsCrudMutation = extendType({
       resolve: async (
         _,
         { id, secondaryEmail, phoneNumber },
-        { payload }: MyContext,
+        { payload }: MyContext
       ): Promise<UpdateUserContactDetailsType | ErrorType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
