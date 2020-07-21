@@ -21,9 +21,8 @@ import { softRemove } from "../utils/softRemove";
 import { BeachBar } from "./BeachBar";
 import { BundleProductComponent } from "./BundleProductComponent";
 import { CartProduct } from "./CartProduct";
+import { OfferCampaign } from "./OfferCampaign";
 import { ProductCategory } from "./ProductCategory";
-import { ProductCouponCode } from "./ProductCouponCode";
-import { ProductOfferCampaign } from "./ProductOfferCampaign";
 import { ProductPriceHistory } from "./ProductPriceHistory";
 import { ProductReservationLimit } from "./ProductReservationLimit";
 import { ReservedProduct } from "./ReservedProduct";
@@ -81,8 +80,8 @@ export class Product extends BaseEntity {
   @OneToMany(() => ReservedProduct, reservedProduct => reservedProduct.product, { nullable: true })
   reservedProducts?: ReservedProduct[];
 
-  @ManyToMany(() => ProductOfferCampaign, productCouponCode => productCouponCode.products, { nullable: true })
-  offerCampaigns?: ProductOfferCampaign[];
+  @ManyToMany(() => OfferCampaign, offerCampaign => offerCampaign.products, { nullable: true })
+  offerCampaigns?: OfferCampaign[];
 
   @UpdateDateColumn({ name: "updated_at", type: "timestamptz", default: () => `NOW()` })
   updatedAt: Dayjs;
@@ -182,9 +181,10 @@ export class Product extends BaseEntity {
     await softRemove(
       Product,
       { id: this.id, name: this.name, beachBarId: this.beachBarId },
-      [BundleProductComponent, CartProduct, ProductCouponCode, ProductCouponCode, ReservedProduct, ProductReservationLimit],
+      [BundleProductComponent, CartProduct, ReservedProduct, ProductReservationLimit],
       findOptions
     );
+    this.offerCampaigns?.forEach(async campaign => campaign.softRemove());
     await this.beachBar.updateRedis();
   }
 }

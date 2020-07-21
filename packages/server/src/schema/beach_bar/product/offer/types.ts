@@ -1,26 +1,58 @@
 import { BigIntScalar, DateTimeScalar } from "@beach_bar/common";
-import { objectType, unionType } from "@nexus/schema";
+import { interfaceType, objectType, unionType } from "@nexus/schema";
 import { ProductType } from "../types";
 
-export const ProductCouponCodeType = objectType({
-  name: "ProductCouponCode",
-  description: "Represents a coupon code for a product",
+export const CouponCodeInterface = interfaceType({
+  name: "CouponCodeInterface",
+  description: "Represents a coupon code interface for a #beach_bar",
   definition(t) {
     t.field("id", { type: BigIntScalar, nullable: false });
     t.string("title", { nullable: false });
-    t.string("refCode", { nullable: false });
     t.float("discountPercentage", { nullable: false });
     t.boolean("beachBarOffer", { nullable: false });
     t.boolean("isActive", { nullable: false });
     t.field("validUntil", { type: DateTimeScalar, nullable: true });
     t.int("timesLimit", { nullable: false, description: "Represents how many times this coupon code can be used" });
     t.int("timesUsed", { nullable: false, description: "Represents the times this coupon code has been used" });
+    t.resolveType(() => null);
   },
 });
 
-export const ProductOfferCampaignType = objectType({
-  name: "ProductOfferCampaign",
-  description: "Represents an offer campaign for a product",
+export const OfferCampaignCodeInterface = interfaceType({
+  name: "OfferCampaignCodeInterface",
+  description: "Represents an offer code interface for an offer campaign",
+  definition(t) {
+    t.field("id", { type: BigIntScalar, nullable: false });
+    t.float("totalAmount", {
+      nullable: false,
+      description: "The total amount to make a discount from",
+      resolve: o => o.campaign.calculateTotalProductPrice(),
+    });
+    t.int("timesUsed", { nullable: false, description: "Represents how many times this offer code has been used" });
+    t.boolean("isRedeemed", { nullable: false, description: "Indicates if the offer code has been fully redeemed" });
+    t.field("campaign", {
+      type: OfferCampaignType,
+      description: "The campaign the offer code is assigned to",
+      nullable: false,
+      resolve: o => o.campaign,
+    });
+    t.field("timestamp", { type: DateTimeScalar, nullable: false });
+    t.field("deletedAt", { type: DateTimeScalar, nullable: true });
+    t.resolveType(() => null);
+  },
+});
+
+export const CouponCodeType = objectType({
+  name: "CouponCode",
+  description: "Represents a coupon code",
+  definition(t) {
+    t.implements(CouponCodeInterface);
+  },
+});
+
+export const OfferCampaignType = objectType({
+  name: "OfferCampaign",
+  description: "Represents an offer campaign of a #beach_bar",
   definition(t) {
     t.int("id", { nullable: false });
     t.string("title", { nullable: false });
@@ -37,51 +69,36 @@ export const ProductOfferCampaignType = objectType({
   },
 });
 
-export const ProductOfferCodeType = objectType({
-  name: "ProductOfferCode",
+export const OfferCampaignCodeType = objectType({
+  name: "OfferCampaignCode",
   description: "Represents an offer code for a campaign of a product",
   definition(t) {
-    t.field("id", { type: BigIntScalar, nullable: false });
-    t.float("totalAmount", {
-      nullable: false,
-      description: "The total amount to make a discount from",
-      resolve: o => o.campaign.calculateTotalProductPrice(),
-    });
-    t.int("timesUsed", { nullable: false, description: "Represents how many times this offer code has been used" });
-    t.boolean("isRedeemed", { nullable: false, description: "Indicates if the offer code has been fully redeemed" });
-    t.field("campaign", {
-      type: ProductOfferCampaignType,
-      description: "The campaign the offer code is assigned to",
-      nullable: false,
-      resolve: o => o.campaign,
-    });
-    t.field("timestamp", { type: DateTimeScalar, nullable: false });
-    t.field("deletedAt", { type: DateTimeScalar, nullable: true });
+    t.implements(OfferCampaignCodeInterface);
   },
 });
 
 export const ProductOfferQueryResult = unionType({
   name: "ProductOfferQuery",
   definition(t) {
-    t.members("ProductCouponCode", "ProductOfferCode", "Error");
+    t.members("CouponCode", "OfferCampaignCode", "Error");
     t.resolveType(item => {
       if (item.error) {
         return "Error";
       } else if (item.campaign) {
-        return "ProductOfferCode";
+        return "OfferCampaignCode";
       } else {
-        return "ProductCouponCode";
+        return "CouponCode";
       }
     });
   },
 });
 
-export const AddProductCouponCodeType = objectType({
-  name: "AddProductCouponCode",
-  description: "Info to be returned when a coupon code is added",
+export const AddCouponCodeType = objectType({
+  name: "AddCouponCode",
+  description: "Info to be returned when a coupon code is added (issued)",
   definition(t) {
     t.field("couponCode", {
-      type: ProductCouponCodeType,
+      type: CouponCodeType,
       description: "The coupon code that is added",
       nullable: false,
       resolve: o => o.couponCode,
@@ -93,26 +110,26 @@ export const AddProductCouponCodeType = objectType({
   },
 });
 
-export const AddProductCouponCodeResult = unionType({
-  name: "AddProductCouponCodeResult",
+export const AddCouponCodeResult = unionType({
+  name: "AddCouponCodeResult",
   definition(t) {
-    t.members("AddProductCouponCode", "Error");
+    t.members("AddCouponCode", "Error");
     t.resolveType(item => {
       if (item.error) {
         return "Error";
       } else {
-        return "AddProductCouponCode";
+        return "AddCouponCode";
       }
     });
   },
 });
 
-export const UpdateProductCouponCodeType = objectType({
-  name: "UpdateProductCouponCode",
+export const UpdateCouponCodeType = objectType({
+  name: "UpdateCouponCode",
   description: "Info to be returned when a coupon code details are updated",
   definition(t) {
     t.field("couponCode", {
-      type: ProductCouponCodeType,
+      type: CouponCodeType,
       description: "The coupon code that is updated",
       nullable: false,
       resolve: o => o.couponCode,
@@ -125,29 +142,29 @@ export const UpdateProductCouponCodeType = objectType({
 });
 
 // * Add also the DeleteType
-export const UpdateProductCouponCodeResult = unionType({
-  name: "UpdateProductCouponCodeResult",
+export const UpdateCouponCodeResult = unionType({
+  name: "UpdateCouponCodeResult",
   definition(t) {
-    t.members("UpdateProductCouponCode", "Delete", "Error");
+    t.members("UpdateCouponCode", "Delete", "Error");
     t.resolveType(item => {
       if (item.error) {
         return "Error";
       } else if (item.deleted) {
         return "Delete";
       } else {
-        return "UpdateProductCouponCode";
+        return "UpdateCouponCode";
       }
     });
   },
 });
 
-export const AddProductOfferCampaignType = objectType({
-  name: "AddProductOfferCampaign",
+export const AddOfferCampaignType = objectType({
+  name: "AddOfferCampaign",
   description: "Info to be returned when an offer campaign is added to a or some #beach_bar's product(s)",
   definition(t) {
     t.field("offerCampaign", {
-      type: ProductOfferCampaignType,
-      description: "The offer campaign that is added to a or some product(s)",
+      type: OfferCampaignType,
+      description: "The offer campaign that is added",
       nullable: false,
       resolve: o => o.offerCampaign,
     });
@@ -158,26 +175,26 @@ export const AddProductOfferCampaignType = objectType({
   },
 });
 
-export const AddProductOfferCampaignResult = unionType({
-  name: "AddProductOfferCampaignResult",
+export const AddOfferCampaignResult = unionType({
+  name: "AddOfferCampaignResult",
   definition(t) {
-    t.members("AddProductOfferCampaign", "Error");
+    t.members("AddOfferCampaign", "Error");
     t.resolveType(item => {
       if (item.error) {
         return "Error";
       } else {
-        return "AddProductOfferCampaign";
+        return "AddOfferCampaign";
       }
     });
   },
 });
 
-export const UpdateProductOfferCampaignType = objectType({
-  name: "UpdateProductOfferCampaign",
+export const UpdateOfferCampaignType = objectType({
+  name: "UpdateOfferCampaign",
   description: "Info to be returned when an offer campaign details are updated",
   definition(t) {
     t.field("offerCampaign", {
-      type: ProductOfferCampaignType,
+      type: OfferCampaignType,
       description: "The offer campaign that is updated",
       nullable: false,
       resolve: o => o.offerCampaign,
@@ -189,26 +206,26 @@ export const UpdateProductOfferCampaignType = objectType({
   },
 });
 
-export const UpdateProductOfferCampaignResult = unionType({
-  name: "UpdateProductOfferCampaignResult",
+export const UpdateOfferCampaignResult = unionType({
+  name: "UpdateOfferCampaignResult",
   definition(t) {
-    t.members("UpdateProductOfferCampaign", "Error");
+    t.members("UpdateOfferCampaign", "Error");
     t.resolveType(item => {
       if (item.error) {
         return "Error";
       } else {
-        return "UpdateProductOfferCampaign";
+        return "UpdateOfferCampaign";
       }
     });
   },
 });
 
-export const AddProductOfferCodeType = objectType({
-  name: "AddProductOfferCode",
+export const AddOfferCampaignCodeType = objectType({
+  name: "AddOfferCampaignCode",
   description: "Info to be returned when a new offer code, of an offer campaign, is added (issued)",
   definition(t) {
     t.field("offerCode", {
-      type: ProductOfferCodeType,
+      type: OfferCampaignCodeType,
       description: "The offer code that is added (issued)",
       nullable: false,
       resolve: o => o.offerCode,
@@ -220,46 +237,61 @@ export const AddProductOfferCodeType = objectType({
   },
 });
 
-export const AddProductOfferCodeResult = unionType({
-  name: "AddProductOfferCodeResult",
+export const AddOfferCampaignCodeResult = unionType({
+  name: "AddOfferCampaignCodeResult",
   definition(t) {
-    t.members("AddProductOfferCode", "Error");
+    t.members("AddOfferCampaignCode", "Error");
     t.resolveType(item => {
       if (item.error) {
         return "Error";
       } else {
-        return "AddProductOfferCode";
+        return "AddOfferCampaignCode";
       }
     });
   },
 });
 
-export const UpdateProductOfferCodeType = objectType({
-  name: "UpdateProductOfferCode",
-  description: "Info to be returned when an offer code, of an offer campaign, is updated",
+export const CouponCodeRevealType = objectType({
+  name: "CouponCodeReveal",
+  description: "Represents a coupon code, with its referral code revealed",
   definition(t) {
-    t.field("offerCampaign", {
-      type: ProductOfferCodeType,
-      description: "The offer code that is updated",
-      nullable: false,
-      resolve: o => o.offerCampaign,
-    });
-    t.boolean("updated", {
-      nullable: false,
-      description: "Indicates if the offer code has been successfully updated",
-    });
+    t.implements(CouponCodeInterface);
+    t.string("refCode", { nullable: false, description: "The referral code of the coupon code, to use and get a discount" });
   },
 });
 
-export const UpdateProductOfferCodeResult = unionType({
-  name: "UpdateProductOfferCodeResult",
+export const CouponCodeRevealResult = unionType({
+  name: "CouponCodeRevealResult",
   definition(t) {
-    t.members("UpdateProductOfferCode", "Error");
+    t.members("CouponCodeReveal", "Error");
     t.resolveType(item => {
       if (item.error) {
         return "Error";
       } else {
-        return "UpdateProductOfferCode";
+        return "CouponCodeReveal";
+      }
+    });
+  },
+});
+
+export const OfferCampaignCodeRevealType = objectType({
+  name: "OfferCampaignCodeReveal",
+  description: "Represents an offer campaign code, with its referral code revealed",
+  definition(t) {
+    t.implements(OfferCampaignCodeInterface);
+    t.string("refCode", { nullable: false, description: "The referral code of the offer campaign code, to use and get a discount" });
+  },
+});
+
+export const OfferCampaignCodeRevealResult = unionType({
+  name: "OfferCampaignCodeRevealResult",
+  definition(t) {
+    t.members("OfferCampaignCodeReveal", "Error");
+    t.resolveType(item => {
+      if (item.error) {
+        return "Error";
+      } else {
+        return "OfferCampaignCodeReveal";
       }
     });
   },

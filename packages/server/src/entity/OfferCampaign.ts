@@ -3,6 +3,7 @@ import {
   BaseEntity,
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   In,
   JoinTable,
@@ -10,14 +11,13 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-  DeleteDateColumn,
 } from "typeorm";
 import { softRemove } from "../utils/softRemove";
 import { Product } from "./Product";
-import { ProductOfferCode } from "./ProductOfferCode";
+import { OfferCampaignCode } from "./OfferCampaignCode";
 
-@Entity({ name: "product_offer_campaign", schema: "public" })
-export class ProductOfferCampaign extends BaseEntity {
+@Entity({ name: "offer_campaign", schema: "public" })
+export class OfferCampaign extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -50,8 +50,8 @@ export class ProductOfferCampaign extends BaseEntity {
   })
   products: Product[];
 
-  @OneToMany(() => ProductOfferCode, productOfferCode => productOfferCode.campaign, { nullable: true })
-  offerCodes?: ProductOfferCode[];
+  @OneToMany(() => OfferCampaignCode, offerCampaignCode => offerCampaignCode.campaign, { nullable: true })
+  offerCodes?: OfferCampaignCode[];
 
   @UpdateDateColumn({ name: "updated_at", type: "timestamptz", default: () => `NOW()` })
   updatedAt: Dayjs;
@@ -69,7 +69,7 @@ export class ProductOfferCampaign extends BaseEntity {
     beachBarOffer?: boolean,
     validUntil?: Dayjs,
     isActive?: boolean
-  ): Promise<ProductOfferCampaign | any> {
+  ): Promise<OfferCampaign | any> {
     try {
       if (productIds && productIds.length >= 1) {
         const products = await Product.find({ where: { id: In(productIds) } });
@@ -110,6 +110,6 @@ export class ProductOfferCampaign extends BaseEntity {
   }
 
   async softRemove(): Promise<any> {
-    await softRemove(ProductOfferCampaign, { id: this.id }, [ProductOfferCode], { campaignId: this.id });
+    await softRemove(OfferCampaign, { id: this.id }, [OfferCampaignCode], { campaignId: this.id });
   }
 }

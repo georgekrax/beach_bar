@@ -12,10 +12,10 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { softRemove } from "../utils/softRemove";
-import { ProductOfferCampaign } from "./ProductOfferCampaign";
+import { OfferCampaign } from "./OfferCampaign";
 
-@Entity({ name: "product_offer_code", schema: "public" })
-export class ProductOfferCode extends BaseEntity {
+@Entity({ name: "offer_campaign_code", schema: "public" })
+export class OfferCampaignCode extends BaseEntity {
   @PrimaryGeneratedColumn({ type: "bigint" })
   id: bigint;
 
@@ -31,9 +31,9 @@ export class ProductOfferCode extends BaseEntity {
   @Column({ type: "smallint", name: "is_redeemed", default: () => false })
   isRedeemed: boolean;
 
-  @ManyToOne(() => ProductOfferCampaign, productOfferCampaign => productOfferCampaign.offerCodes, { nullable: false })
+  @ManyToOne(() => OfferCampaign, offerCampaign => offerCampaign.offerCodes, { nullable: false })
   @JoinColumn({ name: "campaign_id" })
-  campaign: ProductOfferCampaign;
+  campaign: OfferCampaign;
 
   @CreateDateColumn({ name: "timestamp", type: "timestamptz", default: () => `NOW()` })
   timestamp: Dayjs;
@@ -47,6 +47,6 @@ export class ProductOfferCode extends BaseEntity {
   }
 
   async softRemove(): Promise<any> {
-    await softRemove(ProductOfferCode, { id: this.id });
+    await softRemove(OfferCampaignCode, { id: this.id });
   }
 }

@@ -12,8 +12,8 @@ import {
 } from "typeorm";
 import { softRemove } from "../utils/softRemove";
 
-@Entity({ name: "product_coupon_code", schema: "public" })
-export class ProductCouponCode extends BaseEntity {
+@Entity({ name: "coupon_code", schema: "public" })
+export class CouponCode extends BaseEntity {
   @PrimaryGeneratedColumn({ type: "bigint" })
   id: bigint;
 
@@ -62,7 +62,7 @@ export class ProductCouponCode extends BaseEntity {
     validUntil?: Dayjs,
     isActive?: boolean,
     timesLimit?: number
-  ): Promise<ProductCouponCode[] | { deleted: true } | any> {
+  ): Promise<CouponCode[] | { deleted: true } | any> {
     try {
       if (title && title !== this.title) {
         this.title = title;
@@ -94,6 +94,6 @@ export class ProductCouponCode extends BaseEntity {
   }
 
   async softRemove(): Promise<any> {
-    await softRemove(ProductCouponCode, { id: this.id });
+    await softRemove(CouponCode, { id: this.id });
   }
 }

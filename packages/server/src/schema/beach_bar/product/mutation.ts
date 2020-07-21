@@ -305,7 +305,7 @@ export const ProductCrudMutation = extendType({
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid product" } };
         }
 
-        const product = await Product.findOne({ where: { id: productId }, relations: ["beachBar"] });
+        const product = await Product.findOne({ where: { id: productId }, relations: ["beachBar", "offerCampaigns"] });
         if (!product) {
           return { error: { code: errors.CONFLICT, message: "Specified product does not exist" } };
         }
