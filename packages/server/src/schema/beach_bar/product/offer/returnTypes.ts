@@ -1,7 +1,7 @@
 import { ProductCouponCode } from "../../../../entity/ProductCouponCode";
-import { ProductVoucherCampaign } from "../../../../entity/ProductVoucherCampaign";
+import { ProductOfferCampaign } from "../../../../entity/ProductOfferCampaign";
+import { ProductOfferCode } from "../../../../entity/ProductOfferCode";
 import { AddType, UpdateType } from "../../../returnTypes";
-import { ProductVoucherCode } from "../../../../entity/ProductVoucherCode";
 
 type ProductCouponCodeType = {
   couponCode: ProductCouponCode;
@@ -11,18 +11,20 @@ export type AddProductCouponCodeType = AddType & ProductCouponCodeType;
 
 export type UpdateProductCouponCodeType = UpdateType & ProductCouponCodeType;
 
-type ProductVoucherCampaignType = {
-  voucherCampaign: ProductVoucherCampaign;
+type ProductOfferCampaignType = {
+  offerCampaign: ProductOfferCampaign;
 };
 
-export type AddProductVoucherCampaignType = AddType & ProductVoucherCampaignType;
+export type AddProductOfferCampaignType = AddType & ProductOfferCampaignType;
 
-export type UpdateProductVoucherCampaignType = UpdateType & ProductVoucherCampaignType;
+export type UpdateProductOfferCampaignType = UpdateType & ProductOfferCampaignType;
 
-type ProductVoucherCodeType = {
-  voucherCode: ProductVoucherCode;
+type ProductOfferCodeType = {
+  offerCode: ProductOfferCode;
 };
 
-export type AddProductVoucherCodeType = AddType & ProductVoucherCodeType;
+export type AddProductOfferCodeType = AddType & ProductOfferCodeType;
 
-export type UpdateProductVoucherCodeType = UpdateType & ProductVoucherCodeType;
+export type UpdateProductOfferCodeType = UpdateType & ProductOfferCodeType;
+
+export type ProductOfferType = ProductCouponCode | ProductOfferCode;

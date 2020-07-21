@@ -27,7 +27,7 @@ export const UserSearchType = objectType({
       resolve: o => o.inputValue,
     });
     t.list.field("filters", {
-      type: SearchFilter,
+      type: SearchFilterType,
       description: "A list with the filters being added to the user's search",
       nullable: true,
       resolve: o => o.filters,
@@ -138,7 +138,7 @@ export const SearchInputValueType = objectType({
   },
 });
 
-export const SearchFilter = objectType({
+export const SearchFilterType = objectType({
   name: "SearchFilter",
   description: "Represents a filter used by users when searching for (availability at) #beach_bars",
   definition(t) {

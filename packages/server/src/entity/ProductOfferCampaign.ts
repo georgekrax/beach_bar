@@ -10,13 +10,14 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  DeleteDateColumn,
 } from "typeorm";
 import { softRemove } from "../utils/softRemove";
 import { Product } from "./Product";
-import { ProductVoucherCode } from "./ProductVoucherCode";
+import { ProductOfferCode } from "./ProductOfferCode";
 
-@Entity({ name: "product_voucher_campaign", schema: "public" })
-export class ProductVoucherCampaign extends BaseEntity {
+@Entity({ name: "product_offer_campaign", schema: "public" })
+export class ProductOfferCampaign extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -35,11 +36,11 @@ export class ProductVoucherCampaign extends BaseEntity {
   @Column({ type: "timestamptz", name: "valid_until", nullable: true })
   validUntil: Dayjs;
 
-  @ManyToMany(() => Product, product => product.voucherCampaigns, { nullable: false })
+  @ManyToMany(() => Product, product => product.offerCampaigns, { nullable: false })
   @JoinTable({
-    name: "voucher_campaign_offer_product",
+    name: "offer_campaign_product",
     joinColumn: {
-      name: "voucher_campaign_id",
+      name: "campaign_id",
       referencedColumnName: "id",
     },
     inverseJoinColumn: {
@@ -49,8 +50,8 @@ export class ProductVoucherCampaign extends BaseEntity {
   })
   products: Product[];
 
-  @OneToMany(() => ProductVoucherCode, productVoucherCode => productVoucherCode.campaign, { nullable: true })
-  voucherCodes?: ProductVoucherCode[];
+  @OneToMany(() => ProductOfferCode, productOfferCode => productOfferCode.campaign, { nullable: true })
+  offerCodes?: ProductOfferCode[];
 
   @UpdateDateColumn({ name: "updated_at", type: "timestamptz", default: () => `NOW()` })
   updatedAt: Dayjs;
@@ -58,7 +59,7 @@ export class ProductVoucherCampaign extends BaseEntity {
   @CreateDateColumn({ name: "timestamp", type: "timestamptz", default: () => `NOW()` })
   timestamp: Dayjs;
 
-  @Column({ type: "timestamptz", name: "deleted_at", nullable: true })
+  @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Dayjs;
 
   async update(
@@ -67,13 +68,13 @@ export class ProductVoucherCampaign extends BaseEntity {
     discountPercentage?: number,
     beachBarOffer?: boolean,
     validUntil?: Dayjs,
-    isActive?: boolean,
-  ): Promise<ProductVoucherCampaign | any> {
+    isActive?: boolean
+  ): Promise<ProductOfferCampaign | any> {
     try {
       if (productIds && productIds.length >= 1) {
         const products = await Product.find({ where: { id: In(productIds) } });
         if (products.some(product => !product.isActive)) {
-          throw new Error("All the products should be active, in order to be applied for a voucher campaign");
+          throw new Error("All the products should be active, in order to be applied for an offer campaign");
         }
         this.products = products;
       }
@@ -109,7 +110,6 @@ export class ProductVoucherCampaign extends BaseEntity {
   }
 
   async softRemove(): Promise<any> {
-    const findOptions: any = { campaignId: this.id };
-    await softRemove(ProductVoucherCampaign, { id: this.id }, [ProductVoucherCode], findOptions);
+    await softRemove(ProductOfferCampaign, { id: this.id }, [ProductOfferCode], { campaignId: this.id });
   }
 }

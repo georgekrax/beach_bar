@@ -1,4 +1,5 @@
-import { BaseEntity, Column, Entity, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
+import { SearchFilterCategory } from "./SearchFilterCategory";
 import { UserSearch } from "./UserSearch";
 
 @Entity({ name: "search_filter", schema: "public" })
@@ -14,6 +15,20 @@ export class SearchFilter extends BaseEntity {
 
   @Column({ type: "text", name: "description", nullable: true })
   description?: string;
+
+  @ManyToMany(() => SearchFilterCategory, searchFilterCategory => searchFilterCategory.filters, { nullable: false })
+  @JoinTable({
+    name: "search_filter_section",
+    joinColumn: {
+      name: "filter_id",
+      referencedColumnName: "id",
+    },
+    inverseJoinColumn: {
+      name: "category_id",
+      referencedColumnName: "id",
+    },
+  })
+  categories: SearchFilterCategory[];
 
   @ManyToMany(() => UserSearch, userSearch => userSearch.filters, { nullable: true })
   userSearches?: UserSearch[];

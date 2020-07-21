@@ -1,5 +1,15 @@
 import { Dayjs } from "dayjs";
-import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn, UpdateDateColumn } from "typeorm";
+import {
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+  UpdateDateColumn,
+} from "typeorm";
 import { softRemove } from "../utils/softRemove";
 import { BeachBar } from "./BeachBar";
 import { BeachBarService } from "./BeachBarService";
@@ -32,7 +42,7 @@ export class BeachBarFeature extends BaseEntity {
   @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
   timestamp: Dayjs;
 
-  @Column({ type: "timestamptz", name: "deleted_at", nullable: true })
+  @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Dayjs;
 
   async customSoftRemove(featureId: number): Promise<any> {

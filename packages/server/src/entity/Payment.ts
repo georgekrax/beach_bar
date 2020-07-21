@@ -1,3 +1,4 @@
+import { errors } from "@beach_bar/common";
 import dayjs, { Dayjs } from "dayjs";
 import minMax from "dayjs/plugin/minMax";
 import {
@@ -13,7 +14,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { payment } from "../constants/status";
+import { payment, payment as paymentStatus } from "../constants/status";
 import { softRemove } from "../utils/softRemove";
 import { BeachBarReview } from "./BeachBarReview";
 import { Card } from "./Card";
@@ -22,7 +23,6 @@ import { PaymentStatus } from "./PaymentStatus";
 import { Product } from "./Product";
 import { RefundPercentage } from "./RefundPercentage";
 import { ReservedProduct } from "./ReservedProduct";
-import { errors } from "@beach_bar/common";
 
 interface GetRefundPercentage {
   refundPercentage: RefundPercentage;
@@ -158,12 +158,16 @@ export class Payment extends BaseEntity {
       return undefined;
     }
     const beachBarProducts = this.cart.products.map(product => product.product).filter(product => product.beachBarId === beachBarId);
-    console.log(beachBarProducts);
     return beachBarProducts;
   }
 
   async softRemove(): Promise<any> {
     await this.cart.customSoftRemove(false);
+    const refundedStatus = await PaymentStatus.findOne({ status: paymentStatus.REFUNDED });
+    if (refundedStatus) {
+      this.status = refundedStatus;
+      await this.save();
+    }
     const findOptions: any = { paymentId: this.id };
     await softRemove(Payment, { id: this.id }, [ReservedProduct], findOptions);
   }

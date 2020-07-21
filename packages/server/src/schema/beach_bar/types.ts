@@ -2,6 +2,7 @@ import { DateTimeScalar, UrlScalar } from "@beach_bar/common";
 import { objectType, unionType } from "@nexus/schema";
 import { CurrencyType } from "../details/countryTypes";
 import { QuarterTimeType } from "../details/time/types";
+import { BeachBarCategoryType } from "../details/types";
 import { BeachBarOwnerType } from "../owner/types";
 import { BeachBarLocationType } from "./location/types";
 import { BeachBarRestaurantType } from "./restaurant/types";
@@ -25,11 +26,6 @@ export const BeachBarType = objectType({
       nullable: false,
       description: "A boolean that indicates if to NOT display the #beach_bar contact phone number",
     });
-    t.field("updatedAt", {
-      type: DateTimeScalar,
-      nullable: false,
-      description: "The last time the #beach_bar was updated, in the format of a timestamp",
-    });
     t.boolean("isActive", {
       nullable: false,
       description: "A boolean that indicates if the #beach_bar is active or not",
@@ -38,22 +34,17 @@ export const BeachBarType = objectType({
       nullable: false,
       description: "A boolean that indicates if the #beach_bar is shown in the search results, even if it has no availability",
     });
-    t.field("timestamp", {
-      type: DateTimeScalar,
-      nullable: false,
-      description: "The timestamp recorded, when the #beach_bar was created",
-    });
     t.field("location", {
       type: BeachBarLocationType,
       description: "The location of the #beach_bar",
       nullable: false,
       resolve: o => o.location,
     });
-    t.list.field("owners", {
-      type: BeachBarOwnerType,
-      description: "A list of all the owners of the #beach_bar",
+    t.field("category", {
+      type: BeachBarCategoryType,
+      description: "The category (type) of the #beach_bar",
       nullable: false,
-      resolve: o => o.owners,
+      resolve: o => o.category,
     });
     t.list.field("reviews", {
       type: BeachBarReviewType,
@@ -79,6 +70,12 @@ export const BeachBarType = objectType({
       nullable: false,
       resolve: o => o.defaultCurrency,
     });
+    t.list.field("owners", {
+      type: BeachBarOwnerType,
+      description: "A list of all the owners of the #beach_bar",
+      nullable: false,
+      resolve: o => o.owners,
+    });
     t.field("openingTime", {
       type: QuarterTimeType,
       description: "The opening quarter time of the #beach_bar, in the time zone of its country",
@@ -90,6 +87,16 @@ export const BeachBarType = objectType({
       description: "The closing quarter time of the #beach_bar, in the time zone of its country",
       nullable: false,
       resolve: o => o.closingTime,
+    });
+    t.field("updatedAt", {
+      type: DateTimeScalar,
+      nullable: false,
+      description: "The last time the #beach_bar was updated, in the format of a timestamp",
+    });
+    t.field("timestamp", {
+      type: DateTimeScalar,
+      nullable: false,
+      description: "The timestamp recorded, when the #beach_bar was created",
     });
   },
 });

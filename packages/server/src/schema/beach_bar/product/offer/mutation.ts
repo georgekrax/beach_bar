@@ -4,24 +4,24 @@ import dayjs from "dayjs";
 import { In } from "typeorm";
 import { Product } from "../../../../entity/Product";
 import { ProductCouponCode } from "../../../../entity/ProductCouponCode";
-import { ProductVoucherCampaign } from "../../../../entity/ProductVoucherCampaign";
-import { ProductVoucherCode } from "../../../../entity/ProductVoucherCode";
+import { ProductOfferCampaign } from "../../../../entity/ProductOfferCampaign";
+import { ProductOfferCode } from "../../../../entity/ProductOfferCode";
 import { checkScopes } from "../../../../utils/checkScopes";
 import { DeleteType, ErrorType } from "../../../returnTypes";
 import { DeleteResult } from "../../../types";
 import {
   AddProductCouponCodeType,
-  AddProductVoucherCampaignType,
-  AddProductVoucherCodeType,
+  AddProductOfferCampaignType,
+  AddProductOfferCodeType,
   UpdateProductCouponCodeType,
-  UpdateProductVoucherCampaignType,
+  UpdateProductOfferCampaignType,
 } from "./returnTypes";
 import {
   AddProductCouponCodeResult,
-  AddProductVoucherCampaignResult,
-  AddProductVoucherCodeResult,
+  AddProductOfferCampaignResult,
+  AddProductOfferCodeResult,
   UpdateProductCouponCodeResult,
-  UpdateProductVoucherCampaignResult,
+  UpdateProductOfferCampaignResult,
 } from "./types";
 
 export const ProductCouponCodeCrudMutation = extendType({
@@ -29,14 +29,9 @@ export const ProductCouponCodeCrudMutation = extendType({
   definition(t) {
     t.field("addProductCouponCode", {
       type: AddProductCouponCodeResult,
-      description: "Add a coupon code to a #beach_bar product",
+      description: "Add a coupon code",
       nullable: false,
       args: {
-        productIds: intArg({
-          required: true,
-          description: "The ID value of the product",
-          list: true,
-        }),
         title: stringArg({
           required: true,
           description: "The name or a short description of the coupon code",
@@ -59,11 +54,15 @@ export const ProductCouponCodeCrudMutation = extendType({
           description: "Set to true if coupon code is active. Its default value is set to false",
           default: false,
         }),
+        timesLimit: intArg({
+          required: true,
+          description: "Represents how many times this coupon code can be used",
+        }),
       },
       resolve: async (
         _,
-        { productIds, title, discountPercentage, beachBarOffer, validUntil, isActive },
-        { payload }: MyContext,
+        { title, discountPercentage, beachBarOffer, validUntil, isActive, timesLimit },
+        { payload }: MyContext
       ): Promise<AddProductCouponCodeType | ErrorType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
@@ -72,21 +71,13 @@ export const ProductCouponCodeCrudMutation = extendType({
           return {
             error: {
               code: errors.UNAUTHORIZED_CODE,
-              message: "You are not allowed to add a coupon code to a #beach_bar's product",
+              message: "You are not allowed to add (issue) a coupon code",
             },
           };
         }
 
-        if (!productIds || productIds.length === 0 || productIds.some(id => id === undefined || id === null)) {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a or some valid product(s)" } };
-        }
         if (!discountPercentage || discountPercentage <= 0 || discountPercentage > 100) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a or some discount percentage" } };
-        }
-
-        const products = await Product.find({ where: { id: In(productIds) } });
-        if (products.some(product => !product.isActive)) {
-          return { error: { message: "All the products should be active, in order to be applied for a coupon code" } };
         }
 
         const newCouponCode = ProductCouponCode.create({
@@ -95,7 +86,7 @@ export const ProductCouponCodeCrudMutation = extendType({
           beachBarOffer,
           isActive,
           validUntil,
-          products,
+          timesLimit,
         });
 
         try {
@@ -112,18 +103,13 @@ export const ProductCouponCodeCrudMutation = extendType({
     });
     t.field("updateProductCouponCode", {
       type: UpdateProductCouponCodeResult,
-      description: "Update a coupon code of a #beach_bar product",
+      description: "Update a coupon code",
       nullable: false,
       args: {
         couponCodeId: arg({
           type: BigIntScalar,
           required: true,
           description: "The ID value of the product coupon code",
-        }),
-        productIds: intArg({
-          required: false,
-          description: "The ID value of the product",
-          list: true,
         }),
         title: stringArg({
           required: false,
@@ -146,12 +132,16 @@ export const ProductCouponCodeCrudMutation = extendType({
           required: false,
           description: "Set to true if coupon code is active. Its default value is set to false",
         }),
+        timesLimit: intArg({
+          required: false,
+          description: "Represents how many times this coupon code can be used",
+        }),
       },
       resolve: async (
         _,
-        { couponCodeId, productIds, title, discountPercentage, beachBarOffer, validUntil, isActive },
-        { payload }: MyContext,
-      ): Promise<UpdateProductCouponCodeType | ErrorType> => {
+        { couponCodeId, title, discountPercentage, beachBarOffer, validUntil, isActive, timesLimit },
+        { payload }: MyContext
+      ): Promise<UpdateProductCouponCodeType | DeleteType | ErrorType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
@@ -159,7 +149,7 @@ export const ProductCouponCodeCrudMutation = extendType({
           return {
             error: {
               code: errors.UNAUTHORIZED_CODE,
-              message: "You are not allowed to update a coupon code of a #beach_bar's product",
+              message: "You are not allowed to update a coupon code",
             },
           };
         }
@@ -171,20 +161,25 @@ export const ProductCouponCodeCrudMutation = extendType({
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a or some discount percentage" } };
         }
 
-        const couponCode = await ProductCouponCode.findOne({ where: { id: couponCodeId }, relations: ["products"] });
+        const couponCode = await ProductCouponCode.findOne(couponCodeId);
         if (!couponCode) {
           return { error: { code: errors.CONFLICT, message: "Specified coupon code does not exist" } };
         }
 
         try {
           const updatedCouponCode = await couponCode.update(
-            productIds,
             title,
             discountPercentage,
             beachBarOffer,
             validUntil,
             isActive,
+            timesLimit
           );
+          if (updatedCouponCode.deleted) {
+            return {
+              deleted: true,
+            };
+          }
 
           return {
             couponCode: updatedCouponCode,
@@ -197,8 +192,6 @@ export const ProductCouponCodeCrudMutation = extendType({
     });
     t.field("deleteProductCouponCode", {
       type: DeleteResult,
-      description: "Delete a coupon code of a product",
-      nullable: false,
       args: {
         couponCodeId: arg({
           type: BigIntScalar,
@@ -214,7 +207,7 @@ export const ProductCouponCodeCrudMutation = extendType({
           return {
             error: {
               code: errors.UNAUTHORIZED_CODE,
-              message: "You are not allowed to delete a coupon code of a product",
+              message: "You are not allowed to delete (invalidate) a coupon code",
             },
           };
         }
@@ -242,12 +235,12 @@ export const ProductCouponCodeCrudMutation = extendType({
   },
 });
 
-export const ProductVoucherCampaignCrudMutation = extendType({
+export const ProductOfferCampaignCrudMutation = extendType({
   type: "Mutation",
   definition(t) {
-    t.field("addProductVoucherCampaign", {
-      type: AddProductVoucherCampaignResult,
-      description: "Add a voucher campaign to a #beach_bar's product",
+    t.field("addProductOfferCampaign", {
+      type: AddProductOfferCampaignResult,
+      description: "Add an offer campaign to a #beach_bar",
       nullable: false,
       args: {
         productIds: intArg({
@@ -281,16 +274,16 @@ export const ProductVoucherCampaignCrudMutation = extendType({
       resolve: async (
         _,
         { productIds, title, discountPercentage, beachBarOffer, validUntil, isActive },
-        { payload }: MyContext,
-      ): Promise<AddProductVoucherCampaignType | ErrorType> => {
+        { payload }: MyContext
+      ): Promise<AddProductOfferCampaignType | ErrorType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
-        if (!checkScopes(payload, ["beach_bar@crud:product_voucher_campaign"])) {
+        if (!checkScopes(payload, ["beach_bar@crud:product_offer_campaign"])) {
           return {
             error: {
               code: errors.UNAUTHORIZED_CODE,
-              message: "You are not allowed to add a voucher campaign to a #beach_bar's product",
+              message: "You are not allowed to add an offer campaign to a #beach_bar",
             },
           };
         }
@@ -304,10 +297,10 @@ export const ProductVoucherCampaignCrudMutation = extendType({
 
         const products = await Product.find({ where: { id: In(productIds) } });
         if (products.some(product => !product.isActive)) {
-          return { error: { message: "All the products should be active, in order to be applied for a voucher campaign" } };
+          return { error: { message: "All the products should be active, in order to be applied for an offer campaign" } };
         }
 
-        const newVoucherCampaign = ProductVoucherCampaign.create({
+        const newOfferCampaign = ProductOfferCampaign.create({
           title,
           discountPercentage,
           beachBarOffer,
@@ -317,26 +310,26 @@ export const ProductVoucherCampaignCrudMutation = extendType({
         });
 
         try {
-          await newVoucherCampaign.save();
+          await newOfferCampaign.save();
         } catch (err) {
           return { error: { message: `${errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
         }
 
         return {
-          voucherCampaign: newVoucherCampaign,
+          offerCampaign: newOfferCampaign,
           added: true,
         };
       },
     });
-    t.field("updateProductVoucherCampaign", {
-      type: UpdateProductVoucherCampaignResult,
-      description: "Update a voucher campaign of a #beach_bar's product",
+    t.field("updateProductOfferCampaign", {
+      type: UpdateProductOfferCampaignResult,
+      description: "Update the details of an offer campaign of a #beach_bar",
       nullable: false,
       args: {
-        voucherCampaignId: arg({
+        offerCampaignId: arg({
           type: BigIntScalar,
           required: true,
-          description: "The ID value of the product voucher campaign",
+          description: "The ID value of the offer campaign",
         }),
         productIds: intArg({
           required: false,
@@ -367,45 +360,52 @@ export const ProductVoucherCampaignCrudMutation = extendType({
       },
       resolve: async (
         _,
-        { voucherCampaignId, productIds, title, discountPercentage, beachBarOffer, validUntil, isActive },
-        { payload }: MyContext,
-      ): Promise<UpdateProductVoucherCampaignType | ErrorType> => {
+        { offerCampaignId, productIds, title, discountPercentage, beachBarOffer, validUntil, isActive },
+        { payload }: MyContext
+      ): Promise<UpdateProductOfferCampaignType | ErrorType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
-        if (!checkScopes(payload, ["beach_bar@crud:product_voucher_campaign", "beach_bar@update:product_voucher_campaign"])) {
+        if (!checkScopes(payload, ["beach_bar@crud:product_offer_campaign", "beach_bar@update:product_offer_campaign"])) {
           return {
             error: {
               code: errors.UNAUTHORIZED_CODE,
-              message: "You are not allowed to update a voucher campaign of a #beach_bar's product",
+              message: "You are not allowed to update an offer campaign of a #beach_bar",
             },
           };
         }
 
-        if (!voucherCampaignId || voucherCampaignId <= 0) {
+        if (!offerCampaignId || offerCampaignId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: errors.SOMETHING_WENT_WRONG } };
         }
         if (!discountPercentage || discountPercentage <= 0 || discountPercentage > 100) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a or some discount percentage" } };
         }
 
-        const voucherCampaign = await ProductVoucherCampaign.findOne({ where: { id: voucherCampaignId }, relations: ["products"] });
-        if (!voucherCampaign) {
-          return { error: { code: errors.CONFLICT, message: "Specified voucher campaign does not exist" } };
+        const offerCampaign = await ProductOfferCampaign.findOne({ where: { id: offerCampaignId }, relations: ["products"] });
+        if (!offerCampaign) {
+          return { error: { code: errors.CONFLICT, message: "Specified offer campaign does not exist" } };
+        }
+        if (!offerCampaign.validUntil || validUntil < dayjs(offerCampaign.validUntil)) {
+          return {
+            error: {
+              message: "You should delete the offer campaign, if you want it to be valid before the datetime you had initially set",
+            },
+          };
         }
 
         try {
-          const updatedVoucherCampaign = await voucherCampaign.update(
+          const updatedOfferCampaign = await offerCampaign.update(
             productIds,
             title,
             discountPercentage,
             beachBarOffer,
             validUntil,
-            isActive,
+            isActive
           );
 
           return {
-            voucherCampaign: updatedVoucherCampaign,
+            offerCampaign: updatedOfferCampaign,
             updated: true,
           };
         } catch (err) {
@@ -413,41 +413,41 @@ export const ProductVoucherCampaignCrudMutation = extendType({
         }
       },
     });
-    t.field("deleteProductVoucherCampaign", {
+    t.field("deleteProductOfferCampaign", {
       type: DeleteResult,
-      description: "Delete a voucher campaign from a #beach_bar product",
+      description: "Delete an offer campaign of a #beach_bar",
       nullable: false,
       args: {
-        voucherCampaignId: arg({
+        offerCampaignId: arg({
           type: BigIntScalar,
           required: true,
-          description: "The ID value of the product voucher campaign",
+          description: "The ID value of the offer campaign",
         }),
       },
-      resolve: async (_, { voucherCampaignId }, { payload }: MyContext): Promise<DeleteType | ErrorType> => {
+      resolve: async (_, { offerCampaignId }, { payload }: MyContext): Promise<DeleteType | ErrorType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
-        if (!checkScopes(payload, ["beach_bar@crud:product_voucher_campaign"])) {
+        if (!checkScopes(payload, ["beach_bar@crud:product_offer_campaign"])) {
           return {
             error: {
               code: errors.UNAUTHORIZED_CODE,
-              message: "You are not allowed to delete a voucher campaign of a product",
+              message: "You are not allowed to delete an offer campaign of a #beach_bar",
             },
           };
         }
 
-        if (!voucherCampaignId || voucherCampaignId <= 0) {
+        if (!offerCampaignId || offerCampaignId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: errors.SOMETHING_WENT_WRONG } };
         }
 
-        const voucherCampaign = await ProductVoucherCampaign.findOne(voucherCampaignId);
-        if (!voucherCampaign) {
-          return { error: { code: errors.CONFLICT, message: "Specified voucher campaign does not exist" } };
+        const offerCampaign = await ProductOfferCampaign.findOne(offerCampaignId);
+        if (!offerCampaign) {
+          return { error: { code: errors.CONFLICT, message: "Specified offer campaign does not exist" } };
         }
 
         try {
-          await voucherCampaign.softRemove();
+          await offerCampaign.softRemove();
         } catch (err) {
           return { error: { message: `${errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
         }
@@ -460,90 +460,90 @@ export const ProductVoucherCampaignCrudMutation = extendType({
   },
 });
 
-export const ProductVoucherCodeCrudMutation = extendType({
+export const ProductOfferCodeCrudMutation = extendType({
   type: "Mutation",
   definition(t) {
-    t.field("addProductVoucherCode", {
-      type: AddProductVoucherCodeResult,
-      description: "Add (issue) a new voucher code",
+    t.field("addProductOfferCode", {
+      type: AddProductOfferCodeResult,
+      description: "Add (issue) a new offer code",
       nullable: false,
       args: {
-        voucherCampaignId: arg({
+        offerCampaignId: arg({
           type: BigIntScalar,
           required: true,
-          description: "The ID value of the product voucher campaign",
+          description: "The ID value of the offer campaign",
         }),
       },
-      resolve: async (_, { voucherCampaignId }, { payload }: MyContext): Promise<AddProductVoucherCodeType | ErrorType> => {
+      resolve: async (_, { offerCampaignId }, { payload }: MyContext): Promise<AddProductOfferCodeType | ErrorType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
-        if (!checkScopes(payload, ["beach_bar@crud:product_voucher_campaign"])) {
+        if (!checkScopes(payload, ["beach_bar@crud:product_offer_campaign"])) {
           return {
             error: {
               code: errors.UNAUTHORIZED_CODE,
-              message: "You are not allowed to add (issue) a new voucher code",
+              message: "You are not allowed to add (issue) a new offer code",
             },
           };
         }
 
-        const voucherCampaign = await ProductVoucherCampaign.findOne({ where: { id: voucherCampaignId }, relations: ["product"] });
-        if (!voucherCampaign) {
-          return { error: { code: errors.CONFLICT, message: "Specified voucher campaign does not exist" } };
+        const offerCampaign = await ProductOfferCampaign.findOne({ where: { id: offerCampaignId }, relations: ["products"] });
+        if (!offerCampaign) {
+          return { error: { code: errors.CONFLICT, message: "Specified offer campaign does not exist" } };
         }
-        if (voucherCampaign.validUntil < dayjs()) {
-          return { error: { code: errors.CONFLICT, message: "Specified voucher campaign has expired" } };
+        if (dayjs(offerCampaign.validUntil) < dayjs()) {
+          return { error: { code: errors.CONFLICT, message: "Specified offer campaign has expired" } };
         }
 
-        const newVoucherCode = ProductVoucherCode.create({ campaign: voucherCampaign });
+        const newOfferCode = ProductOfferCode.create({ campaign: offerCampaign });
 
         try {
-          await newVoucherCode.save();
+          await newOfferCode.save();
         } catch (err) {
           return { error: { message: `${errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
         }
 
         return {
-          voucherCode: newVoucherCode,
+          offerCode: newOfferCode,
           added: true,
         };
       },
     });
-    t.field("deleteProductVoucherCode", {
+    t.field("deleteProductOfferCode", {
       type: DeleteResult,
-      description: "Delete (invalidate) a voucher code of a product voucher campaign",
+      description: "Delete (invalidate) an offer code of an offer campaign",
       nullable: false,
       args: {
-        voucherCodeId: arg({
+        offerCodeId: arg({
           type: BigIntScalar,
           required: true,
-          description: "The ID value of the product voucher campaign",
+          description: "The ID value of the offer campaign",
         }),
       },
-      resolve: async (_, { voucherCodeId }, { payload }: MyContext): Promise<DeleteType | ErrorType> => {
+      resolve: async (_, { offerCodeId }, { payload }: MyContext): Promise<DeleteType | ErrorType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
-        if (!checkScopes(payload, ["beach_bar@crud:product_voucher_campaign"])) {
+        if (!checkScopes(payload, ["beach_bar@crud:product_offer_campaign"])) {
           return {
             error: {
               code: errors.UNAUTHORIZED_CODE,
-              message: "You are not allowed to delete a voucher code of a product's voucher campaign",
+              message: "You are not allowed to delete an offer code of an offer campaign",
             },
           };
         }
 
-        if (!voucherCodeId || voucherCodeId <= 0) {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: errors.SOMETHING_WENT_WRONG } };
+        if (!offerCodeId || offerCodeId <= 0) {
+          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
         }
 
-        const voucherCode = await ProductVoucherCode.findOne(voucherCodeId);
-        if (!voucherCode) {
-          return { error: { code: errors.CONFLICT, message: "Specified voucher code does not exist" } };
+        const offerCode = await ProductOfferCode.findOne(offerCodeId);
+        if (!offerCode) {
+          return { error: { code: errors.CONFLICT, message: "Specified offer code does not exist" } };
         }
 
         try {
-          await voucherCode.softRemove();
+          await offerCode.softRemove();
         } catch (err) {
           return { error: { message: `${errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
         }

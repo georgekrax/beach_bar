@@ -1,5 +1,6 @@
 export default Object.freeze({
   BEACH_BAR: [
+    "category",
     "products",
     "products.category",
     "products.components",

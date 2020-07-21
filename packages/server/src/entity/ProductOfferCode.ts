@@ -12,25 +12,28 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { softRemove } from "../utils/softRemove";
-import { ProductVoucherCampaign } from "./ProductVoucherCampaign";
+import { ProductOfferCampaign } from "./ProductOfferCampaign";
 
-@Entity({ name: "product_voucher_code", schema: "public" })
-export class ProductVoucherCode extends BaseEntity {
+@Entity({ name: "product_offer_code", schema: "public" })
+export class ProductOfferCode extends BaseEntity {
   @PrimaryGeneratedColumn({ type: "bigint" })
   id: bigint;
-
-  @Column("varchar", { length: 23, name: "ref_code" })
-  refCode: string;
 
   @Column({ type: "integer", name: "campaign_id" })
   campaignId: number;
 
-  @ManyToOne(() => ProductVoucherCampaign, productVoucherCampaign => productVoucherCampaign.voucherCodes, {
-    nullable: false,
-    cascade: ["soft-remove", "recover"],
-  })
+  @Column("varchar", { length: 23, name: "ref_code" })
+  refCode: string;
+
+  @Column({ type: "smallint", name: "times_used", default: () => 0 })
+  timesUsed: number;
+
+  @Column({ type: "smallint", name: "is_redeemed", default: () => false })
+  isRedeemed: boolean;
+
+  @ManyToOne(() => ProductOfferCampaign, productOfferCampaign => productOfferCampaign.offerCodes, { nullable: false })
   @JoinColumn({ name: "campaign_id" })
-  campaign: ProductVoucherCampaign;
+  campaign: ProductOfferCampaign;
 
   @CreateDateColumn({ name: "timestamp", type: "timestamptz", default: () => `NOW()` })
   timestamp: Dayjs;
@@ -44,6 +47,6 @@ export class ProductVoucherCode extends BaseEntity {
   }
 
   async softRemove(): Promise<any> {
-    await softRemove(ProductVoucherCode, { id: this.id });
+    await softRemove(ProductOfferCode, { id: this.id });
   }
 }

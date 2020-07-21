@@ -5,20 +5,17 @@ import {
   BeforeInsert,
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
-  In,
-  JoinTable,
-  ManyToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
 import { softRemove } from "../utils/softRemove";
-import { Product } from "./Product";
 
 @Entity({ name: "product_coupon_code", schema: "public" })
 export class ProductCouponCode extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn({ type: "bigint" })
+  id: bigint;
 
   @Column("varchar", { length: 255, name: "title" })
   title: string;
@@ -38,19 +35,11 @@ export class ProductCouponCode extends BaseEntity {
   @Column({ type: "timestamptz", name: "valid_until", nullable: true })
   validUntil?: Dayjs;
 
-  @ManyToMany(() => Product, product => product.coupons, { nullable: false })
-  @JoinTable({
-    name: "coupon_code_offer_product",
-    joinColumn: {
-      name: "coupon_code_id",
-      referencedColumnName: "id",
-    },
-    inverseJoinColumn: {
-      name: "product_id",
-      referencedColumnName: "id",
-    },
-  })
-  products: Product[];
+  @Column({ type: "smallint", name: "times_limit" })
+  timesLimit: number;
+
+  @Column({ type: "smallint", name: "times_used", default: () => 0 })
+  timesUsed: number;
 
   @UpdateDateColumn({ name: "updated_at", type: "timestamptz", default: () => `NOW()` })
   updatedAt: Dayjs;
@@ -58,7 +47,7 @@ export class ProductCouponCode extends BaseEntity {
   @CreateDateColumn({ name: "timestamp", type: "timestamptz", default: () => `NOW()` })
   timestamp: Dayjs;
 
-  @Column({ type: "timestamptz", name: "deleted_at", nullable: true })
+  @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Dayjs;
 
   @BeforeInsert()
@@ -67,21 +56,14 @@ export class ProductCouponCode extends BaseEntity {
   }
 
   async update(
-    productIds: number[],
     title?: string,
     discountPercentage?: number,
     beachBarOffer?: boolean,
     validUntil?: Dayjs,
     isActive?: boolean,
-  ): Promise<ProductCouponCode[] | any> {
+    timesLimit?: number
+  ): Promise<ProductCouponCode[] | { deleted: true } | any> {
     try {
-      if (productIds && productIds.length >= 1) {
-        const products = await Product.find({ where: { id: In(productIds) } });
-        if (products.some(product => !product.isActive)) {
-          throw new Error("All the products should be active, in order to be applied for a coupon code");
-        }
-        this.products = products;
-      }
       if (title && title !== this.title) {
         this.title = title;
       }
@@ -97,32 +79,18 @@ export class ProductCouponCode extends BaseEntity {
       if (isActive !== null && isActive !== undefined && isActive !== this.isActive) {
         this.isActive = isActive;
       }
+      if (timesLimit && timesLimit !== this.timesLimit) {
+        this.timesLimit = timesLimit;
+      }
+      if (timesLimit && timesLimit < this.timesUsed) {
+        await this.softRemove();
+        return { deleted: true };
+      }
       await this.save();
       return this;
     } catch (err) {
       throw new Error(err.message);
     }
-  }
-
-  calculateTotalDiscountAmount(): number | undefined {
-    if (this.products) {
-      const total = this.calculateTotalProductPrice();
-      if (!total) {
-        return undefined;
-      }
-      const diffAmount = (total * parseFloat(this.discountPercentage.toFixed(2))) / 100;
-      return total - diffAmount;
-    }
-    return undefined;
-  }
-
-  calculateTotalProductPrice(): number | undefined {
-    if (this.products) {
-      return this.products.reduce((sum, i) => {
-        return parseFloat(sum.toString()) + parseFloat(i.price.toString());
-      }, 0);
-    }
-    return undefined;
   }
 
   async softRemove(): Promise<any> {

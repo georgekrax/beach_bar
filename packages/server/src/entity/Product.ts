@@ -14,7 +14,7 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
-  UpdateDateColumn
+  UpdateDateColumn,
 } from "typeorm";
 import { ProductAvailabilityHourReturnType } from "../schema/beach_bar/product/returnTypes";
 import { softRemove } from "../utils/softRemove";
@@ -23,9 +23,9 @@ import { BundleProductComponent } from "./BundleProductComponent";
 import { CartProduct } from "./CartProduct";
 import { ProductCategory } from "./ProductCategory";
 import { ProductCouponCode } from "./ProductCouponCode";
+import { ProductOfferCampaign } from "./ProductOfferCampaign";
 import { ProductPriceHistory } from "./ProductPriceHistory";
 import { ProductReservationLimit } from "./ProductReservationLimit";
-import { ProductVoucherCampaign } from "./ProductVoucherCampaign";
 import { ReservedProduct } from "./ReservedProduct";
 import { HourTime } from "./Time";
 
@@ -81,11 +81,8 @@ export class Product extends BaseEntity {
   @OneToMany(() => ReservedProduct, reservedProduct => reservedProduct.product, { nullable: true })
   reservedProducts?: ReservedProduct[];
 
-  @ManyToMany(() => ProductCouponCode, productCouponCode => productCouponCode.products, { nullable: true })
-  coupons?: ProductCouponCode[];
-
-  @ManyToMany(() => ProductVoucherCampaign, productCouponCode => productCouponCode.products, { nullable: true })
-  voucherCampaigns?: ProductCouponCode[];
+  @ManyToMany(() => ProductOfferCampaign, productCouponCode => productCouponCode.products, { nullable: true })
+  offerCampaigns?: ProductOfferCampaign[];
 
   @UpdateDateColumn({ name: "updated_at", type: "timestamptz", default: () => `NOW()` })
   updatedAt: Dayjs;

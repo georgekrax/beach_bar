@@ -20,7 +20,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
   Repository,
-  UpdateDateColumn
+  UpdateDateColumn,
 } from "typeorm";
 import redisKeys from "../constants/redisKeys";
 import relations from "../constants/relations";
@@ -31,6 +31,7 @@ import { getReservationLimits } from "../utils/beach_bar/getReservationLimits";
 import { getReservedProducts } from "../utils/beach_bar/getReservedProducts";
 import { groupBy } from "../utils/groupBy";
 import { softRemove } from "../utils/softRemove";
+import { BeachBarCategory } from "./BeachBarCategory";
 import { BeachBarEntryFee } from "./BeachBarEntryFee";
 import { BeachBarFeature } from "./BeachBarFeature";
 import { BeachBarLocation } from "./BeachBarLocation";
@@ -77,6 +78,9 @@ export class BeachBar extends BaseEntity {
   @Column({ type: "integer", name: "fee_id" })
   feeId: number;
 
+  @Column({ type: "integer", name: "category_id" })
+  categoryId: number;
+
   @Column({ type: "decimal", precision: 3, scale: 1, name: "avg_rating" })
   avgRating: number;
 
@@ -110,9 +114,13 @@ export class BeachBar extends BaseEntity {
   @Column("varchar", { length: 255, name: "stripe_connect_id", unique: true })
   stripeConnectId: string;
 
-  @ManyToOne(() => PricingFee, PricingFee => PricingFee.beachBars)
+  @ManyToOne(() => PricingFee, pricingFee => pricingFee.beachBars)
   @JoinColumn({ name: "fee_id" })
   fee: PricingFee;
+
+  @ManyToOne(() => BeachBarCategory, beachBarCategory => beachBarCategory.beachBars, { nullable: false })
+  @JoinColumn({ name: "category_id" })
+  category: BeachBarCategory;
 
   @ManyToOne(() => Currency, currency => currency.beachBars)
   @JoinColumn({ name: "default_currency_id" })
@@ -205,6 +213,7 @@ export class BeachBar extends BaseEntity {
     hidePhoneNumber?: boolean,
     zeroCartTotal?: boolean,
     isAvailable?: boolean,
+    categoryId?: number,
     openingTimeId?: number,
     closingTimeId?: number
   ): Promise<BeachBar | any> {
@@ -229,6 +238,12 @@ export class BeachBar extends BaseEntity {
       }
       if (isAvailable !== null && isAvailable !== undefined && isAvailable !== this.isAvailable) {
         this.isAvailable = isAvailable;
+      }
+      if (categoryId && categoryId !== this.categoryId) {
+        const category = await BeachBarCategory.findOne(categoryId);
+        if (category) {
+          this.category = category;
+        }
       }
       if (openingTimeId && openingTimeId !== this.openingTimeId) {
         const quarterTime = await QuarterTime.findOne(openingTimeId);

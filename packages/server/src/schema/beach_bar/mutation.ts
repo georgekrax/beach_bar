@@ -1,6 +1,8 @@
 import { errors, MyContext } from "@beach_bar/common";
 import { booleanArg, extendType, intArg, stringArg } from "@nexus/schema";
+import redisKeys from "../../constants/redisKeys";
 import { BeachBar } from "../../entity/BeachBar";
+import { BeachBarCategory } from "../../entity/BeachBarCategory";
 import { Currency } from "../../entity/Currency";
 import { User } from "../../entity/User";
 import { checkScopes } from "../../utils/checkScopes";
@@ -8,7 +10,6 @@ import { DeleteType, ErrorType } from "../returnTypes";
 import { DeleteResult } from "../types";
 import { AddBeachBarType, UpdateBeachBarType } from "./returnTypes";
 import { AddBeachBarResult, UpdateBeachBarResult } from "./types";
-import redisKeys from "../../constants/redisKeys";
 
 export const BeachBarCrudMutation = extendType({
   type: "Mutation",
@@ -45,6 +46,10 @@ export const BeachBarCrudMutation = extendType({
           description:
             "Set to true if the #beach_bar accepts for a customer / user to have less than the #beach_bar minimum currency price",
         }),
+        categoryId: intArg({
+          required: true,
+          description: "The ID value of the category of the #beach_bar",
+        }),
         openingTimeId: intArg({
           required: true,
           description: "The ID value of the opening quarter time of the #beach_bar, in its country time zone",
@@ -65,6 +70,7 @@ export const BeachBarCrudMutation = extendType({
           contactPhoneNumber,
           hidePhoneNumber,
           zeroCartTotal,
+          categoryId,
           openingTimeId,
           closingTimeId,
           code,
@@ -104,7 +110,7 @@ export const BeachBarCrudMutation = extendType({
             },
           };
         }
-        if (!openingTimeId || openingTimeId <= 0 || !closingTimeId || closingTimeId <= 0) {
+        if (!openingTimeId || openingTimeId <= 0 || !closingTimeId || closingTimeId <= 0 || !categoryId || categoryId <= 0) {
           return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
         }
 
@@ -136,7 +142,12 @@ export const BeachBarCrudMutation = extendType({
 
           const currency = await Currency.findOne({ isoCode: stripeAccount.default_currency.toUpperCase() });
           if (!currency) {
-            return { error: { message: errors.SOMETHING_WENT_WRONG } };
+            return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
+          }
+
+          const category = await BeachBarCategory.findOne(categoryId);
+          if (!category) {
+            return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
           }
 
           const newBeachBar = BeachBar.create({
@@ -148,6 +159,7 @@ export const BeachBarCrudMutation = extendType({
             defaultCurrency: currency,
             stripeConnectId: stripeUserId,
             zeroCartTotal,
+            category,
             openingTimeId,
             closingTimeId,
           });
@@ -219,6 +231,10 @@ export const BeachBarCrudMutation = extendType({
           required: false,
           description: "Set to true, if to show #beach_bar in the search results, even if it has no availability",
         }),
+        categoryId: intArg({
+          required: false,
+          description: "The ID value of the category of the #beach_bar",
+        }),
         openingTimeId: intArg({
           required: false,
           description: "The ID value of the opening quarter time of the #beach_bar, in its country time zone",
@@ -239,6 +255,7 @@ export const BeachBarCrudMutation = extendType({
           hidePhoneNumber,
           zeroCartTotal,
           isAvailable,
+          categoryId,
           openingTimeId,
           closingTimeId,
         },
@@ -273,6 +290,7 @@ export const BeachBarCrudMutation = extendType({
             hidePhoneNumber,
             zeroCartTotal,
             isAvailable,
+            categoryId,
             openingTimeId,
             closingTimeId
           );
