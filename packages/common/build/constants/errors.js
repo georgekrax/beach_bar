@@ -36,5 +36,7 @@ exports.errors = Object.freeze({
     LATER_DATE_ERROR_CODE: "later_date",
     MAX_ADULTS_ERROR_CODE: "max_adults",
     MAX_CHILDREN_ERROR_CODE: "max_children",
+    INVALID_PRODUCT_OFFER_CODE: "invalid_product_offer",
+    INVALID_REF_CODE_MESSAGE: "Specified referral code is invalid",
 });
 //# sourceMappingURL=errors.js.map

@@ -12,40 +12,16 @@ exports.DateTimeScalar = schema_1.scalarType({
     asNexusMethod: "datetime",
     description: "Use JavaScript Date object for date/time fields.",
     serialize(value) {
-        let v = value;
-        if (!(v instanceof Date) &&
-            typeof v !== "string" &&
-            typeof v !== "number") {
-            throw new TypeError(`Value is not an instance of Date, Date string or number: ${JSON.stringify(v)}`);
-        }
-        if (typeof v === "string") {
-            v = dayjs_1.default();
-            v.setTime(Date.parse(value));
-        }
-        else if (typeof v === "number") {
-            v = dayjs_1.default(v);
-        }
-        if (Number.isNaN(v.getTime())) {
-            throw new TypeError(`Value is not a valid Date: ${JSON.stringify(v)}`);
-        }
-        return v.toJSON();
+        return dayjs_1.default(value);
     },
     parseValue(value) {
-        const date = dayjs_1.default(value);
-        if (Number.isNaN(date.getTime())) {
-            throw new TypeError(`Value is not a valid Date: ${value}`);
-        }
-        return date;
+        return dayjs_1.default(value);
     },
     parseLiteral(ast) {
-        if (ast.kind !== graphql_1.Kind.STRING && ast.kind !== graphql_1.Kind.INT) {
-            throw new graphql_1.GraphQLError(`Can only parse strings & integers to dates but got a: ${ast.kind}`);
+        if (ast.kind === graphql_1.Kind.STRING) {
+            return dayjs_1.default(ast.value);
         }
-        const result = dayjs_1.default(ast.kind === graphql_1.Kind.INT ? Number(ast.value) : ast.value);
-        if (Number.isNaN(result.getTime())) {
-            throw new graphql_1.GraphQLError(`Value is not a valid Date: ${ast.value}`);
-        }
-        return result;
+        return null;
     },
 });
 //# sourceMappingURL=datetimeScalar.js.map

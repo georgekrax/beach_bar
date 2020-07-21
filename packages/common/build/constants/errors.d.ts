@@ -33,4 +33,6 @@ export declare const errors: Readonly<{
     LATER_DATE_ERROR_CODE: string;
     MAX_ADULTS_ERROR_CODE: string;
     MAX_CHILDREN_ERROR_CODE: string;
+    INVALID_PRODUCT_OFFER_CODE: string;
+    INVALID_REF_CODE_MESSAGE: string;
 }>;
