@@ -12,14 +12,20 @@ import {
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
-  Repository
+  Repository,
 } from "typeorm";
 import { softRemove } from "../utils/softRemove";
 import { BeachBar } from "./BeachBar";
 import { BeachBarEntryFee } from "./BeachBarEntryFee";
 import { CartProduct } from "./CartProduct";
 import { Payment } from "./Payment";
+import { StripeFee } from "./StripeFee";
 import { User } from "./User";
+
+interface GetTotalPrice {
+  totalWithoutEntryFees: number;
+  totalWithEntryFees: number;
+}
 
 interface GetBeachBarTotalPrice {
   entryFeeTotal: number;
@@ -74,16 +80,46 @@ export class Cart extends BaseEntity {
     }
   }
 
-  async getTotalPrice(): Promise<number | undefined> {
-    let products = await CartProduct.find({ where: { cart: this }, relations: ["product"] });
-    if (products) {
-      products = products.filter(product => !product.deletedAt);
-      const total = products.reduce((sum, i) => {
+  async getTotalPrice(): Promise<GetTotalPrice | undefined> {
+    if (this.products) {
+      const filteredProducts = this.products.filter(product => !product.deletedAt);
+      const total = filteredProducts.reduce((sum, i) => {
         return sum + i.product.price * i.quantity;
       }, 0);
-      return total;
+      const entryFeesTotal = await this.getBeachBarsEntryFeeTotal();
+      if (entryFeesTotal === undefined) {
+        return undefined;
+      }
+      return {
+        totalWithoutEntryFees: total,
+        totalWithEntryFees: total + entryFeesTotal,
+      };
     }
     return undefined;
+  }
+
+  async getStripeFee(isEu: boolean, total?: number): Promise<number | undefined> {
+    const cardProcessingFee = await StripeFee.findOne({ isEu });
+    if (!cardProcessingFee) {
+      return undefined;
+    }
+    let totalWithEntryFees: number;
+    if (!total) {
+      const total = await this.getTotalPrice();
+      if (total === undefined) {
+        return undefined;
+      }
+      totalWithEntryFees = total.totalWithEntryFees;
+    } else {
+      totalWithEntryFees = total;
+    }
+    const stripeTotalFee: number = parseFloat(
+      (
+        totalWithEntryFees * (parseFloat(cardProcessingFee.percentageValue.toString()) / 100) +
+        parseFloat(cardProcessingFee.pricingFee.toString())
+      ).toFixed(2)
+    );
+    return parseFloat(stripeTotalFee.toFixed(2));
   }
 
   async getBeachBarsEntryFeeTotal(): Promise<number | undefined> {
@@ -116,7 +152,7 @@ export class Cart extends BaseEntity {
         return undefined;
       }
       const uniqueProductDates = Array.from(
-        new Set(this.products.filter(product => product.product.beachBarId === beachBarId).map(product => product.date)),
+        new Set(this.products.filter(product => product.product.beachBarId === beachBarId).map(product => product.date))
       );
       let entryFeeTotal = 0;
       for (let i = 0; i < uniqueProductDates.length; i++) {
@@ -131,7 +167,7 @@ export class Cart extends BaseEntity {
     return undefined;
   }
 
-  async getBeachBarTotalPrice(beachBarId: number): Promise<GetBeachBarTotalPrice | undefined> {
+  async getBeachBarTotalPrice(beachBarId: number, discount = 0): Promise<GetBeachBarTotalPrice | undefined> {
     if (this.products) {
       const products = this.products.filter(product => product.product.beachBarId === beachBarId && !product.product.deletedAt);
       if (products) {
@@ -144,8 +180,8 @@ export class Cart extends BaseEntity {
         }
         return {
           entryFeeTotal: totalEntryFees,
-          totalWithoutEntryFees: total,
-          totalWithEntryFees: parseFloat((total + totalEntryFees).toFixed(2)),
+          totalWithoutEntryFees: total - discount,
+          totalWithEntryFees: parseFloat((total + totalEntryFees - discount).toFixed(2)),
         };
       }
       return undefined;

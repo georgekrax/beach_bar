@@ -1,15 +1,16 @@
-import { BigIntScalar } from "@beach_bar/common";
+// import { BigIntScalar } from "@beach_bar/common";
 import { objectType, unionType } from "@nexus/schema";
 import { CartType } from "../cart/types";
 import { CardType } from "../customer/card/types";
 import { PaymentStatusType } from "../details/payment/types";
+import { PaymentOfferCodeType } from "./offer_code/types";
 import { ReservedProductType } from "./reserved_product/types";
 
 export const PaymentType = objectType({
   name: "Payment",
   description: "Represents a payment",
   definition(t) {
-    t.field("id", { type: BigIntScalar, nullable: false });
+    t.id("id", { nullable: false });
     t.string("refCode", { nullable: false, description: "A unique identifier (referral code) of the payment" });
     t.string("stripeId", { nullable: false, description: "Stripe's ID value of the payment" });
     t.boolean("isRefunded", { nullable: false, description: "A boolean that indicates if the whole payment was refunded" });
@@ -31,6 +32,12 @@ export const PaymentType = objectType({
       nullable: false,
       resolve: o => o.status,
     });
+    t.list.field("offerCodes", {
+      type: PaymentOfferCodeType,
+      description: "A list with all the offer codes added to the payment",
+      nullable: true,
+      resolve: o => o.offerCodes,
+    });
     t.list.field("reservedProducts", {
       type: ReservedProductType,
       description: "A list with all the reserved products of the payment",
@@ -42,13 +49,13 @@ export const PaymentType = objectType({
 
 export const AddPaymentType = objectType({
   name: "AddPayment",
-  description: "Info to be returned when some payments are created (made)",
+  description: "Info to be returned when a payment is created (made)",
   definition(t) {
-    t.list.field("payments", {
+    t.field("payment", {
       type: PaymentType,
-      description: "The payments that are created (made)",
+      description: "The payment that is created (made)",
       nullable: false,
-      resolve: o => o.payments,
+      resolve: o => o.payment,
     });
     t.boolean("added", {
       nullable: false,

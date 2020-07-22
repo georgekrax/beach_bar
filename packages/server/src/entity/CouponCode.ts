@@ -3,16 +3,21 @@ import { Dayjs } from "dayjs";
 import {
   BaseEntity,
   BeforeInsert,
+  Check,
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
 import { softRemove } from "../utils/softRemove";
+import { PaymentOfferCode } from "./PaymentOfferCode";
 
 @Entity({ name: "coupon_code", schema: "public" })
+@Check(`"timesLimit" IS NULL OR "timesLimit" > 0`)
+@Check(`"timesUsed" <= "timesLimit"`)
 export class CouponCode extends BaseEntity {
   @PrimaryGeneratedColumn({ type: "bigint" })
   id: bigint;
@@ -35,11 +40,14 @@ export class CouponCode extends BaseEntity {
   @Column({ type: "timestamptz", name: "valid_until", nullable: true })
   validUntil?: Dayjs;
 
-  @Column({ type: "smallint", name: "times_limit" })
-  timesLimit: number;
+  @Column({ type: "smallint", name: "times_limit", nullable: true })
+  timesLimit?: number;
 
   @Column({ type: "smallint", name: "times_used", default: () => 0 })
   timesUsed: number;
+
+  @OneToMany(() => PaymentOfferCode, paymentOfferCode => paymentOfferCode.couponCode, { nullable: true })
+  payments?: PaymentOfferCode[];
 
   @UpdateDateColumn({ name: "updated_at", type: "timestamptz", default: () => `NOW()` })
   updatedAt: Dayjs;

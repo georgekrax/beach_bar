@@ -2,7 +2,7 @@ import { Payment } from "../../entity/Payment";
 import { AddType, UpdateType } from "../returnTypes";
 
 type PaymentType = {
-  payments: Payment[];
+  payment: Payment;
 };
 
 export type AddPaymentType = AddType & PaymentType;

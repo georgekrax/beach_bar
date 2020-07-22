@@ -23,6 +23,7 @@ import { PaymentStatus } from "./PaymentStatus";
 import { Product } from "./Product";
 import { RefundPercentage } from "./RefundPercentage";
 import { ReservedProduct } from "./ReservedProduct";
+import { PaymentOfferCode } from "./PaymentOfferCode";
 
 interface GetRefundPercentage {
   refundPercentage: RefundPercentage;
@@ -49,13 +50,16 @@ export class Payment extends BaseEntity {
   @Column("varchar", { length: 255, name: "stripe_id" })
   stripeId: string;
 
+  @Column("varchar", { length: 19, name: "transfer_group_code", unique: true })
+  transferGroupCode: string;
+
   @Column({ type: "boolean", name: "is_refunded", default: () => false })
   isRefunded: boolean;
 
   @Column({ type: "decimal", precision: 12, scale: 2, name: "app_fee", nullable: true })
   appFee: number;
 
-  @Column({ type: "integer", name: "transfer_amount", nullable: true })
+  @Column({ type: "decimal", precision: 12, scale: 2, name: "transfer_amount", nullable: true })
   transferAmount: number;
 
   @ManyToOne(() => Cart, cart => cart.payment, { nullable: false })
@@ -72,6 +76,9 @@ export class Payment extends BaseEntity {
 
   @OneToMany(() => BeachBarReview, beachBarReview => beachBarReview.payment, { nullable: true })
   reviews?: BeachBarReview[];
+
+  @OneToMany(() => PaymentOfferCode, paymentOfferCode => paymentOfferCode.payment, { nullable: true })
+  offerCodes?: PaymentOfferCode[];
 
   @OneToMany(() => ReservedProduct, reservedProduct => reservedProduct.payment, { nullable: true })
   reservedProducts?: ReservedProduct[];

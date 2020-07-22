@@ -33,8 +33,13 @@ export const ProductOfferQuery = extendType({
           if (!couponCode) {
             return { error: { code: errors.CONFLICT, message: errors.INVALID_REF_CODE_MESSAGE } };
           }
-          if (!couponCode.isActive || dayjs(couponCode.validUntil) < dayjs() || couponCode.timesUsed >= couponCode.timesLimit) {
+          if (!couponCode.isActive || dayjs(couponCode.validUntil) < dayjs()) {
             return { error: { code: errors.INVALID_PRODUCT_OFFER_CODE, message: errors.INVALID_REF_CODE_MESSAGE } };
+          }
+          if (couponCode.timesLimit && couponCode.timesUsed >= couponCode.timesLimit) {
+            return {
+              error: { code: errors.INVALID_PRODUCT_OFFER_CODE, message: "You have exceeded the times of use of the coupon code" },
+            };
           }
           return couponCode;
         } else if (refCode.trim().length === 23) {
@@ -42,7 +47,12 @@ export const ProductOfferQuery = extendType({
           if (!offerCode) {
             return { error: { code: errors.CONFLICT, message: errors.INVALID_REF_CODE_MESSAGE } };
           }
-          if (offerCode.isRedeemed || dayjs(offerCode.campaign.validUntil) < dayjs() || !offerCode.campaign.isActive) {
+          if (
+            offerCode.isRedeemed ||
+            dayjs(offerCode.campaign.validUntil) < dayjs() ||
+            !offerCode.campaign.isActive ||
+            offerCode.percentageUsed === 1000
+          ) {
             return { error: { code: errors.INVALID_PRODUCT_OFFER_CODE, message: errors.INVALID_REF_CODE_MESSAGE } };
           }
           return offerCode;

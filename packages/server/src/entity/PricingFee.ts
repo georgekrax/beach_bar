@@ -1,7 +1,6 @@
 import { Dayjs } from "dayjs";
 import { BaseEntity, Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { BeachBar } from "./BeachBar";
-import { PricingFeeCurrency } from "./PricingFeeCurrency";
 
 @Entity({ name: "pricing_fee", schema: "public" })
 export class PricingFee extends BaseEntity {
@@ -19,9 +18,6 @@ export class PricingFee extends BaseEntity {
 
   @OneToMany(() => BeachBar, beachBar => beachBar.fee)
   beachBars: BeachBar[];
-
-  @OneToMany(() => PricingFeeCurrency, pricingFeeCurrency => pricingFeeCurrency.fee)
-  currencies: PricingFeeCurrency[];
 
   @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
   timestamp: Dayjs;

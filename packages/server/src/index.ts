@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 import express from "express";
 import Redis from "ioredis";
 import { verify } from "jsonwebtoken";
+import mongoose from "mongoose";
 import "reflect-metadata";
 import { Stripe } from "stripe";
 import { UAParser } from "ua-parser-js";
@@ -21,24 +22,45 @@ import { createDBConnection } from "./utils/createDBConnection";
 
 export let redis;
 export let stripe: Stripe;
-export * from "./schema";
 
-const startServer = async (): Promise<any> => {
-  redis = new Redis({
-    password: "george2016",
-    db: 2,
-    connectTimeout: 10000,
-    reconnectOnError: (): boolean => true,
-  });
+(async (): Promise<any> => {
+  try {
+    redis = new Redis({
+      password: "george2016",
+      db: 2,
+      connectTimeout: 10000,
+      reconnectOnError: (): boolean => true,
+    });
 
-  redis.on("error", (err: any) => {
+    redis.on("error", (err: any) => {
+      throw new Error(err.message);
+    });
+
+    await createDBConnection();
+
+    await mongoose.connect(process.env.MONGO_DB_URL!.toString(), {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      auth: { user: process.env.MONGO_DB_USERNAME!.toString(), password: process.env.MONGO_DB_PASSWORD!.toString() },
+      dbName: process.env.MONGO_DB_NAME!.toString(),
+    });
+    const mongoDb = mongoose.connection;
+    mongoDb.on("error", (err: any) => {
+      throw new Error(err.message);
+    });
+  } catch (err) {
     console.log(err);
     process.exit(0);
-  });
+  }
 
   const app = express();
 
-  // Stripe webhooks routes have to use the "express.raw()", to work
+  stripe = new Stripe(
+    process.env.NODE_ENV === "production" ? process.env.STRIPE_SECRET_LIVE_KEY!.toString() : process.env.STRIPE_SECRET_KEY!.toString(),
+    { apiVersion: "2020-03-02", typescript: true }
+  );
+
+  // Stripe webhooks routes have to use the "express.raw()", in order to work
   app.use((req, res, next) => {
     if (req.originalUrl.includes(process.env.STRIPE_WEBHOOK_ORIGIN_URL!.toString())) {
       express.raw({ type: "application/json" })(req, res, next);
@@ -52,11 +74,6 @@ const startServer = async (): Promise<any> => {
 
   sgClient.setApiKey(process.env.SENDGRID_API_KEY!.toString());
   sgMail.setApiKey(process.env.SENDGRID_API_KEY!.toString());
-
-  stripe = new Stripe(
-    process.env.NODE_ENV === "production" ? process.env.STRIPE_SECRET_LIVE_KEY!.toString() : process.env.STRIPE_SECRET_KEY!.toString(),
-    { apiVersion: "2020-03-02", typescript: true }
-  );
 
   const server = new ApolloServer({
     tracing: !(process.env.NODE_ENV === "production"),
@@ -170,16 +187,9 @@ const startServer = async (): Promise<any> => {
     },
   });
 
-  await createDBConnection().catch(err => {
-    console.log(err);
-    process.exit(0);
-  });
-
   server.applyMiddleware({ app, cors: false });
 
   app.listen({ port: parseInt(process.env.PORT!) || 4000 }, () =>
     console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`)
   );
-};
-
-startServer();
+})();

@@ -10,7 +10,7 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn
+  UpdateDateColumn,
 } from "typeorm";
 import redisKeys from "../constants/redisKeys";
 import { redis } from "../index";

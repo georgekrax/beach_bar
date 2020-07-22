@@ -10,11 +10,15 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  OneToMany,
+  Check,
 } from "typeorm";
 import { softRemove } from "../utils/softRemove";
 import { OfferCampaign } from "./OfferCampaign";
+import { PaymentOfferCode } from "./PaymentOfferCode";
 
 @Entity({ name: "offer_campaign_code", schema: "public" })
+@Check(`"percentageUsed" >= 0 AND "percentageUsed" <= 100`)
 export class OfferCampaignCode extends BaseEntity {
   @PrimaryGeneratedColumn({ type: "bigint" })
   id: bigint;
@@ -25,6 +29,9 @@ export class OfferCampaignCode extends BaseEntity {
   @Column("varchar", { length: 23, name: "ref_code" })
   refCode: string;
 
+  @Column({ type: "decimal", precision: 3, scale: 0, name: "percentage_used", default: () => 0 })
+  percentageUsed: number;
+
   @Column({ type: "smallint", name: "times_used", default: () => 0 })
   timesUsed: number;
 
@@ -34,6 +41,9 @@ export class OfferCampaignCode extends BaseEntity {
   @ManyToOne(() => OfferCampaign, offerCampaign => offerCampaign.offerCodes, { nullable: false })
   @JoinColumn({ name: "campaign_id" })
   campaign: OfferCampaign;
+
+  @OneToMany(() => PaymentOfferCode, paymentOfferCode => paymentOfferCode.offerCode, { nullable: true })
+  payments?: PaymentOfferCode[];
 
   @CreateDateColumn({ name: "timestamp", type: "timestamptz", default: () => `NOW()` })
   timestamp: Dayjs;

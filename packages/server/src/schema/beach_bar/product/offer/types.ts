@@ -28,6 +28,10 @@ export const OfferCampaignCodeInterface = interfaceType({
       description: "The total amount to make a discount from",
       resolve: o => o.campaign.calculateTotalProductPrice(),
     });
+    t.int("percentageUsed", {
+      nullable: false,
+      description: "The percentage that is used till now, when applying the offer code to a payment",
+    });
     t.int("timesUsed", { nullable: false, description: "Represents how many times this offer code has been used" });
     t.boolean("isRedeemed", { nullable: false, description: "Indicates if the offer code has been fully redeemed" });
     t.field("campaign", {

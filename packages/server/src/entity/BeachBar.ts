@@ -45,7 +45,6 @@ import { Product } from "./Product";
 import { ProductReservationLimit } from "./ProductReservationLimit";
 import { ReservedProduct } from "./ReservedProduct";
 import { SearchInputValue } from "./SearchInputValue";
-import { StripeFee } from "./StripeFee";
 import { StripeMinimumCurrency } from "./StripeMinimumCurrency";
 import { QuarterTime } from "./Time";
 
@@ -54,10 +53,11 @@ interface GetFullPricingReturnType {
   currencyFee: PricingFeeCurrency;
 }
 
-interface GetBeachBarPaymentFee {
+interface getBeachBarPaymentDetails {
   total: number;
   transferAmount: number;
   beachBarAppFee: number;
+  stripeFee: number;
 }
 
 @Entity({ name: "beach_bar", schema: "public" })
@@ -343,7 +343,7 @@ export class BeachBar extends BaseEntity {
 
   async getFullPricingFee(): Promise<GetFullPricingReturnType | undefined> {
     const pricingFee = await this.getPricingFee();
-    const currencyFee = await PricingFeeCurrency.findOne({ fee: pricingFee, currency: this.defaultCurrency });
+    const currencyFee = await PricingFeeCurrency.findOne({ currencyId: this.defaultCurrencyId });
     if (!pricingFee || !currencyFee) {
       return undefined;
     }
@@ -353,26 +353,20 @@ export class BeachBar extends BaseEntity {
     };
   }
 
-  async getBeachBarPaymentFee(cardProcessingFee: StripeFee, total: number): Promise<GetBeachBarPaymentFee | undefined> {
+  async getBeachBarPaymentDetails(total: number, stripeFee: number): Promise<getBeachBarPaymentDetails | undefined> {
     const beachBarPricingFee = await this.getFullPricingFee();
     if (!beachBarPricingFee) {
       return undefined;
     }
     const { pricingFee, currencyFee } = beachBarPricingFee;
-    const percentageFee = (total * parseInt(pricingFee.percentageValue.toString())) / 100;
-    const beachBarAppFee = percentageFee + parseFloat(currencyFee.percentageValue.toString());
-    const totalPricingFeeWithoutStripe = Math.trunc(total - beachBarAppFee);
-    const stripeTotalFee: number = parseFloat(
-      (
-        total * (parseFloat(cardProcessingFee.percentageValue.toString()) / 100) +
-        parseFloat(cardProcessingFee.pricingFee.toString())
-      ).toFixed(2)
-    );
-    const transferAmount = Math.trunc(totalPricingFeeWithoutStripe - stripeTotalFee);
+    const percentageFee = parseFloat(((total * parseFloat(pricingFee.percentageValue.toString())) / 100).toFixed(2));
+    const beachBarAppFee = parseFloat((percentageFee + parseFloat(currencyFee.numericValue.toString())).toFixed(2));
+    const transferAmount = parseFloat((total - beachBarAppFee - stripeFee).toFixed(2));
     return {
       total,
       transferAmount,
       beachBarAppFee,
+      stripeFee,
     };
   }
 
