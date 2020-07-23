@@ -10,6 +10,5 @@ export * from "./scalars/ipV4Scalar";
 export * from "./scalars/jsonScalar";
 export * from "./scalars/timeScalar";
 export * from "./scalars/urlScalar";
-export * from "./utils/filterSearch";
 export * from "./utils/generateID";
 export * from "./yup/userSchema";
