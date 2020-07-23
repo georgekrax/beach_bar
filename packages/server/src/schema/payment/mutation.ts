@@ -2,6 +2,7 @@
 import { BigIntScalar, errors, generateID, MyContext } from "@beach_bar/common";
 import { arg, extendType } from "@nexus/schema";
 import dayjs from "dayjs";
+import prefixes from "../../constants/prefixes";
 import { payment as paymentStatus } from "../../constants/status";
 import { Card } from "../../entity/Card";
 import { Cart } from "../../entity/Cart";
@@ -69,7 +70,7 @@ export const PaymentCrudMutation = extendType({
           return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
         }
         const uniqueBeachBars: UniqueBeachBarsType = uBeachBars.map(beachBar => {
-          return { beachBar, discountAmount: 0 };
+          return { beachBar, discountPercentage: 0 };
         });
 
         const cartTotal = await cart.getTotalPrice();
@@ -95,7 +96,7 @@ export const PaymentCrudMutation = extendType({
         }
 
         const refCode = generateID(16);
-        const transferGroupCode = `tg_${generateID(16)}`;
+        const transferGroupCode = `${prefixes.PAYMENT_TARGET_GROUP}${generateID(16)}`;
 
         const newPayment = Payment.create({
           cart,
@@ -104,14 +105,14 @@ export const PaymentCrudMutation = extendType({
           refCode,
           transferGroupCode,
         });
-
         const { totalWithEntryFees, totalWithoutEntryFees } = cartTotal;
         let total = totalWithEntryFees;
-        let discount = 0;
+        let couponCodeDiscount = 0;
 
         const couponCodes: CouponCode[] = [],
           offerCampaignCodes: OfferCampaignCode[] = [],
           paymentOfferCodes: PaymentOfferCode[] = [];
+
         if (offerCodes) {
           const totalDiscountPercentage = offerCodes.reduce((sum, i) => sum + i.discountPercentage, 0);
           if (totalDiscountPercentage > 100) {
@@ -140,12 +141,15 @@ export const PaymentCrudMutation = extendType({
                 couponCode,
                 discountPercentage: element.discountPercentage,
               });
+              const discount = (totalWithEntryFees * element.discountPercentage) / 100;
+              couponCodeDiscount += discount;
+              console.log(total);
               paymentOfferCodes.push(newPaymentOfferCode);
               couponCodes.push(couponCode);
             } else if (element.refCode.trim().length === 23) {
               const offerCode = await OfferCampaignCode.findOne({
                 where: { refCode: element.refCode },
-                relations: ["campaign", "campaign.products"],
+                relations: ["campaign", "campaign.products", "campaign.products.beachBar", "campaign.products.beachBar.products"],
               });
               if (!offerCode) {
                 return { error: { code: errors.CONFLICT, message: errors.INVALID_REF_CODE_MESSAGE } };
@@ -163,6 +167,11 @@ export const PaymentCrudMutation = extendType({
               ) {
                 return { error: { message: "This offer code's campaign does not include any products of your shopping cart" } };
               }
+              const campaignBeachBar = offerCode.getProductBeachBars();
+              for (let i = 0; i < campaignBeachBar.length; i++) {
+                const idx = uniqueBeachBars.findIndex(obj => obj.beachBar.id === campaignBeachBar[i].id);
+                uniqueBeachBars[idx].discountPercentage += element.discountPercentage;
+              }
               const newPaymentOfferCode = PaymentOfferCode.create({
                 payment: newPayment,
                 offerCode,
@@ -172,12 +181,17 @@ export const PaymentCrudMutation = extendType({
               offerCampaignCodes.push(offerCode);
             }
           }
-          discount = (total * totalDiscountPercentage) / 100;
+          const discount = (total * totalDiscountPercentage) / 100;
           total = total - discount;
+          total = parseFloat(total.toFixed(2));
         }
-        newPayment.offerCodes = paymentOfferCodes;
-        console.log(discount);
+        console.log(cartTotal);
         console.log(total);
+        console.log(couponCodeDiscount);
+
+        console.log(uniqueBeachBars.map(bar => `${bar.beachBar.id} - ${bar.discountPercentage}`));
+        const couponCodeDiscountPerBar = parseFloat((couponCodeDiscount / uniqueBeachBars.length).toFixed(2));
+        newPayment.offerCodes = paymentOfferCodes;
 
         try {
           // * check if cart total is 0
@@ -257,13 +271,18 @@ export const PaymentCrudMutation = extendType({
           let beachBarPricingFee = 0;
           let transferAmount = 0;
           for (let i = 0; i < uniqueBeachBars.length; i++) {
-            const { beachBar, discountAmount } = uniqueBeachBars[i];
-            console.log(discountAmount);
-            const cartBeachBarTotal = await cart.getBeachBarTotalPrice(beachBar.id, discount);
+            const { beachBar, discountPercentage } = uniqueBeachBars[i];
+
+            const cartBeachBarTotal = await cart.getBeachBarTotalPrice(beachBar.id, couponCodeDiscountPerBar);
             if (cartBeachBarTotal === undefined) {
               return { error: { message: errors.SOMETHING_WENT_WRONG } };
             }
-            const { totalWithEntryFees: beachBarTotal } = cartBeachBarTotal;
+            console.log(cartBeachBarTotal);
+            const { totalWithEntryFees } = cartBeachBarTotal;
+            const discountAmount = (totalWithEntryFees * discountPercentage) / 100;
+            const beachBarTotal = parseFloat((totalWithEntryFees - discountAmount).toFixed(2));
+            console.log(discountAmount);
+            console.log(beachBarTotal);
             const beachBarStripeFee = await cart.getStripeFee(card.country.isEu, beachBarTotal);
             if (beachBarStripeFee === undefined) {
               return { error: { message: errors.SOMETHING_WENT_WRONG } };
@@ -280,6 +299,7 @@ export const PaymentCrudMutation = extendType({
             beachBarPricingFee += beachBarAppFee;
             transferAmount += beachBarTransferAmount;
             console.log(`Stripe fee: ${beachBarStripeFee}`);
+            if (beachBarTransferAmount * 100 > 1) {
             const stripeTransfer = await stripe.transfers.create({
               amount: beachBarTransferAmount * 100,
               currency: stripePayment.currency.toLowerCase(),
@@ -314,6 +334,7 @@ export const PaymentCrudMutation = extendType({
             if (!stripeTransfer) {
               return { error: { message: errors.SOMETHING_WENT_WRONG } };
             }
+          }
           }
 
           newPayment.appFee = beachBarPricingFee;
@@ -360,39 +381,38 @@ export const PaymentCrudMutation = extendType({
         if (payment.isRefunded) {
           return { error: { code: errors.CONFLICT, message: "Specified payment has already been refunded" } };
         }
-        if (payment.offerCodes)
-          try {
-            const refund = await payment.getRefundPercentage();
-            if (!refund) {
-              return { error: { message: errors.SOMETHING_WENT_WRONG } };
-            }
-            const { refundPercentage, daysDiff } = refund;
-            const cartTotal = await payment.cart.getTotalPrice();
-            if (cartTotal === undefined) {
-              return { error: { message: errors.SOMETHING_WENT_WRONG } };
-            }
-            const { totalWithEntryFees } = cartTotal;
-            if (totalWithEntryFees === 0) {
-              return { error: { message: "You shopping cart total was 0" } };
-            }
-            // ! Do not divide by 100, because Stipe processes cents, and the number will be automatically in cents
-            const refundedAmount = totalWithEntryFees * parseInt(refundPercentage.percentageValue.toString());
-            if (daysDiff >= 86400000) {
-              const stripeRefund = await stripe.refunds.create({
-                payment_intent: payment.stripeId,
-                amount: refundedAmount,
-                reason: "requested_by_customer",
-                reverse_transfer: true,
-                refund_application_fee: false,
-              });
-              if (!stripeRefund) {
-                return { error: { message: errors.SOMETHING_WENT_WRONG } };
-              }
-            }
-            await payment.softRemove();
-          } catch (err) {
-            return { error: { message: `${errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
+        try {
+          const refund = await payment.getRefundPercentage();
+          if (!refund) {
+            return { error: { message: errors.SOMETHING_WENT_WRONG } };
           }
+          const { refundPercentage, daysDiff } = refund;
+          const cartTotal = await payment.cart.getTotalPrice();
+          if (cartTotal === undefined) {
+            return { error: { message: errors.SOMETHING_WENT_WRONG } };
+          }
+          const { totalWithEntryFees } = cartTotal;
+          if (totalWithEntryFees === 0) {
+            return { error: { message: "You shopping cart total was 0" } };
+          }
+          // ! Do not divide by 100, because Stipe processes cents, and the number will be automatically in cents
+          const refundedAmount = totalWithEntryFees * parseInt(refundPercentage.percentageValue.toString());
+          if (daysDiff >= 86400000) {
+            const stripeRefund = await stripe.refunds.create({
+              payment_intent: payment.stripeId,
+              amount: refundedAmount,
+              reason: "requested_by_customer",
+              reverse_transfer: true,
+              refund_application_fee: false,
+            });
+            if (!stripeRefund) {
+              return { error: { message: errors.SOMETHING_WENT_WRONG } };
+            }
+          }
+          await payment.softRemove();
+        } catch (err) {
+          return { error: { message: `${errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
+        }
         return {
           deleted: true,
         };

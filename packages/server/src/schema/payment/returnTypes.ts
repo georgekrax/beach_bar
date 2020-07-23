@@ -12,5 +12,5 @@ export type UpdatePaymentType = UpdateType & PaymentType;
 
 export type UniqueBeachBarsType = {
   beachBar: BeachBar;
-  discountAmount: number;
+  discountPercentage: number;
 }[];

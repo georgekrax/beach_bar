@@ -359,6 +359,8 @@ export class BeachBar extends BaseEntity {
       return undefined;
     }
     const { pricingFee, currencyFee } = beachBarPricingFee;
+    console.log(pricingFee);
+    console.log(currencyFee);
     const percentageFee = parseFloat(((total * parseFloat(pricingFee.percentageValue.toString())) / 100).toFixed(2));
     const beachBarAppFee = parseFloat((percentageFee + parseFloat(currencyFee.numericValue.toString())).toFixed(2));
     const transferAmount = parseFloat((total - beachBarAppFee - stripeFee).toFixed(2));

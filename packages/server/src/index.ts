@@ -7,7 +7,6 @@ import cookieParser from "cookie-parser";
 import express from "express";
 import Redis from "ioredis";
 import { verify } from "jsonwebtoken";
-import mongoose from "mongoose";
 import "reflect-metadata";
 import { Stripe } from "stripe";
 import { UAParser } from "ua-parser-js";
@@ -38,17 +37,17 @@ export let stripe: Stripe;
 
     await createDBConnection();
 
-    await mongoose.connect(process.env.MONGO_DB_URL!.toString(), {
-      useCreateIndex: true,
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      auth: { user: process.env.MONGO_DB_USERNAME!.toString(), password: process.env.MONGO_DB_PASSWORD!.toString() },
-      dbName: process.env.MONGO_DB_NAME!.toString(),
-    });
-    const mongoDb = mongoose.connection;
-    mongoDb.on("error", (err: any) => {
-      throw new Error(err.message);
-    });
+    // await mongoose.connect(process.env.MONGO_DB_URL!.toString(), {
+    //   useCreateIndex: true,
+    //   useNewUrlParser: true,
+    //   useUnifiedTopology: true,
+    //   auth: { user: process.env.MONGO_DB_USERNAME!.toString(), password: process.env.MONGO_DB_PASSWORD!.toString() },
+    //   dbName: process.env.MONGO_DB_NAME!.toString(),
+    // });
+    // const mongoDb = mongoose.connection;
+    // mongoDb.on("error", (err: any) => {
+    //   throw new Error(err.message);
+    // });
   } catch (err) {
     console.log(err);
     process.exit(0);

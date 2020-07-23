@@ -3,17 +3,18 @@ import { Dayjs } from "dayjs";
 import {
   BaseEntity,
   BeforeInsert,
+  Check,
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
-  PrimaryGeneratedColumn,
   OneToMany,
-  Check,
+  PrimaryGeneratedColumn,
 } from "typeorm";
 import { softRemove } from "../utils/softRemove";
+import { BeachBar } from "./BeachBar";
 import { OfferCampaign } from "./OfferCampaign";
 import { PaymentOfferCode } from "./PaymentOfferCode";
 
@@ -54,6 +55,11 @@ export class OfferCampaignCode extends BaseEntity {
   @BeforeInsert()
   generateRefCode(): void {
     this.refCode = generateID(23);
+  }
+
+  getProductBeachBars(): BeachBar[] {
+    const productBeachBars = this.campaign.products.map(product => product.beachBar);
+    return productBeachBars.filter((beachBar, index, self) => index === self.findIndex(t => t.id === beachBar.id));
   }
 
   async softRemove(): Promise<any> {

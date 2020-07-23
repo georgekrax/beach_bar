@@ -167,7 +167,7 @@ export class Cart extends BaseEntity {
     return undefined;
   }
 
-  async getBeachBarTotalPrice(beachBarId: number, discount = 0): Promise<GetBeachBarTotalPrice | undefined> {
+  async getBeachBarTotalPrice(beachBarId: number, couponCodeDiscount = 0): Promise<GetBeachBarTotalPrice | undefined> {
     if (this.products) {
       const products = this.products.filter(product => product.product.beachBarId === beachBarId && !product.product.deletedAt);
       if (products) {
@@ -180,8 +180,8 @@ export class Cart extends BaseEntity {
         }
         return {
           entryFeeTotal: totalEntryFees,
-          totalWithoutEntryFees: total - discount,
-          totalWithEntryFees: parseFloat((total + totalEntryFees - discount).toFixed(2)),
+          totalWithoutEntryFees: total - couponCodeDiscount,
+          totalWithEntryFees: parseFloat((total + totalEntryFees - couponCodeDiscount).toFixed(2)),
         };
       }
       return undefined;
