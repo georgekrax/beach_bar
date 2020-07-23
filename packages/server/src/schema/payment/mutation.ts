@@ -14,7 +14,7 @@ import { StripeMinimumCurrency } from "../../entity/StripeMinimumCurrency";
 import { DeleteType, ErrorType } from "../returnTypes";
 import { DeleteResult } from "../types";
 import { PaymentOfferCodeInput } from "./offer_code/types";
-import { AddPaymentType } from "./returnTypes";
+import { AddPaymentType, UniqueBeachBarsType } from "./returnTypes";
 import { AddPaymentResult } from "./types";
 
 export const PaymentCrudMutation = extendType({
@@ -64,10 +64,13 @@ export const PaymentCrudMutation = extendType({
         if (!cart || !cart.products || cart.products.length === 0) {
           return { error: { code: errors.CONFLICT, message: "Specified shopping cart does not exist" } };
         }
-        const uniqueBeachBars = cart.getUniqueBeachBars();
-        if (!uniqueBeachBars || uniqueBeachBars.length === 0) {
-          return { error: { message: errors.SOMETHING_WENT_WRONG } };
+        const uBeachBars = cart.getUniqueBeachBars();
+        if (!uBeachBars || uBeachBars.length === 0) {
+          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
         }
+        const uniqueBeachBars: UniqueBeachBarsType = uBeachBars.map(beachBar => {
+          return { beachBar, discountAmount: 0 };
+        });
 
         const cartTotal = await cart.getTotalPrice();
         if (cartTotal === undefined || cartTotal.totalWithoutEntryFees !== parseFloat(cart.total.toString())) {
@@ -179,7 +182,7 @@ export const PaymentCrudMutation = extendType({
         try {
           // * check if cart total is 0
           for (let i = 0; i < uniqueBeachBars.length; i++) {
-            const beachBar = uniqueBeachBars[i];
+            const beachBar = uniqueBeachBars[i].beachBar;
             const isZeroCartTotal = cart.verifyZeroCartTotal(beachBar);
             const minimumCurrency = await StripeMinimumCurrency.findOne({ currencyId: beachBar.defaultCurrencyId });
             if (!minimumCurrency) {
@@ -254,7 +257,8 @@ export const PaymentCrudMutation = extendType({
           let beachBarPricingFee = 0;
           let transferAmount = 0;
           for (let i = 0; i < uniqueBeachBars.length; i++) {
-            const beachBar = uniqueBeachBars[i];
+            const { beachBar, discountAmount } = uniqueBeachBars[i];
+            console.log(discountAmount);
             const cartBeachBarTotal = await cart.getBeachBarTotalPrice(beachBar.id, discount);
             if (cartBeachBarTotal === undefined) {
               return { error: { message: errors.SOMETHING_WENT_WRONG } };

@@ -1,13 +1,13 @@
+import { errors } from "@beach_bar/common";
 import * as express from "express";
 import { KeyType } from "ioredis";
 import { decode, verify } from "jsonwebtoken";
 import { URL } from "url";
-import { redis } from "../index";
 import { User } from "../entity/User";
+import { redis } from "../index";
 import { generateAccessToken, generateRefreshToken } from "../utils/auth/generateAuthTokens";
 import { refreshTokenForHashtagUser } from "../utils/auth/refreshTokenForHashtagUser";
 import { sendRefreshToken } from "../utils/auth/sendRefreshToken";
-import { errors } from "@beach_bar/common";
 
 export const router = express.Router();
 
@@ -152,7 +152,7 @@ router.post("/refresh_token", async (req: express.Request, res: express.Response
   }
 
   // get user (new) scopes from Redis
-  const scope = await redis.smembers(`scope:${user.id}` as KeyType);
+  const scope = await redis.smembers(user.getRedisKey(true) as KeyType);
 
   const newAccessToken = generateAccessToken(user, scope);
 

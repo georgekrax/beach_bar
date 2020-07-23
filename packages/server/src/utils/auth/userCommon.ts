@@ -1,11 +1,12 @@
-import { City } from "../../entity/City";
 import { Account } from "../../entity/Account";
+import { City } from "../../entity/City";
 import { Country } from "../../entity/Country";
-import { Platform } from "../../entity/Platform";
-import { ClientBrowser, ClientOs } from "../../entity/ClientOs&Browser";
-import { loginDetailStatus, LoginDetails } from "../../entity/LoginDetails";
+import clientBrowser from "../../models/clientBrowser";
+import clientOs from "../../models/clientOs";
+import loginDetails from "../../models/loginDetails";
+import Platform from "../../models/platform";
 
-export const switchPlatform = async (urlHostname: string): Promise<Platform | Error> => {
+export const switchPlatform = async (urlHostname: string): Promise<any | Error> => {
   const platform = await Platform.findOne({ urlHostname });
 
   if (!platform) {
@@ -16,54 +17,48 @@ export const switchPlatform = async (urlHostname: string): Promise<Platform | Er
 };
 
 export const createUserLoginDetails = async (
-  status: loginDetailStatus,
-  platform: Platform,
+  status: string,
+  platformName: string,
   account: Account,
-  clientOs: ClientOs | null,
-  clientBrowser: ClientBrowser | null,
-  country: Country | null,
-  city: City | null,
-  ipAddr: string | null,
+  clientOs?: any,
+  clientBrowser?: any,
+  country?: Country,
+  city?: City,
+  ipAddr?: string
 ): Promise<void> => {
-  const userLoginDetails = LoginDetails.create({
+  // pass beach_bar platform to user login details
+  const platform = await Platform.findOne({ name: platformName });
+  if (!platform) {
+    throw new Error();
+  }
+  await loginDetails.create({
+    accountId: account.id,
+    platformId: platform._id,
     status,
-    platform,
-    account,
+    osId: clientOs ? clientOs._id : undefined,
+    clientId: clientBrowser ? clientBrowser._id : undefined,
+    countryId: country ? country.id : undefined,
+    cityId: city ? city.id : undefined,
+    ipAddr,
   });
-  if (clientOs) {
-    userLoginDetails.clientOs = clientOs;
-  }
-  if (clientBrowser) {
-    userLoginDetails.clientBrowser = clientBrowser;
-  }
-  if (country) {
-    userLoginDetails.country = country;
-  }
-  if (city) {
-    userLoginDetails.city = city;
-  }
-  if (ipAddr) {
-    userLoginDetails.ipAddr = ipAddr;
-  }
-  await userLoginDetails.save();
 };
 
-export const findOs = async (osName: string): Promise<ClientOs | null> => {
+export const findOs = async (osName: string): Promise<any | null> => {
   if (!osName) {
     return null;
   }
-  const os = await ClientOs.findOne({ where: { name: osName } });
+  const os = await clientOs.findOne({ name: osName });
   if (!os) {
     throw new Error("Invalid OS name");
   }
   return os;
 };
 
-export const findBrowser = async (browserName: string): Promise<ClientBrowser | null> => {
+export const findBrowser = async (browserName: string): Promise<any | null> => {
   if (!browserName) {
     return null;
   }
-  const browser = await ClientBrowser.findOne({ where: { name: browserName } });
+  const browser = await clientBrowser.findOne({ name: browserName });
   if (!browser) {
     throw new Error("Invalid browser name");
   }

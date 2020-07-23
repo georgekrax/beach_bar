@@ -12,6 +12,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import redisKeys from "../constants/redisKeys";
 import { SearchFilter } from "./SearchFilter";
 import { SearchInputValue } from "./SearchInputValue";
 import { User } from "./User";
@@ -65,4 +66,8 @@ export class UserSearch extends BaseEntity {
 
   @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
   timestamp: Dayjs;
+
+  getRedisKey(): string {
+    return `${redisKeys.USER}:${redisKeys.USER_SEARCHES}`;
+  }
 }

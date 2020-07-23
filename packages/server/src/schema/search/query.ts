@@ -1,8 +1,9 @@
-import { dayjsFormat, errors, filterSearch, MyContext } from "@beach_bar/common";
+import { dayjsFormat, errors, MyContext } from "@beach_bar/common";
 import { arg, extendType, stringArg } from "@nexus/schema";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { getCustomRepository, In } from "typeorm";
+import redisKeys from "../../constants/redisKeys";
 import { BeachBar, BeachBarRepository } from "../../entity/BeachBar";
 import { BeachBarFeature } from "../../entity/BeachBarFeature";
 import { Product } from "../../entity/Product";
@@ -30,28 +31,26 @@ export const SearchQuery = extendType({
       type: UserSearchType,
       description: "Get a list with a user's latest searches",
       nullable: true,
-      resolve: async (_, __, { payload }: MyContext): Promise<UserSearch[] | null> => {
+      resolve: async (_, __, { payload, redis }: MyContext): Promise<UserSearch[] | null> => {
         if (!payload) {
           return null;
         }
 
-        const searches = await UserSearch.find({
-          where: { userId: payload.sub },
-          relations: ["user", "inputValue", "inputValue.country", "inputValue.city", "inputValue.region", "inputValue.beachBar"],
-          order: {
-            updatedAt: "DESC",
-          },
-        });
+        const searches: UserSearch[] = (
+          await redis.lrange(`${redisKeys.USER}:${redisKeys.USER_SEARCHES}:${payload.sub}`, 0, -1)
+        ).map((x: string) => JSON.parse(x));
+        const userSearches = searches.filter(search => parseInt(search.userId.toString()) === payload.sub);
+
         const result: UserSearch[] = [];
         const map = new Map();
-        for (let i = 0; i < searches.length; i++) {
-          if (!map.has(searches[i].inputValueId)) {
-            map.set(searches[i].inputValueId, true);
-            result.push(searches[i]);
+        for (let i = 0; i < userSearches.length; i++) {
+          if (!map.has(userSearches[i].inputValueId)) {
+            map.set(userSearches[i].inputValueId, true);
+            result.push(userSearches[i]);
           }
         }
 
-        return result.slice(0, 5);
+        return result;
       },
     });
     t.field("search", {
@@ -165,7 +164,6 @@ export const SearchQuery = extendType({
         let filters: SearchFilter[] = [];
         if (filterIds && filterIds.length > 0) {
           filters = await SearchFilter.find({ publicId: In(filterIds) });
-          results = filterSearch(filterIds, results);
         }
 
         const userSearch = UserSearch.create({
@@ -179,6 +177,11 @@ export const SearchQuery = extendType({
 
         try {
           await userSearch.save();
+
+          // cache in Redis, if user is authenticated
+          if (payload && payload.sub) {
+            await redis.lpush(`${userSearch.getRedisKey()}:${payload.sub}`, JSON.stringify(userSearch));
+          }
         } catch (err) {
           return { error: { code: errors.INTERNAL_SERVER_ERROR, message: `${errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
         }

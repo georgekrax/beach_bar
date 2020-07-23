@@ -6,7 +6,6 @@ import { City } from "./City";
 import { CountryFlagIcon } from "./CountryFlagIcon";
 import { Currency } from "./Currency";
 import { Customer } from "./Customer";
-import { LoginDetails } from "./LoginDetails";
 import { Region } from "./Region";
 import { SearchInputValue } from "./SearchInputValue";
 import { UserContactDetails } from "./UserContactDetails";
@@ -67,7 +66,4 @@ export class Country extends BaseEntity {
 
   @OneToMany(() => SearchInputValue, searchInputValue => searchInputValue.country, { nullable: true })
   searchInputValues?: SearchInputValue[];
-
-  @OneToMany(() => LoginDetails, loginDetails => loginDetails.country, { nullable: true })
-  loginDetails?: LoginDetails[];
 }

@@ -4,10 +4,11 @@ import { execute, makePromise } from "apollo-link";
 import { createHash, randomBytes } from "crypto";
 import { KeyType } from "ioredis";
 import { link } from "../../config/apolloLink";
+import platformNames from "../../constants/platformNames";
+import redisKeys from "../../constants/redisKeys";
+import { loginDetails as loginDetailsStatus } from "../../constants/status";
 import { City } from "../../entity/City";
 import { Country } from "../../entity/Country";
-import { loginDetailStatus } from "../../entity/LoginDetails";
-import { Platform } from "../../entity/Platform";
 import { User } from "../../entity/User";
 import authorizeWithHashtagQuery from "../../graphql/AUTHORIZE_WITH_HASHTAG";
 import changeUserPasswordQuery from "../../graphql/CHANGE_USER_PASSWORD";
@@ -123,7 +124,7 @@ export const UserSignUpAndLoginMutation = extendType({
           undefined,
           country,
           city,
-          hashtagUser.birthday,
+          hashtagUser.birthday
         );
         // @ts-ignore
         if (response.error && !response.user) {
@@ -157,7 +158,7 @@ export const UserSignUpAndLoginMutation = extendType({
       resolve: async (
         _,
         { loginDetails, userCredentials },
-        { res, redis, uaParser }: MyContext,
+        { res, redis, uaParser }: MyContext
       ): Promise<UserLoginType | ErrorType> => {
         const { email, password } = userCredentials;
         if (!email || email === "" || email === " ") {
@@ -169,9 +170,9 @@ export const UserSignUpAndLoginMutation = extendType({
 
         let os: any = uaParser.getOS().name,
           browser: any = uaParser.getBrowser().name,
-          country: any = null,
-          city: any = null,
-          ipAddr: string | null = null;
+          country: any = undefined,
+          city: any = undefined,
+          ipAddr: string | undefined = undefined;
 
         if (loginDetails) {
           ({ city, country, ipAddr } = loginDetails);
@@ -221,7 +222,7 @@ export const UserSignUpAndLoginMutation = extendType({
         }
 
         const state = createHash("sha256").update(randomBytes(1024)).digest("hex");
-        const scope = await redis.smembers(`scope:${user.id}` as KeyType);
+        const scope = await redis.smembers(`${redisKeys.USER}:${user.id}:${redisKeys.USER_SCOPE}` as KeyType);
 
         const authorizeWithHashtagOperation = {
           query: authorizeWithHashtagQuery,
@@ -274,24 +275,32 @@ export const UserSignUpAndLoginMutation = extendType({
             return { error: { message: `Something went wrong: ${err.message}` } };
           });
 
-        // pass beach_bar platform to user login details
-        const platform = await Platform.findOne({ where: { name: "#beach_bar" } });
-        if (!platform) {
-          return { error: { message: "Something went wrong" } };
-        }
-
         if (errorCode || errorMessage) {
           if (errorMessage === errors.INVALID_PASSWORD_MESSAGE || errorCode === errors.INVALID_PASSWORD_CODE) {
             await createUserLoginDetails(
-              loginDetailStatus.invalidPassword,
-              platform,
+              loginDetailsStatus.INVALID_PASSWORD,
+              platformNames.BEACH_BAR,
               user.account,
               os,
               browser,
               country,
               city,
-              ipAddr,
+              ipAddr
             );
+          } else {
+            await createUserLoginDetails(
+              loginDetailsStatus.FAILED,
+              platformNames.BEACH_BAR,
+              user.account,
+              os,
+              browser,
+              country,
+              city,
+              ipAddr
+            );
+          }
+          if (errorCode === errors.SCOPE_MISMATCH) {
+            return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
           }
           return { error: { code: errorCode, message: errorMessage } };
         }
@@ -346,6 +355,16 @@ export const UserSignUpAndLoginMutation = extendType({
           });
 
         if (errorCode || errorMessage) {
+          await createUserLoginDetails(
+            loginDetailsStatus.FAILED,
+            platformNames.BEACH_BAR,
+            user.account,
+            os,
+            browser,
+            country,
+            city,
+            ipAddr
+          );
           return {
             error: { code: errorCode, message: errorMessage },
           };
@@ -387,6 +406,16 @@ export const UserSignUpAndLoginMutation = extendType({
           });
 
         if (errorCode || errorMessage) {
+          await createUserLoginDetails(
+            loginDetailsStatus.FAILED,
+            platformNames.BEACH_BAR,
+            user.account,
+            os,
+            browser,
+            country,
+            city,
+            ipAddr
+          );
           return { error: { code: errorCode, message: errorMessage as any } };
         }
 
@@ -419,7 +448,16 @@ export const UserSignUpAndLoginMutation = extendType({
         }
 
         // create user login details
-        await createUserLoginDetails(loginDetailStatus.loggedIn, platform, user.account, os, browser, country, city, ipAddr);
+        await createUserLoginDetails(
+          loginDetailsStatus.LOGGED_IN,
+          platformNames.BEACH_BAR,
+          user.account,
+          os,
+          browser,
+          country,
+          city,
+          ipAddr
+        );
 
         const refreshToken = generateRefreshToken(user);
         const accessToken = generateAccessToken(user, scope);
@@ -738,7 +776,7 @@ export const UserCrudMutation = extendType({
       resolve: async (
         _,
         { email, username, firstName, lastName, imgUrl, personTitle, birthday, countryId, cityId, address, zipCode },
-        { payload, redis, stripe }: MyContext,
+        { payload, redis, stripe }: MyContext
       ): Promise<UserUpdateType | ErrorType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };

@@ -22,7 +22,7 @@ export const signUpUser = async (
   lastName?: string,
   country?: Country,
   city?: City,
-  birthday?: Date,
+  birthday?: Date
 ): Promise<{ user: User } | ErrorType> => {
   const user = await User.findOne({ where: { email }, relations: ["account"] });
   if (user) {
@@ -60,9 +60,9 @@ export const signUpUser = async (
   }
 
   if (isPrimaryOwner) {
-    await redis.sadd(`scope:${newUser.id}` as KeyType, userScopes.PRIMARY_OWNER);
+    await redis.sadd(newUser.getRedisKey(true) as KeyType, userScopes.PRIMARY_OWNER);
   } else {
-    await redis.sadd(`scope:${newUser.id}` as KeyType, userScopes.SIMPLE_USER);
+    await redis.sadd(newUser.getRedisKey(true) as KeyType, userScopes.SIMPLE_USER);
   }
 
   return { user: newUser };

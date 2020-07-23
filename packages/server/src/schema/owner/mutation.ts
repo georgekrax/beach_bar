@@ -228,10 +228,10 @@ export const OwnerCrudMutation = extendType({
             return { error: { code: errors.UNAUTHORIZED_CODE, message: "You are not allowed to make this owner a primary one" } };
           } else if (isPrimary && payload.scope.includes("beach_bar@crud:beach_bar")) {
             beachBarOwner.isPrimary = true;
-            await redis.sadd(`scope:${beachBarOwner.owner.user.id}` as KeyType, [user.CRUD_OWNER_BEACH_BAR, user.CRUD_BEACH_BAR]);
+            await redis.sadd(beachBarOwner.owner.user.getRedisKey(true) as KeyType, [user.CRUD_OWNER_BEACH_BAR, user.CRUD_BEACH_BAR]);
           } else {
             beachBarOwner.isPrimary = false;
-            await redis.srem(`scope:${beachBarOwner.owner.user.id}` as KeyType, [user.CRUD_OWNER_BEACH_BAR, user.CRUD_BEACH_BAR]);
+            await redis.srem(beachBarOwner.owner.user.getRedisKey(true) as KeyType, [user.CRUD_OWNER_BEACH_BAR, user.CRUD_BEACH_BAR]);
           }
           if ((publicInfo !== undefined || null) && primaryBeachBarOwner) {
             return {
@@ -336,10 +336,10 @@ export const OwnerCrudMutation = extendType({
         }
 
         try {
-          const ownerScopes = await redis.smembers(`scope:${beachBarOwner.owner.user.id}` as KeyType);
+          const ownerScopes = await redis.smembers(beachBarOwner.owner.user.getRedisKey(true) as KeyType);
           const diff = arrDiff(user.SIMPLE_USER, ownerScopes);
           if (diff.length > 0) {
-            await redis.srem(`scope:${beachBarOwner.owner.user.id}` as KeyType, ...diff);
+            await redis.srem(beachBarOwner.owner.user.getRedisKey(true) as KeyType, ...diff);
           }
           await beachBarOwner.softRemove();
         } catch (err) {

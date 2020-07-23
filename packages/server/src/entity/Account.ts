@@ -15,7 +15,6 @@ import {
   UpdateDateColumn,
 } from "typeorm";
 import { softRemove } from "../utils/softRemove";
-import { LoginDetails } from "././LoginDetails";
 import { City } from "./City";
 import { Country } from "./Country";
 import { User } from "./User";
@@ -80,9 +79,6 @@ export class Account extends BaseEntity {
 
   @OneToMany(() => UserContactDetails, userContactDetails => userContactDetails.account, { nullable: true })
   contactDetails?: UserContactDetails[];
-
-  @OneToMany(() => LoginDetails, loginDetails => loginDetails.account, { nullable: true })
-  loginDetails?: LoginDetails[];
 
   @UpdateDateColumn({ name: "updated_at", type: "timestamptz", default: () => `NOW()` })
   updatedAt: Dayjs;

@@ -22,6 +22,7 @@ import { Owner } from "./Owner";
 import { UserSearch } from "./UserSearch";
 import { Vote } from "./Vote";
 import { Dayjs } from "dayjs";
+import redisKeys from "../constants/redisKeys";
 
 @Entity({ name: "user", schema: "public" })
 export class User extends BaseEntity {
@@ -89,6 +90,13 @@ export class User extends BaseEntity {
 
   getFullName(): string {
     return `${this.firstName ? this.firstName : ""}${this.firstName && this.lastName ? " " : ""}${this.lastName ? this.lastName : ""}`;
+  }
+
+  getRedisKey(scope = false): string {
+    if (scope) {
+      return `${redisKeys.USER}:${this.id}:${redisKeys.USER_SCOPE}`
+    }
+    return `${redisKeys.USER}`;
   }
 
   getIsNew(data: UpdateUser): boolean {

@@ -111,6 +111,8 @@ export const UserLoginDetailsInput = inputObjectType({
   name: "UserLoginDetailsInput",
   description: "User details in login",
   definition(t) {
+    t.string("os", { required: false, description: "The operating system (OS) name from where the user logins" });
+    t.string("browser", { required: false, description: "The browser name that the user uses to login" });
     t.string("country", { required: false, description: "Country from where user logins" });
     t.string("city", { required: false, description: "City from where user logins" });
     t.field("ipAddr", { type: IPv4Scalar, required: false, description: "Internet Protocol (IP) address of user to login" });

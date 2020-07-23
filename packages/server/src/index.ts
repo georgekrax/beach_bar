@@ -39,6 +39,7 @@ export let stripe: Stripe;
     await createDBConnection();
 
     await mongoose.connect(process.env.MONGO_DB_URL!.toString(), {
+      useCreateIndex: true,
       useNewUrlParser: true,
       useUnifiedTopology: true,
       auth: { user: process.env.MONGO_DB_USERNAME!.toString(), password: process.env.MONGO_DB_PASSWORD!.toString() },
@@ -186,7 +187,6 @@ export let stripe: Stripe;
       return { req, res, payload, redis, sgMail, sgClient, stripe, uaParser, googleOAuth2Client };
     },
   });
-
   server.applyMiddleware({ app, cors: false });
 
   app.listen({ port: parseInt(process.env.PORT!) || 4000 }, () =>

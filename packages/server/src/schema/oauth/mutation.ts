@@ -2,8 +2,8 @@ import { EmailScalar, errors, MyContext } from "@beach_bar/common";
 import { arg, booleanArg, extendType, stringArg } from "@nexus/schema";
 import dayjs from "dayjs";
 import fetch from "node-fetch";
-import { loginDetailStatus } from "../../entity/LoginDetails";
-import { Platform } from "../../entity/Platform";
+import platformNames from "../../constants/platformNames";
+import { loginDetails as loginDetailsStatus } from "../../constants/status";
 import { User } from "../../entity/User";
 import { generateAccessToken, generateRefreshToken } from "../../utils/auth/generateAuthTokens";
 import { sendRefreshToken } from "../../utils/auth/sendRefreshToken";
@@ -38,7 +38,7 @@ export const AuthorizeWithOAuthProviders = extendType({
       resolve: async (
         _,
         { code, state, loginDetails, isPrimaryOwner },
-        { req, res, googleOAuth2Client, uaParser, redis }: MyContext,
+        { req, res, googleOAuth2Client, uaParser, redis }: MyContext
       ): Promise<AuthorizeWithOAuthType | ErrorType> => {
         if (!code || code === "" || code === " ") {
           return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
@@ -62,7 +62,7 @@ export const AuthorizeWithOAuthProviders = extendType({
           return {
             error: {
               code: errors.INTERNAL_SERVER_ERROR,
-              message: "Something went wrong",
+              message: errors.SOMETHING_WENT_WRONG,
             },
           };
         }
@@ -82,7 +82,7 @@ export const AuthorizeWithOAuthProviders = extendType({
             };
           }
         } catch (err) {
-          return { error: { message: `Something went wrong: ${err.message}` } };
+          return { error: { message: `${errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
         }
 
         const { sub: googleId, given_name: firstName, family_name: lastName, email, locale } = response.data;
@@ -98,9 +98,9 @@ export const AuthorizeWithOAuthProviders = extendType({
 
         let os: any = uaParser.getOS().name,
           browser: any = uaParser.getBrowser().name,
-          country: any = null,
-          city: any = null,
-          ipAddr: string | null = null;
+          country: any = undefined,
+          city: any = undefined,
+          ipAddr: string | undefined = undefined;
 
         if (loginDetails) {
           ({ city, country, ipAddr } = loginDetails);
@@ -143,7 +143,7 @@ export const AuthorizeWithOAuthProviders = extendType({
             lastName,
             country,
             city,
-            undefined,
+            undefined
           );
           // @ts-ignore
           if (response.error && !response.user) {
@@ -164,18 +164,24 @@ export const AuthorizeWithOAuthProviders = extendType({
           return { error: { code: errors.INTERNAL_SERVER_ERROR, message: "Something went wrong" } };
         }
 
-        // pass beach_bar platform to user login details
-        const platform = await Platform.findOne({ name: "Google" });
-        if (!platform) {
-          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: "Something went wrong" } };
-        }
-
         // logined successfully
-        // create user login details
-        await createUserLoginDetails(loginDetailStatus.loggedIn, platform, user.account, os, browser, country, city, ipAddr);
-
+        try {
+          // create user login details
+          await createUserLoginDetails(
+            loginDetailsStatus.LOGGED_IN,
+            platformNames.GOOGLE,
+            user.account,
+            os,
+            browser,
+            country,
+            city,
+            ipAddr
+          );
+        } catch (err) {
+          return { error: { message: `${errors.SOMETHING_WENT_WRONG}${err.message && err.message !== "" ? err.message : ""}` } };
+        }
         // get user's scopes from Redis
-        const scope = await redis.smembers(`scope:${user.id}` as KeyType);
+        const scope = await redis.smembers(user.getRedisKey(true) as KeyType);
         const refreshToken = generateRefreshToken(user);
         const accessToken = generateAccessToken(user, scope);
         sendRefreshToken(res, refreshToken.token);
@@ -228,7 +234,7 @@ export const AuthorizeWithOAuthProviders = extendType({
       resolve: async (
         _,
         { code, state, loginDetails, isPrimaryOwner },
-        { req, res, uaParser, redis }: MyContext,
+        { req, res, uaParser, redis }: MyContext
       ): Promise<AuthorizeWithOAuthType | ErrorType> => {
         if (!code || code.trim().length === 0) {
           return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
@@ -252,7 +258,7 @@ export const AuthorizeWithOAuthProviders = extendType({
           `${process.env.FACEBOOK_GRAPH_API_HOSTNAME!.toString()}/v7.0/oauth/access_token?client_id=${process.env.FACEBOOK_APP_ID!.toString()}&redirect_uri=${process.env.FACEBOOK_REDIRECT_URI!.toString()}&client_secret=${process.env.FACEBOOK_APP_SECRET!.toString()}&code=${code}`,
           {
             method: "GET",
-          },
+          }
         )
           .then(res => {
             requestStatus = res.status;
@@ -267,7 +273,7 @@ export const AuthorizeWithOAuthProviders = extendType({
             }
           })
           .catch(err => {
-            return { error: { message: `Something went wrong: ${err.message}` } };
+            return { error: { message: `${errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
           });
 
         if (!success || !facebookAccessToken) {
@@ -280,7 +286,7 @@ export const AuthorizeWithOAuthProviders = extendType({
           `${process.env.FACEBOOK_GRAPH_API_HOSTNAME!.toString()}/debug_token?input_token=${facebookAccessToken}&access_token=${process.env.FACEBOOK_APP_ACCESS_TOKEN!.toString()}`,
           {
             method: "GET",
-          },
+          }
         )
           .then(res => {
             requestStatus = res.status;
@@ -321,7 +327,7 @@ export const AuthorizeWithOAuthProviders = extendType({
           `${process.env.FACEBOOK_GRAPH_API_HOSTNAME!.toString()}/me?fields=id,email,first_name,last_name,birthday,hometown,location,picture{is_silhouette,url}&access_token=${facebookAccessToken}`,
           {
             method: "GET",
-          },
+          }
         )
           .then(res => {
             requestStatus = res.status;
@@ -357,7 +363,7 @@ export const AuthorizeWithOAuthProviders = extendType({
 
         let os: any = uaParser.getOS().name,
           browser: any = uaParser.getBrowser().name,
-          ipAddr: string | null = null;
+          ipAddr: string | undefined = undefined;
 
         if (loginDetails) {
           ({ city, country, ipAddr } = loginDetails);
@@ -391,7 +397,7 @@ export const AuthorizeWithOAuthProviders = extendType({
             lastName,
             country,
             city,
-            birthday,
+            birthday
           );
           // @ts-ignore
           if (response.error && !response.user) {
@@ -412,18 +418,21 @@ export const AuthorizeWithOAuthProviders = extendType({
           return { error: { code: errors.INTERNAL_SERVER_ERROR, message: "Something went wrong" } };
         }
 
-        // pass beach_bar platform to user login details
-        const platform = await Platform.findOne({ name: "Facebook" });
-        if (!platform) {
-          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: "Something went wrong" } };
-        }
-
         // logined successfully
         // create user login details
-        await createUserLoginDetails(loginDetailStatus.loggedIn, platform, user.account, os, browser, country, city, ipAddr);
+        await createUserLoginDetails(
+          loginDetailsStatus.LOGGED_IN,
+          platformNames.FACEBOOK,
+          user.account,
+          os,
+          browser,
+          country,
+          city,
+          ipAddr
+        );
 
         // get user's scopes from Redis
-        const scope = await redis.smembers(`scope:${user.id}` as KeyType);
+        const scope = await redis.smembers(user.getRedisKey(true) as KeyType);
         const refreshToken = generateRefreshToken(user);
         const accessToken = generateAccessToken(user, scope);
         sendRefreshToken(res, refreshToken.token);
@@ -446,7 +455,17 @@ export const AuthorizeWithOAuthProviders = extendType({
             return { error: { code: errors.INTERNAL_SERVER_ERROR, message: "Something went wrong" } };
           }
         } catch (err) {
-          return { error: { message: `Something went wrong: ${err.message}` } };
+          await createUserLoginDetails(
+            loginDetailsStatus.FAILED,
+            platformNames.BEACH_BAR,
+            user.account,
+            os,
+            browser,
+            country,
+            city,
+            ipAddr
+          );
+          return { error: { message: `${errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
         }
 
         res.clearCookie("fbstate", { httpOnly: true, maxAge: 310000 });
@@ -481,7 +500,7 @@ export const AuthorizeWithOAuthProviders = extendType({
       resolve: async (
         _,
         { email, code, state, loginDetails, isPrimaryOwner },
-        { req, res, uaParser, redis }: MyContext,
+        { req, res, uaParser, redis }: MyContext
       ): Promise<AuthorizeWithOAuthType | ErrorType> => {
         if (!email || email === "" || email === " ") {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid email address" } };
@@ -549,7 +568,7 @@ export const AuthorizeWithOAuthProviders = extendType({
           `${process.env.INSTAGRAM_GRAPH_API_HOSTNAME!.toString()}/${instagramUserId}?fields=id,username&access_token=${instagramAccessToken}`,
           {
             method: "GET",
-          },
+          }
         )
           .then(res => {
             requestStatus = res.status;
@@ -576,7 +595,7 @@ export const AuthorizeWithOAuthProviders = extendType({
           browser: any = uaParser.getBrowser().name,
           country: any = undefined,
           city: any = undefined,
-          ipAddr: string | null = null;
+          ipAddr: string | undefined = undefined;
 
         if (loginDetails) {
           ({ city, country, ipAddr } = loginDetails);
@@ -613,7 +632,7 @@ export const AuthorizeWithOAuthProviders = extendType({
             undefined,
             country,
             city,
-            undefined,
+            undefined
           );
 
           // @ts-ignore
@@ -631,18 +650,21 @@ export const AuthorizeWithOAuthProviders = extendType({
           };
         }
 
-        // pass beach_bar platform to user login details
-        const platform = await Platform.findOne({ name: "Instagram" });
-        if (!platform) {
-          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: "Something went wrong" } };
-        }
-
         // logined successfully
         // create user login details
-        await createUserLoginDetails(loginDetailStatus.loggedIn, platform, user.account, os, browser, country, city, ipAddr);
+        await createUserLoginDetails(
+          loginDetailsStatus.LOGGED_IN,
+          platformNames.INSTAGRAM,
+          user.account,
+          os,
+          browser,
+          country,
+          city,
+          ipAddr
+        );
 
         // get user's scopes from Redis
-        const scope = await redis.smembers(`scope:${user.id}` as KeyType);
+        const scope = await redis.smembers(user.getRedisKey() as KeyType);
         const refreshToken = generateRefreshToken(user);
         const accessToken = generateAccessToken(user, scope);
         sendRefreshToken(res, refreshToken.token);
@@ -662,7 +684,17 @@ export const AuthorizeWithOAuthProviders = extendType({
             return { error: { code: errors.INTERNAL_SERVER_ERROR, message: "Something went wrong" } };
           }
         } catch (err) {
-          return { error: { message: `Something went wrong: ${err.message}` } };
+          await createUserLoginDetails(
+            loginDetailsStatus.FAILED,
+            platformNames.BEACH_BAR,
+            user.account,
+            os,
+            browser,
+            country,
+            city,
+            ipAddr
+          );
+          return { error: { message: `${errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
         }
 
         res.clearCookie("instastate", { httpOnly: true, maxAge: 310000 });
