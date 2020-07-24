@@ -8,11 +8,20 @@ import { UAParser } from "ua-parser-js";
 export interface MyContext {
   req: Request;
   res: Response;
-  payload?: { scope: string[]; iat: number; exp: number; aud: string; iss: string; sub: number; jti: string };
+  payload?: {
+    scope: string[];
+    iat: number;
+    exp: number;
+    aud: string;
+    iss: string;
+    sub: number;
+    jti: string;
+  };
   redis: Redis;
   sgMail: MailService;
   sgClient: any;
   stripe: Stripe;
   uaParser: UAParser;
   googleOAuth2Client: OAuth2Client;
+  ipAddr?: string;
 }

@@ -22,4 +22,5 @@ export interface MyContext {
     stripe: Stripe;
     uaParser: UAParser;
     googleOAuth2Client: OAuth2Client;
+    ipAddr?: string;
 }
