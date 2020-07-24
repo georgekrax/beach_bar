@@ -287,7 +287,7 @@ export class CustomerRepository extends Repository<Customer> {
       if (address.city) {
         city = await City.findOne({ name: address.city });
       }
-      await customer.user.updateUser({
+      await customer.user.update({
         email,
         firstName: name.split(" ")[0],
         lastName: name.split(" ")[1],

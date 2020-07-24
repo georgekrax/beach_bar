@@ -8,6 +8,7 @@ import { redis } from "../index";
 import { generateAccessToken, generateRefreshToken } from "../utils/auth/generateAuthTokens";
 import { refreshTokenForHashtagUser } from "../utils/auth/refreshTokenForHashtagUser";
 import { sendRefreshToken } from "../utils/auth/sendRefreshToken";
+import redisKeys from "../constants/redisKeys";
 
 export const router = express.Router();
 
@@ -94,13 +95,13 @@ router.post("/refresh_token", async (req: express.Request, res: express.Response
         }
       }
       const newRefreshToken = generateRefreshToken(user);
-      await redis.hset(user.id.toString() as KeyType, "refresh_token", newRefreshToken.token);
+      await redis.hset(user.getRedisKey() as KeyType, "refresh_token", newRefreshToken.token);
       sendRefreshToken(res, newRefreshToken.token);
     } else {
       return res.send({
         success: false,
         accessToken: null,
-        error: `Something went wrong. ${err.message}`,
+        error: `${errors.SOMETHING_WENT_WRONG}. ${err.message}`,
       });
     }
   }
@@ -113,7 +114,7 @@ router.post("/refresh_token", async (req: express.Request, res: express.Response
     });
   }
 
-  const redisUser = await redis.hgetall(payload.sub.toString() as KeyType);
+  const redisUser = await redis.hgetall(`${redisKeys.USER}:${payload.sub}` as KeyType);
   if (!redisUser || !redisUser.refresh_token) {
     return res.status(422).send({
       success: false,
@@ -156,7 +157,7 @@ router.post("/refresh_token", async (req: express.Request, res: express.Response
 
   const newAccessToken = generateAccessToken(user, scope);
 
-  await redis.hset(user.id.toString() as KeyType, "access_token", newAccessToken.token);
+  await redis.hset(user.getRedisKey() as KeyType, "access_token", newAccessToken.token);
 
   // send back a new accessToken
   return res.send({

@@ -4,7 +4,7 @@ import fetch from "node-fetch";
 import { User } from "../../entity/User";
 
 export const refreshTokenForHashtagUser = async (user: User, redis: Redis): Promise<void | Error> => {
-  const redisUser = await redis.hgetall(user.id.toString() as KeyType);
+  const redisUser = await redis.hgetall(user.getRedisKey() as KeyType);
   if (!redisUser || !redisUser.refresh_token) {
     throw new Error(errors.INVALID_REFRESH_TOKEN);
   }
@@ -40,9 +40,9 @@ export const refreshTokenForHashtagUser = async (user: User, redis: Redis): Prom
     .then(async data => {
       if (data.success && data.accessToken.token && !data.refreshToken) {
         success = true;
-        await redis.hset(user.id.toString(), "hashtag_access_token", data.accessToken.token);
+        await redis.hset(user.getRedisKey(), "hashtag_access_token", data.accessToken.token);
       } else if (data.success && data.refreshToken && !data.accessToken) {
-        await redis.hset(user.id.toString(), "hashtag_refresh_token", data.refreshToken);
+        await redis.hset(user.getRedisKey(), "hashtag_refresh_token", data.refreshToken);
         const newRequestBody = { ...requestBody, refresh_token: data.refreshToken };
         fetch(`${process.env.HASHTAG_API_HOSTNAME}/oauth/refresh_token`, {
           method: "POST",
@@ -57,7 +57,7 @@ export const refreshTokenForHashtagUser = async (user: User, redis: Redis): Prom
           .then(async data => {
             if (data && data.accessToken && !data.refreshToken) {
               success = true;
-              await redis.hset(user.id.toString(), "hashtag_access_token", data.accessToken.token);
+              await redis.hset(user.getRedisKey(), "hashtag_access_token", data.accessToken.token);
             }
           })
           .catch(err => {

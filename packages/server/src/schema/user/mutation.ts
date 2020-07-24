@@ -158,7 +158,7 @@ export const UserSignUpAndLoginMutation = extendType({
       resolve: async (
         _,
         { loginDetails, userCredentials },
-        { res, redis, uaParser }: MyContext
+        { res, redis, uaParser, ipAddr }: MyContext
       ): Promise<UserLoginType | ErrorType> => {
         const { email, password } = userCredentials;
         if (!email || email === "" || email === " ") {
@@ -171,11 +171,10 @@ export const UserSignUpAndLoginMutation = extendType({
         let os: any = uaParser.getOS().name,
           browser: any = uaParser.getBrowser().name,
           country: any = undefined,
-          city: any = undefined,
-          ipAddr: string | undefined = undefined;
+          city: any = undefined;
 
         if (loginDetails) {
-          ({ city, country, ipAddr } = loginDetails);
+          ({ city, country } = loginDetails);
         }
 
         try {
@@ -464,10 +463,10 @@ export const UserSignUpAndLoginMutation = extendType({
         sendRefreshToken(res, refreshToken.token);
 
         try {
-          await redis.hset(`${user.id.toString()}` as KeyType, "access_token", accessToken.token);
-          await redis.hset(`${user.id.toString()}` as KeyType, "refresh_token", refreshToken.token);
-          await redis.hset(`${user.id.toString()}` as KeyType, "hashtag_access_token", hashtagAccessToken.token);
-          await redis.hset(`${user.id.toString()}` as KeyType, "hashtag_refresh_token", hashtagRefreshToken.token);
+          await redis.hset(user.getRedisKey() as KeyType, "access_token", accessToken.token);
+          await redis.hset(user.getRedisKey() as KeyType, "refresh_token", refreshToken.token);
+          await redis.hset(user.getRedisKey() as KeyType, "hashtag_access_token", hashtagAccessToken.token);
+          await redis.hset(user.getRedisKey() as KeyType, "hashtag_refresh_token", hashtagRefreshToken.token);
 
           user.account.isActive = true;
           await user.save();
@@ -498,7 +497,7 @@ export const UserLogoutMutation = extendType({
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
 
-        const redisUser = await redis.hgetall(payload.sub.toString() as KeyType);
+        const redisUser = await redis.hgetall(`${redisKeys.USER}:${payload.sub.toString()}` as KeyType);
         if (!redisUser) {
           return { error: { message: "Something went wrong" } };
         }
@@ -772,10 +771,15 @@ export const UserCrudMutation = extendType({
           required: false,
           description: "User's house or office zip code",
         }),
+        preferenceIds: intArg({
+          required: false,
+          list: true,
+          description: "A list with the user's preferences",
+        }),
       },
       resolve: async (
         _,
-        { email, username, firstName, lastName, imgUrl, personTitle, birthday, countryId, cityId, address, zipCode },
+        { email, username, firstName, lastName, imgUrl, personTitle, birthday, countryId, cityId, address, zipCode, preferenceIds },
         { payload, redis, stripe }: MyContext
       ): Promise<UserUpdateType | ErrorType> => {
         if (!payload) {
@@ -785,18 +789,18 @@ export const UserCrudMutation = extendType({
           return {
             error: {
               code: errors.UNAUTHORIZED_CODE,
-              message: "You are not allowed to update 'this' user",
+              message: "You are not allowed to update a user",
             },
           };
         }
 
-        if (email && (email === "" || email === " ")) {
+        if (email && email.trim().length === 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid email address" } };
         }
 
         const user = await User.findOne({
           where: { id: payload.sub },
-          relations: ["account", "account.country", "account.city", "customer", "reviews", "reviews.visitType"],
+          relations: ["account", "account.country", "account.city", "account.preferences", "customer", "reviews", "reviews.visitType"],
         });
         if (!user) {
           return { error: { code: errors.NOT_FOUND, message: errors.USER_NOT_FOUND_MESSAGE } };
@@ -805,7 +809,7 @@ export const UserCrudMutation = extendType({
         let isNew = false;
 
         try {
-          const response = await user.updateUser({
+          const response = await user.update({
             email,
             username,
             firstName,
@@ -817,6 +821,7 @@ export const UserCrudMutation = extendType({
             zipCode,
             countryId,
             cityId,
+            preferenceIds,
           });
           const { user: updatedUser, isNew: updated } = response;
           isNew = updated;
@@ -845,7 +850,7 @@ export const UserCrudMutation = extendType({
           };
         }
 
-        const redisUser = await redis.hgetall(user.id.toString() as KeyType);
+        const redisUser = await redis.hgetall(user.getRedisKey() as KeyType);
         if (!redisUser) {
           return { error: { message: errors.SOMETHING_WENT_WRONG } };
         }

@@ -55,6 +55,7 @@ export * from "./payment/reserved_product/mutation";
 export * from "./payment/reserved_product/types";
 export * from "./payment/types";
 export * from "./query";
+export * from "./search/mutation";
 export * from "./search/query";
 export * from "./search/types";
 export * from "./types";

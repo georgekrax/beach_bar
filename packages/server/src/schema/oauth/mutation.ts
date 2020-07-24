@@ -38,7 +38,7 @@ export const AuthorizeWithOAuthProviders = extendType({
       resolve: async (
         _,
         { code, state, loginDetails, isPrimaryOwner },
-        { req, res, googleOAuth2Client, uaParser, redis }: MyContext
+        { req, res, googleOAuth2Client, uaParser, redis, ipAddr }: MyContext
       ): Promise<AuthorizeWithOAuthType | ErrorType> => {
         if (!code || code === "" || code === " ") {
           return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
@@ -99,11 +99,10 @@ export const AuthorizeWithOAuthProviders = extendType({
         let os: any = uaParser.getOS().name,
           browser: any = uaParser.getBrowser().name,
           country: any = undefined,
-          city: any = undefined,
-          ipAddr: string | undefined = undefined;
+          city: any = undefined;
 
         if (loginDetails) {
-          ({ city, country, ipAddr } = loginDetails);
+          ({ city, country } = loginDetails);
         }
 
         try {
@@ -187,8 +186,8 @@ export const AuthorizeWithOAuthProviders = extendType({
         sendRefreshToken(res, refreshToken.token);
 
         try {
-          await redis.hset(`${user.id.toString()}` as KeyType, "access_token", accessToken.token);
-          await redis.hset(`${user.id.toString()}` as KeyType, "refresh_token", refreshToken.token);
+          await redis.hset(user.getRedisKey() as KeyType, "access_token", accessToken.token);
+          await redis.hset(user.getRedisKey() as KeyType, "refresh_token", refreshToken.token);
 
           user.googleId = googleId;
           user.account.isActive = true;
@@ -234,7 +233,7 @@ export const AuthorizeWithOAuthProviders = extendType({
       resolve: async (
         _,
         { code, state, loginDetails, isPrimaryOwner },
-        { req, res, uaParser, redis }: MyContext
+        { req, res, uaParser, redis, ipAddr }: MyContext
       ): Promise<AuthorizeWithOAuthType | ErrorType> => {
         if (!code || code.trim().length === 0) {
           return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
@@ -362,11 +361,10 @@ export const AuthorizeWithOAuthProviders = extendType({
         }
 
         let os: any = uaParser.getOS().name,
-          browser: any = uaParser.getBrowser().name,
-          ipAddr: string | undefined = undefined;
+          browser: any = uaParser.getBrowser().name;
 
         if (loginDetails) {
-          ({ city, country, ipAddr } = loginDetails);
+          ({ city, country } = loginDetails);
         }
 
         try {
@@ -438,8 +436,8 @@ export const AuthorizeWithOAuthProviders = extendType({
         sendRefreshToken(res, refreshToken.token);
 
         try {
-          await redis.hset(`${user.id.toString()}` as KeyType, "access_token", accessToken.token);
-          await redis.hset(`${user.id.toString()}` as KeyType, "refresh_token", refreshToken.token);
+          await redis.hset(user.getRedisKey() as KeyType, "access_token", accessToken.token);
+          await redis.hset(user.getRedisKey() as KeyType, "refresh_token", refreshToken.token);
 
           user.facebookId = facebookId;
           user.account.isActive = true;
@@ -500,7 +498,7 @@ export const AuthorizeWithOAuthProviders = extendType({
       resolve: async (
         _,
         { email, code, state, loginDetails, isPrimaryOwner },
-        { req, res, uaParser, redis }: MyContext
+        { req, res, uaParser, redis, ipAddr }: MyContext
       ): Promise<AuthorizeWithOAuthType | ErrorType> => {
         if (!email || email === "" || email === " ") {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid email address" } };
@@ -594,11 +592,10 @@ export const AuthorizeWithOAuthProviders = extendType({
         let os: any = uaParser.getOS().name,
           browser: any = uaParser.getBrowser().name,
           country: any = undefined,
-          city: any = undefined,
-          ipAddr: string | undefined = undefined;
+          city: any = undefined;
 
         if (loginDetails) {
-          ({ city, country, ipAddr } = loginDetails);
+          ({ city, country } = loginDetails);
         }
 
         try {
@@ -670,8 +667,8 @@ export const AuthorizeWithOAuthProviders = extendType({
         sendRefreshToken(res, refreshToken.token);
 
         try {
-          await redis.hset(`${user.id.toString()}` as KeyType, "access_token", accessToken.token);
-          await redis.hset(`${user.id.toString()}` as KeyType, "refresh_token", refreshToken.token);
+          await redis.hset(user.getRedisKey() as KeyType, "access_token", accessToken.token);
+          await redis.hset(user.getRedisKey() as KeyType, "refresh_token", refreshToken.token);
 
           user.instagramId = instagramId;
           user.account.isActive = true;

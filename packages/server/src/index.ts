@@ -13,6 +13,7 @@ import { Stripe } from "stripe";
 import { UAParser } from "ua-parser-js";
 import { link } from "./config/apolloLink";
 import { googleOAuth2Client } from "./config/googleOAuth";
+import redisKeys from "./constants/redisKeys";
 import { User } from "./entity/User";
 import verifyAccessTokenQuery from "./graphql/VERIFY_ACCESS_TOKEN";
 import { router as oauthRouter } from "./routes/authRoutes";
@@ -78,6 +79,10 @@ export let stripe: Stripe;
 
   const server = new ApolloServer({
     tracing: !(process.env.NODE_ENV === "production"),
+    engine: {
+      reportSchema: true,
+      graphVariant: "current",
+    },
     schema,
     formatError: (err): any => {
       if (
@@ -100,12 +105,12 @@ export let stripe: Stripe;
       if (accessToken) {
         try {
           payload = verify(accessToken, process.env.ACCESS_TOKEN_SECRET!, { issuer: process.env.TOKEN_ISSUER!.toString() });
-          if (payload && payload.sub && (payload.sub !== "" || " ")) {
-            const redisUser = await redis.hgetall(payload.sub.toString());
+          if (payload && payload.sub && payload.sub.trim().length !== 0) {
+            const redisUser = await redis.hgetall(`${redisKeys.USER}:${payload.sub.toString()}`);
             if (!redisUser) {
               payload = null;
             }
-          } else if (payload.sub === "" || payload.sub === " ") {
+          } else if (payload.sub.trim().length >= 0) {
             payload = null;
           }
         } catch (err) {
@@ -178,16 +183,17 @@ export let stripe: Stripe;
           }
         }
       }
-
       if (payload && payload.sub) {
         payload.sub = parseInt(payload.sub);
       }
 
       const uaParser = new UAParser(req.headers["user-agent"]);
-      return { req, res, payload, redis, sgMail, sgClient, stripe, uaParser, googleOAuth2Client };
+      // @ts-ignore
+      const ipAddr: string | undefined = req.ipAddr;
+      return { req, res, payload, redis, sgMail, sgClient, stripe, uaParser, googleOAuth2Client, ipAddr };
     },
   });
-  server.applyMiddleware({ app, cors: false });
+  server.applyMiddleware({ app, cors: true });
 
   app.listen({ port: parseInt(process.env.PORT!) || 4000 }, () =>
     console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`)

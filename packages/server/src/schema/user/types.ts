@@ -1,7 +1,7 @@
+import { EmailScalar } from "@beach_bar/common";
 import { inputObjectType, objectType, unionType } from "@nexus/schema";
 import { BeachBarReviewType } from "../beach_bar/review/types";
 import { UserAccountType } from "./account/types";
-import { EmailScalar, IPv4Scalar } from "@beach_bar/common";
 
 export const UserType = objectType({
   name: "User",
@@ -109,13 +109,12 @@ export const UserCredentialsInput = inputObjectType({
 
 export const UserLoginDetailsInput = inputObjectType({
   name: "UserLoginDetailsInput",
-  description: "User details in login",
+  description: "User details in login. The user's IP address is passed via the context",
   definition(t) {
     t.string("os", { required: false, description: "The operating system (OS) name from where the user logins" });
     t.string("browser", { required: false, description: "The browser name that the user uses to login" });
     t.string("country", { required: false, description: "Country from where user logins" });
     t.string("city", { required: false, description: "City from where user logins" });
-    t.field("ipAddr", { type: IPv4Scalar, required: false, description: "Internet Protocol (IP) address of user to login" });
   },
 });
 

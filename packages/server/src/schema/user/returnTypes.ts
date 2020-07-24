@@ -31,20 +31,6 @@ export type UserType = {
   };
 };
 
-export interface UpdateUser {
-  email: string;
-  username?: string;
-  firstName?: string;
-  lastName?: string;
-  imgUrl?: string;
-  personTitle?: string;
-  birthday?: Dayjs;
-  address?: string;
-  zipCode?: string;
-  countryId?: number;
-  cityId?: number;
-}
-
 export type UserSignUpType = AddType & {
   user: User;
 };

@@ -1,18 +1,22 @@
+import { Dayjs } from "dayjs";
 import {
   BaseEntity,
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  In,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   // eslint-disable-next-line prettier/prettier
-  UpdateDateColumn,
+  UpdateDateColumn
 } from "typeorm";
-import { UpdateUser } from "../schema/user/returnTypes";
+import redisKeys from "../constants/redisKeys";
 import { softRemove } from "../utils/softRemove";
 import { Account } from "./Account";
+import { AccountPreference } from "./AccountPreference";
+import { AccountPreferenceType } from "./AccountPreferenceType";
 import { BeachBarReview } from "./BeachBarReview";
 import { Cart } from "./Cart";
 import { City } from "./City";
@@ -21,8 +25,20 @@ import { Customer } from "./Customer";
 import { Owner } from "./Owner";
 import { UserSearch } from "./UserSearch";
 import { Vote } from "./Vote";
-import { Dayjs } from "dayjs";
-import redisKeys from "../constants/redisKeys";
+export interface UpdateUserInfo {
+  email: string;
+  username?: string;
+  firstName?: string;
+  lastName?: string;
+  imgUrl?: string;
+  personTitle?: string;
+  birthday?: Dayjs;
+  address?: string;
+  zipCode?: string;
+  countryId?: number;
+  cityId?: number;
+  preferenceIds?: number[];
+}
 
 @Entity({ name: "user", schema: "public" })
 export class User extends BaseEntity {
@@ -94,12 +110,12 @@ export class User extends BaseEntity {
 
   getRedisKey(scope = false): string {
     if (scope) {
-      return `${redisKeys.USER}:${this.id}:${redisKeys.USER_SCOPE}`
+      return `${redisKeys.USER}:${this.id}:${redisKeys.USER_SCOPE}`;
     }
-    return `${redisKeys.USER}`;
+    return `${redisKeys.USER}:${this.id}`;
   }
 
-  getIsNew(data: UpdateUser): boolean {
+  getIsNew(data: UpdateUserInfo): boolean {
     let isNew = false;
     const { email, username, firstName, lastName, imgUrl, personTitle, birthday, countryId, cityId, address, zipCode } = data;
     if (
@@ -120,9 +136,22 @@ export class User extends BaseEntity {
     return isNew;
   }
 
-  async updateUser(data: UpdateUser): Promise<{ user: User; isNew: boolean }> {
+  async update(data: UpdateUserInfo): Promise<{ user: User; isNew: boolean }> {
     const isNew = this.getIsNew(data);
-    const { email, username, firstName, lastName, imgUrl, personTitle, birthday, countryId, cityId, address, zipCode } = data;
+    const {
+      email,
+      username,
+      firstName,
+      lastName,
+      imgUrl,
+      personTitle,
+      birthday,
+      countryId,
+      cityId,
+      address,
+      zipCode,
+      preferenceIds,
+    } = data;
     if (email && email.trim().length !== 0) {
       this.email = email;
     }
@@ -182,6 +211,19 @@ export class User extends BaseEntity {
         this.account.city = city;
       }
     }
+    if (preferenceIds) {
+      const preferences = await AccountPreferenceType.find({ id: In(preferenceIds) });
+      if (preferences.length > 0) {
+        this.account.preferences?.forEach(preference => preference.softRemove());
+        const accountPreferences: AccountPreference[] = [];
+        for (let i = 0; i < preferences.length; i++) {
+          const preference = preferences[i];
+          const newAccountPreference = await AccountPreference.create({ account: this, preference }).save();
+          accountPreferences.push(newAccountPreference);
+        }
+        this.account.preferences = accountPreferences;
+      }
+    }
     if (isNew) {
       await this.save();
       await this.account.save();
@@ -191,6 +233,7 @@ export class User extends BaseEntity {
 
   async softRemove(): Promise<any> {
     const findOptions: any = { userId: this.id };
+    // delete in Redis, happens within the User mutation resolvers too
     await softRemove(User, { id: this.id }, [Account, BeachBarReview, Cart, Owner, Customer], findOptions);
   }
 }

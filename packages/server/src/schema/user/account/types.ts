@@ -1,9 +1,9 @@
+import { DateScalar } from "@beach_bar/common";
 import { objectType } from "@nexus/schema";
 import { CityType } from "../../details/cityTypes";
-import { UserContactDetailsType } from "../contact_details.ts/types";
 import { CountryType } from "../../details/countryTypes";
+import { UserContactDetailsType } from "../contact_details.ts/types";
 import { UserType } from "../types";
-import { DateScalar } from "@beach_bar/common";
 
 export const UserAccountType = objectType({
   name: "UserAccount",
@@ -37,6 +37,12 @@ export const UserAccountType = objectType({
       nullable: true,
       resolve: o => o.city,
     });
+    t.list.field("preferences", {
+      type: AccountPreferenceTypeGraphQL,
+      description: "The user's account preferences",
+      nullable: true,
+      resolve: o => o.preferences.preference,
+    });
     t.list.field("contactDetails", {
       type: UserContactDetailsType,
       description: "User contact details",
@@ -45,3 +51,32 @@ export const UserAccountType = objectType({
     });
   },
 });
+
+export const AccountPreferenceTypeGraphQL = objectType({
+  name: "AccountPreferenceType",
+  description: "Represents a user's preferences type",
+  definition(t) {
+    t.id("id", { nullable: false });
+    t.string("name", { nullable: false });
+    t.string("description", { nullable: true });
+  },
+});
+
+// export const AccountPreferenceType = objectType({
+//   name: "AccountPreference",
+//   description: "Represents a user's preferences",
+//   definition(t) {
+//     t.field("account", {
+//       type: UserAccountType,
+//       description: "The user's account",
+//       nullable: false,
+//       resolve: o => o.account,
+//     });
+//     t.field("preference", {
+//       type: AccountPreferenceTypeGraphQL,
+//       description: "The account preference type",
+//       nullable: false,
+//       resolve: o => o.preference,
+//     });
+//   },
+// });

@@ -15,6 +15,7 @@ import {
   UpdateDateColumn,
 } from "typeorm";
 import { softRemove } from "../utils/softRemove";
+import { AccountPreference } from "./AccountPreference";
 import { City } from "./City";
 import { Country } from "./Country";
 import { User } from "./User";
@@ -77,6 +78,9 @@ export class Account extends BaseEntity {
   @JoinColumn({ name: "city_id" })
   city?: City;
 
+  @OneToMany(() => AccountPreference, accountPreference => accountPreference.account, { nullable: true })
+  preferences?: AccountPreference[];
+
   @OneToMany(() => UserContactDetails, userContactDetails => userContactDetails.account, { nullable: true })
   contactDetails?: UserContactDetails[];
 
@@ -91,7 +95,7 @@ export class Account extends BaseEntity {
 
   async softRemove(): Promise<any> {
     const findOptions: any = { accountId: this.id };
-    await softRemove(Account, { id: this.id }, [UserContactDetails], findOptions);
+    await softRemove(Account, { id: this.id }, [AccountPreference, UserContactDetails], findOptions);
   }
 
   @BeforeInsert()

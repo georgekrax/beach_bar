@@ -5,7 +5,7 @@ import { user } from "../../constants/scopes";
 import { BeachBar } from "../../entity/BeachBar";
 import { BeachBarOwner } from "../../entity/BeachBarOwner";
 import { Owner } from "../../entity/Owner";
-import { arrDiff } from "../../utils/arrDiff";
+import arrDiff from "../../utils/arrDiff";
 import { DeleteType, ErrorType } from "../returnTypes";
 import { DeleteResult } from "../types";
 import { AddBeachBarOwnerType, UpdateBeachBarOwnerType } from "./returnTypes";

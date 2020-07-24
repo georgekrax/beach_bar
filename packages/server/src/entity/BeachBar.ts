@@ -269,7 +269,7 @@ export class BeachBar extends BaseEntity {
     try {
       const beachBar = await BeachBar.findOne({
         where: { id: this.id },
-        relations: relations.BEACH_BAR,
+        relations: relations.BEACH_BAR_EXTENSIVE,
       });
       if (!beachBar) {
         throw new Error();

@@ -1,13 +1,54 @@
 import { MyContext } from "@beach_bar/common";
-import { arg, extendType, intArg } from "@nexus/schema";
+import { arg, booleanArg, extendType, intArg } from "@nexus/schema";
 import { BeachBar } from "../../entity/BeachBar";
 import { SearchInputType } from "../search/types";
 import { BeachBarAvailabilityReturnType } from "./returnTypes";
 import { BeachBarAvailabilityType, BeachBarType } from "./types";
+import userHistory from "../../models/userHistory";
+import { Types } from "mongoose";
+import historyActivity from "../../constants/historyActivity";
+import redisKeys from "../../constants/redisKeys";
 
 export const BeachBarQuery = extendType({
   type: "Query",
   definition(t) {
+    t.field("getBeachBar", {
+      type: BeachBarType,
+      description: "Get the detail info of a #beach_bar",
+      nullable: true,
+      args: {
+        beachBarId: intArg({
+          required: true,
+          description: "The ID value of the #beach_bar",
+        }),
+        userVisit: booleanArg({
+          required: false,
+          description: "Indicates if to retrieve information for user search. Its default value is set to true",
+          default: true,
+        }),
+      },
+      resolve: async (_, { beachBarId, userVisit }, { redis, ipAddr }: MyContext): Promise<BeachBar | null> => {
+        if (!beachBarId || beachBarId <= 0) {
+          return null;
+        }
+
+        const beachBars: BeachBar[] = (await redis.lrange(redisKeys.BEACH_BAR_CACHE_KEY, 0, -1)).map((x: string) => JSON.parse(x));
+        const beachBar = beachBars.find(beachBar => beachBar.id === beachBarId);
+        if (!beachBar) {
+          return null;
+        }
+        if (userVisit) {
+          await userHistory.create({
+            activityId: new Types.ObjectId(historyActivity.BEACH_BAR_SEARCH_ID),
+            objectId: beachBar.id,
+            userId: undefined,
+            ipAddr,
+          });
+        }
+
+        return beachBar;
+      },
+    });
     t.field("checkBeachBarAvailability", {
       type: BeachBarAvailabilityType,
       description: "Check a #beach_bar's availability",

@@ -1,6 +1,8 @@
 export default Object.freeze({
-  BEACH_BAR: [
+  BEACH_BAR_EXTENSIVE: [
     "category",
+    "openingTime",
+    "closingTime",
     "products",
     "products.category",
     "products.components",
@@ -25,5 +27,28 @@ export default Object.freeze({
     "entryFees",
     "restaurants",
     "restaurants.foodItems",
+    "restaurants.foodItems.menuCategory",
+  ],
+  BEACH_BAR_QUERY: [
+    "category",
+    "openingTime",
+    "closingTime",
+    "products",
+    "products.category",
+    "products.components",
+    "features",
+    "features.service",
+    "location",
+    "location.country",
+    "location.city",
+    "location.region",
+    "reviews",
+    "reviews.customer",
+    "reviews.answer",
+    "defaultCurrency",
+    "entryFees",
+    "restaurants",
+    "restaurants.foodItems",
+    "restaurants.foodItems.menuCategory",
   ],
 });

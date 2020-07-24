@@ -1,4 +1,5 @@
 import { Dayjs } from "dayjs";
+import { Redis } from "ioredis";
 import {
   BaseEntity,
   Check,
@@ -67,7 +68,17 @@ export class UserSearch extends BaseEntity {
   @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
   timestamp: Dayjs;
 
-  getRedisKey(): string {
-    return `${redisKeys.USER}:${redisKeys.USER_SEARCHES}`;
+  getRedisKey(userId?: number): string {
+    if (userId !== undefined) {
+      return `${redisKeys.USER}:${userId}:${redisKeys.USER_SEARCH}`;
+    } else {
+      return redisKeys.USER_SEARCH;
+    }
+  }
+
+  async getRedisIdx(redis: Redis, userId?: number): Promise<number> {
+    const userSearches = await redis.lrange(this.getRedisKey(userId), 0, -1);
+    const idx = userSearches.findIndex((x: string) => JSON.parse(x).id === this.id);
+    return idx;
   }
 }
