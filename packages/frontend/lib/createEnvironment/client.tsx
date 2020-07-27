@@ -21,7 +21,7 @@ export default {
           ttl: 60 * 1000,
         }),
         urlMiddleware({
-          url: () => "http://localhost:4000/graphql",
+          url: () => process.env.GRAPHQL_API_ENDPOINT,
         }),
         uploadMiddleware(),
       ]),

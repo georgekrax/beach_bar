@@ -11,7 +11,7 @@ export default {
         store,
         network: new RelayNetworkLayer([
           urlMiddleware({
-            url: () => "http://localhost:4000/graphql",
+            url: () => process.env.GRAPHQL_API_ENDPOINT,
           }),
         ]),
       }),
@@ -25,7 +25,7 @@ export default {
       store,
       network: new RelayNetworkLayer([
         urlMiddleware({
-          url: () => "http://localhost:4000/graphql",
+          url: () => process.env.GRAPHQL_API_ENDPOINT,
         }),
       ]),
     });
