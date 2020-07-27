@@ -10,7 +10,7 @@
     "relay": "relay-compiler --src ./ --schema ../server/build/generated/schema.graphql --artifactDirectory generated --extensions ts tsx --language typescript",
     "scss": "tsm public/static/**/*.scss -q double",
     "scss:watch": "tsm public/static/**/*.scss -w -q double",
-    "type-check": "tsc"
+    "typescript": "tsc"
   },
   "author": "George Krachtopoulos <georgekraxt@gmail.com>",
   "dependencies": {
@@ -25,7 +25,7 @@
     "cross-env": "^7.0.2",
     "dayjs": "^1.8.29",
     "esm": "^3.2.25",
-    "graphql": "^15.3.0",
+    "extract-files": "^9.0.0",
     "graphql-tag": "^2.10.4",
     "less": "^3.12.2",
     "less-vars-to-js": "^1.3.0",
@@ -35,6 +35,7 @@
     "postcss-preset-env": "^6.7.0",
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
+    "react-dropzone": "^11.0.2",
     "react-relay": "^9.0.0",
     "react-relay-network-modern": "^4.5.0",
     "react-relay-network-modern-ssr": "^1.4.0",
@@ -65,10 +66,6 @@
     "relay-compiler-language-typescript": "^12.0.3",
     "typed-scss-modules": "^2.0.1",
     "typescript": "^3.9.7",
-    "webpack": "^4.4.0"
-  },
-  "peerDependencies": {
-    "graphql": "^14.2.0",
     "webpack": "^4.0.0"
   }
 }

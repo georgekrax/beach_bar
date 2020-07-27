@@ -1,4 +1,4 @@
-import { cacheMiddleware, RelayNetworkLayer, urlMiddleware } from "react-relay-network-modern/node8";
+import { cacheMiddleware, RelayNetworkLayer, uploadMiddleware, urlMiddleware } from "react-relay-network-modern/node8";
 import { Environment, RecordSource, Store } from "relay-runtime";
 
 let store, source;
@@ -21,8 +21,9 @@ export default {
           ttl: 60 * 1000,
         }),
         urlMiddleware({
-          url: () => process.env.GRAPHQL_API_ENDPOINT,
+          url: () => "http://localhost:4000/graphql",
         }),
+        uploadMiddleware(),
       ]),
     });
 
