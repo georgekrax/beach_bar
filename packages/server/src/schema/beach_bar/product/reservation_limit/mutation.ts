@@ -1,13 +1,13 @@
 import { BigIntScalar, DateScalar, errors, MyContext } from "@beach_bar/common";
+import { Product } from "@entity/Product";
+import { ProductReservationLimit } from "@entity/ProductReservationLimit";
+import { HourTime } from "@entity/Time";
 import { arg, extendType, intArg } from "@nexus/schema";
+import { DeleteType } from "@typings/.index";
+import { AddProductReservationLimitType, UpdateProductReservationLimitType } from "@typings/beach_bar/product/reservationLimit";
 import { In } from "typeorm";
-import { Product } from "../../../../entity/Product";
-import { ProductReservationLimit } from "../../../../entity/ProductReservationLimit";
-import { HourTime } from "../../../../entity/Time";
-import { checkScopes } from "../../../../utils/checkScopes";
-import { DeleteType, ErrorType } from "../../../returnTypes";
 import { DeleteResult } from "../../../types";
-import { AddProductReservationLimitType, UpdateProductReservationLimitType } from "./returnTypes";
+import { checkScopes } from "@utils/checkScopes";
 import { AddProductReservationLimitResult, UpdateProductReservationLimitResult } from "./types";
 
 export const ProductReservationLimitCrudMutation = extendType({
@@ -34,7 +34,7 @@ export const ProductReservationLimitCrudMutation = extendType({
         _,
         { productId, limit, dates, startTimeId, endTimeId },
         { payload }: MyContext
-      ): Promise<AddProductReservationLimitType | ErrorType> => {
+      ): Promise<AddProductReservationLimitType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
@@ -116,7 +116,7 @@ export const ProductReservationLimitCrudMutation = extendType({
         _,
         { reservationLimitIds, limit, startTimeId, endTimeId },
         { payload }: MyContext
-      ): Promise<UpdateProductReservationLimitType | ErrorType> => {
+      ): Promise<UpdateProductReservationLimitType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
@@ -177,7 +177,7 @@ export const ProductReservationLimitCrudMutation = extendType({
           description: "A list with all the reservation limits to delete",
         }),
       },
-      resolve: async (_, { reservationLimitIds }, { payload }: MyContext): Promise<DeleteType | ErrorType> => {
+      resolve: async (_, { reservationLimitIds }, { payload }: MyContext): Promise<DeleteType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }

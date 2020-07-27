@@ -1,14 +1,14 @@
 import { DateScalar, errors, MyContext } from "@beach_bar/common";
 import { arg, extendType, intArg } from "@nexus/schema";
 import { getCustomRepository } from "typeorm";
-import { CartRepository } from "../../../entity/Cart";
-import { CartProduct } from "../../../entity/CartProduct";
-import { Product } from "../../../entity/Product";
-import { HourTime } from "../../../entity/Time";
-import { DeleteType, ErrorType } from "../../returnTypes";
 import { DeleteResult } from "../../types";
-import { AddCartProductType, UpdateCartProductType } from "./returnTypes";
 import { AddCartProductResult, UpdateCartProductResult } from "./types";
+import { AddCartProductType, UpdateCartProductType } from "@typings/cart/product";
+import { CartRepository } from "@entity/Cart";
+import { Product } from "@entity/Product";
+import { HourTime } from "@entity/Time";
+import { CartProduct } from "@entity/CartProduct";
+import { DeleteType } from "@typings/.index";
 
 export const CartProductCrudMutation = extendType({
   type: "Mutation",
@@ -35,8 +35,8 @@ export const CartProductCrudMutation = extendType({
       resolve: async (
         _,
         { cartId, productId, quantity, date, timeId },
-        { payload }: MyContext,
-      ): Promise<AddCartProductType | ErrorType> => {
+        { payload }: MyContext
+      ): Promise<AddCartProductType> => {
         if (!cartId || cartId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid shopping cart" } };
         }
@@ -109,7 +109,7 @@ export const CartProductCrudMutation = extendType({
           description: "The number that indicates how many times to add the product to the cart",
         }),
       },
-      resolve: async (_, { cartId, productId, quantity }): Promise<UpdateCartProductType | ErrorType> => {
+      resolve: async (_, { cartId, productId, quantity }): Promise<UpdateCartProductType> => {
         if (!cartId || cartId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid shopping cart" } };
         }
@@ -164,7 +164,7 @@ export const CartProductCrudMutation = extendType({
         cartId: intArg({ required: true, description: "The ID value of the shopping cart" }),
         productId: intArg({ required: true, description: "The ID value of the product to delete (remove)" }),
       },
-      resolve: async (_, { cartId, productId }): Promise<DeleteType | ErrorType> => {
+      resolve: async (_, { cartId, productId }): Promise<DeleteType> => {
         if (!cartId || cartId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid shopping cart" } };
         }

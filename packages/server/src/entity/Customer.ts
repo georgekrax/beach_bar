@@ -1,24 +1,23 @@
-import { validateEmailSchema, errors } from "@beach_bar/common";
+import { errors, validateEmailSchema } from "@beach_bar/common";
+import { AddCustomerType } from "@typings/customer";
+import { softRemove } from "@utils/softRemove";
 import { Dayjs } from "dayjs";
 import { Stripe } from "stripe";
 import {
-  BaseEntity,
-  Column,
-  CreateDateColumn,
-  DeleteDateColumn,
-  Entity,
-  EntityRepository,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-  OneToOne,
-  PrimaryGeneratedColumn,
-  Repository,
-  UpdateDateColumn
+    BaseEntity,
+    Column,
+    CreateDateColumn,
+    DeleteDateColumn,
+    Entity,
+    EntityRepository,
+    JoinColumn,
+    ManyToOne,
+    OneToMany,
+    OneToOne,
+    PrimaryGeneratedColumn,
+    Repository,
+    UpdateDateColumn
 } from "typeorm";
-import { AddCustomerType } from "../schema/customer/returnTypes";
-import { ErrorType } from "../schema/returnTypes";
-import { softRemove } from "../utils/softRemove";
 import { Account } from "./Account";
 import { BeachBarReview } from "./BeachBarReview";
 import { Card } from "./Card";
@@ -125,8 +124,8 @@ export class CustomerRepository extends Repository<Customer> {
     email: string,
     phoneNumber?: string,
     countryIsoCode?: string,
-    payload?: any,
-  ): Promise<AddCustomerType | ErrorType> {
+    payload?: any
+  ): Promise<AddCustomerType> {
     let user: User | undefined = undefined;
     if (payload && payload.sub) {
       user = await User.findOne({

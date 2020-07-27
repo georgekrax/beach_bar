@@ -1,4 +1,3 @@
-import { errors } from "@beach_bar/common";
 import { Dayjs } from "dayjs";
 import {
   BaseEntity,
@@ -29,13 +28,13 @@ export class BeachBarLocation extends BaseEntity {
   zipCode?: string;
 
   @Column({ type: "decimal", precision: 10, scale: 6, name: "latitude" })
-  latitude: string;
+  latitude: number;
 
   @Column({ type: "decimal", precision: 10, scale: 6, name: "longitude" })
-  longitude: string;
+  longitude: number;
 
   @Column({ type: "geography", name: "where_is" })
-  whereIs: string;
+  whereIs?: number[];
 
   @Column({ type: "integer", name: "country_id" })
   countryId: number;
@@ -77,8 +76,8 @@ export class BeachBarLocation extends BaseEntity {
   async update(
     address?: string,
     zipCode?: string,
-    latitude?: string,
-    longitude?: string,
+    latitude?: number,
+    longitude?: number,
     countryId?: number,
     cityId?: number,
     regionId?: number
@@ -91,15 +90,9 @@ export class BeachBarLocation extends BaseEntity {
         this.zipCode = zipCode;
       }
       if (latitude && latitude !== this.latitude) {
-        if (latitude.length > 16) {
-          throw new Error();
-        }
         this.latitude = latitude;
       }
       if (longitude && longitude !== this.longitude) {
-        if (longitude.length > 16) {
-          throw new Error(errors.SOMETHING_WENT_WRONG);
-        }
         this.longitude = longitude;
       }
       if (countryId && countryId !== this.countryId) {

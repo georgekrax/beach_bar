@@ -1,3 +1,4 @@
+import { softRemove } from "@utils/softRemove";
 import dayjs, { Dayjs } from "dayjs";
 import {
   BaseEntity,
@@ -14,7 +15,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { softRemove } from "../utils/softRemove";
 import { AccountPreference } from "./AccountPreference";
 import { City } from "./City";
 import { Country } from "./Country";
@@ -93,11 +93,6 @@ export class Account extends BaseEntity {
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Dayjs;
 
-  async softRemove(): Promise<any> {
-    const findOptions: any = { accountId: this.id };
-    await softRemove(Account, { id: this.id }, [AccountPreference, UserContactDetails], findOptions);
-  }
-
   @BeforeInsert()
   @BeforeUpdate()
   calculateUsersAge(): void {
@@ -106,5 +101,10 @@ export class Account extends BaseEntity {
       const ageFormat = Math.abs(dayjs(differenceMs).year() - 1970);
       this.age = ageFormat;
     }
+  }
+
+  async softRemove(): Promise<any> {
+    const findOptions: any = { accountId: this.id };
+    await softRemove(Account, { id: this.id }, [AccountPreference, UserContactDetails], findOptions);
   }
 }

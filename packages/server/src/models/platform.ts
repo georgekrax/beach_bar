@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 import { model, Schema } from "mongoose";
+import { IPlatform } from "./typings/schemaInterfaces";
 
 const platformSchema = new Schema(
   {
@@ -24,4 +25,4 @@ const platformSchema = new Schema(
   }
 );
 
-export default model("platform", platformSchema);
+export default model<IPlatform>("platform", platformSchema);

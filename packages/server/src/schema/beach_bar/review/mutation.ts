@@ -1,13 +1,13 @@
 import { BigIntScalar, errors, MyContext } from "@beach_bar/common";
+import { BeachBar } from "@entity/BeachBar";
+import { BeachBarReview } from "@entity/BeachBarReview";
+import { ReviewVisitType } from "@entity/ReviewVisitType";
+import { MonthTime } from "@entity/Time";
 import { arg, booleanArg, extendType, intArg, stringArg } from "@nexus/schema";
-import { BeachBar } from "../../../entity/BeachBar";
-import { BeachBarReview } from "../../../entity/BeachBarReview";
-import { ReviewVisitType } from "../../../entity/ReviewVisitType";
-import { MonthTime } from "../../../entity/Time";
-import { verifyUserPaymentReview } from "../../../utils/beach_bar/verifyUserPaymentReview";
-import { DeleteType, ErrorType } from "../../returnTypes";
+import { DeleteType } from "@typings/.index";
+import { AddBeachBarReviewType, UpdateBeachBarReviewType } from "@typings/beach_bar/review";
+import { verifyUserPaymentReview } from "@utils/beach_bar/verifyUserPaymentReview";
 import { DeleteResult } from "../../types";
-import { AddBeachBarReviewType, UpdateBeachBarReviewType } from "./returnTypes";
 import { AddBeachBarReviewResult, UpdateBeachBarReviewResult } from "./types";
 
 export const BeachBarReviewCrudMutation = extendType({
@@ -50,8 +50,8 @@ export const BeachBarReviewCrudMutation = extendType({
       resolve: async (
         _,
         { beachBarId, paymentRefCode, monthTimeId, ratingValue, visitTypeId, niceComment, badComment },
-        { payload }: MyContext,
-      ): Promise<AddBeachBarReviewType | ErrorType> => {
+        { payload }: MyContext
+      ): Promise<AddBeachBarReviewType> => {
         if (!beachBarId || beachBarId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid #beach_bar" } };
         }
@@ -164,8 +164,8 @@ export const BeachBarReviewCrudMutation = extendType({
       },
       resolve: async (
         _,
-        { reviewId, ratingValue, visitTypeId, monthTimeId, niceComment, badComment },
-      ): Promise<UpdateBeachBarReviewType | ErrorType> => {
+        { reviewId, ratingValue, visitTypeId, monthTimeId, niceComment, badComment }
+      ): Promise<UpdateBeachBarReviewType> => {
         if (!reviewId || reviewId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid customer's review" } };
         }
@@ -210,7 +210,7 @@ export const BeachBarReviewCrudMutation = extendType({
           description: "The ID value of the customer's review",
         }),
       },
-      resolve: async (_, { reviewId }): Promise<DeleteType | ErrorType> => {
+      resolve: async (_, { reviewId }): Promise<DeleteType> => {
         if (!reviewId || reviewId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid customer's review" } };
         }
@@ -256,7 +256,7 @@ export const BeachBarReviewVoteMutation = extendType({
           description: "Set to true if to decrement the review's votes",
         }),
       },
-      resolve: async (_, { reviewId, upvote, downvote }): Promise<UpdateBeachBarReviewType | ErrorType> => {
+      resolve: async (_, { reviewId, upvote, downvote }): Promise<UpdateBeachBarReviewType> => {
         if (!reviewId || reviewId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid customer's review" } };
         }

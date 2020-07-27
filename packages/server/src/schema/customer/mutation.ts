@@ -2,12 +2,12 @@
 import { BigIntScalar, EmailScalar, errors, MyContext } from "@beach_bar/common";
 import { arg, extendType, stringArg } from "@nexus/schema";
 import { getCustomRepository, IsNull } from "typeorm";
-import { Customer, CustomerRepository } from "../../entity/Customer";
-import { User } from "../../entity/User";
-import { DeleteType, ErrorType } from "../returnTypes";
 import { DeleteResult } from "../types";
-import { AddCustomerType, UpdateCustomerType } from "./returnTypes";
 import { AddCustomerResult, UpdateCustomerResult } from "./types";
+import { AddCustomerType, UpdateCustomerType } from "@typings/customer";
+import { CustomerRepository, Customer } from "@entity/Customer";
+import { DeleteType } from "@typings/.index";
+import { User } from "@entity/User";
 
 export const CustomerCrudMutation = extendType({
   type: "Mutation",
@@ -35,7 +35,7 @@ export const CustomerCrudMutation = extendType({
         _,
         { email, phoneNumber, countryIsoCode },
         { payload, stripe }: MyContext,
-      ): Promise<AddCustomerType | ErrorType> => {
+      ): Promise<AddCustomerType> => {
         if (!email && !payload) {
           return {
             error: { code: errors.INVALID_ARGUMENTS, message: "You should either be authenticated or provide an email address" },
@@ -85,7 +85,7 @@ export const CustomerCrudMutation = extendType({
           description: "The ISO code of the country of customer's telephone",
         }),
       },
-      resolve: async (_, { customerId, phoneNumber, countryIsoCode }): Promise<UpdateCustomerType | ErrorType> => {
+      resolve: async (_, { customerId, phoneNumber, countryIsoCode }): Promise<UpdateCustomerType> => {
         if (!customerId || customerId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid customer ID" } };
         }
@@ -127,7 +127,7 @@ export const CustomerCrudMutation = extendType({
           description: "The ID value of the registered customer to delete",
         }),
       },
-      resolve: async (_, { customerId }, { payload, stripe }: MyContext): Promise<DeleteType | ErrorType> => {
+      resolve: async (_, { customerId }, { payload, stripe }: MyContext): Promise<DeleteType> => {
         if (customerId && customerId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid customer" } };
         }

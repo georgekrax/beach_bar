@@ -2,7 +2,7 @@ import { MyContext, UrlScalar } from "@beach_bar/common";
 import { extendType } from "@nexus/schema";
 import { createHash, randomBytes } from "crypto";
 import { CodeChallengeMethod } from "google-auth-library";
-import { User } from "../../entity/User";
+import { User } from "@entity/User";
 
 export const OAuthQuery = extendType({
   type: "Query",

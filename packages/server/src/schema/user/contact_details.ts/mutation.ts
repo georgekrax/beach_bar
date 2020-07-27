@@ -1,13 +1,13 @@
 import { EmailScalar, errors, MyContext } from "@beach_bar/common";
 import { arg, extendType, intArg, stringArg } from "@nexus/schema";
 import { getConnection } from "typeorm";
-import { Country } from "../../../entity/Country";
-import { User } from "../../../entity/User";
-import { UserContactDetails } from "../../../entity/UserContactDetails";
-import { DeleteType, ErrorType } from "../../returnTypes";
-import { DeleteResult } from "../../types";
-import { AddUserContactDetailsType, UpdateUserContactDetailsType } from "./returnTypes";
 import { AddUserContactDetailsResult, UpdateUserContactDetailsResult } from "./types";
+import { DeleteResult } from "../../types";
+import { AddUserContactDetailsType, UpdateUserContactDetailsType } from "@typings/user/contactDetails";
+import { DeleteType } from "@typings/.index";
+import { User } from "@entity/User";
+import { UserContactDetails } from "@entity/UserContactDetails";
+import { Country } from "@entity/Country";
 
 export const UserContactDetailsCrudMutation = extendType({
   type: "Mutation",
@@ -25,11 +25,7 @@ export const UserContactDetailsCrudMutation = extendType({
         }),
         phoneNumber: stringArg({ required: false, description: "A phone number to call the user" }),
       },
-      resolve: async (
-        _,
-        { countryId, secondaryEmail, phoneNumber },
-        { payload }: MyContext
-      ): Promise<AddUserContactDetailsType | ErrorType> => {
+      resolve: async (_, { countryId, secondaryEmail, phoneNumber }, { payload }: MyContext): Promise<AddUserContactDetailsType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
@@ -130,11 +126,7 @@ export const UserContactDetailsCrudMutation = extendType({
           required: false,
         }),
       },
-      resolve: async (
-        _,
-        { id, secondaryEmail, phoneNumber },
-        { payload }: MyContext
-      ): Promise<UpdateUserContactDetailsType | ErrorType> => {
+      resolve: async (_, { id, secondaryEmail, phoneNumber }, { payload }: MyContext): Promise<UpdateUserContactDetailsType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
@@ -218,7 +210,7 @@ export const UserContactDetailsCrudMutation = extendType({
           required: true,
         }),
       },
-      resolve: async (_, { id }, { payload }: MyContext): Promise<DeleteType | ErrorType> => {
+      resolve: async (_, { id }, { payload }: MyContext): Promise<DeleteType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }

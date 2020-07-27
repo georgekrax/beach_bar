@@ -1,21 +1,21 @@
 /* eslint-disable prettier/prettier */
-import { BigIntScalar, errors, generateID, MyContext } from "@beach_bar/common";
+import { BigIntScalar, errors, generateId, MyContext } from "@beach_bar/common";
+import prefixes from "@constants/prefixes";
+import { payment as paymentStatus } from "@constants/status";
+import { Card } from "@entity/Card";
+import { Cart } from "@entity/Cart";
+import { CouponCode } from "@entity/CouponCode";
+import { OfferCampaignCode } from "@entity/OfferCampaignCode";
+import { Payment } from "@entity/Payment";
+import { PaymentOfferCode } from "@entity/PaymentOfferCode";
+import { PaymentStatus } from "@entity/PaymentStatus";
+import { StripeMinimumCurrency } from "@entity/StripeMinimumCurrency";
 import { arg, extendType } from "@nexus/schema";
+import { DeleteType } from "@typings/.index";
+import { AddPaymentType, UniqueBeachBarsType } from "@typings/payment";
 import dayjs from "dayjs";
-import prefixes from "../../constants/prefixes";
-import { payment as paymentStatus } from "../../constants/status";
-import { Card } from "../../entity/Card";
-import { Cart } from "../../entity/Cart";
-import { CouponCode } from "../../entity/CouponCode";
-import { OfferCampaignCode } from "../../entity/OfferCampaignCode";
-import { Payment } from "../../entity/Payment";
-import { PaymentOfferCode } from "../../entity/PaymentOfferCode";
-import { PaymentStatus } from "../../entity/PaymentStatus";
-import { StripeMinimumCurrency } from "../../entity/StripeMinimumCurrency";
-import { DeleteType, ErrorType } from "../returnTypes";
 import { DeleteResult } from "../types";
 import { PaymentOfferCodeInput } from "./offer_code/types";
-import { AddPaymentType, UniqueBeachBarsType } from "./returnTypes";
 import { AddPaymentResult } from "./types";
 
 export const PaymentCrudMutation = extendType({
@@ -44,7 +44,7 @@ export const PaymentCrudMutation = extendType({
             "A list with the offer codes, with their discount percentages each, to apply to the payment. The discount percentages total should be less or equal to 100%",
         }),
       },
-      resolve: async (_, { cartId, cardId, offerCodes }, { stripe }: MyContext): Promise<AddPaymentType | ErrorType> => {
+      resolve: async (_, { cartId, cardId, offerCodes }, { stripe }: MyContext): Promise<AddPaymentType> => {
         if (!cartId || cartId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid shopping cart" } };
         }
@@ -95,8 +95,8 @@ export const PaymentCrudMutation = extendType({
           return { error: { message: errors.SOMETHING_WENT_WRONG } };
         }
 
-        const refCode = generateID(16);
-        const transferGroupCode = `${prefixes.PAYMENT_TARGET_GROUP}${generateID(16)}`;
+        const refCode = generateId({ length: 16});
+        const transferGroupCode = `${prefixes.PAYMENT_TARGET_GROUP}${generateId({ length: 16})}`;
 
         const newPayment = Payment.create({
           cart,
@@ -366,7 +366,7 @@ export const PaymentCrudMutation = extendType({
           description: "The ID value of the payment to update",
         }),
       },
-      resolve: async (_, { paymentId }, { stripe }: MyContext): Promise<DeleteType | ErrorType> => {
+      resolve: async (_, { paymentId }, { stripe }: MyContext): Promise<DeleteType> => {
         if (!paymentId || paymentId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid payment" } };
         }

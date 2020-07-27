@@ -1,19 +1,19 @@
+import { softRemove } from "@utils/softRemove";
+import { Dayjs } from "dayjs";
 import {
-  BaseEntity,
-  Check,
-  Column,
-  CreateDateColumn,
-  DeleteDateColumn,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
+    BaseEntity,
+    Check,
+    Column,
+    CreateDateColumn,
+    DeleteDateColumn,
+    Entity,
+    JoinColumn,
+    ManyToOne,
+    PrimaryGeneratedColumn,
+    UpdateDateColumn
 } from "typeorm";
-import { softRemove } from "../utils/softRemove";
 import { Product } from "./Product";
 import { HourTime } from "./Time";
-import { Dayjs } from "dayjs";
 
 @Entity({ name: "product_reservation_limit", schema: "public" })
 @Check(`"limitNumber" > 0`)

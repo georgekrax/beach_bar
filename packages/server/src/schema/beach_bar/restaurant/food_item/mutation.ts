@@ -1,12 +1,12 @@
 import { BigIntScalar, errors, MyContext } from "@beach_bar/common";
+import { BeachBarRestaurant } from "@entity/BeachBarRestaurant";
+import { RestaurantFoodItem } from "@entity/RestaurantFoodItem";
+import { RestaurantMenuCategory } from "@entity/RestaurantMenuCategory";
 import { arg, extendType, floatArg, intArg, stringArg } from "@nexus/schema";
-import { BeachBarRestaurant } from "../../../../entity/BeachBarRestaurant";
-import { RestaurantFoodItem } from "../../../../entity/RestaurantFoodItem";
-import { RestaurantMenuCategory } from "../../../../entity/RestaurantMenuCategory";
-import { checkScopes } from "../../../../utils/checkScopes";
-import { DeleteType, ErrorType } from "../../../returnTypes";
+import { DeleteType } from "@typings/.index";
+import { AddRestaurantFoodItemType, UpdateRestaurantFoodItemType } from "@typings/beach_bar/restaurant/footItem";
 import { DeleteResult } from "../../../types";
-import { AddRestaurantFoodItemType, UpdateRestaurantFoodItemType } from "./returnTypes";
+import { checkScopes } from "@utils/checkScopes";
 import { AddRestaurantFoodItemResult, UpdateRestaurantFoodItemResult } from "./types";
 
 export const RestaurantFoodItemCrudMutation = extendType({
@@ -42,7 +42,7 @@ export const RestaurantFoodItemCrudMutation = extendType({
         _,
         { restaurantId, name, price, menuCategoryId, imgUrl },
         { payload }: MyContext
-      ): Promise<AddRestaurantFoodItemType | ErrorType> => {
+      ): Promise<AddRestaurantFoodItemType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
@@ -149,7 +149,7 @@ export const RestaurantFoodItemCrudMutation = extendType({
         _,
         { foodItemId, name, price, menuCategoryId, imgUrl },
         { payload }: MyContext
-      ): Promise<UpdateRestaurantFoodItemType | ErrorType> => {
+      ): Promise<UpdateRestaurantFoodItemType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
@@ -216,7 +216,7 @@ export const RestaurantFoodItemCrudMutation = extendType({
           description: "The ID value of the food item",
         }),
       },
-      resolve: async (_, { foodItemId }, { payload }: MyContext): Promise<DeleteType | ErrorType> => {
+      resolve: async (_, { foodItemId }, { payload }: MyContext): Promise<DeleteType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }

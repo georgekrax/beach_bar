@@ -1,6 +1,6 @@
+import { DateTimeScalar } from "@beach_bar/common";
 import { objectType, unionType } from "@nexus/schema";
 import { BeachBarType } from "../types";
-import { DateTimeScalar } from "@beach_bar/common";
 
 export const BeachBarServiceType = objectType({
   name: "BeachBarService",

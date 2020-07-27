@@ -1,4 +1,5 @@
-import { generateID } from "@beach_bar/common";
+import { generateId } from "@beach_bar/common";
+import { softRemove } from "@utils/softRemove";
 import { Dayjs } from "dayjs";
 import {
   BaseEntity,
@@ -12,7 +13,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { softRemove } from "../utils/softRemove";
 import { PaymentOfferCode } from "./PaymentOfferCode";
 
 @Entity({ name: "coupon_code", schema: "public" })
@@ -60,7 +60,7 @@ export class CouponCode extends BaseEntity {
 
   @BeforeInsert()
   generateRefCode(): void {
-    this.refCode = generateID(18);
+    this.refCode = generateId({ length: 18 });
   }
 
   async update(

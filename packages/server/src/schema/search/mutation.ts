@@ -1,10 +1,10 @@
 import { MyContext } from "@beach_bar/common";
 import { extendType, idArg, stringArg } from "@nexus/schema";
 import { In } from "typeorm";
-import { SearchFilter } from "../../entity/SearchFilter";
-import { UserSearch } from "../../entity/UserSearch";
-import arrEquals from "../../utils/arrEquals";
+import arrEquals from "@utils/arrEquals";
 import { UserSearchType } from "./types";
+import { UserSearch } from "@entity/UserSearch";
+import { SearchFilter } from "@entity/SearchFilter";
 
 export const SearchUpdateMutation = extendType({
   type: "Mutation",

@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
-import { BeachBar } from "../../entity/BeachBar";
-import { CurrencyProductPrice } from "../../entity/CurrencyProductPrice";
-import { ProductCategory } from "../../entity/ProductCategory";
+import { ProductCategory } from "@entity/ProductCategory";
+import { BeachBar } from "@entity/BeachBar";
+import { CurrencyProductPrice } from "@entity/CurrencyProductPrice";
 
 export const checkMinimumProductPrice = async (
   price: number,

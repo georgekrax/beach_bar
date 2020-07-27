@@ -1,4 +1,6 @@
 export * from "@beach_bar/common";
+export * from "./aws/mutation";
+export * from "./aws/types";
 export * from "./beach_bar/entry_fee/mutation";
 export * from "./beach_bar/entry_fee/query";
 export * from "./beach_bar/entry_fee/types";
@@ -39,6 +41,7 @@ export * from "./customer/types";
 export * from "./details/cardBrandTypes";
 export * from "./details/cityTypes";
 export * from "./details/countryTypes";
+export * from "./details/payment/types";
 export * from "./details/product/types";
 export * from "./details/review/types";
 export * from "./details/time/types";

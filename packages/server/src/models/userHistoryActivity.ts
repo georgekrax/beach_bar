@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 import { model, Schema } from "mongoose";
+import { IUserHistoryActivity } from "./typings/schemaInterfaces";
 
 const userHistoryActivitySchema = new Schema(
   {
@@ -19,4 +20,4 @@ const userHistoryActivitySchema = new Schema(
   }
 );
 
-export default model("userHistoryActivity", userHistoryActivitySchema);
+export default model<IUserHistoryActivity>("userHistoryActivity", userHistoryActivitySchema);

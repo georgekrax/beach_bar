@@ -1,17 +1,17 @@
-import {
-  BaseEntity,
-  Column,
-  CreateDateColumn,
-  DeleteDateColumn,
-  Entity,
-  JoinColumn,
-  OneToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from "typeorm";
-import { softRemove } from "../utils/softRemove";
-import { BeachBarReview } from "./BeachBarReview";
+import { softRemove } from "@utils/softRemove";
 import { Dayjs } from "dayjs";
+import {
+    BaseEntity,
+    Column,
+    CreateDateColumn,
+    DeleteDateColumn,
+    Entity,
+    JoinColumn,
+    OneToOne,
+    PrimaryGeneratedColumn,
+    UpdateDateColumn
+} from "typeorm";
+import { BeachBarReview } from "./BeachBarReview";
 
 @Entity({ name: "review_answer", schema: "public" })
 export class ReviewAnswer extends BaseEntity {

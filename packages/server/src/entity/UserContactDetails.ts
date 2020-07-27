@@ -1,3 +1,5 @@
+import { softRemove } from "@utils/softRemove";
+import { Dayjs } from "dayjs";
 import {
   BaseEntity,
   Column,
@@ -10,10 +12,8 @@ import {
   Unique,
   UpdateDateColumn,
 } from "typeorm";
-import { softRemove } from "../utils/softRemove";
 import { Account } from "./Account";
 import { Country } from "./Country";
-import { Dayjs } from "dayjs";
 
 @Entity({ name: "user_contact_details", schema: "public" })
 @Unique("contact_details_phone_number_key", ["accountId", "phoneNumber"])

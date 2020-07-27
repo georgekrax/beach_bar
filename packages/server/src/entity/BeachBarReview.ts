@@ -1,18 +1,18 @@
+import { softRemove } from "@utils/softRemove";
 import { Dayjs } from "dayjs";
 import {
-  BaseEntity,
-  Check,
-  Column,
-  CreateDateColumn,
-  DeleteDateColumn,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
+    BaseEntity,
+    Check,
+    Column,
+    CreateDateColumn,
+    DeleteDateColumn,
+    Entity,
+    JoinColumn,
+    ManyToOne,
+    OneToOne,
+    PrimaryGeneratedColumn,
+    UpdateDateColumn
 } from "typeorm";
-import { softRemove } from "../utils/softRemove";
 import { BeachBar } from "./BeachBar";
 import { Customer } from "./Customer";
 import { Payment } from "./Payment";

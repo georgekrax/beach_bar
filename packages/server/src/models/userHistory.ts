@@ -1,10 +1,13 @@
 import dayjs from "dayjs";
 import { model, Schema } from "mongoose";
+import { IUserHistory } from "./typings/schemaInterfaces";
+
+const ObjectId = Schema.Types.ObjectId;
 
 const userHistorySchema = new Schema(
   {
     activityId: {
-      type: Schema.Types.ObjectId,
+      type: ObjectId,
       required: true,
       ref: "userHistoryActivity",
     },
@@ -31,4 +34,4 @@ const userHistorySchema = new Schema(
   }
 );
 
-export default model("userHistory", userHistorySchema);
+export default model<IUserHistory>("userHistory", userHistorySchema);

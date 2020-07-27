@@ -1,16 +1,16 @@
+import { softRemove } from "@utils/softRemove";
 import { Dayjs } from "dayjs";
 import {
-  BaseEntity,
-  Column,
-  CreateDateColumn,
-  DeleteDateColumn,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
+    BaseEntity,
+    Column,
+    CreateDateColumn,
+    DeleteDateColumn,
+    Entity,
+    JoinColumn,
+    ManyToOne,
+    PrimaryGeneratedColumn,
+    UpdateDateColumn
 } from "typeorm";
-import { softRemove } from "../utils/softRemove";
 import { BeachBar } from "./BeachBar";
 
 @Entity({ name: "beach_bar_entry_fee", schema: "public" })

@@ -1,11 +1,11 @@
 import { BigIntScalar, errors, MyContext } from "@beach_bar/common";
 import { arg, extendType, stringArg } from "@nexus/schema";
-import { BeachBarReview } from "../../../../entity/BeachBarReview";
-import { ReviewAnswer } from "../../../../entity/ReviewAnswer";
-import { ErrorType, DeleteType } from "../../../returnTypes";
 import { DeleteResult } from "../../../types";
-import { AddReviewAnswerType, UpdateReviewAnswerType } from "./returnTypes";
 import { AddReviewAnswerResult, UpdateReviewAnswerResult } from "./types";
+import { AddReviewAnswerType, UpdateReviewAnswerType } from "@typings/beach_bar/review/answer";
+import { DeleteType } from "@typings/.index";
+import { BeachBarReview } from "@entity/BeachBarReview";
+import { ReviewAnswer } from "@entity/ReviewAnswer";
 
 export const ReviewAnswerCrudMutation = extendType({
   type: "Mutation",
@@ -25,7 +25,7 @@ export const ReviewAnswerCrudMutation = extendType({
           description: "The body of the reply",
         }),
       },
-      resolve: async (_, { reviewId, body }, { payload }: MyContext): Promise<AddReviewAnswerType | ErrorType> => {
+      resolve: async (_, { reviewId, body }, { payload }: MyContext): Promise<AddReviewAnswerType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
@@ -76,7 +76,7 @@ export const ReviewAnswerCrudMutation = extendType({
           description: "The body of the reply",
         }),
       },
-      resolve: async (_, { answerId, body }, { payload }: MyContext): Promise<UpdateReviewAnswerType | ErrorType> => {
+      resolve: async (_, { answerId, body }, { payload }: MyContext): Promise<UpdateReviewAnswerType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
@@ -117,7 +117,7 @@ export const ReviewAnswerCrudMutation = extendType({
           description: "The ID value of the review's answer",
         }),
       },
-      resolve: async (_, { answerId }, { payload }: MyContext): Promise<DeleteType | ErrorType> => {
+      resolve: async (_, { answerId }, { payload }: MyContext): Promise<DeleteType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }

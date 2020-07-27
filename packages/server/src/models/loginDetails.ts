@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 import { model, Schema } from "mongoose";
+import { ILoginDetails } from "./typings/schemaInterfaces";
 
 const ObjectId = Schema.Types.ObjectId;
 
@@ -50,4 +51,4 @@ const loginDetailsSchema = new Schema(
   }
 );
 
-export default model("loginDetails", loginDetailsSchema);
+export default model<ILoginDetails>("loginDetails", loginDetailsSchema);

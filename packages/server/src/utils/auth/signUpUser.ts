@@ -1,12 +1,11 @@
 import { errors } from "@beach_bar/common";
 import { Redis } from "ioredis";
-import { user as userScopes } from "../../constants/scopes";
-import { Account } from "../../entity/Account";
-import { City } from "../../entity/City";
-import { Country } from "../../entity/Country";
-import { Owner } from "../../entity/Owner";
-import { User } from "../../entity/User";
-import { ErrorType } from "../../schema/returnTypes";
+import { user as userScopes } from "@constants/scopes";
+import { Country } from "@entity/Country";
+import { City } from "@entity/City";
+import { User } from "@entity/User";
+import { Account } from "@entity/Account";
+import { Owner } from "@entity/Owner";
 
 export const signUpUser = async (
   email: string,
@@ -23,7 +22,7 @@ export const signUpUser = async (
   country?: Country,
   city?: City,
   birthday?: Date
-): Promise<{ user: User } | ErrorType> => {
+): Promise<{ user: User } | any> => {
   const user = await User.findOne({ where: { email }, relations: ["account"] });
   if (user) {
     return { error: { code: errors.CONFLICT, message: "User already exists" } };

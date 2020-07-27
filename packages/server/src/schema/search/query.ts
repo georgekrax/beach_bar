@@ -1,21 +1,20 @@
 import { dayjsFormat, errors, MyContext } from "@beach_bar/common";
+import { BeachBar, BeachBarRepository } from "@entity/BeachBar";
+import { BeachBarFeature } from "@entity/BeachBarFeature";
+import { Product } from "@entity/Product";
+import { SearchFilter } from "@entity/SearchFilter";
+import { SearchInputValue } from "@entity/SearchInputValue";
+import { UserSearch } from "@entity/UserSearch";
 import { arg, extendType, idArg, stringArg } from "@nexus/schema";
+import { RedisSearchReturnType, SearchResultReturnType, SearchReturnType } from "@typings/search";
+import { checkAvailability } from "@utils/beach_bar/checkAvailability";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { Types } from "mongoose";
 import { getCustomRepository, In } from "typeorm";
-import historyActivity from "../../constants/historyActivity";
-import redisKeys from "../../constants/redisKeys";
-import { BeachBar, BeachBarRepository } from "../../entity/BeachBar";
-import { BeachBarFeature } from "../../entity/BeachBarFeature";
-import { Product } from "../../entity/Product";
-import { SearchFilter } from "../../entity/SearchFilter";
-import { SearchInputValue } from "../../entity/SearchInputValue";
-import { UserSearch } from "../../entity/UserSearch";
+import historyActivity from "@constants/historyActivity";
+import redisKeys from "@constants/redisKeys";
 import userHistory from "../../models/userHistory";
-import { checkAvailability } from "../../utils/beach_bar/checkAvailability";
-import { ErrorType } from "../returnTypes";
-import { SearchResultReturnType, SearchReturnType } from "./returnTypes";
 import { FormattedSearchInputValueType, SearchInputType, SearchResult, UserSearchType } from "./types";
 
 export const SearchQuery = extendType({
@@ -87,24 +86,26 @@ export const SearchQuery = extendType({
         _,
         { inputId, inputValue, availability, filterIds, searchId },
         { payload, redis, ipAddr }: MyContext
-      ): Promise<SearchReturnType | ErrorType> => {
+      ): Promise<SearchReturnType> => {
         dayjs.extend(utc);
 
         if (searchId && !payload) {
-          const searches: SearchReturnType[] = (await redis.lrange(redisKeys.USER_SEARCH, 0, -1)).map((x: string) => JSON.parse(x));
+          const searches: RedisSearchReturnType[] = (await redis.lrange(redisKeys.USER_SEARCH, 0, -1)).map((x: string) =>
+            JSON.parse(x)
+          );
           const userSearch = searches.find(search => BigInt(search.search.id) === BigInt(searchId));
           if (!userSearch) {
             return { error: { code: errors.CONFLICT, message: errors.SOMETHING_WENT_WRONG } };
           }
           await userHistory.create({
             activityId: new Types.ObjectId(historyActivity.BEACH_BAR_SEARCH_ID),
-            objectId: userSearch.search.id,
+            objectId: String(userSearch.search.id),
             userId: undefined,
             ipAddr,
           });
           return userSearch;
         } else if (searchId && payload) {
-          const searches: SearchReturnType[] = (
+          const searches: RedisSearchReturnType[] = (
             await redis.lrange(`${redisKeys.USER}:${payload.sub}:${redisKeys.USER_SEARCH}`, 0, -1)
           ).map((x: string) => JSON.parse(x));
           const userSearch = searches.find(search => BigInt(search.search.id) === BigInt(searchId));
@@ -114,7 +115,7 @@ export const SearchQuery = extendType({
           }
           await userHistory.create({
             activityId: new Types.ObjectId(historyActivity.BEACH_BAR_SEARCH_ID),
-            objectId: userSearch.search.id,
+            objectId: String(userSearch.search.id),
             userId: payload.sub,
             ipAddr,
           });
@@ -219,7 +220,6 @@ export const SearchQuery = extendType({
 
             // cache in Redis
             // * store in general user searches, even if the user is not authenticated
-            console.log(returnResult);
             if (payload && payload.sub) {
               await redis.lpush(`${redisKeys.USER}:${payload.sub}:${redisKeys.USER_SEARCH}`, JSON.stringify(returnResult));
             }
@@ -227,7 +227,7 @@ export const SearchQuery = extendType({
 
             await userHistory.create({
               activityId: new Types.ObjectId(historyActivity.BEACH_BAR_SEARCH_ID),
-              objectId: userSearch.id,
+              objectId: String(userSearch.id),
               userId: payload ? payload.sub : undefined,
               ipAddr,
             });

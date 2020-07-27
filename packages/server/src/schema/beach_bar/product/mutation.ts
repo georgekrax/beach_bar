@@ -1,16 +1,16 @@
 import { errors, MyContext } from "@beach_bar/common";
+import { BeachBar } from "@entity/BeachBar";
+import { BeachBarOwner } from "@entity/BeachBarOwner";
+import { Product } from "@entity/Product";
+import { ProductCategory } from "@entity/ProductCategory";
+import { ProductPriceHistory } from "@entity/ProductPriceHistory";
 import { booleanArg, extendType, floatArg, intArg, stringArg } from "@nexus/schema";
-import { BeachBar } from "../../../entity/BeachBar";
-import { BeachBarOwner } from "../../../entity/BeachBarOwner";
-import { Product } from "../../../entity/Product";
-import { ProductCategory } from "../../../entity/ProductCategory";
-import { ProductPriceHistory } from "../../../entity/ProductPriceHistory";
-import { checkMinimumProductPrice } from "../../../utils/beach_bar/checkMinimumProductPrice";
-import { checkScopes } from "../../../utils/checkScopes";
-import { DeleteType, ErrorType } from "../../returnTypes";
+import { DeleteType } from "@typings/.index";
+import { AddProductType, UpdateProductType } from "@typings/beach_bar/product";
 import { DeleteResult } from "../../types";
-import { AddProductType, UpdateProductType } from "./returnTypes";
 import { AddProductResult, UpdateProductResult } from "./types";
+import { checkScopes } from "@utils/checkScopes";
+import { checkMinimumProductPrice } from "@utils/beach_bar/checkMinimumProductPrice";
 
 export const ProductCrudMutation = extendType({
   type: "Mutation",
@@ -47,8 +47,8 @@ export const ProductCrudMutation = extendType({
       resolve: async (
         _,
         { beachBarId, name, description, categoryId, price, isActive, maxPeople },
-        { payload }: MyContext,
-      ): Promise<AddProductType | ErrorType> => {
+        { payload }: MyContext
+      ): Promise<AddProductType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
@@ -188,8 +188,8 @@ export const ProductCrudMutation = extendType({
       resolve: async (
         _,
         { productId, name, description, categoryId, price, isActive, maxPeople },
-        { payload }: MyContext,
-      ): Promise<UpdateProductType | ErrorType> => {
+        { payload }: MyContext
+      ): Promise<UpdateProductType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
@@ -288,7 +288,7 @@ export const ProductCrudMutation = extendType({
           description: "The ID value of the product",
         }),
       },
-      resolve: async (_, { productId }, { payload }: MyContext): Promise<DeleteType | ErrorType> => {
+      resolve: async (_, { productId }, { payload }: MyContext): Promise<DeleteType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
@@ -337,7 +337,7 @@ export const ProductRestoreMutation = extendType({
           description: "The ID value of the product",
         }),
       },
-      resolve: async (_, { productId }, { payload }: MyContext): Promise<UpdateProductType | ErrorType> => {
+      resolve: async (_, { productId }, { payload }: MyContext): Promise<UpdateProductType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }

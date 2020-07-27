@@ -2,17 +2,16 @@ import { EmailScalar, errors, MyContext } from "@beach_bar/common";
 import { arg, booleanArg, extendType, stringArg } from "@nexus/schema";
 import dayjs from "dayjs";
 import fetch from "node-fetch";
-import platformNames from "../../constants/platformNames";
-import { loginDetails as loginDetailsStatus } from "../../constants/status";
-import { User } from "../../entity/User";
-import { generateAccessToken, generateRefreshToken } from "../../utils/auth/generateAuthTokens";
-import { sendRefreshToken } from "../../utils/auth/sendRefreshToken";
-import { signUpUser } from "../../utils/auth/signUpUser";
-import { createUserLoginDetails, findBrowser, findCity, findCountry, findOs } from "../../utils/auth/userCommon";
-import { ErrorType } from "../returnTypes";
+import platformNames from "@constants/platformNames";
+import { loginDetails as loginDetailsStatus } from "@constants/status";
 import { UserLoginDetailsInput } from "../user/types";
-import { AuthorizeWithOAuthType } from "./returnTypes";
 import { OAuthAuthorizationResult } from "./types";
+import { AuthorizeWithOAuthType } from "@typings/oauth";
+import { User } from "@entity/User";
+import { findOs, findBrowser, findCountry, findCity, createUserLoginDetails } from "@utils/auth/userCommon";
+import { signUpUser } from "@utils/auth/signUpUser";
+import { generateRefreshToken, generateAccessToken } from "@utils/auth/generateAuthTokens";
+import { sendRefreshToken } from "@utils/auth/sendRefreshToken";
 
 export const AuthorizeWithOAuthProviders = extendType({
   type: "Mutation",
@@ -39,7 +38,7 @@ export const AuthorizeWithOAuthProviders = extendType({
         _,
         { code, state, loginDetails, isPrimaryOwner },
         { req, res, googleOAuth2Client, uaParser, redis, ipAddr }: MyContext
-      ): Promise<AuthorizeWithOAuthType | ErrorType> => {
+      ): Promise<AuthorizeWithOAuthType> => {
         if (!code || code === "" || code === " ") {
           return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
         }
@@ -234,7 +233,7 @@ export const AuthorizeWithOAuthProviders = extendType({
         _,
         { code, state, loginDetails, isPrimaryOwner },
         { req, res, uaParser, redis, ipAddr }: MyContext
-      ): Promise<AuthorizeWithOAuthType | ErrorType> => {
+      ): Promise<AuthorizeWithOAuthType> => {
         if (!code || code.trim().length === 0) {
           return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
         }
@@ -499,7 +498,7 @@ export const AuthorizeWithOAuthProviders = extendType({
         _,
         { email, code, state, loginDetails, isPrimaryOwner },
         { req, res, uaParser, redis, ipAddr }: MyContext
-      ): Promise<AuthorizeWithOAuthType | ErrorType> => {
+      ): Promise<AuthorizeWithOAuthType> => {
         if (!email || email === "" || email === " ") {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid email address" } };
         }

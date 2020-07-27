@@ -1,3 +1,4 @@
+import redisKeys from "@constants/redisKeys";
 import { Dayjs } from "dayjs";
 import { Redis } from "ioredis";
 import {
@@ -13,7 +14,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import redisKeys from "../constants/redisKeys";
 import { SearchFilter } from "./SearchFilter";
 import { SearchInputValue } from "./SearchInputValue";
 import { User } from "./User";

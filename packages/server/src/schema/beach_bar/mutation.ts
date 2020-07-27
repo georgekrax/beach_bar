@@ -1,15 +1,15 @@
 import { errors, MyContext } from "@beach_bar/common";
 import { booleanArg, extendType, intArg, stringArg } from "@nexus/schema";
-import redisKeys from "../../constants/redisKeys";
-import { BeachBar } from "../../entity/BeachBar";
-import { BeachBarCategory } from "../../entity/BeachBarCategory";
-import { Currency } from "../../entity/Currency";
-import { User } from "../../entity/User";
-import { checkScopes } from "../../utils/checkScopes";
-import { DeleteType, ErrorType } from "../returnTypes";
+import { AddBeachBarType, UpdateBeachBarType } from "@typings/beach_bar";
+import redisKeys from "@constants/redisKeys";
 import { DeleteResult } from "../types";
-import { AddBeachBarType, UpdateBeachBarType } from "./returnTypes";
 import { AddBeachBarResult, UpdateBeachBarResult } from "./types";
+import { DeleteType } from "@typings/.index";
+import { User } from "@entity/User";
+import { Currency } from "@entity/Currency";
+import { BeachBarCategory } from "@entity/BeachBarCategory";
+import { BeachBar } from "@entity/BeachBar";
+import { checkScopes } from "@utils/checkScopes";
 
 export const BeachBarCrudMutation = extendType({
   type: "Mutation",
@@ -77,7 +77,7 @@ export const BeachBarCrudMutation = extendType({
           state,
         },
         { payload, req, res, stripe, redis }: MyContext
-      ): Promise<AddBeachBarType | ErrorType> => {
+      ): Promise<AddBeachBarType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
@@ -260,7 +260,7 @@ export const BeachBarCrudMutation = extendType({
           closingTimeId,
         },
         { payload }: MyContext
-      ): Promise<UpdateBeachBarType | ErrorType> => {
+      ): Promise<UpdateBeachBarType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
@@ -316,7 +316,7 @@ export const BeachBarCrudMutation = extendType({
           description: "The ID value of the #beach_bar",
         }),
       },
-      resolve: async (_, { beachBarId }, { payload, redis, stripe }: MyContext): Promise<DeleteType | ErrorType> => {
+      resolve: async (_, { beachBarId }, { payload, redis, stripe }: MyContext): Promise<DeleteType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
@@ -380,7 +380,7 @@ export const BeachBarUpdateStatusMutation = extendType({
           description: "Set to true if the #beach_bar is active",
         }),
       },
-      resolve: async (_, { beachBarId, isActive }, { payload }: MyContext): Promise<UpdateBeachBarType | ErrorType> => {
+      resolve: async (_, { beachBarId, isActive }, { payload }: MyContext): Promise<UpdateBeachBarType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }

@@ -1,20 +1,20 @@
+import { softRemove } from "@utils/softRemove";
 import { Dayjs } from "dayjs";
 import {
-  BaseEntity,
-  Column,
-  CreateDateColumn,
-  DeleteDateColumn,
-  Entity,
-  In,
-  JoinTable,
-  ManyToMany,
-  OneToMany,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
+    BaseEntity,
+    Column,
+    CreateDateColumn,
+    DeleteDateColumn,
+    Entity,
+    In,
+    JoinTable,
+    ManyToMany,
+    OneToMany,
+    PrimaryGeneratedColumn,
+    UpdateDateColumn
 } from "typeorm";
-import { softRemove } from "../utils/softRemove";
-import { Product } from "./Product";
 import { OfferCampaignCode } from "./OfferCampaignCode";
+import { Product } from "./Product";
 
 @Entity({ name: "offer_campaign", schema: "public" })
 export class OfferCampaign extends BaseEntity {

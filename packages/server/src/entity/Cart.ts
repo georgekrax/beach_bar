@@ -1,20 +1,20 @@
+import { softRemove } from "@utils/softRemove";
 import { Dayjs } from "dayjs";
 import {
-  BaseEntity,
-  Column,
-  CreateDateColumn,
-  DeleteDateColumn,
-  Entity,
-  EntityRepository,
-  getManager,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-  OneToOne,
-  PrimaryGeneratedColumn,
-  Repository,
+    BaseEntity,
+    Column,
+    CreateDateColumn,
+    DeleteDateColumn,
+    Entity,
+    EntityRepository,
+    getManager,
+    JoinColumn,
+    ManyToOne,
+    OneToMany,
+    OneToOne,
+    PrimaryGeneratedColumn,
+    Repository
 } from "typeorm";
-import { softRemove } from "../utils/softRemove";
 import { BeachBar } from "./BeachBar";
 import { BeachBarEntryFee } from "./BeachBarEntryFee";
 import { CartProduct } from "./CartProduct";

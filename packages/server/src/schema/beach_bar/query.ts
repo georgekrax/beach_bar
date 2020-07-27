@@ -1,13 +1,13 @@
 import { MyContext } from "@beach_bar/common";
 import { arg, booleanArg, extendType, intArg } from "@nexus/schema";
-import { BeachBar } from "../../entity/BeachBar";
-import { SearchInputType } from "../search/types";
-import { BeachBarAvailabilityReturnType } from "./returnTypes";
-import { BeachBarAvailabilityType, BeachBarType } from "./types";
-import userHistory from "../../models/userHistory";
 import { Types } from "mongoose";
-import historyActivity from "../../constants/historyActivity";
-import redisKeys from "../../constants/redisKeys";
+import historyActivity from "@constants/historyActivity";
+import redisKeys from "@constants/redisKeys";
+import userHistory from "../../models/userHistory";
+import { SearchInputType } from "../search/types";
+import { BeachBarAvailabilityType, BeachBarType } from "./types";
+import { BeachBarAvailabilityReturnType } from "@typings/beach_bar";
+import { BeachBar } from "@entity/BeachBar";
 
 export const BeachBarQuery = extendType({
   type: "Query",
@@ -95,7 +95,7 @@ export const BeachBarQuery = extendType({
       type: BeachBarType,
       description: "A list with all the available #beach_bars",
       nullable: true,
-      resolve: async () => {
+      resolve: async (): Promise<BeachBar[]> => {
         const beachBars = await BeachBar.find({
           relations: [
             "owners",

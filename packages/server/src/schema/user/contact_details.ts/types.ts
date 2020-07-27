@@ -1,7 +1,7 @@
-import { objectType, unionType } from "@nexus/schema";
-import { UserAccountType } from "../account/types";
-import { CountryType } from "../../details/countryTypes";
 import { EmailScalar } from "@beach_bar/common";
+import { objectType, unionType } from "@nexus/schema";
+import { CountryType } from "../../details/countryTypes";
+import { UserAccountType } from "../account/types";
 
 export const UserContactDetailsType = objectType({
   name: "UserContactDetails",

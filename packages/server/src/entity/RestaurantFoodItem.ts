@@ -1,3 +1,4 @@
+import { softRemove } from "@utils/softRemove";
 import { Dayjs } from "dayjs";
 import {
   BaseEntity,
@@ -10,10 +11,9 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { checkScopes } from "../utils/checkScopes";
-import { softRemove } from "../utils/softRemove";
 import { BeachBarRestaurant } from "./BeachBarRestaurant";
 import { RestaurantMenuCategory } from "./RestaurantMenuCategory";
+import { checkScopes } from "@utils/checkScopes";
 
 @Entity({ name: "restaurant_food_item", schema: "public" })
 export class RestaurantFoodItem extends BaseEntity {

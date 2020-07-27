@@ -1,4 +1,7 @@
 import { errors } from "@beach_bar/common";
+import { payment, payment as paymentStatus } from "@constants/status";
+import { GetRefundPercentage } from "@typings/payment";
+import { softRemove } from "@utils/softRemove";
 import dayjs, { Dayjs } from "dayjs";
 import minMax from "dayjs/plugin/minMax";
 import {
@@ -14,21 +17,14 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { payment, payment as paymentStatus } from "../constants/status";
-import { softRemove } from "../utils/softRemove";
 import { BeachBarReview } from "./BeachBarReview";
 import { Card } from "./Card";
 import { Cart } from "./Cart";
+import { PaymentOfferCode } from "./PaymentOfferCode";
 import { PaymentStatus } from "./PaymentStatus";
 import { Product } from "./Product";
 import { RefundPercentage } from "./RefundPercentage";
 import { ReservedProduct } from "./ReservedProduct";
-import { PaymentOfferCode } from "./PaymentOfferCode";
-
-interface GetRefundPercentage {
-  refundPercentage: RefundPercentage;
-  daysDiff: number;
-}
 
 @Entity({ name: "payment", schema: "public" })
 export class Payment extends BaseEntity {

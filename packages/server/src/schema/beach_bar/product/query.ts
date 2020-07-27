@@ -1,9 +1,9 @@
 import { DateScalar, MyContext } from "@beach_bar/common";
+import { Product } from "@entity/Product";
 import { arg, booleanArg, extendType, intArg } from "@nexus/schema";
+import { ProductAvailabilityHourReturnType } from "@typings/beach_bar/product";
 import dayjs from "dayjs";
-import { Product } from "../../../entity/Product";
-import { checkScopes } from "../../../utils/checkScopes";
-import { ProductAvailabilityHourReturnType } from "./returnTypes";
+import { checkScopes } from "@utils/checkScopes";
 import { ProductAvailabilityHourType, ProductType } from "./types";
 
 export const ProductCrudQuery = extendType({

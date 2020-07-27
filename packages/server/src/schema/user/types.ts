@@ -27,7 +27,7 @@ export const UserType = objectType({
   },
 });
 
-export const UserTypeResult = unionType({
+export const UserResult = unionType({
   name: "UserTypeResult",
   definition(t) {
     t.members("User", "Error");

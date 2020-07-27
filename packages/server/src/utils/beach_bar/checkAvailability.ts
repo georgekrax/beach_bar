@@ -1,16 +1,16 @@
 import { Dayjs } from "dayjs";
 import { Redis } from "ioredis";
-import { BeachBar } from "../../entity/BeachBar";
 import { getReservationLimits } from "./getReservationLimits";
 import { getReservedProducts } from "./getReservedProducts";
-import { BeachBarAvailabilityReturnType } from "../../schema/beach_bar/returnTypes";
+import { BeachBar } from "@entity/BeachBar";
+import { BeachBarAvailabilityReturnType } from "@typings/beach_bar";
 
 export const checkAvailability = async (
   redis: Redis,
   beachBar: BeachBar,
   date: Dayjs,
   timeId?: number,
-  totalPeople?: number,
+  totalPeople?: number
 ): Promise<BeachBarAvailabilityReturnType> => {
   const reservedProducts = await getReservedProducts(redis, beachBar, date, timeId);
   const reservationLimits = getReservationLimits(beachBar, date, timeId);

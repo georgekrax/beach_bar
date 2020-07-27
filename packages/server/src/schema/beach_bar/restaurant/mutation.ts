@@ -1,10 +1,10 @@
 import { errors, MyContext } from "@beach_bar/common";
+import { BeachBar } from "@entity/BeachBar";
+import { BeachBarRestaurant } from "@entity/BeachBarRestaurant";
 import { booleanArg, extendType, intArg, stringArg } from "@nexus/schema";
-import { BeachBar } from "../../../entity/BeachBar";
-import { BeachBarRestaurant } from "../../../entity/BeachBarRestaurant";
-import { DeleteType, ErrorType } from "../../returnTypes";
+import { DeleteType } from "@typings/.index";
+import { AddBeachBarRestaurantType, UpdateBeachBarRestaurantType } from "@typings/beach_bar/restaurant";
 import { DeleteResult } from "../../types";
-import { AddBeachBarRestaurantType, UpdateBeachBarRestaurantType } from "./returnTypes";
 import { AddBeachBarRestaurantResult, UpdateBeachBarRestaurantResult } from "./types";
 
 export const BeachBarRestaurantCrudMutation = extendType({
@@ -33,11 +33,7 @@ export const BeachBarRestaurantCrudMutation = extendType({
           default: false,
         }),
       },
-      resolve: async (
-        _,
-        { beachBarId, name, description, isActive },
-        { payload }: MyContext
-      ): Promise<AddBeachBarRestaurantType | ErrorType> => {
+      resolve: async (_, { beachBarId, name, description, isActive }, { payload }: MyContext): Promise<AddBeachBarRestaurantType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
@@ -116,7 +112,7 @@ export const BeachBarRestaurantCrudMutation = extendType({
         _,
         { restaurantId, name, description, isActive },
         { payload }: MyContext
-      ): Promise<UpdateBeachBarRestaurantType | ErrorType> => {
+      ): Promise<UpdateBeachBarRestaurantType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
@@ -169,7 +165,7 @@ export const BeachBarRestaurantCrudMutation = extendType({
           description: "The ID value of the #beach_bar restaurant",
         }),
       },
-      resolve: async (_, { restaurantId }, { payload }: MyContext): Promise<DeleteType | ErrorType> => {
+      resolve: async (_, { restaurantId }, { payload }: MyContext): Promise<DeleteType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }

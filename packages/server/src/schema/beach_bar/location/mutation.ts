@@ -1,12 +1,11 @@
 import { errors, MyContext } from "@beach_bar/common";
+import { BeachBar } from "@entity/BeachBar";
+import { BeachBarLocation } from "@entity/BeachBarLocation";
+import { Country } from "@entity/Country";
+import { Region } from "@entity/Region";
 import { extendType, intArg, stringArg } from "@nexus/schema";
-import { BeachBar } from "../../../entity/BeachBar";
-import { BeachBarLocation } from "../../../entity/BeachBarLocation";
-import { Country } from "../../../entity/Country";
-import { Region } from "../../../entity/Region";
-import { checkScopes } from "../../../utils/checkScopes";
-import { ErrorType } from "../../returnTypes";
-import { AddBeachBarLocationType, UpdateBeachBarLocationType } from "./returnTypes";
+import { AddBeachBarLocationType, UpdateBeachBarLocationType } from "@typings/beach_bar/location";
+import { checkScopes } from "@utils/checkScopes";
 import { AddBeachBarLocationResult, UpdateBeachBarLocationResult } from "./types";
 
 export const BeachBarLocationCrudMutation = extendType({
@@ -54,7 +53,7 @@ export const BeachBarLocationCrudMutation = extendType({
         _,
         { beachBarId, address, zipCode, latitude, longitude, countryId, cityId, regionId },
         { payload }: MyContext
-      ): Promise<AddBeachBarLocationType | ErrorType> => {
+      ): Promise<AddBeachBarLocationType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
@@ -175,7 +174,7 @@ export const BeachBarLocationCrudMutation = extendType({
         _,
         { locationId, address, zipCode, latitude, longitude, countryId, cityId, regionId },
         { payload }: MyContext
-      ): Promise<UpdateBeachBarLocationType | ErrorType> => {
+      ): Promise<UpdateBeachBarLocationType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }

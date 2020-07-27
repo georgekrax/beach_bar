@@ -1,4 +1,12 @@
-import { dayjsFormat, generateID } from "@beach_bar/common";
+import { dayjsFormat, generateId } from "@beach_bar/common";
+import redisKeys from "@constants/redisKeys";
+import relations from "@constants/relations";
+import { BeachBarAvailabilityReturnType, GetBeachBarPaymentDetails, GetFullPricingReturnType } from "@typings/beach_bar";
+import { checkAvailability } from "@utils/beach_bar/checkAvailability";
+import { getReservationLimits } from "@utils/beach_bar/getReservationLimits";
+import { getReservedProducts } from "@utils/beach_bar/getReservedProducts";
+import { groupBy } from "@utils/groupBy";
+import { softRemove } from "@utils/softRemove";
 import dayjs, { Dayjs } from "dayjs";
 import { Redis } from "ioredis";
 import {
@@ -22,15 +30,7 @@ import {
   Repository,
   UpdateDateColumn,
 } from "typeorm";
-import redisKeys from "../constants/redisKeys";
-import relations from "../constants/relations";
 import { redis } from "../index";
-import { BeachBarAvailabilityReturnType } from "../schema/beach_bar/returnTypes";
-import { checkAvailability } from "../utils/beach_bar/checkAvailability";
-import { getReservationLimits } from "../utils/beach_bar/getReservationLimits";
-import { getReservedProducts } from "../utils/beach_bar/getReservedProducts";
-import { groupBy } from "../utils/groupBy";
-import { softRemove } from "../utils/softRemove";
 import { BeachBarCategory } from "./BeachBarCategory";
 import { BeachBarEntryFee } from "./BeachBarEntryFee";
 import { BeachBarFeature } from "./BeachBarFeature";
@@ -47,18 +47,6 @@ import { ReservedProduct } from "./ReservedProduct";
 import { SearchInputValue } from "./SearchInputValue";
 import { StripeMinimumCurrency } from "./StripeMinimumCurrency";
 import { QuarterTime } from "./Time";
-
-interface GetFullPricingReturnType {
-  pricingFee: PricingFee;
-  currencyFee: PricingFeeCurrency;
-}
-
-interface getBeachBarPaymentDetails {
-  total: number;
-  transferAmount: number;
-  beachBarAppFee: number;
-  stripeFee: number;
-}
 
 @Entity({ name: "beach_bar", schema: "public" })
 @Check(`"avgRating" >= 0 AND "avgRating" <= 10`)
@@ -85,7 +73,7 @@ export class BeachBar extends BaseEntity {
   avgRating: number;
 
   @Column({ type: "text", name: "thumbnail_url", nullable: true })
-  thumbnailUrl?: string;
+  thumbnailUrl: string;
 
   @Column("varchar", { length: 20, name: "contact_phone_number" })
   contactPhoneNumber: string;
@@ -176,7 +164,7 @@ export class BeachBar extends BaseEntity {
       if (res.affected === 0) {
         await SearchInputValue.create({
           beachBarId: this.id,
-          publicId: generateID(5, true),
+          publicId: generateId({ length: 5, numbersOnly: true }),
         }).save();
       }
     } else {
@@ -353,7 +341,7 @@ export class BeachBar extends BaseEntity {
     };
   }
 
-  async getBeachBarPaymentDetails(total: number, stripeFee: number): Promise<getBeachBarPaymentDetails | undefined> {
+  async getBeachBarPaymentDetails(total: number, stripeFee: number): Promise<GetBeachBarPaymentDetails | undefined> {
     const beachBarPricingFee = await this.getFullPricingFee();
     if (!beachBarPricingFee) {
       return undefined;

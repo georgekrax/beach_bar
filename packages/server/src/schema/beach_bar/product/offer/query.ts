@@ -1,13 +1,13 @@
 import { BigIntScalar, errors, MyContext } from "@beach_bar/common";
+import { BeachBar } from "@entity/BeachBar";
+import { CouponCode } from "@entity/CouponCode";
+import { OfferCampaign } from "@entity/OfferCampaign";
+import { OfferCampaignCode } from "@entity/OfferCampaignCode";
 import { arg, extendType, intArg, stringArg } from "@nexus/schema";
+import { ErrorType } from "@typings/.index";
+import { ProductOfferType } from "@typings/beach_bar/product/offer";
 import dayjs from "dayjs";
-import { BeachBar } from "../../../../entity/BeachBar";
-import { CouponCode } from "../../../../entity/CouponCode";
-import { OfferCampaign } from "../../../../entity/OfferCampaign";
-import { OfferCampaignCode } from "../../../../entity/OfferCampaignCode";
-import { checkScopes } from "../../../../utils/checkScopes";
-import { ErrorType } from "../../../returnTypes";
-import { ProductOfferType } from "./returnTypes";
+import { checkScopes } from "@utils/checkScopes";
 import { CouponCodeRevealResult, OfferCampaignCodeRevealResult, OfferCampaignType, ProductOfferQueryResult } from "./types";
 
 export const ProductOfferQuery = extendType({
@@ -23,7 +23,7 @@ export const ProductOfferQuery = extendType({
           description: "The referral code of the product offer or coupon",
         }),
       },
-      resolve: async (_, { refCode }): Promise<ProductOfferType | ErrorType | null> => {
+      resolve: async (_, { refCode }): Promise<ProductOfferType> => {
         if (!refCode || refCode.trim().length === 0) {
           return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
         }

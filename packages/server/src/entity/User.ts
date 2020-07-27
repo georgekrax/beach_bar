@@ -1,3 +1,6 @@
+import redisKeys from "@constants/redisKeys";
+import { UpdateUserInfo } from "@typings/user";
+import { softRemove } from "@utils/softRemove";
 import { Dayjs } from "dayjs";
 import {
   BaseEntity,
@@ -9,11 +12,8 @@ import {
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
-  // eslint-disable-next-line prettier/prettier
-  UpdateDateColumn
+  UpdateDateColumn,
 } from "typeorm";
-import redisKeys from "../constants/redisKeys";
-import { softRemove } from "../utils/softRemove";
 import { Account } from "./Account";
 import { AccountPreference } from "./AccountPreference";
 import { AccountPreferenceType } from "./AccountPreferenceType";
@@ -25,20 +25,6 @@ import { Customer } from "./Customer";
 import { Owner } from "./Owner";
 import { UserSearch } from "./UserSearch";
 import { Vote } from "./Vote";
-export interface UpdateUserInfo {
-  email: string;
-  username?: string;
-  firstName?: string;
-  lastName?: string;
-  imgUrl?: string;
-  personTitle?: string;
-  birthday?: Dayjs;
-  address?: string;
-  zipCode?: string;
-  countryId?: number;
-  cityId?: number;
-  preferenceIds?: number[];
-}
 
 @Entity({ name: "user", schema: "public" })
 export class User extends BaseEntity {

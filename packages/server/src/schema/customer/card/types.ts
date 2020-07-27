@@ -1,8 +1,8 @@
+import { BigIntScalar } from "@beach_bar/common";
 import { objectType, unionType } from "@nexus/schema";
 import { CardBrandType } from "../../details/cardBrandTypes";
 import { CountryType } from "../../details/countryTypes";
 import { CustomerType } from "../types";
-import { BigIntScalar } from "@beach_bar/common";
 
 export const CardType = objectType({
   name: "Card",

@@ -1,8 +1,8 @@
 import { errors } from "@beach_bar/common";
+import { User } from "@entity/User";
 import { decode, sign } from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 import { GeneratedTokenType } from "../returnTypes";
-import { User } from "./../../entity/User";
 
 export const generateAccessToken = (user: User, scope: string[]): GeneratedTokenType => {
   const token = sign(
@@ -16,7 +16,7 @@ export const generateAccessToken = (user: User, scope: string[]): GeneratedToken
       subject: user.id.toString(),
       expiresIn: process.env.ACCESS_TOKEN_EXPIRATION!.toString(),
       jwtid: uuidv4(),
-    },
+    }
   );
 
   const tokenPayload: any = decode(token);
@@ -45,7 +45,7 @@ export const generateRefreshToken = (user: User): GeneratedTokenType => {
       subject: user.id.toString(),
       expiresIn: process.env.REFRESH_TOKEN_EXPIRATION!.toString(),
       jwtid: uuidv4(),
-    },
+    }
   );
 
   const tokenPayload: any = decode(token);

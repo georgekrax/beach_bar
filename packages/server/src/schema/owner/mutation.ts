@@ -1,15 +1,15 @@
 import { errors, MyContext } from "@beach_bar/common";
 import { booleanArg, extendType, intArg } from "@nexus/schema";
 import { KeyType } from "ioredis";
-import { user } from "../../constants/scopes";
-import { BeachBar } from "../../entity/BeachBar";
-import { BeachBarOwner } from "../../entity/BeachBarOwner";
-import { Owner } from "../../entity/Owner";
-import arrDiff from "../../utils/arrDiff";
-import { DeleteType, ErrorType } from "../returnTypes";
+import { user } from "@constants/scopes";
+import arrDiff from "@utils/arrDiff";
 import { DeleteResult } from "../types";
-import { AddBeachBarOwnerType, UpdateBeachBarOwnerType } from "./returnTypes";
 import { AddBeachBarOwnerResult, UpdateBeachBarOwnerResult } from "./types";
+import { AddBeachBarOwnerType, UpdateBeachBarOwnerType } from "@typings/owner";
+import { BeachBar } from "@entity/BeachBar";
+import { Owner } from "@entity/Owner";
+import { BeachBarOwner } from "@entity/BeachBarOwner";
+import { DeleteType } from "@typings/.index";
 
 export const OwnerCrudMutation = extendType({
   type: "Mutation",
@@ -34,7 +34,7 @@ export const OwnerCrudMutation = extendType({
           default: false,
         }),
       },
-      resolve: async (_, { userId, beachBarId, isPrimary }, { payload }: MyContext): Promise<AddBeachBarOwnerType | ErrorType> => {
+      resolve: async (_, { userId, beachBarId, isPrimary }, { payload }: MyContext): Promise<AddBeachBarOwnerType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
@@ -158,7 +158,7 @@ export const OwnerCrudMutation = extendType({
         _,
         { beachBarId, userId, publicInfo, isPrimary },
         { payload, redis }: MyContext
-      ): Promise<UpdateBeachBarOwnerType | ErrorType> => {
+      ): Promise<UpdateBeachBarOwnerType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
@@ -270,7 +270,7 @@ export const OwnerCrudMutation = extendType({
             "The owner with its userId to delete (remove) from the #beach_bar. Its value should not be null or 0, if a primary owner wants to update another primary owner",
         }),
       },
-      resolve: async (_, { beachBarId, userId }, { payload, redis }: MyContext): Promise<DeleteType | ErrorType | any> => {
+      resolve: async (_, { beachBarId, userId }, { payload, redis }: MyContext): Promise<DeleteType | any> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }

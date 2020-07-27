@@ -1,17 +1,11 @@
-import { Customer } from "../../entity/Customer";
-import { Payment } from "../../entity/Payment";
-import { User } from "../../entity/User";
-
-interface VerifyUserPaymentReviewReturnResult {
-  boolean: boolean;
-  customer?: Customer;
-  payment?: Payment;
-}
+import { Payment } from "@entity/Payment";
+import { User } from "@entity/User";
+import { VerifyUserPaymentReviewReturnResult } from "@typings/beach_bar/review";
 
 export const verifyUserPaymentReview = async (
   beachBarId: number,
   refCode?: string,
-  payload?: any,
+  payload?: any
 ): Promise<VerifyUserPaymentReviewReturnResult> => {
   if (refCode) {
     const payment = await Payment.findOne({

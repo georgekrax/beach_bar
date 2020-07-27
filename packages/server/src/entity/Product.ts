@@ -1,23 +1,23 @@
 import { dayjsFormat } from "@beach_bar/common";
+import { ProductAvailabilityHourReturnType } from "@typings/beach_bar/product";
+import { softRemove } from "@utils/softRemove";
 import dayjs, { Dayjs } from "dayjs";
 import {
-  BaseEntity,
-  Between,
-  Column,
-  CreateDateColumn,
-  DeleteDateColumn,
-  Entity,
-  getManager,
-  getRepository,
-  JoinColumn,
-  ManyToMany,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
+    BaseEntity,
+    Between,
+    Column,
+    CreateDateColumn,
+    DeleteDateColumn,
+    Entity,
+    getManager,
+    getRepository,
+    JoinColumn,
+    ManyToMany,
+    ManyToOne,
+    OneToMany,
+    PrimaryGeneratedColumn,
+    UpdateDateColumn
 } from "typeorm";
-import { ProductAvailabilityHourReturnType } from "../schema/beach_bar/product/returnTypes";
-import { softRemove } from "../utils/softRemove";
 import { BeachBar } from "./BeachBar";
 import { BundleProductComponent } from "./BundleProductComponent";
 import { CartProduct } from "./CartProduct";

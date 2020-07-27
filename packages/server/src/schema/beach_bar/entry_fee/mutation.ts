@@ -1,12 +1,12 @@
 import { BigIntScalar, DateScalar, errors, MyContext } from "@beach_bar/common";
+import { BeachBar } from "@entity/BeachBar";
+import { BeachBarEntryFee } from "@entity/BeachBarEntryFee";
 import { arg, extendType, floatArg, intArg } from "@nexus/schema";
+import { DeleteType } from "@typings/.index";
+import { AddBeachBarEntryFeeType, UpdateBeachBarEntryFeeType } from "@typings/beach_bar/entry_fee";
 import { In } from "typeorm";
-import { BeachBar } from "../../../entity/BeachBar";
-import { BeachBarEntryFee } from "../../../entity/BeachBarEntryFee";
-import { checkScopes } from "../../../utils/checkScopes";
-import { DeleteType, ErrorType } from "../../returnTypes";
 import { DeleteResult } from "../../types";
-import { AddBeachBarEntryFeeType, UpdateBeachBarEntryFeeType } from "./returnTypes";
+import { checkScopes } from "@utils/checkScopes";
 import { AddBeachBarEntryFeeResult, UpdateBeachBarEntryFeeResult } from "./types";
 
 export const BeachBarEntryFeeCrudMutation = extendType({
@@ -32,7 +32,7 @@ export const BeachBarEntryFeeCrudMutation = extendType({
           description: "A list with all the dates to add (assign) the entry fee",
         }),
       },
-      resolve: async (_, { beachBarId, fee, dates }, { payload }: MyContext): Promise<AddBeachBarEntryFeeType | any> => {
+      resolve: async (_, { beachBarId, fee, dates }, { payload }: MyContext): Promise<AddBeachBarEntryFeeType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
@@ -101,7 +101,7 @@ export const BeachBarEntryFeeCrudMutation = extendType({
         }),
         fee: floatArg({ required: false, description: "The price value to update the entry fees" }),
       },
-      resolve: async (_, { entryFeeIds, price }, { payload }: MyContext): Promise<UpdateBeachBarEntryFeeType | ErrorType> => {
+      resolve: async (_, { entryFeeIds, price }, { payload }: MyContext): Promise<UpdateBeachBarEntryFeeType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
@@ -170,7 +170,7 @@ export const BeachBarEntryFeeCrudMutation = extendType({
           description: "A list with all the ID values of entry fee(s) to delete (remove) from a #beach_bar",
         }),
       },
-      resolve: async (_, { entryFeeIds }, { payload }: MyContext): Promise<DeleteType | ErrorType> => {
+      resolve: async (_, { entryFeeIds }, { payload }: MyContext): Promise<DeleteType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }

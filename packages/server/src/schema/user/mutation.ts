@@ -1,15 +1,17 @@
 import { DateScalar, EmailScalar, errors, MyContext, UrlScalar } from "@beach_bar/common";
+import { City } from "@entity/City";
+import { Country } from "@entity/Country";
+import { User } from "@entity/User";
 import { arg, booleanArg, extendType, intArg, stringArg } from "@nexus/schema";
+import { DeleteType, SuccessType } from "@typings/.index";
+import { UpdateUserType, UserLoginType, UserSignUpType } from "@typings/user";
 import { execute, makePromise } from "apollo-link";
 import { createHash, randomBytes } from "crypto";
 import { KeyType } from "ioredis";
 import { link } from "../../config/apolloLink";
-import platformNames from "../../constants/platformNames";
-import redisKeys from "../../constants/redisKeys";
-import { loginDetails as loginDetailsStatus } from "../../constants/status";
-import { City } from "../../entity/City";
-import { Country } from "../../entity/Country";
-import { User } from "../../entity/User";
+import platformNames from "@constants/platformNames";
+import redisKeys from "@constants/redisKeys";
+import { loginDetails as loginDetailsStatus } from "@constants/status";
 import authorizeWithHashtagQuery from "../../graphql/AUTHORIZE_WITH_HASHTAG";
 import changeUserPasswordQuery from "../../graphql/CHANGE_USER_PASSWORD";
 import exchangeCodeQuery from "../../graphql/EXCHANGE_CODE";
@@ -18,22 +20,13 @@ import sendForgotPasswordLinkQuery from "../../graphql/SEND_FORGOT_PASSWORD_LINK
 import signUpUserQuery from "../../graphql/SIGN_UP_USER";
 import tokenInfoQuery from "../../graphql/TOKEN_INFO";
 import updateUserQuery from "../../graphql/UPDATE_USER";
-import { generateAccessToken, generateRefreshToken } from "../../utils/auth/generateAuthTokens";
-import { sendRefreshToken } from "../../utils/auth/sendRefreshToken";
-import { signUpUser } from "../../utils/auth/signUpUser";
-import { createUserLoginDetails, findBrowser, findCity, findCountry, findOs } from "../../utils/auth/userCommon";
-import { removeUserSessions } from "../../utils/removeUserSessions";
-import { DeleteType, ErrorType, SuccessType } from "../returnTypes";
 import { DeleteResult, SuccessResult } from "../types";
-import { UserLoginType, UserSignUpType, UserUpdateType } from "./returnTypes";
-import {
-  UserCredentialsInput,
-  UserLoginDetailsInput,
-  UserLoginResult,
-  UserSignUpResult,
-  // eslint-disable-next-line prettier/prettier
-  UserUpdateResult,
-} from "./types";
+import { UserCredentialsInput, UserLoginDetailsInput, UserLoginResult, UserSignUpResult, UserUpdateResult } from "./types";
+import { signUpUser } from "@utils/auth/signUpUser";
+import { findOs, findBrowser, findCountry, findCity, createUserLoginDetails } from "@utils/auth/userCommon";
+import { generateRefreshToken, generateAccessToken } from "@utils/auth/generateAuthTokens";
+import { sendRefreshToken } from "@utils/auth/sendRefreshToken";
+import { removeUserSessions } from "@utils/removeUserSessions";
 
 export const UserSignUpAndLoginMutation = extendType({
   type: "Mutation",
@@ -54,7 +47,7 @@ export const UserSignUpAndLoginMutation = extendType({
           description: "Set to true if you want to sign up an owner for a #beach_bar",
         }),
       },
-      resolve: async (_, { userCredentials, isPrimaryOwner }, { redis }: MyContext): Promise<UserSignUpType | ErrorType> => {
+      resolve: async (_, { userCredentials, isPrimaryOwner }, { redis }: MyContext): Promise<UserSignUpType> => {
         const { email, password } = userCredentials;
         if (!email || email === "" || email === " ") {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid email address" } };
@@ -155,11 +148,7 @@ export const UserSignUpAndLoginMutation = extendType({
           description: "Credential for signing up a user",
         }),
       },
-      resolve: async (
-        _,
-        { loginDetails, userCredentials },
-        { res, redis, uaParser, ipAddr }: MyContext
-      ): Promise<UserLoginType | ErrorType> => {
+      resolve: async (_, { loginDetails, userCredentials }, { res, redis, uaParser, ipAddr }: MyContext): Promise<UserLoginType> => {
         const { email, password } = userCredentials;
         if (!email || email === "" || email === " ") {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid email address" } };
@@ -569,7 +558,7 @@ export const UserForgotPasswordMutation = extendType({
           description: "The email address of user",
         }),
       },
-      resolve: async (_, { email }, { res, redis }): Promise<SuccessType | ErrorType> => {
+      resolve: async (_, { email }, { res, redis }): Promise<SuccessType> => {
         if (!email || email === "" || email === " ") {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid email address" } };
         }
@@ -653,7 +642,7 @@ export const UserForgotPasswordMutation = extendType({
           description: "User's new password",
         }),
       },
-      resolve: async (_, { email, key, newPassword }): Promise<SuccessType | ErrorType> => {
+      resolve: async (_, { email, key, newPassword }): Promise<SuccessType> => {
         if (!email || email === "" || email === " ") {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid email address" } };
         }
@@ -781,7 +770,7 @@ export const UserCrudMutation = extendType({
         _,
         { email, username, firstName, lastName, imgUrl, personTitle, birthday, countryId, cityId, address, zipCode, preferenceIds },
         { payload, redis, stripe }: MyContext
-      ): Promise<UserUpdateType | ErrorType> => {
+      ): Promise<UpdateUserType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
@@ -918,7 +907,7 @@ export const UserCrudMutation = extendType({
       type: DeleteResult,
       description: "Delete a user & its account",
       nullable: false,
-      resolve: async (_, __, { payload, redis, stripe }: MyContext): Promise<DeleteType | ErrorType> => {
+      resolve: async (_, __, { payload, redis, stripe }: MyContext): Promise<DeleteType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }

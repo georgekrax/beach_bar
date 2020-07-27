@@ -1,6 +1,6 @@
-import { Account } from "../../entity/Account";
-import { City } from "../../entity/City";
-import { Country } from "../../entity/Country";
+import { City } from "@entity/City";
+import { Country } from "@entity/Country";
+import { Account } from "@entity/Account";
 import clientBrowser from "../../models/clientBrowser";
 import clientOs from "../../models/clientOs";
 import loginDetails from "../../models/loginDetails";
@@ -36,7 +36,7 @@ export const createUserLoginDetails = async (
     platformId: platform._id,
     status,
     osId: clientOs ? clientOs._id : undefined,
-    clientId: clientBrowser ? clientBrowser._id : undefined,
+    browserId: clientBrowser ? clientBrowser._id : undefined,
     countryId: country ? country.id : undefined,
     cityId: city ? city.id : undefined,
     ipAddr,

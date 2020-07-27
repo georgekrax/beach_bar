@@ -1,8 +1,8 @@
 import { booleanArg, extendType, intArg } from "@nexus/schema";
 import dayjs from "dayjs";
 import { MoreThanOrEqual } from "typeorm";
-import { BeachBarEntryFee } from "../../../entity/BeachBarEntryFee";
 import { BeachBarEntryFeeType } from "./types";
+import { BeachBarEntryFee } from "@entity/BeachBarEntryFee";
 
 export const BeachBarEntryFeeQuery = extendType({
   type: "Query",

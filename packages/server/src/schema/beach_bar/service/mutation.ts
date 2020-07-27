@@ -1,12 +1,12 @@
 import { errors, MyContext } from "@beach_bar/common";
 import { extendType, intArg, stringArg } from "@nexus/schema";
-import { BeachBar } from "../../../entity/BeachBar";
-import { BeachBarFeature } from "../../../entity/BeachBarFeature";
-import { BeachBarService } from "../../../entity/BeachBarService";
-import { DeleteType, ErrorType } from "../../returnTypes";
 import { DeleteResult } from "../../types";
-import { AddBeachBarFeatureType, UpdateBeachBarFeatureType } from "./returnTypes";
 import { AddBeachBarFeatureResult, UpdateBeachBarFeatureResult } from "./types";
+import { AddBeachBarFeatureType, UpdateBeachBarFeatureType } from "@typings/beach_bar/service";
+import { DeleteType } from "@typings/.index";
+import { BeachBar } from "@entity/BeachBar";
+import { BeachBarFeature } from "@entity/BeachBarFeature";
+import { BeachBarService } from "@entity/BeachBarService";
 
 export const BeachBarFeatureMutation = extendType({
   type: "Mutation",
@@ -37,8 +37,8 @@ export const BeachBarFeatureMutation = extendType({
       resolve: async (
         _,
         { beachBarId, featureId, quantity, description },
-        { payload }: MyContext,
-      ): Promise<AddBeachBarFeatureType | ErrorType> => {
+        { payload }: MyContext
+      ): Promise<AddBeachBarFeatureType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
@@ -143,8 +143,8 @@ export const BeachBarFeatureMutation = extendType({
       resolve: async (
         _,
         { beachBarId, featureId, quantity, description },
-        { payload }: MyContext,
-      ): Promise<UpdateBeachBarFeatureType | ErrorType> => {
+        { payload }: MyContext
+      ): Promise<UpdateBeachBarFeatureType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
@@ -219,7 +219,7 @@ export const BeachBarFeatureMutation = extendType({
           description: "The ID value of the feature of the #beach_bar, to delete (remove)",
         }),
       },
-      resolve: async (_, { beachBarId, featureId }, { payload }: MyContext): Promise<DeleteType | ErrorType> => {
+      resolve: async (_, { beachBarId, featureId }, { payload }: MyContext): Promise<DeleteType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }

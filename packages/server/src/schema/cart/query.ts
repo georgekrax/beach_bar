@@ -1,6 +1,6 @@
 import { BigIntScalar } from "@beach_bar/common";
 import { arg, extendType } from "@nexus/schema";
-import { Cart } from "../../entity/Cart";
+import { Cart } from "@entity/Cart";
 
 export const CartQuery = extendType({
   type: "Query",
@@ -40,9 +40,9 @@ export const CartQuery = extendType({
           description: "The ID values of the shopping cart",
         }),
       },
-      resolve: async (_, { cartId }): Promise<boolean | undefined> => {
+      resolve: async (_, { cartId }): Promise<boolean | null> => {
         if (!cartId || cartId <= 0) {
-          return undefined;
+          return null;
         }
 
         const cart = await Cart.findOne({
@@ -50,23 +50,24 @@ export const CartQuery = extendType({
           relations: ["products", "products.product", "products.product.beachBar"],
         });
         if (!cart) {
-          return undefined;
+          return null;
         }
 
         const uniqueBeachBars = cart.getUniqueBeachBars();
         if (!uniqueBeachBars) {
-          return undefined;
+          return null;
         }
 
         for (let i = 0; i < uniqueBeachBars.length; i++) {
           const beachBar = uniqueBeachBars[i];
           const totalPrice = await cart.getBeachBarTotalPrice(beachBar.id);
           if (totalPrice === undefined) {
-            return undefined;
+            return null;
           }
           const isZeroCartTotal = cart.verifyZeroCartTotal(beachBar);
-          return isZeroCartTotal;
+          return isZeroCartTotal === undefined ? null : isZeroCartTotal;
         }
+        return null;
       },
     });
   },

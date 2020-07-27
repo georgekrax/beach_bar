@@ -1,10 +1,10 @@
 import { BigIntScalar, errors, MyContext } from "@beach_bar/common";
 import { arg, extendType } from "@nexus/schema";
 import { getCustomRepository } from "typeorm";
-import { Cart, CartRepository } from "../../entity/Cart";
-import { DeleteType, ErrorType } from "../returnTypes";
 import { DeleteResult } from "../types";
 import { CartType } from "./types";
+import { Cart, CartRepository } from "@entity/Cart";
+import { DeleteType } from "@typings/.index";
 
 export const CartCrudMutation = extendType({
   type: "Mutation",
@@ -20,11 +20,11 @@ export const CartCrudMutation = extendType({
           description: "The ID values of the shopping cart, if it is created previously",
         }),
       },
-      resolve: async (_, { cartId }, { payload }: MyContext): Promise<Cart | undefined> => {
+      resolve: async (_, { cartId }, { payload }: MyContext): Promise<Cart | null> => {
         // ! order the products by timestamp in the frontend
         const cart = await getCustomRepository(CartRepository).getOrCreateCart(payload, cartId);
         if (!cart) {
-          return undefined;
+          return null;
         }
         return cart;
       },
@@ -37,7 +37,7 @@ export const CartCrudMutation = extendType({
       args: {
         cartId: arg({ type: BigIntScalar, required: true, description: "The ID values of the shopping cart" }),
       },
-      resolve: async (_, { cartId }, { payload }: MyContext): Promise<DeleteType | ErrorType> => {
+      resolve: async (_, { cartId }, { payload }: MyContext): Promise<DeleteType> => {
         if (!cartId || cartId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid shopping cart" } };
         }

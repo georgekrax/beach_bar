@@ -1,21 +1,21 @@
 import { BigIntScalar, DateTimeScalar, errors, MyContext } from "@beach_bar/common";
+import { CouponCode } from "@entity/CouponCode";
+import { OfferCampaign } from "@entity/OfferCampaign";
+import { OfferCampaignCode } from "@entity/OfferCampaignCode";
+import { Product } from "@entity/Product";
 import { arg, booleanArg, extendType, floatArg, intArg, stringArg } from "@nexus/schema";
-import dayjs from "dayjs";
-import { In } from "typeorm";
-import { CouponCode } from "../../../../entity/CouponCode";
-import { OfferCampaign } from "../../../../entity/OfferCampaign";
-import { OfferCampaignCode } from "../../../../entity/OfferCampaignCode";
-import { Product } from "../../../../entity/Product";
-import { checkScopes } from "../../../../utils/checkScopes";
-import { DeleteType, ErrorType } from "../../../returnTypes";
-import { DeleteResult } from "../../../types";
+import { DeleteType } from "@typings/.index";
 import {
   AddCouponCodeType,
   AddOfferCampaignCodeType,
   AddOfferCampaignType,
   UpdateCouponCodeType,
   UpdateOfferCampaignType,
-} from "./returnTypes";
+} from "@typings/beach_bar/product/offer";
+import dayjs from "dayjs";
+import { In } from "typeorm";
+import { DeleteResult } from "../../../types";
+import { checkScopes } from "@utils/checkScopes";
 import {
   AddCouponCodeResult,
   AddOfferCampaignCodeResult,
@@ -63,7 +63,7 @@ export const CouponCodeCrudMutation = extendType({
         _,
         { title, discountPercentage, beachBarOffer, validUntil, isActive, timesLimit },
         { payload }: MyContext
-      ): Promise<AddCouponCodeType | ErrorType> => {
+      ): Promise<AddCouponCodeType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
@@ -141,7 +141,7 @@ export const CouponCodeCrudMutation = extendType({
         _,
         { couponCodeId, title, discountPercentage, beachBarOffer, validUntil, isActive, timesLimit },
         { payload }: MyContext
-      ): Promise<UpdateCouponCodeType | DeleteType | ErrorType> => {
+      ): Promise<UpdateCouponCodeType | DeleteType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
@@ -199,7 +199,7 @@ export const CouponCodeCrudMutation = extendType({
           description: "The ID value of the coupon code",
         }),
       },
-      resolve: async (_, { couponCodeId }, { payload }: MyContext): Promise<DeleteType | ErrorType> => {
+      resolve: async (_, { couponCodeId }, { payload }: MyContext): Promise<DeleteType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
@@ -275,7 +275,7 @@ export const OfferCampaignCrudMutation = extendType({
         _,
         { productIds, title, discountPercentage, beachBarOffer, validUntil, isActive },
         { payload }: MyContext
-      ): Promise<AddOfferCampaignType | ErrorType> => {
+      ): Promise<AddOfferCampaignType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
@@ -362,7 +362,7 @@ export const OfferCampaignCrudMutation = extendType({
         _,
         { offerCampaignId, productIds, title, discountPercentage, beachBarOffer, validUntil, isActive },
         { payload }: MyContext
-      ): Promise<UpdateOfferCampaignType | ErrorType> => {
+      ): Promise<UpdateOfferCampaignType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
@@ -424,7 +424,7 @@ export const OfferCampaignCrudMutation = extendType({
           description: "The ID value of the offer campaign",
         }),
       },
-      resolve: async (_, { offerCampaignId }, { payload }: MyContext): Promise<DeleteType | ErrorType> => {
+      resolve: async (_, { offerCampaignId }, { payload }: MyContext): Promise<DeleteType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
@@ -474,7 +474,7 @@ export const OfferCodeCrudMutation = extendType({
           description: "The ID value of the offer campaign",
         }),
       },
-      resolve: async (_, { offerCampaignId }, { payload }: MyContext): Promise<AddOfferCampaignCodeType | ErrorType> => {
+      resolve: async (_, { offerCampaignId }, { payload }: MyContext): Promise<AddOfferCampaignCodeType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }
@@ -520,7 +520,7 @@ export const OfferCodeCrudMutation = extendType({
           description: "The ID value of the offer campaign",
         }),
       },
-      resolve: async (_, { offerCodeId }, { payload }: MyContext): Promise<DeleteType | ErrorType> => {
+      resolve: async (_, { offerCodeId }, { payload }: MyContext): Promise<DeleteType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
         }

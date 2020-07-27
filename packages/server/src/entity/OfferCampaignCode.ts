@@ -1,4 +1,5 @@
-import { generateID } from "@beach_bar/common";
+import { generateId } from "@beach_bar/common";
+import { softRemove } from "@utils/softRemove";
 import { Dayjs } from "dayjs";
 import {
   BaseEntity,
@@ -13,7 +14,6 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
-import { softRemove } from "../utils/softRemove";
 import { BeachBar } from "./BeachBar";
 import { OfferCampaign } from "./OfferCampaign";
 import { PaymentOfferCode } from "./PaymentOfferCode";
@@ -54,7 +54,7 @@ export class OfferCampaignCode extends BaseEntity {
 
   @BeforeInsert()
   generateRefCode(): void {
-    this.refCode = generateID(23);
+    this.refCode = generateId({ length: 23 });
   }
 
   getProductBeachBars(): BeachBar[] {

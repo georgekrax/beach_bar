@@ -1,8 +1,8 @@
 import { BigIntScalar, errors, MyContext } from "@beach_bar/common";
 import { arg, extendType } from "@nexus/schema";
-import { ReservedProduct } from "../../../entity/ReservedProduct";
-import { DeleteType, ErrorType } from "../../returnTypes";
 import { DeleteResult } from "../../types";
+import { DeleteType } from "@typings/.index";
+import { ReservedProduct } from "@entity/ReservedProduct";
 
 export const ReserveProductCrudMutation = extendType({
   type: "Mutation",
@@ -18,7 +18,7 @@ export const ReserveProductCrudMutation = extendType({
           description: "The ID value of the reserved product",
         }),
       },
-      resolve: async (_, { reservedProductId }, { stripe, redis }: MyContext): Promise<DeleteType | ErrorType> => {
+      resolve: async (_, { reservedProductId }, { stripe, redis }: MyContext): Promise<DeleteType> => {
         if (!reservedProductId || reservedProductId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid reserved product" } };
         }

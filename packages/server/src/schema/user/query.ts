@@ -1,16 +1,16 @@
 import { errors, MyContext } from "@beach_bar/common";
+import { User } from "@entity/User";
 import { extendType } from "@nexus/schema";
-import { userInfoPayloadScope } from "../../utils/userInfoPayloadScope";
-import { ErrorType } from "../returnTypes";
-import { User } from "./../../entity/User";
-import { UserType } from "./returnTypes";
-import { UserTypeResult } from "./types";
+import { ErrorType } from "@typings/.index";
+import { UserType } from "@typings/user";
+import { UserResult } from "./types";
+import { userInfoPayloadScope } from "@utils/userInfoPayloadScope"
 
 export const UserQuery = extendType({
   type: "Query",
   definition(t) {
     t.field("me", {
-      type: UserTypeResult,
+      type: UserResult,
       description: "Returns current authenticated user",
       resolve: async (_, __, { payload }: MyContext): Promise<UserType | ErrorType> => {
         if (!payload) {

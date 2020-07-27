@@ -1,14 +1,14 @@
 import { BigIntScalar, errors, MyContext } from "@beach_bar/common";
+import { Card, CardRepository } from "@entity/Card";
+import { CardBrand } from "@entity/CardBrand";
+import { Country } from "@entity/Country";
+import { Customer } from "@entity/Customer";
 import { arg, booleanArg, extendType, intArg, stringArg } from "@nexus/schema";
+import { DeleteType } from "@typings/.index";
+import { AddCardType, UpdateCardType } from "@typings/customer/card";
 import dayjs from "dayjs";
 import { getCustomRepository } from "typeorm";
-import { Card, CardRepository } from "../../../entity/Card";
-import { CardBrand } from "../../../entity/CardBrand";
-import { Country } from "../../../entity/Country";
-import { Customer } from "../../../entity/Customer";
-import { DeleteType, ErrorType } from "../../returnTypes";
 import { DeleteResult } from "../../types";
-import { AddCardType, UpdateCardType } from "./returnTypes";
 import { AddCardResult, UpdateCardResult } from "./types";
 
 export const CardCrudMutation = extendType({
@@ -39,11 +39,7 @@ export const CardCrudMutation = extendType({
           default: false,
         }),
       },
-      resolve: async (
-        _,
-        { source, customerId, cardholderName, isDefault },
-        { payload, stripe }: MyContext,
-      ): Promise<AddCardType | ErrorType> => {
+      resolve: async (_, { source, customerId, cardholderName, isDefault }, { payload, stripe }: MyContext): Promise<AddCardType> => {
         if (!source || source.trim().length === 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid card" } };
         }
@@ -85,7 +81,7 @@ export const CardCrudMutation = extendType({
             brand,
             country,
             isDefault,
-            cardholderName,
+            cardholderName
           );
           return {
             card: newCustomerCard,
@@ -123,11 +119,7 @@ export const CardCrudMutation = extendType({
           description: "A boolean that indicates if the card is the default one for the customer, to use in its transactions",
         }),
       },
-      resolve: async (
-        _,
-        { cardId, cardholderName, expMonth, expYear, isDefault },
-        { stripe }: MyContext,
-      ): Promise<UpdateCardType | ErrorType> => {
+      resolve: async (_, { cardId, cardholderName, expMonth, expYear, isDefault }, { stripe }: MyContext): Promise<UpdateCardType> => {
         if (!cardId || cardId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid card" } };
         }
@@ -185,7 +177,7 @@ export const CardCrudMutation = extendType({
           description: "The ID values of the card to delete",
         }),
       },
-      resolve: async (_, { cardId }, { stripe }: MyContext): Promise<DeleteType | ErrorType> => {
+      resolve: async (_, { cardId }, { stripe }: MyContext): Promise<DeleteType> => {
         if (!cardId || cardId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid card" } };
         }
