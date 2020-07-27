@@ -85,4 +85,4 @@ exports.TimeScalar = schema_1.scalarType({
         throw new TypeError(`Time cannot represent an invalid time-string ${String(value)}.`);
     },
 });
-//# sourceMappingURL=timeScalar.js.map
+//# sourceMappingURL=time.js.map

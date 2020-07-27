@@ -26,4 +26,4 @@ exports.EmailScalar = schema_1.scalarType({
         return validate(ast.value);
     },
 });
-//# sourceMappingURL=emailScalar.js.map
+//# sourceMappingURL=email.js.map

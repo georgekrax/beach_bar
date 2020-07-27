@@ -1,1 +1,2 @@
-export declare const generateID: (length: number, numbersOnly?: boolean) => string;
+import { GenerateIdParams } from "../typings/generateId";
+export declare const generateId: ({ specialCharacters, lowerCase, upperCase, numbersOnly, numbers, hyphen, underscore }: GenerateIdParams) => string;

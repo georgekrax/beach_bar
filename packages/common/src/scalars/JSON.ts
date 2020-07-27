@@ -36,7 +36,7 @@ function parseLiteral(ast: ValueNode, variables: any): any {
   }
 }
 
-export const JsonScalar = scalarType({
+export const JSONScalar = scalarType({
   name: "JSON",
   description: "The `JSON` scalar type represents JSON values as specified by ECMA-404",
   asNexusMethod: "json",

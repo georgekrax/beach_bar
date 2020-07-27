@@ -38,4 +38,4 @@ exports.BigIntScalar = schema_1.scalarType({
         return null;
     },
 });
-//# sourceMappingURL=bigIntScalar.js.map
+//# sourceMappingURL=bigInt.js.map

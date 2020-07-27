@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.JsonScalar = void 0;
+exports.JSONScalar = void 0;
 const schema_1 = require("@nexus/schema");
 const graphql_1 = require("graphql");
 function identity(value) {
@@ -33,7 +33,7 @@ function parseLiteral(ast, variables) {
         }
     }
 }
-exports.JsonScalar = schema_1.scalarType({
+exports.JSONScalar = schema_1.scalarType({
     name: "JSON",
     description: "The `JSON` scalar type represents JSON values as specified by ECMA-404",
     asNexusMethod: "json",
@@ -41,4 +41,4 @@ exports.JsonScalar = schema_1.scalarType({
     parseValue: identity,
     parseLiteral,
 });
-//# sourceMappingURL=jsonScalar.js.map
+//# sourceMappingURL=JSON.js.map

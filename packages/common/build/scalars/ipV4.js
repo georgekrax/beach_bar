@@ -30,4 +30,4 @@ exports.IPv4Scalar = schema_1.scalarType({
         return validate(ast.value);
     },
 });
-//# sourceMappingURL=ipV4Scalar.js.map
+//# sourceMappingURL=ipV4.js.map
