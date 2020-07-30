@@ -28,8 +28,8 @@ export const generateAccessToken = (user: User, scope: string[]): GeneratedToken
     exp: tokenPayload.exp * 1000,
     iat: tokenPayload.iat * 1000,
     jti: tokenPayload.jti,
-    aud: tokenPayload.audience,
-    iss: tokenPayload.issuer,
+    aud: tokenPayload.aud,
+    iss: tokenPayload.iss,
   };
 };
 
@@ -57,7 +57,7 @@ export const generateRefreshToken = (user: User): GeneratedTokenType => {
     exp: tokenPayload.exp * 1000,
     iat: tokenPayload.iat * 1000,
     jti: tokenPayload.jti,
-    aud: tokenPayload.audience,
-    iss: tokenPayload.issuer,
+    aud: tokenPayload.aud,
+    iss: tokenPayload.iss,
   };
 };

@@ -92,7 +92,7 @@ export const RestaurantFoodItemCrudMutation = extendType({
         const newFoodItem = RestaurantFoodItem.create({
           name,
           price,
-          imgUrl,
+          imgUrl: imgUrl.toString(),
           menuCategory,
           restaurant,
         });

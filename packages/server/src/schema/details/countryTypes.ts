@@ -1,5 +1,6 @@
 import { objectType } from "@nexus/schema";
 import { CityType } from "./cityTypes";
+import { IconSizeType } from "./types";
 
 export const CurrencyType = objectType({
   name: "Currency",
@@ -19,7 +20,12 @@ export const CountryFlagIconType = objectType({
   definition(t) {
     t.int("id", { nullable: false, description: "The ID value of the flag icon" });
     t.string("urlValue", { nullable: false, description: "The URL value of the flag icon image" });
-    t.string("size", { nullable: false, description: "The size in 'px' of the flag icon image" });
+    t.field("size", {
+      type: IconSizeType,
+      description: "The size of the flag icon",
+      nullable: false,
+      resolve: o => o.size,
+    });
   },
 });
 

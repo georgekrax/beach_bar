@@ -153,7 +153,7 @@ export const BeachBarCrudMutation = extendType({
           const newBeachBar = BeachBar.create({
             name,
             description,
-            thumbnailUrl,
+            thumbnailUrl: thumbnailUrl.toString(),
             contactPhoneNumber,
             hidePhoneNumber,
             defaultCurrency: currency,

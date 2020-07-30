@@ -13,21 +13,21 @@ import {
 } from "typeorm";
 import { BeachBar } from "./BeachBar";
 
-@Entity({ name: "beach_bar_entry_fee", schema: "public" })
-export class BeachBarEntryFee extends BaseEntity {
+@Entity({ name: "beach_bar_img_url", schema: "public" })
+export class BeachBarImgUrl extends BaseEntity {
   @PrimaryGeneratedColumn({ type: "bigint" })
   id: bigint;
-
-  @Column({ type: "decimal", name: "fee", precision: 5, scale: 2 })
-  fee: number;
 
   @Column({ type: "integer", name: "beach_bar_id" })
   beachBarId: number;
 
-  @Column({ type: "date", name: "date" })
-  date: Dayjs;
+  @Column({ type: "text", name: "img_url" })
+  imgUrl: string;
 
-  @ManyToOne(() => BeachBar, beachBar => beachBar.entryFees)
+  @Column({ type: "text", name: "description", nullable: true })
+  description?: string;
+
+  @ManyToOne(() => BeachBar, beachBar => beachBar.imgUrls, { nullable: false })
   @JoinColumn({ name: "beach_bar_id" })
   beachBar: BeachBar;
 
@@ -40,13 +40,15 @@ export class BeachBarEntryFee extends BaseEntity {
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Dayjs;
 
-  async update(fee?: number): Promise<BeachBarEntryFee | any> {
+  async update(imgUrl?: string, description?: string): Promise<BeachBarImgUrl | any> {
     try {
-      if (fee && fee > 0) {
-        this.fee = fee;
-        await this.save();
-        await this.beachBar.updateRedis();
+      if (imgUrl && imgUrl !== this.imgUrl) {
+        this.imgUrl = imgUrl.toString();
       }
+      if (description && description !== this.description) {
+        this.description = description;
+      }
+      await this.save();
       return this;
     } catch (err) {
       throw new Error(err.message);
@@ -54,7 +56,7 @@ export class BeachBarEntryFee extends BaseEntity {
   }
 
   async softRemove(): Promise<any> {
-    await softRemove(BeachBarEntryFee, { id: this.id });
+    await softRemove(BeachBarImgUrl, { id: this.id });
     await this.beachBar.updateRedis();
   }
 }

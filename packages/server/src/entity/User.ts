@@ -1,7 +1,7 @@
 import redisKeys from "@constants/redisKeys";
 import { UpdateUserInfo } from "@typings/user";
 import { softRemove } from "@utils/softRemove";
-import { Dayjs } from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import {
   BaseEntity,
   Column,
@@ -138,60 +138,40 @@ export class User extends BaseEntity {
       zipCode,
       preferenceIds,
     } = data;
-    if (email && email.trim().length !== 0) {
+    if (email && email !== this.email) {
       this.email = email;
     }
-    if (username && username.trim().length === 0) {
-      this.username = undefined;
-    } else if (username) {
+    if (username && username !== this.username) {
       this.username = username;
     }
-    if (firstName && firstName.trim().length === 0) {
-      this.firstName = undefined;
-    } else if (firstName) {
+    if (firstName && firstName !== this.firstName) {
       this.firstName = firstName;
     }
-    if (lastName && lastName.trim().length === 0) {
-      this.lastName = undefined;
-    } else if (lastName) {
+    if (lastName && lastName !== this.lastName) {
       this.lastName = lastName;
     }
-    if (imgUrl && imgUrl.toString().trim().length === 0) {
-      this.account.imgUrl = undefined;
-    } else if (imgUrl) {
-      this.account.imgUrl = imgUrl;
+    if (imgUrl && imgUrl !== this.account.imgUrl) {
+      this.account.imgUrl = imgUrl.toString();
     }
-    if (personTitle && personTitle.trim().length === 0) {
-      this.account.personTitle = undefined;
-    } else if (personTitle) {
+    if (personTitle && personTitle !== this.account.personTitle) {
       this.account.personTitle = personTitle;
     }
-    if (birthday && birthday.toString().trim().length === 0) {
-      this.account.birthday = undefined;
-    } else if (birthday) {
+    if (birthday && dayjs(birthday) !== dayjs(this.account.birthday)) {
       this.account.birthday = birthday;
     }
-    if (address && address.trim().length === 0) {
-      this.account.address = undefined;
-    } else if (address) {
+    if (address && address !== this.account.address) {
       this.account.address = address;
     }
-    if (zipCode && zipCode.trim().length === 0) {
-      this.account.zipCode = undefined;
-    } else if (zipCode) {
+    if (zipCode && zipCode !== this.account.zipCode) {
       this.account.zipCode = zipCode;
     }
-    if (countryId && countryId <= 0) {
-      this.account.country = undefined;
-    } else if (countryId) {
+    if (countryId && countryId !== this.account.countryId) {
       const country = await Country.findOne(countryId);
       if (country) {
         this.account.country = country;
       }
     }
-    if (cityId && cityId <= 0) {
-      this.account.city = undefined;
-    } else if (cityId) {
+    if (cityId && cityId !== this.account.cityId) {
       const city = await City.findOne(cityId);
       if (city) {
         this.account.city = city;

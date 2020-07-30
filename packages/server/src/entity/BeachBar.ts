@@ -32,6 +32,7 @@ import {
 } from "typeorm";
 import { redis } from "../index";
 import { BeachBarCategory } from "./BeachBarCategory";
+import { BeachBarImgUrl } from "./BeachBarImgUrl";
 import { BeachBarEntryFee } from "./BeachBarEntryFee";
 import { BeachBarFeature } from "./BeachBarFeature";
 import { BeachBarLocation } from "./BeachBarLocation";
@@ -128,6 +129,9 @@ export class BeachBar extends BaseEntity {
   @OneToOne(() => BeachBarLocation, location => location.beachBar)
   location: BeachBarLocation;
 
+  @OneToMany(() => BeachBarImgUrl, beachBarImgUrls => beachBarImgUrls.beachBar, { nullable: true })
+  imgUrls?: BeachBarImgUrl[];
+
   @OneToMany(() => BeachBarOwner, beachBarOwner => beachBarOwner.beachBar)
   owners: BeachBarOwner[];
 
@@ -213,7 +217,7 @@ export class BeachBar extends BaseEntity {
         this.description = description;
       }
       if (thumbnailUrl && thumbnailUrl !== this.thumbnailUrl) {
-        this.thumbnailUrl = thumbnailUrl;
+        this.thumbnailUrl = thumbnailUrl.toString();
       }
       if (contactPhoneNumber && contactPhoneNumber !== this.contactPhoneNumber) {
         this.contactPhoneNumber = contactPhoneNumber;
@@ -421,6 +425,7 @@ export class BeachBar extends BaseEntity {
       { id: this.id },
       [
         BeachBarLocation,
+        BeachBarImgUrl,
         BeachBarOwner,
         BeachBarFeature,
         BeachBarReview,

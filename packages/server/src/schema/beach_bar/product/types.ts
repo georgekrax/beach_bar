@@ -1,4 +1,4 @@
-import { DateTimeScalar } from "@beach_bar/common";
+import { DateTimeScalar, UrlScalar } from "@beach_bar/common";
 import { objectType, unionType } from "@nexus/schema";
 import { ProductCategoryType } from "../../details/product/types";
 import { HourTimeType } from "../../details/time/types";
@@ -15,6 +15,7 @@ export const ProductType = objectType({
     t.boolean("isActive", { nullable: false });
     t.boolean("isIndividual", { nullable: false });
     t.int("maxPeople", { nullable: false });
+    t.field("imgUrl", { type: UrlScalar, nullable: true });
     t.field("beachBar", {
       type: BeachBarType,
       description: "The #beach_bar that provides the product",

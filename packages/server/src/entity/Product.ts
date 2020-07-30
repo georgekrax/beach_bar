@@ -51,6 +51,9 @@ export class Product extends BaseEntity {
   @Column({ type: "integer", name: "max_people" })
   maxPeople: number;
 
+  @Column({ type: "text", name: "img_url", nullable: true })
+  imgUrl?: string;
+
   @Column({ type: "boolean", name: "is_active", default: () => true })
   isActive: boolean;
 

@@ -1,10 +1,10 @@
-import { errors, MyContext } from "@beach_bar/common";
+import { errors, MyContext, UrlScalar } from "@beach_bar/common";
 import { BeachBar } from "@entity/BeachBar";
 import { BeachBarOwner } from "@entity/BeachBarOwner";
 import { Product } from "@entity/Product";
 import { ProductCategory } from "@entity/ProductCategory";
 import { ProductPriceHistory } from "@entity/ProductPriceHistory";
-import { booleanArg, extendType, floatArg, intArg, stringArg } from "@nexus/schema";
+import { booleanArg, extendType, floatArg, intArg, stringArg, arg } from "@nexus/schema";
 import { DeleteType } from "@typings/.index";
 import { AddProductType, UpdateProductType } from "@typings/beach_bar/product";
 import { DeleteResult } from "../../types";
@@ -43,10 +43,15 @@ export const ProductCrudMutation = extendType({
           required: true,
           description: "How many people can use this specific product",
         }),
+        imgUrl: arg({
+          type: UrlScalar,
+          required: false,
+          description: "An image for the #beach_bar's product",
+        }),
       },
       resolve: async (
         _,
-        { beachBarId, name, description, categoryId, price, isActive, maxPeople },
+        { beachBarId, name, description, categoryId, price, isActive, maxPeople, imgUrl },
         { payload }: MyContext
       ): Promise<AddProductType> => {
         if (!payload) {
@@ -122,6 +127,7 @@ export const ProductCrudMutation = extendType({
           description,
           maxPeople,
           isActive,
+          imgUrl: imgUrl.toString(),
         });
 
         try {
@@ -184,10 +190,15 @@ export const ProductCrudMutation = extendType({
           required: true,
           description: "How many people can use this specific product",
         }),
+        imgUrl: arg({
+          type: UrlScalar,
+          required: false,
+          description: "An image for the #beach_bar's product",
+        }),
       },
       resolve: async (
         _,
-        { productId, name, description, categoryId, price, isActive, maxPeople },
+        { productId, name, description, categoryId, price, isActive, maxPeople, imgUrl },
         { payload }: MyContext
       ): Promise<UpdateProductType> => {
         if (!payload) {
@@ -262,6 +273,9 @@ export const ProductCrudMutation = extendType({
           }
           if (maxPeople && maxPeople !== product.maxPeople && maxPeople > 0) {
             product.maxPeople = maxPeople;
+          }
+          if (imgUrl && imgUrl !== product.imgUrl) {
+            product.imgUrl = imgUrl.toString();
           }
           await product.save();
           await product.beachBar.updateRedis();

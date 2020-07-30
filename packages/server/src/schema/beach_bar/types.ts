@@ -8,6 +8,7 @@ import { BeachBarLocationType } from "./location/types";
 import { BeachBarRestaurantType } from "./restaurant/types";
 import { BeachBarReviewType } from "./review/types";
 import { BeachBarFeatureType } from "./service/types";
+import { BeachBarImgUrlType } from "./img_url/types";
 
 export const BeachBarType = objectType({
   name: "BeachBar",
@@ -45,6 +46,12 @@ export const BeachBarType = objectType({
       description: "The category (type) of the #beach_bar",
       nullable: false,
       resolve: o => o.category,
+    });
+    t.list.field("imgUrls", {
+      type: BeachBarImgUrlType,
+      description: "A list with all the #beach_bar's images (URL values)",
+      nullable: true,
+      resolve: o => o.imgUrls,
     });
     t.list.field("reviews", {
       type: BeachBarReviewType,

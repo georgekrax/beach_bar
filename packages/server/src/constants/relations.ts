@@ -16,6 +16,7 @@ export default Object.freeze({
     "location.country",
     "location.city",
     "location.region",
+    "imgUrls",
     "fee",
     "reviews",
     "reviews.customer",

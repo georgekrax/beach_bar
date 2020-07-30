@@ -68,21 +68,21 @@ export class RestaurantFoodItem extends BaseEntity {
       if (name && name !== this.name && name.trim().length !== 0) {
         this.name = name;
       }
-      if (price && price !== this.price && price >= 0) {
+      if (price && price !== this.price) {
         if (checkScopes(payload, ["beach_bar@update:restaurant_food_item"])) {
           throw new Error("You are not allowed to modify the price of the food item product");
         }
         this.price = price;
       }
-      if (menuCategoryId && menuCategoryId !== this.menuCategoryId && menuCategoryId >= 0) {
+      if (menuCategoryId && menuCategoryId !== this.menuCategoryId) {
         const menuCategory = await RestaurantMenuCategory.findOne(menuCategoryId);
         if (!menuCategory) {
           throw new Error("Please provide a valid menu category");
         }
         this.menuCategory = menuCategory;
       }
-      if (imgUrl && imgUrl !== this.imgUrl && imgUrl.trim().length !== 0) {
-        this.imgUrl = imgUrl;
+      if (imgUrl && imgUrl !== this.imgUrl) {
+        this.imgUrl = imgUrl.toString();
       }
       await this.save();
       await this.restaurant.beachBar.updateRedis();
