@@ -1,29 +1,23 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateId = void 0;
-exports.generateId = ({ specialCharacters = "@#./&", lowerCase = true, upperCase = true, numbersOnly = false, numbers = true, hyphen = true, underscore = true }) => {
+exports.generateId = ({ length, specialCharacters = "@#./&-_", lowerCase = true, upperCase = true, numbersOnly = false, numbers = true, }) => {
     let result = "";
     let characters = "";
     if (lowerCase) {
-        characters.concat("abcdefghijklmnopqrstuvwxyz");
+        characters = characters.concat("abcdefghijklmnopqrstuvwxyz");
     }
     if (upperCase) {
-        characters.concat("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+        characters = characters.concat("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
     }
     if (numbers) {
-        characters.concat("0123456789");
-    }
-    if (hyphen) {
-        characters.concat("-");
-    }
-    if (underscore) {
-        characters.concat("_");
+        characters = characters.concat("0123456789");
     }
     if (numbersOnly) {
         characters = "0123456789";
     }
     if (specialCharacters) {
-        characters.concat(specialCharacters);
+        characters = characters.concat(specialCharacters);
     }
     const charactersLength = characters.length;
     for (let i = 0; i < length; i++) {

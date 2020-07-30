@@ -14,8 +14,8 @@
   },
   "author": "George Krachtopoulos <georgekraxt@gmail.com>",
   "dependencies": {
-    "@ant-design/icons": "^4.2.1",
     "@beach_bar/common": "1.0.0",
+    "@ant-design/icons": "^4.2.1",
     "@next/bundle-analyzer": "^9.4.4",
     "@zeit/next-css": "^1.0.1",
     "@zeit/next-less": "^1.0.1",

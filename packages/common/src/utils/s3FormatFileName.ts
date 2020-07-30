@@ -13,13 +13,33 @@ import { generateId } from "../utils/generateId";
  * @param {string} s3Bucket.uKeyAndFilenameSeparator - The separator of the uKey and the serialized filename
  * @returns {string} The serialized filename
  */
-export const s3FormatFileName = (filename: string, s3Bucket: S3BucketObjectType): string => {
-  const uKey = generateId({ length: s3Bucket.uKeyLength });
-  const serializedFileName = filename.toLowerCase().replace(/[^a-z0-9]/g, s3Bucket.uKeyAndFilenameSeparator);
+export const s3FormatFileName = (
+  filename: string,
+  s3Bucket: S3BucketObjectType
+): string => {
+  const specialCharacters = `${
+    s3Bucket.keyAndFilenameSeparator.trim() === "_"
+      ? "_"
+      : `${s3Bucket.keyAndFilenameSeparator.trim()}_`
+  }`;
+  const uKey = generateId({ length: s3Bucket.keyLength, specialCharacters });
+  const extension = filename.match(/\.[0-9a-z]{1,5}$/i);
+  if (!extension || !extension.index) {
+    return "";
+  }
+  const serializedFileName = filename
+    .substring(extension.index, -1)
+    .replace(/[^a-z0-9A-Z]/g, s3Bucket.keyAndFilenameSeparator);
   /*
    * 1,024 bytes are allowed for a S3 object key in UTF-8
    * however UTF-8 supports characters up to 4 bytes
    * so the result is 1024 / 4 = 256
-  */
-  return `${serializedFileName}${s3Bucket.uKeyAndFilenameSeparator}${uKey}`.substring(0, 256);
-}
+   * - characters of the extension
+   */
+  return (
+    `${uKey}${s3Bucket.keyAndFilenameSeparator}${serializedFileName}`.substring(
+      0,
+      256 - extension.length
+    ) + extension
+  );
+};

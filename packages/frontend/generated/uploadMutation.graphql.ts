@@ -3,13 +3,14 @@
 
 import { ConcreteRequest } from "relay-runtime";
 export type uploadMutationVariables = {
-    file: unknown;
+    filename: string;
+    filetype: string;
+    tableName: string;
 };
 export type uploadMutationResponse = {
-    readonly uploadSingleFile: {
-        readonly filename: string;
-        readonly mimetype: string;
-        readonly encoding: string;
+    readonly signS3: {
+        readonly signedRequest: unknown;
+        readonly url: unknown;
     } | null;
 };
 export type uploadMutation = {
@@ -21,12 +22,13 @@ export type uploadMutation = {
 
 /*
 mutation uploadMutation(
-  $file: Upload!
+  $filename: String!
+  $filetype: String!
+  $tableName: String!
 ) {
-  uploadSingleFile(file: $file) {
-    filename
-    mimetype
-    encoding
+  signS3(filename: $filename, filetype: $filetype, tableName: $tableName) {
+    signedRequest
+    url
   }
 }
 */
@@ -36,8 +38,20 @@ var v0 = [
   {
     "defaultValue": null,
     "kind": "LocalArgument",
-    "name": "file",
-    "type": "Upload!"
+    "name": "filename",
+    "type": "String!"
+  },
+  {
+    "defaultValue": null,
+    "kind": "LocalArgument",
+    "name": "filetype",
+    "type": "String!"
+  },
+  {
+    "defaultValue": null,
+    "kind": "LocalArgument",
+    "name": "tableName",
+    "type": "String!"
   }
 ],
 v1 = [
@@ -46,34 +60,37 @@ v1 = [
     "args": [
       {
         "kind": "Variable",
-        "name": "file",
-        "variableName": "file"
+        "name": "filename",
+        "variableName": "filename"
+      },
+      {
+        "kind": "Variable",
+        "name": "filetype",
+        "variableName": "filetype"
+      },
+      {
+        "kind": "Variable",
+        "name": "tableName",
+        "variableName": "tableName"
       }
     ],
-    "concreteType": "File",
+    "concreteType": "S3Payload",
     "kind": "LinkedField",
-    "name": "uploadSingleFile",
+    "name": "signS3",
     "plural": false,
     "selections": [
       {
         "alias": null,
         "args": null,
         "kind": "ScalarField",
-        "name": "filename",
+        "name": "signedRequest",
         "storageKey": null
       },
       {
         "alias": null,
         "args": null,
         "kind": "ScalarField",
-        "name": "mimetype",
-        "storageKey": null
-      },
-      {
-        "alias": null,
-        "args": null,
-        "kind": "ScalarField",
-        "name": "encoding",
+        "name": "url",
         "storageKey": null
       }
     ],
@@ -101,9 +118,9 @@ return {
     "metadata": {},
     "name": "uploadMutation",
     "operationKind": "mutation",
-    "text": "mutation uploadMutation(\n  $file: Upload!\n) {\n  uploadSingleFile(file: $file) {\n    filename\n    mimetype\n    encoding\n  }\n}\n"
+    "text": "mutation uploadMutation(\n  $filename: String!\n  $filetype: String!\n  $tableName: String!\n) {\n  signS3(filename: $filename, filetype: $filetype, tableName: $tableName) {\n    signedRequest\n    url\n  }\n}\n"
   }
 };
 })();
-(node as any).hash = '279df082e1333b93125274961403da69';
+(node as any).hash = 'd795b98f3011d3ed8b6d9f7d1582b612';
 export default node;

@@ -3,6 +3,7 @@ export interface S3BucketObjectType {
   readonly region: string;
   readonly name: string;
   readonly urlExpiration: number;
-  readonly uKeyLength: number;
-  readonly uKeyAndFilenameSeparator: string;
+  readonly keyLength: number;
+  readonly keyAndFilenameSeparator: string;
+  readonly tableName: string;
 }

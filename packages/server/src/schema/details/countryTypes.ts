@@ -37,6 +37,7 @@ export const CountryType = objectType({
       type: CityType,
       description: "The cities of the country",
       nullable: true,
+      resolve: o => o.cities,
     });
     t.field("currency", {
       type: CurrencyType,
