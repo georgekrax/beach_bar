@@ -1,17 +1,22 @@
 import { DateScalar, EmailScalar, errors, MyContext, UrlScalar } from "@beach_bar/common";
+import platformNames from "@constants/platformNames";
+import redisKeys from "@constants/redisKeys";
+import { loginDetails as loginDetailsStatus } from "@constants/status";
 import { City } from "@entity/City";
 import { Country } from "@entity/Country";
 import { User } from "@entity/User";
 import { arg, booleanArg, extendType, intArg, stringArg } from "@nexus/schema";
 import { DeleteType, SuccessType } from "@typings/.index";
 import { UpdateUserType, UserLoginType, UserSignUpType } from "@typings/user";
+import { generateAccessToken, generateRefreshToken } from "@utils/auth/generateAuthTokens";
+import { sendRefreshToken } from "@utils/auth/sendRefreshToken";
+import { signUpUser } from "@utils/auth/signUpUser";
+import { createUserLoginDetails, findBrowser, findCity, findCountry, findOs } from "@utils/auth/userCommon";
+import { removeUserSessions } from "@utils/removeUserSessions";
 import { execute, makePromise } from "apollo-link";
 import { createHash, randomBytes } from "crypto";
 import { KeyType } from "ioredis";
 import { link } from "../../config/apolloLink";
-import platformNames from "@constants/platformNames";
-import redisKeys from "@constants/redisKeys";
-import { loginDetails as loginDetailsStatus } from "@constants/status";
 import authorizeWithHashtagQuery from "../../graphql/AUTHORIZE_WITH_HASHTAG";
 import changeUserPasswordQuery from "../../graphql/CHANGE_USER_PASSWORD";
 import exchangeCodeQuery from "../../graphql/EXCHANGE_CODE";
@@ -22,11 +27,6 @@ import tokenInfoQuery from "../../graphql/TOKEN_INFO";
 import updateUserQuery from "../../graphql/UPDATE_USER";
 import { DeleteResult, SuccessResult } from "../types";
 import { UserCredentialsInput, UserLoginDetailsInput, UserLoginResult, UserSignUpResult, UserUpdateResult } from "./types";
-import { signUpUser } from "@utils/auth/signUpUser";
-import { findOs, findBrowser, findCountry, findCity, createUserLoginDetails } from "@utils/auth/userCommon";
-import { generateRefreshToken, generateAccessToken } from "@utils/auth/generateAuthTokens";
-import { sendRefreshToken } from "@utils/auth/sendRefreshToken";
-import { removeUserSessions } from "@utils/removeUserSessions";
 
 export const UserSignUpAndLoginMutation = extendType({
   type: "Mutation",
@@ -830,6 +830,7 @@ export const UserCrudMutation = extendType({
                 city: uAccount.city?.name || undefined,
                 postal_code: uAccount.zipCode || undefined,
               },
+              // @ts-ignore
               phone: uAccount.contactDetails ? (uAccount.contactDetails?.[0].phoneNumber as any) : undefined,
             });
           }

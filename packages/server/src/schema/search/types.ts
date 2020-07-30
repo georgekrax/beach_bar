@@ -162,11 +162,6 @@ export const FormattedSearchInputValueType = objectType({
       nullable: false,
       resolve: o => o,
     });
-    t.string("formattedValue", {
-      nullable: false,
-      description: "The search input value formatted into a string",
-      resolve: o => o.format(),
-    });
     t.field("beachBarThumbnailUrl", {
       type: UrlScalar,
       nullable: true,

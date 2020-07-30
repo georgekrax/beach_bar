@@ -1,6 +1,9 @@
 import { errors, MyContext } from "@beach_bar/common";
+import redisKeys from "@constants/redisKeys";
+import { User } from "@entity/User";
 import sgClient from "@sendgrid/client";
 import sgMail from "@sendgrid/mail";
+import { createDBConnection } from "@utils/createDBConnection";
 import { execute, makePromise } from "apollo-link";
 import { ApolloServer } from "apollo-server-express";
 import cookieParser from "cookie-parser";
@@ -13,13 +16,10 @@ import { Stripe } from "stripe";
 import { UAParser } from "ua-parser-js";
 import { link } from "./config/apolloLink";
 import { googleOAuth2Client } from "./config/googleOAuth";
-import redisKeys from "@constants/redisKeys";
 import verifyAccessTokenQuery from "./graphql/VERIFY_ACCESS_TOKEN";
 import { router as oauthRouter } from "./routes/authRoutes";
 import { router as stripeRouter } from "./routes/stripeWebhooks";
 import { schema } from "./schema";
-import { User } from "@entity/User";
-import { createDBConnection } from "@utils/createDBConnection";
 
 export let redis;
 export let stripe: Stripe;

@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import { model, Schema } from "mongoose";
-import { ILoginDetails } from "./typings/schemaInterfaces";
+import { ILoginDetails } from "../typings/schemaInterfaces";
 
 const ObjectId = Schema.Types.ObjectId;
 

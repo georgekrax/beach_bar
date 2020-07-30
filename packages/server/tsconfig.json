@@ -4,17 +4,17 @@
     "sourceMap": true,
     "target": "ES6",
     "module": "CommonJS",
-    "outDir": "build",
-    "rootDir": "./src",
+    "outDir": "./build",
+    "rootDir": "src",
     "moduleResolution": "node",
-    "baseUrl": ".",
+    "baseUrl": "./src",
     "paths": {
-      "@entity/*": ["./src/entity/*"],
-      "@utils/*": ["./src/utils/*"],
-      "@constants/*": ["./src/constants/*"],
-      "@typings/*": ["./src/typings/*"]
+      "@entity/*": ["entity/*"],
+      "@utils/*": ["utils/*"],
+      "@constants/*": ["constants/*"],
+      "@typings/*": ["typings/*"]
     }
   },
   "exclude": ["node_modules"],
-  "include": ["./src/**/*.ts", "src/typings/.index.ts"]
+  "include": ["./src/**/*.ts"]
 }

@@ -41,6 +41,7 @@ export const SearchUpdateMutation = extendType({
               userSearch.filters.map(filter => filter.publicId)
             )) ||
           filterIds.length === 0 ||
+          // @ts-ignore
           userSearch.filters?.length === 0
         ) {
           if (filterIds) {

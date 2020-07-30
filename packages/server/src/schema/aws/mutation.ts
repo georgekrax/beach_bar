@@ -1,8 +1,8 @@
-import { S3ACLPermissions, S3Buckets } from "@beach_bar/common";
+import { MyContext, S3ACLPermissions, s3FormatFileName } from "@beach_bar/common";
 import { extendType, stringArg } from "@nexus/schema";
 import { S3PayloadReturnType } from "@typings/aws";
+import { switchS3Bucket } from "@utils/aws/switchS3Bucket";
 import aws from "aws-sdk";
-import { v4 as uuidv4 } from "uuid";
 import { S3PayloadType } from "./types";
 
 export const AWSMutation = extendType({
@@ -21,27 +21,36 @@ export const AWSMutation = extendType({
           required: true,
           description: "The type of the file to sign (upload)",
         }),
+        tableName: stringArg({
+          required: true,
+          description: "The name of the table in PostgreSQL",
+        }),
       },
-      resolve: async (_, { filename, filetype }): Promise<S3PayloadReturnType> => {
-        const { signatureVersion, region, name: s3Bucket, urlExpiration } = S3Buckets.USER_PROFILE_IMAGE;
+      resolve: async (_, { filename, filetype, tableName }, { redis }: MyContext): Promise<S3PayloadReturnType | null> => {
+        const s3Bucket = await switchS3Bucket(redis, tableName);
+        if (!s3Bucket) {
+          return null;
+        }
+
+        const { signatureVersion, region, name, urlExpiration } = s3Bucket;
+        const s3Key = s3FormatFileName(filename, s3Bucket);
 
         const s3 = new aws.S3({
           signatureVersion: signatureVersion,
           region: region,
         });
 
-        const s3Key = `${filename}#${uuidv4()}`;
-
         const params = {
-          Bucket: s3Bucket,
+          Bucket: name,
           Key: s3Key,
           Expires: urlExpiration,
           ContentType: filetype,
           ACL: S3ACLPermissions.PUBLIC_READ,
+          RequestPayer: "requester",
         };
 
-        const signedRequest = await s3.getSignedUrl("putObject", params);
-        const url = `https://${s3Bucket}.${process.env.AWS_S3_HOSTNAME!.toString()}/${s3Key}`;
+        const signedRequest = s3.getSignedUrl("putObject", params);
+        const url = `https://${name}.${process.env.AWS_S3_HOSTNAME!.toString()}/${s3Key}`;
 
         return {
           signedRequest,

@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import { model, Schema } from "mongoose";
-import { IPlatform } from "./typings/schemaInterfaces";
+import { IPlatform } from "../typings/schemaInterfaces";
 
 const platformSchema = new Schema(
   {

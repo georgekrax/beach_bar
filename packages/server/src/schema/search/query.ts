@@ -10,12 +10,12 @@ import { RedisSearchReturnType, SearchResultReturnType, SearchReturnType } from 
 import { checkAvailability } from "@utils/beach_bar/checkAvailability";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
-import { Types } from "mongoose";
 import { getCustomRepository, In } from "typeorm";
-import historyActivity from "@constants/historyActivity";
 import redisKeys from "@constants/redisKeys";
-import userHistory from "../../models/userHistory";
 import { FormattedSearchInputValueType, SearchInputType, SearchResult, UserSearchType } from "./types";
+import userHistory from "models/userHistory";
+import { Types } from "mongoose";
+import historyActivity from "@constants/historyActivity";
 
 export const SearchQuery = extendType({
   type: "Query",
@@ -41,7 +41,7 @@ export const SearchQuery = extendType({
         const searches: UserSearch[] = (
           await redis.lrange(`${redisKeys.USER}:${payload.sub}:${redisKeys.USER_SEARCH}`, 0, -1)
         ).map((x: string) => JSON.parse(x));
-        const userSearches = searches.filter(search => parseInt(search.userId.toString()) === payload.sub);
+        const userSearches = searches.filter(search => search.userId && parseInt(search.userId.toString()) === payload.sub);
 
         const result: UserSearch[] = [];
         const map = new Map();

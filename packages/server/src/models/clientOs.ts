@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import { model, Schema } from "mongoose";
-import { IClientOs } from "./typings/schemaInterfaces";
+import { IClientOs } from "../typings/schemaInterfaces";
 
 const clientOsSchema = new Schema(
   {

@@ -95,8 +95,8 @@ export const PaymentCrudMutation = extendType({
           return { error: { message: errors.SOMETHING_WENT_WRONG } };
         }
 
-        const refCode = generateId({ length: 16});
-        const transferGroupCode = `${prefixes.PAYMENT_TARGET_GROUP}${generateId({ length: 16})}`;
+        const refCode = generateId({ length: 16 });
+        const transferGroupCode = `${prefixes.PAYMENT_TARGET_GROUP}${generateId({ length: 16 })}`;
 
         const newPayment = Payment.create({
           cart,
@@ -162,6 +162,7 @@ export const PaymentCrudMutation = extendType({
               }
               if (
                 !cart.products
+                  // @ts-ignore
                   ?.map(product => product.productId)
                   .some(id => offerCode.campaign.products.map(product => product.id).includes(id))
               ) {
@@ -247,18 +248,20 @@ export const PaymentCrudMutation = extendType({
                 .replace(/[:]/g, ": ")
                 .replace(/[,]/g, ", "),
               offer_codes: newPayment.offerCodes
-                .map(code => {
-                  return JSON.stringify({
-                    id: code.couponCode ? code.couponCode.id : code.offerCode?.id,
-                    discount_percentage: code.discountPercentage,
-                    type: code.couponCode ? "coupon_code" : "offer_campaign_code",
-                  });
-                })
-                .toString()
-                .replace(/[[\]]/g, "")
-                .replace(/},{/g, "} - {")
-                .replace(/[:]/g, ": ")
-                .replace(/[,]/g, ", "),
+                ? newPayment.offerCodes
+                    .map(code => {
+                      return JSON.stringify({
+                        id: code.couponCode ? code.couponCode.id : code.offerCode?.id,
+                        discount_percentage: code.discountPercentage,
+                        type: code.couponCode ? "coupon_code" : "offer_campaign_code",
+                      });
+                    })
+                    .toString()
+                    .replace(/[[\]]/g, "")
+                    .replace(/},{/g, "} - {")
+                    .replace(/[:]/g, ": ")
+                    .replace(/[,]/g, ", ")
+                : null,
               entry_fees_total: totalWithEntryFees - totalWithoutEntryFees + total,
             },
             transfer_group: transferGroupCode,
@@ -300,41 +303,43 @@ export const PaymentCrudMutation = extendType({
             transferAmount += beachBarTransferAmount;
             console.log(`Stripe fee: ${beachBarStripeFee}`);
             if (beachBarTransferAmount * 100 > 1) {
-            const stripeTransfer = await stripe.transfers.create({
-              amount: beachBarTransferAmount * 100,
-              currency: stripePayment.currency.toLowerCase(),
-              transfer_group: transferGroupCode,
-              destination: beachBar.stripeConnectId,
-              metadata: {
-                ref_code: refCode,
-                stripe_fee: beachBarStripeFee,
-                platform_fee: beachBarAppFee,
-                products: cartProducts
-                  .filter(product => product.product.beachBarId === beachBar.id)
-                  .map(product => JSON.stringify({ name: product.product.name }))
-                  .toString()
-                  .replace("[", "")
-                  .replace("]", "")
-                  .replace("},{", "} - {"),
-                offer_codes: newPayment.offerCodes
-                  .map(code => {
-                    return JSON.stringify({
-                      discount_percentage: code.discountPercentage,
-                      type: code.couponCode ? "coupon_code" : "offer_campaign_code",
-                    });
-                  })
-                  .toString()
-                  .replace(/[[\]]/g, "")
-                  .replace(/},{/g, "} - {")
-                  .replace(/[:]/g, ": ")
-                  .replace(/[,]/g, ", "),
-              },
-            });
-            console.log(stripeTransfer);
-            if (!stripeTransfer) {
-              return { error: { message: errors.SOMETHING_WENT_WRONG } };
+              const stripeTransfer = await stripe.transfers.create({
+                amount: beachBarTransferAmount * 100,
+                currency: stripePayment.currency.toLowerCase(),
+                transfer_group: transferGroupCode,
+                destination: beachBar.stripeConnectId,
+                metadata: {
+                  ref_code: refCode,
+                  stripe_fee: beachBarStripeFee,
+                  platform_fee: beachBarAppFee,
+                  products: cartProducts
+                    .filter(product => product.product.beachBarId === beachBar.id)
+                    .map(product => JSON.stringify({ name: product.product.name }))
+                    .toString()
+                    .replace("[", "")
+                    .replace("]", "")
+                    .replace("},{", "} - {"),
+                  offer_codes: newPayment.offerCodes
+                    ? newPayment.offerCodes
+                        .map(code => {
+                          return JSON.stringify({
+                            discount_percentage: code.discountPercentage,
+                            type: code.couponCode ? "coupon_code" : "offer_campaign_code",
+                          });
+                        })
+                        .toString()
+                        .replace(/[[\]]/g, "")
+                        .replace(/},{/g, "} - {")
+                        .replace(/[:]/g, ": ")
+                        .replace(/[,]/g, ", ")
+                    : null,
+                },
+              });
+              console.log(stripeTransfer);
+              if (!stripeTransfer) {
+                return { error: { message: errors.SOMETHING_WENT_WRONG } };
+              }
             }
-          }
           }
 
           newPayment.appFee = beachBarPricingFee;

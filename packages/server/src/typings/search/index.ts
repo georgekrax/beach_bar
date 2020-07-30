@@ -1,8 +1,8 @@
-import { SearchInputValue } from "@entity/SearchInputValue";
 import { BeachBar } from "@entity/BeachBar";
-import { BeachBarAvailabilityReturnType } from "@typings/beach_bar";
+import { SearchInputValue } from "@entity/SearchInputValue";
 import { UserSearch } from "@entity/UserSearch";
 import { ErrorType } from "@typings/.index";
+import { BeachBarAvailabilityReturnType } from "@typings/beach_bar";
 
 export type SearchInputValueReturnType = {
   inputValue: SearchInputValue;
@@ -23,7 +23,9 @@ export type RedisSearchReturnType = {
   search: UserSearch;
 };
 
-export type SearchReturnType = {
-  results: SearchResultReturnType[];
-  search: UserSearch;
-} | ErrorType;
+export type SearchReturnType =
+  | {
+      results: SearchResultReturnType[];
+      search: UserSearch;
+    }
+  | ErrorType;

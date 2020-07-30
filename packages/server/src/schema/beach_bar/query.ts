@@ -1,13 +1,16 @@
 import { MyContext } from "@beach_bar/common";
 import { arg, booleanArg, extendType, intArg } from "@nexus/schema";
-import { Types } from "mongoose";
-import historyActivity from "@constants/historyActivity";
+// import { Types } from "mongoose";
+// import historyActivity from "@constants/historyActivity";
 import redisKeys from "@constants/redisKeys";
-import userHistory from "../../models/userHistory";
+// import userHistory from "../../models/userHistory";
 import { SearchInputType } from "../search/types";
 import { BeachBarAvailabilityType, BeachBarType } from "./types";
 import { BeachBarAvailabilityReturnType } from "@typings/beach_bar";
 import { BeachBar } from "@entity/BeachBar";
+import userHistory from "models/userHistory";
+import { Types } from "mongoose";
+import historyActivity from "@constants/historyActivity";
 
 export const BeachBarQuery = extendType({
   type: "Query",

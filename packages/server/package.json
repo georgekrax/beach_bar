@@ -5,7 +5,7 @@
   "main": "build/index.js",
   "scripts": {
     "build": "rm -rf ./build && tsc",
-    "build:watch": "rm -rf ./build && tsc --watch",
+    "build:watch": "tsc --watch",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon -L"
   },
@@ -44,6 +44,7 @@
     "nodemon": "^2.0.3",
     "prettier": "^2.0.5",
     "ts-node": "8.10.2",
+    "tsconfig-paths": "^3.9.0",
     "typescript": "^3.9.5",
     "webpack": "^4.43.0"
   },
@@ -65,6 +66,7 @@
     "graphql": "14.6.0",
     "ioredis": "^4.17.3",
     "jsonwebtoken": "^8.5.1",
+    "module-alias": "^2.2.2",
     "mongoose": "^5.9.25",
     "node-fetch": "^2.6.0",
     "pg": "^8.2.1",
@@ -75,5 +77,11 @@
     "uuid": "^8.2.0",
     "validator": "^13.1.1",
     "yup": "^0.29.1"
+  },
+  "_moduleAliases": {
+    "@constants": "./build/constants",
+    "@utils": "./build/utils",
+    "@entity": "./build/entity",
+    "@typings": "./build/typings"
   }
 }
