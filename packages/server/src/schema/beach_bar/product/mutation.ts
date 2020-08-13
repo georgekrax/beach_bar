@@ -1,16 +1,15 @@
 import { errors, MyContext, UrlScalar } from "@beach_bar/common";
 import { BeachBar } from "@entity/BeachBar";
-import { BeachBarOwner } from "@entity/BeachBarOwner";
 import { Product } from "@entity/Product";
 import { ProductCategory } from "@entity/ProductCategory";
 import { ProductPriceHistory } from "@entity/ProductPriceHistory";
-import { booleanArg, extendType, floatArg, intArg, stringArg, arg } from "@nexus/schema";
+import { arg, booleanArg, extendType, floatArg, intArg, stringArg } from "@nexus/schema";
 import { DeleteType } from "@typings/.index";
 import { AddProductType, UpdateProductType } from "@typings/beach_bar/product";
+import { checkMinimumProductPrice } from "@utils/beach_bar/checkMinimumProductPrice";
+import { checkScopes } from "@utils/checkScopes";
 import { DeleteResult } from "../../types";
 import { AddProductResult, UpdateProductResult } from "./types";
-import { checkScopes } from "@utils/checkScopes";
-import { checkMinimumProductPrice } from "@utils/beach_bar/checkMinimumProductPrice";
 
 export const ProductCrudMutation = extendType({
   type: "Mutation",
@@ -89,19 +88,15 @@ export const ProductCrudMutation = extendType({
 
         const beachBar = await BeachBar.findOne({
           where: { id: beachBarId },
-          relations: ["entryFees"],
+          relations: ["entryFees", "owners", "owners.owner"],
         });
         if (!beachBar) {
           return { error: { code: errors.CONFLICT, message: errors.BEACH_BAR_DOES_NOT_EXIST } };
         }
 
-        const owners = await BeachBarOwner.find({ where: { beachBar }, relations: ["owner", "owner.user"] });
-        if (!owners) {
-          return { error: { code: errors.CONFLICT, message: errors.SOMETHING_WENT_WRONG } };
-        }
-        const owner = owners.find(beachBarOwner => beachBarOwner.owner.user.id === payload.sub);
+        const owner = beachBar.owners.find(owner => String(owner.owner.userId).trim() === String(payload.sub).trim());
         if (!owner) {
-          return { error: { code: errors.UNAUTHORIZED_CODE, message: errors.YOU_ARE_NOT_BEACH_BAR_OWNER } };
+          return { error: { code: errors.CONFLICT, message: errors.SOMETHING_WENT_WRONG } };
         }
         if (!owner.isPrimary) {
           return { error: { code: errors.UNAUTHORIZED_CODE, message: errors.YOU_ARE_NOT_BEACH_BAR_PRIMARY_OWNER } };
@@ -219,77 +214,50 @@ export const ProductCrudMutation = extendType({
 
         const product = await Product.findOne({
           where: { id: productId },
-          relations: ["beachBar", "beachBar.entryFees", "currency", "category", "category.productComponents"],
+          relations: [
+            "beachBar",
+            "beachBar.entryFees",
+            "beachBar.owners",
+            "beachBar.owners.owner",
+            "currency",
+            "category",
+            "category.productComponents",
+          ],
         });
         if (!product) {
           return { error: { code: errors.CONFLICT, message: "Specified product does not exist" } };
         }
 
-        const owners = await BeachBarOwner.find({ where: { beachBarId: product.beachBarId }, relations: ["owner", "owner.user"] });
-        if (!owners) {
-          return { error: { code: errors.CONFLICT, message: errors.SOMETHING_WENT_WRONG } };
-        }
-        const owner = owners.find(beachBarOwner => beachBarOwner.owner.user.id === payload.sub);
+        const owner = product.beachBar.owners.find(
+          beachBarOwner => String(beachBarOwner.owner.userId).trim() === String(payload.sub).trim()
+        );
         if (!owner) {
-          return { error: { code: errors.UNAUTHORIZED_CODE, message: errors.YOU_ARE_NOT_BEACH_BAR_OWNER } };
-        }
-        if (!owner.isPrimary && !payload.scope.includes("beach_bar@update:product")) {
-          return {
-            error: { code: errors.UNAUTHORIZED_CODE, message: "You are not allowed to update this product of this #beach_bar" },
-          };
+          return { error: { code: errors.CONFLICT, message: errors.YOU_ARE_NOT_BEACH_BAR_OWNER } };
         }
 
         try {
-          if (
-            (price !== null || price !== undefined) &&
-            price >= 0 &&
-            checkScopes(payload, ["beach_bar@crud:beach_bar", "beach_bar@crud:product"])
-          ) {
-            try {
-              await checkMinimumProductPrice(price, product.category, product.beachBar, product.beachBar.defaultCurrencyId);
-            } catch (err) {
-              throw new Error(err.message);
-            }
-            product.price = price;
-            await ProductPriceHistory.create({ product, owner: owner.owner, newPrice: price }).save();
-          }
-          if (categoryId && categoryId !== product.categoryId && categoryId <= 0) {
-            const category = await ProductCategory.findOne({ where: { id: categoryId }, relations: ["productComponents"] });
-            if (category) {
-              product.category = category;
-              await product.createProductComponents(true);
-            } else {
-              return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid product category" } };
-            }
-          }
-          if (isActive !== null && isActive !== undefined) {
-            product.isActive = isActive;
-          }
-          if (name && name !== product.name) {
-            product.name = name;
-          }
-          if (description && description !== product.description) {
-            product.description = description;
-          }
-          if (maxPeople && maxPeople !== product.maxPeople && maxPeople > 0) {
-            product.maxPeople = maxPeople;
-          }
-          if (imgUrl && imgUrl !== product.imgUrl) {
-            product.imgUrl = imgUrl.toString();
-          }
-          await product.save();
-          await product.beachBar.updateRedis();
+          const updatedProduct = await product.update({
+            name,
+            description,
+            price,
+            categoryId,
+            isActive,
+            maxPeople,
+            imgUrl,
+            owner: owner.owner,
+            payload,
+          });
+
+          return {
+            product: updatedProduct,
+            updated: true,
+          };
         } catch (err) {
           if (err.message === errors.SOMETHING_WENT_WRONG) {
             return { error: { message: errors.SOMETHING_WENT_WRONG } };
           }
           return { error: { message: `Something went wrong: ${err.message}` } };
         }
-
-        return {
-          product,
-          updated: true,
-        };
       },
     });
     t.field("deleteProduct", {

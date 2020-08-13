@@ -1,27 +1,30 @@
 import { dayjsFormat } from "@beach_bar/common";
 import { ProductAvailabilityHourReturnType } from "@typings/beach_bar/product";
+import { checkMinimumProductPrice } from "@utils/beach_bar/checkMinimumProductPrice";
+import { checkScopes } from "@utils/checkScopes";
 import { softRemove } from "@utils/softRemove";
 import dayjs, { Dayjs } from "dayjs";
 import {
-    BaseEntity,
-    Between,
-    Column,
-    CreateDateColumn,
-    DeleteDateColumn,
-    Entity,
-    getManager,
-    getRepository,
-    JoinColumn,
-    ManyToMany,
-    ManyToOne,
-    OneToMany,
-    PrimaryGeneratedColumn,
-    UpdateDateColumn
+  BaseEntity,
+  Between,
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  getManager,
+  getRepository,
+  JoinColumn,
+  ManyToMany,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from "typeorm";
 import { BeachBar } from "./BeachBar";
 import { BundleProductComponent } from "./BundleProductComponent";
 import { CartProduct } from "./CartProduct";
 import { OfferCampaign } from "./OfferCampaign";
+import { Owner } from "./Owner";
 import { ProductCategory } from "./ProductCategory";
 import { ProductPriceHistory } from "./ProductPriceHistory";
 import { ProductReservationLimit } from "./ProductReservationLimit";
@@ -177,6 +180,59 @@ export class Product extends BaseEntity {
     this.category.productComponents.forEach(async productComponent => {
       await BundleProductComponent.create({ product: this, component: productComponent, deletedAt: undefined }).save();
     });
+  }
+
+  async update(options: {
+    name?: string;
+    categoryId?: number;
+    description?: string;
+    price?: number;
+    maxPeople?: number;
+    imgUrl?: string;
+    isActive?: boolean;
+    owner?: Owner;
+    payload?: any;
+  }): Promise<Product | any> {
+    const { name, categoryId, description, price, maxPeople, imgUrl, isActive, owner, payload } = options;
+    try {
+      if (price && checkScopes(payload, ["beach_bar@crud:beach_bar", "beach_bar@crud:product"])) {
+        try {
+          await checkMinimumProductPrice(price, this.category, this.beachBar, this.beachBar.defaultCurrencyId);
+        } catch (err) {
+          throw new Error(err.message);
+        }
+        this.price = price;
+        await ProductPriceHistory.create({ product: this, owner, newPrice: price }).save();
+      }
+      if (categoryId && categoryId !== this.categoryId && categoryId <= 0) {
+        const category = await ProductCategory.findOne({ where: { id: categoryId }, relations: ["productComponents"] });
+        if (category) {
+          this.category = category;
+          await this.createProductComponents(true);
+        } else {
+          throw new Error("Please provide a valid product category");
+        }
+      }
+      if (isActive !== null && isActive !== undefined) {
+        this.isActive = isActive;
+      }
+      if (name && name !== this.name) {
+        this.name = name;
+      }
+      if (description && description !== this.description) {
+        this.description = description;
+      }
+      if (maxPeople && maxPeople !== this.maxPeople && maxPeople > 0) {
+        this.maxPeople = maxPeople;
+      }
+      if (imgUrl && imgUrl !== this.imgUrl) {
+        this.imgUrl = imgUrl.toString();
+      }
+      await this.save();
+      await this.beachBar.updateRedis();
+    } catch (err) {
+      throw new Error(err.message);
+    }
   }
 
   async softRemove(): Promise<any> {

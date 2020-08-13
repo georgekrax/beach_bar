@@ -1,12 +1,12 @@
 import { errors, MyContext } from "@beach_bar/common";
-import { extendType, intArg, stringArg } from "@nexus/schema";
-import { DeleteResult } from "../../types";
-import { AddBeachBarFeatureResult, UpdateBeachBarFeatureResult } from "./types";
-import { AddBeachBarFeatureType, UpdateBeachBarFeatureType } from "@typings/beach_bar/service";
-import { DeleteType } from "@typings/.index";
 import { BeachBar } from "@entity/BeachBar";
 import { BeachBarFeature } from "@entity/BeachBarFeature";
 import { BeachBarService } from "@entity/BeachBarService";
+import { extendType, intArg, stringArg } from "@nexus/schema";
+import { DeleteType } from "@typings/.index";
+import { AddBeachBarFeatureType, UpdateBeachBarFeatureType } from "@typings/beach_bar/service";
+import { DeleteResult } from "../../types";
+import { AddBeachBarFeatureResult, UpdateBeachBarFeatureResult } from "./types";
 
 export const BeachBarFeatureMutation = extendType({
   type: "Mutation",
@@ -60,7 +60,7 @@ export const BeachBarFeatureMutation = extendType({
 
         const beachBar = await BeachBar.findOne({
           where: { id: beachBarId },
-          relations: ["owners", "owners.owner", "owners.owner.user", "features", "features.service"],
+          relations: ["owners", "owners.owner", "features", "features.service"],
         });
         if (!beachBar) {
           return { error: { code: errors.CONFLICT, message: errors.BEACH_BAR_DOES_NOT_EXIST } };
@@ -87,7 +87,7 @@ export const BeachBarFeatureMutation = extendType({
           }
         }
 
-        const owner = beachBar.owners.find(owner => owner.owner.user.id === payload.sub);
+        const owner = beachBar.owners.find(owner => String(owner.owner.userId).trim() === String(payload.sub));
         if (!owner) {
           return { error: { code: errors.CONFLICT, message: errors.SOMETHING_WENT_WRONG } };
         }
@@ -168,13 +168,13 @@ export const BeachBarFeatureMutation = extendType({
 
         const feature = await BeachBarFeature.findOne({
           where: { beachBarId, serviceId: featureId },
-          relations: ["beachBar", "beachBar.owners", "beachBar.owners.owner", "beachBar.owners.owner.user", "service"],
+          relations: ["beachBar", "beachBar.owners", "beachBar.owners.owner", "service"],
         });
         if (!feature) {
           return { error: { code: errors.CONFLICT, message: "Specified feature does not exist" } };
         }
 
-        const owner = feature.beachBar.owners.find(owner => owner.owner.user.id === payload.sub);
+        const owner = feature.beachBar.owners.find(owner => String(owner.owner.userId).trim() === String(payload.sub).trim());
         if (!owner) {
           return { error: { code: errors.CONFLICT, message: errors.SOMETHING_WENT_WRONG } };
         }
@@ -241,13 +241,13 @@ export const BeachBarFeatureMutation = extendType({
 
         const feature = await BeachBarFeature.findOne({
           where: { beachBarId, serviceId: featureId },
-          relations: ["beachBar", "beachBar.owners", "beachBar.owners.owner", "beachBar.owners.owner.user", "service"],
+          relations: ["beachBar", "beachBar.owners", "beachBar.owners.owner", "service"],
         });
         if (!feature) {
           return { error: { code: errors.CONFLICT, message: "Specified feature does not exist" } };
         }
 
-        const owner = feature.beachBar.owners.find(owner => owner.owner.user.id === payload.sub);
+        const owner = feature.beachBar.owners.find(owner => String(owner.owner.userId).trim() === String(payload.sub).trim());
         if (!owner) {
           return { error: { code: errors.CONFLICT, message: errors.SOMETHING_WENT_WRONG } };
         }

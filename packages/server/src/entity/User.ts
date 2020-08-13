@@ -119,53 +119,57 @@ export class User extends BaseEntity {
     return isNew;
   }
 
-  async update(data: UpdateUserInfo): Promise<{ user: User; isNew: boolean }> {
+  async update(data: UpdateUserInfo): Promise<{ user: User; isNew: boolean } | any> {
     const isNew = this.getIsNew(data);
     const { email, firstName, lastName, imgUrl, personTitle, birthday, countryId, cityId, address, zipCode, trackHistory } = data;
-    if (email && email !== this.email) {
-      this.email = email;
-    }
-    if (firstName && firstName !== this.firstName) {
-      this.firstName = firstName;
-    }
-    if (lastName && lastName !== this.lastName) {
-      this.lastName = lastName;
-    }
-    if (imgUrl && imgUrl !== this.account.imgUrl) {
-      this.account.imgUrl = imgUrl.toString();
-    }
-    if (personTitle && personTitle !== this.account.personTitle) {
-      this.account.personTitle = personTitle;
-    }
-    if (birthday && dayjs(birthday) !== dayjs(this.account.birthday)) {
-      this.account.birthday = birthday;
-    }
-    if (address && address !== this.account.address) {
-      this.account.address = address;
-    }
-    if (zipCode && zipCode !== this.account.zipCode) {
-      this.account.zipCode = zipCode;
-    }
-    if (countryId && countryId !== this.account.countryId) {
-      const country = await Country.findOne(countryId);
-      if (country) {
-        this.account.country = country;
+    try {
+      if (email && email !== this.email) {
+        this.email = email;
       }
-    }
-    if (cityId && cityId !== this.account.cityId) {
-      const city = await City.findOne({ id: cityId });
-      if (city) {
-        this.account.city = city;
+      if (firstName && firstName !== this.firstName) {
+        this.firstName = firstName;
       }
+      if (lastName && lastName !== this.lastName) {
+        this.lastName = lastName;
+      }
+      if (imgUrl && imgUrl !== this.account.imgUrl) {
+        this.account.imgUrl = imgUrl.toString();
+      }
+      if (personTitle && personTitle !== this.account.personTitle) {
+        this.account.personTitle = personTitle;
+      }
+      if (birthday && dayjs(birthday) !== dayjs(this.account.birthday)) {
+        this.account.birthday = birthday;
+      }
+      if (address && address !== this.account.address) {
+        this.account.address = address;
+      }
+      if (zipCode && zipCode !== this.account.zipCode) {
+        this.account.zipCode = zipCode;
+      }
+      if (countryId && countryId !== this.account.countryId) {
+        const country = await Country.findOne(countryId);
+        if (country) {
+          this.account.country = country;
+        }
+      }
+      if (cityId && cityId !== this.account.cityId) {
+        const city = await City.findOne({ id: cityId });
+        if (city) {
+          this.account.city = city;
+        }
+      }
+      if (trackHistory !== undefined && trackHistory !== this.account.trackHistory) {
+        this.account.trackHistory = trackHistory;
+      }
+      if (isNew) {
+        await this.save();
+        await this.account.save();
+      }
+      return { user: this, isNew };
+    } catch (err) {
+      throw new Error(err.message);
     }
-    if (trackHistory !== undefined && trackHistory !== this.account.trackHistory) {
-      this.account.trackHistory = trackHistory;
-    }
-    if (isNew) {
-      await this.save();
-      await this.account.save();
-    }
-    return { user: this, isNew };
   }
 
   async softRemove(): Promise<any> {
