@@ -10,7 +10,6 @@ export const UserType = objectType({
   definition(t) {
     t.int("id", { nullable: false, description: "User's ID value" });
     t.field("email", { type: EmailScalar, nullable: false, description: "User's email address" });
-    t.string("username", { nullable: true, description: "Username of the user. It can be null" });
     t.string("firstName", { nullable: true, description: "User's first (given) name" });
     t.string("lastName", { nullable: true, description: "User's last (family) name" });
     t.field("account", {

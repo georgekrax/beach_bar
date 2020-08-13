@@ -9,7 +9,6 @@ import { Dayjs } from "dayjs";
 export type UserType = {
   id: number;
   email: string;
-  username?: string;
   firstName?: string;
   lastName?: string;
   reviews?: BeachBarReview[];
@@ -33,7 +32,6 @@ export type UserType = {
 
 export interface UpdateUserInfo {
   email: string;
-  username?: string;
   firstName?: string;
   lastName?: string;
   imgUrl?: string;

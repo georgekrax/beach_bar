@@ -32,9 +32,6 @@ export class User extends BaseEntity {
   @Column("varchar", { name: "email", length: 255 })
   email: string;
 
-  @Column("varchar", { length: 35, name: "username", unique: true })
-  username?: string;
-
   @Column({ name: "token_version", type: "integer", default: () => 0 })
   tokenVersion: number;
 
@@ -104,10 +101,9 @@ export class User extends BaseEntity {
 
   getIsNew(data: UpdateUserInfo): boolean {
     let isNew = false;
-    const { email, username, firstName, lastName, imgUrl, personTitle, birthday, countryId, cityId, address, zipCode } = data;
+    const { email, firstName, lastName, imgUrl, personTitle, birthday, countryId, cityId, address, zipCode } = data;
     if (
       email !== this.email ||
-      username !== this.username ||
       firstName !== this.firstName ||
       lastName !== this.lastName ||
       imgUrl !== this.account.imgUrl ||
@@ -125,25 +121,9 @@ export class User extends BaseEntity {
 
   async update(data: UpdateUserInfo): Promise<{ user: User; isNew: boolean }> {
     const isNew = this.getIsNew(data);
-    const {
-      email,
-      username,
-      firstName,
-      lastName,
-      imgUrl,
-      personTitle,
-      birthday,
-      countryId,
-      cityId,
-      address,
-      zipCode,
-      trackHistory,
-    } = data;
+    const { email, firstName, lastName, imgUrl, personTitle, birthday, countryId, cityId, address, zipCode, trackHistory } = data;
     if (email && email !== this.email) {
       this.email = email;
-    }
-    if (username && username !== this.username) {
-      this.username = username;
     }
     if (firstName && firstName !== this.firstName) {
       this.firstName = firstName;

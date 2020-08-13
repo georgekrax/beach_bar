@@ -103,22 +103,15 @@ export const UserSignUpAndLoginMutation = extendType({
           city = await City.findOne(hashtagUser.city.id);
         }
 
-        const response = await signUpUser(
-          hashtagUser.email,
+        const response = await signUpUser({
+          email: hashtagUser.email,
           redis,
           isPrimaryOwner,
-          hashtagUser.id,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
+          hashtagId: hashtagUser.id,
           country,
           city,
-          hashtagUser.birthday
-        );
+          birthday: hashtagUser.birthday,
+        });
         // @ts-ignore
         if (response.error && !response.user) {
           // @ts-ignore
@@ -722,9 +715,6 @@ export const UserCrudMutation = extendType({
           type: EmailScalar,
           required: false,
         }),
-        username: stringArg({
-          required: false,
-        }),
         firstName: stringArg({
           required: false,
         }),
@@ -767,7 +757,7 @@ export const UserCrudMutation = extendType({
       },
       resolve: async (
         _,
-        { email, username, firstName, lastName, imgUrl, personTitle, birthday, countryId, cityId, address, zipCode, trackHistory },
+        { email, firstName, lastName, imgUrl, personTitle, birthday, countryId, cityId, address, zipCode, trackHistory },
         { payload, redis, stripe }: MyContext
       ): Promise<UpdateUserType> => {
         if (!payload) {
@@ -799,7 +789,6 @@ export const UserCrudMutation = extendType({
         try {
           const response = await user.update({
             email,
-            username,
             firstName,
             lastName,
             imgUrl,

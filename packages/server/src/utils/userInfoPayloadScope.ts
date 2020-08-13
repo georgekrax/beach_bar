@@ -5,7 +5,6 @@ export const userInfoPayloadScope = (payload: any, user: User): UserType => {
   return {
     id: user.id,
     email: user.email,
-    username: user.username,
     firstName: user.firstName,
     lastName: user.lastName,
     reviews: payload.scope.some(scope =>

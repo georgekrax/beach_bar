@@ -1,28 +1,42 @@
 import { errors } from "@beach_bar/common";
-import { Redis } from "ioredis";
 import { user as userScopes } from "@constants/scopes";
-import { Country } from "@entity/Country";
-import { City } from "@entity/City";
-import { User } from "@entity/User";
 import { Account } from "@entity/Account";
+import { City } from "@entity/City";
+import { Country } from "@entity/Country";
 import { Owner } from "@entity/Owner";
+import { User } from "@entity/User";
+import { Redis } from "ioredis";
 
-export const signUpUser = async (
-  email: string,
-  redis: Redis,
-  isPrimaryOwner: boolean,
-  hashtagId?: bigint,
-  googleId?: any,
-  facebookId?: any,
-  instagramId?: any,
-  instagramUsername?: string | any,
-  username?: string,
-  firstName?: string,
-  lastName?: string,
-  country?: Country,
-  city?: City,
-  birthday?: Date
-): Promise<{ user: User } | any> => {
+export const signUpUser = async (options: {
+  email: string;
+  redis: Redis;
+  isPrimaryOwner: boolean;
+  hashtagId?: bigint;
+  googleId?: any;
+  facebookId?: any;
+  instagramId?: any;
+  instagramUsername?: string | any;
+  firstName?: string;
+  lastName?: string;
+  country?: Country;
+  city?: City;
+  birthday?: Date;
+}): Promise<{ user: User } | any> => {
+  const {
+    email,
+    redis,
+    isPrimaryOwner,
+    hashtagId,
+    googleId,
+    facebookId,
+    instagramId,
+    instagramUsername,
+    firstName,
+    lastName,
+    country,
+    city,
+    birthday,
+  } = options;
   const user = await User.findOne({ where: { email }, relations: ["account"] });
   if (user) {
     return { error: { code: errors.CONFLICT, message: "User already exists" } };
@@ -34,7 +48,6 @@ export const signUpUser = async (
     facebookId,
     instagramId,
     instagramUsername,
-    username,
     firstName,
     lastName,
   });

@@ -1,17 +1,17 @@
 import { EmailScalar, errors, MyContext } from "@beach_bar/common";
-import { arg, booleanArg, extendType, stringArg } from "@nexus/schema";
-import dayjs from "dayjs";
-import fetch from "node-fetch";
 import platformNames from "@constants/platformNames";
 import { loginDetails as loginDetailsStatus } from "@constants/status";
+import { User } from "@entity/User";
+import { arg, booleanArg, extendType, stringArg } from "@nexus/schema";
+import { AuthorizeWithOAuthType } from "@typings/oauth";
+import { generateAccessToken, generateRefreshToken } from "@utils/auth/generateAuthTokens";
+import { sendRefreshToken } from "@utils/auth/sendRefreshToken";
+import { signUpUser } from "@utils/auth/signUpUser";
+import { createUserLoginDetails, findBrowser, findCity, findCountry, findOs } from "@utils/auth/userCommon";
+import dayjs from "dayjs";
+import fetch from "node-fetch";
 import { UserLoginDetailsInput } from "../user/types";
 import { OAuthAuthorizationResult } from "./types";
-import { AuthorizeWithOAuthType } from "@typings/oauth";
-import { User } from "@entity/User";
-import { findOs, findBrowser, findCountry, findCity, createUserLoginDetails } from "@utils/auth/userCommon";
-import { signUpUser } from "@utils/auth/signUpUser";
-import { generateRefreshToken, generateAccessToken } from "@utils/auth/generateAuthTokens";
-import { sendRefreshToken } from "@utils/auth/sendRefreshToken";
 
 export const AuthorizeWithOAuthProviders = extendType({
   type: "Mutation",
@@ -127,22 +127,16 @@ export const AuthorizeWithOAuthProviders = extendType({
         let signedUp = false;
         if (!user) {
           signedUp = true;
-          const response = await signUpUser(
+          const response = await signUpUser({
             email,
             redis,
             isPrimaryOwner,
-            undefined,
             googleId,
-            undefined,
-            undefined,
-            undefined,
-            undefined,
             firstName,
             lastName,
             country,
             city,
-            undefined
-          );
+          });
           // @ts-ignore
           if (response.error && !response.user) {
             // @ts-ignore
@@ -380,22 +374,17 @@ export const AuthorizeWithOAuthProviders = extendType({
         let signedUp = false;
         if (!user) {
           signedUp = true;
-          const response = await signUpUser(
-            facebookEmail,
+          const response = await signUpUser({
+            email: facebookEmail,
             redis,
             isPrimaryOwner,
-            undefined,
-            undefined,
             facebookId,
-            undefined,
-            undefined,
-            undefined,
             firstName,
             lastName,
             country,
             city,
-            birthday
-          );
+            birthday,
+          });
           // @ts-ignore
           if (response.error && !response.user) {
             // @ts-ignore
@@ -614,22 +603,15 @@ export const AuthorizeWithOAuthProviders = extendType({
         let signedUp = false;
         if (!user) {
           signedUp = true;
-          const response = await signUpUser(
+          const response = await signUpUser({
             email,
             redis,
             isPrimaryOwner,
-            undefined,
-            undefined,
-            undefined,
             instagramId,
             instagramUsername,
-            undefined,
-            undefined,
-            undefined,
             country,
             city,
-            undefined
-          );
+          });
 
           // @ts-ignore
           if (response.error && !response.user) {
