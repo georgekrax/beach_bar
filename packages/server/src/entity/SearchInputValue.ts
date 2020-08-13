@@ -1,16 +1,16 @@
 import { softRemove } from "@utils/softRemove";
 import { Dayjs } from "dayjs";
 import {
-    BaseEntity,
-    Column,
-    CreateDateColumn,
-    DeleteDateColumn,
-    Entity,
-    JoinColumn,
-    ManyToOne,
-    OneToMany,
-    PrimaryGeneratedColumn,
-    UpdateDateColumn
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from "typeorm";
 import { BeachBar } from "./BeachBar";
 import { City } from "./City";
@@ -74,10 +74,17 @@ export class SearchInputValue extends BaseEntity {
       return formattedString;
     } else {
       if (this.country) {
-        formattedString = this.country.name;
+        if (this.country.shortName && this.country.shortName.trim().length > 0) {
+          formattedString = this.country.shortName;
+        } else {
+          formattedString = this.country.name;
+        }
       }
       if (this.city) {
         formattedString = this.city.name;
+        if (this.city.secondName && this.city.secondName.trim().length > 0) {
+          formattedString.concat(`(${this.city.secondName})`);
+        }
         if (this.country) {
           // @ts-ignore
           formattedString = formattedString.concat(`, ${this.country.name}`);

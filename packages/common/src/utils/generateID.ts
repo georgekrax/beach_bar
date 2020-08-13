@@ -4,14 +4,12 @@ import { GenerateIdParams } from "../typings/generateId";
  * Generates a unique identifier (ID)
  * @param {object} options
  * @param {number} options.length - How long the ID to be
- * @param {string=} options.specialCharacters - A string with special characters to apply
+ * @param {string=} options.specialCharacters - A string with special characters to apply. Its default value is "@#./&-_"
  * @param {boolean=} options.lowerCase - Indicates if to use lower case letters
  * @param {boolean=} options.upperCase - Indicates if to use upper case letters
  * @param {boolean=} options.numbersOnly - Indicates if to use only numbers, and not other characters
  * @param {boolean=} options.numbers - Indicates if to use numbers
- * @param {boolean=} options.hyphens - Indicates if to use hyphens
- * @param {boolean=} options.underscores - Indicates if to use underscores
- * @returns {string} The generated ID
+ * @returns {string} The generated ID (string)
  */
 export const generateId = ({
   length,

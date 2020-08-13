@@ -178,9 +178,6 @@ export class Cart extends BaseEntity {
         if (totalEntryFees === undefined) {
           return undefined;
         }
-        console.log(totalEntryFees);
-        console.log(total);
-        console.log(couponCodeDiscount);
         return {
           entryFeeTotal: parseFloat(totalEntryFees.toFixed(2)),
           totalWithoutEntryFees: parseFloat((total - couponCodeDiscount).toFixed(2)),
