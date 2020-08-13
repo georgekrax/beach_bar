@@ -1,15 +1,15 @@
 import { softRemove } from "@utils/softRemove";
 import { Dayjs } from "dayjs";
 import {
-    BaseEntity,
-    Column,
-    CreateDateColumn,
-    DeleteDateColumn,
-    Entity,
-    JoinColumn,
-    OneToOne,
-    PrimaryGeneratedColumn,
-    UpdateDateColumn
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from "typeorm";
 import { BeachBarReview } from "./BeachBarReview";
 
@@ -41,7 +41,7 @@ export class ReviewAnswer extends BaseEntity {
     try {
       if (body && body !== this.body) {
         this.body = body;
-        await this.save()
+        await this.save();
         await this.review.beachBar.updateRedis();
       }
       return this;

@@ -20,8 +20,8 @@ import {
 import { BeachBarReview } from "./BeachBarReview";
 import { Card } from "./Card";
 import { Cart } from "./Cart";
-import { PaymentOfferCode } from "./PaymentOfferCode";
 import { PaymentStatus } from "./PaymentStatus";
+import { PaymentVoucherCode } from "./PaymentVoucherCode";
 import { Product } from "./Product";
 import { RefundPercentage } from "./RefundPercentage";
 import { ReservedProduct } from "./ReservedProduct";
@@ -73,8 +73,8 @@ export class Payment extends BaseEntity {
   @OneToMany(() => BeachBarReview, beachBarReview => beachBarReview.payment, { nullable: true })
   reviews?: BeachBarReview[];
 
-  @OneToMany(() => PaymentOfferCode, paymentOfferCode => paymentOfferCode.payment, { nullable: true })
-  offerCodes?: PaymentOfferCode[];
+  @OneToOne(() => PaymentVoucherCode, paymentVoucherCode => paymentVoucherCode.payment, { nullable: true })
+  voucherCode?: PaymentVoucherCode;
 
   @OneToMany(() => ReservedProduct, reservedProduct => reservedProduct.payment, { nullable: true })
   reservedProducts?: ReservedProduct[];

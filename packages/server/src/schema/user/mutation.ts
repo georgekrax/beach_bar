@@ -760,15 +760,14 @@ export const UserCrudMutation = extendType({
           required: false,
           description: "User's house or office zip code",
         }),
-        preferenceIds: intArg({
+        trackHistory: booleanArg({
           required: false,
-          list: true,
-          description: "A list with the user's preferences",
+          description: "Indicates if to track user's history",
         }),
       },
       resolve: async (
         _,
-        { email, username, firstName, lastName, imgUrl, personTitle, birthday, countryId, cityId, address, zipCode, preferenceIds },
+        { email, username, firstName, lastName, imgUrl, personTitle, birthday, countryId, cityId, address, zipCode, trackHistory },
         { payload, redis, stripe }: MyContext
       ): Promise<UpdateUserType> => {
         if (!payload) {
@@ -810,7 +809,7 @@ export const UserCrudMutation = extendType({
             zipCode,
             countryId,
             cityId,
-            preferenceIds,
+            trackHistory,
           });
           const { user: updatedUser, isNew: updated } = response;
           isNew = updated;

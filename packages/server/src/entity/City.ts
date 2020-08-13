@@ -7,11 +7,14 @@ import { SearchInputValue } from "./SearchInputValue";
 
 @Entity({ name: "city", schema: "public" })
 export class City extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn({ type: "bigint" })
+  id: bigint;
 
   @Column("varchar", { length: 100, name: "name", unique: true })
   name: string;
+
+  @Column("varchar", { length: 100, name: "second_name", unique: true, nullable: true })
+  secondName?: string;
 
   @Column({ name: "country_id", type: "integer" })
   countryId: number;

@@ -24,7 +24,7 @@ export type UserType = {
     country?: Country;
     countryId?: number;
     city?: City;
-    cityId?: number;
+    cityId?: bigint;
     address?: string;
     zipCode?: string;
     contactDetails?: UserContactDetails[];
@@ -42,8 +42,8 @@ export interface UpdateUserInfo {
   address?: string;
   zipCode?: string;
   countryId?: number;
-  cityId?: number;
-  preferenceIds?: number[];
+  cityId?: bigint;
+  trackHistory?: boolean;
 }
 
 type UserReturnType = {

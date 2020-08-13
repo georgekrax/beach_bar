@@ -40,7 +40,7 @@ export class BeachBarLocation extends BaseEntity {
   countryId: number;
 
   @Column({ type: "integer", name: "city_id" })
-  cityId: number;
+  cityId: bigint;
 
   @Column({ type: "integer", name: "region_id", nullable: true })
   regionId?: number;
@@ -79,7 +79,7 @@ export class BeachBarLocation extends BaseEntity {
     latitude?: number,
     longitude?: number,
     countryId?: number,
-    cityId?: number,
+    cityId?: bigint,
     regionId?: number
   ): Promise<BeachBarLocation | any> {
     try {
@@ -103,7 +103,7 @@ export class BeachBarLocation extends BaseEntity {
         this.country = country;
       }
       if (cityId && cityId !== this.cityId) {
-        const city = await City.findOne(cityId);
+        const city = await City.findOne({ id: cityId });
         if (!city) {
           throw new Error("Invalid city");
         }

@@ -35,6 +35,7 @@ export const CountryType = objectType({
   definition(t) {
     t.int("id", { nullable: false, description: "The ID of the country" });
     t.string("name", { nullable: false, description: "The name of the country" });
+    t.string("shortName", { nullable: true, description: "A short name (abbreviation) of the country" });
     t.string("callingCode", { nullable: false, description: "The calling code of the country" });
     t.string("isoCode", { nullable: false, description: "The ISO registered code of the country" });
     t.string("languageId", { nullable: false, description: "The language identifier (locale) of the country" });

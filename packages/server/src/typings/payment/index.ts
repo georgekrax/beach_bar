@@ -1,12 +1,6 @@
-import { BeachBar } from "@entity/BeachBar";
 import { Payment } from "@entity/Payment";
 import { RefundPercentage } from "@entity/RefundPercentage";
 import { AddType, ErrorType, UpdateType } from "@typings/.index";
-
-export type UniqueBeachBarsType = {
-  beachBar: BeachBar;
-  discountPercentage: number;
-}[];
 
 export interface GetRefundPercentage {
   refundPercentage: RefundPercentage;

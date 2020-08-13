@@ -2,6 +2,7 @@ import { EmailScalar } from "@beach_bar/common";
 import { inputObjectType, objectType, unionType } from "@nexus/schema";
 import { BeachBarReviewType } from "../beach_bar/review/types";
 import { UserAccountType } from "./account/types";
+import { UserFavoriteBarType } from "./favorite_bar/types";
 
 export const UserType = objectType({
   name: "User",
@@ -23,6 +24,12 @@ export const UserType = objectType({
       description: "A user's review on a #beach_bar",
       nullable: true,
       resolve: o => o.reviews,
+    });
+    t.list.field("favoriteBars", {
+      type: UserFavoriteBarType,
+      description: "A list with all the user's favorite #beach_bars",
+      nullable: true,
+      resolve: o => o.favoriteBars,
     });
   },
 });

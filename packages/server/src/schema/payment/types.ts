@@ -32,11 +32,11 @@ export const PaymentType = objectType({
       nullable: false,
       resolve: o => o.status,
     });
-    t.list.field("offerCodes", {
+    t.field("voucherCode", {
       type: PaymentOfferCodeType,
-      description: "A list with all the offer codes added to the payment",
+      description: "A coupon or an offer campaign code used, to apply a discount, at this payment",
       nullable: true,
-      resolve: o => o.offerCodes,
+      resolve: o => o.voucherCode,
     });
     t.list.field("reservedProducts", {
       type: ReservedProductType,

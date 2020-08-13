@@ -6,8 +6,8 @@ import { SearchInputValue } from "./SearchInputValue";
 
 @Entity({ name: "region", schema: "public" })
 export class Region extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn({ type: "bigint" })
+  id: bigint;
 
   @Column("varchar", { length: 100, name: "name" })
   name: string;
@@ -16,7 +16,7 @@ export class Region extends BaseEntity {
   countryId: number;
 
   @Column({ type: "integer", name: "city_id", nullable: true })
-  cityId?: number;
+  cityId?: bigint;
 
   @ManyToOne(() => Country, country => country.regions, { nullable: false })
   @JoinColumn({ name: "country_id" })

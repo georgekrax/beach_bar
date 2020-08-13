@@ -15,20 +15,19 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { AccountPreference } from "./AccountPreference";
 import { City } from "./City";
 import { Country } from "./Country";
 import { User } from "./User";
 import { UserContactDetails } from "./UserContactDetails";
 
 export enum personHonorificTitle {
+  dr = "Dr",
+  lady = "Lady",
+  miss = "Miss",
   mr = "Mr",
   mrs = "Mrs",
   ms = "Ms",
-  miss = "Miss",
   sr = "Sr",
-  dr = "Dr",
-  lady = "Lady",
 }
 
 @Entity({ name: "account", schema: "public" })
@@ -55,7 +54,7 @@ export class Account extends BaseEntity {
   countryId?: number;
 
   @Column({ name: "city_id", type: "integer", nullable: true })
-  cityId?: number;
+  cityId?: bigint;
 
   @Column("varchar", { length: 100, name: "address", nullable: true })
   address?: string;
@@ -63,8 +62,11 @@ export class Account extends BaseEntity {
   @Column("varchar", { length: 12, name: "zip_code", nullable: true })
   zipCode?: string;
 
-  @Column({ name: "is_active", type: "boolean", nullable: true, default: () => false })
+  @Column({ name: "is_active", type: "boolean", default: () => true })
   isActive: boolean;
+
+  @Column({ name: "track_history", type: "boolean", default: () => true })
+  trackHistory: boolean;
 
   @OneToOne(() => User, { nullable: false, cascade: ["soft-remove", "recover"] })
   @JoinColumn({ name: "user_id" })
@@ -77,9 +79,6 @@ export class Account extends BaseEntity {
   @ManyToOne(() => City, city => city.accounts, { nullable: true })
   @JoinColumn({ name: "city_id" })
   city?: City;
-
-  @OneToMany(() => AccountPreference, accountPreference => accountPreference.account, { nullable: true })
-  preferences?: AccountPreference[];
 
   @OneToMany(() => UserContactDetails, userContactDetails => userContactDetails.account, { nullable: true })
   contactDetails?: UserContactDetails[];
@@ -105,6 +104,6 @@ export class Account extends BaseEntity {
 
   async softRemove(): Promise<any> {
     const findOptions: any = { accountId: this.id };
-    await softRemove(Account, { id: this.id }, [AccountPreference, UserContactDetails], findOptions);
+    await softRemove(Account, { id: this.id }, [UserContactDetails], findOptions);
   }
 }

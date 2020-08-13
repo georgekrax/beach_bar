@@ -1,17 +1,17 @@
 import { softRemove } from "@utils/softRemove";
 import { Dayjs } from "dayjs";
 import {
-    BaseEntity,
-    Check,
-    Column,
-    CreateDateColumn,
-    DeleteDateColumn,
-    Entity,
-    JoinColumn,
-    ManyToOne,
-    OneToOne,
-    PrimaryGeneratedColumn,
-    UpdateDateColumn
+  BaseEntity,
+  Check,
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from "typeorm";
 import { BeachBar } from "./BeachBar";
 import { Customer } from "./Customer";
@@ -50,11 +50,14 @@ export class BeachBarReview extends BaseEntity {
   @Column({ type: "integer", name: "downvotes", default: () => 0 })
   downvotes: number;
 
-  @Column({ type: "text", name: "nice_comment", nullable: true })
-  niceComment?: string;
+  @Column({ type: "text", name: "positive_comment", nullable: true })
+  positiveComment?: string;
 
-  @Column({ type: "text", name: "bad_comment", nullable: true })
-  badComment?: string;
+  @Column({ type: "text", name: "negative_comment", nullable: true })
+  negativeComment?: string;
+
+  @Column({ type: "text", name: "review", nullable: true })
+  review?: string;
 
   @ManyToOne(() => BeachBar, beachBar => beachBar.reviews, { nullable: false, cascade: ["soft-remove", "recover"] })
   @JoinColumn({ name: "beach_bar_id" })
@@ -88,13 +91,15 @@ export class BeachBarReview extends BaseEntity {
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt: Dayjs;
 
-  async update(
-    ratingValue?: number,
-    visitTypeId?: number,
-    monthTimeId?: number,
-    niceComment?: string,
-    badComment?: string
-  ): Promise<BeachBarReview | any> {
+  async update(options: {
+    ratingValue?: number;
+    visitTypeId?: number;
+    monthTimeId?: number;
+    positiveComment?: string;
+    negativeComment?: string;
+    review?: string;
+  }): Promise<BeachBarReview | any> {
+    const { ratingValue, visitTypeId, monthTimeId, positiveComment, negativeComment, review } = options;
     try {
       if (ratingValue && ratingValue !== this.ratingValue && ratingValue >= 1 && ratingValue <= 10) {
         this.ratingValue = ratingValue;
@@ -113,11 +118,14 @@ export class BeachBarReview extends BaseEntity {
         }
         this.monthTime = monthTime;
       }
-      if (niceComment && niceComment !== this.niceComment && niceComment.trim().length > 0) {
-        this.niceComment = niceComment;
+      if (positiveComment && positiveComment !== this.positiveComment) {
+        this.positiveComment = positiveComment;
       }
-      if (badComment && badComment !== this.badComment && badComment.trim().length > 0) {
-        this.badComment = badComment;
+      if (negativeComment && negativeComment !== this.negativeComment) {
+        this.negativeComment = negativeComment;
+      }
+      if (review && review !== this.review) {
+        this.review = review;
       }
       await this.save();
       await this.beachBar.updateRedis();

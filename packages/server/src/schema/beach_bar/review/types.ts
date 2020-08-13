@@ -16,8 +16,9 @@ export const BeachBarReviewType = objectType({
       nullable: true,
       description: "The time the particular review was voted not to be helpful, by other users",
     });
-    t.string("niceComment", { nullable: true, description: "A nice comment by the user for the reviewed #beach_bar" });
-    t.string("badComment", { nullable: true, description: "A bad comment by the user for the reviewed #beach_bar" });
+    t.string("positiveComment", { nullable: true, description: "A positive comment for the #beach_bar" });
+    t.string("negativeComment", { nullable: true, description: "A negative comment for the #beach_bar" });
+    t.string("review", { nullable: true, description: "A summary (description) of the user's overall review" });
     t.field("updatedAt", {
       type: DateTimeScalar,
       nullable: false,

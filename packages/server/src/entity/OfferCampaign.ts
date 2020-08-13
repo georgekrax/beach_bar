@@ -1,17 +1,17 @@
 import { softRemove } from "@utils/softRemove";
 import { Dayjs } from "dayjs";
 import {
-    BaseEntity,
-    Column,
-    CreateDateColumn,
-    DeleteDateColumn,
-    Entity,
-    In,
-    JoinTable,
-    ManyToMany,
-    OneToMany,
-    PrimaryGeneratedColumn,
-    UpdateDateColumn
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  In,
+  JoinTable,
+  ManyToMany,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from "typeorm";
 import { OfferCampaignCode } from "./OfferCampaignCode";
 import { Product } from "./Product";
@@ -26,9 +26,6 @@ export class OfferCampaign extends BaseEntity {
 
   @Column({ type: "decimal", precision: 3, scale: 0, name: "discount_percentage" })
   discountPercentage: number;
-
-  @Column({ type: "boolean", name: "beach_bar_offer" })
-  beachBarOffer: boolean;
 
   @Column({ type: "boolean", name: "is_active", default: () => false })
   isActive: boolean;
@@ -66,7 +63,6 @@ export class OfferCampaign extends BaseEntity {
     productIds: number[],
     title?: string,
     discountPercentage?: number,
-    beachBarOffer?: boolean,
     validUntil?: Dayjs,
     isActive?: boolean
   ): Promise<OfferCampaign | any> {
@@ -83,9 +79,6 @@ export class OfferCampaign extends BaseEntity {
       }
       if (discountPercentage && discountPercentage !== this.discountPercentage) {
         this.discountPercentage = discountPercentage;
-      }
-      if (beachBarOffer !== null && beachBarOffer !== undefined && beachBarOffer !== this.beachBarOffer) {
-        this.beachBarOffer = beachBarOffer;
       }
       if (validUntil && validUntil !== this.validUntil) {
         this.validUntil = validUntil;

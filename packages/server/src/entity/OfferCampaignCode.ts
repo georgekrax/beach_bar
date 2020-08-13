@@ -1,4 +1,5 @@
 import { generateId } from "@beach_bar/common";
+import { generateIdSpecialCharacters, voucherCodeLength } from "@constants/.index";
 import { softRemove } from "@utils/softRemove";
 import { Dayjs } from "dayjs";
 import {
@@ -16,7 +17,7 @@ import {
 } from "typeorm";
 import { BeachBar } from "./BeachBar";
 import { OfferCampaign } from "./OfferCampaign";
-import { PaymentOfferCode } from "./PaymentOfferCode";
+import { PaymentVoucherCode } from "./PaymentVoucherCode";
 
 @Entity({ name: "offer_campaign_code", schema: "public" })
 @Check(`"percentageUsed" >= 0 AND "percentageUsed" <= 100`)
@@ -27,24 +28,18 @@ export class OfferCampaignCode extends BaseEntity {
   @Column({ type: "integer", name: "campaign_id" })
   campaignId: number;
 
-  @Column("varchar", { length: 23, name: "ref_code" })
+  @Column("varchar", { length: voucherCodeLength.OFFER_CAMPAIGN_CODE, name: "ref_code" })
   refCode: string;
-
-  @Column({ type: "decimal", precision: 3, scale: 0, name: "percentage_used", default: () => 0 })
-  percentageUsed: number;
 
   @Column({ type: "smallint", name: "times_used", default: () => 0 })
   timesUsed: number;
-
-  @Column({ type: "smallint", name: "is_redeemed", default: () => false })
-  isRedeemed: boolean;
 
   @ManyToOne(() => OfferCampaign, offerCampaign => offerCampaign.offerCodes, { nullable: false })
   @JoinColumn({ name: "campaign_id" })
   campaign: OfferCampaign;
 
-  @OneToMany(() => PaymentOfferCode, paymentOfferCode => paymentOfferCode.offerCode, { nullable: true })
-  payments?: PaymentOfferCode[];
+  @OneToMany(() => PaymentVoucherCode, paymentVoucherCode => paymentVoucherCode.offerCode, { nullable: true })
+  payments?: PaymentVoucherCode[];
 
   @CreateDateColumn({ name: "timestamp", type: "timestamptz", default: () => `NOW()` })
   timestamp: Dayjs;
@@ -54,7 +49,10 @@ export class OfferCampaignCode extends BaseEntity {
 
   @BeforeInsert()
   generateRefCode(): void {
-    this.refCode = generateId({ length: 23 });
+    this.refCode = generateId({
+      length: voucherCodeLength.OFFER_CAMPAIGN_CODE,
+      specialCharacters: generateIdSpecialCharacters.VOUCHER_CODE,
+    });
   }
 
   getProductBeachBars(): BeachBar[] {

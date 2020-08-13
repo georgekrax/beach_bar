@@ -8,6 +8,7 @@ export const CityType = objectType({
   definition(t) {
     t.int("id", { nullable: false, description: "The ID of the city" });
     t.string("name", { nullable: false, description: "The name of the city" });
+    t.string("secondName", { nullable: true, description: "A second name of the city" });
     t.field("country", {
       type: CountryType,
       nullable: true,

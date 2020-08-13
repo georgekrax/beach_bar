@@ -38,18 +38,22 @@ export const BeachBarReviewCrudMutation = extendType({
           required: false,
           description: "The ID value of the month time",
         }),
-        niceComment: stringArg({
+        positiveComment: stringArg({
           required: false,
-          description: "A nice comment about the #beach_bar",
+          description: "A positive comment about the #beach_bar",
         }),
-        badComment: stringArg({
+        negativeComment: stringArg({
           required: false,
           description: "A negative comment about the #beach_bar",
+        }),
+        review: stringArg({
+          required: false,
+          description: "A summary (description) of the user's overall review",
         }),
       },
       resolve: async (
         _,
-        { beachBarId, paymentRefCode, monthTimeId, ratingValue, visitTypeId, niceComment, badComment },
+        { beachBarId, paymentRefCode, monthTimeId, ratingValue, visitTypeId, positiveComment, negativeComment, review },
         { payload }: MyContext
       ): Promise<AddBeachBarReviewType> => {
         if (!beachBarId || beachBarId <= 0) {
@@ -95,7 +99,7 @@ export const BeachBarReviewCrudMutation = extendType({
 
         const monthTime = await MonthTime.findOne(monthTimeId);
         if (!monthTime && monthTimeId) {
-          return { error: { code: errors.CONFLICT, message: "Invalid month" } };
+          return { error: { code: errors.CONFLICT, message: "Invalid visit month" } };
         } else if (monthTime && monthTimeId) {
           const paymentProductsMonth = payment.getProductsMonth(beachBarId);
           if (!paymentProductsMonth) {
@@ -114,8 +118,9 @@ export const BeachBarReviewCrudMutation = extendType({
           ratingValue,
           visitType,
           monthTime,
-          niceComment,
-          badComment,
+          positiveComment,
+          negativeComment,
+          review,
         });
 
         try {
@@ -153,18 +158,22 @@ export const BeachBarReviewCrudMutation = extendType({
           required: false,
           description: "The ID value of the month time",
         }),
-        niceComment: stringArg({
+        positiveComment: stringArg({
           required: false,
-          description: "A nice comment about the #beach_bar",
+          description: "A positive comment about the #beach_bar",
         }),
-        badComment: stringArg({
+        negativeComment: stringArg({
           required: false,
           description: "A negative comment about the #beach_bar",
+        }),
+        review: stringArg({
+          required: false,
+          description: "A summary (description) of the user's overall review",
         }),
       },
       resolve: async (
         _,
-        { reviewId, ratingValue, visitTypeId, monthTimeId, niceComment, badComment }
+        { reviewId, ratingValue, visitTypeId, monthTimeId, positiveComment, negativeComment, review }
       ): Promise<UpdateBeachBarReviewType> => {
         if (!reviewId || reviewId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid customer's review" } };
@@ -179,13 +188,20 @@ export const BeachBarReviewCrudMutation = extendType({
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid month" } };
         }
 
-        const review = await BeachBarReview.findOne({ where: { id: reviewId }, relations: ["beachBar", "customer"] });
-        if (!review) {
+        const usersReview = await BeachBarReview.findOne({ where: { id: reviewId }, relations: ["beachBar", "customer"] });
+        if (!usersReview) {
           return { error: { code: errors.CONFLICT, message: "Specified review does not exist" } };
         }
 
         try {
-          const updatedReview = await review.update(ratingValue, visitTypeId, monthTimeId, niceComment, badComment);
+          const updatedReview = await usersReview.update({
+            ratingValue,
+            visitTypeId,
+            monthTimeId,
+            positiveComment,
+            negativeComment,
+            review,
+          });
           if (!updatedReview) {
             return { error: { message: errors.SOMETHING_WENT_WRONG } };
           }

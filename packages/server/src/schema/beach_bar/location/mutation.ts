@@ -3,10 +3,11 @@ import { BeachBar } from "@entity/BeachBar";
 import { BeachBarLocation } from "@entity/BeachBarLocation";
 import { Country } from "@entity/Country";
 import { Region } from "@entity/Region";
-import { extendType, intArg, stringArg } from "@nexus/schema";
+import { extendType, intArg, stringArg, idArg } from "@nexus/schema";
 import { AddBeachBarLocationType, UpdateBeachBarLocationType } from "@typings/beach_bar/location";
 import { checkScopes } from "@utils/checkScopes";
 import { AddBeachBarLocationResult, UpdateBeachBarLocationResult } from "./types";
+import { City } from "@entity/City";
 
 export const BeachBarLocationCrudMutation = extendType({
   type: "Mutation",
@@ -36,11 +37,11 @@ export const BeachBarLocationCrudMutation = extendType({
           required: true,
           description: "The longitude of the location of the #beach_bar",
         }),
-        countryId: intArg({
+        countryId: idArg({
           required: true,
           description: "The ID value of the country the #beach_bar is located at",
         }),
-        cityId: intArg({
+        cityId: idArg({
           required: true,
           description: "The ID value of the city the #beach_bar is located at",
         }),
@@ -91,7 +92,7 @@ export const BeachBarLocationCrudMutation = extendType({
         if (!country) {
           return { error: { code: errors.CONFLICT, message: "Specified country does not exist" } };
         }
-        const city = await Country.findOne(cityId);
+        const city = await City.findOne(cityId);
         if (!city) {
           return { error: { code: errors.CONFLICT, message: "Specified city does not exist" } };
         }

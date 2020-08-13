@@ -6,15 +6,15 @@ import { OfferCampaignCode } from "@entity/OfferCampaignCode";
 import { arg, extendType, intArg, stringArg } from "@nexus/schema";
 import { ErrorType } from "@typings/.index";
 import { ProductOfferType } from "@typings/beach_bar/product/offer";
-import dayjs from "dayjs";
 import { checkScopes } from "@utils/checkScopes";
-import { CouponCodeRevealResult, OfferCampaignCodeRevealResult, OfferCampaignType, ProductOfferQueryResult } from "./types";
+import { checkVoucherCode } from "@utils/checkVoucherCode";
+import { CouponCodeRevealResult, OfferCampaignCodeRevealResult, OfferCampaignType, VoucherCodeQueryResult } from "./types";
 
-export const ProductOfferQuery = extendType({
+export const VoucherCoderQuery = extendType({
   type: "Query",
   definition(t) {
-    t.field("getProductOffer", {
-      type: ProductOfferQueryResult,
+    t.field("getVoucherCode", {
+      type: VoucherCodeQueryResult,
       description: "Get the product offer or coupon, based on its referral code",
       nullable: true,
       args: {
@@ -25,40 +25,16 @@ export const ProductOfferQuery = extendType({
       },
       resolve: async (_, { refCode }): Promise<ProductOfferType> => {
         if (!refCode || refCode.trim().length === 0) {
-          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
+          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: "Invalid coupon code" } };
         }
 
-        if (refCode.trim().length === 18) {
-          const couponCode = await CouponCode.findOne({ where: { refCode } });
-          if (!couponCode) {
-            return { error: { code: errors.CONFLICT, message: errors.INVALID_REF_CODE_MESSAGE } };
-          }
-          if (!couponCode.isActive || dayjs(couponCode.validUntil) < dayjs()) {
-            return { error: { code: errors.INVALID_PRODUCT_OFFER_CODE, message: errors.INVALID_REF_CODE_MESSAGE } };
-          }
-          if (couponCode.timesLimit && couponCode.timesUsed >= couponCode.timesLimit) {
-            return {
-              error: { code: errors.INVALID_PRODUCT_OFFER_CODE, message: "You have exceeded the times of use of the coupon code" },
-            };
-          }
-          return couponCode;
-        } else if (refCode.trim().length === 23) {
-          const offerCode = await OfferCampaignCode.findOne({ where: { refCode }, relations: ["campaign", "campaign.products"] });
-          if (!offerCode) {
-            return { error: { code: errors.CONFLICT, message: errors.INVALID_REF_CODE_MESSAGE } };
-          }
-          if (
-            offerCode.isRedeemed ||
-            dayjs(offerCode.campaign.validUntil) < dayjs() ||
-            !offerCode.campaign.isActive ||
-            offerCode.percentageUsed === 1000
-          ) {
-            return { error: { code: errors.INVALID_PRODUCT_OFFER_CODE, message: errors.INVALID_REF_CODE_MESSAGE } };
-          }
-          return offerCode;
-        } else {
-          return { error: { code: errors.INVALID_PRODUCT_OFFER_CODE, message: errors.INVALID_REF_CODE_MESSAGE } };
+        const res = await checkVoucherCode(refCode);
+        if (res.couponCode) {
+          return res.couponCode;
+        } else if (res.offerCode) {
+          return res.offerCode;
         }
+        return res.error as any;
       },
     });
     t.list.field("getBeachBarOfferCampaigns", {
@@ -92,7 +68,7 @@ export const ProductOfferQuery = extendType({
     });
     t.field("revealCouponCode", {
       type: CouponCodeRevealResult,
-      description: "Get a coupon's code details + its referral code",
+      description: "Get a coupon's code details & its referral code",
       nullable: false,
       args: {
         couponCodeId: arg({

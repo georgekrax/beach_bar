@@ -13,7 +13,7 @@ export interface ILoginDetails extends Document {
   osId?: Schema.Types.ObjectId;
   browserId?: Schema.Types.ObjectId;
   countryId?: number;
-  cityId?: number;
+  cityId?: bigint;
   ipAddr?: string;
 }
 

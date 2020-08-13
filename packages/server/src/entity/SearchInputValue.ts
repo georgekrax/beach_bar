@@ -30,7 +30,7 @@ export class SearchInputValue extends BaseEntity {
   countryId: number;
 
   @Column({ type: "integer", name: "city_id", nullable: true })
-  cityId: number;
+  cityId: bigint;
 
   @Column({ type: "integer", name: "region_id", nullable: true })
   regionId: number;

@@ -1,9 +1,10 @@
 import { BigIntScalar, DateTimeScalar, errors, MyContext } from "@beach_bar/common";
+import { BeachBar } from "@entity/BeachBar";
 import { CouponCode } from "@entity/CouponCode";
 import { OfferCampaign } from "@entity/OfferCampaign";
 import { OfferCampaignCode } from "@entity/OfferCampaignCode";
 import { Product } from "@entity/Product";
-import { arg, booleanArg, extendType, floatArg, intArg, stringArg } from "@nexus/schema";
+import { arg, booleanArg, extendType, floatArg, idArg, intArg, stringArg } from "@nexus/schema";
 import { DeleteType } from "@typings/.index";
 import {
   AddCouponCodeType,
@@ -12,10 +13,10 @@ import {
   UpdateCouponCodeType,
   UpdateOfferCampaignType,
 } from "@typings/beach_bar/product/offer";
+import { checkScopes } from "@utils/checkScopes";
 import dayjs from "dayjs";
 import { In } from "typeorm";
 import { DeleteResult } from "../../../types";
-import { checkScopes } from "@utils/checkScopes";
 import {
   AddCouponCodeResult,
   AddOfferCampaignCodeResult,
@@ -40,9 +41,9 @@ export const CouponCodeCrudMutation = extendType({
           required: true,
           description: "The percentage of the coupon code discount",
         }),
-        beachBarOffer: booleanArg({
-          required: true,
-          description: "Set to true if this is an offer from a #beach_bar",
+        beachBarId: idArg({
+          required: false,
+          description: "The ID value of the #beach_bar, to apply the coupon code for",
         }),
         validUntil: arg({
           type: DateTimeScalar,
@@ -61,7 +62,7 @@ export const CouponCodeCrudMutation = extendType({
       },
       resolve: async (
         _,
-        { title, discountPercentage, beachBarOffer, validUntil, isActive, timesLimit },
+        { title, discountPercentage, beachBarId, validUntil, isActive, timesLimit },
         { payload }: MyContext
       ): Promise<AddCouponCodeType> => {
         if (!payload) {
@@ -83,11 +84,18 @@ export const CouponCodeCrudMutation = extendType({
         const newCouponCode = CouponCode.create({
           title,
           discountPercentage,
-          beachBarOffer,
           isActive,
           validUntil,
           timesLimit,
         });
+
+        if (beachBarId) {
+          const beachBar = await BeachBar.findOne(beachBarId);
+          if (!beachBar) {
+            return { error: { code: errors.CONFLICT, message: errors.BEACH_BAR_DOES_NOT_EXIST } };
+          }
+          newCouponCode.beachBar = beachBar;
+        }
 
         try {
           await newCouponCode.save();
@@ -119,10 +127,6 @@ export const CouponCodeCrudMutation = extendType({
           required: false,
           description: "The percentage of the coupon code discount",
         }),
-        beachBarOffer: booleanArg({
-          required: false,
-          description: "Set to true if this is an offer from a #beach_bar",
-        }),
         validUntil: arg({
           type: DateTimeScalar,
           required: false,
@@ -139,7 +143,7 @@ export const CouponCodeCrudMutation = extendType({
       },
       resolve: async (
         _,
-        { couponCodeId, title, discountPercentage, beachBarOffer, validUntil, isActive, timesLimit },
+        { couponCodeId, title, discountPercentage, validUntil, isActive, timesLimit },
         { payload }: MyContext
       ): Promise<UpdateCouponCodeType | DeleteType> => {
         if (!payload) {
@@ -167,14 +171,13 @@ export const CouponCodeCrudMutation = extendType({
         }
 
         try {
-          const updatedCouponCode = await couponCode.update(
+          const updatedCouponCode = await couponCode.update({
             title,
             discountPercentage,
-            beachBarOffer,
             validUntil,
             isActive,
-            timesLimit
-          );
+            timesLimit,
+          });
           if (updatedCouponCode.deleted) {
             return {
               deleted: true,
@@ -256,10 +259,6 @@ export const OfferCampaignCrudMutation = extendType({
           required: true,
           description: "The percentage of the coupon code discount",
         }),
-        beachBarOffer: booleanArg({
-          required: true,
-          description: "Set to true if this is an offer from a #beach_bar",
-        }),
         validUntil: arg({
           type: DateTimeScalar,
           required: true,
@@ -273,7 +272,7 @@ export const OfferCampaignCrudMutation = extendType({
       },
       resolve: async (
         _,
-        { productIds, title, discountPercentage, beachBarOffer, validUntil, isActive },
+        { productIds, title, discountPercentage, validUntil, isActive },
         { payload }: MyContext
       ): Promise<AddOfferCampaignType> => {
         if (!payload) {
@@ -303,7 +302,6 @@ export const OfferCampaignCrudMutation = extendType({
         const newOfferCampaign = OfferCampaign.create({
           title,
           discountPercentage,
-          beachBarOffer,
           isActive,
           validUntil,
           products,
@@ -344,10 +342,6 @@ export const OfferCampaignCrudMutation = extendType({
           required: false,
           description: "The percentage of the coupon code discount",
         }),
-        beachBarOffer: booleanArg({
-          required: false,
-          description: "Set to true if this is an offer from a #beach_bar",
-        }),
         validUntil: arg({
           type: DateTimeScalar,
           required: false,
@@ -360,7 +354,7 @@ export const OfferCampaignCrudMutation = extendType({
       },
       resolve: async (
         _,
-        { offerCampaignId, productIds, title, discountPercentage, beachBarOffer, validUntil, isActive },
+        { offerCampaignId, productIds, title, discountPercentage, validUntil, isActive },
         { payload }: MyContext
       ): Promise<UpdateOfferCampaignType> => {
         if (!payload) {
@@ -395,14 +389,7 @@ export const OfferCampaignCrudMutation = extendType({
         }
 
         try {
-          const updatedOfferCampaign = await offerCampaign.update(
-            productIds,
-            title,
-            discountPercentage,
-            beachBarOffer,
-            validUntil,
-            isActive
-          );
+          const updatedOfferCampaign = await offerCampaign.update(productIds, title, discountPercentage, validUntil, isActive);
 
           return {
             offerCampaign: updatedOfferCampaign,
@@ -460,7 +447,7 @@ export const OfferCampaignCrudMutation = extendType({
   },
 });
 
-export const OfferCodeCrudMutation = extendType({
+export const OfferCampaignCodeCrudMutation = extendType({
   type: "Mutation",
   definition(t) {
     t.field("addOfferCampaignCode", {

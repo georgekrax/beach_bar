@@ -8,21 +8,19 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  In,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
 import { Account } from "./Account";
-import { AccountPreference } from "./AccountPreference";
-import { AccountPreferenceType } from "./AccountPreferenceType";
 import { BeachBarReview } from "./BeachBarReview";
 import { Cart } from "./Cart";
 import { City } from "./City";
 import { Country } from "./Country";
 import { Customer } from "./Customer";
 import { Owner } from "./Owner";
+import { UserFavoriteBar } from "./UserFavoriteBar";
 import { UserSearch } from "./UserSearch";
 import { Vote } from "./Vote";
 
@@ -70,6 +68,9 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Cart, cart => cart.user)
   carts?: Cart[];
+
+  @OneToMany(() => UserFavoriteBar, userFavoriteBar => userFavoriteBar.user)
+  favoriteBars?: UserFavoriteBar[];
 
   // * excluded in softRemove
   @OneToMany(() => Vote, vote => vote.user, { nullable: true })
@@ -136,7 +137,7 @@ export class User extends BaseEntity {
       cityId,
       address,
       zipCode,
-      preferenceIds,
+      trackHistory,
     } = data;
     if (email && email !== this.email) {
       this.email = email;
@@ -172,23 +173,13 @@ export class User extends BaseEntity {
       }
     }
     if (cityId && cityId !== this.account.cityId) {
-      const city = await City.findOne(cityId);
+      const city = await City.findOne({ id: cityId });
       if (city) {
         this.account.city = city;
       }
     }
-    if (preferenceIds) {
-      const preferences = await AccountPreferenceType.find({ id: In(preferenceIds) });
-      if (preferences.length > 0) {
-        this.account.preferences?.forEach(preference => preference.softRemove());
-        const accountPreferences: AccountPreference[] = [];
-        for (let i = 0; i < preferences.length; i++) {
-          const preference = preferences[i];
-          const newAccountPreference = await AccountPreference.create({ account: this, preference }).save();
-          accountPreferences.push(newAccountPreference);
-        }
-        this.account.preferences = accountPreferences;
-      }
+    if (trackHistory !== undefined && trackHistory !== this.account.trackHistory) {
+      this.account.trackHistory = trackHistory;
     }
     if (isNew) {
       await this.save();
@@ -199,7 +190,7 @@ export class User extends BaseEntity {
 
   async softRemove(): Promise<any> {
     const findOptions: any = { userId: this.id };
-    // delete in Redis, happens within the User mutation resolvers too
-    await softRemove(User, { id: this.id }, [Account, BeachBarReview, Cart, Owner, Customer], findOptions);
+    // delete in Redis, happens within the User mutation resolvers
+    await softRemove(User, { id: this.id }, [Account, BeachBarReview, Cart, UserFavoriteBar, Owner, Customer], findOptions);
   }
 }

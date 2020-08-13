@@ -1,19 +1,19 @@
 import { softRemove } from "@utils/softRemove";
 import { Dayjs } from "dayjs";
 import {
-    BaseEntity,
-    Column,
-    CreateDateColumn,
-    DeleteDateColumn,
-    Entity,
-    EntityRepository,
-    getManager,
-    JoinColumn,
-    ManyToOne,
-    OneToMany,
-    OneToOne,
-    PrimaryGeneratedColumn,
-    Repository
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  EntityRepository,
+  getManager,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  Repository,
 } from "typeorm";
 import { BeachBar } from "./BeachBar";
 import { BeachBarEntryFee } from "./BeachBarEntryFee";
@@ -178,9 +178,12 @@ export class Cart extends BaseEntity {
         if (totalEntryFees === undefined) {
           return undefined;
         }
+        console.log(totalEntryFees);
+        console.log(total);
+        console.log(couponCodeDiscount);
         return {
-          entryFeeTotal: totalEntryFees,
-          totalWithoutEntryFees: total - couponCodeDiscount,
+          entryFeeTotal: parseFloat(totalEntryFees.toFixed(2)),
+          totalWithoutEntryFees: parseFloat((total - couponCodeDiscount).toFixed(2)),
           totalWithEntryFees: parseFloat((total + totalEntryFees - couponCodeDiscount).toFixed(2)),
         };
       }

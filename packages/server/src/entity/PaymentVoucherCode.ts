@@ -1,12 +1,15 @@
-import { BaseEntity, Check, Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
+import { Dayjs } from "dayjs";
+import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, OneToOne } from "typeorm";
 import { CouponCode } from "./CouponCode";
 import { OfferCampaignCode } from "./OfferCampaignCode";
 import { Payment } from "./Payment";
 
-@Entity({ name: "payment_offer_code", schema: "public" })
-@Check(`"discountPercentage" >= 0 AND "discountPercentage" <= 100`)
-export class PaymentOfferCode extends BaseEntity {
-  @PrimaryColumn({ type: "bigint", name: "payment_id" })
+@Entity({ name: "payment_voucher_code", schema: "public" })
+export class PaymentVoucherCode extends BaseEntity {
+  @PrimaryGeneratedColumn({ type: "bigint" })
+  id: bigint;
+
+  @Column({ type: "bigint", name: "payment_id" })
   paymentId: bigint;
 
   @Column({ type: "bigint", name: "coupon_code_id", nullable: true })
@@ -15,10 +18,7 @@ export class PaymentOfferCode extends BaseEntity {
   @Column({ type: "bigint", name: "offer_code_id", nullable: true })
   offerCodeId?: bigint;
 
-  @Column({ type: "decimal", precision: 4, scale: 2, name: "discount_percentage" })
-  discountPercentage: number;
-
-  @ManyToOne(() => Payment, payment => payment.offerCodes, { nullable: false })
+  @OneToOne(() => Payment, payment => payment.voucherCode, { nullable: false })
   @JoinColumn({ name: "payment_id" })
   payment: Payment;
 
@@ -27,6 +27,9 @@ export class PaymentOfferCode extends BaseEntity {
   couponCode?: CouponCode;
 
   @ManyToOne(() => OfferCampaignCode, offerCampaignCode => offerCampaignCode.payments, { nullable: true })
-  @JoinColumn({ name: "payment_id" })
+  @JoinColumn({ name: "offer_code_id" })
   offerCode?: OfferCampaignCode;
+
+  @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
+  timestamp: Dayjs;
 }

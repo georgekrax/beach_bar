@@ -1,5 +1,6 @@
 import { BigIntScalar, DateTimeScalar } from "@beach_bar/common";
 import { interfaceType, objectType, unionType } from "@nexus/schema";
+import { BeachBarType } from "schema/beach_bar/types";
 import { ProductType } from "../types";
 
 export const CouponCodeInterface = interfaceType({
@@ -9,11 +10,16 @@ export const CouponCodeInterface = interfaceType({
     t.field("id", { type: BigIntScalar, nullable: false });
     t.string("title", { nullable: false });
     t.float("discountPercentage", { nullable: false });
-    t.boolean("beachBarOffer", { nullable: false });
     t.boolean("isActive", { nullable: false });
     t.field("validUntil", { type: DateTimeScalar, nullable: true });
     t.int("timesLimit", { nullable: false, description: "Represents how many times this coupon code can be used" });
     t.int("timesUsed", { nullable: false, description: "Represents the times this coupon code has been used" });
+    t.field("beachBar", {
+      type: BeachBarType,
+      description: "The #beach_bar this coupon code applies to",
+      nullable: true,
+      resolve: o => o.beachBar,
+    });
     t.resolveType(() => null);
   },
 });
@@ -28,12 +34,7 @@ export const OfferCampaignCodeInterface = interfaceType({
       description: "The total amount to make a discount from",
       resolve: o => o.campaign.calculateTotalProductPrice(),
     });
-    t.int("percentageUsed", {
-      nullable: false,
-      description: "The percentage that is used till now, when applying the offer code to a payment",
-    });
     t.int("timesUsed", { nullable: false, description: "Represents how many times this offer code has been used" });
-    t.boolean("isRedeemed", { nullable: false, description: "Indicates if the offer code has been fully redeemed" });
     t.field("campaign", {
       type: OfferCampaignType,
       description: "The campaign the offer code is assigned to",
@@ -61,7 +62,6 @@ export const OfferCampaignType = objectType({
     t.int("id", { nullable: false });
     t.string("title", { nullable: false });
     t.float("discountPercentage", { nullable: false });
-    t.boolean("beachBarOffer", { nullable: false });
     t.boolean("isActive", { nullable: false });
     t.field("validUntil", { type: DateTimeScalar, nullable: true });
     t.list.field("products", {
@@ -81,8 +81,8 @@ export const OfferCampaignCodeType = objectType({
   },
 });
 
-export const ProductOfferQueryResult = unionType({
-  name: "ProductOfferQuery",
+export const VoucherCodeQueryResult = unionType({
+  name: "VoucherCodeQueryResult",
   definition(t) {
     t.members("CouponCode", "OfferCampaignCode", "Error");
     t.resolveType(item => {

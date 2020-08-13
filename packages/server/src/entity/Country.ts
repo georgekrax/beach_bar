@@ -18,6 +18,9 @@ export class Country extends BaseEntity {
   @Column("varchar", { length: 100, name: "name", unique: true })
   name: string;
 
+  @Column("varchar", { length: 100, name: "short_name", unique: true, nullable: true })
+  shortName?: string;
+
   @Column("varchar", { length: 10, name: "calling_code", unique: true })
   callingCode: string;
 

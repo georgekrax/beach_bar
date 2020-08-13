@@ -48,6 +48,8 @@ import { ReservedProduct } from "./ReservedProduct";
 import { SearchInputValue } from "./SearchInputValue";
 import { StripeMinimumCurrency } from "./StripeMinimumCurrency";
 import { QuarterTime } from "./Time";
+import { UserFavoriteBar } from "./UserFavoriteBar";
+import { CouponCode } from "./CouponCode";
 
 @Entity({ name: "beach_bar", schema: "public" })
 @Check(`"avgRating" >= 0 AND "avgRating" <= 10`)
@@ -149,6 +151,12 @@ export class BeachBar extends BaseEntity {
 
   @OneToMany(() => BeachBarRestaurant, beachBarRestaurant => beachBarRestaurant.beachBar)
   restaurants: BeachBarRestaurant[];
+
+  @OneToMany(() => UserFavoriteBar, userFavoriteBar => userFavoriteBar.beachBar, { nullable: true })
+  usersFavorite?: UserFavoriteBar[];
+
+  @OneToMany(() => CouponCode, couponCode => couponCode.beachBar, { nullable: true })
+  couponCodes?: CouponCode[];
 
   @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
   updatedAt: Dayjs;
@@ -351,8 +359,6 @@ export class BeachBar extends BaseEntity {
       return undefined;
     }
     const { pricingFee, currencyFee } = beachBarPricingFee;
-    console.log(pricingFee);
-    console.log(currencyFee);
     const percentageFee = parseFloat(((total * parseFloat(pricingFee.percentageValue.toString())) / 100).toFixed(2));
     const beachBarAppFee = parseFloat((percentageFee + parseFloat(currencyFee.numericValue.toString())).toFixed(2));
     const transferAmount = parseFloat((total - beachBarAppFee - stripeFee).toFixed(2));
@@ -430,6 +436,7 @@ export class BeachBar extends BaseEntity {
         BeachBarFeature,
         BeachBarReview,
         Product,
+        UserFavoriteBar,
         BeachBarEntryFee,
         BeachBarRestaurant,
         SearchInputValue,
