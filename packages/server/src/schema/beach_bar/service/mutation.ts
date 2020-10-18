@@ -1,10 +1,10 @@
 import { errors, MyContext } from "@beach_bar/common";
-import { BeachBar } from "@entity/BeachBar";
-import { BeachBarFeature } from "@entity/BeachBarFeature";
-import { BeachBarService } from "@entity/BeachBarService";
 import { extendType, intArg, stringArg } from "@nexus/schema";
-import { DeleteType } from "@typings/.index";
-import { AddBeachBarFeatureType, UpdateBeachBarFeatureType } from "@typings/beach_bar/service";
+import { BeachBar } from "entity/BeachBar";
+import { BeachBarFeature } from "entity/BeachBarFeature";
+import { BeachBarService } from "entity/BeachBarService";
+import { DeleteType } from "typings/.index";
+import { AddBeachBarFeatureType, UpdateBeachBarFeatureType } from "typings/beach_bar/service";
 import { DeleteResult } from "../../types";
 import { AddBeachBarFeatureResult, UpdateBeachBarFeatureResult } from "./types";
 

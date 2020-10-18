@@ -1,5 +1,5 @@
-import { ReviewAnswer } from "@entity/ReviewAnswer";
-import { AddType, UpdateType, ErrorType } from "@typings/.index";
+import { ReviewAnswer } from "entity/ReviewAnswer";
+import { AddType, ErrorType, UpdateType } from "typings/.index";
 
 type ReviewAnswerType = {
   answer: ReviewAnswer;

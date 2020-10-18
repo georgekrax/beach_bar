@@ -1,12 +1,8 @@
-import { dayjsFormat, generateId } from "@beach_bar/common";
-import redisKeys from "@constants/redisKeys";
-import relations from "@constants/relations";
-import { BeachBarAvailabilityReturnType, GetBeachBarPaymentDetails, GetFullPricingReturnType } from "@typings/beach_bar";
-import { checkAvailability } from "@utils/beach_bar/checkAvailability";
-import { getReservationLimits } from "@utils/beach_bar/getReservationLimits";
-import { getReservedProducts } from "@utils/beach_bar/getReservedProducts";
-import { groupBy } from "@utils/groupBy";
-import { softRemove } from "@utils/softRemove";
+import { dayjsFormat } from "@beach_bar/common";
+import { generateId } from "@georgekrax-hashtag/common";
+import redisKeys from "constants/redisKeys";
+import relations from "constants/relations";
+import { beachBarReviewRatingMaxValue } from "constants/_index";
 import dayjs, { Dayjs } from "dayjs";
 import { Redis } from "ioredis";
 import {
@@ -28,17 +24,25 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
   Repository,
-  UpdateDateColumn,
+  UpdateDateColumn
 } from "typeorm";
+import { BeachBarAvailabilityReturnType, GetBeachBarPaymentDetails, GetFullPricingReturnType } from "typings/beach_bar";
+import { checkAvailability } from "utils/beach_bar/checkAvailability";
+import { getReservationLimits } from "utils/beach_bar/getReservationLimits";
+import { getReservedProducts } from "utils/beach_bar/getReservedProducts";
+import { groupBy } from "utils/groupBy";
+import { softRemove } from "utils/softRemove";
 import { redis } from "../index";
 import { BeachBarCategory } from "./BeachBarCategory";
-import { BeachBarImgUrl } from "./BeachBarImgUrl";
 import { BeachBarEntryFee } from "./BeachBarEntryFee";
 import { BeachBarFeature } from "./BeachBarFeature";
+import { BeachBarImgUrl } from "./BeachBarImgUrl";
 import { BeachBarLocation } from "./BeachBarLocation";
 import { BeachBarOwner } from "./BeachBarOwner";
 import { BeachBarRestaurant } from "./BeachBarRestaurant";
 import { BeachBarReview } from "./BeachBarReview";
+import { BeachBarType } from "./BeachBarType";
+import { CouponCode } from "./CouponCode";
 import { Currency } from "./Currency";
 import { PricingFee } from "./PricingFee";
 import { PricingFeeCurrency } from "./PricingFeeCurrency";
@@ -49,10 +53,9 @@ import { SearchInputValue } from "./SearchInputValue";
 import { StripeMinimumCurrency } from "./StripeMinimumCurrency";
 import { QuarterTime } from "./Time";
 import { UserFavoriteBar } from "./UserFavoriteBar";
-import { CouponCode } from "./CouponCode";
 
 @Entity({ name: "beach_bar", schema: "public" })
-@Check(`"avgRating" >= 0 AND "avgRating" <= 10`)
+@Check(`"avgRating" >= 0 AND "avgRating" <= ${beachBarReviewRatingMaxValue}`)
 export class BeachBar extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -72,7 +75,7 @@ export class BeachBar extends BaseEntity {
   @Column({ type: "integer", name: "category_id" })
   categoryId: number;
 
-  @Column({ type: "decimal", precision: 3, scale: 1, name: "avg_rating" })
+  @Column({ type: "decimal", precision: 2, scale: 1, name: "avg_rating" })
   avgRating: number;
 
   @Column({ type: "text", name: "thumbnail_url", nullable: true })
@@ -139,6 +142,9 @@ export class BeachBar extends BaseEntity {
 
   @OneToMany(() => BeachBarFeature, beachBarFeature => beachBarFeature.beachBar)
   features: BeachBarFeature[];
+
+  @OneToMany(() => BeachBarType, beachBarType => beachBarType.beachBar)
+  styles?: BeachBarType[];
 
   @OneToMany(() => BeachBarReview, beachBarReview => beachBarReview.beachBar)
   reviews: BeachBarReview[];
@@ -440,6 +446,7 @@ export class BeachBar extends BaseEntity {
         BeachBarEntryFee,
         BeachBarRestaurant,
         SearchInputValue,
+        BeachBarType,
       ],
       findOptions
     );

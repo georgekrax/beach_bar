@@ -2,6 +2,7 @@ import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGe
 import { Account } from "./Account";
 import { BeachBarLocation } from "./BeachBarLocation";
 import { Country } from "./Country";
+import { LoginDetails } from "./LoginDetails";
 import { Region } from "./Region";
 import { SearchInputValue } from "./SearchInputValue";
 
@@ -34,4 +35,7 @@ export class City extends BaseEntity {
 
   @OneToMany(() => SearchInputValue, searchInputValue => searchInputValue.city, { nullable: true })
   searchInputValues?: SearchInputValue[];
+
+  @OneToMany(() => LoginDetails, loginDetails => loginDetails.city, { nullable: true })
+  loginDetails?: LoginDetails[];
 }

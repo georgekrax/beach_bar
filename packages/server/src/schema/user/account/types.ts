@@ -1,4 +1,4 @@
-import { DateScalar } from "@beach_bar/common";
+import { DateScalar } from "@georgekrax-hashtag/common";
 import { objectType } from "@nexus/schema";
 import { CityType } from "../../details/cityTypes";
 import { CountryType } from "../../details/countryTypes";

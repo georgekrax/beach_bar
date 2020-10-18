@@ -1,5 +1,5 @@
-import { BeachBarEntryFee } from "@entity/BeachBarEntryFee";
-import { AddType, ErrorType, UpdateType } from "@typings/.index";
+import { BeachBarEntryFee } from "entity/BeachBarEntryFee";
+import { AddType, ErrorType, UpdateType } from "typings/.index";
 
 type BeachBarEntryFeeType = {
   fees: BeachBarEntryFee[];

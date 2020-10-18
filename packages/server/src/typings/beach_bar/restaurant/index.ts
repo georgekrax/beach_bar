@@ -1,5 +1,5 @@
-import { BeachBarRestaurant } from "@entity/BeachBarRestaurant";
-import { ErrorType, AddType, UpdateType } from "@typings/.index";
+import { BeachBarRestaurant } from "entity/BeachBarRestaurant";
+import { AddType, ErrorType, UpdateType } from "typings/.index";
 
 type BeachBarRestaurantType = {
   restaurant: BeachBarRestaurant;

@@ -1,88 +1,105 @@
-import { City } from "@entity/City";
-import { Country } from "@entity/Country";
-import { Account } from "@entity/Account";
-import clientBrowser from "../../models/clientBrowser";
-import clientOs from "../../models/clientOs";
-import loginDetails from "../../models/loginDetails";
-import Platform from "../../models/platform";
+import { LoginPlatformType } from "config/platformNames";
+import { Account } from "entity/Account";
+import { LoginDetails, LoginDetailStatus } from "entity/LoginDetails";
+import fs from "fs";
+import { LoginDetailsType } from "typings/.index";
+import { UAParser } from "ua-parser-js";
 
-export const switchPlatform = async (urlHostname: string): Promise<any | Error> => {
-  const platform = await Platform.findOne({ urlHostname });
+type findDetailsReturnType = number | undefined;
+type findLoginDetailsType = {
+  details?: Omit<LoginDetailsType, "osId" | "browserId">;
+  uaParser: UAParser;
+};
 
-  if (!platform) {
-    throw new Error("Could not find specified platform");
+export const findLoginDetails = ({ details, uaParser }: findLoginDetailsType): LoginDetailsType => {
+  const obj: LoginDetailsType = {
+    osId: undefined,
+    browserId: undefined,
+    countryId: undefined,
+    cityId: details?.cityId || undefined,
+  };
+  if (details) {
+    const osName = uaParser.getOS().name || undefined;
+    if (osName) {
+      obj.osId = findOs(osName);
+    }
+    const browserName = uaParser.getBrowser().name || undefined;
+    if (browserName) {
+      obj.browserId = findOs(browserName);
+    }
+    if (details.countryId) {
+      obj.countryId = findCountry(details.countryId);
+    }
   }
-
-  return platform;
+  return obj;
 };
 
 export const createUserLoginDetails = async (
-  status: string,
-  platformName: string,
+  status: LoginDetailStatus,
+  platform: LoginPlatformType,
   account: Account,
-  clientOs?: any,
-  clientBrowser?: any,
-  country?: Country,
-  city?: City,
+  osId?: number,
+  browserId?: number,
+  countryId?: number,
+  cityId?: bigint,
   ipAddr?: string
 ): Promise<void> => {
-  // pass beach_bar platform to user login details
-  const platform = await Platform.findOne({ name: platformName });
-  if (!platform) {
-    throw new Error();
-  }
-  await loginDetails.create({
-    accountId: account.id,
-    platformId: platform._id,
-    status,
-    osId: clientOs ? clientOs._id : undefined,
-    browserId: clientBrowser ? clientBrowser._id : undefined,
-    countryId: country ? country.id : undefined,
-    cityId: city ? city.id : undefined,
+  const loginDetails = LoginDetails.create({
+    account,
+    platformId: platform.id,
+    browserId,
+    osId,
+    countryId,
+    cityId,
     ipAddr,
+    status,
   });
+
+  try {
+    await loginDetails.save();
+  } catch (err) {
+    throw new Error(err.message);
+  }
 };
 
-export const findOs = async (osName: string): Promise<any | null> => {
+export const findOs = (osName: unknown): findDetailsReturnType => {
   if (!osName) {
-    return null;
+    return undefined;
   }
-  const os = await clientOs.findOne({ name: osName });
+  console.log(osName);
+  const file = JSON.parse(fs.readFileSync("../../config/clientOs.json", "utf8"));
+  const os = file.data.find(data => data.name === osName);
+  console.log(os);
   if (!os) {
-    throw new Error("Invalid OS name");
+    return undefined;
   }
-  return os;
+  return os.id;
 };
 
-export const findBrowser = async (browserName: string): Promise<any | null> => {
+export const findBrowser = (browserName: unknown): findDetailsReturnType => {
   if (!browserName) {
-    return null;
+    return undefined;
   }
-  const browser = await clientBrowser.findOne({ name: browserName });
+  console.log(browserName);
+  const file = JSON.parse(fs.readFileSync("../../config/clientBrowser.json.json", "utf8"));
+  const browser = file.data.find(data => data.name === browserName);
+  console.log(browser);
   if (!browser) {
-    throw new Error("Invalid browser name");
+    return undefined;
   }
-  return browser;
+  return browser.id;
 };
 
-export const findCountry = async (countryName: string): Promise<Country | null> => {
-  if (!countryName) {
-    return null;
+export const findCountry = (countryId: number | undefined): findDetailsReturnType => {
+  if (!countryId) {
+    return undefined;
   }
-  const country = await Country.findOne({ where: { name: countryName } });
+  console.log(countryId);
+  const file = JSON.parse(fs.readFileSync("../../config/countries.json.json", "utf8"));
+  const country = file.data.find(data => Number(data.id) === Number(countryId));
+  console.log(country);
   if (!country) {
-    throw new Error("Invalid country name");
+    return undefined;
   }
-  return country;
-};
-
-export const findCity = async (cityName: string): Promise<City | null> => {
-  if (!cityName) {
-    return null;
-  }
-  const city = await City.findOne({ where: { name: cityName } });
-  if (!city) {
-    throw new Error("Invalid city name");
-  }
-  return city;
+  return country.id;
 };

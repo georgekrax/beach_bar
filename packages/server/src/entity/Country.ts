@@ -3,9 +3,9 @@ import { Account } from "./Account";
 import { BeachBarLocation } from "./BeachBarLocation";
 import { Card } from "./Card";
 import { City } from "./City";
-import { CountryFlagIcon } from "./CountryFlagIcon";
 import { Currency } from "./Currency";
 import { Customer } from "./Customer";
+import { LoginDetails } from "./LoginDetails";
 import { Region } from "./Region";
 import { SearchInputValue } from "./SearchInputValue";
 import { UserContactDetails } from "./UserContactDetails";
@@ -39,6 +39,10 @@ export class Country extends BaseEntity {
   @Column({ type: "integer", name: "currency_id" })
   currencyId: number;
 
+  // TODO: Change in DB, to be NOT NULL (add NOT NULL constraint)
+  @Column({ type: "text", name: "flag_28x20", unique: true })
+  flag28x20: string;
+
   @ManyToOne(() => Currency, currency => currency.countries, { nullable: false })
   @JoinColumn({ name: "currency_id" })
   currency: Currency;
@@ -48,9 +52,6 @@ export class Country extends BaseEntity {
 
   @OneToMany(() => Account, account => account.country)
   accounts?: Account[];
-
-  @OneToMany(() => CountryFlagIcon, countryFlagIcon => countryFlagIcon.country, { nullable: false })
-  flagIcons: CountryFlagIcon[];
 
   @OneToMany(() => UserContactDetails, userContactDetails => userContactDetails.country)
   userContactDetails?: UserContactDetails[];
@@ -69,4 +70,7 @@ export class Country extends BaseEntity {
 
   @OneToMany(() => SearchInputValue, searchInputValue => searchInputValue.country, { nullable: true })
   searchInputValues?: SearchInputValue[];
+
+  @OneToMany(() => LoginDetails, loginDetails => loginDetails.country, { nullable: true })
+  loginDetails?: LoginDetails[];
 }

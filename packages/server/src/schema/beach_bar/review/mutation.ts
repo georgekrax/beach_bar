@@ -1,12 +1,14 @@
-import { BigIntScalar, errors, MyContext } from "@beach_bar/common";
-import { BeachBar } from "@entity/BeachBar";
-import { BeachBarReview } from "@entity/BeachBarReview";
-import { ReviewVisitType } from "@entity/ReviewVisitType";
-import { MonthTime } from "@entity/Time";
+import { errors, MyContext } from "@beach_bar/common";
+import { BigIntScalar } from "@georgekrax-hashtag/common";
 import { arg, booleanArg, extendType, intArg, stringArg } from "@nexus/schema";
-import { DeleteType } from "@typings/.index";
-import { AddBeachBarReviewType, UpdateBeachBarReviewType } from "@typings/beach_bar/review";
-import { verifyUserPaymentReview } from "@utils/beach_bar/verifyUserPaymentReview";
+import { beachBarReviewRatingMaxValue } from "constants/_index";
+import { BeachBar } from "entity/BeachBar";
+import { BeachBarReview } from "entity/BeachBarReview";
+import { ReviewVisitType } from "entity/ReviewVisitType";
+import { MonthTime } from "entity/Time";
+import { DeleteType } from "typings/.index";
+import { AddBeachBarReviewType, UpdateBeachBarReviewType } from "typings/beach_bar/review";
+import { verifyUserPaymentReview } from "utils/beach_bar/verifyUserPaymentReview";
 import { DeleteResult } from "../../types";
 import { AddBeachBarReviewResult, UpdateBeachBarReviewResult } from "./types";
 
@@ -59,8 +61,13 @@ export const BeachBarReviewCrudMutation = extendType({
         if (!beachBarId || beachBarId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid #beach_bar" } };
         }
-        if (!ratingValue || ratingValue < 1 || ratingValue > 10) {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid rating value, between 1 and 10" } };
+        if (!ratingValue || ratingValue < 1 || ratingValue > beachBarReviewRatingMaxValue) {
+          return {
+            error: {
+              code: errors.INVALID_ARGUMENTS,
+              message: `Please provide a valid rating value, between 1 and ${beachBarReviewRatingMaxValue}`,
+            },
+          };
         }
         if (visitTypeId && visitTypeId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid visit type" } };
@@ -178,8 +185,13 @@ export const BeachBarReviewCrudMutation = extendType({
         if (!reviewId || reviewId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid customer's review" } };
         }
-        if (ratingValue && ratingValue < 1 && ratingValue > 10) {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid rating value, between 1 and 10" } };
+        if (ratingValue && (ratingValue < 1 || ratingValue > beachBarReviewRatingMaxValue)) {
+          return {
+            error: {
+              code: errors.INVALID_ARGUMENTS,
+              message: `Please provide a valid rating value, between 1 and ${beachBarReviewRatingMaxValue}`,
+            },
+          };
         }
         if (visitTypeId && visitTypeId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid visit type" } };

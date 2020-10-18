@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./build",
+    "paths": {
+      "entity/*": ["entity/*"],
+      "utils/*": ["utils/*"],
+      "constants/*": ["constants/*"],
+      "typings/*": ["typings/*"]
+    }
+  }
+}

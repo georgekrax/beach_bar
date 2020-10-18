@@ -1,5 +1,5 @@
 import { errors } from "@beach_bar/common";
-import { User } from "@entity/User";
+import { User } from "entity/User";
 import { decode, sign } from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 import { GeneratedTokenType } from "../returnTypes";

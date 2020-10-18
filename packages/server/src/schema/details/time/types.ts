@@ -1,4 +1,4 @@
-import { TimeScalar } from "@beach_bar/common";
+import { TimeScalar } from "@georgekrax-hashtag/common";
 import { objectType } from "@nexus/schema";
 
 export const HourTimeType = objectType({

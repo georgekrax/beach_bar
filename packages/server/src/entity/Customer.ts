@@ -1,6 +1,5 @@
-import { errors, validateEmailSchema } from "@beach_bar/common";
-import { AddCustomerType } from "@typings/customer";
-import { softRemove } from "@utils/softRemove";
+import { errors } from "@beach_bar/common";
+import { validateEmailSchema } from "@georgekrax-hashtag/common";
 import { Dayjs } from "dayjs";
 import { Stripe } from "stripe";
 import {
@@ -18,6 +17,8 @@ import {
   Repository,
   UpdateDateColumn,
 } from "typeorm";
+import { AddCustomerType } from "typings/customer";
+import { softRemove } from "utils/softRemove";
 import { Account } from "./Account";
 import { BeachBarReview } from "./BeachBarReview";
 import { Card } from "./Card";

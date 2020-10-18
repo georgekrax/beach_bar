@@ -1,4 +1,4 @@
-import { HourTime, MonthTime, QuarterTime } from "@entity/Time";
+import { HourTime, MonthTime, QuarterTime } from "entity/Time";
 
 export type HourTimeReturnType = {
   hourTime: HourTime;

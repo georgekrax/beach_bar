@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { BigIntScalar, EmailScalar, errors, MyContext } from "@beach_bar/common";
+import { errors, MyContext } from "@beach_bar/common";
+import { EmailScalar, BigIntScalar } from "@georgekrax-hashtag/common";
 import { arg, extendType, stringArg } from "@nexus/schema";
+import { Customer, CustomerRepository } from "entity/Customer";
+import { User } from "entity/User";
 import { getCustomRepository, IsNull } from "typeorm";
+import { DeleteType } from "typings/.index";
+import { AddCustomerType, UpdateCustomerType } from "typings/customer";
 import { DeleteResult } from "../types";
 import { AddCustomerResult, UpdateCustomerResult } from "./types";
-import { AddCustomerType, UpdateCustomerType } from "@typings/customer";
-import { CustomerRepository, Customer } from "@entity/Customer";
-import { DeleteType } from "@typings/.index";
-import { User } from "@entity/User";
 
 export const CustomerCrudMutation = extendType({
   type: "Mutation",
@@ -31,11 +32,7 @@ export const CustomerCrudMutation = extendType({
           description: "The ISO code of the country of customer's telephone",
         }),
       },
-      resolve: async (
-        _,
-        { email, phoneNumber, countryIsoCode },
-        { payload, stripe }: MyContext,
-      ): Promise<AddCustomerType> => {
+      resolve: async (_, { email, phoneNumber, countryIsoCode }, { payload, stripe }: MyContext): Promise<AddCustomerType> => {
         if (!email && !payload) {
           return {
             error: { code: errors.INVALID_ARGUMENTS, message: "You should either be authenticated or provide an email address" },
@@ -57,7 +54,7 @@ export const CustomerCrudMutation = extendType({
           email,
           phoneNumber,
           countryIsoCode,
-          payload,
+          payload
         );
 
         if (response) {

@@ -1,4 +1,4 @@
-import { softRemove } from "@utils/softRemove";
+import { beachBarReviewRatingMaxValue } from "constants/_index";
 import { Dayjs } from "dayjs";
 import {
   BaseEntity,
@@ -13,6 +13,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { softRemove } from "utils/softRemove";
 import { BeachBar } from "./BeachBar";
 import { Customer } from "./Customer";
 import { Payment } from "./Payment";
@@ -21,7 +22,7 @@ import { ReviewVisitType } from "./ReviewVisitType";
 import { MonthTime } from "./Time";
 
 @Entity({ name: "beach_bar_review", schema: "public" })
-@Check(`"ratingValue" >= 0 AND "ratingValue" <= 10`)
+@Check(`"ratingValue" >= 0 AND "ratingValue" <= ${beachBarReviewRatingMaxValue}`)
 export class BeachBarReview extends BaseEntity {
   @PrimaryGeneratedColumn({ type: "bigint" })
   id: bigint;

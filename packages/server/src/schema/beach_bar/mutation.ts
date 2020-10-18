@@ -1,13 +1,13 @@
 import { errors, MyContext } from "@beach_bar/common";
-import redisKeys from "@constants/redisKeys";
-import { BeachBar } from "@entity/BeachBar";
-import { BeachBarCategory } from "@entity/BeachBarCategory";
-import { Currency } from "@entity/Currency";
-import { User } from "@entity/User";
 import { booleanArg, extendType, intArg, stringArg } from "@nexus/schema";
-import { DeleteType } from "@typings/.index";
-import { AddBeachBarType, UpdateBeachBarType } from "@typings/beach_bar";
-import { checkScopes } from "@utils/checkScopes";
+import redisKeys from "constants/redisKeys";
+import { BeachBar } from "entity/BeachBar";
+import { BeachBarCategory } from "entity/BeachBarCategory";
+import { Currency } from "entity/Currency";
+import { User } from "entity/User";
+import { DeleteType } from "typings/.index";
+import { AddBeachBarType, UpdateBeachBarType } from "typings/beach_bar";
+import { checkScopes } from "utils/checkScopes";
 import { DeleteResult } from "../types";
 import { AddBeachBarResult, UpdateBeachBarResult } from "./types";
 

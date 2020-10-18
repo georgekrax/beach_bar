@@ -1,5 +1,5 @@
-import { BeachBarImgUrl } from "@entity/BeachBarImgUrl";
 import { extendType, intArg } from "@nexus/schema";
+import { BeachBarImgUrl } from "entity/BeachBarImgUrl";
 import { BeachBarImgUrlType } from "./types";
 
 export const BeachBarImgUrlQuery = extendType({

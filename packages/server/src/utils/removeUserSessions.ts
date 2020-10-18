@@ -1,8 +1,8 @@
-import { Account } from "@entity/Account";
-import { User } from "@entity/User";
+import { Account } from "../entity/Account";
+import { User } from "../entity/User";
 import { Redis } from "ioredis";
 import { getConnection } from "typeorm";
-import redisKeys from "@constants/redisKeys";
+import redisKeys from "../constants/redisKeys";
 
 export const removeUserSessions = async (userId: number, redis: Redis): Promise<void> => {
   await redis.del(`${redisKeys.USER}:${userId.toString()}` as KeyType);

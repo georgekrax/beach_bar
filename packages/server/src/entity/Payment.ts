@@ -1,7 +1,5 @@
 import { errors } from "@beach_bar/common";
-import { payment, payment as paymentStatus } from "@constants/status";
-import { GetRefundPercentage } from "@typings/payment";
-import { softRemove } from "@utils/softRemove";
+import { payment, payment as paymentStatus } from "constants/status";
 import dayjs, { Dayjs } from "dayjs";
 import minMax from "dayjs/plugin/minMax";
 import {
@@ -17,6 +15,8 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { GetRefundPercentage } from "typings/payment";
+import { softRemove } from "utils/softRemove";
 import { BeachBarReview } from "./BeachBarReview";
 import { Card } from "./Card";
 import { Cart } from "./Cart";

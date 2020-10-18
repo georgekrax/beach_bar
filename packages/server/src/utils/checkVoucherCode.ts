@@ -1,9 +1,9 @@
 import { errors } from "@beach_bar/common";
-import { voucherCodeLength } from "@constants/.index";
-import { CouponCode } from "@entity/CouponCode";
-import { OfferCampaignCode } from "@entity/OfferCampaignCode";
-import { ErrorType } from "@typings/.index";
+import { voucherCodeLength } from "constants/_index";
 import dayjs from "dayjs";
+import { CouponCode } from "entity/CouponCode";
+import { OfferCampaignCode } from "entity/OfferCampaignCode";
+import { ErrorType } from "typings/.index";
 
 type CheckVoucherCodeReturnType = {
   couponCode?: CouponCode;

@@ -1,4 +1,4 @@
-import redisKeys from "@constants/redisKeys";
+import redisKeys from "constants/redisKeys";
 import { Dayjs } from "dayjs";
 import { Redis } from "ioredis";
 import {

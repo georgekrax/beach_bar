@@ -1,15 +1,15 @@
 import { errors, MyContext } from "@beach_bar/common";
 import { booleanArg, extendType, intArg } from "@nexus/schema";
+import { user } from "constants/scopes";
+import { BeachBar } from "entity/BeachBar";
+import { BeachBarOwner } from "entity/BeachBarOwner";
+import { Owner } from "entity/Owner";
 import { KeyType } from "ioredis";
-import { user } from "@constants/scopes";
-import arrDiff from "@utils/arrDiff";
+import { DeleteType } from "typings/.index";
+import { AddBeachBarOwnerType, UpdateBeachBarOwnerType } from "typings/owner";
+import arrDiff from "utils/arrDiff";
 import { DeleteResult } from "../types";
 import { AddBeachBarOwnerResult, UpdateBeachBarOwnerResult } from "./types";
-import { AddBeachBarOwnerType, UpdateBeachBarOwnerType } from "@typings/owner";
-import { BeachBar } from "@entity/BeachBar";
-import { Owner } from "@entity/Owner";
-import { BeachBarOwner } from "@entity/BeachBarOwner";
-import { DeleteType } from "@typings/.index";
 
 export const OwnerCrudMutation = extendType({
   type: "Mutation",

@@ -1,5 +1,5 @@
-import { User } from "@entity/User";
-import { UserType } from "@typings/user";
+import { User } from "../entity/User";
+import { UserType } from "../typings/user";
 
 export const userInfoPayloadScope = (payload: any, user: User): UserType => {
   return {

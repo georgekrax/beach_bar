@@ -9,6 +9,7 @@ export const Query = queryType({
         if (payload) {
           return `Hello world, ${payload.sub}!`;
         }
+        // console.log("hey");
         return "Hello world!";
       },
     });

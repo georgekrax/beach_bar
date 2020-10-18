@@ -1,5 +1,5 @@
-import { ReservedProduct } from "@entity/ReservedProduct";
-import { AddType, ErrorType, UpdateType } from "@typings/.index";
+import { ReservedProduct } from "entity/ReservedProduct";
+import { AddType, ErrorType, UpdateType } from "typings/.index";
 
 type ReservedProductType = {
   reservedProduct: ReservedProduct;

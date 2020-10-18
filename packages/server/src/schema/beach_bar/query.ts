@@ -1,16 +1,12 @@
 import { MyContext } from "@beach_bar/common";
 import { arg, booleanArg, extendType, intArg } from "@nexus/schema";
-// import { Types } from "mongoose";
-// import historyActivity from "@constants/historyActivity";
-import redisKeys from "@constants/redisKeys";
-// import userHistory from "../../models/userHistory";
+import redisKeys from "constants/redisKeys";
+import { historyActivity } from "constants/_index";
+import { BeachBar } from "entity/BeachBar";
+import { UserHistory } from "entity/UserHistory";
+import { BeachBarAvailabilityReturnType } from "typings/beach_bar";
 import { SearchInputType } from "../search/types";
 import { BeachBarAvailabilityType, BeachBarType } from "./types";
-import { BeachBarAvailabilityReturnType } from "@typings/beach_bar";
-import { BeachBar } from "@entity/BeachBar";
-import userHistory from "models/userHistory";
-import { Types } from "mongoose";
-import historyActivity from "@constants/historyActivity";
 
 export const BeachBarQuery = extendType({
   type: "Query",
@@ -30,7 +26,7 @@ export const BeachBarQuery = extendType({
           default: true,
         }),
       },
-      resolve: async (_, { beachBarId, userVisit }, { redis, ipAddr }: MyContext): Promise<BeachBar | null> => {
+      resolve: async (_, { beachBarId, userVisit }, { redis, ipAddr, payload }: MyContext): Promise<BeachBar | null> => {
         if (!beachBarId || beachBarId <= 0) {
           return null;
         }
@@ -41,12 +37,12 @@ export const BeachBarQuery = extendType({
           return null;
         }
         if (userVisit) {
-          await userHistory.create({
-            activityId: new Types.ObjectId(historyActivity.BEACH_BAR_SEARCH_ID),
-            objectId: beachBar.id,
-            userId: undefined,
+          await UserHistory.create({
+            activityId: historyActivity.BEACH_BAR_QUERY_ID,
+            objectId: BigInt(beachBar.id),
+            userId: payload ? payload.sub : undefined,
             ipAddr,
-          });
+          }).save();
         }
 
         return beachBar;

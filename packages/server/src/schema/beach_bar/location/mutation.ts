@@ -1,13 +1,13 @@
 import { errors, MyContext } from "@beach_bar/common";
-import { BeachBar } from "@entity/BeachBar";
-import { BeachBarLocation } from "@entity/BeachBarLocation";
-import { Country } from "@entity/Country";
-import { Region } from "@entity/Region";
-import { extendType, intArg, stringArg, idArg } from "@nexus/schema";
-import { AddBeachBarLocationType, UpdateBeachBarLocationType } from "@typings/beach_bar/location";
-import { checkScopes } from "@utils/checkScopes";
+import { extendType, idArg, intArg, stringArg } from "@nexus/schema";
+import { BeachBar } from "entity/BeachBar";
+import { BeachBarLocation } from "entity/BeachBarLocation";
+import { City } from "entity/City";
+import { Country } from "entity/Country";
+import { Region } from "entity/Region";
+import { AddBeachBarLocationType, UpdateBeachBarLocationType } from "typings/beach_bar/location";
+import { checkScopes } from "utils/checkScopes";
 import { AddBeachBarLocationResult, UpdateBeachBarLocationResult } from "./types";
-import { City } from "@entity/City";
 
 export const BeachBarLocationCrudMutation = extendType({
   type: "Mutation",

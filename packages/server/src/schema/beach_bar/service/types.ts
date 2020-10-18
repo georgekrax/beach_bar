@@ -1,4 +1,4 @@
-import { DateTimeScalar } from "@beach_bar/common";
+import { DateTimeScalar } from "@georgekrax-hashtag/common";
 import { objectType, unionType } from "@nexus/schema";
 import { BeachBarType } from "../types";
 
@@ -14,6 +14,10 @@ export const BeachBarServiceType = objectType({
     t.string("iconUrl", {
       nullable: false,
       description: "The URL value of the icon image of the feature",
+    });
+    t.string("iconUrl", {
+      nullable: true,
+      description: "The URL value of the icon colored image of the feature, with color",
     });
   },
 });

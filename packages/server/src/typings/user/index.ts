@@ -1,10 +1,10 @@
-import { BeachBarReview } from "@entity/BeachBarReview";
-import { City } from "@entity/City";
-import { Country } from "@entity/Country";
-import { User } from "@entity/User";
-import { UserContactDetails } from "@entity/UserContactDetails";
-import { AddType, ErrorType, SuccessType, UpdateType } from "@typings/.index";
 import { Dayjs } from "dayjs";
+import { BeachBarReview } from "entity/BeachBarReview";
+import { City } from "entity/City";
+import { Country } from "entity/Country";
+import { User } from "entity/User";
+import { UserContactDetails } from "entity/UserContactDetails";
+import { ErrorType } from "typings/.index";
 
 export type UserType = {
   id: number;
@@ -48,13 +48,8 @@ type UserReturnType = {
   user: User;
 };
 
-export type UserLoginType =
-  | (SuccessType &
-      UserReturnType & {
-        accessToken: string;
-      })
-  | ErrorType;
+export type UserLoginType = (UserReturnType & { accessToken: string }) | ErrorType;
 
-export type UserSignUpType = (AddType & UserReturnType) | ErrorType;
+export type UserSignUpType = UserReturnType | ErrorType;
 
-export type UpdateUserType = (UpdateType & UserReturnType) | ErrorType;
+export type UpdateUserType = UserReturnType | ErrorType;

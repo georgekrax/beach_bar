@@ -1,9 +1,9 @@
 import { errors, MyContext } from "@beach_bar/common";
-import { BeachBar } from "@entity/BeachBar";
-import { BeachBarRestaurant } from "@entity/BeachBarRestaurant";
 import { booleanArg, extendType, intArg, stringArg } from "@nexus/schema";
-import { DeleteType } from "@typings/.index";
-import { AddBeachBarRestaurantType, UpdateBeachBarRestaurantType } from "@typings/beach_bar/restaurant";
+import { BeachBar } from "entity/BeachBar";
+import { BeachBarRestaurant } from "entity/BeachBarRestaurant";
+import { DeleteType } from "typings/.index";
+import { AddBeachBarRestaurantType, UpdateBeachBarRestaurantType } from "typings/beach_bar/restaurant";
 import { DeleteResult } from "../../types";
 import { AddBeachBarRestaurantResult, UpdateBeachBarRestaurantResult } from "./types";
 

@@ -1,10 +1,10 @@
-import { UploadScalar } from "@beach_bar/common";
+import { UploadScalar } from "@georgekrax-hashtag/common";
 import { arg, mutationType, stringArg } from "@nexus/schema";
 import { createWriteStream } from "fs";
 import path from "path";
+import { FileType } from "typings/aws";
 import { v4 as uuid } from "uuid";
 import { FileGraphQlType } from "./types";
-import { FileType } from "@typings/aws";
 
 export const Mutation = mutationType({
   description: "Mutation",

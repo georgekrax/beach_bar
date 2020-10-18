@@ -26,6 +26,15 @@ export type DeleteType =
     }
   | ErrorType;
 
-export type SuccessType = ErrorType & {
-  success?: boolean;
+export type SuccessType =
+  | ErrorType
+  | {
+      success: boolean;
+    };
+
+export type LoginDetailsType = {
+  osId?: number;
+  browserId?: number;
+  countryId?: number;
+  cityId?: bigint;
 };

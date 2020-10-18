@@ -1,14 +1,15 @@
-import { DateScalar, errors, MyContext } from "@beach_bar/common";
+import { errors, MyContext } from "@beach_bar/common";
+import { DateScalar } from "@georgekrax-hashtag/common";
 import { arg, extendType, intArg } from "@nexus/schema";
+import { CartRepository } from "entity/Cart";
+import { CartProduct } from "entity/CartProduct";
+import { Product } from "entity/Product";
+import { HourTime } from "entity/Time";
 import { getCustomRepository } from "typeorm";
+import { DeleteType } from "typings/.index";
+import { AddCartProductType, UpdateCartProductType } from "typings/cart/product";
 import { DeleteResult } from "../../types";
 import { AddCartProductResult, UpdateCartProductResult } from "./types";
-import { AddCartProductType, UpdateCartProductType } from "@typings/cart/product";
-import { CartRepository } from "@entity/Cart";
-import { Product } from "@entity/Product";
-import { HourTime } from "@entity/Time";
-import { CartProduct } from "@entity/CartProduct";
-import { DeleteType } from "@typings/.index";
 
 export const CartProductCrudMutation = extendType({
   type: "Mutation",
@@ -32,11 +33,7 @@ export const CartProductCrudMutation = extendType({
           description: "The date to purchase the product. Its default value its the current date",
         }),
       },
-      resolve: async (
-        _,
-        { cartId, productId, quantity, date, timeId },
-        { payload }: MyContext
-      ): Promise<AddCartProductType> => {
+      resolve: async (_, { cartId, productId, quantity, date, timeId }, { payload }: MyContext): Promise<AddCartProductType> => {
         if (!cartId || cartId <= 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid shopping cart" } };
         }

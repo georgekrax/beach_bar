@@ -1,6 +1,6 @@
+import redisKeys from "constants/redisKeys";
+import { AWSS3Bucket } from "entity/AWSS3Bucket";
 import { Redis } from "ioredis";
-import { AWSS3Bucket } from "@entity/AWSS3Bucket";
-import redisKeys from "@constants/redisKeys";
 
 export default async (redis: Redis, tableName: string, redisBucket?: AWSS3Bucket): Promise<AWSS3Bucket | undefined> => {
   let s3Bucket: AWSS3Bucket | undefined = redisBucket;

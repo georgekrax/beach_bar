@@ -2,7 +2,6 @@
 .vscode/
 node_modules/
 packages/server/node_modules
-packages/server/build/
 tmp/
 temp/
 packages/server/ormconfig.json

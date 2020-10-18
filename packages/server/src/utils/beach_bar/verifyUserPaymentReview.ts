@@ -1,6 +1,6 @@
-import { Payment } from "@entity/Payment";
-import { User } from "@entity/User";
-import { VerifyUserPaymentReviewReturnResult } from "@typings/beach_bar/review";
+import { Payment } from "entity/Payment";
+import { User } from "entity/User";
+import { VerifyUserPaymentReviewReturnResult } from "typings/beach_bar/review";
 
 export const verifyUserPaymentReview = async (
   beachBarId: number,

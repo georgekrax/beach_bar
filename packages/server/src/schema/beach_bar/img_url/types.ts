@@ -1,4 +1,4 @@
-import { UrlScalar } from "@beach_bar/common";
+import { UrlScalar } from "@georgekrax-hashtag/common";
 import { objectType, unionType } from "@nexus/schema";
 import { BeachBarType } from "../types";
 

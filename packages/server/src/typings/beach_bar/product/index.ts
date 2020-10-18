@@ -1,6 +1,6 @@
-import { ErrorType, AddType, UpdateType } from "@typings/.index";
-import { Product } from "@entity/Product";
-import { HourTimeReturnType } from "@typings/details/time";
+import { Product } from "entity/Product";
+import { AddType, ErrorType, UpdateType } from "typings/.index";
+import { HourTimeReturnType } from "typings/details/time";
 
 export type ProductType = {
   product: Product;

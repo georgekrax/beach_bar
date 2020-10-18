@@ -1,5 +1,5 @@
-import { BeachBarOwner } from "@entity/BeachBarOwner";
-import { AddType, ErrorType, UpdateType } from "@typings/.index";
+import { BeachBarOwner } from "entity/BeachBarOwner";
+import { AddType, ErrorType, UpdateType } from "typings/.index";
 
 type BeachBarOwnerType = {
   owner: BeachBarOwner;

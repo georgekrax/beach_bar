@@ -1,13 +1,14 @@
-import { BigIntScalar, DateScalar, errors, MyContext } from "@beach_bar/common";
-import { Product } from "@entity/Product";
-import { ProductReservationLimit } from "@entity/ProductReservationLimit";
-import { HourTime } from "@entity/Time";
+import { errors, MyContext } from "@beach_bar/common";
+import { DateScalar, BigIntScalar } from "@georgekrax-hashtag/common";
 import { arg, extendType, intArg } from "@nexus/schema";
-import { DeleteType } from "@typings/.index";
-import { AddProductReservationLimitType, UpdateProductReservationLimitType } from "@typings/beach_bar/product/reservationLimit";
+import { Product } from "entity/Product";
+import { ProductReservationLimit } from "entity/ProductReservationLimit";
+import { HourTime } from "entity/Time";
 import { In } from "typeorm";
+import { DeleteType } from "typings/.index";
+import { AddProductReservationLimitType, UpdateProductReservationLimitType } from "typings/beach_bar/product/reservationLimit";
+import { checkScopes } from "utils/checkScopes";
 import { DeleteResult } from "../../../types";
-import { checkScopes } from "@utils/checkScopes";
 import { AddProductReservationLimitResult, UpdateProductReservationLimitResult } from "./types";
 
 export const ProductReservationLimitCrudMutation = extendType({

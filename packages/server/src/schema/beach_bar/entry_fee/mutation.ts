@@ -1,12 +1,13 @@
-import { BigIntScalar, DateScalar, errors, MyContext } from "@beach_bar/common";
-import { BeachBar } from "@entity/BeachBar";
-import { BeachBarEntryFee } from "@entity/BeachBarEntryFee";
+import { errors, MyContext } from "@beach_bar/common";
+import { BigIntScalar, DateScalar } from "@georgekrax-hashtag/common";
 import { arg, extendType, floatArg, intArg } from "@nexus/schema";
-import { DeleteType } from "@typings/.index";
-import { AddBeachBarEntryFeeType, UpdateBeachBarEntryFeeType } from "@typings/beach_bar/entry_fee";
+import { BeachBar } from "entity/BeachBar";
+import { BeachBarEntryFee } from "entity/BeachBarEntryFee";
 import { In } from "typeorm";
+import { DeleteType } from "typings/.index";
+import { AddBeachBarEntryFeeType, UpdateBeachBarEntryFeeType } from "typings/beach_bar/entry_fee";
+import { checkScopes } from "utils/checkScopes";
 import { DeleteResult } from "../../types";
-import { checkScopes } from "@utils/checkScopes";
 import { AddBeachBarEntryFeeResult, UpdateBeachBarEntryFeeResult } from "./types";
 
 export const BeachBarEntryFeeCrudMutation = extendType({

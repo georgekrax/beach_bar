@@ -1,4 +1,4 @@
-import { BigIntScalar } from "@beach_bar/common";
+import { BigIntScalar } from "@georgekrax-hashtag/common";
 import { objectType, unionType } from "@nexus/schema";
 
 export const RestaurantMenuCategoryType = objectType({

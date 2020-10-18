@@ -1,6 +1,6 @@
-import { HourTime } from "@entity/Time";
-import { ErrorType, AddType, UpdateType } from "@typings/.index";
-import { ProductReservationLimit } from "@entity/ProductReservationLimit";
+import { ProductReservationLimit } from "entity/ProductReservationLimit";
+import { HourTime } from "entity/Time";
+import { AddType, ErrorType, UpdateType } from "typings/.index";
 
 type ProductReservationLimitType = {
   reservationLimit: ProductReservationLimit[];

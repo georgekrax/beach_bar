@@ -1,8 +1,8 @@
 import { MyContext } from "@beach_bar/common";
-import { MonthTime } from "@entity/Time";
 import { extendType, intArg, stringArg } from "@nexus/schema";
+import { MonthTime } from "entity/Time";
 import { In } from "typeorm";
-import { verifyUserPaymentReview } from "@utils/beach_bar/verifyUserPaymentReview";
+import { verifyUserPaymentReview } from "utils/beach_bar/verifyUserPaymentReview";
 import { MonthTimeType } from "../../details/time/types";
 
 export const BeachBarReviewQuery = extendType({

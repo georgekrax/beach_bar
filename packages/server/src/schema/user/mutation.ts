@@ -1,22 +1,16 @@
-import { DateScalar, EmailScalar, errors, MyContext, UrlScalar } from "@beach_bar/common";
-import platformNames from "@constants/platformNames";
-import redisKeys from "@constants/redisKeys";
-import { loginDetails as loginDetailsStatus } from "@constants/status";
-import { City } from "@entity/City";
-import { Country } from "@entity/Country";
-import { User } from "@entity/User";
+import { errors, MyContext } from "@beach_bar/common";
+import { DateScalar, EmailScalar, UrlScalar } from "@georgekrax-hashtag/common";
 import { arg, booleanArg, extendType, intArg, stringArg } from "@nexus/schema";
-import { DeleteType, SuccessType } from "@typings/.index";
-import { UpdateUserType, UserLoginType, UserSignUpType } from "@typings/user";
-import { generateAccessToken, generateRefreshToken } from "@utils/auth/generateAuthTokens";
-import { sendRefreshToken } from "@utils/auth/sendRefreshToken";
-import { signUpUser } from "@utils/auth/signUpUser";
-import { createUserLoginDetails, findBrowser, findCity, findCountry, findOs } from "@utils/auth/userCommon";
-import { removeUserSessions } from "@utils/removeUserSessions";
 import { execute, makePromise } from "apollo-link";
 import { createHash, randomBytes } from "crypto";
+import { LoginDetailStatus } from "entity/LoginDetails";
 import { KeyType } from "ioredis";
 import { link } from "../../config/apolloLink";
+import platformNames from "../../config/platformNames";
+import redisKeys from "../../constants/redisKeys";
+import { City } from "../../entity/City";
+import { Country } from "../../entity/Country";
+import { User } from "../../entity/User";
 import authorizeWithHashtagQuery from "../../graphql/AUTHORIZE_WITH_HASHTAG";
 import changeUserPasswordQuery from "../../graphql/CHANGE_USER_PASSWORD";
 import exchangeCodeQuery from "../../graphql/EXCHANGE_CODE";
@@ -25,6 +19,13 @@ import sendForgotPasswordLinkQuery from "../../graphql/SEND_FORGOT_PASSWORD_LINK
 import signUpUserQuery from "../../graphql/SIGN_UP_USER";
 import tokenInfoQuery from "../../graphql/TOKEN_INFO";
 import updateUserQuery from "../../graphql/UPDATE_USER";
+import { DeleteType, SuccessType } from "../../typings/.index";
+import { UpdateUserType, UserLoginType, UserSignUpType } from "../../typings/user";
+import { generateAccessToken, generateRefreshToken } from "../../utils/auth/generateAuthTokens";
+import { sendRefreshToken } from "../../utils/auth/sendRefreshToken";
+import { signUpUser } from "../../utils/auth/signUpUser";
+import { createUserLoginDetails, findLoginDetails } from "../../utils/auth/userCommon";
+import { removeUserSessions } from "../../utils/removeUserSessions";
 import { DeleteResult, SuccessResult } from "../types";
 import { UserCredentialsInput, UserLoginDetailsInput, UserLoginResult, UserSignUpResult, UserUpdateResult } from "./types";
 
@@ -49,10 +50,10 @@ export const UserSignUpAndLoginMutation = extendType({
       },
       resolve: async (_, { userCredentials, isPrimaryOwner }, { redis }: MyContext): Promise<UserSignUpType> => {
         const { email, password } = userCredentials;
-        if (!email || email === "" || email === " ") {
+        if (!email || email.trim().length === 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid email address" } };
         }
-        if (!password || password === "" || password === " ") {
+        if (!password || password.trim().length === 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid password" } };
         }
 
@@ -91,7 +92,7 @@ export const UserSignUpAndLoginMutation = extendType({
         ) {
           return { error: { code: errorCode, message: errorMessage } };
         }
-        if (email !== hashtagUser.email || hashtagUser.id === "" || hashtagUser.id === " ") {
+        if (email !== hashtagUser.email || hashtagUser.id.trim().length === 0) {
           return { error: { message: errors.SOMETHING_WENT_WRONG } };
         }
 
@@ -108,20 +109,17 @@ export const UserSignUpAndLoginMutation = extendType({
           redis,
           isPrimaryOwner,
           hashtagId: hashtagUser.id,
-          country,
-          city,
+          countryId: country ? country.id : undefined,
+          cityId: city ? city.id : undefined,
           birthday: hashtagUser.birthday,
         });
-        // @ts-ignore
         if (response.error && !response.user) {
           // @ts-ignore
           return { error: { code: response.error.code, message: response.error.message } };
         }
 
         return {
-          // @ts-ignore
           user: response.user,
-          added: true,
         };
       },
     });
@@ -143,30 +141,14 @@ export const UserSignUpAndLoginMutation = extendType({
       },
       resolve: async (_, { loginDetails, userCredentials }, { res, redis, uaParser, ipAddr }: MyContext): Promise<UserLoginType> => {
         const { email, password } = userCredentials;
-        if (!email || email === "" || email === " ") {
+        if (!email || email.length === 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid email address" } };
         }
-        if (!password || password === "" || password === " ") {
+        if (!password || password.length === 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid password" } };
         }
-
-        let os: any = uaParser.getOS().name,
-          browser: any = uaParser.getBrowser().name,
-          country: any = undefined,
-          city: any = undefined;
-
-        if (loginDetails) {
-          ({ city, country } = loginDetails);
-        }
-
-        try {
-          os = await findOs(os);
-          browser = await findBrowser(browser);
-          country = await findCountry(country);
-          city = await findCity(city);
-        } catch (err) {
-          return { error: { message: `Something went wrong: ${err.message}` } };
-        }
+        // TODO: Fix loginDetails
+        const { osId, browserId, countryId, cityId } = findLoginDetails({ details: loginDetails, uaParser });
 
         // search for user in DB
         const user = await User.findOne({ where: { email }, relations: ["account"] });
@@ -175,15 +157,6 @@ export const UserSignUpAndLoginMutation = extendType({
             error: {
               code: errors.NOT_FOUND,
               message: errors.USER_NOT_FOUND_MESSAGE,
-            },
-          };
-        }
-
-        // check user's account
-        if (!user.account) {
-          return {
-            error: {
-              message: "Something went wrong",
             },
           };
         }
@@ -215,10 +188,10 @@ export const UserSignUpAndLoginMutation = extendType({
             state,
             email,
             password,
-            os: os ? os.name : null,
-            browser: browser ? browser.name : null,
-            country: country ? country.name : null,
-            city: city ? city.name : null,
+            osId,
+            browserId,
+            countryId,
+            cityId,
             ipAddr,
           },
         };
@@ -227,11 +200,8 @@ export const UserSignUpAndLoginMutation = extendType({
           hashtagId: bigint | undefined = undefined,
           hashtagState: string | undefined = undefined,
           hashtagScope: string[] | undefined = undefined,
-          hashtagClientId: string | undefined = undefined,
-          hashtagClientSecret: string | undefined = undefined,
           code: string | undefined = undefined,
           prompt: boolean | undefined = undefined,
-          authorized: boolean | undefined = undefined,
           errorCode: string | undefined = undefined,
           errorMessage: string | any = undefined;
 
@@ -246,11 +216,8 @@ export const UserSignUpAndLoginMutation = extendType({
             hashtagId = data.user.id;
             hashtagState = data.state;
             hashtagScope = data.scope;
-            hashtagClientId = data.oauthClient.clientId;
-            hashtagClientSecret = data.oauthClient.clientSecret;
             code = data.code;
             prompt = data.prompt.none;
-            authorized = data.authorized;
           })
           .catch(err => {
             return { error: { message: `Something went wrong: ${err.message}` } };
@@ -259,24 +226,24 @@ export const UserSignUpAndLoginMutation = extendType({
         if (errorCode || errorMessage) {
           if (errorMessage === errors.INVALID_PASSWORD_MESSAGE || errorCode === errors.INVALID_PASSWORD_CODE) {
             await createUserLoginDetails(
-              loginDetailsStatus.INVALID_PASSWORD,
+              LoginDetailStatus.invalidPassword,
               platformNames.BEACH_BAR,
               user.account,
-              os,
-              browser,
-              country,
-              city,
+              osId,
+              browserId,
+              countryId,
+              cityId,
               ipAddr
             );
           } else {
             await createUserLoginDetails(
-              loginDetailsStatus.FAILED,
+              LoginDetailStatus.failed,
               platformNames.BEACH_BAR,
               user.account,
-              os,
-              browser,
-              country,
-              city,
+              osId,
+              browserId,
+              countryId,
+              cityId,
               ipAddr
             );
           }
@@ -289,19 +256,15 @@ export const UserSignUpAndLoginMutation = extendType({
         if (
           state !== hashtagState ||
           !code ||
-          code === "" ||
-          code === " " ||
+          code!.trim().length === 0 ||
           prompt !== true ||
-          !authorized ||
-          hashtagClientId !== process.env.HASHTAG_CLIENT_ID!.toString() ||
-          hashtagClientSecret !== process.env.HASHTAG_CLIENT_SECRET!.toString() ||
           JSON.stringify(scope) !== JSON.stringify(hashtagScope)
         ) {
-          return { error: { message: "Something went wrong" } };
+          return { error: { message: errors.SOMETHING_WENT_WRONG } };
         }
 
         if (String(hashtagId) !== String(user.hashtagId) || email !== hashtagEmail) {
-          return { error: { message: "Something went wrong" } };
+          return { error: { message: errors.SOMETHING_WENT_WRONG } };
         }
 
         // exchange for ID & Access tokens
@@ -325,25 +288,23 @@ export const UserSignUpAndLoginMutation = extendType({
               errorCode = data.error.code;
               errorMessage = data.error.message;
             }
-            hashtagClientId = data.oauthClient.clientId;
-            hashtagClientSecret = data.oauthClient.clientSecret;
             hashtagAccessToken = data.tokens[0];
             hashtagRefreshToken = data.tokens[1];
             idToken = data.tokens[2];
           })
           .catch(err => {
-            return { error: { message: `Something went wrong: ${err.message}` } };
+            return { error: { message: `${errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
           });
 
         if (errorCode || errorMessage) {
           await createUserLoginDetails(
-            loginDetailsStatus.FAILED,
+            LoginDetailStatus.failed,
             platformNames.BEACH_BAR,
             user.account,
-            os,
-            browser,
-            country,
-            city,
+            osId,
+            browserId,
+            countryId,
+            cityId,
             ipAddr
           );
           return {
@@ -351,14 +312,8 @@ export const UserSignUpAndLoginMutation = extendType({
           };
         }
 
-        if (
-          !hashtagAccessToken ||
-          !hashtagRefreshToken ||
-          !idToken ||
-          hashtagClientId !== process.env.HASHTAG_CLIENT_ID!.toString() ||
-          hashtagClientSecret !== process.env.HASHTAG_CLIENT_SECRET!.toString()
-        ) {
-          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: "Something went wrong" } };
+        if (!hashtagAccessToken || !hashtagRefreshToken || !idToken) {
+          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
         }
 
         // logined successfully
@@ -366,7 +321,6 @@ export const UserSignUpAndLoginMutation = extendType({
         const tokenInfoOperation = {
           query: tokenInfoQuery,
           variables: {
-            // @ts-ignore
             token: idToken.token,
           },
         };
@@ -383,18 +337,18 @@ export const UserSignUpAndLoginMutation = extendType({
             tokenInfo = data;
           })
           .catch(err => {
-            return { error: { message: `Something went wrong: ${err.message}` } };
+            return { error: { message: `${errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
           });
 
         if (errorCode || errorMessage) {
           await createUserLoginDetails(
-            loginDetailsStatus.FAILED,
+            LoginDetailStatus.failed,
             platformNames.BEACH_BAR,
             user.account,
-            os,
-            browser,
-            country,
-            city,
+            osId,
+            browserId,
+            countryId,
+            cityId,
             ipAddr
           );
           return { error: { code: errorCode, message: errorMessage as any } };
@@ -407,7 +361,7 @@ export const UserSignUpAndLoginMutation = extendType({
           tokenInfo.iss !== process.env.HASHTAG_TOKEN_ISSUER!.toString() ||
           tokenInfo.aud !== process.env.HASHTAG_CLIENT_ID!.toString()
         ) {
-          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: "Something went wrong" } };
+          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
         }
 
         if (tokenInfo.firstName || tokenInfo.lastName || tokenInfo.pictureUrl || tokenInfo.locale) {
@@ -430,13 +384,13 @@ export const UserSignUpAndLoginMutation = extendType({
 
         // create user login details
         await createUserLoginDetails(
-          loginDetailsStatus.LOGGED_IN,
+          LoginDetailStatus.loggedIn,
           platformNames.BEACH_BAR,
           user.account,
-          os,
-          browser,
-          country,
-          city,
+          osId,
+          browserId,
+          countryId,
+          cityId,
           ipAddr
         );
 
@@ -460,7 +414,6 @@ export const UserSignUpAndLoginMutation = extendType({
         return {
           user,
           accessToken: accessToken.token,
-          success: true,
         };
       },
     });
@@ -552,7 +505,7 @@ export const UserForgotPasswordMutation = extendType({
         }),
       },
       resolve: async (_, { email }, { res, redis }): Promise<SuccessType> => {
-        if (!email || email === "" || email === " ") {
+        if (!email || email.trim().length === 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid email address" } };
         }
 
@@ -636,13 +589,13 @@ export const UserForgotPasswordMutation = extendType({
         }),
       },
       resolve: async (_, { email, key, newPassword }): Promise<SuccessType> => {
-        if (!email || email === "" || email === " ") {
+        if (!email || email.trim().length === 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid email address" } };
         }
-        if (!newPassword || newPassword === "" || newPassword === " ") {
+        if (!newPassword || newPassword.trim().length === 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid newPassword" } };
         }
-        if (!key || key === "" || key === " ") {
+        if (!key || key.trim().length === 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid key" } };
         }
 
@@ -888,7 +841,6 @@ export const UserCrudMutation = extendType({
 
         return {
           user,
-          updated: true,
         };
       },
     });

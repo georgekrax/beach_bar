@@ -1,6 +1,4 @@
-import redisKeys from "@constants/redisKeys";
-import { UpdateUserInfo } from "@typings/user";
-import { softRemove } from "@utils/softRemove";
+import redisKeys from "constants/redisKeys";
 import dayjs, { Dayjs } from "dayjs";
 import {
   BaseEntity,
@@ -13,6 +11,8 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { UpdateUserInfo } from "typings/user";
+import { softRemove } from "utils/softRemove";
 import { Account } from "./Account";
 import { BeachBarReview } from "./BeachBarReview";
 import { Cart } from "./Cart";
@@ -21,6 +21,7 @@ import { Country } from "./Country";
 import { Customer } from "./Customer";
 import { Owner } from "./Owner";
 import { UserFavoriteBar } from "./UserFavoriteBar";
+import { UserHistory } from "./UserHistory";
 import { UserSearch } from "./UserSearch";
 import { Vote } from "./Vote";
 
@@ -78,6 +79,9 @@ export class User extends BaseEntity {
 
   @OneToOne(() => Customer, customer => customer.user)
   customer?: Customer;
+
+  @OneToMany(() => UserHistory, userHistory => userHistory.user, { nullable: true })
+  history: UserHistory[];
 
   @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
   updatedAt: Dayjs;

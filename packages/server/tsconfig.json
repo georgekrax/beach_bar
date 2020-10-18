@@ -4,15 +4,16 @@
     "sourceMap": true,
     "target": "ES6",
     "module": "CommonJS",
+    "noEmit": false,
     "outDir": "./build",
     "rootDir": "src",
     "moduleResolution": "node",
     "baseUrl": "./src",
     "paths": {
-      "@entity/*": ["entity/*"],
-      "@utils/*": ["utils/*"],
-      "@constants/*": ["constants/*"],
-      "@typings/*": ["typings/*"]
+      "entity/*": ["entity/*"],
+      "utils/*": ["utils/*"],
+      "constants/*": ["constants/*"],
+      "typings/*": ["typings/*"]
     }
   },
   "exclude": ["node_modules"],

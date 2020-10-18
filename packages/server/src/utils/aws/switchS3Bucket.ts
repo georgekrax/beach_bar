@@ -1,8 +1,8 @@
 import { tableNames } from "@beach_bar/common";
-import redisKeys from "@constants/redisKeys";
-import cacheBucketInRedis from "@utils/aws/cacheBucketInRedis";
-import { AWSS3Bucket } from "@entity/AWSS3Bucket";
+import redisKeys from "constants/redisKeys";
+import { AWSS3Bucket } from "entity/AWSS3Bucket";
 import { Redis } from "ioredis";
+import cacheBucketInRedis from "utils/aws/cacheBucketInRedis";
 
 export const switchS3Bucket = async (redis: Redis, tableName: string): Promise<AWSS3Bucket | undefined> => {
   let s3Bucket: AWSS3Bucket | undefined;

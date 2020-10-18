@@ -1,8 +1,7 @@
-import { ErrorType, AddType, UpdateType } from "@typings/.index";
-import { CouponCode } from "@entity/CouponCode";
-import { OfferCampaign } from "@entity/OfferCampaign";
-import { OfferCampaignCode } from "@entity/OfferCampaignCode";
-
+import { CouponCode } from "entity/CouponCode";
+import { OfferCampaign } from "entity/OfferCampaign";
+import { OfferCampaignCode } from "entity/OfferCampaignCode";
+import { AddType, ErrorType, UpdateType } from "typings/.index";
 
 type CouponCodeType = {
   couponCode: CouponCode;

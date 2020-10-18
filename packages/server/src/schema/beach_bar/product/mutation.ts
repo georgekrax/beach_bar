@@ -1,13 +1,14 @@
-import { errors, MyContext, UrlScalar } from "@beach_bar/common";
-import { BeachBar } from "@entity/BeachBar";
-import { Product } from "@entity/Product";
-import { ProductCategory } from "@entity/ProductCategory";
-import { ProductPriceHistory } from "@entity/ProductPriceHistory";
+import { errors, MyContext } from "@beach_bar/common";
+import { UrlScalar } from "@georgekrax-hashtag/common";
 import { arg, booleanArg, extendType, floatArg, intArg, stringArg } from "@nexus/schema";
-import { DeleteType } from "@typings/.index";
-import { AddProductType, UpdateProductType } from "@typings/beach_bar/product";
-import { checkMinimumProductPrice } from "@utils/beach_bar/checkMinimumProductPrice";
-import { checkScopes } from "@utils/checkScopes";
+import { BeachBar } from "entity/BeachBar";
+import { Product } from "entity/Product";
+import { ProductCategory } from "entity/ProductCategory";
+import { ProductPriceHistory } from "entity/ProductPriceHistory";
+import { DeleteType } from "typings/.index";
+import { AddProductType, UpdateProductType } from "typings/beach_bar/product";
+import { checkMinimumProductPrice } from "utils/beach_bar/checkMinimumProductPrice";
+import { checkScopes } from "utils/checkScopes";
 import { DeleteResult } from "../../types";
 import { AddProductResult, UpdateProductResult } from "./types";
 

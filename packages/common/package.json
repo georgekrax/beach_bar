@@ -10,27 +10,21 @@
   },
   "devDependencies": {
     "@types/node": "^14.0.14",
-    "@types/yup": "^0.29.3",
-    "@typescript-eslint/eslint-plugin": "^3.7.1",
-    "@typescript-eslint/parser": "^3.7.1",
+    "@typescript-eslint/eslint-plugin": "^4.4.1",
+    "@typescript-eslint/parser": "^4.4.1",
     "eslint": "^7.5.0",
     "eslint-config-prettier": "^6.11.0",
     "eslint-import-resolver-typescript": "^2.2.0",
     "eslint-plugin-import": "^2.22.0",
     "eslint-plugin-prettier": "^3.1.4",
-    "typescript": "^3.9.5"
+    "typescript": "^4.0.3"
   },
   "dependencies": {
-    "@nexus/schema": "^0.14.0",
-    "@sendgrid/mail": "^7.2.1",
-    "apollo-server-express": "^2.16.0",
-    "dayjs": "^1.8.29",
+    "@sendgrid/mail": "^7.3.0",
     "express": "^4.17.1",
-    "google-auth-library": "^6.0.2",
-    "graphql": "14.6.0",
+    "google-auth-library": "^6.1.1",
     "ioredis": "^4.17.3",
-    "stripe": "^8.67.0",
-    "ua-parser-js": "^0.7.21",
-    "yup": "^0.29.1"
+    "stripe": "^8.113.0",
+    "ua-parser-js": "^0.7.22"
   }
 }

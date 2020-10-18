@@ -1,21 +1,20 @@
 import { dayjsFormat, errors, MyContext } from "@beach_bar/common";
-import { BeachBar, BeachBarRepository } from "@entity/BeachBar";
-import { BeachBarFeature } from "@entity/BeachBarFeature";
-import { Product } from "@entity/Product";
-import { SearchFilter } from "@entity/SearchFilter";
-import { SearchInputValue } from "@entity/SearchInputValue";
-import { UserSearch } from "@entity/UserSearch";
 import { arg, extendType, idArg, stringArg } from "@nexus/schema";
-import { RedisSearchReturnType, SearchResultReturnType, SearchReturnType } from "@typings/search";
-import { checkAvailability } from "@utils/beach_bar/checkAvailability";
+import redisKeys from "constants/redisKeys";
+import { historyActivity } from "constants/_index";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
+import { BeachBar, BeachBarRepository } from "entity/BeachBar";
+import { BeachBarFeature } from "entity/BeachBarFeature";
+import { Product } from "entity/Product";
+import { SearchFilter } from "entity/SearchFilter";
+import { SearchInputValue } from "entity/SearchInputValue";
+import { UserHistory } from "entity/UserHistory";
+import { UserSearch } from "entity/UserSearch";
 import { getCustomRepository, In } from "typeorm";
-import redisKeys from "@constants/redisKeys";
+import { RedisSearchReturnType, SearchResultReturnType, SearchReturnType } from "typings/search";
+import { checkAvailability } from "utils/beach_bar/checkAvailability";
 import { FormattedSearchInputValueType, SearchInputType, SearchResult, UserSearchType } from "./types";
-import userHistory from "models/userHistory";
-import { Types } from "mongoose";
-import historyActivity from "@constants/historyActivity";
 
 export const SearchQuery = extendType({
   type: "Query",
@@ -97,12 +96,12 @@ export const SearchQuery = extendType({
           if (!userSearch) {
             return { error: { code: errors.CONFLICT, message: errors.SOMETHING_WENT_WRONG } };
           }
-          await userHistory.create({
-            activityId: new Types.ObjectId(historyActivity.BEACH_BAR_SEARCH_ID),
-            objectId: String(userSearch.search.id),
+          await UserHistory.create({
+            activityId: historyActivity.SEARCH_ID,
+            objectId: userSearch.search.id,
             userId: undefined,
             ipAddr,
-          });
+          }).save();
           return userSearch;
         } else if (searchId && payload) {
           const searches: RedisSearchReturnType[] = (
@@ -113,12 +112,13 @@ export const SearchQuery = extendType({
           if (!userSearch) {
             return { error: { code: errors.CONFLICT, message: errors.SOMETHING_WENT_WRONG } };
           }
-          await userHistory.create({
-            activityId: new Types.ObjectId(historyActivity.BEACH_BAR_SEARCH_ID),
-            objectId: String(userSearch.search.id),
+
+          await UserHistory.create({
+            activityId: historyActivity.SEARCH_ID,
+            objectId: userSearch.search.id,
             userId: payload.sub,
             ipAddr,
-          });
+          }).save();
           return userSearch;
         } else {
           if (!inputId && !inputValue) {
@@ -201,7 +201,7 @@ export const SearchQuery = extendType({
 
           let filters: SearchFilter[] = [];
           if (filterIds && filterIds.length > 0) {
-            filters = await SearchFilter.find({ publicId: In(filterIds) });
+            filters = await SearchFilter.find({ where: { publicId: In(filterIds) } });
           }
 
           const userSearch = UserSearch.create({
@@ -225,12 +225,12 @@ export const SearchQuery = extendType({
             }
             await redis.lpush(redisKeys.USER_SEARCH, JSON.stringify(returnResult));
 
-            await userHistory.create({
-              activityId: new Types.ObjectId(historyActivity.BEACH_BAR_SEARCH_ID),
-              objectId: String(userSearch.id),
+            await UserHistory.create({
+              activityId: historyActivity.SEARCH_ID,
+              objectId: userSearch.id,
               userId: payload ? payload.sub : undefined,
               ipAddr,
-            });
+            }).save();
           } catch (err) {
             return { error: { code: errors.INTERNAL_SERVER_ERROR, message: `${errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
           }

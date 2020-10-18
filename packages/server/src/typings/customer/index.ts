@@ -1,5 +1,5 @@
-import { Customer } from "@entity/Customer";
-import { AddType, ErrorType, UpdateType } from "@typings/.index";
+import { Customer } from "entity/Customer";
+import { AddType, ErrorType, UpdateType } from "typings/.index";
 
 type CustomerType = {
   customer: Customer;

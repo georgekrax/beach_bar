@@ -1,9 +1,9 @@
-import { DateScalar } from "@beach_bar/common";
+import { DateScalar } from "@georgekrax-hashtag/common";
 import { arg, extendType, intArg } from "@nexus/schema";
+import { Product } from "entity/Product";
+import { HourTime } from "entity/Time";
+import { AvailableProductReturnType } from "typings/beach_bar/product/reservationLimit";
 import { AvailableProductType } from "./types";
-import { AvailableProductReturnType } from "@typings/beach_bar/product/reservationLimit";
-import { Product } from "@entity/Product";
-import { HourTime } from "@entity/Time";
 
 export const ProductQuery = extendType({
   type: "Query",

@@ -1,15 +1,16 @@
-import { EmailScalar, errors, MyContext } from "@beach_bar/common";
-import platformNames from "@constants/platformNames";
-import { loginDetails as loginDetailsStatus } from "@constants/status";
-import { User } from "@entity/User";
+import { errors, MyContext } from "@beach_bar/common";
+import { EmailScalar } from "@georgekrax-hashtag/common";
 import { arg, booleanArg, extendType, stringArg } from "@nexus/schema";
-import { AuthorizeWithOAuthType } from "@typings/oauth";
-import { generateAccessToken, generateRefreshToken } from "@utils/auth/generateAuthTokens";
-import { sendRefreshToken } from "@utils/auth/sendRefreshToken";
-import { signUpUser } from "@utils/auth/signUpUser";
-import { createUserLoginDetails, findBrowser, findCity, findCountry, findOs } from "@utils/auth/userCommon";
+import platformNames from "config/platformNames";
 import dayjs from "dayjs";
+import { LoginDetailStatus } from "entity/LoginDetails";
+import { User } from "entity/User";
 import fetch from "node-fetch";
+import { AuthorizeWithOAuthType } from "typings/oauth";
+import { generateAccessToken, generateRefreshToken } from "utils/auth/generateAuthTokens";
+import { sendRefreshToken } from "utils/auth/sendRefreshToken";
+import { signUpUser } from "utils/auth/signUpUser";
+import { createUserLoginDetails, findLoginDetails } from "utils/auth/userCommon";
 import { UserLoginDetailsInput } from "../user/types";
 import { OAuthAuthorizationResult } from "./types";
 
@@ -39,10 +40,10 @@ export const AuthorizeWithOAuthProviders = extendType({
         { code, state, loginDetails, isPrimaryOwner },
         { req, res, googleOAuth2Client, uaParser, redis, ipAddr }: MyContext
       ): Promise<AuthorizeWithOAuthType> => {
-        if (!code || code === "" || code === " ") {
+        if (!code || code.trim().length === 0) {
           return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
         }
-        if (!state || state === "" || state === " ") {
+        if (!state || state.trim().length === 0) {
           return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
         }
         if (state !== req.cookies.gstate) {
@@ -84,7 +85,7 @@ export const AuthorizeWithOAuthProviders = extendType({
           return { error: { message: `${errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
         }
 
-        const { sub: googleId, given_name: firstName, family_name: lastName, email, locale } = response.data;
+        const { sub: googleId, given_name: firstName, family_name: lastName, email } = response.data;
 
         if (!googleId || googleId === ("" || " ") || !email || email === ("" || " ")) {
           return {
@@ -95,32 +96,7 @@ export const AuthorizeWithOAuthProviders = extendType({
           };
         }
 
-        let os: any = uaParser.getOS().name,
-          browser: any = uaParser.getBrowser().name,
-          country: any = undefined,
-          city: any = undefined;
-
-        if (loginDetails) {
-          ({ city, country } = loginDetails);
-        }
-
-        try {
-          os = await findOs(os);
-          browser = await findBrowser(browser);
-          country = await findCountry(country);
-          city = await findCity(city);
-        } catch (err) {
-          return { error: { message: `Something went wrong. ${err}` } };
-        }
-
-        if (country !== null && country.languageIdentifier !== locale) {
-          return {
-            error: {
-              code: errors.INTERNAL_SERVER_ERROR,
-              message: "Something went wrong",
-            },
-          };
-        }
+        const { osId, browserId, countryId, cityId } = findLoginDetails({ details: loginDetails, uaParser });
 
         // search for user in DB
         let user: User | undefined = await User.findOne({ where: { email }, relations: ["account"] });
@@ -134,8 +110,8 @@ export const AuthorizeWithOAuthProviders = extendType({
             googleId,
             firstName,
             lastName,
-            country,
-            city,
+            countryId,
+            cityId,
           });
           // @ts-ignore
           if (response.error && !response.user) {
@@ -160,13 +136,13 @@ export const AuthorizeWithOAuthProviders = extendType({
         try {
           // create user login details
           await createUserLoginDetails(
-            loginDetailsStatus.LOGGED_IN,
+            LoginDetailStatus.loggedIn,
             platformNames.GOOGLE,
             user.account,
-            os,
-            browser,
-            country,
-            city,
+            osId,
+            browserId,
+            countryId,
+            cityId,
             ipAddr
           );
         } catch (err) {
@@ -310,9 +286,7 @@ export const AuthorizeWithOAuthProviders = extendType({
           firstName: string | undefined = undefined,
           lastName: string | undefined = undefined,
           birthday: Date | undefined = undefined,
-          pictureUrl: string | undefined = undefined,
-          city: any = undefined,
-          country: any = undefined;
+          pictureUrl: string | undefined = undefined;
         requestStatus = undefined;
         success = false;
         await fetch(
@@ -340,9 +314,6 @@ export const AuthorizeWithOAuthProviders = extendType({
               if (data.picture && !data.picture.is_silhouette) {
                 pictureUrl = data.picture.data.url;
               }
-              // @todo check again for this property
-              city = data.hometown.name;
-              country = data.location;
             }
           })
           .catch(err => {
@@ -353,21 +324,7 @@ export const AuthorizeWithOAuthProviders = extendType({
           return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
         }
 
-        let os: any = uaParser.getOS().name,
-          browser: any = uaParser.getBrowser().name;
-
-        if (loginDetails) {
-          ({ city, country } = loginDetails);
-        }
-
-        try {
-          os = await findOs(os);
-          browser = await findBrowser(browser);
-          country = await findCountry(country);
-          city = await findCity(city);
-        } catch (err) {
-          return { error: { message: `Something went wrong. ${err}` } };
-        }
+        const { osId, browserId, countryId, cityId } = findLoginDetails({ details: loginDetails, uaParser });
 
         // search for user in DB
         let user: User | undefined = await User.findOne({ where: { email: facebookEmail }, relations: ["account"] });
@@ -381,8 +338,8 @@ export const AuthorizeWithOAuthProviders = extendType({
             facebookId,
             firstName,
             lastName,
-            country,
-            city,
+            countryId,
+            cityId,
             birthday,
           });
           // @ts-ignore
@@ -407,13 +364,13 @@ export const AuthorizeWithOAuthProviders = extendType({
         // logined successfully
         // create user login details
         await createUserLoginDetails(
-          loginDetailsStatus.LOGGED_IN,
+          LoginDetailStatus.loggedIn,
           platformNames.FACEBOOK,
           user.account,
-          os,
-          browser,
-          country,
-          city,
+          osId,
+          browserId,
+          countryId,
+          cityId,
           ipAddr
         );
 
@@ -442,13 +399,13 @@ export const AuthorizeWithOAuthProviders = extendType({
           }
         } catch (err) {
           await createUserLoginDetails(
-            loginDetailsStatus.FAILED,
+            LoginDetailStatus.failed,
             platformNames.BEACH_BAR,
             user.account,
-            os,
-            browser,
-            country,
-            city,
+            osId,
+            browserId,
+            countryId,
+            cityId,
             ipAddr
           );
           return { error: { message: `${errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
@@ -488,13 +445,13 @@ export const AuthorizeWithOAuthProviders = extendType({
         { email, code, state, loginDetails, isPrimaryOwner },
         { req, res, uaParser, redis, ipAddr }: MyContext
       ): Promise<AuthorizeWithOAuthType> => {
-        if (!email || email === "" || email === " ") {
+        if (!email || email.trim().length === 0) {
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid email address" } };
         }
-        if (!code || code === "" || code === " ") {
+        if (!code || code.trim().length === 0) {
           return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
         }
-        if (!state || state === "" || state === " ") {
+        if (!state || state.trim().length === 0) {
           return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
         }
         if (state !== req.cookies.instastate) {
@@ -577,23 +534,7 @@ export const AuthorizeWithOAuthProviders = extendType({
           return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
         }
 
-        let os: any = uaParser.getOS().name,
-          browser: any = uaParser.getBrowser().name,
-          country: any = undefined,
-          city: any = undefined;
-
-        if (loginDetails) {
-          ({ city, country } = loginDetails);
-        }
-
-        try {
-          os = await findOs(os);
-          browser = await findBrowser(browser);
-          country = await findCountry(country);
-          city = await findCity(city);
-        } catch (err) {
-          return { error: { message: `Something went wrong. ${err}` } };
-        }
+        const { osId, browserId, countryId, cityId } = findLoginDetails({ details: loginDetails, uaParser });
 
         // search for user in DB
         let user: User | undefined = await User.findOne({
@@ -609,8 +550,8 @@ export const AuthorizeWithOAuthProviders = extendType({
             isPrimaryOwner,
             instagramId,
             instagramUsername,
-            country,
-            city,
+            countryId,
+            cityId,
           });
 
           // @ts-ignore
@@ -631,13 +572,13 @@ export const AuthorizeWithOAuthProviders = extendType({
         // logined successfully
         // create user login details
         await createUserLoginDetails(
-          loginDetailsStatus.LOGGED_IN,
+          LoginDetailStatus.loggedIn,
           platformNames.INSTAGRAM,
           user.account,
-          os,
-          browser,
-          country,
-          city,
+          osId,
+          browserId,
+          countryId,
+          cityId,
           ipAddr
         );
 
@@ -663,13 +604,13 @@ export const AuthorizeWithOAuthProviders = extendType({
           }
         } catch (err) {
           await createUserLoginDetails(
-            loginDetailsStatus.FAILED,
+            LoginDetailStatus.failed,
             platformNames.BEACH_BAR,
             user.account,
-            os,
-            browser,
-            country,
-            city,
+            osId,
+            browserId,
+            countryId,
+            cityId,
             ipAddr
           );
           return { error: { message: `${errors.SOMETHING_WENT_WRONG}: ${err.message}` } };

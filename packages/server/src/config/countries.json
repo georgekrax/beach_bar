@@ -1,0 +1,24 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "Greece",
+      "shortName": null,
+      "callingCode": 30,
+      "isoCode": "GR",
+      "alpha3Code": "GRC",
+      "languageIdentifier": "el",
+      "isEu": true
+    },
+    {
+      "id": 2,
+      "name": "United States",
+      "shortName": "USA",
+      "callingCode": 1,
+      "isoCode": "US",
+      "alpha3Code": "USA",
+      "languageIdentifier": "en",
+      "isEu": false
+    }
+  ]
+}

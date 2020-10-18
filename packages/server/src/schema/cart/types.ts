@@ -1,7 +1,7 @@
 import { objectType } from "@nexus/schema";
 import { UserType } from "../user/types";
 import { CartProductType } from "./product/types";
-import { BigIntScalar } from "@beach_bar/common";
+import { BigIntScalar } from "@georgekrax-hashtag/common";
 
 export const CartType = objectType({
   name: "Cart",

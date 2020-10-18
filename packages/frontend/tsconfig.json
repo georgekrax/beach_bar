@@ -1,12 +1,13 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "target": "ES6",
+    "target": "ESNext",
     "lib": [
       "DOM",
       "DOM.Iterable"
     ],
     "allowJs": false,
+    "skipLibCheck": true,
     "noEmit": true,
     "sourceMap": true,
     "module": "ESNext",

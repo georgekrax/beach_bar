@@ -1,10 +1,10 @@
 import { errors, MyContext } from "@beach_bar/common";
-import { User } from "@entity/User";
 import { extendType } from "@nexus/schema";
-import { ErrorType } from "@typings/.index";
-import { UserType } from "@typings/user";
+import { User } from "entity/User";
+import { ErrorType } from "typings/.index";
+import { UserType } from "typings/user";
+import { userInfoPayloadScope } from "utils/userInfoPayloadScope";
 import { UserResult } from "./types";
-import { userInfoPayloadScope } from "@utils/userInfoPayloadScope"
 
 export const UserQuery = extendType({
   type: "Query",

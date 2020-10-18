@@ -1,21 +1,22 @@
-import { BigIntScalar, DateTimeScalar, errors, MyContext } from "@beach_bar/common";
-import { BeachBar } from "@entity/BeachBar";
-import { CouponCode } from "@entity/CouponCode";
-import { OfferCampaign } from "@entity/OfferCampaign";
-import { OfferCampaignCode } from "@entity/OfferCampaignCode";
-import { Product } from "@entity/Product";
+import { errors, MyContext } from "@beach_bar/common";
+import { BigIntScalar, DateTimeScalar } from "@georgekrax-hashtag/common";
 import { arg, booleanArg, extendType, floatArg, idArg, intArg, stringArg } from "@nexus/schema";
-import { DeleteType } from "@typings/.index";
+import dayjs from "dayjs";
+import { BeachBar } from "entity/BeachBar";
+import { CouponCode } from "entity/CouponCode";
+import { OfferCampaign } from "entity/OfferCampaign";
+import { OfferCampaignCode } from "entity/OfferCampaignCode";
+import { Product } from "entity/Product";
+import { In } from "typeorm";
+import { DeleteType } from "typings/.index";
 import {
   AddCouponCodeType,
   AddOfferCampaignCodeType,
   AddOfferCampaignType,
   UpdateCouponCodeType,
   UpdateOfferCampaignType,
-} from "@typings/beach_bar/product/offer";
-import { checkScopes } from "@utils/checkScopes";
-import dayjs from "dayjs";
-import { In } from "typeorm";
+} from "typings/beach_bar/product/offer";
+import { checkScopes } from "utils/checkScopes";
 import { DeleteResult } from "../../../types";
 import {
   AddCouponCodeResult,

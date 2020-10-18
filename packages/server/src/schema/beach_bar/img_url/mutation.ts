@@ -1,11 +1,12 @@
-import { errors, MyContext, UrlScalar } from "@beach_bar/common";
-import { BeachBar } from "@entity/BeachBar";
-import { BeachBarImgUrl } from "@entity/BeachBarImgUrl";
+import { errors, MyContext } from "@beach_bar/common";
+import { UrlScalar } from "@georgekrax-hashtag/common";
 import { arg, extendType, idArg, intArg, stringArg } from "@nexus/schema";
-import { DeleteType } from "@typings/.index";
-import { AddBeachBarImgUrlType, UpdateBeachBarImgUrlType } from "@typings/beach_bar/img_url";
-import { checkScopes } from "@utils/checkScopes";
+import { BeachBar } from "entity/BeachBar";
+import { BeachBarImgUrl } from "entity/BeachBarImgUrl";
 import { DeleteResult } from "schema/types";
+import { DeleteType } from "typings/.index";
+import { AddBeachBarImgUrlType, UpdateBeachBarImgUrlType } from "typings/beach_bar/img_url";
+import { checkScopes } from "utils/checkScopes";
 import { AddBeachBarImgUrlResult, UpdateBeachBarImgUrlResult } from "./types";
 
 export const BeachBarImgUrlCrudMutation = extendType({

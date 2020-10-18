@@ -1,4 +1,4 @@
-import { EmailScalar } from "@beach_bar/common";
+import { EmailScalar } from "@georgekrax-hashtag/common";
 import { inputObjectType, objectType, unionType } from "@nexus/schema";
 import { BeachBarReviewType } from "../beach_bar/review/types";
 import { UserAccountType } from "./account/types";
@@ -47,29 +47,15 @@ export const UserResult = unionType({
   },
 });
 
-export const UserSignUpType = objectType({
-  name: "UserSignUp",
-  description: "User info to be returned on user sign up",
-  definition(t) {
-    t.field("user", {
-      type: UserType,
-      description: "The user that signs up",
-      nullable: false,
-      resolve: o => o.user,
-    });
-    t.boolean("added", { nullable: false, description: "A boolean that indicates if the user has successfully signed up" });
-  },
-});
-
 export const UserSignUpResult = unionType({
   name: "UserSignUpResult",
   definition(t) {
-    t.members("UserSignUp", "Error");
+    t.members("User", "Error");
     t.resolveType(item => {
       if (item.error) {
         return "Error";
       } else {
-        return "UserSignUp";
+        return "User";
       }
     });
   },
@@ -86,7 +72,6 @@ export const UserLoginType = objectType({
       resolve: o => o.user,
     });
     t.string("accessToken", { nullable: false, description: "The access token to authenticate & authorize the user" });
-    t.boolean("success", { nullable: false, description: "A boolean that indicates if the user has successfully logined" });
   },
 });
 
@@ -117,36 +102,20 @@ export const UserLoginDetailsInput = inputObjectType({
   name: "UserLoginDetailsInput",
   description: "User details in login. The user's IP address is passed via the context",
   definition(t) {
-    t.string("os", { required: false, description: "The operating system (OS) name from where the user logins" });
-    t.string("browser", { required: false, description: "The browser name that the user uses to login" });
-    t.string("country", { required: false, description: "Country from where user logins" });
-    t.string("city", { required: false, description: "City from where user logins" });
-  },
-});
-
-export const UserUpdateType = objectType({
-  name: "UserUpdate",
-  description: "User info to be returned when user is updated",
-  definition(t) {
-    t.field("user", {
-      type: UserType,
-      description: "The user (object) that is updated",
-      nullable: false,
-      resolve: o => o.user,
-    });
-    t.boolean("updated", { nullable: false, description: "A boolean that indicates if the user has been successfully updated" });
+    t.int("countryId", { required: false, description: "The ID of the country, user logins from" });
+    t.int("cityId", { required: false, description: "The ID of the city, user logins from" });
   },
 });
 
 export const UserUpdateResult = unionType({
   name: "UserUpdateResult",
   definition(t) {
-    t.members("UserUpdate", "Error");
+    t.members("User", "Error");
     t.resolveType(item => {
       if (item.error) {
         return "Error";
       } else {
-        return "UserUpdate";
+        return "User";
       }
     });
   },

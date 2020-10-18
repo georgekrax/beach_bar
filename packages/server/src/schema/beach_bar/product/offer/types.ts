@@ -1,4 +1,4 @@
-import { BigIntScalar, DateTimeScalar } from "@beach_bar/common";
+import { BigIntScalar, DateTimeScalar } from "@georgekrax-hashtag/common";
 import { interfaceType, objectType, unionType } from "@nexus/schema";
 import { BeachBarType } from "schema/beach_bar/types";
 import { ProductType } from "../types";

@@ -1,13 +1,14 @@
-import { BigIntScalar, errors, MyContext } from "@beach_bar/common";
-import { BeachBar } from "@entity/BeachBar";
-import { CouponCode } from "@entity/CouponCode";
-import { OfferCampaign } from "@entity/OfferCampaign";
-import { OfferCampaignCode } from "@entity/OfferCampaignCode";
+import { errors, MyContext } from "@beach_bar/common";
+import { BigIntScalar } from "@georgekrax-hashtag/common";
 import { arg, extendType, intArg, stringArg } from "@nexus/schema";
-import { ErrorType } from "@typings/.index";
-import { ProductOfferType } from "@typings/beach_bar/product/offer";
-import { checkScopes } from "@utils/checkScopes";
-import { checkVoucherCode } from "@utils/checkVoucherCode";
+import { BeachBar } from "entity/BeachBar";
+import { CouponCode } from "entity/CouponCode";
+import { OfferCampaign } from "entity/OfferCampaign";
+import { OfferCampaignCode } from "entity/OfferCampaignCode";
+import { ErrorType } from "typings/.index";
+import { ProductOfferType } from "typings/beach_bar/product/offer";
+import { checkScopes } from "utils/checkScopes";
+import { checkVoucherCode } from "utils/checkVoucherCode";
 import { CouponCodeRevealResult, OfferCampaignCodeRevealResult, OfferCampaignType, VoucherCodeQueryResult } from "./types";
 
 export const VoucherCoderQuery = extendType({

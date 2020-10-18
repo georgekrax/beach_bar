@@ -1,5 +1,5 @@
-import { Card } from "@entity/Card";
-import { AddType, ErrorType, UpdateType } from "@typings/.index";
+import { Card } from "entity/Card";
+import { AddType, ErrorType, UpdateType } from "typings/.index";
 
 type CardType = {
   card: Card;

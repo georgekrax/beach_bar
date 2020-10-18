@@ -1,6 +1,6 @@
-import { BigIntScalar } from "@beach_bar/common";
+import { BigIntScalar } from "@georgekrax-hashtag/common";
 import { arg, extendType } from "@nexus/schema";
-import { Cart } from "@entity/Cart";
+import { Cart } from "entity/Cart";
 
 export const CartQuery = extendType({
   type: "Query",

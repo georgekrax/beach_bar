@@ -1,4 +1,3 @@
-import { softRemove } from "@utils/softRemove";
 import dayjs, { Dayjs } from "dayjs";
 import {
   BaseEntity,
@@ -15,8 +14,10 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { softRemove } from "utils/softRemove";
 import { City } from "./City";
 import { Country } from "./Country";
+import { LoginDetails } from "./LoginDetails";
 import { User } from "./User";
 import { UserContactDetails } from "./UserContactDetails";
 
@@ -68,10 +69,6 @@ export class Account extends BaseEntity {
   @Column({ name: "track_history", type: "boolean", default: () => true })
   trackHistory: boolean;
 
-  @OneToOne(() => User, { nullable: false, cascade: ["soft-remove", "recover"] })
-  @JoinColumn({ name: "user_id" })
-  user: User;
-
   @ManyToOne(() => Country, country => country.accounts, { nullable: true })
   @JoinColumn({ name: "country_id" })
   country?: Country;
@@ -79,6 +76,13 @@ export class Account extends BaseEntity {
   @ManyToOne(() => City, city => city.accounts, { nullable: true })
   @JoinColumn({ name: "city_id" })
   city?: City;
+
+  @OneToOne(() => User, { nullable: false, cascade: ["soft-remove", "recover"] })
+  @JoinColumn({ name: "user_id" })
+  user: User;
+
+  @OneToMany(() => LoginDetails, loginDetails => loginDetails.account, { nullable: true })
+  loginDetails?: LoginDetails[];
 
   @OneToMany(() => UserContactDetails, userContactDetails => userContactDetails.account, { nullable: true })
   contactDetails?: UserContactDetails[];

@@ -1,4 +1,4 @@
-import { BigIntScalar, DateScalar, DateTimeScalar, UrlScalar } from "@beach_bar/common";
+import { BigIntScalar, DateScalar, DateTimeScalar, UrlScalar } from "@georgekrax-hashtag/common";
 import { inputObjectType, objectType, unionType } from "@nexus/schema";
 import { BeachBarAvailabilityType, BeachBarType } from "../beach_bar/types";
 import { CityType } from "../details/cityTypes";

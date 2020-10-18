@@ -1,4 +1,4 @@
-import { UrlScalar } from "@beach_bar/common";
+import { UrlScalar } from "@georgekrax-hashtag/common";
 import { objectType } from "@nexus/schema";
 
 export const S3PayloadType = objectType({

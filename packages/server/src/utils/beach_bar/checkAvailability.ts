@@ -1,9 +1,9 @@
 import { Dayjs } from "dayjs";
+import { BeachBar } from "entity/BeachBar";
 import { Redis } from "ioredis";
+import { BeachBarAvailabilityReturnType } from "typings/beach_bar";
 import { getReservationLimits } from "./getReservationLimits";
 import { getReservedProducts } from "./getReservedProducts";
-import { BeachBar } from "@entity/BeachBar";
-import { BeachBarAvailabilityReturnType } from "@typings/beach_bar";
 
 export const checkAvailability = async (
   redis: Redis,

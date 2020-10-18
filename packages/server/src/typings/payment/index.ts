@@ -1,6 +1,6 @@
-import { Payment } from "@entity/Payment";
-import { RefundPercentage } from "@entity/RefundPercentage";
-import { AddType, ErrorType, UpdateType } from "@typings/.index";
+import { Payment } from "entity/Payment";
+import { RefundPercentage } from "entity/RefundPercentage";
+import { AddType, ErrorType, UpdateType } from "typings/.index";
 
 export interface GetRefundPercentage {
   refundPercentage: RefundPercentage;

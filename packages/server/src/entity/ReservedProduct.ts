@@ -1,5 +1,4 @@
-import redisKeys from "@constants/redisKeys";
-import { softRemove } from "@utils/softRemove";
+import redisKeys from "constants/redisKeys";
 import { Dayjs } from "dayjs";
 import { Redis } from "ioredis";
 import {
@@ -14,6 +13,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { softRemove } from "utils/softRemove";
 import { redis } from "../index";
 import { Payment } from "./Payment";
 import { Product } from "./Product";

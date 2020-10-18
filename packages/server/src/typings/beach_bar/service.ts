@@ -1,5 +1,5 @@
-import { BeachBarFeature } from "@entity/BeachBarFeature";
-import { AddType, UpdateType, ErrorType } from "@typings/.index";
+import { BeachBarFeature } from "entity/BeachBarFeature";
+import { AddType, ErrorType, UpdateType } from "typings/.index";
 
 export type BeachBarFeatureType = {
   feature: BeachBarFeature;

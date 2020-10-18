@@ -1,10 +1,10 @@
 import { MyContext } from "@beach_bar/common";
 import { extendType, idArg, stringArg } from "@nexus/schema";
+import { SearchFilter } from "entity/SearchFilter";
+import { UserSearch } from "entity/UserSearch";
 import { In } from "typeorm";
-import arrEquals from "@utils/arrEquals";
+import arrEquals from "utils/arrEquals";
 import { UserSearchType } from "./types";
-import { UserSearch } from "@entity/UserSearch";
-import { SearchFilter } from "@entity/SearchFilter";
 
 export const SearchUpdateMutation = extendType({
   type: "Mutation",
@@ -45,7 +45,7 @@ export const SearchUpdateMutation = extendType({
           userSearch.filters?.length === 0
         ) {
           if (filterIds) {
-            const filters = await SearchFilter.find({ publicId: In(filterIds) });
+            const filters = await SearchFilter.find({ where: { publicId: In(filterIds) } });
             userSearch.filters = filters;
           } else {
             userSearch.filters = [];

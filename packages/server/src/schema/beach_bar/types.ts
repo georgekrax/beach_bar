@@ -1,14 +1,15 @@
-import { DateTimeScalar, UrlScalar } from "@beach_bar/common";
+import { DateTimeScalar, UrlScalar } from "@georgekrax-hashtag/common";
 import { objectType, unionType } from "@nexus/schema";
 import { CurrencyType } from "../details/countryTypes";
 import { QuarterTimeType } from "../details/time/types";
 import { BeachBarCategoryType } from "../details/types";
 import { BeachBarOwnerType } from "../owner/types";
+import { BeachBarImgUrlType } from "./img_url/types";
 import { BeachBarLocationType } from "./location/types";
 import { BeachBarRestaurantType } from "./restaurant/types";
 import { BeachBarReviewType } from "./review/types";
 import { BeachBarFeatureType } from "./service/types";
-import { BeachBarImgUrlType } from "./img_url/types";
+import { BeachBarStyleType } from "./style/types";
 
 export const BeachBarType = objectType({
   name: "BeachBar",
@@ -64,6 +65,12 @@ export const BeachBarType = objectType({
       description: "A list of all the #beach_bar's features",
       nullable: true,
       resolve: o => o.features,
+    });
+    t.list.field("styles", {
+      type: BeachBarStyleType,
+      description: "A list of all the styles the #beach_bar is associated with",
+      nullable: true,
+      resolve: o => o.styles,
     });
     t.list.field("restaurants", {
       type: BeachBarRestaurantType,

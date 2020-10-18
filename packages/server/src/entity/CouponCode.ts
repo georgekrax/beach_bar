@@ -1,6 +1,5 @@
-import { generateId } from "@beach_bar/common";
-import { generateIdSpecialCharacters, voucherCodeLength } from "@constants/.index";
-import { softRemove } from "@utils/softRemove";
+import { generateId } from "@georgekrax-hashtag/common";
+import { generateIdSpecialCharacters, voucherCodeLength } from "constants/_index";
 import { Dayjs } from "dayjs";
 import {
   BaseEntity,
@@ -16,6 +15,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { softRemove } from "utils/softRemove";
 import { BeachBar } from "./BeachBar";
 import { PaymentVoucherCode } from "./PaymentVoucherCode";
 

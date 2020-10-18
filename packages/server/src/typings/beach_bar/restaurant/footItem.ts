@@ -1,5 +1,5 @@
-import { RestaurantFoodItem } from "@entity/RestaurantFoodItem";
-import { ErrorType, AddType, UpdateType } from "@typings/.index";
+import { RestaurantFoodItem } from "entity/RestaurantFoodItem";
+import { AddType, ErrorType, UpdateType } from "typings/.index";
 
 type RestaurantFoodItemType = {
   foodItem: RestaurantFoodItem;

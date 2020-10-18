@@ -6,7 +6,6 @@
     "es2020": true,
     "jest": true,
     "shared-node-browser": true,
-    "mongo": true,
     "serviceworker": true
   },
   "plugins": ["@typescript-eslint", "prettier"],

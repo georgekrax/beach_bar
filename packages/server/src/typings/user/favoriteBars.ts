@@ -1,5 +1,5 @@
-import { UserFavoriteBar } from "@entity/UserFavoriteBar";
-import { AddType, ErrorType } from "@typings/.index";
+import { UserFavoriteBar } from "entity/UserFavoriteBar";
+import { AddType, ErrorType } from "typings/.index";
 
 type UserFavoriteBarType = {
   favoriteBar: UserFavoriteBar;

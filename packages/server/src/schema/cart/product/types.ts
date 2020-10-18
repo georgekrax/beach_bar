@@ -1,4 +1,4 @@
-import { DateScalar, DateTimeScalar } from "@beach_bar/common";
+import { DateScalar, DateTimeScalar } from "@georgekrax-hashtag/common";
 import { objectType, unionType } from "@nexus/schema";
 import { ProductType } from "../../beach_bar/product/types";
 import { HourTimeType } from "../../details/time/types";

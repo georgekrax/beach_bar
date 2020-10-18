@@ -1,8 +1,4 @@
 import { dayjsFormat } from "@beach_bar/common";
-import { ProductAvailabilityHourReturnType } from "@typings/beach_bar/product";
-import { checkMinimumProductPrice } from "@utils/beach_bar/checkMinimumProductPrice";
-import { checkScopes } from "@utils/checkScopes";
-import { softRemove } from "@utils/softRemove";
 import dayjs, { Dayjs } from "dayjs";
 import {
   BaseEntity,
@@ -20,6 +16,10 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { ProductAvailabilityHourReturnType } from "typings/beach_bar/product";
+import { checkMinimumProductPrice } from "utils/beach_bar/checkMinimumProductPrice";
+import { checkScopes } from "utils/checkScopes";
+import { softRemove } from "utils/softRemove";
 import { BeachBar } from "./BeachBar";
 import { BundleProductComponent } from "./BundleProductComponent";
 import { CartProduct } from "./CartProduct";

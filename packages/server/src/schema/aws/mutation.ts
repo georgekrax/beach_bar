@@ -1,8 +1,9 @@
-import { MyContext, S3ACLPermissions, s3FormatFileName } from "@beach_bar/common";
+import { MyContext, S3ACLPermissions } from "@beach_bar/common";
+import { s3FormatFileName } from "@georgekrax-hashtag/common";
 import { extendType, stringArg } from "@nexus/schema";
-import { S3PayloadReturnType } from "@typings/aws";
-import { switchS3Bucket } from "@utils/aws/switchS3Bucket";
 import aws from "aws-sdk";
+import { S3PayloadReturnType } from "typings/aws";
+import { switchS3Bucket } from "utils/aws/switchS3Bucket";
 import { S3PayloadType } from "./types";
 
 export const AWSMutation = extendType({

@@ -1,13 +1,14 @@
-import { EmailScalar, errors, MyContext } from "@beach_bar/common";
+import { errors, MyContext } from "@beach_bar/common";
+import { EmailScalar } from "@georgekrax-hashtag/common";
 import { arg, extendType, intArg, stringArg } from "@nexus/schema";
+import { Country } from "entity/Country";
+import { User } from "entity/User";
+import { UserContactDetails } from "entity/UserContactDetails";
 import { getConnection } from "typeorm";
-import { AddUserContactDetailsResult, UpdateUserContactDetailsResult } from "./types";
+import { DeleteType } from "typings/.index";
+import { AddUserContactDetailsType, UpdateUserContactDetailsType } from "typings/user/contactDetails";
 import { DeleteResult } from "../../types";
-import { AddUserContactDetailsType, UpdateUserContactDetailsType } from "@typings/user/contactDetails";
-import { DeleteType } from "@typings/.index";
-import { User } from "@entity/User";
-import { UserContactDetails } from "@entity/UserContactDetails";
-import { Country } from "@entity/Country";
+import { AddUserContactDetailsResult, UpdateUserContactDetailsResult } from "./types";
 
 export const UserContactDetailsCrudMutation = extendType({
   type: "Mutation",

@@ -7,12 +7,12 @@ const query = gql`
     $redirectUri: URL!
     $originUri: URL!
     $state: String
-    $email: EmailAddress!
+    $email: Email!
     $password: String
-    $os: String
-    $browser: String
-    $country: String
-    $city: String
+    $osId: ID
+    $browserId: ID
+    $countryId: ID
+    $cityId: ID
     $ipAddr: IPv4
   ) {
     authorizeWithHashtag(
@@ -22,7 +22,7 @@ const query = gql`
       originUri: $originUri
       state: $state
       userCredentials: { email: $email, password: $password }
-      loginDetails: { os: $os, browser: $browser, country: $country, city: $city, ipAddr: $ipAddr }
+      loginDetails: { osId: $osId, browserId: $browserId, countryId: $countryId, cityId: $cityId, ipAddr: $ipAddr }
       getCode: true
       prompt: "none"
       accessType: "offline"
@@ -34,11 +34,6 @@ const query = gql`
           none
         }
         scope
-        authorized
-        oauthClient {
-          clientId
-          clientSecret
-        }
         user {
           id
           email

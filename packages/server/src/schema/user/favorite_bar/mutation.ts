@@ -1,13 +1,13 @@
 import { errors, MyContext } from "@beach_bar/common";
-import redisKeys from "@constants/redisKeys";
-import { BeachBar } from "@entity/BeachBar";
-import { User } from "@entity/User";
-import { UserFavoriteBar } from "@entity/UserFavoriteBar";
 import { extendType, intArg } from "@nexus/schema";
-import { DeleteType } from "@typings/.index";
-import { AddUserFavoriteBarType } from "@typings/user/favoriteBars";
-import { checkScopes } from "@utils/checkScopes";
+import redisKeys from "constants/redisKeys";
+import { BeachBar } from "entity/BeachBar";
+import { User } from "entity/User";
+import { UserFavoriteBar } from "entity/UserFavoriteBar";
 import { DeleteResult } from "schema/types";
+import { DeleteType } from "typings/.index";
+import { AddUserFavoriteBarType } from "typings/user/favoriteBars";
+import { checkScopes } from "utils/checkScopes";
 import { AddUserFavoriteBarResult } from "./types";
 
 export const UserFavoriteBarCrudMutation = extendType({

@@ -7,9 +7,10 @@ const fs = require("fs");
 const path = require("path");
 
 // Where your antd-custom.less file lives
-const themeVariables = lessToJS(fs.readFileSync(path.resolve(__dirname, "./assets/antd-custom.less"), "utf8"));
+const themeVariables = lessToJS(fs.readFileSync(path.resolve(__dirname, "./styles/antd-custom.less"), "utf8"));
 
 module.exports = withSass({
+  includePaths: [path.join(__dirname, "./styles/scss")],
   cssModules: true,
   cssLoaderOptions: {
     importLoaders: 3,

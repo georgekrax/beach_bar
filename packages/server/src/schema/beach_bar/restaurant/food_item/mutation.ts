@@ -1,12 +1,13 @@
-import { BigIntScalar, errors, MyContext } from "@beach_bar/common";
-import { BeachBarRestaurant } from "@entity/BeachBarRestaurant";
-import { RestaurantFoodItem } from "@entity/RestaurantFoodItem";
-import { RestaurantMenuCategory } from "@entity/RestaurantMenuCategory";
+import {  errors, MyContext } from "@beach_bar/common";
+import { BigIntScalar } from "@georgekrax-hashtag/common";
 import { arg, extendType, floatArg, intArg, stringArg } from "@nexus/schema";
-import { DeleteType } from "@typings/.index";
-import { AddRestaurantFoodItemType, UpdateRestaurantFoodItemType } from "@typings/beach_bar/restaurant/footItem";
+import { BeachBarRestaurant } from "entity/BeachBarRestaurant";
+import { RestaurantFoodItem } from "entity/RestaurantFoodItem";
+import { RestaurantMenuCategory } from "entity/RestaurantMenuCategory";
+import { DeleteType } from "typings/.index";
+import { AddRestaurantFoodItemType, UpdateRestaurantFoodItemType } from "typings/beach_bar/restaurant/footItem";
+import { checkScopes } from "utils/checkScopes";
 import { DeleteResult } from "../../../types";
-import { checkScopes } from "@utils/checkScopes";
 import { AddRestaurantFoodItemResult, UpdateRestaurantFoodItemResult } from "./types";
 
 export const RestaurantFoodItemCrudMutation = extendType({

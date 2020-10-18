@@ -1,13 +1,13 @@
 import dayjs from "dayjs";
-import { ProductCategory } from "@entity/ProductCategory";
-import { BeachBar } from "@entity/BeachBar";
-import { CurrencyProductPrice } from "@entity/CurrencyProductPrice";
+import { BeachBar } from "entity/BeachBar";
+import { CurrencyProductPrice } from "entity/CurrencyProductPrice";
+import { ProductCategory } from "entity/ProductCategory";
 
 export const checkMinimumProductPrice = async (
   price: number,
   category: ProductCategory,
   beachBar: BeachBar,
-  currencyId: number,
+  currencyId: number
 ): Promise<Error | void> => {
   const productPrice = await CurrencyProductPrice.findOne({ where: { currencyId }, relations: ["currency"] });
   if (!productPrice) {
@@ -25,7 +25,7 @@ export const checkMinimumProductPrice = async (
   }
   if (price < productPrice.price && (!category.zeroPrice || !category.whitelist)) {
     throw new Error(
-      `You are not allowed to have a price lower than ${productPrice.price}${productPrice.currency.symbol} for this type of product`,
+      `You are not allowed to have a price lower than ${productPrice.price}${productPrice.currency.symbol} for this type of product`
     );
   }
 };

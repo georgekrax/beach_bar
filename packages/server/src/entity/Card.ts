@@ -1,21 +1,21 @@
-import { softRemove } from "@utils/softRemove";
 import { Dayjs } from "dayjs";
 import { Stripe } from "stripe";
 import {
-    BaseEntity,
-    Check,
-    Column,
-    CreateDateColumn,
-    DeleteDateColumn,
-    Entity,
-    EntityRepository,
-    JoinColumn,
-    ManyToOne,
-    OneToMany,
-    PrimaryGeneratedColumn,
-    Repository,
-    UpdateDateColumn
+  BaseEntity,
+  Check,
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  EntityRepository,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  Repository,
+  UpdateDateColumn,
 } from "typeorm";
+import { softRemove } from "utils/softRemove";
 import { stripe } from "..";
 import { CardBrand } from "./CardBrand";
 import { Country } from "./Country";
@@ -108,7 +108,7 @@ export class Card extends BaseEntity {
     expMonth?: number,
     expYear?: number,
     isDefault?: boolean,
-    webhook = false,
+    webhook = false
   ): Promise<Card | any> {
     try {
       if (cardholderName && cardholderName !== this.cardholderName) {
@@ -178,7 +178,7 @@ export class CardRepository extends Repository<Card> {
     brand?: CardBrand,
     country?: Country,
     isDefault?: boolean,
-    cardholderName?: string,
+    cardholderName?: string
   ): Promise<Card | any> {
     try {
       const newCustomerCard = Card.create({

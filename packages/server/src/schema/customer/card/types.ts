@@ -1,4 +1,4 @@
-import { BigIntScalar } from "@beach_bar/common";
+import { BigIntScalar } from "@georgekrax-hashtag/common";
 import { objectType, unionType } from "@nexus/schema";
 import { CardBrandType } from "../../details/cardBrandTypes";
 import { CountryType } from "../../details/countryTypes";

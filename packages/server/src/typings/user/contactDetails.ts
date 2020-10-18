@@ -1,5 +1,5 @@
-import { UserContactDetails } from "@entity/UserContactDetails";
-import { AddType, ErrorType, UpdateType } from "@typings/.index";
+import { UserContactDetails } from "entity/UserContactDetails";
+import { AddType, ErrorType, UpdateType } from "typings/.index";
 
 type UserContactDetailsType = {
   contactDetails: UserContactDetails;

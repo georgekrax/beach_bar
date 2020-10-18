@@ -1,7 +1,7 @@
 import { dayjsFormat } from "@beach_bar/common";
 import dayjs, { Dayjs } from "dayjs";
-import { BeachBar } from "@entity/BeachBar";
-import { ProductReservationLimit } from "@entity/ProductReservationLimit";
+import { BeachBar } from "entity/BeachBar";
+import { ProductReservationLimit } from "entity/ProductReservationLimit";
 
 export const getReservationLimits = (beachBar: BeachBar, date?: Dayjs, timeId?: number): ProductReservationLimit[] | undefined => {
   if (beachBar.products.some(product => product.reservationLimits && product.reservationLimits.length > 0)) {
@@ -15,7 +15,7 @@ export const getReservationLimits = (beachBar: BeachBar, date?: Dayjs, timeId?: 
 
     if (date) {
       reservationLimits = reservationLimits.filter(
-        (limit: any) => dayjs(limit.date).format(dayjsFormat.ISO_STRING) === date.format(dayjsFormat.ISO_STRING),
+        (limit: any) => dayjs(limit.date).format(dayjsFormat.ISO_STRING) === date.format(dayjsFormat.ISO_STRING)
       );
     }
     if (timeId) {

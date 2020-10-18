@@ -1,4 +1,4 @@
-import { BigIntScalar, EmailScalar } from "@beach_bar/common";
+import { BigIntScalar, EmailScalar } from "@georgekrax-hashtag/common";
 import { objectType, unionType } from "@nexus/schema";
 import { CountryType } from "../details/countryTypes";
 import { UserType } from "../user/types";

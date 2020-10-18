@@ -1,10 +1,8 @@
 import { errors } from "@beach_bar/common";
-import { user as userScopes } from "@constants/scopes";
-import { Account } from "@entity/Account";
-import { City } from "@entity/City";
-import { Country } from "@entity/Country";
-import { Owner } from "@entity/Owner";
-import { User } from "@entity/User";
+import { user as userScopes } from "constants/scopes";
+import { Account } from "entity/Account";
+import { Owner } from "entity/Owner";
+import { User } from "entity/User";
 import { Redis } from "ioredis";
 
 export const signUpUser = async (options: {
@@ -18,8 +16,8 @@ export const signUpUser = async (options: {
   instagramUsername?: string | any;
   firstName?: string;
   lastName?: string;
-  country?: Country;
-  city?: City;
+  countryId?: number;
+  cityId?: bigint;
   birthday?: Date;
 }): Promise<{ user: User } | any> => {
   const {
@@ -33,8 +31,8 @@ export const signUpUser = async (options: {
     instagramUsername,
     firstName,
     lastName,
-    country,
-    city,
+    countryId,
+    cityId,
     birthday,
   } = options;
   const user = await User.findOne({ where: { email }, relations: ["account"] });
@@ -52,17 +50,11 @@ export const signUpUser = async (options: {
     lastName,
   });
 
-  const newUserAccount = Account.create({ country, city, birthday });
+  const newUserAccount = Account.create({ countryId, cityId, birthday });
 
   try {
     await newUser.save();
     newUserAccount.user = newUser;
-    if (country) {
-      newUserAccount.country = country;
-    }
-    if (city) {
-      newUserAccount.city = city;
-    }
     await newUserAccount.save();
     if (isPrimaryOwner) {
       await Owner.create({ user: newUser }).save();

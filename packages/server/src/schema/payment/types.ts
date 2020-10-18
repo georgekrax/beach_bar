@@ -1,4 +1,3 @@
-// import { BigIntScalar } from "@beach_bar/common";
 import { objectType, unionType } from "@nexus/schema";
 import { CartType } from "../cart/types";
 import { CardType } from "../customer/card/types";

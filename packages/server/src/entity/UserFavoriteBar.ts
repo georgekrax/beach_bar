@@ -1,6 +1,6 @@
-import { softRemove } from "@utils/softRemove";
 import { Dayjs } from "dayjs";
 import { BaseEntity, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
+import { softRemove } from "utils/softRemove";
 import { BeachBar } from "./BeachBar";
 import { User } from "./User";
 

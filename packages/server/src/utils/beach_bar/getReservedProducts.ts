@@ -1,8 +1,8 @@
 import { dayjsFormat } from "@beach_bar/common";
-import redisKeys from "@constants/redisKeys";
-import { BeachBar } from "@entity/BeachBar";
-import { ReservedProduct } from "@entity/ReservedProduct";
+import redisKeys from "constants/redisKeys";
 import dayjs, { Dayjs } from "dayjs";
+import { BeachBar } from "entity/BeachBar";
+import { ReservedProduct } from "entity/ReservedProduct";
 import { Redis } from "ioredis";
 
 export const getReservedProducts = async (
