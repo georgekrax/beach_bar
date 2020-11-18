@@ -45,7 +45,7 @@
     "prettier": "^2.0.5",
     "ts-node": "8.10.1",
     "tsconfig-paths": "^3.9.0",
-    "typescript": "^4.0.3"
+    "typescript": "^4.0.5"
   },
   "dependencies": {
     "@beach_bar/common": "^1.0.0",
