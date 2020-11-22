@@ -34,7 +34,7 @@
     "null-loader": "^4.0.0",
     "postcss-preset-env": "^6.7.0",
     "react": "^16.13.0",
-    "react-dom": "^16.13.0",
+    "react-dom": "^17.0.1",
     "react-dropzone": "^11.0.2",
     "react-relay": "^10.1.0",
     "react-relay-network-modern": "^4.5.0",
