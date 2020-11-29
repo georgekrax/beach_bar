@@ -52,7 +52,7 @@
     "@georgekrax-hashtag/common": "^1.0.6",
     "@nexus/schema": "^0.16.0",
     "@sendgrid/client": "^7.3.0",
-    "@sendgrid/mail": "^7.3.0",
+    "@sendgrid/mail": "^7.4.0",
     "apollo-boost": "^0.4.9",
     "apollo-link": "^1.2.14",
     "apollo-link-http": "^1.5.17",
