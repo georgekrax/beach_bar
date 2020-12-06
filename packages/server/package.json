@@ -71,7 +71,7 @@
     "pg": "^8.5.1",
     "reflect-metadata": "^0.1.13",
     "stripe": "^8.113.0",
-    "typeorm": "^0.2.28",
+    "typeorm": "^0.2.29",
     "ua-parser-js": "^0.7.22",
     "uuid": "^8.3.1",
     "validator": "^13.1.17",
