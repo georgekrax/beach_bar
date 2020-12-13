@@ -37,7 +37,7 @@
     "react-dom": "^17.0.1",
     "react-dropzone": "^11.2.4",
     "react-relay": "^10.1.0",
-    "react-relay-network-modern": "^4.5.0",
+    "react-relay-network-modern": "^6.0.0",
     "react-relay-network-modern-ssr": "^1.4.0",
     "relay-runtime": "^10.1.0",
     "sass": "^1.30.0"
