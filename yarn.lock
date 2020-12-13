@@ -3727,10 +3727,10 @@ core-js-pure@^3.0.0:
   resolved "https://registry.yarnpkg.com/core-js-pure/-/core-js-pure-3.6.5.tgz#c79e75f5e38dbc85a662d91eea52b8256d53b813"
   integrity sha512-lacdXOimsiD0QyNf9BC/mxivNJ/ybBGJXQFKzRekp1WTHoVUWsUHEn+2T8GJAzzIhyOuXA+gOxCVN3l+5PLPUA==
 
-core-js@^3.0.1:
-  version "3.6.5"
-  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.6.5.tgz#7395dc273af37fb2e50e9bd3d9fe841285231d1a"
-  integrity sha512-vZVEEwZoIsI+vPEuoF9Iqf5H7/M3eeQqWlQnYa8FSKKePuYTf5MWnxb5SDAzCa60b3JBRS5g9b+Dq7b1y/RCrA==
+core-js@^3.0.0, core-js@^3.0.1:
+  version "3.8.1"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.8.1.tgz#f51523668ac8a294d1285c3b9db44025fda66d47"
+  integrity sha512-9Id2xHY1W7m8hCl8NkhQn5CufmF/WuR30BTRewvCXc1aZd3kMECwNZ69ndLbekKfakw9Rf2Xyc+QR6E7Gg+obg==
 
 core-util-is@1.0.2, core-util-is@~1.0.0:
   version "1.0.2"
@@ -4931,11 +4931,6 @@ extglob@^2.0.4:
     regex-not "^1.0.0"
     snapdragon "^0.8.1"
     to-regex "^3.0.1"
-
-extract-files@^5.0.1:
-  version "5.0.1"
-  resolved "https://registry.yarnpkg.com/extract-files/-/extract-files-5.0.1.tgz#c9492a8410be643e260a376f0151361993d5f659"
-  integrity sha512-qRW6y9eKF0VbCyOoOEtFhzJ3uykAw8GKwQVXyAIqwocyEWW4m+v+evec34RwtUkkxxHh7NKBLJ6AnXM8W4dH5w==
 
 extract-files@^9.0.0:
   version "9.0.0"
@@ -9196,12 +9191,13 @@ react-relay-network-modern-ssr@^1.4.0:
   resolved "https://registry.yarnpkg.com/react-relay-network-modern-ssr/-/react-relay-network-modern-ssr-1.4.0.tgz#a5e4b60e69e14769c7266a1a0f5002430c815fe1"
   integrity sha512-sCIiwjzDPV9eBPOb7VcT/dmZkwrqcNpAK5eHkwjvC3Xw+RShtgB/uCSVgCUzMZpOR8iUSkzaceC/HMZdnKxF3w==
 
-react-relay-network-modern@^4.5.0:
-  version "4.7.7"
-  resolved "https://registry.yarnpkg.com/react-relay-network-modern/-/react-relay-network-modern-4.7.7.tgz#e0e9c42a6af0066a934c88328b8510091a8e5803"
-  integrity sha512-QzuZZwUhzVhNzgn7ACh8l0ckSxbFXzh32YFVa2nqTK/6n9eGx1a5e2ezvbGv1hRywYcXJ+7bRAdBTjzz/ymMHQ==
+react-relay-network-modern@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/react-relay-network-modern/-/react-relay-network-modern-6.0.0.tgz#faa2b6499f3f1d9fdac5af9851b7a851fc36c67b"
+  integrity sha512-Glg9iGK9pV+KXC9Oa3X7H2cjd/6Kg4v6fMBkjMdoQRgV/ct5tAtbOs0xB5k1PHJs6cK+mmidTgVhT8VEfa2NFA==
   dependencies:
-    extract-files "^5.0.1"
+    core-js "^3.0.0"
+    extract-files "^9.0.0"
 
 react-relay@^10.1.0:
   version "10.1.0"
