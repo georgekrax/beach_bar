@@ -50,7 +50,7 @@
   "dependencies": {
     "@beach_bar/common": "^1.0.0",
     "@georgekrax-hashtag/common": "^1.0.6",
-    "@nexus/schema": "^0.16.0",
+    "@nexus/schema": "^0.20.1",
     "@sendgrid/client": "^7.3.0",
     "@sendgrid/mail": "^7.4.0",
     "apollo-boost": "^0.4.9",
