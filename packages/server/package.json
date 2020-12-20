@@ -74,7 +74,7 @@
     "typeorm": "^0.2.29",
     "ua-parser-js": "^0.7.22",
     "uuid": "^8.3.1",
-    "validator": "^13.5.1",
+    "validator": "^13.5.2",
     "yup": "^0.32.8"
   }
 }
