@@ -39,7 +39,7 @@
     "react-relay": "^10.1.0",
     "react-relay-network-modern": "^6.0.0",
     "react-relay-network-modern-ssr": "^1.4.0",
-    "relay-runtime": "^10.1.0",
+    "relay-runtime": "^10.1.2",
     "sass": "^1.30.0"
   },
   "devDependencies": {
