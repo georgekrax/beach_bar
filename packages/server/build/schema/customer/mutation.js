@@ -11,34 +11,30 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CustomerCrudMutation = void 0;
 const common_1 = require("@beach_bar/common");
-const common_2 = require("@georgekrax-hashtag/common");
-const schema_1 = require("@nexus/schema");
+const graphql_1 = require("@the_hashtag/common/dist/graphql");
 const Customer_1 = require("entity/Customer");
 const User_1 = require("entity/User");
+const nexus_1 = require("nexus");
 const typeorm_1 = require("typeorm");
 const types_1 = require("../types");
 const types_2 = require("./types");
-exports.CustomerCrudMutation = schema_1.extendType({
+exports.CustomerCrudMutation = nexus_1.extendType({
     type: "Mutation",
     definition(t) {
         t.field("getOrAddCustomer", {
             type: types_2.AddCustomerResult,
             description: "Add a customer",
-            nullable: false,
             args: {
-                email: schema_1.arg({
-                    type: common_2.EmailScalar,
-                    required: true,
+                email: nexus_1.arg({
+                    type: graphql_1.EmailScalar,
                     description: "The email address of an authenticated or non user, to register as a client",
                 }),
-                phoneNumber: schema_1.stringArg({
-                    required: false,
+                phoneNumber: nexus_1.nullable(nexus_1.stringArg({
                     description: "The phone number of the customer",
-                }),
-                countryIsoCode: schema_1.stringArg({
-                    required: false,
+                })),
+                countryIsoCode: nexus_1.nullable(nexus_1.stringArg({
                     description: "The ISO code of the country of customer's telephone",
-                }),
+                })),
             },
             resolve: (_, { email, phoneNumber, countryIsoCode }, { payload, stripe }) => __awaiter(this, void 0, void 0, function* () {
                 if (!email && !payload) {
@@ -65,21 +61,13 @@ exports.CustomerCrudMutation = schema_1.extendType({
         t.field("updateCustomer", {
             type: types_2.UpdateCustomerResult,
             description: "Update a customer's details",
-            nullable: false,
             args: {
-                customerId: schema_1.arg({
-                    type: common_2.BigIntScalar,
-                    required: true,
+                customerId: nexus_1.arg({
+                    type: graphql_1.BigIntScalar,
                     description: "The ID value of the customer",
                 }),
-                phoneNumber: schema_1.stringArg({
-                    required: false,
-                    description: "The phone number of the customer",
-                }),
-                countryIsoCode: schema_1.stringArg({
-                    required: false,
-                    description: "The ISO code of the country of customer's telephone",
-                }),
+                phoneNumber: nexus_1.nullable(nexus_1.stringArg({ description: "The phone number of the customer" })),
+                countryIsoCode: nexus_1.nullable(nexus_1.stringArg({ description: "The ISO code of the country of customer's telephone" })),
             },
             resolve: (_, { customerId, phoneNumber, countryIsoCode }) => __awaiter(this, void 0, void 0, function* () {
                 if (!customerId || customerId <= 0) {
@@ -113,13 +101,11 @@ exports.CustomerCrudMutation = schema_1.extendType({
         t.field("deleteCustomer", {
             type: types_1.DeleteResult,
             description: "Delete (remove) a customer",
-            nullable: false,
             args: {
-                customerId: schema_1.arg({
-                    type: common_2.BigIntScalar,
-                    required: false,
+                customerId: nexus_1.nullable(nexus_1.arg({
+                    type: graphql_1.BigIntScalar,
                     description: "The ID value of the registered customer to delete",
-                }),
+                })),
             },
             resolve: (_, { customerId }, { payload, stripe }) => __awaiter(this, void 0, void 0, function* () {
                 if (customerId && customerId <= 0) {
@@ -154,4 +140,3 @@ exports.CustomerCrudMutation = schema_1.extendType({
         });
     },
 });
-//# sourceMappingURL=mutation.js.map

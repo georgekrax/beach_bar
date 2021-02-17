@@ -1,17 +1,15 @@
-import { objectType } from "@nexus/schema";
-
+import { objectType } from "nexus";
 import { CountryType } from "./countryTypes";
 
 export const CityType = objectType({
   name: "City",
   description: "Represents a city of a country",
   definition(t) {
-    t.int("id", { nullable: false, description: "The ID of the city" });
-    t.string("name", { nullable: false, description: "The name of the city" });
-    t.string("secondName", { nullable: true, description: "A second name of the city" });
-    t.field("country", {
+    t.id("id", { description: "The ID of the city" });
+    t.string("name", { description: "The name of the city" });
+    t.nullable.string("secondName", { description: "A second name of the city" });
+    t.nullable.field("country", {
       type: CountryType,
-      nullable: true,
       description: "The country of the city",
       resolve: o => o.country,
     });

@@ -1,10 +1,10 @@
 import { errors, MyContext } from "@beach_bar/common";
-import { BigIntScalar } from "@georgekrax-hashtag/common";
-import { arg, extendType, intArg, stringArg } from "@nexus/schema";
+import { BigIntScalar } from "@the_hashtag/common/dist/graphql";
 import { BeachBar } from "entity/BeachBar";
 import { CouponCode } from "entity/CouponCode";
 import { OfferCampaign } from "entity/OfferCampaign";
 import { OfferCampaignCode } from "entity/OfferCampaignCode";
+import { arg, extendType, intArg, stringArg } from "nexus";
 import { ErrorType } from "typings/.index";
 import { ProductOfferType } from "typings/beach_bar/product/offer";
 import { checkScopes } from "utils/checkScopes";
@@ -14,15 +14,11 @@ import { CouponCodeRevealResult, OfferCampaignCodeRevealResult, OfferCampaignTyp
 export const VoucherCoderQuery = extendType({
   type: "Query",
   definition(t) {
-    t.field("getVoucherCode", {
+    t.nullable.field("getVoucherCode", {
       type: VoucherCodeQueryResult,
       description: "Get the product offer or coupon, based on its referral code",
-      nullable: true,
       args: {
-        refCode: stringArg({
-          required: true,
-          description: "The referral code of the product offer or coupon",
-        }),
+        refCode: stringArg({ description: "The referral code of the product offer or coupon" }),
       },
       resolve: async (_, { refCode }): Promise<ProductOfferType> => {
         if (!refCode || refCode.trim().length === 0) {
@@ -38,15 +34,11 @@ export const VoucherCoderQuery = extendType({
         return res.error as any;
       },
     });
-    t.list.field("getBeachBarOfferCampaigns", {
+    t.nullable.list.field("getBeachBarOfferCampaigns", {
       type: OfferCampaignType,
       description: "Get a list with all the offer campaigns of a #beach_bar",
-      nullable: true,
       args: {
-        beachBarId: intArg({
-          required: true,
-          description: "The ID value of the #beach_bar",
-        }),
+        beachBarId: intArg({ description: "The ID value of the #beach_bar" }),
       },
       resolve: async (_, { beachBarId }): Promise<OfferCampaign[] | null> => {
         if (!beachBarId || beachBarId <= 0) {
@@ -70,11 +62,9 @@ export const VoucherCoderQuery = extendType({
     t.field("revealCouponCode", {
       type: CouponCodeRevealResult,
       description: "Get a coupon's code details & its referral code",
-      nullable: false,
       args: {
         couponCodeId: arg({
           type: BigIntScalar,
-          required: true,
           description: "The ID value of the coupon code",
         }),
       },
@@ -102,11 +92,9 @@ export const VoucherCoderQuery = extendType({
     t.field("revealOfferCampaignCode", {
       type: OfferCampaignCodeRevealResult,
       description: "Get an offer's campaign code details + its referral code",
-      nullable: false,
       args: {
         offerCampaignCodeId: arg({
           type: BigIntScalar,
-          required: true,
           description: "The ID value of the offer campaign code",
         }),
       },

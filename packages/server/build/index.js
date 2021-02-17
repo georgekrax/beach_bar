@@ -48,7 +48,7 @@ const schema_1 = require("./schema");
         yield createDBConnection_1.createDBConnection();
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         process.exit(0);
     }
     const app = express_1.default();
@@ -66,8 +66,9 @@ const schema_1 = require("./schema");
     app.use("/oauth", authRoutes_1.router);
     client_1.default.setApiKey(process.env.SENDGRID_API_KEY.toString());
     mail_1.default.setApiKey(process.env.SENDGRID_API_KEY.toString());
+    const notIsProd = !(process.env.NODE_ENV === "production");
     const server = new apollo_server_express_1.ApolloServer({
-        tracing: !(process.env.NODE_ENV === "production"),
+        playground: notIsProd,
         schema: schema_1.schema,
         uploads: true,
         formatError: (err) => {
@@ -170,4 +171,3 @@ const schema_1 = require("./schema");
     server.applyMiddleware({ app, cors: true });
     app.listen({ port: parseInt(process.env.PORT) || 4000 }, () => console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`));
 }))();
-//# sourceMappingURL=index.js.map

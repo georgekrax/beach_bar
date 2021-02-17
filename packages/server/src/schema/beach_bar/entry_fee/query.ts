@@ -1,6 +1,6 @@
-import { booleanArg, extendType, intArg } from "@nexus/schema";
 import dayjs from "dayjs";
 import { BeachBarEntryFee } from "entity/BeachBarEntryFee";
+import { booleanArg, extendType, intArg, nullable } from "nexus";
 import { MoreThanOrEqual } from "typeorm";
 import { BeachBarEntryFeeType } from "./types";
 
@@ -11,15 +11,13 @@ export const BeachBarEntryFeeQuery = extendType({
       type: BeachBarEntryFeeType,
       description: "Get a list with all entry fees of a #beach_bar",
       args: {
-        beachBarId: intArg({
-          required: true,
-          description: "The ID value of the #beach_bar",
-        }),
-        moreThanOrEqualToToday: booleanArg({
-          required: false,
-          description: "Set to true if to retrieve the entry fees from today and in the future. Its default value is set to true",
-          default: true,
-        }),
+        beachBarId: intArg({ description: "The ID value of the #beach_bar" }),
+        moreThanOrEqualToToday: nullable(
+          booleanArg({
+            description: "Set to true if to retrieve the entry fees from today and in the future. Its default value is set to true",
+            default: true,
+          })
+        ),
       },
       resolve: async (_, { beachBarId, moreThanOrEqualToToday }): Promise<BeachBarEntryFee[]> => {
         if (moreThanOrEqualToToday) {

@@ -30,4 +30,3 @@ RestaurantMenuCategory = __decorate([
     typeorm_1.Entity({ name: "restaurant_menu_category", schema: "public" })
 ], RestaurantMenuCategory);
 exports.RestaurantMenuCategory = RestaurantMenuCategory;
-//# sourceMappingURL=RestaurantMenuCategory.js.map

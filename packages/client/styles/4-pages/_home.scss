@@ -1,0 +1,225 @@
+.index {
+  $border-radius: 14px;
+  $img-height: 80vw;
+  $space-width: 20vw;
+
+  &__section {
+    &__container {
+      @extend .w-100;
+      overflow: auto;
+    }
+
+    &__list {
+      @extend .w-100;
+      flex-wrap: wrap;
+      gap: map-get($em-spacers, 16);
+    }
+  }
+
+  // &__container {
+  // height: 100%;
+  // overflow: hidden;
+  // }
+
+  &__header {
+    margin-bottom: 1.75em;
+    max-width: 65%;
+    width: fit-content;
+    height: fit-content;
+
+    h4 {
+      text-transform: none;
+      margin-bottom: 0.25em;
+      color: $grey-9;
+    }
+
+    p {
+      color: $grey-8;
+    }
+  }
+
+  &__carousel {
+    &__container {
+      gap: 1em;
+      position: relative;
+      left: 0;
+      width: 100vw;
+      height: fit-content;
+      // Does not work as needed, so we use a "spacer" div
+      // padding: 0 1.5em 0 1.5em;
+      overflow-x: scroll;
+      cursor: grab;
+
+      div.spacer {
+        width: calc(#{$wrapper-padding} + #{$space-width});
+        height: $img-height;
+        flex-shrink: 0;
+      }
+
+      @include breakpoint("md") {
+        div.spacer {
+          width: calc(#{$wrapper-padding} + #{$space-width * 2});
+        }
+      }
+    }
+
+    &__img {
+      border-radius: $border-radius;
+
+      &__container {
+        width: 60vw;
+        max-width: 320px;
+        height: $img-height;
+        position: relative;
+        flex-shrink: 0;
+        overflow: hidden;
+
+        &::after {
+          @extend .w-100;
+          content: "";
+          background: linear-gradient(
+            180deg,
+            rgba($grey-1, 0) 45%,
+            rgba($grey-10, 0.25) 57.5%,
+            rgba($grey-10, 0.75) 100%
+          );
+          height: 100%;
+          position: absolute;
+          bottom: 0;
+          border-radius: $border-radius;
+          z-index: 1;
+          pointer-events: none;
+        }
+      }
+    }
+
+    &__content {
+      &__container {
+        position: absolute;
+        // padding: 0.5em;
+        // background: rgba($grey-1, 0.5);
+        // box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        // backdrop-filter: blur(15px);
+        // border-radius: $border-radius;
+        // border: 1px solid rgba($grey-1, 0.5);
+        width: 86%;
+        left: 50%;
+        bottom: 5%;
+        transform: translateX(-50%);
+        overflow: hidden;
+        z-index: 2;
+
+        div {
+          svg {
+            margin-right: 0.3em;
+
+            path {
+              fill: $grey-1;
+            }
+          }
+        }
+
+        h6 {
+          margin-bottom: 0.3em;
+        }
+
+        & > * {
+          color: $grey-1;
+        }
+      }
+    }
+
+    &__bookmark {
+      position: absolute;
+      top: -4.25px;
+      right: 7.5%;
+
+      svg:first-child path {
+        stroke: $grey-1;
+        fill: rgba($grey-1, 0.6);
+      }
+
+      svg:last-child {
+        position: absolute;
+        top: 0;
+        left: 0;
+
+        path {
+          stroke: $volcano-4;
+          fill: $volcano-4;
+        }
+      }
+    }
+  }
+
+  &__form {
+    &__container {
+      height: fit-content;
+      // padding: 0.875em 1em;
+      margin-top: 1.5em;
+      background-color: $grey-1;
+      border-radius: $border-radius;
+
+      .input,
+      .input__container {
+        width: 100%;
+      }
+
+      .input {
+        height: 3.5em;
+        border: none;
+      }
+
+      .input:focus {
+        @extend .semibold;
+        height: 4em;
+        font-size: 1.5rem;
+
+        &::placeholder {
+          font-weight: map-get($font-weights, "normal");
+        }
+      }
+    }
+
+    // &__bottom-sheet {
+    //   height: fit-content;
+    //   width: 100%;
+    //   padding-bottom: 12.5vh !important;
+
+    //   & > div {
+    //     margin-bottom: 1.25em;
+    //   }
+
+    //   .hr-vector {
+    //     width: 100%;
+    //     height: 1px;
+    //     background-color: $grey-4;
+    //   }
+
+    //   .input {
+    //     display: none;
+
+    //     &-incr-dcr__container {
+    //       gap: 0.75em;
+    //     }
+    //   }
+
+    //   .people {
+    //     &__container {
+    //       p {
+    //         color: $grey-7;
+    //       }
+
+    //       span {
+    //         font-size: 1.25rem;
+    //         color: $grey-9;
+    //       }
+    //     }
+
+    //     &__quantity {
+    //       padding: 0.5em 0;
+    //     }
+    //   }
+    // }
+  }
+}

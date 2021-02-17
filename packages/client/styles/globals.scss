@@ -1,0 +1,39 @@
+@use "@hashtag-design-system/components/dist/esm/index.scss" as index;
+@import "./4-pages/home";
+@import "./4-pages/search";
+
+// TODO: Add to <Fouter /> $tapbar-height
+body {
+  // height: 100vh ;
+  height: calc(100vh + #{$tapbar-height});
+  background: $grey-1;
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  max-width: 60ch;
+}
+
+@include index.icon-classNames() {
+  path {
+    stroke-width: 1.5px;
+    stroke: $grey-10;
+  }
+
+  circle {
+    stroke-width: 1.5px;
+    stroke: $grey-10;
+  }
+}
+
+@include path--filled-classNames() {
+  fill: $grey-10;
+}

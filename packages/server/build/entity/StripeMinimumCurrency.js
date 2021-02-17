@@ -35,4 +35,3 @@ StripeMinimumCurrency = __decorate([
     typeorm_1.Entity({ name: "stripe_minimum_currency", schema: "public" })
 ], StripeMinimumCurrency);
 exports.StripeMinimumCurrency = StripeMinimumCurrency;
-//# sourceMappingURL=StripeMinimumCurrency.js.map

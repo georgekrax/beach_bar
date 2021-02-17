@@ -1,0 +1,8 @@
+schema: http://localhost:4000/graphql/
+extensions:
+  codegen:
+    generates:
+      ./graphql/schema.graphql:
+        plugins:
+          - schema-ast
+# documents: ./src/components/**/*.jsx

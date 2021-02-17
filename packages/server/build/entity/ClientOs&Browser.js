@@ -48,4 +48,3 @@ ClientBrowser = __decorate([
     typeorm_1.Entity({ name: "client_browser", schema: "public" })
 ], ClientBrowser);
 exports.ClientBrowser = ClientBrowser;
-//# sourceMappingURL=ClientOs&Browser.js.map

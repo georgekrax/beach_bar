@@ -1,0 +1,2999 @@
+scalar BigInt
+
+"""Use JavaScript Date object for date-only fields."""
+scalar Date
+
+"""Use JavaScript Date object for date/time fields."""
+scalar DateTime
+
+"""
+A field whose value conforms to the standard internet email address format as specified in RFC822: https://www.w3.org/Protocols/rfc822/.
+"""
+scalar Email
+
+"""Represents a formatted error"""
+type Error {
+  """
+  Returns an error in a type of string, if there is one, with a status and a message
+  """
+  error: ErrorObject
+}
+
+"""Represents an error object"""
+type ErrorObject {
+  """
+  The error code of the operation, it can be found in a list in the documentation
+  """
+  code: String
+
+  """A short description for the error occurred"""
+  message: String
+}
+
+"""
+A field whose value is a IPv4 address: https://en.wikipedia.org/wiki/IPv4.
+"""
+scalar IPv4
+
+"""The `JSON` scalar type represents JSON values as specified by ECMA-404"""
+scalar JSON
+
+"""A time string at UTC, such as 10:15:30Z"""
+scalar Time
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
+
+"""
+A field whose value conforms to the standard URL format as specified in RFC3986: https://www.ietf.org/rfc/rfc3986.txt.
+"""
+scalar URL
+
+"""Represents the payload (data) of Amazon Web Services (AWS) S3"""
+type S3Payload {
+  signedRequest: URL!
+
+  """
+  The presigned URL gives you access to the object identified in the URL, to upload the user's image
+  """
+  url: URL!
+}
+
+"""Represents an entry fee for a #beach_bar"""
+type BeachBarEntryFee {
+  id: BigInt!
+  fee: Float!
+
+  """The date this entry fee is applicable for"""
+  date: Date!
+
+  """The #beach_bar this fee is added (assigned) to"""
+  beachBar: BeachBar!
+}
+
+"""Info to be returned when an entry fee is added to a #beach_bar"""
+type AddBeachBarEntryFee {
+  """The fees that are being added & its details"""
+  fees: [BeachBarEntryFee!]!
+
+  """
+  A boolean that indicates if the fees have been successfully being added to a #beach_bar
+  """
+  added: Boolean!
+}
+
+union AddBeachBarEntryFeeResult = AddBeachBarEntryFee | Error
+
+"""
+Info to be returned when the details of #beach_bar entry fee, are updated
+"""
+type UpdateBeachBarEntryFee {
+  """The fees being updated"""
+  fees: [BeachBarEntryFee!]!
+
+  """
+  A boolean that indicates if the fee details have been successfully updated
+  """
+  updated: Boolean!
+}
+
+union UpdateBeachBarEntryFeeResult = UpdateBeachBarEntryFee | Error
+
+"""Represents a #beach_bar's image (URL value)"""
+type BeachBarImgUrl {
+  id: ID!
+  imgUrl: URL!
+
+  """
+  A short description about what the image represents. The characters of the description should not exceed the number 175
+  """
+  description: String
+  beachBar: BeachBar!
+}
+
+"""Info to be returned when an image (URL) is added to a #beach_bar"""
+type AddBeachBarImgUrl {
+  """The image that is added"""
+  imgUrl: BeachBarImgUrl!
+
+  """
+  Indicates if the image (URL) has been successfully been added to the #beach_bar
+  """
+  added: Boolean!
+}
+
+union AddBeachBarImgUrlResult = AddBeachBarImgUrl | Error
+
+"""
+Info to be returned when the details of #beach_bar's image, are updated
+"""
+type UpdateBeachBarImgUrl {
+  """The image that is updated"""
+  imgUrl: BeachBarImgUrl!
+
+  """Indicates if the image details have been successfully updated"""
+  updated: Boolean!
+}
+
+union UpdateBeachBarImgUrlResult = UpdateBeachBarImgUrl | Error
+
+"""Represents a #beach_bar's location details"""
+type BeachBarLocation {
+  id: ID!
+
+  """The street address of the #beach_bar"""
+  address: String!
+
+  """The zip code of the #beach_bar, for its street address"""
+  zipCode: String
+
+  """The latitude of the #beach_bar in the maps, provided by Mapbox"""
+  latitude: Float!
+
+  """The longitude of the #beach_bar in the maps, provided by Mapbox"""
+  longitude: Float!
+
+  """
+  The 'point' value generated from latitude & longitude, provided by the PostGIS PostgreSQL extension
+  """
+  whereIs: [Float!]
+
+  """The country the #beach_bar is located at"""
+  country: Country!
+
+  """The city the #beach_bar is located at"""
+  city: City!
+
+  """The region the #beach_bar is located at"""
+  region: Region
+}
+
+"""Info to be returned when location is added (assigned) to a #beach_bar"""
+type AddBeachBarLocation {
+  """The location of the #beach_bar that is added"""
+  location: BeachBarLocation!
+
+  """
+  A boolean that indicates if the #beach_bar locations has been successfully being added
+  """
+  added: Boolean!
+}
+
+union AddBeachBarLocationResult = AddBeachBarLocation | Error
+
+"""
+Info to be returned when the details of #beach_bar location are updated
+"""
+type UpdateBeachBarLocation {
+  """The #beach_bar location that is updated"""
+  location: BeachBarLocation!
+
+  """
+  A boolean that indicates if the #beach_bar location details have been successfully updated
+  """
+  updated: Boolean!
+}
+
+union UpdateBeachBarLocationResult = UpdateBeachBarLocation | Error
+
+"""Represents a coupon code interface for a #beach_bar"""
+interface CouponCodeInterface {
+  id: BigInt!
+  title: String!
+  discountPercentage: Float!
+  isActive: Boolean!
+  validUntil: DateTime
+
+  """Represents how many times this coupon code can be used"""
+  timesLimit: Int!
+
+  """Represents the times this coupon code has been used"""
+  timesUsed: Int!
+
+  """The #beach_bar this coupon code applies to"""
+  beachBar: BeachBar
+}
+
+"""Represents an offer code interface for an offer campaign"""
+interface OfferCampaignCodeInterface {
+  id: BigInt!
+
+  """The total amount to make a discount from"""
+  totalAmount: Float!
+
+  """Represents how many times this offer code has been used"""
+  timesUsed: Int!
+
+  """The campaign the offer code is assigned to"""
+  campaign: OfferCampaign!
+  timestamp: DateTime!
+  deletedAt: DateTime
+}
+
+"""Represents a coupon code"""
+type CouponCode implements CouponCodeInterface {
+  id: BigInt!
+  title: String!
+  discountPercentage: Float!
+  isActive: Boolean!
+  validUntil: DateTime
+
+  """Represents how many times this coupon code can be used"""
+  timesLimit: Int!
+
+  """Represents the times this coupon code has been used"""
+  timesUsed: Int!
+
+  """The #beach_bar this coupon code applies to"""
+  beachBar: BeachBar
+}
+
+"""Represents an offer campaign of a #beach_bar"""
+type OfferCampaign {
+  id: ID!
+  title: String!
+  discountPercentage: Float!
+  isActive: Boolean!
+  validUntil: DateTime
+
+  """A list of products that are discounted via the campaign"""
+  products: [Product!]!
+}
+
+"""Represents an offer code for a campaign of a product"""
+type OfferCampaignCode implements OfferCampaignCodeInterface {
+  id: BigInt!
+
+  """The total amount to make a discount from"""
+  totalAmount: Float!
+
+  """Represents how many times this offer code has been used"""
+  timesUsed: Int!
+
+  """The campaign the offer code is assigned to"""
+  campaign: OfferCampaign!
+  timestamp: DateTime!
+  deletedAt: DateTime
+}
+
+union VoucherCodeQueryResult = CouponCode | OfferCampaignCode | Error
+
+"""Info to be returned when a coupon code is added (issued)"""
+type AddCouponCode {
+  """The coupon code that is added"""
+  couponCode: CouponCode!
+
+  """Indicates if the coupon code has been successfully added"""
+  added: Boolean!
+}
+
+union AddCouponCodeResult = AddCouponCode | Error
+
+"""Info to be returned when a coupon code details are updated"""
+type UpdateCouponCode {
+  """The coupon code that is updated"""
+  couponCode: CouponCode!
+
+  """Indicates if the coupon code has been successfully updated"""
+  updated: Boolean!
+}
+
+union UpdateCouponCodeResult = UpdateCouponCode | Delete | Error
+
+"""
+Info to be returned when an offer campaign is added to a or some #beach_bar's product(s)
+"""
+type AddOfferCampaign {
+  """The offer campaign that is added"""
+  offerCampaign: OfferCampaign!
+
+  """Indicates if the offer campaign has been successfully added"""
+  added: Boolean!
+}
+
+union AddOfferCampaignResult = AddOfferCampaign | Error
+
+"""Info to be returned when an offer campaign details are updated"""
+type UpdateOfferCampaign {
+  """The offer campaign that is updated"""
+  offerCampaign: OfferCampaign!
+
+  """Indicates if the offer campaign details have been successfully updated"""
+  updated: Boolean!
+}
+
+union UpdateOfferCampaignResult = UpdateOfferCampaign | Error
+
+"""
+Info to be returned when a new offer code, of an offer campaign, is added (issued)
+"""
+type AddOfferCampaignCode {
+  """The offer code that is added (issued)"""
+  offerCode: OfferCampaignCode!
+
+  """Indicates if the offer code has been successfully added (issued)"""
+  added: Boolean!
+}
+
+union AddOfferCampaignCodeResult = AddOfferCampaignCode | Error
+
+"""Represents a coupon code, with its referral code revealed"""
+type CouponCodeReveal implements CouponCodeInterface {
+  id: BigInt!
+  title: String!
+  discountPercentage: Float!
+  isActive: Boolean!
+  validUntil: DateTime
+
+  """Represents how many times this coupon code can be used"""
+  timesLimit: Int!
+
+  """Represents the times this coupon code has been used"""
+  timesUsed: Int!
+
+  """The #beach_bar this coupon code applies to"""
+  beachBar: BeachBar
+
+  """The referral code of the coupon code, to use and get a discount"""
+  refCode: String!
+}
+
+union CouponCodeRevealResult = CouponCodeReveal | Error
+
+"""Represents an offer campaign code, with its referral code revealed"""
+type OfferCampaignCodeReveal implements OfferCampaignCodeInterface {
+  id: BigInt!
+
+  """The total amount to make a discount from"""
+  totalAmount: Float!
+
+  """Represents how many times this offer code has been used"""
+  timesUsed: Int!
+
+  """The campaign the offer code is assigned to"""
+  campaign: OfferCampaign!
+  timestamp: DateTime!
+  deletedAt: DateTime
+
+  """
+  The referral code of the offer campaign code, to use and get a discount
+  """
+  refCode: String!
+}
+
+union OfferCampaignCodeRevealResult = OfferCampaignCodeReveal | Error
+
+"""
+Represents a the limit number, on how many times a product can be provided by a #beach_bar on a specific date
+"""
+type ProductReservationLimit {
+  id: BigInt!
+  limitNumber: Int!
+
+  """The date this limit is applicable for the product"""
+  date: Date!
+
+  """The product this limit is assigned to"""
+  product: Product!
+
+  """The hour that this limit is applicable for"""
+  startTime: HourTime!
+
+  """The hour that this limit ends"""
+  endTime: HourTime!
+}
+
+"""
+Info to be returned when a reservation limit is added to a #beach_bar's product
+"""
+type AddProductReservationLimit {
+  """The reservation limit that is added"""
+  reservationLimit: [ProductReservationLimit!]!
+
+  """
+  A boolean that indicates if the limit has been successfully added to the product
+  """
+  added: Boolean!
+}
+
+union AddProductReservationLimitResult = AddProductReservationLimit | Error
+
+"""
+Info to be returned when a reservation limit of a #beach_bar's product is updated
+"""
+type UpdateProductReservationLimit {
+  """The reservation limit that is updated"""
+  reservationLimit: [ProductReservationLimit!]!
+
+  """
+  A boolean that indicates if the limit details has been successfully updated
+  """
+  updated: Boolean!
+}
+
+union UpdateProductReservationLimitResult = UpdateProductReservationLimit | Error
+
+"""
+Info to be returned, when checking if a #beach_bar product is available
+"""
+type AvailableProduct {
+  """The hour (time), to check if available"""
+  hourTime: HourTime!
+
+  """A boolean that indicates if the product is available in the hour time"""
+  isAvailable: Boolean!
+}
+
+"""Represents a product of a #beach_bar"""
+type Product {
+  id: ID!
+  name: String!
+  description: String
+  price: Float!
+  isActive: Boolean!
+  isIndividual: Boolean!
+  maxPeople: Int!
+  imgUrl: URL
+
+  """The #beach_bar that provides the product"""
+  beachBar: BeachBar!
+
+  """The category of the product"""
+  category: ProductCategory!
+  updatedAt: DateTime!
+  deletedAt: DateTime
+}
+
+"""Info to be returned when a product is added to a #beach_bar"""
+type AddProduct {
+  """The product that is added"""
+  product: Product!
+
+  """
+  A boolean that indicates if the product has been successfully added to the #beach_bar
+  """
+  added: Boolean!
+}
+
+union AddProductResult = AddProduct | Error
+
+"""Info to be returned when a product of a #beach_bar is updated"""
+type UpdateProduct {
+  """The product that is updated"""
+  product: Product!
+
+  """A boolean that indicates if the product has been successfully updated"""
+  updated: Boolean!
+}
+
+union UpdateProductResult = UpdateProduct | Error
+
+"""
+The info to be returned when checking for a #beach_bar product's availability hour times
+"""
+type ProductAvailabilityHour {
+  """The hour time of a day"""
+  hourTime: HourTime!
+  isAvailable: Boolean!
+}
+
+"""Represents a category of a #beach_bar's restaurant menu"""
+type RestaurantMenuCategory {
+  """The ID value of the menu category"""
+  id: ID!
+
+  """The name of the menu category"""
+  name: String!
+}
+
+"""
+Represents a #beach_bar's restaurant food item (product) in its menu catalog
+"""
+type RestaurantFoodItem {
+  """The ID value of the food item"""
+  id: BigInt!
+
+  """The name of the food item"""
+  name: String!
+
+  """
+  The price of the food item, in decimal format with precision of five (5) & scale of two (2)
+  """
+  price: Float!
+
+  """The URL value of the food item's picture"""
+  imgUrl: String
+
+  """The menu category this food item is associated to"""
+  menuCategory: RestaurantMenuCategory!
+}
+
+"""
+Info to be returned when a food item is added to a #beach_bar's restaurant
+"""
+type AddRestaurantFoodItem {
+  """The food item being added & its info"""
+  foodItem: RestaurantFoodItem!
+
+  """
+  A boolean that indicates if the food item has been successfully being added to a restaurant
+  """
+  added: Boolean!
+}
+
+union AddRestaurantFoodItemResult = AddRestaurantFoodItem | Error
+
+"""
+Info to be returned when the food item of #beach_bar restaurant, is updated
+"""
+type UpdateRestaurantFoodItem {
+  """The food item being updated"""
+  foodItem: RestaurantFoodItem!
+
+  """
+  A boolean that indicates if the food item has been successfully updated
+  """
+  updated: Boolean!
+}
+
+union UpdateRestaurantFoodItemResult = UpdateRestaurantFoodItem | Error
+
+"""Represents a #beach_bar's restaurant"""
+type BeachBarRestaurant {
+  """The ID value of the restaurant"""
+  id: ID!
+
+  """The name of the restaurant"""
+  name: String!
+
+  """A short description (info) about the restaurant"""
+  description: String
+
+  """
+  A boolean that indicates if the restaurant is active. It can be changed by the primary owner of the #beach_bar
+  """
+  isActive: Boolean!
+
+  """The #beach_bar this restaurant is owned by"""
+  beachBar: BeachBar!
+
+  """A list of food items (products) in the menu of the restaurant"""
+  foodItems: [RestaurantFoodItem!]
+}
+
+"""Info to be returned when a restaurant is added to a #beach_bar"""
+type AddBeachBarRestaurant {
+  """The restaurant that is added & its info"""
+  restaurant: BeachBarRestaurant!
+
+  """
+  A boolean that indicates if the restaurant has been successfully being added to the #beach_bar
+  """
+  added: Boolean!
+}
+
+union AddBeachBarRestaurantResult = AddBeachBarRestaurant | Error
+
+"""
+Info to be returned when the details of #beach_bar restaurant, are updated
+"""
+type UpdateBeachBarRestaurant {
+  """The restaurant that is updated"""
+  restaurant: BeachBarRestaurant!
+
+  """
+  A boolean that indicates if the restaurant details have been successfully updated
+  """
+  updated: Boolean!
+}
+
+union UpdateBeachBarRestaurantResult = UpdateBeachBarRestaurant | Error
+
+"""Represents an answer for a review of a #beach_bar, by the owner"""
+type ReviewAnswer {
+  """The ID value of the particular review answer"""
+  id: BigInt!
+
+  """
+  The body (content) of the review answer, written by the reviewed #beach_bar's owner
+  """
+  body: String!
+
+  """The review this answer is assigned to"""
+  review: BeachBarReview!
+
+  """The last time user's account was updated, in the format of a timestamp"""
+  updatedAt: DateTime!
+
+  """The timestamp recorded, when the user's account was created"""
+  timestamp: DateTime!
+}
+
+"""Info to be returned when an answer is added to a customer's review"""
+type AddReviewAnswer {
+  """The answer that is added to the review"""
+  answer: ReviewAnswer!
+
+  """
+  A boolean that indicates if the answer has been successfully being added to the customer's review
+  """
+  added: Boolean!
+}
+
+union AddReviewAnswerResult = AddReviewAnswer | Error
+
+"""Info to be returned when the answer of a customer's review is updated"""
+type UpdateReviewAnswer {
+  """The review answer that is updated"""
+  answer: ReviewAnswer!
+
+  """
+  A boolean that indicates if the review answer has been successfully updated
+  """
+  updated: Boolean!
+}
+
+union UpdateReviewAnswerResult = UpdateReviewAnswer | Error
+
+"""Represents a #beach_bar's review, by a customer"""
+type BeachBarReview {
+  """The ID value of the review"""
+  id: BigInt!
+
+  """The user's rating, between 0 and 10"""
+  ratingValue: Int!
+
+  """The time the particular review was voted to be helpful, by other users"""
+  upvotes: Int
+
+  """
+  The time the particular review was voted not to be helpful, by other users
+  """
+  downvotes: Int
+
+  """A positive comment for the #beach_bar"""
+  positiveComment: String
+
+  """A negative comment for the #beach_bar"""
+  negativeComment: String
+
+  """A summary (description) of the user's overall review"""
+  review: String
+
+  """The last time user's account was updated, in the format of a timestamp"""
+  updatedAt: DateTime!
+
+  """The timestamp recorded, when the user's account was created"""
+  timestamp: DateTime!
+
+  """The #beach_bar of the review"""
+  beachBar: BeachBar!
+
+  """The customer that submitted the particular review for the #beach_bar"""
+  customer: Customer!
+
+  """The type of visit for the user"""
+  visitType: ReviewVisitType
+
+  """The visited month of the customer visited the #beach_bar"""
+  month: MonthTime
+}
+
+"""Info to be returned when a review is added to a #beach_bar"""
+type AddBeachBarReview {
+  """The review that is added"""
+  review: BeachBarReview!
+
+  """
+  A boolean that indicates if the review has been successfully being added to the #beach_bar
+  """
+  added: Boolean!
+}
+
+union AddBeachBarReviewResult = AddBeachBarReview | Error
+
+"""
+Info to be returned when the details of a customer's review, are updated
+"""
+type UpdateBeachBarReview {
+  """The review that is updated"""
+  review: BeachBarReview!
+
+  """A boolean that indicates if the review has been successfully updated"""
+  updated: Boolean!
+}
+
+union UpdateBeachBarReviewResult = UpdateBeachBarReview | Error
+
+"""Represents a service (feature), which a #beach_bar can provide"""
+type BeachBarService {
+  """The ID value of the feature"""
+  id: ID!
+
+  """The name of the feature"""
+  name: String!
+
+  """The URL value of the icon colored image of the feature, with color"""
+  iconUrl: String
+}
+
+"""Represents a #beach_bar's feature (service) & its details"""
+type BeachBarFeature {
+  """The feature (service) the #beach_bar provides"""
+  service: BeachBarService!
+
+  """The #beach_bar that provides the feature (service)"""
+  beachBar: BeachBar!
+
+  """
+  An integer that indicates the quantity of the service, a #beach_bar provides
+  """
+  quantity: Int!
+
+  """A short description about the service"""
+  description: String
+  updatedAt: DateTime!
+  timestamp: DateTime!
+}
+
+"""Info to be returned when a feature is added (assigned) to a #beach_bar"""
+type AddBeachBarFeature {
+  """The feature that will be added (assigned) to the #beach_bar"""
+  feature: BeachBarFeature!
+
+  """
+  A boolean that indicates if the feature has been successfully added (assigned) to the #beach_bar
+  """
+  added: Boolean!
+}
+
+union AddBeachBarFeatureResult = AddBeachBarFeature | Error
+
+"""
+Info to be returned when the info of a feature of a #beach_bar, are updated
+"""
+type UpdateBeachBarFeature {
+  """The feature that will be updated"""
+  feature: BeachBarFeature!
+
+  """A boolean that indicates if the feature has been successfully updated"""
+  updated: Boolean!
+}
+
+union UpdateBeachBarFeatureResult = UpdateBeachBarFeature | Error
+
+"""Represents a #beach_bar"""
+type BeachBar {
+  """The ID value of the #beach_bar"""
+  id: ID!
+
+  """The name of the #beach_bar"""
+  name: String!
+
+  """A description text about the #beach_bar"""
+  description: String
+
+  """The average rating of all the user reviews for this #beach_bar"""
+  avgRating: Float
+  thumbnailUrl: URL
+
+  """A phone number to contact the #beach_bar directly"""
+  contactPhoneNumber: String!
+
+  """
+  A boolean that indicates if to NOT display the #beach_bar contact phone number
+  """
+  hidePhoneNumber: Boolean!
+
+  """A boolean that indicates if the #beach_bar is active or not"""
+  isActive: Boolean!
+
+  """
+  A boolean that indicates if the #beach_bar is shown in the search results, even if it has no availability
+  """
+  isAvailable: Boolean!
+
+  """The location of the #beach_bar"""
+  location: BeachBarLocation!
+
+  """The category (type) of the #beach_bar"""
+  category: BeachBarCategory!
+
+  """A list with all the #beach_bar's images (URL values)"""
+  imgUrls: [BeachBarImgUrl!]
+
+  """A list of all the reviews of the #beach_bar"""
+  reviews: [BeachBarReview!]
+
+  """A list of all the #beach_bar's features"""
+  features: [BeachBarFeature]!
+
+  """A list of all the styles the #beach_bar is associated with"""
+  styles: [BeachBarStyle!]
+
+  """A list of all the restaurants of a #beach_bar"""
+  restaurants: [BeachBarRestaurant!]
+
+  """The default currency of the #beach_bar"""
+  defaultCurrency: Currency!
+
+  """A list of all the owners of the #beach_bar"""
+  owners: [BeachBarOwner!]!
+
+  """
+  The opening quarter time of the #beach_bar, in the time zone of its country
+  """
+  openingTime: QuarterTime!
+
+  """
+  The closing quarter time of the #beach_bar, in the time zone of its country
+  """
+  closingTime: QuarterTime!
+
+  """The last time the #beach_bar was updated, in the format of a timestamp"""
+  updatedAt: DateTime!
+
+  """The timestamp recorded, when the #beach_bar was created"""
+  timestamp: DateTime!
+}
+
+union BeachBarResult = BeachBar | Error
+
+"""
+Info to be returned when a #beach_bar is added (registered) to the platform
+"""
+type AddBeachBar {
+  """The #beach_bar that is added"""
+  beachBar: BeachBar!
+
+  """
+  A boolean that indicates if the #beach_bar has been successfully being registered
+  """
+  added: Boolean!
+}
+
+union AddBeachBarResult = AddBeachBar | Error
+
+"""Info to be returned when the details of #beach_bar are updated"""
+type UpdateBeachBar {
+  """The #beach_bar that is updated"""
+  beachBar: BeachBar!
+
+  """
+  A boolean that indicates if the #beach_bar details have been successfully updated
+  """
+  updated: Boolean!
+}
+
+union UpdateBeachBarResult = UpdateBeachBar | Error
+
+"""Boolean values to show if the #beach_bar is available"""
+type BeachBarAvailability {
+  """
+  A boolean that indicates if the #beach_bar has availability for the dates selected
+  """
+  hasAvailability: Boolean
+
+  """
+  A boolean that indicates if the #beach_bar has availability for the people selected
+  """
+  hasCapacity: Boolean
+}
+
+"""Represents a shopping cart with its products"""
+type CartProduct {
+  quantity: Int!
+
+  """The date of purchase of the product"""
+  date: Date!
+  timestamp: DateTime!
+
+  """The shopping cart the product is added to"""
+  cart: Cart!
+
+  """The product that is added to the shopping cart"""
+  product: Product!
+
+  """The hour of use of the product"""
+  time: HourTime!
+}
+
+"""Info to be returned when a product is added to a shopping cart"""
+type AddCartProduct {
+  """The product that is added to the cart"""
+  product: CartProduct!
+
+  """
+  A boolean that indicates if the product has been successfully added to the cart
+  """
+  added: Boolean!
+}
+
+union AddCartProductResult = AddCartProduct | Error
+
+"""Info to be returned when a product of a shopping cart is updated"""
+type UpdateCartProduct {
+  """The product that is updated"""
+  product: CartProduct!
+
+  """A boolean that indicates if the product has been successfully updated"""
+  updated: Boolean!
+}
+
+union UpdateCartProductResult = UpdateCartProduct | Error
+
+"""Represents a shopping cart"""
+type Cart {
+  id: BigInt!
+  total: Float!
+
+  """The use that has created this shopping cart"""
+  user: User
+
+  """A list with all the cart products"""
+  products: [CartProduct!]
+}
+
+"""Represents a customer's credit or debit card"""
+type Card {
+  id: BigInt!
+  type: String!
+  expMonth: Int
+  expYear: Int
+  last4: String!
+  cardholderName: String
+  isDefault: Boolean!
+  stripeId: String!
+
+  """The customer that owns this credit or debit card"""
+  customer: Customer!
+
+  """The brand of the credit or debit card"""
+  brand: CardBrand
+
+  """The country of the customer's card"""
+  country: Country
+}
+
+"""Info to be returned when a card is added to a customer"""
+type AddCard {
+  """The card that is added to a customer"""
+  card: Card!
+
+  """A boolean that indicates if the card has been successfully added"""
+  added: Boolean!
+}
+
+union AddCardResult = AddCard | Error
+
+"""Info to be returned when a customer card details are updated"""
+type UpdateCard {
+  """The card that is updated"""
+  card: Card!
+
+  """
+  A boolean that indicates if the card details have been successfully updated
+  """
+  updated: Boolean!
+}
+
+union UpdateCardResult = UpdateCard | Error
+
+"""Represents a customer"""
+type Customer {
+  id: BigInt!
+  email: Email!
+  phoneNumber: String!
+
+  """The user that is a customer too"""
+  user: User
+
+  """A list of all the customers cards"""
+  cards: [Card!]
+
+  """The country of the customer"""
+  country: Country
+}
+
+"""Info to be returned when a customer is added (registered)"""
+type AddCustomer {
+  """The customer that is added (registered)"""
+  customer: Customer!
+
+  """
+  A boolean that indicates if the customer has been successfully added (registered)
+  """
+  added: Boolean!
+}
+
+union AddCustomerResult = AddCustomer | Error
+
+"""Info to be returned when a customer details are updated"""
+type UpdateCustomer {
+  """The customer that is updated"""
+  customer: Customer!
+
+  """
+  A boolean that indicates if the customer details have been successfully updated
+  """
+  updated: Boolean!
+}
+
+union UpdateCustomerResult = UpdateCustomer | Error
+
+"""Represents the brand of a credit or debit card"""
+type CardBrand {
+  id: ID!
+  name: String!
+}
+
+"""Represents a city of a country"""
+type City {
+  """The ID of the city"""
+  id: ID!
+
+  """The name of the city"""
+  name: String!
+
+  """A second name of the city"""
+  secondName: String
+
+  """The country of the city"""
+  country: Country
+}
+
+"""Represents a currency"""
+type Currency {
+  id: ID!
+
+  """The name of the currency"""
+  name: String!
+
+  """The ISO code of the currency internationally"""
+  isoCode: String!
+
+  """The currency's symbol"""
+  symbol: String!
+
+  """The currency's second (alternative) symbol"""
+  secondSymbol: String
+}
+
+"""Represents the info of an icon for a country's flag"""
+type CountryFlagIcon {
+  """The ID value of the flag icon"""
+  id: ID!
+
+  """The URL value of the flag icon image"""
+  urlValue: String!
+
+  """The size of the flag icon"""
+  size: IconSize!
+}
+
+"""Represents a country"""
+type Country {
+  """The ID of the country"""
+  id: ID!
+
+  """The name of the country"""
+  name: String!
+
+  """A short name (abbreviation) of the country"""
+  shortName: String
+
+  """The calling code of the country"""
+  callingCode: String!
+
+  """The ISO registered code of the country"""
+  isoCode: String!
+
+  """The language identifier (locale) of the country"""
+  languageId: String!
+
+  """A boolean that indicates if the country is part of European Union (EU)"""
+  isEu: Boolean!
+
+  """The cities of the country"""
+  cities: [City!]
+
+  """The currency of the country"""
+  currency: Currency!
+
+  """The flag icons in a variety of sizes of a country"""
+  flagIcon: [CountryFlagIcon!]!
+}
+
+"""Represents the status of a payment"""
+type PaymentStatus {
+  id: ID!
+  status: String!
+}
+
+"""Represents a component of a #beach_bar product. For example a sunbed."""
+type ProductComponent {
+  id: ID!
+  title: String!
+  description: String!
+  iconUrl: URL!
+}
+
+"""Represents a #beach_bar product & its components"""
+type BundleProductComponent {
+  """The product of the #beach_bar"""
+  product: Product!
+
+  """The component of the product"""
+  component: ProductComponent!
+  quantity: Int!
+}
+
+"""Represents a #beach_bar's product category"""
+type ProductCategory {
+  id: ID!
+  name: String!
+  underscoredName: String!
+  description: String
+
+  """The component of a product"""
+  productComponents: [ProductComponent!]!
+}
+
+"""Represents a review's visit type, by the user"""
+type ReviewVisitType {
+  id: ID!
+
+  """The name of the particular visit type"""
+  name: String!
+}
+
+"""Represents each hour of the day"""
+type HourTime {
+  id: ID!
+  value: String!
+
+  """The time value in the UTC format and corresponding value"""
+  utcValue: Time!
+}
+
+"""Represents each quarter of the day"""
+type QuarterTime {
+  id: ID!
+  value: String!
+
+  """The time value in the UTC format and corresponding value"""
+  utcValue: Time!
+}
+
+"""Represents each month of the year"""
+type MonthTime {
+  id: ID!
+  value: String!
+
+  """The days (count) of a month"""
+  days: Int!
+}
+
+"""Represents a #beach_bar's category"""
+type BeachBarCategory {
+  id: ID!
+  name: String!
+  description: String
+}
+
+"""Represents an icon size (dimensions)"""
+type IconSize {
+  id: ID!
+
+  """
+  The size as an "Integer"
+  """
+  value: Int!
+
+  """
+  The formatted value of the icon size, in as a "String"
+  """
+  formattedValue: String!
+}
+
+"""Represents a voting category"""
+type VoteCategory {
+  id: ID!
+  title: String!
+  description: String!
+  refCode: String!
+}
+
+"""Represents the votes (voting result) of a voting category"""
+type VoteTag {
+  id: ID!
+  upvotes: Int!
+  downvotes: Int!
+  totalVotes: Int
+
+  """The voting category these vote results are assigned to"""
+  category: VoteCategory!
+}
+
+"""Mutation"""
+type Mutation {
+  """Upload a single file"""
+  uploadSingleFile(
+    """The file to upload"""
+    file: Upload!
+  ): File
+
+  """Sample mutation"""
+  hello(name: String): String!
+  signS3(
+    """The name of the file to sign (upload)"""
+    filename: String!
+
+    """The type of the file to sign (upload)"""
+    filetype: String!
+
+    """The name of the table in PostgreSQL"""
+    tableName: String!
+  ): S3Payload
+
+  """Add an entry fee(s) to a #beach_bar"""
+  addBeachBarEntryFee(
+    """The ID value of the #beach_bar to add the entry fee(s)"""
+    beachBarId: Int!
+
+    """The price value of the entry fee. Its value cannot be less than 0"""
+    fee: Float!
+
+    """A list with all the dates to add (assign) the entry fee"""
+    dates: [Date!]!
+  ): AddBeachBarEntryFeeResult!
+
+  """Update an or many entry fee(s) of a #beach_bar"""
+  updateBeachBarEntryFee(
+    """A list with all the entry fess to update"""
+    entryFeeIds: [BigInt!]!
+
+    """The price value to update the entry fees"""
+    fee: Float
+  ): UpdateBeachBarEntryFeeResult!
+
+  """Delete (remove) an or some entry fees from a #beach_bar"""
+  deleteBeachBarEntryFee(
+    """
+    A list with all the ID values of entry fee(s) to delete (remove) from a #beach_bar
+    """
+    entryFeeIds: [BigInt!]!
+  ): DeleteResult!
+
+  """Add an image (URL) to a #beach_bar"""
+  addBeachBarImgUrl(
+    """The ID value of the #beach_bar"""
+    beachBarId: Int!
+
+    """The URL value of the image"""
+    imgUrl: URL!
+
+    """
+    A short description about what the image represents. The characters of the description should not exceed the number 175
+    """
+    description: String
+  ): AddBeachBarImgUrlResult!
+
+  """Update the details of a #beach_bar's image"""
+  updateBeachBaImgUrl(
+    """The ID value of the #beach_bar's image"""
+    imgUrlId: ID!
+
+    """The URL value of the image"""
+    imgUrl: URL
+
+    """
+    A short description about what the image represents. The characters of the description should not exceed the number 175
+    """
+    description: String
+  ): UpdateBeachBarImgUrlResult!
+
+  """Delete an image (URL) from a #beach_bar"""
+  deleteBeachBarImgUrl(
+    """The ID value of the #beach_bar's image"""
+    imgUrlId: ID!
+  ): DeleteResult!
+
+  """Add (assign) a location to a #beach_bar"""
+  addBeachBarLocation(
+    """The ID value of the #beach_bar"""
+    beachBarId: Int!
+
+    """The address of the #beach_bar"""
+    address: String!
+
+    """The zip (postal) code of the #beach_bar"""
+    zipCode: String
+
+    """The latitude of the location of the #beach_bar"""
+    latitude: String!
+
+    """The longitude of the location of the #beach_bar"""
+    longitude: String!
+
+    """The ID value of the country the #beach_bar is located at"""
+    countryId: ID!
+
+    """The ID value of the city the #beach_bar is located at"""
+    cityId: ID!
+
+    """The ID value of the #beach_bar region"""
+    regionId: Int
+  ): AddBeachBarLocationResult!
+
+  """Update the location details of a #beach_bar"""
+  updateBeachBarLocation(
+    """The ID value of the #beach_bar location"""
+    locationId: Int!
+
+    """The address of the #beach_bar"""
+    address: String
+
+    """The zip (postal) code of the #beach_bar"""
+    zipCode: String
+
+    """The latitude of the location of the #beach_bar"""
+    latitude: String
+
+    """The longitude of the location of the #beach_bar"""
+    longitude: String
+
+    """The ID value of the country the #beach_bar is located at"""
+    countryId: Int
+
+    """The ID value of the city the #beach_bar is located at"""
+    cityId: Int
+
+    """The ID value of the #beach_bar region"""
+    regionId: Int
+  ): UpdateBeachBarLocationResult!
+
+  """Add (register) a new #beach_bar to the platform"""
+  addBeachBar(
+    """
+    The name to register the #beach_bar. It should be unique among other ones
+    """
+    name: String!
+
+    """A description of the #beach_bar"""
+    description: String
+
+    """
+    A thumbnail URL value of the #beach_bar's image to show in search results
+    """
+    thumbnailUrl: String
+
+    """A phone number to contact the #beach_bar directly"""
+    contactPhoneNumber: String!
+
+    """
+    A boolean that indicates if to NOT display the phone number when retrieving #beach_bar info. Its default value is set to false
+    """
+    hidePhoneNumber: Boolean! = false
+
+    """
+    Set to true if the #beach_bar accepts for a customer / user to have less than the #beach_bar minimum currency price
+    """
+    zeroCartTotal: Boolean!
+
+    """The ID value of the category of the #beach_bar"""
+    categoryId: Int!
+
+    """
+    The ID value of the opening quarter time of the #beach_bar, in its country time zone
+    """
+    openingTimeId: Int!
+
+    """
+    The ID value of the closing quarter time of the #beach_bar, in its country time zone
+    """
+    closingTimeId: Int!
+
+    """The response code from Google's OAuth callback"""
+    code: String!
+
+    """The response state, to check if everything went correct"""
+    state: String!
+  ): AddBeachBarResult!
+
+  """Update a #beach_bar details"""
+  updateBeachBar(
+    """The ID value of the #beach_bar"""
+    beachBarId: Int!
+
+    """
+    The name to register the #beach_bar. It should be unique among other ones
+    """
+    name: String
+
+    """A description of the #beach_bar"""
+    description: String
+
+    """
+    A thumbnail URL value of the #beach_bar's image to show in search results
+    """
+    thumbnailUrl: String
+
+    """A phone number to contact the #beach_bar directly"""
+    contactPhoneNumber: String
+
+    """
+    A boolean that indicates if to NOT display the phone number when retrieving #beach_bar info. Its default value is set to false
+    """
+    hidePhoneNumber: Boolean
+
+    """
+    Set to true if the #beach_bar accepts for a customer / user to have less than the #beach_bar minimum currency price
+    """
+    zeroCartTotal: Boolean
+
+    """
+    Set to true, if to show #beach_bar in the search results, even if it has no availability
+    """
+    isAvailable: Boolean
+
+    """The ID value of the category of the #beach_bar"""
+    categoryId: Int
+
+    """
+    The ID value of the opening quarter time of the #beach_bar, in its country zone
+    """
+    openingTimeId: Int
+
+    """
+    The ID value of the closing quarter time of the #beach_bar, in its country zone
+    """
+    closingTimeId: Int
+  ): UpdateBeachBarResult!
+
+  """Delete (remove) a #beach_bar from the platform"""
+  deleteBeachBar(
+    """The ID value of the #beach_bar"""
+    beachBarId: Int!
+  ): DeleteResult!
+
+  """Update the status of a #beach_bar. If it is active or not"""
+  updateBeachBarStatus(
+    """The ID value of the #beach_bar"""
+    beachBarId: Int!
+
+    """Set to true if the #beach_bar is active"""
+    isActive: Boolean!
+  ): UpdateBeachBarResult!
+
+  """Add a product to a #beach_bar"""
+  addProduct(
+    """The ID value of the #beach_bar to add the product to"""
+    beachBarId: Int!
+
+    """The name of the product"""
+    name: String!
+
+    """A short description of the product"""
+    description: String
+
+    """The ID value of the category of the product"""
+    categoryId: Int!
+
+    """The price of the product"""
+    price: Float!
+
+    """
+    A boolean that indicates if the product is active & can be purchased by a user or a customer
+    """
+    isActive: Boolean = false
+
+    """How many people can use this specific product"""
+    maxPeople: Int!
+
+    """An image for the #beach_bar's product"""
+    imgUrl: URL!
+  ): AddProductResult!
+
+  """Update a #beach_bar's product info"""
+  updateProduct(
+    """The ID value of the product"""
+    productId: Int!
+
+    """The name of the product"""
+    name: String!
+
+    """A short description of the product"""
+    description: String
+
+    """The ID value of the category of the product"""
+    categoryId: Int
+
+    """The price of the product"""
+    price: Float
+
+    """
+    A boolean that indicates if the product is active & can be purchased by a user or a customer
+    """
+    isActive: Boolean
+
+    """How many people can use this specific product"""
+    maxPeople: Int!
+
+    """An image for the #beach_bar's product"""
+    imgUrl: URL
+  ): UpdateProductResult!
+
+  """Delete (remove) a product from a #beach_bar"""
+  deleteProduct(
+    """The ID value of the product"""
+    productId: Int!
+  ): DeleteResult!
+
+  """Restore a (soft) deleted #beach_bar product"""
+  restoreBeachBarProduct(
+    """The ID value of the product"""
+    productId: Int!
+  ): UpdateProductResult!
+
+  """Add a coupon code"""
+  addCouponCode(
+    """The name or a short description of the coupon code"""
+    title: String!
+
+    """The percentage of the coupon code discount"""
+    discountPercentage: Float!
+
+    """The ID value of the #beach_bar, to apply the coupon code for"""
+    beachBarId: ID
+
+    """
+    A timestamp that indicates until what date and time this coupon code is applicable and valid
+    """
+    validUntil: DateTime!
+
+    """
+    Set to true if coupon code is active. Its default value is set to false
+    """
+    isActive: Boolean! = false
+
+    """Represents how many times this coupon code can be used"""
+    timesLimit: Int!
+  ): AddCouponCodeResult!
+
+  """Update a coupon code"""
+  updateCouponCode(
+    """The ID value of the coupon code"""
+    couponCodeId: BigInt!
+
+    """The name or a short description of the coupon code"""
+    title: String
+
+    """The percentage of the coupon code discount"""
+    discountPercentage: Float
+
+    """
+    A timestamp that indicates until what date and time this coupon code is applicable and valid
+    """
+    validUntil: DateTime
+
+    """
+    Set to true if coupon code is active. Its default value is set to false
+    """
+    isActive: Boolean
+
+    """Represents how many times this coupon code can be used"""
+    timesLimit: Int
+  ): UpdateCouponCodeResult!
+  deleteCouponCode(
+    """The ID value of the coupon code"""
+    couponCodeId: BigInt!
+  ): DeleteResult!
+
+  """Add an offer campaign to a #beach_bar"""
+  addOfferCampaign(
+    """The ID value of the product"""
+    productIds: [Int!]!
+
+    """The name or a short description of the coupon code"""
+    title: String!
+
+    """The percentage of the coupon code discount"""
+    discountPercentage: Float!
+
+    """
+    A timestamp that indicates until what date and time this coupon code is applicable and valid
+    """
+    validUntil: DateTime!
+
+    """
+    Set to true if coupon code is active. Its default value is set to false
+    """
+    isActive: Boolean! = false
+  ): AddOfferCampaignResult!
+
+  """Update the details of an offer campaign of a #beach_bar"""
+  updateOfferCampaign(
+    """The ID value of the offer campaign"""
+    offerCampaignId: BigInt!
+
+    """The ID value of the product"""
+    productIds: [Int]!
+
+    """The name or a short description of the coupon code"""
+    title: String
+
+    """The percentage of the coupon code discount"""
+    discountPercentage: Float
+
+    """
+    A timestamp that indicates until what date and time this coupon code is applicable and valid
+    """
+    validUntil: DateTime
+
+    """
+    Set to true if coupon code is active. Its default value is set to false
+    """
+    isActive: Boolean
+  ): UpdateOfferCampaignResult!
+
+  """Delete an offer campaign of a #beach_bar"""
+  deleteOfferCampaign(
+    """The ID value of the offer campaign"""
+    offerCampaignId: BigInt!
+  ): DeleteResult!
+
+  """Add (issue) a new offer code"""
+  addOfferCampaignCode(
+    """The ID value of the offer campaign"""
+    offerCampaignId: BigInt!
+  ): AddOfferCampaignCodeResult!
+
+  """Delete (invalidate) an offer code of an offer campaign"""
+  deleteOfferCode(
+    """The ID value of the offer campaign"""
+    offerCodeId: BigInt!
+  ): DeleteResult!
+
+  """Add a reservation limit to a #beach_bar product"""
+  addProductReservationLimit(
+    """The ID value of the product to add this reservation limit"""
+    productId: Int!
+
+    """
+    The number to add as a limit a #beach_bar can provide the product, for specific date(s)
+    """
+    limit: Int!
+
+    """A list of days this limit is applicable for"""
+    dates: [Date!]!
+
+    """The ID value of the hour time from when this limit is applicable"""
+    startTimeId: Int!
+
+    """
+    The ID value of the hour time from when this limit is terminated (is not applicable anymore)
+    """
+    endTimeId: Int!
+  ): AddProductReservationLimitResult!
+
+  """Update a #beach_bar's product reservation limit"""
+  updateProductReservationLimit(
+    """A list with all the reservation limits to update"""
+    reservationLimitIds: [BigInt!]!
+
+    """
+    The number to add as a limit a #beach_bar can provide the product, for specific date(s)
+    """
+    limit: Int
+
+    """The ID value of the hour time from when this limit is applicable"""
+    startTimeId: Int
+
+    """
+    The ID value of the hour time from when this limit is terminated (is not applicable anymore)
+    """
+    endTimeId: Int
+  ): UpdateProductReservationLimitResult!
+
+  """Delete a or some reservation limit(s) from a #beach_bar's product"""
+  deleteProductReservationLimit(
+    """A list with all the reservation limits to delete"""
+    reservationLimitIds: [BigInt!]!
+  ): DeleteResult!
+
+  """Add a food item to a #beach_bar restaurant"""
+  addRestaurantFoodItem(
+    """The ID value of the #beach_bar restaurant"""
+    restaurantId: Int!
+
+    """The name of the food item"""
+    name: String!
+
+    """The price of the food item in the menu catalogue"""
+    price: Float!
+
+    """
+    The ID value of the category of the gastronomic menu, the food item is assigned to
+    """
+    menuCategoryId: Int!
+
+    """An image representing the food item product"""
+    imgUrl: String
+  ): AddRestaurantFoodItemResult!
+
+  """Update a #beach_bar's restaurant food item details"""
+  updateRestaurantFoodItem(
+    """The ID value of the food item"""
+    foodItemId: BigInt!
+
+    """The name of the food item"""
+    name: String
+
+    """The price of the food item in the menu catalogue"""
+    price: Float
+
+    """
+    The ID value of the category of the gastronomic menu, the food item is assigned to
+    """
+    menuCategoryId: Int
+
+    """An image representing the food item product"""
+    imgUrl: String
+  ): UpdateRestaurantFoodItemResult!
+
+  """Delete (remove) a food item from a #beach_bar's restaurant"""
+  deleteRestaurantFoodItem(
+    """The ID value of the food item"""
+    foodItemId: BigInt!
+  ): DeleteResult!
+
+  """Add a restaurant of a #beach_bar"""
+  addBeachBarRestaurant(
+    """The ID value of the #beach_bar the restaurant will be added to"""
+    beachBarId: Int!
+
+    """The name of the restaurant"""
+    name: String!
+
+    """A short description, info text, about the restaurant itself"""
+    description: String
+
+    """
+    A boolean that indicates if the restaurant is active or not. Its default value is false
+    """
+    isActive: Boolean = false
+  ): AddBeachBarRestaurantResult!
+
+  """Update the restaurant details of a #beach_bar"""
+  updateBeachBarRestaurant(
+    """The ID value of the restaurant"""
+    restaurantId: Int!
+
+    """The name of the restaurant"""
+    name: String
+
+    """A short description, info text, about the restaurant itself"""
+    description: String
+
+    """A boolean that indicates if the restaurant is active or not"""
+    isActive: Boolean
+  ): UpdateBeachBarRestaurantResult!
+
+  """Delete (remove) a restaurant from a #beach_bar"""
+  deleteBeachBarRestaurant(
+    """The ID value of the #beach_bar restaurant"""
+    restaurantId: Int!
+  ): DeleteResult!
+
+  """Add a reply to a #beach_bar's review, by its owner"""
+  addReviewAnswer(
+    """The ID value of the customer's review"""
+    reviewId: BigInt!
+
+    """The body of the reply"""
+    body: String!
+  ): AddReviewAnswerResult!
+
+  """Update the body of a #beach_bar's review reply"""
+  updateReviewAnswer(
+    """The ID value of the review's answer"""
+    answerId: BigInt!
+
+    """The body of the reply"""
+    body: String
+  ): UpdateReviewAnswerResult!
+
+  """Delete (remove) a reply from a #beach_bar's review"""
+  deleteReviewAnswer(
+    """The ID value of the review's answer"""
+    answerId: BigInt!
+  ): DeleteResult!
+
+  """Add a customer's review on a #beach_bar"""
+  addBeachBarReview(
+    """The ID value of the #beach_bar, to submit the review"""
+    beachBarId: Int!
+
+    """The referral code of the customer payment, to find"""
+    paymentRefCode: String
+
+    """The rating value between 1 to 10, the customers rates the #beach_bar"""
+    ratingValue: Int!
+
+    """The ID value of the customer's visit type"""
+    visitTypeId: Int
+
+    """The ID value of the month time"""
+    monthTimeId: Int
+
+    """A positive comment about the #beach_bar"""
+    positiveComment: String
+
+    """A negative comment about the #beach_bar"""
+    negativeComment: String
+
+    """A summary (description) of the user's overall review"""
+    review: String
+  ): AddBeachBarReviewResult!
+
+  """Update a customer's review on a #beach_bar"""
+  updateBeachBarReview(
+    """The ID value of the customer's review"""
+    reviewId: BigInt!
+
+    """The rating value between 1 to 10, the customers rates the #beach_bar"""
+    ratingValue: Int
+
+    """The ID value of the customer's visit type"""
+    visitTypeId: Int
+
+    """The ID value of the month time"""
+    monthTimeId: Int
+
+    """A positive comment about the #beach_bar"""
+    positiveComment: String
+
+    """A negative comment about the #beach_bar"""
+    negativeComment: String
+
+    """A summary (description) of the user's overall review"""
+    review: String
+  ): UpdateBeachBarReviewResult!
+
+  """Delete a customer's review on a #beach_bar"""
+  deleteBeachBarReview(
+    """The ID value of the customer's review"""
+    reviewId: BigInt!
+  ): DeleteResult!
+
+  """Upvote or downvote a customer's review on a #beach_bar"""
+  voteBeachBarReview(
+    """The ID value of the customer's review"""
+    reviewId: BigInt!
+
+    """Set to true if to increment the review's votes"""
+    upvote: Boolean
+
+    """Set to true if to decrement the review's votes"""
+    downvote: Boolean
+  ): UpdateBeachBarReviewResult!
+
+  """Add (assign) a feature to a #beach_bar"""
+  addBeachBarFeature(
+    """The ID value of the #beach_bar to add (assign) the feature"""
+    beachBarId: Int!
+
+    """The ID value of the feature to add (assign) to the #beach_bar"""
+    featureId: Int!
+
+    """
+    An integer that indicates the quantity of the service, a #beach_bar provides
+    """
+    quantity: Int! = 1
+
+    """A short description about the service"""
+    description: String
+  ): AddBeachBarFeatureResult!
+
+  """Update a feature of a #beach_bar"""
+  updateBeachBarFeature(
+    """The ID value of the #beach_bar to update its feature info"""
+    beachBarId: Int!
+
+    """The ID value of the feature of the #beach_bar, to update its info"""
+    featureId: Int!
+
+    """
+    An integer that indicates the quantity of the service, a #beach_bar provides
+    """
+    quantity: Int
+
+    """A short description about the service"""
+    description: String
+  ): UpdateBeachBarFeatureResult!
+
+  """Delete (remove) a feature (service) from a #beach_bar"""
+  deleteBeachBarFeature(
+    """The ID value of the #beach_bar to delete (remove) its feature"""
+    beachBarId: Int!
+
+    """The ID value of the feature of the #beach_bar, to delete (remove)"""
+    featureId: Int!
+  ): DeleteResult!
+
+  """Get the latest cart of an authenticated user or create one"""
+  getOrCreateCart(
+    """The ID values of the shopping cart, if it is created previously"""
+    cartId: BigInt
+  ): Cart!
+
+  """
+  Delete a cart after a transition. This mutation is also called if the user is not authenticated & closes the browser tab
+  """
+  deleteCart(
+    """The ID values of the shopping cart"""
+    cartId: BigInt!
+  ): DeleteResult!
+
+  """Add a product to a shopping cart"""
+  addCartProduct(
+    """The ID value of the shopping cart"""
+    cartId: Int!
+
+    """The ID value of the product to add"""
+    productId: Int!
+
+    """
+    The number that indicates how many times to add the product to the cart. Its default value is 1
+    """
+    quantity: Int = 1
+
+    """The ID value of the hour time of product use"""
+    timeId: Int!
+
+    """
+    The date to purchase the product. Its default value its the current date
+    """
+    date: Date
+  ): AddCartProductResult!
+
+  """Update the quantity of a product in a shopping cart"""
+  updateCartProduct(
+    """The ID value of the shopping cart"""
+    cartId: Int!
+
+    """The ID value of the product to update its quantity"""
+    productId: Int!
+
+    """
+    The number that indicates how many times to add the product to the cart
+    """
+    quantity: Int
+  ): UpdateCartProductResult!
+
+  """Delete (remove) a product from a shopping cart"""
+  deleteCartProduct(
+    """The ID value of the shopping cart"""
+    cartId: Int!
+
+    """The ID value of the product to delete (remove)"""
+    productId: Int!
+  ): DeleteResult!
+
+  """Add a credit / debit card to a customer"""
+  addCustomerCard(
+    """
+    A token returned by Stripe (Stripe.js & Elements), which will automatically validate the card
+    """
+    source: String!
+
+    """The ID value of the registered customer"""
+    customerId: BigInt
+
+    """The (full) name of the cardholder of the card registered"""
+    cardholderName: String
+
+    """
+    A boolean that indicates if the card registered is the default one for the customer, to use in its transactions. Its default value is false
+    """
+    isDefault: Boolean = false
+  ): AddCardResult!
+
+  """Update the details of customer's card"""
+  updateCustomerCard(
+    """The ID values of the card to update"""
+    cardId: BigInt!
+
+    """The (full) name of the cardholder of the card"""
+    cardholderName: String
+
+    """The expiration month of the card"""
+    expMonth: Int
+
+    """The expiration year of the card"""
+    expYear: Int
+
+    """
+    A boolean that indicates if the card is the default one for the customer, to use in its transactions
+    """
+    isDefault: Boolean
+  ): UpdateCardResult!
+
+  """Delete (remove) a card from a customer"""
+  deleteCustomerCard(
+    """The ID values of the card to delete"""
+    cardId: BigInt!
+  ): DeleteResult!
+
+  """Add a customer"""
+  getOrAddCustomer(
+    """
+    The email address of an authenticated or non user, to register as a client
+    """
+    email: Email!
+
+    """The phone number of the customer"""
+    phoneNumber: String
+
+    """The ISO code of the country of customer's telephone"""
+    countryIsoCode: String
+  ): AddCustomerResult!
+
+  """Update a customer's details"""
+  updateCustomer(
+    """The ID value of the customer"""
+    customerId: BigInt!
+
+    """The phone number of the customer"""
+    phoneNumber: String
+
+    """The ISO code of the country of customer's telephone"""
+    countryIsoCode: String
+  ): UpdateCustomerResult!
+
+  """Delete (remove) a customer"""
+  deleteCustomer(
+    """The ID value of the registered customer to delete"""
+    customerId: BigInt
+  ): DeleteResult!
+
+  """Authorize a user with Google"""
+  authorizeWithGoogle(
+    """The response code from Google's OAuth callback"""
+    code: String!
+
+    """The response state, to check if everything went correct"""
+    state: String!
+
+    """User details in login"""
+    loginDetails: UserLoginDetailsInput
+
+    """Set to true if you want to sign up an owner for a #beach_bar"""
+    isPrimaryOwner: Boolean = false
+  ): OAuthAuthorizationResult!
+
+  """Authorize a user with Facebook"""
+  authorizeWithFacebook(
+    """The response code from Google's OAuth callback"""
+    code: String!
+
+    """The response state, to check if everything went correct"""
+    state: String!
+
+    """User details in login"""
+    loginDetails: UserLoginDetailsInput
+
+    """Set to true if you want to sign up an owner for a #beach_bar"""
+    isPrimaryOwner: Boolean = false
+  ): OAuthAuthorizationResult!
+
+  """Authorize a user with Instagram"""
+  authorizeWithInstagram(
+    """Email address of user to authorize with Instagram"""
+    email: Email!
+
+    """The response code from Google's OAuth callback"""
+    code: String!
+
+    """The response state, to check if everything went correct"""
+    state: String!
+
+    """User details in login"""
+    loginDetails: UserLoginDetailsInput
+
+    """Set to true if you want to sign up an owner for a #beach_bar"""
+    isPrimaryOwner: Boolean = false
+  ): OAuthAuthorizationResult!
+
+  """
+  Add (assign) another owner to a #beach_bar too. Only available for the primary owner of a #beach_bar
+  """
+  addBeachBarOwner(
+    """The ID value of the #beach_bar the owner will be added (assigned) to"""
+    beachBarId: Int!
+
+    """
+    The user to add (assign) to the #beach_bar, to become one of its owners
+    """
+    userId: Int
+
+    """
+    Set to true if the user will become the or one of the primary owners of the #beach_bar. It is set to false by default
+    """
+    isPrimary: Boolean = false
+  ): AddBeachBarOwnerResult!
+
+  """Update a #beach_bar's owner info"""
+  updateBeachBarOwner(
+    """The ID value of the #beach_bar the owner is added (assigned) to"""
+    beachBarId: Int!
+
+    """
+    The user to update its info. It should not be null or 0, if a primary owner wants to update another owner
+    """
+    userId: Int
+
+    """
+    A boolean that indicates if the owner info (contact details) are meant to be presented online to the public
+    """
+    publicInfo: Boolean
+
+    """
+    Set to true if the user will become the or one of the primary owners of the #beach_bar. It is set to false by default
+    """
+    isPrimary: Boolean = false
+  ): UpdateBeachBarOwnerResult!
+
+  """Delete (remove) an owner from a #beach_bar"""
+  deleteBeachBarOwner(
+    """The ID value of the #beach_bar the owner is added (assigned) to"""
+    beachBarId: Int!
+
+    """
+    The owner with its userId to delete (remove) from the #beach_bar. Its value should not be null or 0, if a primary owner wants to update another primary owner
+    """
+    userId: Int
+  ): DeleteResult!
+
+  """Create (make) a payment for a customer's shopping cart"""
+  checkout(
+    """The ID value of the shopping cart with the products to purchase"""
+    cartId: BigInt!
+
+    """The ID value of the credit or debit card of the customer"""
+    cardId: BigInt!
+
+    """
+    A coupon or offer campaign code to make a discount to the shopping cart's or payment's price
+    """
+    voucherCode: String
+  ): AddPaymentResult!
+
+  """Refund a payment"""
+  refundPayment(
+    """The ID value of the payment to update"""
+    paymentId: BigInt!
+  ): DeleteResult!
+
+  """Update a previous user's search"""
+  updateSearch(
+    """The ID value of a previous user search"""
+    searchId: ID!
+
+    """
+    A list with the filter IDs to add in the search, found in the documentation
+    """
+    filterIds: [String]!
+  ): UserSearch
+
+  """Add contact details to a user"""
+  addUserContactDetails(
+    """The ID value of the country of the contact details"""
+    countryId: Int
+
+    """A secondary email address for the user"""
+    secondaryEmail: Email
+
+    """A phone number to call the user"""
+    phoneNumber: String
+  ): AddUserContactDetailsResult!
+
+  """Update specific contact details of a user"""
+  updateUserContactDetails(id: Int!, secondaryEmail: Email, phoneNumber: String): UpdateUserContactDetailsResult!
+
+  """Delete (remove) specific contact details from user"""
+  deleteContactDetails(id: Int): DeleteResult!
+
+  """Add a #beach_bar to user's favorites list"""
+  addUserFavoriteBar(
+    """The ID value of the #beach_bar, to add to the user's favorites list"""
+    beachBarId: Int!
+  ): AddUserFavoriteBarResult!
+
+  """Remove a #beach_bar from a user's favorites list"""
+  deleteUserFavoriteBar(
+    """The ID value of the #beach_bar, to add to the user's favorites list"""
+    beachBarId: Int!
+  ): DeleteResult!
+
+  """Sign up a user"""
+  signUp(
+    """Credential for signing up a user"""
+    userCredentials: UserCredentialsInput!
+
+    """Set to true if you want to sign up an owner for a #beach_bar"""
+    isPrimaryOwner: Boolean = false
+  ): UserSignUpResult!
+
+  """Login a user"""
+  login(
+    """User details in login"""
+    loginDetails: UserLoginDetailsInput
+
+    """Credential for signing up a user"""
+    userCredentials: UserCredentialsInput!
+  ): UserLoginResult!
+
+  """Logout a user"""
+  logout: SuccessResult!
+
+  """Sends a link to the user's email address to change its password"""
+  sendForgotPasswordLink(
+    """The email address of user"""
+    email: Email!
+  ): SuccessResult!
+
+  """Change a user's password"""
+  changeUserPassword(
+    """Email of user to retrieve OAuth Client applications"""
+    email: Email!
+
+    """
+    The key in the URL to identify and verify user. Each key lasts 20 minutes
+    """
+    key: String!
+
+    """User's new password"""
+    newPassword: String!
+  ): SuccessResult!
+
+  """Update a user's info"""
+  updateUser(
+    email: Email
+    firstName: String
+    lastName: String
+    imgUrl: URL
+
+    """The honorific title of the user"""
+    personTitle: String
+
+    """User's birthday in the date format"""
+    birthday: Date
+
+    """The country of user"""
+    countryId: Int
+
+    """The city or hometown of user"""
+    cityId: Int
+
+    """User's house or office street address"""
+    address: String
+
+    """User's house or office zip code"""
+    zipCode: String
+
+    """Indicates if to track user's history"""
+    trackHistory: Boolean
+  ): UserUpdateResult!
+
+  """Delete a user & its account"""
+  deleteUser: DeleteResult!
+}
+
+"""User info to be returned on Google OAuth authorization"""
+type OAuthAuthorization {
+  """The JWT access token to be returned upon successful login"""
+  accessToken: String!
+
+  """A boolean that indicates if the user has successfully signed up"""
+  signedUp: Boolean!
+
+  """A boolean that indicates if the user has successfully logined"""
+  logined: Boolean!
+
+  """The user being authorized"""
+  user: User!
+}
+
+union OAuthAuthorizationResult = OAuthAuthorization | Error
+
+"""Represents a user that is an owner of a #beach_bar"""
+type Owner {
+  id: ID!
+
+  """The user that is the owner or one of the owners of the #beach_bar"""
+  user: User!
+}
+
+"""Represents a #beach_bar's owner"""
+type BeachBarOwner {
+  """
+  A boolean that indicates if the owner is the user that also created the #beach_bar & can make modifications
+  """
+  isPrimary: Boolean!
+
+  """
+  A boolean that indicates if the owner info (contact details) are allowed to be presented to the public
+  """
+  publicInfo: Boolean!
+
+  """
+  The #beach_bar the user is assigned to as an owner, either as a primary one or not
+  """
+  beachBar: BeachBar!
+
+  """The owner of the #beach_bar"""
+  owner: Owner!
+
+  """The date and time the owner was added (assigned) to the #beach_bar"""
+  timestamp: DateTime!
+}
+
+"""Info to be returned when an owner is added (assigned) to a #beach_bar"""
+type AddBeachBarOwner {
+  """The owner being added & its info"""
+  owner: BeachBarOwner
+
+  """
+  A boolean that indicates if the owner has been successfully being added (assigned) to a #beach_bar
+  """
+  added: Boolean
+}
+
+union AddBeachBarOwnerResult = AddBeachBarOwner | Error
+
+"""Info to be returned when the info of a #beach_bar owner, are updated"""
+type UpdateBeachBarOwner {
+  """The owner being added & its info"""
+  owner: BeachBarOwner!
+
+  """
+  A boolean that indicates if the owner info have been successfully updated
+  """
+  updated: Boolean!
+}
+
+union UpdateBeachBarOwnerResult = UpdateBeachBarOwner | Error
+
+"""Represents a reserved product"""
+type ReservedProduct {
+  id: BigInt!
+  date: Date!
+
+  """A boolean that indicates if the product was refunded from the payment"""
+  isRefunded: Boolean!
+
+  """The hour (time) that this product was reserved for"""
+  time: HourTime!
+
+  """The product that is reserved"""
+  product: Product!
+
+  """The payment that this product was reserved by"""
+  payment: Payment!
+}
+
+"""
+Info to be returned when a product is marked (added) as a reserved one from a payment
+"""
+type AddReservedProduct {
+  """The product that is marked as a reserved one"""
+  reservedProduct: ReservedProduct!
+
+  """
+  A boolean that indicates if the product has been successfully marked as a reserved one
+  """
+  added: Boolean!
+}
+
+union AddReservedProductResult = AddReservedProduct | Error
+
+"""Info to be returned when a reserved product details are updated"""
+type UpdateReservedProduct {
+  """The reserved product that is updated"""
+  reservedProduct: ReservedProduct!
+
+  """
+  A boolean that indicates if the reserved product details have been successfully updated
+  """
+  updated: Boolean!
+}
+
+union UpdateReservedProductResult = UpdateReservedProduct | Error
+
+"""Represents a payment"""
+type Payment {
+  id: ID!
+
+  """A unique identifier (referral code) of the payment"""
+  refCode: String!
+
+  """Stripe's ID value of the payment"""
+  stripeId: String!
+
+  """A boolean that indicates if the whole payment was refunded"""
+  isRefunded: Boolean!
+
+  """The shopping cart this payment is associated to"""
+  cart: Cart!
+
+  """The credit or debit card this payment is associated to"""
+  card: Card!
+
+  """The status of the payment"""
+  status: PaymentStatus!
+
+  """
+  A coupon or an offer campaign code used, to apply a discount, at this payment
+  """
+  voucherCode: PaymentOfferCode
+
+  """A list with all the reserved products of the payment"""
+  reservedProducts: [ReservedProduct!]
+}
+
+"""Info to be returned when a payment is created (made)"""
+type AddPayment {
+  """The payment that is created (made)"""
+  payment: Payment!
+
+  """
+  A boolean that indicates if the payments have been successfully created (made)
+  """
+  added: Boolean!
+}
+
+union AddPaymentResult = AddPayment | Error
+
+"""Query"""
+type Query {
+  hello: String!
+
+  """Get a list with all entry fees of a #beach_bar"""
+  getAllBeachBarEntryFees(
+    """The ID value of the #beach_bar"""
+    beachBarId: Int!
+
+    """
+    Set to true if to retrieve the entry fees from today and in the future. Its default value is set to true
+    """
+    moreThanOrEqualToToday: Boolean = true
+  ): [BeachBarEntryFee!]!
+
+  """Get a list with all the images (URL values) of a #beach_bar"""
+  getBeachBarImgUrl(
+    """The ID value of the #beach_bar"""
+    beachBarId: Int!
+  ): [BeachBarImgUrl!]
+
+  """Get the product offer or coupon, based on its referral code"""
+  getVoucherCode(
+    """The referral code of the product offer or coupon"""
+    refCode: String!
+  ): VoucherCodeQueryResult
+
+  """Get a list with all the offer campaigns of a #beach_bar"""
+  getBeachBarOfferCampaigns(
+    """The ID value of the #beach_bar"""
+    beachBarId: Int!
+  ): [OfferCampaign!]
+
+  """Get a coupon's code details & its referral code"""
+  revealCouponCode(
+    """The ID value of the coupon code"""
+    couponCodeId: BigInt!
+  ): CouponCodeRevealResult!
+
+  """Get an offer's campaign code details + its referral code"""
+  revealOfferCampaignCode(
+    """The ID value of the offer campaign code"""
+    offerCampaignCodeId: BigInt!
+  ): OfferCampaignCodeRevealResult!
+
+  """Get all products of a #beach_bar"""
+  getBeachBarProducts(
+    """The ID values of the #beach_bar, to get its products"""
+    beachBarId: Int!
+
+    """A boolean that indicates to retrieve only active products"""
+    isActive: Boolean = true
+
+    """
+    A boolean that indicates to retrieve deleted products too. Its default value is set to false
+    """
+    isDeleted: Boolean = false
+  ): [Product!]
+
+  """Retrieve (get) a list with all the available hour times of a product"""
+  getProductAvailabilityHours(
+    """The ID value of the #beach_bar product"""
+    productId: Int!
+
+    """The date to search availability for"""
+    date: Date!
+  ): [ProductAvailabilityHour!]
+  getProductAvailabilityQuantity(
+    """The ID value of the #beach_bar product"""
+    productId: Int!
+
+    """The date to search availability for"""
+    date: Date!
+
+    """The ID value of the hour time to search availability for"""
+    timeId: Int!
+  ): Int
+
+  """Get a list with all the hours this product has reservation limits"""
+  hasProductReservationLimit(
+    """The ID value of the product, to search if available"""
+    productId: Int!
+
+    """
+    The date to purchase the product. Its default value its the current date
+    """
+    date: Date
+  ): [AvailableProduct!]!
+
+  """Get the detail info of a #beach_bar"""
+  getBeachBar(
+    """The ID value of the #beach_bar"""
+    beachBarId: Int!
+
+    """
+    Indicates if to retrieve information for user search. Its default value is set to true
+    """
+    userVisit: Boolean = true
+  ): BeachBar
+
+  """Check a #beach_bar's availability"""
+  checkBeachBarAvailability(
+    """The ID value of the #beach_bar, to check for availability"""
+    beachBarId: Int!
+    availability: SearchInput
+  ): BeachBarAvailability
+
+  """A list with all the available #beach_bars"""
+  getAllBeachBars: [BeachBar!]
+
+  """Verify a user's payment to submit review"""
+  verifyUserPaymentReview(
+    """The ID value of the #beach_bar to submit the review"""
+    beachBarId: Int!
+
+    """The referral code of the customer payment, to find"""
+    refCode: String
+  ): Boolean!
+
+  """Get a list with all the months in a review, by the product purchase"""
+  getPaymentProductsMonth(
+    """The ID value of the #beach_bar to submit the review"""
+    beachBarId: Int!
+
+    """The referral code of the customer payment, to find"""
+    refCode: String
+  ): [MonthTime!]
+  getCartEntryFees(
+    """The ID values of the shopping cart"""
+    cartId: BigInt
+  ): Float
+  verifyZeroCartTotal(
+    """The ID values of the shopping cart"""
+    cartId: BigInt!
+  ): Boolean
+
+  """
+  Returns the URL where the #beach_bar (owner) will be redirected to authorize and register with Stripe, for its connect account
+  """
+  getStripeConnectOAuthUrl: URL
+
+  """Returns the URL where the user will be redirected to login with Google"""
+  getGoogleOAuthUrl: URL!
+
+  """
+  Returns the URL where the user will be redirected to login with Facebook
+  """
+  getFacebookOAuthUrl: URL!
+
+  """
+  Returns the URL where the user will be redirected to login with Instagram
+  """
+  getInstagramOAuthUrl: URL!
+
+  """Returns a list of formatted search input values"""
+  getSearchInputValues: [FormattedSearchInputValue!]!
+
+  """Get a list with a user's latest searches"""
+  getLatestUserSearches: [UserSearch!]
+
+  """Search for available #beach_bars"""
+  search(
+    """The ID value of the search input value, found in the documentation"""
+    inputId: String
+
+    """The search input value, found in the documentation"""
+    inputValue: String
+    availability: SearchInput
+
+    """
+    A list with the filter IDs to add in the search, found in the documentation
+    """
+    filterIds: [String]!
+
+    """The ID value of a previous user search"""
+    searchId: ID
+  ): SearchResult
+
+  """Returns current authenticated user"""
+  me: UserTypeResult!
+}
+
+"""Represents a user search"""
+type UserSearch {
+  id: BigInt!
+  searchDate: Date
+  searchAdults: Int
+  searchChildren: Int
+
+  """The user that made the search"""
+  user: User
+
+  """The input value that the user searched for"""
+  inputValue: SearchInputValue
+
+  """A list with the filters being added to the user's search"""
+  filters: [SearchFilter!]
+  updatedAt: DateTime!
+  timestamp: DateTime!
+}
+
+"""Represents the info (results) to be returned on user search"""
+type SearchResultType {
+  """The #beach_bar found in the search"""
+  beachBar: BeachBar!
+  availability: BeachBarAvailability!
+}
+
+"""
+Represents the info to be returned when a user searches for (availability) at #beach_bars
+"""
+type Search {
+  """The results of the user search"""
+  results: [SearchResultType!]!
+
+  """The details of the search, made by a user"""
+  search: UserSearch!
+}
+
+union SearchResult = Search | Error
+
+"""The arguments (args) used at #beach_bar search or availability"""
+input SearchInput {
+  """The date to search availability at #beach_bars"""
+  date: Date
+
+  """The ID value of the hour time to search availability for"""
+  timeId: Int
+
+  """
+  The number of adults to search availability at #beach_bars. Its value should be less or equal to 12 adults
+  """
+  adults: Int
+
+  """
+  The number of children to search availability at #beach_bars. Its value should be less or equal to 8 children
+  """
+  children: Int
+}
+
+"""Represents a potential input value of a user's search"""
+type SearchInputValue {
+  id: BigInt!
+
+  """A unique identifier (ID) for public use"""
+  publicId: String!
+
+  """The search input value formatted into a string"""
+  formattedValue: String!
+
+  """The country of the input value"""
+  country: Country
+
+  """The city of the input value"""
+  city: City
+
+  """The region of the input value"""
+  region: Region
+
+  """The #beach_bar of the input value"""
+  beachBar: BeachBar
+}
+
+"""
+Represents a filter used by users when searching for (availability at) #beach_bars
+"""
+type SearchFilter {
+  id: ID!
+
+  """A unique identifier (ID) for public use"""
+  publicId: String!
+  name: String!
+
+  """
+  A short description about the filter, what is its value, and when to use
+  """
+  description: String
+}
+
+"""Represents a formatted search input value"""
+type FormattedSearchInputValue {
+  """The search input value"""
+  inputValue: SearchInputValue!
+
+  """
+  The URL value of the #beach_bar thumbnail image to show, at search "dropdown results"
+  """
+  beachBarThumbnailUrl: URL
+}
+
+"""Represents a user's uploaded file"""
+type File {
+  """A string representing the name of the uploaded file"""
+  filename: String!
+
+  """
+  A string representing the MIME type of the uploaded file, such as image/jpeg
+  """
+  mimetype: String!
+
+  """A string representing the file encoding, such as 7bit"""
+  encoding: String!
+}
+
+"""Info to be returned upon successful operation"""
+type Success {
+  """A boolean that indicates if the operation was successful"""
+  success: Boolean!
+}
+
+union SuccessResult = Success | Error
+
+"""Info to be returned upon successful deletion"""
+type Delete {
+  """A boolean that indicates if the delete operation was successful"""
+  deleted: Boolean!
+}
+
+union DeleteResult = Delete | Error
+
+"""Represents a user's account"""
+type UserAccount {
+  """The ID value of the user's account"""
+  id: ID!
+
+  """
+  The user's honorific title. Its value can be null or 'Mr', 'Mrs', 'Ms', 'Miss', 'Sr', 'Dr', 'Lady'
+  """
+  personTitle: String
+
+  """The URL value of user's account profile picture"""
+  imgUrl: String
+
+  """User's birthday date"""
+  birthday: Date
+
+  """User's age"""
+  age: Int
+
+  """The house of office street address of the user"""
+  address: String
+
+  """The zip code of the house or office street address of the user"""
+  zipCode: String
+
+  """The user info of the particular account"""
+  user: User!
+
+  """The country of the user"""
+  country: Country
+
+  """The city or hometown of the user"""
+  city: City
+
+  """Indicates if to track user's history """
+  trackHistory: Boolean!
+
+  """User contact details"""
+  contactDetails: [UserContactDetails!]
+}
+
+"""Represents the contact details info of a user"""
+type UserContactDetails {
+  """The ID value of user's account contact details"""
+  id: ID!
+
+  """The account of user"""
+  account: UserAccount!
+
+  """The country origin of a user"""
+  country: Country
+
+  """A secondary email address to contact the user"""
+  secondaryEmail: Email
+
+  """User's phone number"""
+  phoneNumber: String
+}
+
+"""
+Info to be returned when contact details are added (assigned) to a user
+"""
+type AddUserContactDetails {
+  """The contact details of the user"""
+  contactDetails: UserContactDetails!
+
+  """
+  A boolean that indicates if the contact details have been successfully added (assigned) to the user
+  """
+  added: Boolean!
+}
+
+union AddUserContactDetailsResult = AddUserContactDetails | Error
+
+"""Info to be returned when contact details of a user are updated"""
+type UpdateUserContactDetails {
+  """The contact details of the user"""
+  contactDetails: UserContactDetails!
+
+  """
+  A boolean that indicates if the contact details of the user have been successfully updated
+  """
+  updated: Boolean!
+}
+
+union UpdateUserContactDetailsResult = UpdateUserContactDetails | Error
+
+"""A user's favorite #beach_bar"""
+type UserFavoriteBar {
+  """The user object"""
+  user: User!
+
+  """One of user's favorite #beach_bar"""
+  beachBar: BeachBar!
+}
+
+"""
+Info to be returned when a user add #beach_bar to his / her favorite list
+"""
+type AddUserFavoriteBar {
+  """The #beach_bar that is added"""
+  beachBar: UserFavoriteBar!
+
+  """
+  A boolean that indicates if the #beach_bar has been successfully being added to the user's favorites
+  """
+  added: Boolean!
+}
+
+union AddUserFavoriteBarResult = AddUserFavoriteBar | Error
+
+"""Represents a user"""
+type User {
+  """User's ID value"""
+  id: ID!
+
+  """User's email address"""
+  email: Email!
+
+  """User's first (given) name"""
+  firstName: String
+
+  """User's last (family) name"""
+  lastName: String
+
+  """User's account info"""
+  account: UserAccount
+
+  """A user's review on a #beach_bar"""
+  reviews: [BeachBarReview!]
+
+  """A list with all the user's favorite #beach_bars"""
+  favoriteBars: [UserFavoriteBar!]
+}
+
+union UserTypeResult = User | Error
+
+union UserSignUpResult = User | Error
+
+"""User info to be returned on login"""
+type UserLogin {
+  """The user (object) that logins"""
+  user: User!
+
+  """The access token to authenticate & authorize the user"""
+  accessToken: String!
+}
+
+union UserLoginResult = UserLogin | Error
+
+"""Credentials of user to sign up / login"""
+input UserCredentialsInput {
+  """Email of user to sign up"""
+  email: Email!
+
+  """Password of user"""
+  password: String!
+}
+
+"""User details in login. The user's IP address is passed via the context"""
+input UserLoginDetailsInput {
+  """The ID of the country, user logins from"""
+  countryId: Int!
+
+  """The ID of the city, user logins from"""
+  cityId: Int!
+}
+
+union UserUpdateResult = User | Error
+
+"""Represents a country's or city's region"""
+type Region {
+  id: ID!
+  name: String!
+
+  """The country the region is located at"""
+  country: Country!
+
+  """The city the region is located at"""
+  city: City
+}
+
+"""The style of a #beach_bar"""
+type BeachBarStyle {
+  id: ID!
+  name: String!
+}
+
+"""Represents the offer codes added to a payment"""
+type PaymentOfferCode {
+  id: ID!
+
+  """The payment that holds these offer codes"""
+  payment: Payment!
+
+  """A coupon code added to the payment"""
+  couponCode: CouponCode
+
+  """A campaign offer code added to the payment"""
+  offerCode: OfferCampaignCode
+}

@@ -18,7 +18,7 @@ const _index_1 = require("constants/_index");
 const dayjs_1 = __importDefault(require("dayjs"));
 const CouponCode_1 = require("entity/CouponCode");
 const OfferCampaignCode_1 = require("entity/OfferCampaignCode");
-exports.checkVoucherCode = (refCode) => __awaiter(void 0, void 0, void 0, function* () {
+const checkVoucherCode = (refCode) => __awaiter(void 0, void 0, void 0, function* () {
     if (refCode.trim().length === _index_1.voucherCodeLength.COUPON_CODE) {
         const couponCode = yield CouponCode_1.CouponCode.findOne({ refCode });
         if (!couponCode) {
@@ -52,4 +52,4 @@ exports.checkVoucherCode = (refCode) => __awaiter(void 0, void 0, void 0, functi
         return { error: { error: { code: common_1.errors.INVALID_PRODUCT_OFFER_CODE, message: common_1.errors.INVALID_REF_CODE_MESSAGE } } };
     }
 });
-//# sourceMappingURL=checkVoucherCode.js.map
+exports.checkVoucherCode = checkVoucherCode;

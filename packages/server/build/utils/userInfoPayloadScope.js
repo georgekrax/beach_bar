@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.userInfoPayloadScope = void 0;
-exports.userInfoPayloadScope = (payload, user) => {
+const userInfoPayloadScope = (payload, user) => {
     var _a, _b;
     return {
         id: user.id,
@@ -49,4 +49,4 @@ exports.userInfoPayloadScope = (payload, user) => {
             : undefined,
     };
 };
-//# sourceMappingURL=userInfoPayloadScope.js.map
+exports.userInfoPayloadScope = userInfoPayloadScope;

@@ -1,4 +1,4 @@
-import { objectType, unionType } from "@nexus/schema";
+import { objectType, unionType } from "nexus";
 import { BeachBarType } from "schema/beach_bar/types";
 import { UserType } from "../types";
 
@@ -9,13 +9,11 @@ export const UserFavoriteBarType = objectType({
     t.field("user", {
       type: UserType,
       description: "The user object",
-      nullable: false,
       resolve: o => o.user,
     });
     t.field("beachBar", {
       type: BeachBarType,
       description: "One of user's favorite #beach_bar",
-      nullable: false,
       resolve: o => o.beachBar,
     });
   },
@@ -28,11 +26,9 @@ export const AddUserFavoriteBarType = objectType({
     t.field("beachBar", {
       type: UserFavoriteBarType,
       description: "The #beach_bar that is added",
-      nullable: false,
       resolve: o => o.beachBar,
     });
     t.boolean("added", {
-      nullable: false,
       description: "A boolean that indicates if the #beach_bar has been successfully being added to the user's favorites",
     });
   },
@@ -42,12 +38,12 @@ export const AddUserFavoriteBarResult = unionType({
   name: "AddUserFavoriteBarResult",
   definition(t) {
     t.members("AddUserFavoriteBar", "Error");
-    t.resolveType(item => {
-      if (item.error) {
-        return "Error";
-      } else {
-        return "AddUserFavoriteBar";
-      }
-    });
+  },
+  resolveType: item => {
+    if (item.name === "Error") {
+      return "Error";
+    } else {
+      return "AddUserFavoriteBar";
+    }
   },
 });

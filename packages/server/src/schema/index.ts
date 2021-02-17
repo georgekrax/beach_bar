@@ -9,8 +9,8 @@ export {
   JSONScalar,
   TimeScalar,
   UploadScalar,
-  UrlScalar
-} from "@georgekrax-hashtag/common";
+  UrlScalar,
+} from "@the_hashtag/common/dist/graphql";
 export * from "./aws/mutation";
 export * from "./aws/types";
 export * from "./beach_bar/entry_fee/mutation";
@@ -84,5 +84,3 @@ export * from "./user/favorite_bar/types";
 export * from "./user/mutation";
 export * from "./user/query";
 export * from "./user/types";
-
-

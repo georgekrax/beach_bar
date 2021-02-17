@@ -16,7 +16,7 @@ exports.getReservedProducts = void 0;
 const common_1 = require("@beach_bar/common");
 const redisKeys_1 = __importDefault(require("constants/redisKeys"));
 const dayjs_1 = __importDefault(require("dayjs"));
-exports.getReservedProducts = (redis, beachBar, date, timeId) => __awaiter(void 0, void 0, void 0, function* () {
+const getReservedProducts = (redis, beachBar, date, timeId) => __awaiter(void 0, void 0, void 0, function* () {
     const redisReservedProducts = yield redis.lrange(`${redisKeys_1.default.BEACH_BAR_CACHE_KEY}:${beachBar.id}:${redisKeys_1.default.RESERVED_PRODUCT_CACHE_KEY}`, 0, -1);
     let reservedProducts = redisReservedProducts.map(x => JSON.parse(x));
     if (date) {
@@ -27,4 +27,4 @@ exports.getReservedProducts = (redis, beachBar, date, timeId) => __awaiter(void 
     }
     return reservedProducts;
 });
-//# sourceMappingURL=getReservedProducts.js.map
+exports.getReservedProducts = getReservedProducts;

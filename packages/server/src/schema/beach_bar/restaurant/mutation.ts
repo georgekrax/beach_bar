@@ -1,7 +1,7 @@
 import { errors, MyContext } from "@beach_bar/common";
-import { booleanArg, extendType, intArg, stringArg } from "@nexus/schema";
 import { BeachBar } from "entity/BeachBar";
 import { BeachBarRestaurant } from "entity/BeachBarRestaurant";
+import { booleanArg, extendType, intArg, nullable, stringArg } from "nexus";
 import { DeleteType } from "typings/.index";
 import { AddBeachBarRestaurantType, UpdateBeachBarRestaurantType } from "typings/beach_bar/restaurant";
 import { DeleteResult } from "../../types";
@@ -13,25 +13,16 @@ export const BeachBarRestaurantCrudMutation = extendType({
     t.field("addBeachBarRestaurant", {
       type: AddBeachBarRestaurantResult,
       description: "Add a restaurant of a #beach_bar",
-      nullable: false,
       args: {
-        beachBarId: intArg({
-          required: true,
-          description: "The ID value of the #beach_bar the restaurant will be added to",
-        }),
-        name: stringArg({
-          required: true,
-          description: "The name of the restaurant",
-        }),
-        description: stringArg({
-          required: false,
-          description: "A short description, info text, about the restaurant itself",
-        }),
-        isActive: booleanArg({
-          required: false,
-          description: "A boolean that indicates if the restaurant is active or not. Its default value is false",
-          default: false,
-        }),
+        beachBarId: intArg({ description: "The ID value of the #beach_bar the restaurant will be added to" }),
+        name: stringArg({ description: "The name of the restaurant" }),
+        description: nullable(stringArg({ description: "A short description, info text, about the restaurant itself" })),
+        isActive: nullable(
+          booleanArg({
+            description: "A boolean that indicates if the restaurant is active or not. Its default value is false",
+            default: false,
+          })
+        ),
       },
       resolve: async (_, { beachBarId, name, description, isActive }, { payload }: MyContext): Promise<AddBeachBarRestaurantType> => {
         if (!payload) {
@@ -89,24 +80,11 @@ export const BeachBarRestaurantCrudMutation = extendType({
     t.field("updateBeachBarRestaurant", {
       type: UpdateBeachBarRestaurantResult,
       description: "Update the restaurant details of a #beach_bar",
-      nullable: false,
       args: {
-        restaurantId: intArg({
-          required: true,
-          description: "The ID value of the restaurant",
-        }),
-        name: stringArg({
-          required: false,
-          description: "The name of the restaurant",
-        }),
-        description: stringArg({
-          required: false,
-          description: "A short description, info text, about the restaurant itself",
-        }),
-        isActive: booleanArg({
-          required: false,
-          description: "A boolean that indicates if the restaurant is active or not",
-        }),
+        restaurantId: intArg({ description: "The ID value of the restaurant" }),
+        name: nullable(stringArg({ description: "The name of the restaurant" })),
+        description: nullable(stringArg({ description: "A short description, info text, about the restaurant itself" })),
+        isActive: nullable(booleanArg({ description: "A boolean that indicates if the restaurant is active or not" })),
       },
       resolve: async (
         _,
@@ -158,12 +136,8 @@ export const BeachBarRestaurantCrudMutation = extendType({
     t.field("deleteBeachBarRestaurant", {
       type: DeleteResult,
       description: "Delete (remove) a restaurant from a #beach_bar",
-      nullable: false,
       args: {
-        restaurantId: intArg({
-          required: true,
-          description: "The ID value of the #beach_bar restaurant",
-        }),
+        restaurantId: intArg({ description: "The ID value of the #beach_bar restaurant" }),
       },
       resolve: async (_, { restaurantId }, { payload }: MyContext): Promise<DeleteType> => {
         if (!payload) {

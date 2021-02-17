@@ -13,31 +13,28 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProductCrudQuery = void 0;
-const common_1 = require("@georgekrax-hashtag/common");
-const schema_1 = require("@nexus/schema");
+const graphql_1 = require("@the_hashtag/common/dist/graphql");
 const dayjs_1 = __importDefault(require("dayjs"));
 const Product_1 = require("entity/Product");
+const nexus_1 = require("nexus");
 const checkScopes_1 = require("utils/checkScopes");
 const types_1 = require("./types");
-exports.ProductCrudQuery = schema_1.extendType({
+exports.ProductCrudQuery = nexus_1.extendType({
     type: "Query",
     definition(t) {
-        t.list.field("getBeachBarProducts", {
+        t.nullable.list.field("getBeachBarProducts", {
             type: types_1.ProductType,
             description: "Get all products of a #beach_bar",
-            nullable: true,
             args: {
-                beachBarId: schema_1.intArg({ required: true, description: "The ID values of the #beach_bar, to get its products" }),
-                isActive: schema_1.booleanArg({
-                    required: false,
+                beachBarId: nexus_1.intArg({ description: "The ID values of the #beach_bar, to get its products" }),
+                isActive: nexus_1.nullable(nexus_1.booleanArg({
                     description: "A boolean that indicates to retrieve only active products",
                     default: true,
-                }),
-                isDeleted: schema_1.booleanArg({
-                    required: false,
+                })),
+                isDeleted: nexus_1.nullable(nexus_1.booleanArg({
                     description: "A boolean that indicates to retrieve deleted products too. Its default value is set to false",
                     default: false,
-                }),
+                })),
             },
             resolve: (_, { beachBarId, isActive, isDeleted }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!beachBarId || beachBarId <= 0) {
@@ -64,18 +61,13 @@ exports.ProductCrudQuery = schema_1.extendType({
                 return products;
             }),
         });
-        t.list.field("getProductAvailabilityHours", {
+        t.nullable.list.field("getProductAvailabilityHours", {
             type: types_1.ProductAvailabilityHourType,
             description: "Retrieve (get) a list with all the available hour times of a product",
-            nullable: true,
             args: {
-                productId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the #beach_bar product",
-                }),
-                date: schema_1.arg({
-                    type: common_1.DateScalar,
-                    required: true,
+                productId: nexus_1.intArg({ description: "The ID value of the #beach_bar product" }),
+                date: nexus_1.arg({
+                    type: graphql_1.DateScalar,
                     description: "The date to search availability for",
                 }),
             },
@@ -97,22 +89,14 @@ exports.ProductCrudQuery = schema_1.extendType({
                 return res;
             }),
         });
-        t.int("getProductAvailabilityQuantity", {
-            nullable: true,
+        t.nullable.int("getProductAvailabilityQuantity", {
             args: {
-                productId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the #beach_bar product",
-                }),
-                date: schema_1.arg({
-                    type: common_1.DateScalar,
-                    required: true,
+                productId: nexus_1.intArg({ description: "The ID value of the #beach_bar product" }),
+                date: nexus_1.arg({
+                    type: graphql_1.DateScalar,
                     description: "The date to search availability for",
                 }),
-                timeId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the hour time to search availability for",
-                }),
+                timeId: nexus_1.intArg({ description: "The ID value of the hour time to search availability for" }),
             },
             resolve: (_, { productId, date, timeId }) => __awaiter(this, void 0, void 0, function* () {
                 if (!productId || productId <= 0 || !date || date.add(1, "day") <= dayjs_1.default() || !timeId || timeId <= 0) {
@@ -134,4 +118,3 @@ exports.ProductCrudQuery = schema_1.extendType({
         });
     },
 });
-//# sourceMappingURL=query.js.map

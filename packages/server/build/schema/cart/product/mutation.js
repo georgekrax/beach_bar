@@ -11,36 +11,33 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CartProductCrudMutation = void 0;
 const common_1 = require("@beach_bar/common");
-const common_2 = require("@georgekrax-hashtag/common");
-const schema_1 = require("@nexus/schema");
+const graphql_1 = require("@the_hashtag/common/dist/graphql");
 const Cart_1 = require("entity/Cart");
 const CartProduct_1 = require("entity/CartProduct");
 const Product_1 = require("entity/Product");
 const Time_1 = require("entity/Time");
+const nexus_1 = require("nexus");
 const typeorm_1 = require("typeorm");
 const types_1 = require("../../types");
 const types_2 = require("./types");
-exports.CartProductCrudMutation = schema_1.extendType({
+exports.CartProductCrudMutation = nexus_1.extendType({
     type: "Mutation",
     definition(t) {
         t.field("addCartProduct", {
             type: types_2.AddCartProductResult,
             description: "Add a product to a shopping cart",
-            nullable: false,
             args: {
-                cartId: schema_1.intArg({ required: true, description: "The ID value of the shopping cart" }),
-                productId: schema_1.intArg({ required: true, description: "The ID value of the product to add" }),
-                quantity: schema_1.intArg({
-                    required: false,
+                cartId: nexus_1.intArg({ description: "The ID value of the shopping cart" }),
+                productId: nexus_1.intArg({ description: "The ID value of the product to add" }),
+                quantity: nexus_1.nullable(nexus_1.intArg({
                     description: "The number that indicates how many times to add the product to the cart. Its default value is 1",
                     default: 1,
-                }),
-                timeId: schema_1.intArg({ required: true, description: "The ID value of the hour time of product use" }),
-                date: schema_1.arg({
-                    type: common_2.DateScalar,
-                    required: false,
+                })),
+                timeId: nexus_1.intArg({ description: "The ID value of the hour time of product use" }),
+                date: nexus_1.nullable(nexus_1.arg({
+                    type: graphql_1.DateScalar,
                     description: "The date to purchase the product. Its default value its the current date",
-                }),
+                })),
             },
             resolve: (_, { cartId, productId, quantity, date, timeId }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!cartId || cartId <= 0) {
@@ -101,14 +98,12 @@ exports.CartProductCrudMutation = schema_1.extendType({
         t.field("updateCartProduct", {
             type: types_2.UpdateCartProductResult,
             description: "Update the quantity of a product in a shopping cart",
-            nullable: false,
             args: {
-                cartId: schema_1.intArg({ required: true, description: "The ID value of the shopping cart" }),
-                productId: schema_1.intArg({ required: true, description: "The ID value of the product to update its quantity" }),
-                quantity: schema_1.intArg({
-                    required: false,
+                cartId: nexus_1.intArg({ description: "The ID value of the shopping cart" }),
+                productId: nexus_1.intArg({ description: "The ID value of the product to update its quantity" }),
+                quantity: nexus_1.nullable(nexus_1.intArg({
                     description: "The number that indicates how many times to add the product to the cart",
-                }),
+                })),
             },
             resolve: (_, { cartId, productId, quantity }) => __awaiter(this, void 0, void 0, function* () {
                 if (!cartId || cartId <= 0) {
@@ -160,10 +155,9 @@ exports.CartProductCrudMutation = schema_1.extendType({
         t.field("deleteCartProduct", {
             type: types_1.DeleteResult,
             description: "Delete (remove) a product from a shopping cart",
-            nullable: false,
             args: {
-                cartId: schema_1.intArg({ required: true, description: "The ID value of the shopping cart" }),
-                productId: schema_1.intArg({ required: true, description: "The ID value of the product to delete (remove)" }),
+                cartId: nexus_1.intArg({ description: "The ID value of the shopping cart" }),
+                productId: nexus_1.intArg({ description: "The ID value of the product to delete (remove)" }),
             },
             resolve: (_, { cartId, productId }) => __awaiter(this, void 0, void 0, function* () {
                 if (!cartId || cartId <= 0) {
@@ -189,4 +183,3 @@ exports.CartProductCrudMutation = schema_1.extendType({
         });
     },
 });
-//# sourceMappingURL=mutation.js.map

@@ -1,5 +1,5 @@
-import { DateTimeScalar, UrlScalar } from "@georgekrax-hashtag/common";
-import { objectType, unionType } from "@nexus/schema";
+import { DateTimeScalar, UrlScalar } from "@the_hashtag/common/dist/graphql";
+import { objectType, unionType } from "nexus";
 import { ProductCategoryType } from "../../details/product/types";
 import { HourTimeType } from "../../details/time/types";
 import { BeachBarType } from "../types";
@@ -8,28 +8,26 @@ export const ProductType = objectType({
   name: "Product",
   description: "Represents a product of a #beach_bar",
   definition(t) {
-    t.int("id", { nullable: false });
-    t.string("name", { nullable: false });
-    t.string("description", { nullable: true });
-    t.float("price", { nullable: false });
-    t.boolean("isActive", { nullable: false });
-    t.boolean("isIndividual", { nullable: false });
-    t.int("maxPeople", { nullable: false });
-    t.field("imgUrl", { type: UrlScalar, nullable: true });
+    t.id("id");
+    t.string("name");
+    t.nullable.string("description");
+    t.float("price");
+    t.boolean("isActive");
+    t.boolean("isIndividual");
+    t.int("maxPeople");
+    t.nullable.field("imgUrl", { type: UrlScalar });
     t.field("beachBar", {
       type: BeachBarType,
       description: "The #beach_bar that provides the product",
-      nullable: false,
       resolve: o => o.beachBar,
     });
     t.field("category", {
       type: ProductCategoryType,
       description: "The category of the product",
-      nullable: false,
       resolve: o => o.category,
     });
-    t.field("updatedAt", { type: DateTimeScalar, nullable: false });
-    t.field("deletedAt", { type: DateTimeScalar, nullable: true });
+    t.field("updatedAt", { type: DateTimeScalar });
+    t.nullable.field("deletedAt", { type: DateTimeScalar });
   },
 });
 
@@ -40,13 +38,9 @@ export const AddProductType = objectType({
     t.field("product", {
       type: ProductType,
       description: "The product that is added",
-      nullable: false,
       resolve: o => o.product,
     });
-    t.boolean("added", {
-      nullable: false,
-      description: "A boolean that indicates if the product has been successfully added to the #beach_bar",
-    });
+    t.boolean("added", { description: "A boolean that indicates if the product has been successfully added to the #beach_bar" });
   },
 });
 
@@ -54,13 +48,13 @@ export const AddProductResult = unionType({
   name: "AddProductResult",
   definition(t) {
     t.members("AddProduct", "Error");
-    t.resolveType(item => {
-      if (item.error) {
-        return "Error";
-      } else {
-        return "AddProduct";
-      }
-    });
+  },
+  resolveType: item => {
+    if (item.name === "Error") {
+      return "Error";
+    } else {
+      return "AddProduct";
+    }
   },
 });
 
@@ -71,10 +65,9 @@ export const UpdateProductType = objectType({
     t.field("product", {
       type: ProductType,
       description: "The product that is updated",
-      nullable: false,
       resolve: o => o.product,
     });
-    t.boolean("updated", { nullable: false, description: "A boolean that indicates if the product has been successfully updated" });
+    t.boolean("updated", { description: "A boolean that indicates if the product has been successfully updated" });
   },
 });
 
@@ -82,13 +75,13 @@ export const UpdateProductResult = unionType({
   name: "UpdateProductResult",
   definition(t) {
     t.members("UpdateProduct", "Error");
-    t.resolveType(item => {
-      if (item.error) {
-        return "Error";
-      } else {
-        return "UpdateProduct";
-      }
-    });
+  },
+  resolveType: item => {
+    if (item.name === "Error") {
+      return "Error";
+    } else {
+      return "UpdateProduct";
+    }
   },
 });
 
@@ -99,9 +92,8 @@ export const ProductAvailabilityHourType = objectType({
     t.field("hourTime", {
       type: HourTimeType,
       description: "The hour time of a day",
-      nullable: false,
       resolve: o => o.hourTime,
     });
-    t.boolean("isAvailable", { nullable: false });
+    t.boolean("isAvailable");
   },
 });

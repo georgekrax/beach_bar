@@ -11,28 +11,21 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BeachBarTypeCrudMutation = void 0;
 const common_1 = require("@beach_bar/common");
-const schema_1 = require("@nexus/schema");
 const BeachBar_1 = require("entity/BeachBar");
 const BeachBarStyle_1 = require("entity/BeachBarStyle");
 const BeachBarType_1 = require("entity/BeachBarType");
+const nexus_1 = require("nexus");
 const types_1 = require("schema/types");
 const checkScopes_1 = require("utils/checkScopes");
-exports.BeachBarTypeCrudMutation = schema_1.extendType({
+exports.BeachBarTypeCrudMutation = nexus_1.extendType({
     type: "Mutation",
     definition(t) {
         t.field("addBeachBarType", {
             type: types_1.SuccessResult,
             description: "Add (assign) a style to a #beach_bar",
-            nullable: false,
             args: {
-                beachBarId: schema_1.idArg({
-                    required: true,
-                    description: "The ID value of the #beach_bar, to assign the style",
-                }),
-                styleId: schema_1.idArg({
-                    required: true,
-                    description: "The ID value of the style to assign",
-                }),
+                beachBarId: nexus_1.idArg({ description: "The ID value of the #beach_bar, to assign the style" }),
+                styleId: nexus_1.idArg({ description: "The ID value of the style to assign" }),
             },
             resolve: (_, { beachBarId, styleId }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -69,16 +62,9 @@ exports.BeachBarTypeCrudMutation = schema_1.extendType({
         t.field("deleteBeachBarType", {
             type: types_1.DeleteResult,
             description: "Delete (remove) a style from a #beach_bar",
-            nullable: false,
             args: {
-                beachBarId: schema_1.idArg({
-                    required: true,
-                    description: "The ID value of the #beach_bar, to remove the style",
-                }),
-                styleId: schema_1.idArg({
-                    required: true,
-                    description: "The ID value of the style to remove",
-                }),
+                beachBarId: nexus_1.idArg({ description: "The ID value of the #beach_bar, to remove the style" }),
+                styleId: nexus_1.idArg({ description: "The ID value of the style to remove" }),
             },
             resolve: (_, { beachBarId, styleId }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -106,4 +92,3 @@ exports.BeachBarTypeCrudMutation = schema_1.extendType({
         });
     },
 });
-//# sourceMappingURL=mutation.js.map

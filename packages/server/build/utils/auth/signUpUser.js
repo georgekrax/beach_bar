@@ -15,7 +15,7 @@ const scopes_1 = require("constants/scopes");
 const Account_1 = require("entity/Account");
 const Owner_1 = require("entity/Owner");
 const User_1 = require("entity/User");
-exports.signUpUser = (options) => __awaiter(void 0, void 0, void 0, function* () {
+const signUpUser = (options) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, redis, isPrimaryOwner, hashtagId, googleId, facebookId, instagramId, instagramUsername, firstName, lastName, countryId, cityId, birthday, } = options;
     const user = yield User_1.User.findOne({ where: { email }, relations: ["account"] });
     if (user) {
@@ -51,4 +51,4 @@ exports.signUpUser = (options) => __awaiter(void 0, void 0, void 0, function* ()
     }
     return { user: newUser };
 });
-//# sourceMappingURL=signUpUser.js.map
+exports.signUpUser = signUpUser;

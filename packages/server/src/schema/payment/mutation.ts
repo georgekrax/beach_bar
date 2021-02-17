@@ -1,7 +1,6 @@
-/* eslint-disable prettier/prettier */
 import { errors, MyContext } from "@beach_bar/common";
-import { BigIntScalar, generateId } from "@georgekrax-hashtag/common";
-import { arg, extendType, stringArg } from "@nexus/schema";
+import { generateId } from "@the_hashtag/common";
+import { BigIntScalar } from "@the_hashtag/common/dist/graphql";
 import prefixes from "constants/prefixes";
 import { payment as paymentStatus } from "constants/status";
 import { generateIdSpecialCharacters } from "constants/_index";
@@ -13,6 +12,7 @@ import { Payment } from "entity/Payment";
 import { PaymentStatus } from "entity/PaymentStatus";
 import { PaymentVoucherCode } from "entity/PaymentVoucherCode";
 import { StripeMinimumCurrency } from "entity/StripeMinimumCurrency";
+import { arg, extendType, nullable, stringArg } from "nexus";
 import { getManager } from "typeorm";
 import { DeleteType } from "typings/.index";
 import { AddPaymentType } from "typings/payment";
@@ -26,22 +26,20 @@ export const PaymentCrudMutation = extendType({
     t.field("checkout", {
       type: AddPaymentResult,
       description: "Create (make) a payment for a customer's shopping cart",
-      nullable: false,
       args: {
         cartId: arg({
           type: BigIntScalar,
-          required: true,
           description: "The ID value of the shopping cart with the products to purchase",
         }),
         cardId: arg({
           type: BigIntScalar,
-          required: true,
           description: "The ID value of the credit or debit card of the customer",
         }),
-        voucherCode: stringArg({
-          required: false,
-          description: "A coupon or offer campaign code to make a discount to the shopping cart's or payment's price",
-        }),
+        voucherCode: nullable(
+          stringArg({
+            description: "A coupon or offer campaign code to make a discount to the shopping cart's or payment's price",
+          })
+        ),
       },
       resolve: async (_, { cartId, cardId, voucherCode }, { stripe }: MyContext): Promise<AddPaymentType> => {
         if (!cartId || cartId <= 0) {
@@ -219,7 +217,7 @@ export const PaymentCrudMutation = extendType({
               discountPerBeachBar = beachBarCouponCodeDiscount / uniqueBeachBars.length;
             }
           }
-          console.log(`Discount per #beach_bar: ${discountPerBeachBar}`);
+          // console.log(`Discount per #beach_bar: ${discountPerBeachBar}`);
           for (let i = 0; i < uniqueBeachBars.length; i++) {
             const beachBar = uniqueBeachBars[i];
 
@@ -227,15 +225,15 @@ export const PaymentCrudMutation = extendType({
             if (cartBeachBarTotal === undefined) {
               return { error: { message: errors.SOMETHING_WENT_WRONG } };
             }
-            console.log(cartBeachBarTotal);
+            // console.log(cartBeachBarTotal);
             const { totalWithEntryFees } = cartBeachBarTotal;
             let discountAmount = 0;
             const paymentVoucherCode = newPayment.voucherCode;
             if (paymentVoucherCode && paymentVoucherCode.offerCode) {
               discountAmount = (totalWithEntryFees * paymentVoucherCode.offerCode.campaign.discountPercentage) / 100;
             }
-            console.log(paymentVoucherCode?.couponCode?.beachBarId);
-            console.log(beachBar.id);
+            // console.log(paymentVoucherCode?.couponCode?.beachBarId);
+            // console.log(beachBar.id);
             if (
               paymentVoucherCode &&
               paymentVoucherCode.couponCode &&
@@ -246,8 +244,8 @@ export const PaymentCrudMutation = extendType({
               discountAmount += couponCodeDiscount;
             }
             const beachBarTotal = parseFloat((totalWithEntryFees - discountAmount).toFixed(2));
-            console.log(`Discount amount: ${discountAmount}`);
-            console.log(`#beach_bar total: ${beachBarTotal}`);
+            // console.log(`Discount amount: ${discountAmount}`);
+            // console.log(`#beach_bar total: ${beachBarTotal}`);
             if (beachBarTotal > 0) {
               const beachBarStripeFee = await cart.getStripeFee(card.country.isEu, beachBarTotal);
               if (beachBarStripeFee === undefined) {
@@ -259,13 +257,13 @@ export const PaymentCrudMutation = extendType({
               }
 
               const { beachBarAppFee, transferAmount: beachBarTransferAmount } = pricingFee;
-              console.log(`App fee: ${pricingFee.beachBarAppFee}`);
-              console.log(`Transfer amount: ${pricingFee.transferAmount}`);
-              console.log(`Total: ${pricingFee.total}`);
+              // console.log(`App fee: ${pricingFee.beachBarAppFee}`);
+              // console.log(`Transfer amount: ${pricingFee.transferAmount}`);
+              // console.log(`Total: ${pricingFee.total}`);
               beachBarPricingFee += beachBarAppFee;
               transferAmount += beachBarTransferAmount;
-              console.log(`Stripe fee: ${beachBarStripeFee}`);
-              console.log(stripePayment.currency.toLowerCase());
+              // console.log(`Stripe fee: ${beachBarStripeFee}`);
+              // console.log(stripePayment.currency.toLowerCase());
               if (beachBarTransferAmount * 100 > 1) {
                 const stripeTransfer = await stripe.transfers.create({
                   amount: Math.round(beachBarTransferAmount * 100),
@@ -337,11 +335,9 @@ export const PaymentCrudMutation = extendType({
     t.field("refundPayment", {
       type: DeleteResult,
       description: "Refund a payment",
-      nullable: false,
       args: {
         paymentId: arg({
           type: BigIntScalar,
-          required: true,
           description: "The ID value of the payment to update",
         }),
       },

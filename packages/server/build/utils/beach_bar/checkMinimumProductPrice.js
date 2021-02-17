@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.checkMinimumProductPrice = void 0;
 const dayjs_1 = __importDefault(require("dayjs"));
 const CurrencyProductPrice_1 = require("entity/CurrencyProductPrice");
-exports.checkMinimumProductPrice = (price, category, beachBar, currencyId) => __awaiter(void 0, void 0, void 0, function* () {
+const checkMinimumProductPrice = (price, category, beachBar, currencyId) => __awaiter(void 0, void 0, void 0, function* () {
     const productPrice = yield CurrencyProductPrice_1.CurrencyProductPrice.findOne({ where: { currencyId }, relations: ["currency"] });
     if (!productPrice) {
         throw new Error("Something went wrong");
@@ -32,4 +32,4 @@ exports.checkMinimumProductPrice = (price, category, beachBar, currencyId) => __
         throw new Error(`You are not allowed to have a price lower than ${productPrice.price}${productPrice.currency.symbol} for this type of product`);
     }
 });
-//# sourceMappingURL=checkMinimumProductPrice.js.map
+exports.checkMinimumProductPrice = checkMinimumProductPrice;

@@ -1,5 +1,5 @@
-import { EmailScalar } from "@georgekrax-hashtag/common";
-import { objectType, unionType } from "@nexus/schema";
+import { EmailScalar } from "@the_hashtag/common/dist/graphql";
+import { objectType, unionType } from "nexus";
 import { CountryType } from "../../details/countryTypes";
 import { UserAccountType } from "../account/types";
 
@@ -7,16 +7,15 @@ export const UserContactDetailsType = objectType({
   name: "UserContactDetails",
   description: "Represents the contact details info of a user",
   definition(t) {
-    t.int("id", { nullable: false, description: "The ID value of user's account contact details" });
-    t.field("account", { type: UserAccountType, nullable: false, description: "The account of user", resolve: o => o.account });
-    t.field("country", {
+    t.id("id", { description: "The ID value of user's account contact details" });
+    t.field("account", { type: UserAccountType, description: "The account of user", resolve: o => o.account });
+    t.nullable.field("country", {
       type: CountryType,
-      nullable: true,
       description: "The country origin of a user",
       resolve: o => o.country,
     });
-    t.field("secondaryEmail", { type: EmailScalar, nullable: true, description: "A secondary email address to contact the user" });
-    t.string("phoneNumber", { nullable: true, description: "User's phone number" });
+    t.nullable.field("secondaryEmail", { type: EmailScalar, description: "A secondary email address to contact the user" });
+    t.nullable.string("phoneNumber", { description: "User's phone number" });
   },
 });
 
@@ -27,11 +26,9 @@ export const AddUserContactDetailsType = objectType({
     t.field("contactDetails", {
       type: UserContactDetailsType,
       description: "The contact details of the user",
-      nullable: false,
       resolve: o => o.contactDetails,
     });
     t.boolean("added", {
-      nullable: false,
       description: "A boolean that indicates if the contact details have been successfully added (assigned) to the user",
     });
   },
@@ -41,13 +38,13 @@ export const AddUserContactDetailsResult = unionType({
   name: "AddUserContactDetailsResult",
   definition(t) {
     t.members("AddUserContactDetails", "Error");
-    t.resolveType(item => {
-      if (item.error) {
-        return "Error";
-      } else {
-        return "AddUserContactDetails";
-      }
-    });
+  },
+  resolveType: item => {
+    if (item.name === "Error") {
+      return "Error";
+    } else {
+      return "AddUserContactDetails";
+    }
   },
 });
 
@@ -58,11 +55,9 @@ export const UpdateUserContactDetailsType = objectType({
     t.field("contactDetails", {
       type: UserContactDetailsType,
       description: "The contact details of the user",
-      nullable: false,
       resolve: o => o.contactDetails,
     });
     t.boolean("updated", {
-      nullable: false,
       description: "A boolean that indicates if the contact details of the user have been successfully updated",
     });
   },
@@ -72,12 +67,12 @@ export const UpdateUserContactDetailsResult = unionType({
   name: "UpdateUserContactDetailsResult",
   definition(t) {
     t.members("UpdateUserContactDetails", "Error");
-    t.resolveType(item => {
-      if (item.error) {
-        return "Error";
-      } else {
-        return "UpdateUserContactDetails";
-      }
-    });
+  },
+  resolveType: item => {
+    if (item.name === "Error") {
+      return "Error";
+    } else {
+      return "UpdateUserContactDetails";
+    }
   },
 });

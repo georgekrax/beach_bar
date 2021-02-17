@@ -86,4 +86,3 @@ BeachBarImgUrl = BeachBarImgUrl_1 = __decorate([
     typeorm_1.Entity({ name: "beach_bar_img_url", schema: "public" })
 ], BeachBarImgUrl);
 exports.BeachBarImgUrl = BeachBarImgUrl;
-//# sourceMappingURL=BeachBarImgUrl.js.map

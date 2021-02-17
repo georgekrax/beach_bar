@@ -8,4 +8,3 @@ exports.default = Object.freeze({
     RESERVED_PRODUCT_CACHE_KEY: "reserved_product",
     AWS_S3_BUCKET: "aws_s3_bucket",
 });
-//# sourceMappingURL=redisKeys.js.map

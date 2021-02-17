@@ -11,29 +11,24 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ReviewAnswerCrudMutation = void 0;
 const common_1 = require("@beach_bar/common");
-const common_2 = require("@georgekrax-hashtag/common");
-const schema_1 = require("@nexus/schema");
+const graphql_1 = require("@the_hashtag/common/dist/graphql");
 const BeachBarReview_1 = require("entity/BeachBarReview");
 const ReviewAnswer_1 = require("entity/ReviewAnswer");
+const nexus_1 = require("nexus");
 const types_1 = require("../../../types");
 const types_2 = require("./types");
-exports.ReviewAnswerCrudMutation = schema_1.extendType({
+exports.ReviewAnswerCrudMutation = nexus_1.extendType({
     type: "Mutation",
     definition(t) {
         t.field("addReviewAnswer", {
             type: types_2.AddReviewAnswerResult,
             description: "Add a reply to a #beach_bar's review, by its owner",
-            nullable: false,
             args: {
-                reviewId: schema_1.arg({
-                    type: common_2.BigIntScalar,
-                    required: true,
+                reviewId: nexus_1.arg({
+                    type: graphql_1.BigIntScalar,
                     description: "The ID value of the customer's review",
                 }),
-                body: schema_1.stringArg({
-                    required: true,
-                    description: "The body of the reply",
-                }),
+                body: nexus_1.stringArg({ description: "The body of the reply" }),
             },
             resolve: (_, { reviewId, body }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -71,17 +66,12 @@ exports.ReviewAnswerCrudMutation = schema_1.extendType({
         t.field("updateReviewAnswer", {
             type: types_2.UpdateReviewAnswerResult,
             description: "Update the body of a #beach_bar's review reply",
-            nullable: false,
             args: {
-                answerId: schema_1.arg({
-                    type: common_2.BigIntScalar,
-                    required: true,
+                answerId: nexus_1.arg({
+                    type: graphql_1.BigIntScalar,
                     description: "The ID value of the review's answer",
                 }),
-                body: schema_1.stringArg({
-                    required: false,
-                    description: "The body of the reply",
-                }),
+                body: nexus_1.nullable(nexus_1.stringArg({ description: "The body of the reply" })),
             },
             resolve: (_, { answerId, body }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -114,11 +104,9 @@ exports.ReviewAnswerCrudMutation = schema_1.extendType({
         t.field("deleteReviewAnswer", {
             type: types_1.DeleteResult,
             description: "Delete (remove) a reply from a #beach_bar's review",
-            nullable: false,
             args: {
-                answerId: schema_1.arg({
-                    type: common_2.BigIntScalar,
-                    required: true,
+                answerId: nexus_1.arg({
+                    type: graphql_1.BigIntScalar,
                     description: "The ID value of the review's answer",
                 }),
             },
@@ -151,4 +139,3 @@ exports.ReviewAnswerCrudMutation = schema_1.extendType({
         });
     },
 });
-//# sourceMappingURL=mutation.js.map

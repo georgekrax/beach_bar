@@ -1,8 +1,8 @@
-import {  MyContext } from "@beach_bar/common";
-import { DateScalar } from "@georgekrax-hashtag/common";
-import { arg, booleanArg, extendType, intArg } from "@nexus/schema";
+import { MyContext } from "@beach_bar/common";
+import { DateScalar } from "@the_hashtag/common/dist/graphql";
 import dayjs from "dayjs";
 import { Product } from "entity/Product";
+import { arg, booleanArg, extendType, intArg, nullable } from "nexus";
 import { ProductAvailabilityHourReturnType } from "typings/beach_bar/product";
 import { checkScopes } from "utils/checkScopes";
 import { ProductAvailabilityHourType, ProductType } from "./types";
@@ -10,22 +10,19 @@ import { ProductAvailabilityHourType, ProductType } from "./types";
 export const ProductCrudQuery = extendType({
   type: "Query",
   definition(t) {
-    t.list.field("getBeachBarProducts", {
+    t.nullable.list.field("getBeachBarProducts", {
       type: ProductType,
       description: "Get all products of a #beach_bar",
-      nullable: true,
       args: {
-        beachBarId: intArg({ required: true, description: "The ID values of the #beach_bar, to get its products" }),
-        isActive: booleanArg({
-          required: false,
+        beachBarId: intArg({  description: "The ID values of the #beach_bar, to get its products" }),
+        isActive: nullable(booleanArg({
           description: "A boolean that indicates to retrieve only active products",
           default: true,
-        }),
-        isDeleted: booleanArg({
-          required: false,
+        })),
+        isDeleted: nullable(booleanArg({
           description: "A boolean that indicates to retrieve deleted products too. Its default value is set to false",
           default: false,
-        }),
+        })),
       },
       resolve: async (_, { beachBarId, isActive, isDeleted }, { payload }: MyContext): Promise<Product[] | null> => {
         if (!beachBarId || beachBarId <= 0) {
@@ -52,18 +49,13 @@ export const ProductCrudQuery = extendType({
         return products;
       },
     });
-    t.list.field("getProductAvailabilityHours", {
+    t.nullable.list.field("getProductAvailabilityHours", {
       type: ProductAvailabilityHourType,
       description: "Retrieve (get) a list with all the available hour times of a product",
-      nullable: true,
       args: {
-        productId: intArg({
-          required: true,
-          description: "The ID value of the #beach_bar product",
-        }),
+        productId: intArg({ description: "The ID value of the #beach_bar product" }),
         date: arg({
           type: DateScalar,
-          required: true,
           description: "The date to search availability for",
         }),
       },
@@ -88,22 +80,14 @@ export const ProductCrudQuery = extendType({
         return res;
       },
     });
-    t.int("getProductAvailabilityQuantity", {
-      nullable: true,
+    t.nullable.int("getProductAvailabilityQuantity", {
       args: {
-        productId: intArg({
-          required: true,
-          description: "The ID value of the #beach_bar product",
-        }),
+        productId: intArg({ description: "The ID value of the #beach_bar product" }),
         date: arg({
           type: DateScalar,
-          required: true,
           description: "The date to search availability for",
         }),
-        timeId: intArg({
-          required: true,
-          description: "The ID value of the hour time to search availability for",
-        }),
+        timeId: intArg({ description: "The ID value of the hour time to search availability for" }),
       },
       resolve: async (_, { productId, date, timeId }): Promise<number | null> => {
         if (!productId || productId <= 0 || !date || date.add(1, "day") <= dayjs() || !timeId || timeId <= 0) {

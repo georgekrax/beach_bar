@@ -7,7 +7,6 @@
     "NODE_ENV": "development",
     "TS_NODE_PROJECT": "./tsconfig.prod.json",
     "PORT": 4000,
-    "APOLLO_KEY": "service:beach-bar-API:boig6-VIcvqavKztxJupAg",
     "ACCESS_TOKEN_SECRET": "dfdkodkflLDSKDd56s6d6aadakdma575",
     "ACCESS_TOKEN_EXPIRATION": "1 hour",
     "REFRESH_TOKEN_SECRET": "dfcsknkEEfdkllsd5573WE5S5546dsknds5a5",

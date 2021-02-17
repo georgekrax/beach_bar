@@ -169,4 +169,3 @@ ReservedProduct = ReservedProduct_1 = __decorate([
     typeorm_1.Entity({ name: "reserved_product", schema: "public" })
 ], ReservedProduct);
 exports.ReservedProduct = ReservedProduct;
-//# sourceMappingURL=ReservedProduct.js.map

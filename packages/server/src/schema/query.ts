@@ -1,5 +1,5 @@
 import { MyContext } from "@beach_bar/common";
-import { queryType } from "@nexus/schema";
+import { queryType } from "nexus";
 
 export const Query = queryType({
   description: "Query",

@@ -54,4 +54,3 @@ UserHistory = __decorate([
     typeorm_1.Entity({ name: "user_history", schema: "public" })
 ], UserHistory);
 exports.UserHistory = UserHistory;
-//# sourceMappingURL=UserHistory.js.map

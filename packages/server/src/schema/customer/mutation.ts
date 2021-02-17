@@ -1,9 +1,8 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { errors, MyContext } from "@beach_bar/common";
-import { EmailScalar, BigIntScalar } from "@georgekrax-hashtag/common";
-import { arg, extendType, stringArg } from "@nexus/schema";
+import { BigIntScalar, EmailScalar } from "@the_hashtag/common/dist/graphql";
 import { Customer, CustomerRepository } from "entity/Customer";
 import { User } from "entity/User";
+import { arg, extendType, nullable, stringArg } from "nexus";
 import { getCustomRepository, IsNull } from "typeorm";
 import { DeleteType } from "typings/.index";
 import { AddCustomerType, UpdateCustomerType } from "typings/customer";
@@ -16,21 +15,21 @@ export const CustomerCrudMutation = extendType({
     t.field("getOrAddCustomer", {
       type: AddCustomerResult,
       description: "Add a customer",
-      nullable: false,
       args: {
         email: arg({
           type: EmailScalar,
-          required: true,
           description: "The email address of an authenticated or non user, to register as a client",
         }),
-        phoneNumber: stringArg({
-          required: false,
-          description: "The phone number of the customer",
-        }),
-        countryIsoCode: stringArg({
-          required: false,
-          description: "The ISO code of the country of customer's telephone",
-        }),
+        phoneNumber: nullable(
+          stringArg({
+            description: "The phone number of the customer",
+          })
+        ),
+        countryIsoCode: nullable(
+          stringArg({
+            description: "The ISO code of the country of customer's telephone",
+          })
+        ),
       },
       resolve: async (_, { email, phoneNumber, countryIsoCode }, { payload, stripe }: MyContext): Promise<AddCustomerType> => {
         if (!email && !payload) {
@@ -66,21 +65,13 @@ export const CustomerCrudMutation = extendType({
     t.field("updateCustomer", {
       type: UpdateCustomerResult,
       description: "Update a customer's details",
-      nullable: false,
       args: {
         customerId: arg({
           type: BigIntScalar,
-          required: true,
           description: "The ID value of the customer",
         }),
-        phoneNumber: stringArg({
-          required: false,
-          description: "The phone number of the customer",
-        }),
-        countryIsoCode: stringArg({
-          required: false,
-          description: "The ISO code of the country of customer's telephone",
-        }),
+        phoneNumber: nullable(stringArg({ description: "The phone number of the customer" })),
+        countryIsoCode: nullable(stringArg({ description: "The ISO code of the country of customer's telephone" })),
       },
       resolve: async (_, { customerId, phoneNumber, countryIsoCode }): Promise<UpdateCustomerType> => {
         if (!customerId || customerId <= 0) {
@@ -116,13 +107,11 @@ export const CustomerCrudMutation = extendType({
     t.field("deleteCustomer", {
       type: DeleteResult,
       description: "Delete (remove) a customer",
-      nullable: false,
       args: {
-        customerId: arg({
+        customerId: nullable(arg({
           type: BigIntScalar,
-          required: false,
           description: "The ID value of the registered customer to delete",
-        }),
+        })),
       },
       resolve: async (_, { customerId }, { payload, stripe }: MyContext): Promise<DeleteType> => {
         if (customerId && customerId <= 0) {

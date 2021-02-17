@@ -62,4 +62,3 @@ UserFavoriteBar = UserFavoriteBar_1 = __decorate([
     typeorm_1.Entity({ name: "user_favorite_bar", schema: "public" })
 ], UserFavoriteBar);
 exports.UserFavoriteBar = UserFavoriteBar;
-//# sourceMappingURL=UserFavoriteBar.js.map

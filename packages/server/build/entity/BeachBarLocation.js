@@ -148,4 +148,3 @@ BeachBarLocation = __decorate([
     typeorm_1.Entity({ name: "beach_bar_location", schema: "public" })
 ], BeachBarLocation);
 exports.BeachBarLocation = BeachBarLocation;
-//# sourceMappingURL=BeachBarLocation.js.map

@@ -11,11 +11,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserQuery = void 0;
 const common_1 = require("@beach_bar/common");
-const schema_1 = require("@nexus/schema");
+const nexus_1 = require("nexus");
 const User_1 = require("entity/User");
 const userInfoPayloadScope_1 = require("utils/userInfoPayloadScope");
 const types_1 = require("./types");
-exports.UserQuery = schema_1.extendType({
+exports.UserQuery = nexus_1.extendType({
     type: "Query",
     definition(t) {
         t.field("me", {
@@ -62,4 +62,3 @@ exports.UserQuery = schema_1.extendType({
         });
     },
 });
-//# sourceMappingURL=query.js.map

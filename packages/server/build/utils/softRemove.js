@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.softRemove = void 0;
 const typeorm_1 = require("typeorm");
-exports.softRemove = (primaryRepo, primaryOptions, repositories, findOptions) => __awaiter(void 0, void 0, void 0, function* () {
+const softRemove = (primaryRepo, primaryOptions, repositories, findOptions) => __awaiter(void 0, void 0, void 0, function* () {
     if (repositories && findOptions) {
         repositories.forEach((repository) => __awaiter(void 0, void 0, void 0, function* () {
             yield typeorm_1.getConnection().getRepository(repository).softDelete(findOptions);
@@ -24,4 +24,4 @@ exports.softRemove = (primaryRepo, primaryOptions, repositories, findOptions) =>
         yield typeorm_1.getConnection().getRepository(primaryRepo).softDelete(primaryOptions);
     }
 });
-//# sourceMappingURL=softRemove.js.map
+exports.softRemove = softRemove;

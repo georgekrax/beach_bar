@@ -1,9 +1,9 @@
 import { errors, MyContext } from "@beach_bar/common";
-import { EmailScalar } from "@georgekrax-hashtag/common";
-import { arg, extendType, intArg, stringArg } from "@nexus/schema";
+import { EmailScalar } from "@the_hashtag/common/dist/graphql";
 import { Country } from "entity/Country";
 import { User } from "entity/User";
 import { UserContactDetails } from "entity/UserContactDetails";
+import { arg, extendType, intArg, nullable, stringArg } from "nexus";
 import { getConnection } from "typeorm";
 import { DeleteType } from "typings/.index";
 import { AddUserContactDetailsType, UpdateUserContactDetailsType } from "typings/user/contactDetails";
@@ -16,15 +16,15 @@ export const UserContactDetailsCrudMutation = extendType({
     t.field("addUserContactDetails", {
       type: AddUserContactDetailsResult,
       description: "Add contact details to a user",
-      nullable: false,
       args: {
-        countryId: intArg({ required: false, description: "The ID value of the country of the contact details" }),
-        secondaryEmail: arg({
-          type: EmailScalar,
-          required: false,
-          description: "A secondary email address for the user",
-        }),
-        phoneNumber: stringArg({ required: false, description: "A phone number to call the user" }),
+        countryId: nullable(intArg({ description: "The ID value of the country of the contact details" })),
+        secondaryEmail: nullable(
+          arg({
+            type: EmailScalar,
+            description: "A secondary email address for the user",
+          })
+        ),
+        phoneNumber: nullable(stringArg({ description: "A phone number to call the user" })),
       },
       resolve: async (_, { countryId, secondaryEmail, phoneNumber }, { payload }: MyContext): Promise<AddUserContactDetailsType> => {
         if (!payload) {
@@ -114,18 +114,10 @@ export const UserContactDetailsCrudMutation = extendType({
     t.field("updateUserContactDetails", {
       type: UpdateUserContactDetailsResult,
       description: "Update specific contact details of a user",
-      nullable: false,
       args: {
-        id: intArg({
-          required: true,
-        }),
-        secondaryEmail: arg({
-          type: EmailScalar,
-          required: false,
-        }),
-        phoneNumber: stringArg({
-          required: false,
-        }),
+        id: intArg(),
+        secondaryEmail: nullable(arg({ type: EmailScalar })),
+        phoneNumber: nullable(stringArg()),
       },
       resolve: async (_, { id, secondaryEmail, phoneNumber }, { payload }: MyContext): Promise<UpdateUserContactDetailsType> => {
         if (!payload) {
@@ -205,11 +197,8 @@ export const UserContactDetailsCrudMutation = extendType({
     t.field("deleteContactDetails", {
       type: DeleteResult,
       description: "Delete (remove) specific contact details from user",
-      nullable: false,
       args: {
-        id: intArg({
-          required: true,
-        }),
+        id: nullable(intArg()),
       },
       resolve: async (_, { id }, { payload }: MyContext): Promise<DeleteType> => {
         if (!payload) {

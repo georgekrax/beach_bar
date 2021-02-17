@@ -11,4 +11,3 @@ exports.link = new apollo_link_http_1.HttpLink({
     fetch: node_fetch_1.default,
     credentials: "include",
 });
-//# sourceMappingURL=apolloLink.js.map

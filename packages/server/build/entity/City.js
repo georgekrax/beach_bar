@@ -64,4 +64,3 @@ City = __decorate([
     typeorm_1.Entity({ name: "city", schema: "public" })
 ], City);
 exports.City = City;
-//# sourceMappingURL=City.js.map

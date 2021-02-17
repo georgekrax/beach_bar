@@ -1,9 +1,9 @@
 import { MyContext } from "@beach_bar/common";
-import { arg, booleanArg, extendType, intArg } from "@nexus/schema";
 import redisKeys from "constants/redisKeys";
 import { historyActivity } from "constants/_index";
 import { BeachBar } from "entity/BeachBar";
 import { UserHistory } from "entity/UserHistory";
+import { arg, booleanArg, extendType, intArg, nullable } from "nexus";
 import { BeachBarAvailabilityReturnType } from "typings/beach_bar";
 import { SearchInputType } from "../search/types";
 import { BeachBarAvailabilityType, BeachBarType } from "./types";
@@ -11,20 +11,15 @@ import { BeachBarAvailabilityType, BeachBarType } from "./types";
 export const BeachBarQuery = extendType({
   type: "Query",
   definition(t) {
-    t.field("getBeachBar", {
+    t.nullable.field("getBeachBar", {
       type: BeachBarType,
       description: "Get the detail info of a #beach_bar",
-      nullable: true,
       args: {
-        beachBarId: intArg({
-          required: true,
-          description: "The ID value of the #beach_bar",
-        }),
-        userVisit: booleanArg({
-          required: false,
+        beachBarId: intArg({ description: "The ID value of the #beach_bar" }),
+        userVisit: nullable(booleanArg({
           description: "Indicates if to retrieve information for user search. Its default value is set to true",
           default: true,
-        }),
+        })),
       },
       resolve: async (_, { beachBarId, userVisit }, { redis, ipAddr, payload }: MyContext): Promise<BeachBar | null> => {
         if (!beachBarId || beachBarId <= 0) {
@@ -48,19 +43,12 @@ export const BeachBarQuery = extendType({
         return beachBar;
       },
     });
-    t.field("checkBeachBarAvailability", {
+    t.nullable.field("checkBeachBarAvailability", {
       type: BeachBarAvailabilityType,
       description: "Check a #beach_bar's availability",
-      nullable: true,
       args: {
-        beachBarId: intArg({
-          required: true,
-          description: "The ID value of the #beach_bar, to check for availability",
-        }),
-        availability: arg({
-          type: SearchInputType,
-          required: false,
-        }),
+        beachBarId: intArg({ description: "The ID value of the #beach_bar, to check for availability" }),
+        availability: nullable(arg({ type: SearchInputType })),
       },
       resolve: async (_, { beachBarId, availability }, { redis }: MyContext): Promise<BeachBarAvailabilityReturnType | null> => {
         if (!beachBarId || beachBarId <= 0) {
@@ -90,10 +78,9 @@ export const BeachBarQuery = extendType({
         };
       },
     });
-    t.list.field("getAllBeachBars", {
+    t.nullable.list.field("getAllBeachBars", {
       type: BeachBarType,
       description: "A list with all the available #beach_bars",
-      nullable: true,
       resolve: async (): Promise<BeachBar[]> => {
         const beachBars = await BeachBar.find({
           relations: [

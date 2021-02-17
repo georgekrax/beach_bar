@@ -20,7 +20,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 var CouponCode_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CouponCode = void 0;
-const common_1 = require("@georgekrax-hashtag/common");
+const common_1 = require("@the_hashtag/common");
 const _index_1 = require("constants/_index");
 const dayjs_1 = require("dayjs");
 const typeorm_1 = require("typeorm");
@@ -137,4 +137,3 @@ CouponCode = CouponCode_1 = __decorate([
     typeorm_1.Check(`"timesUsed" <= "timesLimit"`)
 ], CouponCode);
 exports.CouponCode = CouponCode;
-//# sourceMappingURL=CouponCode.js.map

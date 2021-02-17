@@ -12,4 +12,3 @@ function default_1(_arr1, _arr2) {
     return true;
 }
 exports.default = default_1;
-//# sourceMappingURL=arrEquals.js.map

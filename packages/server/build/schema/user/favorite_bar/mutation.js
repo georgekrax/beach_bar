@@ -14,25 +14,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserFavoriteBarCrudMutation = void 0;
 const common_1 = require("@beach_bar/common");
-const schema_1 = require("@nexus/schema");
 const redisKeys_1 = __importDefault(require("constants/redisKeys"));
 const User_1 = require("entity/User");
 const UserFavoriteBar_1 = require("entity/UserFavoriteBar");
+const nexus_1 = require("nexus");
 const types_1 = require("schema/types");
 const checkScopes_1 = require("utils/checkScopes");
 const types_2 = require("./types");
-exports.UserFavoriteBarCrudMutation = schema_1.extendType({
+exports.UserFavoriteBarCrudMutation = nexus_1.extendType({
     type: "Mutation",
     definition(t) {
         t.field("addUserFavoriteBar", {
             type: types_2.AddUserFavoriteBarResult,
             description: "Add a #beach_bar to user's favorites list",
-            nullable: false,
             args: {
-                beachBarId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the #beach_bar, to add to the user's favorites list",
-                }),
+                beachBarId: nexus_1.intArg({ description: "The ID value of the #beach_bar, to add to the user's favorites list" }),
             },
             resolve: (_, { beachBarId }, { payload, redis }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -71,12 +67,8 @@ exports.UserFavoriteBarCrudMutation = schema_1.extendType({
         t.field("deleteUserFavoriteBar", {
             type: types_1.DeleteResult,
             description: "Remove a #beach_bar from a user's favorites list",
-            nullable: false,
             args: {
-                beachBarId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the #beach_bar, to add to the user's favorites list",
-                }),
+                beachBarId: nexus_1.intArg({ description: "The ID value of the #beach_bar, to add to the user's favorites list" }),
             },
             resolve: (_, { beachBarId }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -104,4 +96,3 @@ exports.UserFavoriteBarCrudMutation = schema_1.extendType({
         });
     },
 });
-//# sourceMappingURL=mutation.js.map

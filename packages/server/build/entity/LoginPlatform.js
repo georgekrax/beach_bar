@@ -34,4 +34,3 @@ LoginPlatform = __decorate([
     typeorm_1.Entity({ name: "login_platform", schema: "public" })
 ], LoginPlatform);
 exports.LoginPlatform = LoginPlatform;
-//# sourceMappingURL=LoginPlatform.js.map

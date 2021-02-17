@@ -14,50 +14,37 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OfferCampaignCodeCrudMutation = exports.OfferCampaignCrudMutation = exports.CouponCodeCrudMutation = void 0;
 const common_1 = require("@beach_bar/common");
-const common_2 = require("@georgekrax-hashtag/common");
-const schema_1 = require("@nexus/schema");
+const graphql_1 = require("@the_hashtag/common/dist/graphql");
 const dayjs_1 = __importDefault(require("dayjs"));
 const BeachBar_1 = require("entity/BeachBar");
 const CouponCode_1 = require("entity/CouponCode");
 const OfferCampaign_1 = require("entity/OfferCampaign");
 const OfferCampaignCode_1 = require("entity/OfferCampaignCode");
 const Product_1 = require("entity/Product");
+const nexus_1 = require("nexus");
 const typeorm_1 = require("typeorm");
 const checkScopes_1 = require("utils/checkScopes");
 const types_1 = require("../../../types");
 const types_2 = require("./types");
-exports.CouponCodeCrudMutation = schema_1.extendType({
+exports.CouponCodeCrudMutation = nexus_1.extendType({
     type: "Mutation",
     definition(t) {
         t.field("addCouponCode", {
             type: types_2.AddCouponCodeResult,
             description: "Add a coupon code",
-            nullable: false,
             args: {
-                title: schema_1.stringArg({
-                    required: true,
-                    description: "The name or a short description of the coupon code",
-                }),
-                discountPercentage: schema_1.floatArg({
-                    required: true,
-                    description: "The percentage of the coupon code discount",
-                }),
-                beachBarId: schema_1.idArg({
-                    required: false,
-                    description: "The ID value of the #beach_bar, to apply the coupon code for",
-                }),
-                validUntil: schema_1.arg({
-                    type: common_2.DateTimeScalar,
-                    required: true,
+                title: nexus_1.stringArg({ description: "The name or a short description of the coupon code" }),
+                discountPercentage: nexus_1.floatArg({ description: "The percentage of the coupon code discount" }),
+                beachBarId: nexus_1.nullable(nexus_1.idArg({ description: "The ID value of the #beach_bar, to apply the coupon code for" })),
+                validUntil: nexus_1.arg({
+                    type: graphql_1.DateTimeScalar,
                     description: "A timestamp that indicates until what date and time this coupon code is applicable and valid",
                 }),
-                isActive: schema_1.booleanArg({
-                    required: true,
+                isActive: nexus_1.booleanArg({
                     description: "Set to true if coupon code is active. Its default value is set to false",
                     default: false,
                 }),
-                timesLimit: schema_1.intArg({
-                    required: true,
+                timesLimit: nexus_1.intArg({
                     description: "Represents how many times this coupon code can be used",
                 }),
             },
@@ -105,34 +92,23 @@ exports.CouponCodeCrudMutation = schema_1.extendType({
         t.field("updateCouponCode", {
             type: types_2.UpdateCouponCodeResult,
             description: "Update a coupon code",
-            nullable: false,
             args: {
-                couponCodeId: schema_1.arg({
-                    type: common_2.BigIntScalar,
-                    required: true,
+                couponCodeId: nexus_1.arg({
+                    type: graphql_1.BigIntScalar,
                     description: "The ID value of the coupon code",
                 }),
-                title: schema_1.stringArg({
-                    required: false,
-                    description: "The name or a short description of the coupon code",
-                }),
-                discountPercentage: schema_1.floatArg({
-                    required: false,
-                    description: "The percentage of the coupon code discount",
-                }),
-                validUntil: schema_1.arg({
-                    type: common_2.DateTimeScalar,
-                    required: false,
+                title: nexus_1.nullable(nexus_1.stringArg({ description: "The name or a short description of the coupon code" })),
+                discountPercentage: nexus_1.nullable(nexus_1.floatArg({ description: "The percentage of the coupon code discount" })),
+                validUntil: nexus_1.nullable(nexus_1.arg({
+                    type: graphql_1.DateTimeScalar,
                     description: "A timestamp that indicates until what date and time this coupon code is applicable and valid",
-                }),
-                isActive: schema_1.booleanArg({
-                    required: false,
+                })),
+                isActive: nexus_1.nullable(nexus_1.booleanArg({
                     description: "Set to true if coupon code is active. Its default value is set to false",
-                }),
-                timesLimit: schema_1.intArg({
-                    required: false,
+                })),
+                timesLimit: nexus_1.nullable(nexus_1.intArg({
                     description: "Represents how many times this coupon code can be used",
-                }),
+                })),
             },
             resolve: (_, { couponCodeId, title, discountPercentage, validUntil, isActive, timesLimit }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -182,9 +158,8 @@ exports.CouponCodeCrudMutation = schema_1.extendType({
         t.field("deleteCouponCode", {
             type: types_1.DeleteResult,
             args: {
-                couponCodeId: schema_1.arg({
-                    type: common_2.BigIntScalar,
-                    required: true,
+                couponCodeId: nexus_1.arg({
+                    type: graphql_1.BigIntScalar,
                     description: "The ID value of the coupon code",
                 }),
             },
@@ -220,34 +195,21 @@ exports.CouponCodeCrudMutation = schema_1.extendType({
         });
     },
 });
-exports.OfferCampaignCrudMutation = schema_1.extendType({
+exports.OfferCampaignCrudMutation = nexus_1.extendType({
     type: "Mutation",
     definition(t) {
         t.field("addOfferCampaign", {
             type: types_2.AddOfferCampaignResult,
             description: "Add an offer campaign to a #beach_bar",
-            nullable: false,
             args: {
-                productIds: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the product",
-                    list: true,
-                }),
-                title: schema_1.stringArg({
-                    required: true,
-                    description: "The name or a short description of the coupon code",
-                }),
-                discountPercentage: schema_1.floatArg({
-                    required: true,
-                    description: "The percentage of the coupon code discount",
-                }),
-                validUntil: schema_1.arg({
-                    type: common_2.DateTimeScalar,
-                    required: true,
+                productIds: nexus_1.list(nexus_1.intArg({ description: "The ID value of the product" })),
+                title: nexus_1.stringArg({ description: "The name or a short description of the coupon code" }),
+                discountPercentage: nexus_1.floatArg({ description: "The percentage of the coupon code discount" }),
+                validUntil: nexus_1.arg({
+                    type: graphql_1.DateTimeScalar,
                     description: "A timestamp that indicates until what date and time this coupon code is applicable and valid",
                 }),
-                isActive: schema_1.booleanArg({
-                    required: true,
+                isActive: nexus_1.booleanArg({
                     description: "Set to true if coupon code is active. Its default value is set to false",
                     default: false,
                 }),
@@ -296,35 +258,25 @@ exports.OfferCampaignCrudMutation = schema_1.extendType({
         t.field("updateOfferCampaign", {
             type: types_2.UpdateOfferCampaignResult,
             description: "Update the details of an offer campaign of a #beach_bar",
-            nullable: false,
             args: {
-                offerCampaignId: schema_1.arg({
-                    type: common_2.BigIntScalar,
-                    required: true,
+                offerCampaignId: nexus_1.arg({
+                    type: graphql_1.BigIntScalar,
                     description: "The ID value of the offer campaign",
                 }),
-                productIds: schema_1.intArg({
-                    required: false,
+                productIds: nexus_1.list(nexus_1.nullable(nexus_1.intArg({
                     description: "The ID value of the product",
-                    list: true,
-                }),
-                title: schema_1.stringArg({
-                    required: false,
-                    description: "The name or a short description of the coupon code",
-                }),
-                discountPercentage: schema_1.floatArg({
-                    required: false,
+                }))),
+                title: nexus_1.nullable(nexus_1.stringArg({ description: "The name or a short description of the coupon code" })),
+                discountPercentage: nexus_1.nullable(nexus_1.floatArg({
                     description: "The percentage of the coupon code discount",
-                }),
-                validUntil: schema_1.arg({
-                    type: common_2.DateTimeScalar,
-                    required: false,
+                })),
+                validUntil: nexus_1.nullable(nexus_1.arg({
+                    type: graphql_1.DateTimeScalar,
                     description: "A timestamp that indicates until what date and time this coupon code is applicable and valid",
-                }),
-                isActive: schema_1.booleanArg({
-                    required: false,
+                })),
+                isActive: nexus_1.nullable(nexus_1.booleanArg({
                     description: "Set to true if coupon code is active. Its default value is set to false",
-                }),
+                })),
             },
             resolve: (_, { offerCampaignId, productIds, title, discountPercentage, validUntil, isActive }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -370,11 +322,9 @@ exports.OfferCampaignCrudMutation = schema_1.extendType({
         t.field("deleteOfferCampaign", {
             type: types_1.DeleteResult,
             description: "Delete an offer campaign of a #beach_bar",
-            nullable: false,
             args: {
-                offerCampaignId: schema_1.arg({
-                    type: common_2.BigIntScalar,
-                    required: true,
+                offerCampaignId: nexus_1.arg({
+                    type: graphql_1.BigIntScalar,
                     description: "The ID value of the offer campaign",
                 }),
             },
@@ -410,17 +360,15 @@ exports.OfferCampaignCrudMutation = schema_1.extendType({
         });
     },
 });
-exports.OfferCampaignCodeCrudMutation = schema_1.extendType({
+exports.OfferCampaignCodeCrudMutation = nexus_1.extendType({
     type: "Mutation",
     definition(t) {
         t.field("addOfferCampaignCode", {
             type: types_2.AddOfferCampaignCodeResult,
             description: "Add (issue) a new offer code",
-            nullable: false,
             args: {
-                offerCampaignId: schema_1.arg({
-                    type: common_2.BigIntScalar,
-                    required: true,
+                offerCampaignId: nexus_1.arg({
+                    type: graphql_1.BigIntScalar,
                     description: "The ID value of the offer campaign",
                 }),
             },
@@ -459,11 +407,9 @@ exports.OfferCampaignCodeCrudMutation = schema_1.extendType({
         t.field("deleteOfferCode", {
             type: types_1.DeleteResult,
             description: "Delete (invalidate) an offer code of an offer campaign",
-            nullable: false,
             args: {
-                offerCodeId: schema_1.arg({
-                    type: common_2.BigIntScalar,
-                    required: true,
+                offerCodeId: nexus_1.arg({
+                    type: graphql_1.BigIntScalar,
                     description: "The ID value of the offer campaign",
                 }),
             },
@@ -499,4 +445,3 @@ exports.OfferCampaignCodeCrudMutation = schema_1.extendType({
         });
     },
 });
-//# sourceMappingURL=mutation.js.map

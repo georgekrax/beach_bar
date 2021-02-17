@@ -11,50 +11,35 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProductRestoreMutation = exports.ProductCrudMutation = void 0;
 const common_1 = require("@beach_bar/common");
-const common_2 = require("@georgekrax-hashtag/common");
-const schema_1 = require("@nexus/schema");
+const graphql_1 = require("@the_hashtag/common/dist/graphql");
 const BeachBar_1 = require("entity/BeachBar");
 const Product_1 = require("entity/Product");
 const ProductCategory_1 = require("entity/ProductCategory");
 const ProductPriceHistory_1 = require("entity/ProductPriceHistory");
+const nexus_1 = require("nexus");
 const checkMinimumProductPrice_1 = require("utils/beach_bar/checkMinimumProductPrice");
 const checkScopes_1 = require("utils/checkScopes");
 const types_1 = require("../../types");
 const types_2 = require("./types");
-exports.ProductCrudMutation = schema_1.extendType({
+exports.ProductCrudMutation = nexus_1.extendType({
     type: "Mutation",
     definition(t) {
         t.field("addProduct", {
             type: types_2.AddProductResult,
             description: "Add a product to a #beach_bar",
-            nullable: false,
             args: {
-                beachBarId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the #beach_bar to add the product to",
-                }),
-                name: schema_1.stringArg({
-                    required: true,
-                    description: "The name of the product",
-                }),
-                description: schema_1.stringArg({
-                    required: false,
-                    description: "A short description of the product",
-                }),
-                categoryId: schema_1.intArg({ required: true, description: "The ID value of the category of the product" }),
-                price: schema_1.floatArg({ required: true, description: "The price of the product" }),
-                isActive: schema_1.booleanArg({
-                    required: false,
+                beachBarId: nexus_1.intArg({ description: "The ID value of the #beach_bar to add the product to" }),
+                name: nexus_1.stringArg({ description: "The name of the product" }),
+                description: nexus_1.nullable(nexus_1.stringArg({ description: "A short description of the product" })),
+                categoryId: nexus_1.intArg({ description: "The ID value of the category of the product" }),
+                price: nexus_1.floatArg({ description: "The price of the product" }),
+                isActive: nexus_1.nullable(nexus_1.booleanArg({
                     description: "A boolean that indicates if the product is active & can be purchased by a user or a customer",
                     default: false,
-                }),
-                maxPeople: schema_1.intArg({
-                    required: true,
-                    description: "How many people can use this specific product",
-                }),
-                imgUrl: schema_1.arg({
-                    type: common_2.UrlScalar,
-                    required: false,
+                })),
+                maxPeople: nexus_1.intArg({ description: "How many people can use this specific product" }),
+                imgUrl: nexus_1.arg({
+                    type: graphql_1.UrlScalar,
                     description: "An image for the #beach_bar's product",
                 }),
             },
@@ -162,35 +147,22 @@ exports.ProductCrudMutation = schema_1.extendType({
         t.field("updateProduct", {
             type: types_2.UpdateProductResult,
             description: "Update a #beach_bar's product info",
-            nullable: false,
             args: {
-                productId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the product",
-                }),
-                name: schema_1.stringArg({
-                    required: true,
-                    description: "The name of the product",
-                }),
-                description: schema_1.stringArg({
-                    required: false,
-                    description: "A short description of the product",
-                }),
-                categoryId: schema_1.intArg({ required: false, description: "The ID value of the category of the product" }),
-                price: schema_1.floatArg({ required: false, description: "The price of the product" }),
-                isActive: schema_1.booleanArg({
-                    required: false,
+                productId: nexus_1.intArg({ description: "The ID value of the product" }),
+                name: nexus_1.stringArg({ description: "The name of the product" }),
+                description: nexus_1.nullable(nexus_1.stringArg({ description: "A short description of the product" })),
+                categoryId: nexus_1.nullable(nexus_1.intArg({ description: "The ID value of the category of the product" })),
+                price: nexus_1.nullable(nexus_1.floatArg({ description: "The price of the product" })),
+                isActive: nexus_1.nullable(nexus_1.booleanArg({
                     description: "A boolean that indicates if the product is active & can be purchased by a user or a customer",
-                }),
-                maxPeople: schema_1.intArg({
-                    required: true,
+                })),
+                maxPeople: nexus_1.intArg({
                     description: "How many people can use this specific product",
                 }),
-                imgUrl: schema_1.arg({
-                    type: common_2.UrlScalar,
-                    required: false,
+                imgUrl: nexus_1.nullable(nexus_1.arg({
+                    type: graphql_1.UrlScalar,
                     description: "An image for the #beach_bar's product",
-                }),
+                })),
             },
             resolve: (_, { productId, name, description, categoryId, price, isActive, maxPeople, imgUrl }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -254,12 +226,8 @@ exports.ProductCrudMutation = schema_1.extendType({
         t.field("deleteProduct", {
             type: types_1.DeleteResult,
             description: "Delete (remove) a product from a #beach_bar",
-            nullable: false,
             args: {
-                productId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the product",
-                }),
+                productId: nexus_1.intArg({ description: "The ID value of the product" }),
             },
             resolve: (_, { productId }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -293,18 +261,14 @@ exports.ProductCrudMutation = schema_1.extendType({
         });
     },
 });
-exports.ProductRestoreMutation = schema_1.extendType({
+exports.ProductRestoreMutation = nexus_1.extendType({
     type: "Mutation",
     definition(t) {
         t.field("restoreBeachBarProduct", {
             type: types_2.UpdateProductResult,
             description: "Restore a (soft) deleted #beach_bar product",
-            nullable: false,
             args: {
-                productId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the product",
-                }),
+                productId: nexus_1.intArg({ description: "The ID value of the product" }),
             },
             resolve: (_, { productId }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -344,4 +308,3 @@ exports.ProductRestoreMutation = schema_1.extendType({
         });
     },
 });
-//# sourceMappingURL=mutation.js.map

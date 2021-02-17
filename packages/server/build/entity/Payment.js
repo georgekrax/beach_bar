@@ -222,4 +222,3 @@ Payment = Payment_1 = __decorate([
     typeorm_1.Entity({ name: "payment", schema: "public" })
 ], Payment);
 exports.Payment = Payment;
-//# sourceMappingURL=Payment.js.map

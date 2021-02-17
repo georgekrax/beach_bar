@@ -1,0 +1,27 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "target": "ESNext",
+    "lib": ["DOM", "DOM.Iterable", "ES6"],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "sourceMap": true,
+    "module": "ES2020",
+    "moduleResolution": "Node",
+    "jsx": "preserve",
+    "outDir": "dist",
+    "rootDir": ".",
+    "isolatedModules": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/styles/*": ["styles/*"],
+      "@/components/*": ["components/*"],
+      "@/utils/*": ["utils/*"],
+      "@/config/*": ["config/*"],
+      "@/typings/*": ["typings/*"],
+    }
+  },
+  "exclude": ["node_modules", ".next", "out"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/.*.tsx", "**/*.js"]
+}

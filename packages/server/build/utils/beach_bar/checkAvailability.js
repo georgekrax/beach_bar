@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.checkAvailability = void 0;
 const getReservationLimits_1 = require("./getReservationLimits");
 const getReservedProducts_1 = require("./getReservedProducts");
-exports.checkAvailability = (redis, beachBar, date, timeId, totalPeople) => __awaiter(void 0, void 0, void 0, function* () {
+const checkAvailability = (redis, beachBar, date, timeId, totalPeople) => __awaiter(void 0, void 0, void 0, function* () {
     const reservedProducts = yield getReservedProducts_1.getReservedProducts(redis, beachBar, date, timeId);
     const reservationLimits = getReservationLimits_1.getReservationLimits(beachBar, date, timeId);
     if (!reservationLimits || reservationLimits.length === 0) {
@@ -39,4 +39,4 @@ exports.checkAvailability = (redis, beachBar, date, timeId, totalPeople) => __aw
         };
     }
 });
-//# sourceMappingURL=checkAvailability.js.map
+exports.checkAvailability = checkAvailability;

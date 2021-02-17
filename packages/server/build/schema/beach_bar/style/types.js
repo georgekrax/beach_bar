@@ -1,13 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BeachBarStyleType = void 0;
-const schema_1 = require("@nexus/schema");
-exports.BeachBarStyleType = schema_1.objectType({
+const nexus_1 = require("nexus");
+exports.BeachBarStyleType = nexus_1.objectType({
     name: "BeachBarStyle",
     description: "The style of a #beach_bar",
     definition(t) {
-        t.id("id", { nullable: false });
-        t.string("name", { nullable: false });
+        t.id("id");
+        t.string("name");
     },
 });
-//# sourceMappingURL=types.js.map

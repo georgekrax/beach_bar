@@ -54,4 +54,3 @@ ProductPriceHistory = __decorate([
     typeorm_1.Entity({ name: "product_price_history", schema: "public" })
 ], ProductPriceHistory);
 exports.ProductPriceHistory = ProductPriceHistory;
-//# sourceMappingURL=ProductPriceHistory.js.map

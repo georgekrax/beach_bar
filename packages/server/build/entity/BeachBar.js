@@ -43,7 +43,7 @@ var BeachBar_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BeachBarRepository = exports.BeachBar = void 0;
 const common_1 = require("@beach_bar/common");
-const common_2 = require("@georgekrax-hashtag/common");
+const common_2 = require("@the_hashtag/common");
 const redisKeys_1 = __importDefault(require("constants/redisKeys"));
 const relations_1 = __importDefault(require("constants/relations"));
 const _index_1 = require("constants/_index");
@@ -561,4 +561,3 @@ BeachBarRepository = __decorate([
     typeorm_1.EntityRepository(BeachBar)
 ], BeachBarRepository);
 exports.BeachBarRepository = BeachBarRepository;
-//# sourceMappingURL=BeachBar.js.map

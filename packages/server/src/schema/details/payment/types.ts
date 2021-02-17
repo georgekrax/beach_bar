@@ -1,10 +1,10 @@
-import { objectType } from "@nexus/schema";
+import { objectType } from "nexus";
 
 export const PaymentStatusType = objectType({
   name: "PaymentStatus",
   description: "Represents the status of a payment",
   definition(t) {
-    t.int("id", { nullable: false });
-    t.string("status", { nullable: false });
+    t.id("id");
+    t.string("status");
   },
 });

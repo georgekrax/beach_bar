@@ -14,31 +14,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AWSMutation = void 0;
 const common_1 = require("@beach_bar/common");
-const common_2 = require("@georgekrax-hashtag/common");
-const schema_1 = require("@nexus/schema");
+const common_2 = require("@the_hashtag/common");
 const aws_sdk_1 = __importDefault(require("aws-sdk"));
+const nexus_1 = require("nexus");
 const switchS3Bucket_1 = require("utils/aws/switchS3Bucket");
 const types_1 = require("./types");
-exports.AWSMutation = schema_1.extendType({
+exports.AWSMutation = nexus_1.extendType({
     type: "Mutation",
     definition(t) {
-        t.field("signS3", {
+        t.nullable.field("signS3", {
             type: types_1.S3PayloadType,
             description: "",
-            nullable: true,
             args: {
-                filename: schema_1.stringArg({
-                    required: true,
-                    description: "The name of the file to sign (upload)",
-                }),
-                filetype: schema_1.stringArg({
-                    required: true,
-                    description: "The type of the file to sign (upload)",
-                }),
-                tableName: schema_1.stringArg({
-                    required: true,
-                    description: "The name of the table in PostgreSQL",
-                }),
+                filename: nexus_1.stringArg({ description: "The name of the file to sign (upload)" }),
+                filetype: nexus_1.stringArg({ description: "The type of the file to sign (upload)" }),
+                tableName: nexus_1.stringArg({ description: "The name of the table in PostgreSQL" }),
             },
             resolve: (_, { filename, filetype, tableName }, { redis }) => __awaiter(this, void 0, void 0, function* () {
                 const s3Bucket = yield switchS3Bucket_1.switchS3Bucket(redis, tableName);
@@ -69,4 +59,3 @@ exports.AWSMutation = schema_1.extendType({
         });
     },
 });
-//# sourceMappingURL=mutation.js.map

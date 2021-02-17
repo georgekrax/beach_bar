@@ -47,4 +47,3 @@ StripeFee = __decorate([
     typeorm_1.Entity({ name: "stripe_fee", schema: "public" })
 ], StripeFee);
 exports.StripeFee = StripeFee;
-//# sourceMappingURL=StripeFee.js.map

@@ -1,8 +1,8 @@
 import { errors, MyContext } from "@beach_bar/common";
-import { extendType, intArg, stringArg } from "@nexus/schema";
 import { BeachBar } from "entity/BeachBar";
 import { BeachBarFeature } from "entity/BeachBarFeature";
 import { BeachBarService } from "entity/BeachBarService";
+import { extendType, intArg, nullable, stringArg } from "nexus";
 import { DeleteType } from "typings/.index";
 import { AddBeachBarFeatureType, UpdateBeachBarFeatureType } from "typings/beach_bar/service";
 import { DeleteResult } from "../../types";
@@ -14,25 +14,14 @@ export const BeachBarFeatureMutation = extendType({
     t.field("addBeachBarFeature", {
       type: AddBeachBarFeatureResult,
       description: "Add (assign) a feature to a #beach_bar",
-      nullable: false,
       args: {
-        beachBarId: intArg({
-          required: true,
-          description: "The ID value of the #beach_bar to add (assign) the feature",
-        }),
-        featureId: intArg({
-          required: true,
-          description: "The ID value of the feature to add (assign) to the #beach_bar",
-        }),
+        beachBarId: intArg({ description: "The ID value of the #beach_bar to add (assign) the feature" }),
+        featureId: intArg({ description: "The ID value of the feature to add (assign) to the #beach_bar" }),
         quantity: intArg({
-          required: true,
           description: "An integer that indicates the quantity of the service, a #beach_bar provides",
           default: 1,
         }),
-        description: stringArg({
-          required: false,
-          description: "A short description about the service",
-        }),
+        description: nullable(stringArg({ description: "A short description about the service" })),
       },
       resolve: async (
         _,
@@ -121,24 +110,11 @@ export const BeachBarFeatureMutation = extendType({
     t.field("updateBeachBarFeature", {
       type: UpdateBeachBarFeatureResult,
       description: "Update a feature of a #beach_bar",
-      nullable: false,
       args: {
-        beachBarId: intArg({
-          required: true,
-          description: "The ID value of the #beach_bar to update its feature info",
-        }),
-        featureId: intArg({
-          required: true,
-          description: "The ID value of the feature of the #beach_bar, to update its info",
-        }),
-        quantity: intArg({
-          required: false,
-          description: "An integer that indicates the quantity of the service, a #beach_bar provides",
-        }),
-        description: stringArg({
-          required: false,
-          description: "A short description about the service",
-        }),
+        beachBarId: intArg({ description: "The ID value of the #beach_bar to update its feature info" }),
+        featureId: intArg({ description: "The ID value of the feature of the #beach_bar, to update its info" }),
+        quantity: nullable(intArg({ description: "An integer that indicates the quantity of the service, a #beach_bar provides" })),
+        description: nullable(stringArg({ description: "A short description about the service" })),
       },
       resolve: async (
         _,
@@ -208,16 +184,9 @@ export const BeachBarFeatureMutation = extendType({
     t.field("deleteBeachBarFeature", {
       type: DeleteResult,
       description: "Delete (remove) a feature (service) from a #beach_bar",
-      nullable: false,
       args: {
-        beachBarId: intArg({
-          required: true,
-          description: "The ID value of the #beach_bar to delete (remove) its feature",
-        }),
-        featureId: intArg({
-          required: true,
-          description: "The ID value of the feature of the #beach_bar, to delete (remove)",
-        }),
+        beachBarId: intArg({ description: "The ID value of the #beach_bar to delete (remove) its feature" }),
+        featureId: intArg({ description: "The ID value of the feature of the #beach_bar, to delete (remove)" }),
       },
       resolve: async (_, { beachBarId, featureId }, { payload }: MyContext): Promise<DeleteType> => {
         if (!payload) {

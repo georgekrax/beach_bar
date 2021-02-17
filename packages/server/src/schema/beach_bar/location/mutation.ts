@@ -1,10 +1,10 @@
 import { errors, MyContext } from "@beach_bar/common";
-import { extendType, idArg, intArg, stringArg } from "@nexus/schema";
 import { BeachBar } from "entity/BeachBar";
 import { BeachBarLocation } from "entity/BeachBarLocation";
 import { City } from "entity/City";
 import { Country } from "entity/Country";
 import { Region } from "entity/Region";
+import { extendType, idArg, intArg, nullable, stringArg } from "nexus";
 import { AddBeachBarLocationType, UpdateBeachBarLocationType } from "typings/beach_bar/location";
 import { checkScopes } from "utils/checkScopes";
 import { AddBeachBarLocationResult, UpdateBeachBarLocationResult } from "./types";
@@ -15,40 +15,19 @@ export const BeachBarLocationCrudMutation = extendType({
     t.field("addBeachBarLocation", {
       type: AddBeachBarLocationResult,
       description: "Add (assign) a location to a #beach_bar",
-      nullable: false,
       args: {
-        beachBarId: intArg({
-          required: true,
-          description: "The ID value of the #beach_bar",
-        }),
-        address: stringArg({
-          required: true,
-          description: "The address of the #beach_bar",
-        }),
-        zipCode: stringArg({
-          required: false,
-          description: "The zip (postal) code of the #beach_bar",
-        }),
-        latitude: stringArg({
-          required: true,
-          description: "The latitude of the location of the #beach_bar",
-        }),
-        longitude: stringArg({
-          required: true,
-          description: "The longitude of the location of the #beach_bar",
-        }),
-        countryId: idArg({
-          required: true,
-          description: "The ID value of the country the #beach_bar is located at",
-        }),
-        cityId: idArg({
-          required: true,
-          description: "The ID value of the city the #beach_bar is located at",
-        }),
-        regionId: intArg({
-          required: false,
-          description: "The ID value of the #beach_bar region",
-        }),
+        beachBarId: intArg({ description: "The ID value of the #beach_bar" }),
+        address: stringArg({ description: "The address of the #beach_bar" }),
+        zipCode: nullable(
+          stringArg({
+            description: "The zip (postal) code of the #beach_bar",
+          })
+        ),
+        latitude: stringArg({ description: "The latitude of the location of the #beach_bar" }),
+        longitude: stringArg({ description: "The longitude of the location of the #beach_bar" }),
+        countryId: idArg({ description: "The ID value of the country the #beach_bar is located at" }),
+        cityId: idArg({ description: "The ID value of the city the #beach_bar is located at" }),
+        regionId: nullable(intArg({ description: "The ID value of the #beach_bar region" })),
       },
       resolve: async (
         _,
@@ -136,40 +115,19 @@ export const BeachBarLocationCrudMutation = extendType({
     t.field("updateBeachBarLocation", {
       type: UpdateBeachBarLocationResult,
       description: "Update the location details of a #beach_bar",
-      nullable: false,
       args: {
-        locationId: intArg({
-          required: true,
-          description: "The ID value of the #beach_bar location",
-        }),
-        address: stringArg({
-          required: false,
-          description: "The address of the #beach_bar",
-        }),
-        zipCode: stringArg({
-          required: false,
-          description: "The zip (postal) code of the #beach_bar",
-        }),
-        latitude: stringArg({
-          required: false,
-          description: "The latitude of the location of the #beach_bar",
-        }),
-        longitude: stringArg({
-          required: false,
-          description: "The longitude of the location of the #beach_bar",
-        }),
-        countryId: intArg({
-          required: false,
-          description: "The ID value of the country the #beach_bar is located at",
-        }),
-        cityId: intArg({
-          required: false,
-          description: "The ID value of the city the #beach_bar is located at",
-        }),
-        regionId: intArg({
-          required: false,
-          description: "The ID value of the #beach_bar region",
-        }),
+        locationId: intArg({ description: "The ID value of the #beach_bar location" }),
+        address: nullable(stringArg({ description: "The address of the #beach_bar" })),
+        zipCode: nullable(
+          stringArg({
+            description: "The zip (postal) code of the #beach_bar",
+          })
+        ),
+        latitude: nullable(stringArg({ description: "The latitude of the location of the #beach_bar" })),
+        longitude: nullable(stringArg({ description: "The longitude of the location of the #beach_bar" })),
+        countryId: nullable(intArg({ description: "The ID value of the country the #beach_bar is located at" })),
+        cityId: nullable(intArg({ description: "The ID value of the city the #beach_bar is located at" })),
+        regionId: nullable(intArg({ description: "The ID value of the #beach_bar region" })),
       },
       resolve: async (
         _,

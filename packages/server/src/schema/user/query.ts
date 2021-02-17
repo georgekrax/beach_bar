@@ -1,5 +1,5 @@
 import { errors, MyContext } from "@beach_bar/common";
-import { extendType } from "@nexus/schema";
+import { extendType } from "nexus";
 import { User } from "entity/User";
 import { ErrorType } from "typings/.index";
 import { UserType } from "typings/user";

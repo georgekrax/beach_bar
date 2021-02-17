@@ -56,4 +56,3 @@ PaymentVoucherCode = __decorate([
     typeorm_1.Entity({ name: "payment_voucher_code", schema: "public" })
 ], PaymentVoucherCode);
 exports.PaymentVoucherCode = PaymentVoucherCode;
-//# sourceMappingURL=PaymentVoucherCode.js.map

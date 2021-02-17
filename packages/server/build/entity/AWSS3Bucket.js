@@ -49,4 +49,3 @@ AWSS3Bucket = __decorate([
     typeorm_1.Entity({ name: "aws_s3_bucket", schema: "public" })
 ], AWSS3Bucket);
 exports.AWSS3Bucket = AWSS3Bucket;
-//# sourceMappingURL=AWSS3Bucket.js.map

@@ -31,4 +31,3 @@ const names = {
     },
 };
 exports.default = names;
-//# sourceMappingURL=platformNames.js.map

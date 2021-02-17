@@ -30,4 +30,3 @@ PaymentStatus = __decorate([
     typeorm_1.Entity({ name: "payment_status", schema: "public" })
 ], PaymentStatus);
 exports.PaymentStatus = PaymentStatus;
-//# sourceMappingURL=PaymentStatus.js.map

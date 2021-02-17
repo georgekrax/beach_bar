@@ -14,11 +14,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserCrudMutation = exports.UserForgotPasswordMutation = exports.UserLogoutMutation = exports.UserSignUpAndLoginMutation = void 0;
 const common_1 = require("@beach_bar/common");
-const common_2 = require("@georgekrax-hashtag/common");
-const schema_1 = require("@nexus/schema");
+const graphql_1 = require("@the_hashtag/common/dist/graphql");
 const apollo_link_1 = require("apollo-link");
 const crypto_1 = require("crypto");
 const LoginDetails_1 = require("entity/LoginDetails");
+const nexus_1 = require("nexus");
 const apolloLink_1 = require("../../config/apolloLink");
 const platformNames_1 = __importDefault(require("../../config/platformNames"));
 const redisKeys_1 = __importDefault(require("../../constants/redisKeys"));
@@ -40,24 +40,21 @@ const userCommon_1 = require("../../utils/auth/userCommon");
 const removeUserSessions_1 = require("../../utils/removeUserSessions");
 const types_1 = require("../types");
 const types_2 = require("./types");
-exports.UserSignUpAndLoginMutation = schema_1.extendType({
+exports.UserSignUpAndLoginMutation = nexus_1.extendType({
     type: "Mutation",
     definition(t) {
         t.field("signUp", {
             type: types_2.UserSignUpResult,
             description: "Sign up a user",
-            nullable: false,
             args: {
-                userCredentials: schema_1.arg({
+                userCredentials: nexus_1.arg({
                     type: types_2.UserCredentialsInput,
-                    required: true,
                     description: "Credential for signing up a user",
                 }),
-                isPrimaryOwner: schema_1.booleanArg({
-                    required: false,
+                isPrimaryOwner: nexus_1.nullable(nexus_1.booleanArg({
                     default: false,
                     description: "Set to true if you want to sign up an owner for a #beach_bar",
-                }),
+                })),
             },
             resolve: (_, { userCredentials, isPrimaryOwner }, { redis }) => __awaiter(this, void 0, void 0, function* () {
                 const { email, password } = userCredentials;
@@ -127,16 +124,13 @@ exports.UserSignUpAndLoginMutation = schema_1.extendType({
         t.field("login", {
             type: types_2.UserLoginResult,
             description: "Login a user",
-            nullable: false,
             args: {
-                loginDetails: schema_1.arg({
+                loginDetails: nexus_1.nullable(nexus_1.arg({
                     type: types_2.UserLoginDetailsInput,
-                    required: false,
                     description: "User details in login",
-                }),
-                userCredentials: schema_1.arg({
+                })),
+                userCredentials: nexus_1.arg({
                     type: types_2.UserCredentialsInput,
-                    required: true,
                     description: "Credential for signing up a user",
                 }),
             },
@@ -335,13 +329,12 @@ exports.UserSignUpAndLoginMutation = schema_1.extendType({
         });
     },
 });
-exports.UserLogoutMutation = schema_1.extendType({
+exports.UserLogoutMutation = nexus_1.extendType({
     type: "Mutation",
     definition(t) {
         t.field("logout", {
             type: types_1.SuccessResult,
             description: "Logout a user",
-            nullable: false,
             resolve: (_, __, { res, payload, redis }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
                     return { error: { code: common_1.errors.NOT_AUTHENTICATED_CODE, message: common_1.errors.NOT_AUTHENTICATED_MESSAGE } };
@@ -395,17 +388,15 @@ exports.UserLogoutMutation = schema_1.extendType({
         });
     },
 });
-exports.UserForgotPasswordMutation = schema_1.extendType({
+exports.UserForgotPasswordMutation = nexus_1.extendType({
     type: "Mutation",
     definition(t) {
         t.field("sendForgotPasswordLink", {
             type: types_1.SuccessResult,
             description: "Sends a link to the user's email address to change its password",
-            nullable: false,
             args: {
-                email: schema_1.arg({
-                    type: common_2.EmailScalar,
-                    required: true,
+                email: nexus_1.arg({
+                    type: graphql_1.EmailScalar,
                     description: "The email address of user",
                 }),
             },
@@ -467,19 +458,15 @@ exports.UserForgotPasswordMutation = schema_1.extendType({
         t.field("changeUserPassword", {
             type: types_1.SuccessResult,
             description: "Change a user's password",
-            nullable: false,
             args: {
-                email: schema_1.arg({
-                    type: common_2.EmailScalar,
-                    required: true,
+                email: nexus_1.arg({
+                    type: graphql_1.EmailScalar,
                     description: "Email of user to retrieve OAuth Client applications",
                 }),
-                key: schema_1.stringArg({
-                    required: true,
+                key: nexus_1.stringArg({
                     description: "The key in the URL to identify and verify user. Each key lasts 20 minutes",
                 }),
-                newPassword: schema_1.stringArg({
-                    required: true,
+                newPassword: nexus_1.stringArg({
                     description: "User's new password",
                 }),
             },
@@ -541,57 +528,27 @@ exports.UserForgotPasswordMutation = schema_1.extendType({
         });
     },
 });
-exports.UserCrudMutation = schema_1.extendType({
+exports.UserCrudMutation = nexus_1.extendType({
     type: "Mutation",
     definition(t) {
         t.field("updateUser", {
             type: types_2.UserUpdateResult,
             description: "Update a user's info",
-            nullable: false,
             args: {
-                email: schema_1.arg({
-                    type: common_2.EmailScalar,
-                    required: false,
-                }),
-                firstName: schema_1.stringArg({
-                    required: false,
-                }),
-                lastName: schema_1.stringArg({
-                    required: false,
-                }),
-                imgUrl: schema_1.arg({
-                    type: common_2.UrlScalar,
-                    required: false,
-                }),
-                personTitle: schema_1.stringArg({
-                    required: false,
-                    description: "The honorific title of the user",
-                }),
-                birthday: schema_1.arg({
-                    type: common_2.DateScalar,
-                    required: false,
+                email: nexus_1.nullable(nexus_1.arg({ type: graphql_1.EmailScalar })),
+                firstName: nexus_1.nullable(nexus_1.stringArg()),
+                lastName: nexus_1.nullable(nexus_1.stringArg()),
+                imgUrl: nexus_1.nullable(nexus_1.arg({ type: graphql_1.UrlScalar })),
+                personTitle: nexus_1.nullable(nexus_1.stringArg({ description: "The honorific title of the user" })),
+                birthday: nexus_1.nullable(nexus_1.arg({
+                    type: graphql_1.DateScalar,
                     description: "User's birthday in the date format",
-                }),
-                countryId: schema_1.intArg({
-                    required: false,
-                    description: "The country of user",
-                }),
-                cityId: schema_1.intArg({
-                    required: false,
-                    description: "The city or hometown of user",
-                }),
-                address: schema_1.stringArg({
-                    required: false,
-                    description: "User's house or office street address",
-                }),
-                zipCode: schema_1.stringArg({
-                    required: false,
-                    description: "User's house or office zip code",
-                }),
-                trackHistory: schema_1.booleanArg({
-                    required: false,
-                    description: "Indicates if to track user's history",
-                }),
+                })),
+                countryId: nexus_1.nullable(nexus_1.intArg({ description: "The country of user" })),
+                cityId: nexus_1.nullable(nexus_1.intArg({ description: "The city or hometown of user" })),
+                address: nexus_1.nullable(nexus_1.stringArg({ description: "User's house or office street address" })),
+                zipCode: nexus_1.nullable(nexus_1.stringArg({ description: "User's house or office zip code" })),
+                trackHistory: nexus_1.nullable(nexus_1.booleanArg({ description: "Indicates if to track user's history" })),
             },
             resolve: (_, { email, firstName, lastName, imgUrl, personTitle, birthday, countryId, cityId, address, zipCode, trackHistory }, { payload, redis, stripe }) => __awaiter(this, void 0, void 0, function* () {
                 var _a, _b, _c;
@@ -712,7 +669,6 @@ exports.UserCrudMutation = schema_1.extendType({
         t.field("deleteUser", {
             type: types_1.DeleteResult,
             description: "Delete a user & its account",
-            nullable: false,
             resolve: (_, __, { payload, redis, stripe }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
                     return { error: { code: common_1.errors.NOT_AUTHENTICATED_CODE, message: common_1.errors.NOT_AUTHENTICATED_MESSAGE } };
@@ -747,4 +703,3 @@ exports.UserCrudMutation = schema_1.extendType({
         });
     },
 });
-//# sourceMappingURL=mutation.js.map

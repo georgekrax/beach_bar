@@ -1,11 +1,11 @@
 import { errors, MyContext } from "@beach_bar/common";
-import { BigIntScalar } from "@georgekrax-hashtag/common";
-import { arg, booleanArg, extendType, intArg, stringArg } from "@nexus/schema";
+import { BigIntScalar } from "@the_hashtag/common/dist/graphql";
 import { beachBarReviewRatingMaxValue } from "constants/_index";
 import { BeachBar } from "entity/BeachBar";
 import { BeachBarReview } from "entity/BeachBarReview";
 import { ReviewVisitType } from "entity/ReviewVisitType";
 import { MonthTime } from "entity/Time";
+import { arg, booleanArg, extendType, intArg, nullable, stringArg } from "nexus";
 import { DeleteType } from "typings/.index";
 import { AddBeachBarReviewType, UpdateBeachBarReviewType } from "typings/beach_bar/review";
 import { verifyUserPaymentReview } from "utils/beach_bar/verifyUserPaymentReview";
@@ -18,40 +18,35 @@ export const BeachBarReviewCrudMutation = extendType({
     t.field("addBeachBarReview", {
       type: AddBeachBarReviewResult,
       description: "Add a customer's review on a #beach_bar",
-      nullable: false,
       args: {
-        beachBarId: intArg({
-          required: true,
-          description: "The ID value of the #beach_bar, to submit the review",
-        }),
-        paymentRefCode: stringArg({
-          required: false,
-          description: "The referral code of the customer payment, to find",
-        }),
-        ratingValue: intArg({
-          required: true,
-          description: "The rating value between 1 to 10, the customers rates the #beach_bar",
-        }),
-        visitTypeId: intArg({
-          required: false,
-          description: "The ID value of the customer's visit type",
-        }),
-        monthTimeId: intArg({
-          required: false,
-          description: "The ID value of the month time",
-        }),
-        positiveComment: stringArg({
-          required: false,
-          description: "A positive comment about the #beach_bar",
-        }),
-        negativeComment: stringArg({
-          required: false,
-          description: "A negative comment about the #beach_bar",
-        }),
-        review: stringArg({
-          required: false,
-          description: "A summary (description) of the user's overall review",
-        }),
+        beachBarId: intArg({ description: "The ID value of the #beach_bar, to submit the review" }),
+        paymentRefCode: nullable(stringArg({ description: "The referral code of the customer payment, to find" })),
+        ratingValue: intArg({ description: "The rating value between 1 to 10, the customers rates the #beach_bar" }),
+        visitTypeId: nullable(
+          intArg({
+            description: "The ID value of the customer's visit type",
+          })
+        ),
+        monthTimeId: nullable(
+          intArg({
+            description: "The ID value of the month time",
+          })
+        ),
+        positiveComment: nullable(
+          stringArg({
+            description: "A positive comment about the #beach_bar",
+          })
+        ),
+        negativeComment: nullable(
+          stringArg({
+            description: "A negative comment about the #beach_bar",
+          })
+        ),
+        review: nullable(
+          stringArg({
+            description: "A summary (description) of the user's overall review",
+          })
+        ),
       },
       resolve: async (
         _,
@@ -146,37 +141,37 @@ export const BeachBarReviewCrudMutation = extendType({
     t.field("updateBeachBarReview", {
       type: UpdateBeachBarReviewResult,
       description: "Update a customer's review on a #beach_bar",
-      nullable: false,
       args: {
         reviewId: arg({
           type: BigIntScalar,
-          required: true,
           description: "The ID value of the customer's review",
         }),
-        ratingValue: intArg({
-          required: false,
-          description: "The rating value between 1 to 10, the customers rates the #beach_bar",
-        }),
-        visitTypeId: intArg({
-          required: false,
-          description: "The ID value of the customer's visit type",
-        }),
-        monthTimeId: intArg({
-          required: false,
-          description: "The ID value of the month time",
-        }),
-        positiveComment: stringArg({
-          required: false,
-          description: "A positive comment about the #beach_bar",
-        }),
-        negativeComment: stringArg({
-          required: false,
-          description: "A negative comment about the #beach_bar",
-        }),
-        review: stringArg({
-          required: false,
-          description: "A summary (description) of the user's overall review",
-        }),
+        ratingValue: nullable(
+          intArg({
+            description: "The rating value between 1 to 10, the customers rates the #beach_bar",
+          })
+        ),
+        visitTypeId: nullable(intArg({ description: "The ID value of the customer's visit type" })),
+        monthTimeId: nullable(
+          intArg({
+            description: "The ID value of the month time",
+          })
+        ),
+        positiveComment: nullable(
+          stringArg({
+            description: "A positive comment about the #beach_bar",
+          })
+        ),
+        negativeComment: nullable(
+          stringArg({
+            description: "A negative comment about the #beach_bar",
+          })
+        ),
+        review: nullable(
+          stringArg({
+            description: "A summary (description) of the user's overall review",
+          })
+        ),
       },
       resolve: async (
         _,
@@ -230,11 +225,9 @@ export const BeachBarReviewCrudMutation = extendType({
     t.field("deleteBeachBarReview", {
       type: DeleteResult,
       description: "Delete a customer's review on a #beach_bar",
-      nullable: false,
       args: {
         reviewId: arg({
           type: BigIntScalar,
-          required: true,
           description: "The ID value of the customer's review",
         }),
       },
@@ -268,21 +261,13 @@ export const BeachBarReviewVoteMutation = extendType({
     t.field("voteBeachBarReview", {
       type: UpdateBeachBarReviewResult,
       description: "Upvote or downvote a customer's review on a #beach_bar",
-      nullable: false,
       args: {
         reviewId: arg({
           type: BigIntScalar,
-          required: true,
           description: "The ID value of the customer's review",
         }),
-        upvote: booleanArg({
-          required: false,
-          description: "Set to true if to increment the review's votes",
-        }),
-        downvote: booleanArg({
-          required: false,
-          description: "Set to true if to decrement the review's votes",
-        }),
+        upvote: nullable(booleanArg({ description: "Set to true if to increment the review's votes" })),
+        downvote: nullable(booleanArg({ description: "Set to true if to decrement the review's votes" })),
       },
       resolve: async (_, { reviewId, upvote, downvote }): Promise<UpdateBeachBarReviewType> => {
         if (!reviewId || reviewId <= 0) {

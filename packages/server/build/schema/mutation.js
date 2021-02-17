@@ -13,23 +13,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Mutation = void 0;
-const common_1 = require("@georgekrax-hashtag/common");
-const schema_1 = require("@nexus/schema");
+const graphql_1 = require("@the_hashtag/common/dist/graphql");
 const fs_1 = require("fs");
+const nexus_1 = require("nexus");
 const path_1 = __importDefault(require("path"));
 const uuid_1 = require("uuid");
 const types_1 = require("./types");
-exports.Mutation = schema_1.mutationType({
+exports.Mutation = nexus_1.mutationType({
     description: "Mutation",
     definition(t) {
-        t.field("uploadSingleFile", {
+        t.nullable.field("uploadSingleFile", {
             type: types_1.FileGraphQlType,
             description: "Upload a single file",
-            nullable: true,
             args: {
-                file: schema_1.arg({
-                    type: common_1.UploadScalar,
-                    required: true,
+                file: nexus_1.arg({
+                    type: graphql_1.UploadScalar,
                     description: "The file to upload",
                 }),
             },
@@ -44,7 +42,7 @@ exports.Mutation = schema_1.mutationType({
         t.string("hello", {
             description: "Sample mutation",
             args: {
-                name: schema_1.stringArg({ nullable: true }),
+                name: nexus_1.nullable(nexus_1.stringArg()),
             },
             resolve: (_, { name }) => {
                 if (name) {
@@ -57,4 +55,3 @@ exports.Mutation = schema_1.mutationType({
         });
     },
 });
-//# sourceMappingURL=mutation.js.map

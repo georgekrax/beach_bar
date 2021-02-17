@@ -14,12 +14,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthorizeWithOAuthProviders = void 0;
 const common_1 = require("@beach_bar/common");
-const common_2 = require("@georgekrax-hashtag/common");
-const schema_1 = require("@nexus/schema");
+const graphql_1 = require("@the_hashtag/common/dist/graphql");
 const platformNames_1 = __importDefault(require("config/platformNames"));
 const dayjs_1 = __importDefault(require("dayjs"));
 const LoginDetails_1 = require("entity/LoginDetails");
 const User_1 = require("entity/User");
+const nexus_1 = require("nexus");
 const node_fetch_1 = __importDefault(require("node-fetch"));
 const generateAuthTokens_1 = require("utils/auth/generateAuthTokens");
 const sendRefreshToken_1 = require("utils/auth/sendRefreshToken");
@@ -27,26 +27,23 @@ const signUpUser_1 = require("utils/auth/signUpUser");
 const userCommon_1 = require("utils/auth/userCommon");
 const types_1 = require("../user/types");
 const types_2 = require("./types");
-exports.AuthorizeWithOAuthProviders = schema_1.extendType({
+exports.AuthorizeWithOAuthProviders = nexus_1.extendType({
     type: "Mutation",
     definition(t) {
         t.field("authorizeWithGoogle", {
             type: types_2.OAuthAuthorizationResult,
             description: "Authorize a user with Google",
-            nullable: false,
             args: {
-                code: schema_1.stringArg({ required: true, description: "The response code from Google's OAuth callback" }),
-                state: schema_1.stringArg({ required: true, description: "The response state, to check if everything went correct" }),
-                loginDetails: schema_1.arg({
+                code: nexus_1.stringArg({ description: "The response code from Google's OAuth callback" }),
+                state: nexus_1.stringArg({ description: "The response state, to check if everything went correct" }),
+                loginDetails: nexus_1.nullable(nexus_1.arg({
                     type: types_1.UserLoginDetailsInput,
-                    required: false,
                     description: "User details in login",
-                }),
-                isPrimaryOwner: schema_1.booleanArg({
-                    required: false,
+                })),
+                isPrimaryOwner: nexus_1.nullable(nexus_1.booleanArg({
                     default: false,
                     description: "Set to true if you want to sign up an owner for a #beach_bar",
-                }),
+                })),
             },
             resolve: (_, { code, state, loginDetails, isPrimaryOwner }, { req, res, googleOAuth2Client, uaParser, redis, ipAddr }) => __awaiter(this, void 0, void 0, function* () {
                 if (!code || code.trim().length === 0) {
@@ -165,20 +162,17 @@ exports.AuthorizeWithOAuthProviders = schema_1.extendType({
         t.field("authorizeWithFacebook", {
             type: types_2.OAuthAuthorizationResult,
             description: "Authorize a user with Facebook",
-            nullable: false,
             args: {
-                code: schema_1.stringArg({ required: true, description: "The response code from Google's OAuth callback" }),
-                state: schema_1.stringArg({ required: true, description: "The response state, to check if everything went correct" }),
-                loginDetails: schema_1.arg({
+                code: nexus_1.stringArg({ description: "The response code from Google's OAuth callback" }),
+                state: nexus_1.stringArg({ description: "The response state, to check if everything went correct" }),
+                loginDetails: nexus_1.nullable(nexus_1.arg({
                     type: types_1.UserLoginDetailsInput,
-                    required: false,
                     description: "User details in login",
-                }),
-                isPrimaryOwner: schema_1.booleanArg({
-                    required: false,
+                })),
+                isPrimaryOwner: nexus_1.nullable(nexus_1.booleanArg({
                     default: false,
                     description: "Set to true if you want to sign up an owner for a #beach_bar",
-                }),
+                })),
             },
             resolve: (_, { code, state, loginDetails, isPrimaryOwner }, { req, res, uaParser, redis, ipAddr }) => __awaiter(this, void 0, void 0, function* () {
                 if (!code || code.trim().length === 0) {
@@ -346,21 +340,18 @@ exports.AuthorizeWithOAuthProviders = schema_1.extendType({
         t.field("authorizeWithInstagram", {
             type: types_2.OAuthAuthorizationResult,
             description: "Authorize a user with Instagram",
-            nullable: false,
             args: {
-                email: schema_1.arg({ type: common_2.EmailScalar, required: true, description: "Email address of user to authorize with Instagram" }),
-                code: schema_1.stringArg({ required: true, description: "The response code from Google's OAuth callback" }),
-                state: schema_1.stringArg({ required: true, description: "The response state, to check if everything went correct" }),
-                loginDetails: schema_1.arg({
+                email: nexus_1.arg({ type: graphql_1.EmailScalar, description: "Email address of user to authorize with Instagram" }),
+                code: nexus_1.stringArg({ description: "The response code from Google's OAuth callback" }),
+                state: nexus_1.stringArg({ description: "The response state, to check if everything went correct" }),
+                loginDetails: nexus_1.nullable(nexus_1.arg({
                     type: types_1.UserLoginDetailsInput,
-                    required: false,
                     description: "User details in login",
-                }),
-                isPrimaryOwner: schema_1.booleanArg({
-                    required: false,
+                })),
+                isPrimaryOwner: nexus_1.nullable(nexus_1.booleanArg({
                     default: false,
                     description: "Set to true if you want to sign up an owner for a #beach_bar",
-                }),
+                })),
             },
             resolve: (_, { email, code, state, loginDetails, isPrimaryOwner }, { req, res, uaParser, redis, ipAddr }) => __awaiter(this, void 0, void 0, function* () {
                 if (!email || email.trim().length === 0) {
@@ -501,4 +492,3 @@ exports.AuthorizeWithOAuthProviders = schema_1.extendType({
         });
     },
 });
-//# sourceMappingURL=mutation.js.map

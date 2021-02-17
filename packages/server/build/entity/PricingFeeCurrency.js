@@ -36,4 +36,3 @@ PricingFeeCurrency = __decorate([
     typeorm_1.Entity({ name: "pricing_fee_currency", schema: "public" })
 ], PricingFeeCurrency);
 exports.PricingFeeCurrency = PricingFeeCurrency;
-//# sourceMappingURL=PricingFeeCurrency.js.map

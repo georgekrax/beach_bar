@@ -1,9 +1,9 @@
 import { errors, MyContext } from "@beach_bar/common";
-import { DateScalar, BigIntScalar } from "@georgekrax-hashtag/common";
-import { arg, extendType, intArg } from "@nexus/schema";
+import { BigIntScalar, DateScalar } from "@the_hashtag/common/dist/graphql";
 import { Product } from "entity/Product";
 import { ProductReservationLimit } from "entity/ProductReservationLimit";
 import { HourTime } from "entity/Time";
+import { arg, extendType, intArg, list, nullable } from "nexus";
 import { In } from "typeorm";
 import { DeleteType } from "typings/.index";
 import { AddProductReservationLimitType, UpdateProductReservationLimitType } from "typings/beach_bar/product/reservationLimit";
@@ -17,17 +17,12 @@ export const ProductReservationLimitCrudMutation = extendType({
     t.field("addProductReservationLimit", {
       type: AddProductReservationLimitResult,
       description: "Add a reservation limit to a #beach_bar product",
-      nullable: false,
       args: {
-        productId: intArg({ required: true, description: "The ID value of the product to add this reservation limit" }),
-        limit: intArg({
-          required: true,
-          description: "The number to add as a limit a #beach_bar can provide the product, for specific date(s)",
-        }),
-        dates: arg({ type: DateScalar, required: true, list: true, description: "A list of days this limit is applicable for" }),
-        startTimeId: intArg({ required: true, description: "The ID value of the hour time from when this limit is applicable" }),
+        productId: intArg({ description: "The ID value of the product to add this reservation limit" }),
+        limit: intArg({ description: "The number to add as a limit a #beach_bar can provide the product, for specific date(s)" }),
+        dates: list(arg({ type: DateScalar, description: "A list of days this limit is applicable for" })),
+        startTimeId: intArg({ description: "The ID value of the hour time from when this limit is applicable" }),
         endTimeId: intArg({
-          required: true,
           description: "The ID value of the hour time from when this limit is terminated (is not applicable anymore)",
         }),
       },
@@ -95,23 +90,24 @@ export const ProductReservationLimitCrudMutation = extendType({
     t.field("updateProductReservationLimit", {
       type: UpdateProductReservationLimitResult,
       description: "Update a #beach_bar's product reservation limit",
-      nullable: false,
       args: {
-        reservationLimitIds: arg({
-          type: BigIntScalar,
-          required: true,
-          list: true,
-          description: "A list with all the reservation limits to update",
-        }),
-        limit: intArg({
-          required: false,
-          description: "The number to add as a limit a #beach_bar can provide the product, for specific date(s)",
-        }),
-        startTimeId: intArg({ required: false, description: "The ID value of the hour time from when this limit is applicable" }),
-        endTimeId: intArg({
-          required: false,
-          description: "The ID value of the hour time from when this limit is terminated (is not applicable anymore)",
-        }),
+        reservationLimitIds: list(
+          arg({
+            type: BigIntScalar,
+            description: "A list with all the reservation limits to update",
+          })
+        ),
+        limit: nullable(
+          intArg({
+            description: "The number to add as a limit a #beach_bar can provide the product, for specific date(s)",
+          })
+        ),
+        startTimeId: nullable(intArg({ description: "The ID value of the hour time from when this limit is applicable" })),
+        endTimeId: nullable(
+          intArg({
+            description: "The ID value of the hour time from when this limit is terminated (is not applicable anymore)",
+          })
+        ),
       },
       resolve: async (
         _,
@@ -169,14 +165,11 @@ export const ProductReservationLimitCrudMutation = extendType({
     t.field("deleteProductReservationLimit", {
       type: DeleteResult,
       description: "Delete a or some reservation limit(s) from a #beach_bar's product",
-      nullable: false,
       args: {
-        reservationLimitIds: arg({
+        reservationLimitIds: list(arg({
           type: BigIntScalar,
-          required: true,
-          list: true,
           description: "A list with all the reservation limits to delete",
-        }),
+        })),
       },
       resolve: async (_, { reservationLimitIds }, { payload }: MyContext): Promise<DeleteType> => {
         if (!payload) {

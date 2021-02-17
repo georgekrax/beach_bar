@@ -1,12 +1,12 @@
 import { errors, MyContext } from "@beach_bar/common";
-import { BigIntScalar, DateTimeScalar } from "@georgekrax-hashtag/common";
-import { arg, booleanArg, extendType, floatArg, idArg, intArg, stringArg } from "@nexus/schema";
+import { BigIntScalar, DateTimeScalar } from "@the_hashtag/common/dist/graphql";
 import dayjs from "dayjs";
 import { BeachBar } from "entity/BeachBar";
 import { CouponCode } from "entity/CouponCode";
 import { OfferCampaign } from "entity/OfferCampaign";
 import { OfferCampaignCode } from "entity/OfferCampaignCode";
 import { Product } from "entity/Product";
+import { arg, booleanArg, extendType, floatArg, idArg, intArg, list, nullable, stringArg } from "nexus";
 import { In } from "typeorm";
 import { DeleteType } from "typings/.index";
 import {
@@ -32,32 +32,19 @@ export const CouponCodeCrudMutation = extendType({
     t.field("addCouponCode", {
       type: AddCouponCodeResult,
       description: "Add a coupon code",
-      nullable: false,
       args: {
-        title: stringArg({
-          required: true,
-          description: "The name or a short description of the coupon code",
-        }),
-        discountPercentage: floatArg({
-          required: true,
-          description: "The percentage of the coupon code discount",
-        }),
-        beachBarId: idArg({
-          required: false,
-          description: "The ID value of the #beach_bar, to apply the coupon code for",
-        }),
+        title: stringArg({ description: "The name or a short description of the coupon code" }),
+        discountPercentage: floatArg({ description: "The percentage of the coupon code discount" }),
+        beachBarId: nullable(idArg({ description: "The ID value of the #beach_bar, to apply the coupon code for" })),
         validUntil: arg({
           type: DateTimeScalar,
-          required: true,
           description: "A timestamp that indicates until what date and time this coupon code is applicable and valid",
         }),
         isActive: booleanArg({
-          required: true,
           description: "Set to true if coupon code is active. Its default value is set to false",
           default: false,
         }),
         timesLimit: intArg({
-          required: true,
           description: "Represents how many times this coupon code can be used",
         }),
       },
@@ -113,34 +100,29 @@ export const CouponCodeCrudMutation = extendType({
     t.field("updateCouponCode", {
       type: UpdateCouponCodeResult,
       description: "Update a coupon code",
-      nullable: false,
       args: {
         couponCodeId: arg({
           type: BigIntScalar,
-          required: true,
           description: "The ID value of the coupon code",
         }),
-        title: stringArg({
-          required: false,
-          description: "The name or a short description of the coupon code",
-        }),
-        discountPercentage: floatArg({
-          required: false,
-          description: "The percentage of the coupon code discount",
-        }),
-        validUntil: arg({
-          type: DateTimeScalar,
-          required: false,
-          description: "A timestamp that indicates until what date and time this coupon code is applicable and valid",
-        }),
-        isActive: booleanArg({
-          required: false,
-          description: "Set to true if coupon code is active. Its default value is set to false",
-        }),
-        timesLimit: intArg({
-          required: false,
-          description: "Represents how many times this coupon code can be used",
-        }),
+        title: nullable(stringArg({ description: "The name or a short description of the coupon code" })),
+        discountPercentage: nullable(floatArg({ description: "The percentage of the coupon code discount" })),
+        validUntil: nullable(
+          arg({
+            type: DateTimeScalar,
+            description: "A timestamp that indicates until what date and time this coupon code is applicable and valid",
+          })
+        ),
+        isActive: nullable(
+          booleanArg({
+            description: "Set to true if coupon code is active. Its default value is set to false",
+          })
+        ),
+        timesLimit: nullable(
+          intArg({
+            description: "Represents how many times this coupon code can be used",
+          })
+        ),
       },
       resolve: async (
         _,
@@ -199,7 +181,6 @@ export const CouponCodeCrudMutation = extendType({
       args: {
         couponCodeId: arg({
           type: BigIntScalar,
-          required: true,
           description: "The ID value of the coupon code",
         }),
       },
@@ -245,28 +226,15 @@ export const OfferCampaignCrudMutation = extendType({
     t.field("addOfferCampaign", {
       type: AddOfferCampaignResult,
       description: "Add an offer campaign to a #beach_bar",
-      nullable: false,
       args: {
-        productIds: intArg({
-          required: true,
-          description: "The ID value of the product",
-          list: true,
-        }),
-        title: stringArg({
-          required: true,
-          description: "The name or a short description of the coupon code",
-        }),
-        discountPercentage: floatArg({
-          required: true,
-          description: "The percentage of the coupon code discount",
-        }),
+        productIds: list(intArg({ description: "The ID value of the product" })),
+        title: stringArg({ description: "The name or a short description of the coupon code" }),
+        discountPercentage: floatArg({ description: "The percentage of the coupon code discount" }),
         validUntil: arg({
           type: DateTimeScalar,
-          required: true,
           description: "A timestamp that indicates until what date and time this coupon code is applicable and valid",
         }),
         isActive: booleanArg({
-          required: true,
           description: "Set to true if coupon code is active. Its default value is set to false",
           default: false,
         }),
@@ -323,35 +291,35 @@ export const OfferCampaignCrudMutation = extendType({
     t.field("updateOfferCampaign", {
       type: UpdateOfferCampaignResult,
       description: "Update the details of an offer campaign of a #beach_bar",
-      nullable: false,
       args: {
         offerCampaignId: arg({
           type: BigIntScalar,
-          required: true,
           description: "The ID value of the offer campaign",
         }),
-        productIds: intArg({
-          required: false,
-          description: "The ID value of the product",
-          list: true,
-        }),
-        title: stringArg({
-          required: false,
-          description: "The name or a short description of the coupon code",
-        }),
-        discountPercentage: floatArg({
-          required: false,
-          description: "The percentage of the coupon code discount",
-        }),
-        validUntil: arg({
-          type: DateTimeScalar,
-          required: false,
-          description: "A timestamp that indicates until what date and time this coupon code is applicable and valid",
-        }),
-        isActive: booleanArg({
-          required: false,
-          description: "Set to true if coupon code is active. Its default value is set to false",
-        }),
+        productIds: list(
+          nullable(
+            intArg({
+              description: "The ID value of the product",
+            })
+          )
+        ),
+        title: nullable(stringArg({ description: "The name or a short description of the coupon code" })),
+        discountPercentage: nullable(
+          floatArg({
+            description: "The percentage of the coupon code discount",
+          })
+        ),
+        validUntil: nullable(
+          arg({
+            type: DateTimeScalar,
+            description: "A timestamp that indicates until what date and time this coupon code is applicable and valid",
+          })
+        ),
+        isActive: nullable(
+          booleanArg({
+            description: "Set to true if coupon code is active. Its default value is set to false",
+          })
+        ),
       },
       resolve: async (
         _,
@@ -404,11 +372,9 @@ export const OfferCampaignCrudMutation = extendType({
     t.field("deleteOfferCampaign", {
       type: DeleteResult,
       description: "Delete an offer campaign of a #beach_bar",
-      nullable: false,
       args: {
         offerCampaignId: arg({
           type: BigIntScalar,
-          required: true,
           description: "The ID value of the offer campaign",
         }),
       },
@@ -454,11 +420,9 @@ export const OfferCampaignCodeCrudMutation = extendType({
     t.field("addOfferCampaignCode", {
       type: AddOfferCampaignCodeResult,
       description: "Add (issue) a new offer code",
-      nullable: false,
       args: {
         offerCampaignId: arg({
           type: BigIntScalar,
-          required: true,
           description: "The ID value of the offer campaign",
         }),
       },
@@ -500,11 +464,9 @@ export const OfferCampaignCodeCrudMutation = extendType({
     t.field("deleteOfferCode", {
       type: DeleteResult,
       description: "Delete (invalidate) an offer code of an offer campaign",
-      nullable: false,
       args: {
         offerCodeId: arg({
           type: BigIntScalar,
-          required: true,
           description: "The ID value of the offer campaign",
         }),
       },

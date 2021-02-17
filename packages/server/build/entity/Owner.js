@@ -71,4 +71,3 @@ Owner = Owner_1 = __decorate([
     typeorm_1.Entity({ name: "owner", schema: "public" })
 ], Owner);
 exports.Owner = Owner;
-//# sourceMappingURL=Owner.js.map

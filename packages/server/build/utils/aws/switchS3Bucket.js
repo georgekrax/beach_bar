@@ -16,7 +16,7 @@ exports.switchS3Bucket = void 0;
 const common_1 = require("@beach_bar/common");
 const redisKeys_1 = __importDefault(require("constants/redisKeys"));
 const cacheBucketInRedis_1 = __importDefault(require("utils/aws/cacheBucketInRedis"));
-exports.switchS3Bucket = (redis, tableName) => __awaiter(void 0, void 0, void 0, function* () {
+const switchS3Bucket = (redis, tableName) => __awaiter(void 0, void 0, void 0, function* () {
     let s3Bucket;
     const redisBuckets = yield redis.smembers(redisKeys_1.default.AWS_S3_BUCKET);
     const s3Buckets = redisBuckets.map((x) => JSON.parse(x));
@@ -36,4 +36,4 @@ exports.switchS3Bucket = (redis, tableName) => __awaiter(void 0, void 0, void 0,
     }
     return s3Bucket;
 });
-//# sourceMappingURL=switchS3Bucket.js.map
+exports.switchS3Bucket = switchS3Bucket;

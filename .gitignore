@@ -2,8 +2,11 @@
 .vscode/
 node_modules/
 packages/server/node_modules
+packages/server/build
+packages/server/dist
+packages/server/ormconfig.json
+packages/server/yarn-error.log
 tmp/
 temp/
-packages/server/ormconfig.json
 yarn-error.log
-packages/server/yarn-error.log
+ormconfig.json

@@ -11,37 +11,26 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BeachBarFeatureMutation = void 0;
 const common_1 = require("@beach_bar/common");
-const schema_1 = require("@nexus/schema");
 const BeachBar_1 = require("entity/BeachBar");
 const BeachBarFeature_1 = require("entity/BeachBarFeature");
 const BeachBarService_1 = require("entity/BeachBarService");
+const nexus_1 = require("nexus");
 const types_1 = require("../../types");
 const types_2 = require("./types");
-exports.BeachBarFeatureMutation = schema_1.extendType({
+exports.BeachBarFeatureMutation = nexus_1.extendType({
     type: "Mutation",
     definition(t) {
         t.field("addBeachBarFeature", {
             type: types_2.AddBeachBarFeatureResult,
             description: "Add (assign) a feature to a #beach_bar",
-            nullable: false,
             args: {
-                beachBarId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the #beach_bar to add (assign) the feature",
-                }),
-                featureId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the feature to add (assign) to the #beach_bar",
-                }),
-                quantity: schema_1.intArg({
-                    required: true,
+                beachBarId: nexus_1.intArg({ description: "The ID value of the #beach_bar to add (assign) the feature" }),
+                featureId: nexus_1.intArg({ description: "The ID value of the feature to add (assign) to the #beach_bar" }),
+                quantity: nexus_1.intArg({
                     description: "An integer that indicates the quantity of the service, a #beach_bar provides",
                     default: 1,
                 }),
-                description: schema_1.stringArg({
-                    required: false,
-                    description: "A short description about the service",
-                }),
+                description: nexus_1.nullable(nexus_1.stringArg({ description: "A short description about the service" })),
             },
             resolve: (_, { beachBarId, featureId, quantity, description }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -123,24 +112,11 @@ exports.BeachBarFeatureMutation = schema_1.extendType({
         t.field("updateBeachBarFeature", {
             type: types_2.UpdateBeachBarFeatureResult,
             description: "Update a feature of a #beach_bar",
-            nullable: false,
             args: {
-                beachBarId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the #beach_bar to update its feature info",
-                }),
-                featureId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the feature of the #beach_bar, to update its info",
-                }),
-                quantity: schema_1.intArg({
-                    required: false,
-                    description: "An integer that indicates the quantity of the service, a #beach_bar provides",
-                }),
-                description: schema_1.stringArg({
-                    required: false,
-                    description: "A short description about the service",
-                }),
+                beachBarId: nexus_1.intArg({ description: "The ID value of the #beach_bar to update its feature info" }),
+                featureId: nexus_1.intArg({ description: "The ID value of the feature of the #beach_bar, to update its info" }),
+                quantity: nexus_1.nullable(nexus_1.intArg({ description: "An integer that indicates the quantity of the service, a #beach_bar provides" })),
+                description: nexus_1.nullable(nexus_1.stringArg({ description: "A short description about the service" })),
             },
             resolve: (_, { beachBarId, featureId, quantity, description }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -201,16 +177,9 @@ exports.BeachBarFeatureMutation = schema_1.extendType({
         t.field("deleteBeachBarFeature", {
             type: types_1.DeleteResult,
             description: "Delete (remove) a feature (service) from a #beach_bar",
-            nullable: false,
             args: {
-                beachBarId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the #beach_bar to delete (remove) its feature",
-                }),
-                featureId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the feature of the #beach_bar, to delete (remove)",
-                }),
+                beachBarId: nexus_1.intArg({ description: "The ID value of the #beach_bar to delete (remove) its feature" }),
+                featureId: nexus_1.intArg({ description: "The ID value of the feature of the #beach_bar, to delete (remove)" }),
             },
             resolve: (_, { beachBarId, featureId }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -262,4 +231,3 @@ exports.BeachBarFeatureMutation = schema_1.extendType({
         });
     },
 });
-//# sourceMappingURL=mutation.js.map

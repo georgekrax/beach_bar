@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.verifyUserPaymentReview = void 0;
 const Payment_1 = require("entity/Payment");
 const User_1 = require("entity/User");
-exports.verifyUserPaymentReview = (beachBarId, refCode, payload) => __awaiter(void 0, void 0, void 0, function* () {
+const verifyUserPaymentReview = (beachBarId, refCode, payload) => __awaiter(void 0, void 0, void 0, function* () {
     if (refCode) {
         const payment = yield Payment_1.Payment.findOne({
             where: { refCode },
@@ -69,4 +69,4 @@ exports.verifyUserPaymentReview = (beachBarId, refCode, payload) => __awaiter(vo
         };
     }
 });
-//# sourceMappingURL=verifyUserPaymentReview.js.map
+exports.verifyUserPaymentReview = verifyUserPaymentReview;

@@ -18,4 +18,3 @@ exports.user = Object.freeze({
 exports.oauth = Object.freeze({
     HEY: "hey",
 });
-//# sourceMappingURL=scopes.js.map

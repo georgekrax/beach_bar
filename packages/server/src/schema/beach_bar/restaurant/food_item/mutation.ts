@@ -1,9 +1,9 @@
-import {  errors, MyContext } from "@beach_bar/common";
-import { BigIntScalar } from "@georgekrax-hashtag/common";
-import { arg, extendType, floatArg, intArg, stringArg } from "@nexus/schema";
+import { errors, MyContext } from "@beach_bar/common";
+import { BigIntScalar } from "@the_hashtag/common/dist/graphql";
 import { BeachBarRestaurant } from "entity/BeachBarRestaurant";
 import { RestaurantFoodItem } from "entity/RestaurantFoodItem";
 import { RestaurantMenuCategory } from "entity/RestaurantMenuCategory";
+import { arg, extendType, floatArg, intArg, nullable, stringArg } from "nexus";
 import { DeleteType } from "typings/.index";
 import { AddRestaurantFoodItemType, UpdateRestaurantFoodItemType } from "typings/beach_bar/restaurant/footItem";
 import { checkScopes } from "utils/checkScopes";
@@ -16,28 +16,16 @@ export const RestaurantFoodItemCrudMutation = extendType({
     t.field("addRestaurantFoodItem", {
       type: AddRestaurantFoodItemResult,
       description: "Add a food item to a #beach_bar restaurant",
-      nullable: false,
       args: {
-        restaurantId: intArg({
-          required: true,
-          description: "The ID value of the #beach_bar restaurant",
-        }),
-        name: stringArg({
-          required: true,
-          description: "The name of the food item",
-        }),
-        price: floatArg({
-          required: true,
-          description: "The price of the food item in the menu catalogue",
-        }),
-        menuCategoryId: intArg({
-          required: true,
-          description: "The ID value of the category of the gastronomic menu, the food item is assigned to",
-        }),
-        imgUrl: stringArg({
-          required: false,
-          description: "An image representing the food item product",
-        }),
+        restaurantId: intArg({ description: "The ID value of the #beach_bar restaurant" }),
+        name: stringArg({ description: "The name of the food item" }),
+        price: floatArg({ description: "The price of the food item in the menu catalogue" }),
+        menuCategoryId: intArg({ description: "The ID value of the category of the gastronomic menu, the food item is assigned to" }),
+        imgUrl: nullable(
+          stringArg({
+            description: "An image representing the food item product",
+          })
+        ),
       },
       resolve: async (
         _,
@@ -122,29 +110,31 @@ export const RestaurantFoodItemCrudMutation = extendType({
     t.field("updateRestaurantFoodItem", {
       type: UpdateRestaurantFoodItemResult,
       description: "Update a #beach_bar's restaurant food item details",
-      nullable: false,
       args: {
         foodItemId: arg({
           type: BigIntScalar,
-          required: true,
           description: "The ID value of the food item",
         }),
-        name: stringArg({
-          required: false,
-          description: "The name of the food item",
-        }),
-        price: floatArg({
-          required: false,
-          description: "The price of the food item in the menu catalogue",
-        }),
-        menuCategoryId: intArg({
-          required: false,
-          description: "The ID value of the category of the gastronomic menu, the food item is assigned to",
-        }),
-        imgUrl: stringArg({
-          required: false,
-          description: "An image representing the food item product",
-        }),
+        name: nullable(
+          stringArg({
+            description: "The name of the food item",
+          })
+        ),
+        price: nullable(
+          floatArg({
+            description: "The price of the food item in the menu catalogue",
+          })
+        ),
+        menuCategoryId: nullable(
+          intArg({
+            description: "The ID value of the category of the gastronomic menu, the food item is assigned to",
+          })
+        ),
+        imgUrl: nullable(
+          stringArg({
+            description: "An image representing the food item product",
+          })
+        ),
       },
       resolve: async (
         _,
@@ -213,7 +203,6 @@ export const RestaurantFoodItemCrudMutation = extendType({
       args: {
         foodItemId: arg({
           type: BigIntScalar,
-          required: true,
           description: "The ID value of the food item",
         }),
       },

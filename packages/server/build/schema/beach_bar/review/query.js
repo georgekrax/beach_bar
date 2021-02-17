@@ -10,26 +10,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BeachBarReviewQuery = void 0;
-const schema_1 = require("@nexus/schema");
 const Time_1 = require("entity/Time");
+const nexus_1 = require("nexus");
 const typeorm_1 = require("typeorm");
 const verifyUserPaymentReview_1 = require("utils/beach_bar/verifyUserPaymentReview");
 const types_1 = require("../../details/time/types");
-exports.BeachBarReviewQuery = schema_1.extendType({
+exports.BeachBarReviewQuery = nexus_1.extendType({
     type: "Query",
     definition(t) {
         t.boolean("verifyUserPaymentReview", {
             description: "Verify a user's payment to submit review",
-            nullable: false,
             args: {
-                beachBarId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the #beach_bar to submit the review",
-                }),
-                refCode: schema_1.stringArg({
-                    required: false,
-                    description: "The referral code of the customer payment, to find",
-                }),
+                beachBarId: nexus_1.intArg({ description: "The ID value of the #beach_bar to submit the review" }),
+                refCode: nexus_1.nullable(nexus_1.stringArg({ description: "The referral code of the customer payment, to find" })),
             },
             resolve: (_, { beachBarId, refCode }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!beachBarId || beachBarId <= 0) {
@@ -45,19 +38,12 @@ exports.BeachBarReviewQuery = schema_1.extendType({
                 return boolean;
             }),
         });
-        t.list.field("getPaymentProductsMonth", {
+        t.nullable.list.field("getPaymentProductsMonth", {
             type: types_1.MonthTimeType,
             description: "Get a list with all the months in a review, by the product purchase",
-            nullable: true,
             args: {
-                beachBarId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the #beach_bar to submit the review",
-                }),
-                refCode: schema_1.stringArg({
-                    required: false,
-                    description: "The referral code of the customer payment, to find",
-                }),
+                beachBarId: nexus_1.intArg({ description: "The ID value of the #beach_bar to submit the review" }),
+                refCode: nexus_1.nullable(nexus_1.stringArg({ description: "The referral code of the customer payment, to find" })),
             },
             resolve: (_, { beachBarId, refCode }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!beachBarId || beachBarId <= 0) {
@@ -80,4 +66,3 @@ exports.BeachBarReviewQuery = schema_1.extendType({
         });
     },
 });
-//# sourceMappingURL=query.js.map

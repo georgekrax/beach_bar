@@ -1,31 +1,29 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.VoteTagType = exports.VoteCategoryType = void 0;
-const schema_1 = require("@nexus/schema");
-exports.VoteCategoryType = schema_1.objectType({
+const nexus_1 = require("nexus");
+exports.VoteCategoryType = nexus_1.objectType({
     name: "VoteCategory",
     description: "Represents a voting category",
     definition(t) {
-        t.int("id", { nullable: false });
-        t.string("title", { nullable: false });
-        t.string("description", { nullable: false });
-        t.string("refCode", { nullable: false });
+        t.id("id");
+        t.string("title");
+        t.string("description");
+        t.string("refCode");
     },
 });
-exports.VoteTagType = schema_1.objectType({
+exports.VoteTagType = nexus_1.objectType({
     name: "VoteTag",
     description: "Represents the votes (voting result) of a voting category",
     definition(t) {
-        t.int("id", { nullable: false });
-        t.int("upvotes", { nullable: false });
-        t.int("downvotes", { nullable: false });
-        t.int("totalVotes", { nullable: true });
+        t.id("id");
+        t.int("upvotes");
+        t.int("downvotes");
+        t.nullable.int("totalVotes");
         t.field("category", {
             type: exports.VoteCategoryType,
             description: "The voting category these vote results are assigned to",
-            nullable: false,
             resolve: o => o.category,
         });
     },
 });
-//# sourceMappingURL=types.js.map

@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.groupBy = void 0;
-exports.groupBy = (list, keyGetter) => {
+const groupBy = (list, keyGetter) => {
     const map = new Map();
     list.forEach(item => {
         const key = keyGetter(item);
@@ -15,4 +15,4 @@ exports.groupBy = (list, keyGetter) => {
     });
     return map;
 };
-//# sourceMappingURL=groupBy.js.map
+exports.groupBy = groupBy;

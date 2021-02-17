@@ -17,9 +17,9 @@ const Account_1 = require("../entity/Account");
 const User_1 = require("../entity/User");
 const typeorm_1 = require("typeorm");
 const redisKeys_1 = __importDefault(require("../constants/redisKeys"));
-exports.removeUserSessions = (userId, redis) => __awaiter(void 0, void 0, void 0, function* () {
+const removeUserSessions = (userId, redis) => __awaiter(void 0, void 0, void 0, function* () {
     yield redis.del(`${redisKeys_1.default.USER}:${userId.toString()}`);
     yield typeorm_1.getConnection().getRepository(User_1.User).increment({ id: userId }, "tokenVersion", 1);
     yield typeorm_1.getConnection().createQueryBuilder().update(Account_1.Account).set({ isActive: false }).where("userId = :userId", { userId }).execute();
 });
-//# sourceMappingURL=removeUserSessions.js.map
+exports.removeUserSessions = removeUserSessions;

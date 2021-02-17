@@ -154,4 +154,3 @@ exports.router.post("/webhooks/payment", (req, res) => __awaiter(void 0, void 0,
     }
     return res.json({ received: true });
 }));
-//# sourceMappingURL=stripeWebhooks.js.map

@@ -18,4 +18,3 @@ const query = apollo_server_express_1.gql `
   }
 `;
 exports.default = query;
-//# sourceMappingURL=LOGOUT_USER.js.map

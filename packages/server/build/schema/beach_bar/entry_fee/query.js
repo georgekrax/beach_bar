@@ -13,27 +13,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BeachBarEntryFeeQuery = void 0;
-const schema_1 = require("@nexus/schema");
 const dayjs_1 = __importDefault(require("dayjs"));
 const BeachBarEntryFee_1 = require("entity/BeachBarEntryFee");
+const nexus_1 = require("nexus");
 const typeorm_1 = require("typeorm");
 const types_1 = require("./types");
-exports.BeachBarEntryFeeQuery = schema_1.extendType({
+exports.BeachBarEntryFeeQuery = nexus_1.extendType({
     type: "Query",
     definition(t) {
         t.list.field("getAllBeachBarEntryFees", {
             type: types_1.BeachBarEntryFeeType,
             description: "Get a list with all entry fees of a #beach_bar",
             args: {
-                beachBarId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the #beach_bar",
-                }),
-                moreThanOrEqualToToday: schema_1.booleanArg({
-                    required: false,
+                beachBarId: nexus_1.intArg({ description: "The ID value of the #beach_bar" }),
+                moreThanOrEqualToToday: nexus_1.nullable(nexus_1.booleanArg({
                     description: "Set to true if to retrieve the entry fees from today and in the future. Its default value is set to true",
                     default: true,
-                }),
+                })),
             },
             resolve: (_, { beachBarId, moreThanOrEqualToToday }) => __awaiter(this, void 0, void 0, function* () {
                 if (moreThanOrEqualToToday) {
@@ -51,4 +47,3 @@ exports.BeachBarEntryFeeQuery = schema_1.extendType({
         });
     },
 });
-//# sourceMappingURL=query.js.map

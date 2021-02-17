@@ -119,4 +119,3 @@ ProductReservationLimit = ProductReservationLimit_1 = __decorate([
     typeorm_1.Check(`"endTime" >= "startTime"`)
 ], ProductReservationLimit);
 exports.ProductReservationLimit = ProductReservationLimit;
-//# sourceMappingURL=ProductReservationLimit.js.map

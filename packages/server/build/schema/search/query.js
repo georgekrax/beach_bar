@@ -14,7 +14,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SearchQuery = void 0;
 const common_1 = require("@beach_bar/common");
-const schema_1 = require("@nexus/schema");
 const redisKeys_1 = __importDefault(require("constants/redisKeys"));
 const _index_1 = require("constants/_index");
 const dayjs_1 = __importDefault(require("dayjs"));
@@ -24,25 +23,24 @@ const SearchFilter_1 = require("entity/SearchFilter");
 const SearchInputValue_1 = require("entity/SearchInputValue");
 const UserHistory_1 = require("entity/UserHistory");
 const UserSearch_1 = require("entity/UserSearch");
+const nexus_1 = require("nexus");
 const typeorm_1 = require("typeorm");
 const checkAvailability_1 = require("utils/beach_bar/checkAvailability");
 const types_1 = require("./types");
-exports.SearchQuery = schema_1.extendType({
+exports.SearchQuery = nexus_1.extendType({
     type: "Query",
     definition(t) {
         t.list.field("getSearchInputValues", {
             type: types_1.FormattedSearchInputValueType,
             description: "Returns a list of formatted search input values",
-            nullable: false,
             resolve: () => __awaiter(this, void 0, void 0, function* () {
                 const inputValues = yield SearchInputValue_1.SearchInputValue.find({ relations: ["country", "city", "region", "beachBar"] });
                 return inputValues;
             }),
         });
-        t.list.field("getLatestUserSearches", {
+        t.nullable.list.field("getLatestUserSearches", {
             type: types_1.UserSearchType,
             description: "Get a list with a user's latest searches",
-            nullable: true,
             resolve: (_, __, { payload, redis }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
                     return null;
@@ -60,32 +58,19 @@ exports.SearchQuery = schema_1.extendType({
                 return result;
             }),
         });
-        t.field("search", {
+        t.nullable.field("search", {
             type: types_1.SearchResult,
             description: "Search for available #beach_bars",
-            nullable: true,
             args: {
-                inputId: schema_1.stringArg({
-                    required: false,
+                inputId: nexus_1.nullable(nexus_1.stringArg({
                     description: "The ID value of the search input value, found in the documentation",
-                }),
-                inputValue: schema_1.stringArg({
-                    required: false,
+                })),
+                inputValue: nexus_1.nullable(nexus_1.stringArg({
                     description: "The search input value, found in the documentation",
-                }),
-                availability: schema_1.arg({
-                    type: types_1.SearchInputType,
-                    required: false,
-                }),
-                filterIds: schema_1.stringArg({
-                    required: false,
-                    list: true,
-                    description: "A list with the filter IDs to add in the search, found in the documentation",
-                }),
-                searchId: schema_1.idArg({
-                    required: false,
-                    description: "The ID value of a previous user search",
-                }),
+                })),
+                availability: nexus_1.nullable(nexus_1.arg({ type: types_1.SearchInputType })),
+                filterIds: nexus_1.list(nexus_1.nullable(nexus_1.stringArg({ description: "A list with the filter IDs to add in the search, found in the documentation" }))),
+                searchId: nexus_1.nullable(nexus_1.idArg({ description: "The ID value of a previous user search" })),
             },
             resolve: (_, { inputId, inputValue, availability, filterIds, searchId }, { payload, redis, ipAddr }) => __awaiter(this, void 0, void 0, function* () {
                 dayjs_1.default.extend(utc_1.default);
@@ -227,4 +212,3 @@ exports.SearchQuery = schema_1.extendType({
         });
     },
 });
-//# sourceMappingURL=query.js.map

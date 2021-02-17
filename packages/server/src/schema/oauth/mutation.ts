@@ -1,10 +1,10 @@
 import { errors, MyContext } from "@beach_bar/common";
-import { EmailScalar } from "@georgekrax-hashtag/common";
-import { arg, booleanArg, extendType, stringArg } from "@nexus/schema";
+import { EmailScalar } from "@the_hashtag/common/dist/graphql";
 import platformNames from "config/platformNames";
 import dayjs from "dayjs";
 import { LoginDetailStatus } from "entity/LoginDetails";
 import { User } from "entity/User";
+import { arg, booleanArg, extendType, nullable, stringArg } from "nexus";
 import fetch from "node-fetch";
 import { AuthorizeWithOAuthType } from "typings/oauth";
 import { generateAccessToken, generateRefreshToken } from "utils/auth/generateAuthTokens";
@@ -20,20 +20,21 @@ export const AuthorizeWithOAuthProviders = extendType({
     t.field("authorizeWithGoogle", {
       type: OAuthAuthorizationResult,
       description: "Authorize a user with Google",
-      nullable: false,
       args: {
-        code: stringArg({ required: true, description: "The response code from Google's OAuth callback" }),
-        state: stringArg({ required: true, description: "The response state, to check if everything went correct" }),
-        loginDetails: arg({
-          type: UserLoginDetailsInput,
-          required: false,
-          description: "User details in login",
-        }),
-        isPrimaryOwner: booleanArg({
-          required: false,
-          default: false,
-          description: "Set to true if you want to sign up an owner for a #beach_bar",
-        }),
+        code: stringArg({ description: "The response code from Google's OAuth callback" }),
+        state: stringArg({ description: "The response state, to check if everything went correct" }),
+        loginDetails: nullable(
+          arg({
+            type: UserLoginDetailsInput,
+            description: "User details in login",
+          })
+        ),
+        isPrimaryOwner: nullable(
+          booleanArg({
+            default: false,
+            description: "Set to true if you want to sign up an owner for a #beach_bar",
+          })
+        ),
       },
       resolve: async (
         _,
@@ -184,20 +185,21 @@ export const AuthorizeWithOAuthProviders = extendType({
     t.field("authorizeWithFacebook", {
       type: OAuthAuthorizationResult,
       description: "Authorize a user with Facebook",
-      nullable: false,
       args: {
-        code: stringArg({ required: true, description: "The response code from Google's OAuth callback" }),
-        state: stringArg({ required: true, description: "The response state, to check if everything went correct" }),
-        loginDetails: arg({
-          type: UserLoginDetailsInput,
-          required: false,
-          description: "User details in login",
-        }),
-        isPrimaryOwner: booleanArg({
-          required: false,
-          default: false,
-          description: "Set to true if you want to sign up an owner for a #beach_bar",
-        }),
+        code: stringArg({ description: "The response code from Google's OAuth callback" }),
+        state: stringArg({ description: "The response state, to check if everything went correct" }),
+        loginDetails: nullable(
+          arg({
+            type: UserLoginDetailsInput,
+            description: "User details in login",
+          })
+        ),
+        isPrimaryOwner: nullable(
+          booleanArg({
+            default: false,
+            description: "Set to true if you want to sign up an owner for a #beach_bar",
+          })
+        ),
       },
       resolve: async (
         _,
@@ -424,21 +426,22 @@ export const AuthorizeWithOAuthProviders = extendType({
     t.field("authorizeWithInstagram", {
       type: OAuthAuthorizationResult,
       description: "Authorize a user with Instagram",
-      nullable: false,
       args: {
-        email: arg({ type: EmailScalar, required: true, description: "Email address of user to authorize with Instagram" }),
-        code: stringArg({ required: true, description: "The response code from Google's OAuth callback" }),
-        state: stringArg({ required: true, description: "The response state, to check if everything went correct" }),
-        loginDetails: arg({
-          type: UserLoginDetailsInput,
-          required: false,
-          description: "User details in login",
-        }),
-        isPrimaryOwner: booleanArg({
-          required: false,
-          default: false,
-          description: "Set to true if you want to sign up an owner for a #beach_bar",
-        }),
+        email: arg({ type: EmailScalar, description: "Email address of user to authorize with Instagram" }),
+        code: stringArg({ description: "The response code from Google's OAuth callback" }),
+        state: stringArg({ description: "The response state, to check if everything went correct" }),
+        loginDetails: nullable(
+          arg({
+            type: UserLoginDetailsInput,
+            description: "User details in login",
+          })
+        ),
+        isPrimaryOwner: nullable(
+          booleanArg({
+            default: false,
+            description: "Set to true if you want to sign up an owner for a #beach_bar",
+          })
+        ),
       },
       resolve: async (
         _,

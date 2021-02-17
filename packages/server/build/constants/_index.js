@@ -14,4 +14,3 @@ exports.historyActivity = {
     SEARCH_ID: 1,
     BEACH_BAR__QUERY_ID: 2,
 };
-//# sourceMappingURL=_index.js.map

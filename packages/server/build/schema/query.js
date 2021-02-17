@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Query = void 0;
-const schema_1 = require("@nexus/schema");
-exports.Query = schema_1.queryType({
+const nexus_1 = require("nexus");
+exports.Query = nexus_1.queryType({
     description: "Query",
     definition(t) {
         t.string("hello", {
@@ -15,4 +15,3 @@ exports.Query = schema_1.queryType({
         });
     },
 });
-//# sourceMappingURL=query.js.map

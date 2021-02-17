@@ -1,8 +1,8 @@
 import { errors, MyContext } from "@beach_bar/common";
-import { BigIntScalar } from "@georgekrax-hashtag/common";
-import { arg, extendType, stringArg } from "@nexus/schema";
+import { BigIntScalar } from "@the_hashtag/common/dist/graphql";
 import { BeachBarReview } from "entity/BeachBarReview";
 import { ReviewAnswer } from "entity/ReviewAnswer";
+import { arg, extendType, nullable, stringArg } from "nexus";
 import { DeleteType } from "typings/.index";
 import { AddReviewAnswerType, UpdateReviewAnswerType } from "typings/beach_bar/review/answer";
 import { DeleteResult } from "../../../types";
@@ -14,17 +14,12 @@ export const ReviewAnswerCrudMutation = extendType({
     t.field("addReviewAnswer", {
       type: AddReviewAnswerResult,
       description: "Add a reply to a #beach_bar's review, by its owner",
-      nullable: false,
       args: {
         reviewId: arg({
           type: BigIntScalar,
-          required: true,
           description: "The ID value of the customer's review",
         }),
-        body: stringArg({
-          required: true,
-          description: "The body of the reply",
-        }),
+        body: stringArg({ description: "The body of the reply" }),
       },
       resolve: async (_, { reviewId, body }, { payload }: MyContext): Promise<AddReviewAnswerType> => {
         if (!payload) {
@@ -65,17 +60,12 @@ export const ReviewAnswerCrudMutation = extendType({
     t.field("updateReviewAnswer", {
       type: UpdateReviewAnswerResult,
       description: "Update the body of a #beach_bar's review reply",
-      nullable: false,
       args: {
         answerId: arg({
           type: BigIntScalar,
-          required: true,
           description: "The ID value of the review's answer",
         }),
-        body: stringArg({
-          required: false,
-          description: "The body of the reply",
-        }),
+        body: nullable(stringArg({ description: "The body of the reply" })),
       },
       resolve: async (_, { answerId, body }, { payload }: MyContext): Promise<UpdateReviewAnswerType> => {
         if (!payload) {
@@ -110,11 +100,9 @@ export const ReviewAnswerCrudMutation = extendType({
     t.field("deleteReviewAnswer", {
       type: DeleteResult,
       description: "Delete (remove) a reply from a #beach_bar's review",
-      nullable: false,
       args: {
         answerId: arg({
           type: BigIntScalar,
-          required: true,
           description: "The ID value of the review's answer",
         }),
       },

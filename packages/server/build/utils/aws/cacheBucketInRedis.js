@@ -25,4 +25,3 @@ exports.default = (redis, tableName, redisBucket) => __awaiter(void 0, void 0, v
     }
     return s3Bucket;
 });
-//# sourceMappingURL=cacheBucketInRedis.js.map

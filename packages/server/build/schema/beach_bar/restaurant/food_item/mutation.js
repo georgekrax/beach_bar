@@ -11,42 +11,28 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RestaurantFoodItemCrudMutation = void 0;
 const common_1 = require("@beach_bar/common");
-const common_2 = require("@georgekrax-hashtag/common");
-const schema_1 = require("@nexus/schema");
+const graphql_1 = require("@the_hashtag/common/dist/graphql");
 const BeachBarRestaurant_1 = require("entity/BeachBarRestaurant");
 const RestaurantFoodItem_1 = require("entity/RestaurantFoodItem");
 const RestaurantMenuCategory_1 = require("entity/RestaurantMenuCategory");
+const nexus_1 = require("nexus");
 const checkScopes_1 = require("utils/checkScopes");
 const types_1 = require("../../../types");
 const types_2 = require("./types");
-exports.RestaurantFoodItemCrudMutation = schema_1.extendType({
+exports.RestaurantFoodItemCrudMutation = nexus_1.extendType({
     type: "Mutation",
     definition(t) {
         t.field("addRestaurantFoodItem", {
             type: types_2.AddRestaurantFoodItemResult,
             description: "Add a food item to a #beach_bar restaurant",
-            nullable: false,
             args: {
-                restaurantId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the #beach_bar restaurant",
-                }),
-                name: schema_1.stringArg({
-                    required: true,
-                    description: "The name of the food item",
-                }),
-                price: schema_1.floatArg({
-                    required: true,
-                    description: "The price of the food item in the menu catalogue",
-                }),
-                menuCategoryId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the category of the gastronomic menu, the food item is assigned to",
-                }),
-                imgUrl: schema_1.stringArg({
-                    required: false,
+                restaurantId: nexus_1.intArg({ description: "The ID value of the #beach_bar restaurant" }),
+                name: nexus_1.stringArg({ description: "The name of the food item" }),
+                price: nexus_1.floatArg({ description: "The price of the food item in the menu catalogue" }),
+                menuCategoryId: nexus_1.intArg({ description: "The ID value of the category of the gastronomic menu, the food item is assigned to" }),
+                imgUrl: nexus_1.nullable(nexus_1.stringArg({
                     description: "An image representing the food item product",
-                }),
+                })),
             },
             resolve: (_, { restaurantId, name, price, menuCategoryId, imgUrl }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -120,29 +106,23 @@ exports.RestaurantFoodItemCrudMutation = schema_1.extendType({
         t.field("updateRestaurantFoodItem", {
             type: types_2.UpdateRestaurantFoodItemResult,
             description: "Update a #beach_bar's restaurant food item details",
-            nullable: false,
             args: {
-                foodItemId: schema_1.arg({
-                    type: common_2.BigIntScalar,
-                    required: true,
+                foodItemId: nexus_1.arg({
+                    type: graphql_1.BigIntScalar,
                     description: "The ID value of the food item",
                 }),
-                name: schema_1.stringArg({
-                    required: false,
+                name: nexus_1.nullable(nexus_1.stringArg({
                     description: "The name of the food item",
-                }),
-                price: schema_1.floatArg({
-                    required: false,
+                })),
+                price: nexus_1.nullable(nexus_1.floatArg({
                     description: "The price of the food item in the menu catalogue",
-                }),
-                menuCategoryId: schema_1.intArg({
-                    required: false,
+                })),
+                menuCategoryId: nexus_1.nullable(nexus_1.intArg({
                     description: "The ID value of the category of the gastronomic menu, the food item is assigned to",
-                }),
-                imgUrl: schema_1.stringArg({
-                    required: false,
+                })),
+                imgUrl: nexus_1.nullable(nexus_1.stringArg({
                     description: "An image representing the food item product",
-                }),
+                })),
             },
             resolve: (_, { foodItemId, name, price, menuCategoryId, imgUrl }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -201,9 +181,8 @@ exports.RestaurantFoodItemCrudMutation = schema_1.extendType({
             type: types_1.DeleteResult,
             description: "Delete (remove) a food item from a #beach_bar's restaurant",
             args: {
-                foodItemId: schema_1.arg({
-                    type: common_2.BigIntScalar,
-                    required: true,
+                foodItemId: nexus_1.arg({
+                    type: graphql_1.BigIntScalar,
                     description: "The ID value of the food item",
                 }),
             },
@@ -246,4 +225,3 @@ exports.RestaurantFoodItemCrudMutation = schema_1.extendType({
         });
     },
 });
-//# sourceMappingURL=mutation.js.map

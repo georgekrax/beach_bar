@@ -34,4 +34,3 @@ BeachBarCategory = __decorate([
     typeorm_1.Entity({ name: "beach_bar_category", schema: "public" })
 ], BeachBarCategory);
 exports.BeachBarCategory = BeachBarCategory;
-//# sourceMappingURL=BeachBarCategory.js.map

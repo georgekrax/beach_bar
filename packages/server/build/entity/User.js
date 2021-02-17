@@ -234,4 +234,3 @@ User = User_1 = __decorate([
     typeorm_1.Entity({ name: "user", schema: "public" })
 ], User);
 exports.User = User;
-//# sourceMappingURL=User.js.map

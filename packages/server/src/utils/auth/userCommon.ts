@@ -3,7 +3,7 @@ import { Account } from "entity/Account";
 import { LoginDetails, LoginDetailStatus } from "entity/LoginDetails";
 import fs from "fs";
 import { LoginDetailsType } from "typings/.index";
-import { UAParser } from "ua-parser-js";
+import UAParser from "ua-parser-js";
 
 type findDetailsReturnType = number | undefined;
 type findLoginDetailsType = {
@@ -66,10 +66,10 @@ export const findOs = (osName: unknown): findDetailsReturnType => {
   if (!osName) {
     return undefined;
   }
-  console.log(osName);
+  // console.log(osName);
   const file = JSON.parse(fs.readFileSync("../../config/clientOs.json", "utf8"));
   const os = file.data.find(data => data.name === osName);
-  console.log(os);
+  // console.log(os);
   if (!os) {
     return undefined;
   }

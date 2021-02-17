@@ -11,29 +11,27 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserContactDetailsCrudMutation = void 0;
 const common_1 = require("@beach_bar/common");
-const common_2 = require("@georgekrax-hashtag/common");
-const schema_1 = require("@nexus/schema");
+const graphql_1 = require("@the_hashtag/common/dist/graphql");
 const Country_1 = require("entity/Country");
 const User_1 = require("entity/User");
 const UserContactDetails_1 = require("entity/UserContactDetails");
+const nexus_1 = require("nexus");
 const typeorm_1 = require("typeorm");
 const types_1 = require("../../types");
 const types_2 = require("./types");
-exports.UserContactDetailsCrudMutation = schema_1.extendType({
+exports.UserContactDetailsCrudMutation = nexus_1.extendType({
     type: "Mutation",
     definition(t) {
         t.field("addUserContactDetails", {
             type: types_2.AddUserContactDetailsResult,
             description: "Add contact details to a user",
-            nullable: false,
             args: {
-                countryId: schema_1.intArg({ required: false, description: "The ID value of the country of the contact details" }),
-                secondaryEmail: schema_1.arg({
-                    type: common_2.EmailScalar,
-                    required: false,
+                countryId: nexus_1.nullable(nexus_1.intArg({ description: "The ID value of the country of the contact details" })),
+                secondaryEmail: nexus_1.nullable(nexus_1.arg({
+                    type: graphql_1.EmailScalar,
                     description: "A secondary email address for the user",
-                }),
-                phoneNumber: schema_1.stringArg({ required: false, description: "A phone number to call the user" }),
+                })),
+                phoneNumber: nexus_1.nullable(nexus_1.stringArg({ description: "A phone number to call the user" })),
             },
             resolve: (_, { countryId, secondaryEmail, phoneNumber }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -119,18 +117,10 @@ exports.UserContactDetailsCrudMutation = schema_1.extendType({
         t.field("updateUserContactDetails", {
             type: types_2.UpdateUserContactDetailsResult,
             description: "Update specific contact details of a user",
-            nullable: false,
             args: {
-                id: schema_1.intArg({
-                    required: true,
-                }),
-                secondaryEmail: schema_1.arg({
-                    type: common_2.EmailScalar,
-                    required: false,
-                }),
-                phoneNumber: schema_1.stringArg({
-                    required: false,
-                }),
+                id: nexus_1.intArg(),
+                secondaryEmail: nexus_1.nullable(nexus_1.arg({ type: graphql_1.EmailScalar })),
+                phoneNumber: nexus_1.nullable(nexus_1.stringArg()),
             },
             resolve: (_, { id, secondaryEmail, phoneNumber }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -208,11 +198,8 @@ exports.UserContactDetailsCrudMutation = schema_1.extendType({
         t.field("deleteContactDetails", {
             type: types_1.DeleteResult,
             description: "Delete (remove) specific contact details from user",
-            nullable: false,
             args: {
-                id: schema_1.intArg({
-                    required: true,
-                }),
+                id: nexus_1.nullable(nexus_1.intArg()),
             },
             resolve: (_, { id }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -253,4 +240,3 @@ exports.UserContactDetailsCrudMutation = schema_1.extendType({
         });
     },
 });
-//# sourceMappingURL=mutation.js.map

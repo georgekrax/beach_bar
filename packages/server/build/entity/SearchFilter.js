@@ -54,4 +54,3 @@ SearchFilter = __decorate([
     typeorm_1.Entity({ name: "search_filter", schema: "public" })
 ], SearchFilter);
 exports.SearchFilter = SearchFilter;
-//# sourceMappingURL=SearchFilter.js.map

@@ -62,4 +62,3 @@ ProductCategory = __decorate([
     typeorm_1.Entity({ name: "product_category", schema: "public" })
 ], ProductCategory);
 exports.ProductCategory = ProductCategory;
-//# sourceMappingURL=ProductCategory.js.map

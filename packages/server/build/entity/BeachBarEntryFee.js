@@ -84,4 +84,3 @@ BeachBarEntryFee = BeachBarEntryFee_1 = __decorate([
     typeorm_1.Entity({ name: "beach_bar_entry_fee", schema: "public" })
 ], BeachBarEntryFee);
 exports.BeachBarEntryFee = BeachBarEntryFee;
-//# sourceMappingURL=BeachBarEntryFee.js.map

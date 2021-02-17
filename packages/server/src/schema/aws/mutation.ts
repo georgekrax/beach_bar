@@ -1,7 +1,7 @@
 import { MyContext, S3ACLPermissions } from "@beach_bar/common";
-import { s3FormatFileName } from "@georgekrax-hashtag/common";
-import { extendType, stringArg } from "@nexus/schema";
+import { s3FormatFileName } from "@the_hashtag/common";
 import aws from "aws-sdk";
+import { extendType, stringArg } from "nexus";
 import { S3PayloadReturnType } from "typings/aws";
 import { switchS3Bucket } from "utils/aws/switchS3Bucket";
 import { S3PayloadType } from "./types";
@@ -9,23 +9,13 @@ import { S3PayloadType } from "./types";
 export const AWSMutation = extendType({
   type: "Mutation",
   definition(t) {
-    t.field("signS3", {
+    t.nullable.field("signS3", {
       type: S3PayloadType,
       description: "",
-      nullable: true,
       args: {
-        filename: stringArg({
-          required: true,
-          description: "The name of the file to sign (upload)",
-        }),
-        filetype: stringArg({
-          required: true,
-          description: "The type of the file to sign (upload)",
-        }),
-        tableName: stringArg({
-          required: true,
-          description: "The name of the table in PostgreSQL",
-        }),
+        filename: stringArg({ description: "The name of the file to sign (upload)" }),
+        filetype: stringArg({ description: "The type of the file to sign (upload)" }),
+        tableName: stringArg({ description: "The name of the table in PostgreSQL" }),
       },
       resolve: async (_, { filename, filetype, tableName }, { redis }: MyContext): Promise<S3PayloadReturnType | null> => {
         const s3Bucket = await switchS3Bucket(redis, tableName);

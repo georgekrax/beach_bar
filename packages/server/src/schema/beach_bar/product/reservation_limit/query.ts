@@ -1,7 +1,7 @@
-import { DateScalar } from "@georgekrax-hashtag/common";
-import { arg, extendType, intArg } from "@nexus/schema";
+import { DateScalar } from "@the_hashtag/common/dist/graphql";
 import { Product } from "entity/Product";
 import { HourTime } from "entity/Time";
+import { arg, extendType, intArg, nullable } from "nexus";
 import { AvailableProductReturnType } from "typings/beach_bar/product/reservationLimit";
 import { AvailableProductType } from "./types";
 
@@ -11,17 +11,12 @@ export const ProductQuery = extendType({
     t.list.field("hasProductReservationLimit", {
       type: AvailableProductType,
       description: "Get a list with all the hours this product has reservation limits",
-      nullable: false,
       args: {
-        productId: intArg({
-          required: true,
-          description: "The ID value of the product, to search if available",
-        }),
-        date: arg({
+        productId: intArg({ description: "The ID value of the product, to search if available" }),
+        date: nullable(arg({
           type: DateScalar,
-          required: false,
           description: "The date to purchase the product. Its default value its the current date",
-        }),
+        })),
       },
       resolve: async (_, { productId, date }): Promise<AvailableProductReturnType | null> => {
         if (!productId || productId <= 0) {

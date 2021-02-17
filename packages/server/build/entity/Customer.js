@@ -21,7 +21,7 @@ var Customer_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CustomerRepository = exports.Customer = void 0;
 const common_1 = require("@beach_bar/common");
-const common_2 = require("@georgekrax-hashtag/common");
+const common_2 = require("@the_hashtag/common");
 const dayjs_1 = require("dayjs");
 const typeorm_1 = require("typeorm");
 const softRemove_1 = require("utils/softRemove");
@@ -325,4 +325,3 @@ CustomerRepository = __decorate([
     typeorm_1.EntityRepository(Customer)
 ], CustomerRepository);
 exports.CustomerRepository = CustomerRepository;
-//# sourceMappingURL=Customer.js.map

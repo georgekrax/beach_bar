@@ -99,4 +99,3 @@ LoginDetails = __decorate([
     typeorm_1.Entity({ name: "login_details", schema: "public" })
 ], LoginDetails);
 exports.LoginDetails = LoginDetails;
-//# sourceMappingURL=LoginDetails.js.map

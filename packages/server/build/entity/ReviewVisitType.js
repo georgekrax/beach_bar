@@ -30,4 +30,3 @@ ReviewVisitType = __decorate([
     typeorm_1.Entity({ name: "review_visit_type", schema: "public" })
 ], ReviewVisitType);
 exports.ReviewVisitType = ReviewVisitType;
-//# sourceMappingURL=ReviewVisitType.js.map

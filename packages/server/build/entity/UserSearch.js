@@ -108,4 +108,3 @@ UserSearch = __decorate([
     typeorm_1.Check(`"searchChildren" <= 8`)
 ], UserSearch);
 exports.UserSearch = UserSearch;
-//# sourceMappingURL=UserSearch.js.map

@@ -1,0 +1,15 @@
+@mixin path--filled-classNames() {
+  @include path-classNames() {
+    &.filled {
+      @content;
+    }
+  }
+}
+
+@mixin masonry-item--small($elem: 1) {
+  .item {
+    &:nth-child(#{$elem}) {
+      @extend .item--small;
+    }
+  }
+}

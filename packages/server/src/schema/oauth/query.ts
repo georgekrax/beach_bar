@@ -1,16 +1,15 @@
 import { MyContext } from "@beach_bar/common";
-import { UrlScalar } from "@georgekrax-hashtag/common";
-import { extendType } from "@nexus/schema";
+import { UrlScalar } from "@the_hashtag/common/dist/graphql";
 import { createHash, randomBytes } from "crypto";
 import { User } from "entity/User";
 import { CodeChallengeMethod } from "google-auth-library";
+import { extendType } from "nexus";
 
 export const OAuthQuery = extendType({
   type: "Query",
   definition(t) {
-    t.field("getStripeConnectOAuthUrl", {
+    t.nullable.field("getStripeConnectOAuthUrl", {
       type: UrlScalar,
-      nullable: true,
       description:
         "Returns the URL where the #beach_bar (owner) will be redirected to authorize and register with Stripe, for its connect account",
       resolve: async (_, __, { payload, res, stripe }: MyContext): Promise<string | null> => {
@@ -51,7 +50,6 @@ export const OAuthQuery = extendType({
     });
     t.field("getGoogleOAuthUrl", {
       type: UrlScalar,
-      nullable: false,
       description: "Returns the URL where the user will be redirected to login with Google",
       resolve: async (_, __, { res, googleOAuth2Client }: MyContext): Promise<string> => {
         const state = createHash("sha256").update(randomBytes(1024)).digest("hex");
@@ -79,7 +77,6 @@ export const OAuthQuery = extendType({
     });
     t.field("getFacebookOAuthUrl", {
       type: UrlScalar,
-      nullable: false,
       description: "Returns the URL where the user will be redirected to login with Facebook",
       resolve: async (_, __, { res }: MyContext): Promise<string> => {
         const state = createHash("sha256").update(randomBytes(1024)).digest("hex");
@@ -94,7 +91,6 @@ export const OAuthQuery = extendType({
     });
     t.field("getInstagramOAuthUrl", {
       type: UrlScalar,
-      nullable: false,
       description: "Returns the URL where the user will be redirected to login with Instagram",
       resolve: async (_, __, { res }: MyContext): Promise<string> => {
         const state = createHash("sha256").update(randomBytes(1024)).digest("hex");

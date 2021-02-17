@@ -166,4 +166,3 @@ Account = Account_1 = __decorate([
     typeorm_1.Entity({ name: "account", schema: "public" })
 ], Account);
 exports.Account = Account;
-//# sourceMappingURL=Account.js.map

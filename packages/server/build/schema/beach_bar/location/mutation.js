@@ -11,54 +11,31 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BeachBarLocationCrudMutation = void 0;
 const common_1 = require("@beach_bar/common");
-const schema_1 = require("@nexus/schema");
 const BeachBar_1 = require("entity/BeachBar");
 const BeachBarLocation_1 = require("entity/BeachBarLocation");
 const City_1 = require("entity/City");
 const Country_1 = require("entity/Country");
 const Region_1 = require("entity/Region");
+const nexus_1 = require("nexus");
 const checkScopes_1 = require("utils/checkScopes");
 const types_1 = require("./types");
-exports.BeachBarLocationCrudMutation = schema_1.extendType({
+exports.BeachBarLocationCrudMutation = nexus_1.extendType({
     type: "Mutation",
     definition(t) {
         t.field("addBeachBarLocation", {
             type: types_1.AddBeachBarLocationResult,
             description: "Add (assign) a location to a #beach_bar",
-            nullable: false,
             args: {
-                beachBarId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the #beach_bar",
-                }),
-                address: schema_1.stringArg({
-                    required: true,
-                    description: "The address of the #beach_bar",
-                }),
-                zipCode: schema_1.stringArg({
-                    required: false,
+                beachBarId: nexus_1.intArg({ description: "The ID value of the #beach_bar" }),
+                address: nexus_1.stringArg({ description: "The address of the #beach_bar" }),
+                zipCode: nexus_1.nullable(nexus_1.stringArg({
                     description: "The zip (postal) code of the #beach_bar",
-                }),
-                latitude: schema_1.stringArg({
-                    required: true,
-                    description: "The latitude of the location of the #beach_bar",
-                }),
-                longitude: schema_1.stringArg({
-                    required: true,
-                    description: "The longitude of the location of the #beach_bar",
-                }),
-                countryId: schema_1.idArg({
-                    required: true,
-                    description: "The ID value of the country the #beach_bar is located at",
-                }),
-                cityId: schema_1.idArg({
-                    required: true,
-                    description: "The ID value of the city the #beach_bar is located at",
-                }),
-                regionId: schema_1.intArg({
-                    required: false,
-                    description: "The ID value of the #beach_bar region",
-                }),
+                })),
+                latitude: nexus_1.stringArg({ description: "The latitude of the location of the #beach_bar" }),
+                longitude: nexus_1.stringArg({ description: "The longitude of the location of the #beach_bar" }),
+                countryId: nexus_1.idArg({ description: "The ID value of the country the #beach_bar is located at" }),
+                cityId: nexus_1.idArg({ description: "The ID value of the city the #beach_bar is located at" }),
+                regionId: nexus_1.nullable(nexus_1.intArg({ description: "The ID value of the #beach_bar region" })),
             },
             resolve: (_, { beachBarId, address, zipCode, latitude, longitude, countryId, cityId, regionId }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -136,40 +113,17 @@ exports.BeachBarLocationCrudMutation = schema_1.extendType({
         t.field("updateBeachBarLocation", {
             type: types_1.UpdateBeachBarLocationResult,
             description: "Update the location details of a #beach_bar",
-            nullable: false,
             args: {
-                locationId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the #beach_bar location",
-                }),
-                address: schema_1.stringArg({
-                    required: false,
-                    description: "The address of the #beach_bar",
-                }),
-                zipCode: schema_1.stringArg({
-                    required: false,
+                locationId: nexus_1.intArg({ description: "The ID value of the #beach_bar location" }),
+                address: nexus_1.nullable(nexus_1.stringArg({ description: "The address of the #beach_bar" })),
+                zipCode: nexus_1.nullable(nexus_1.stringArg({
                     description: "The zip (postal) code of the #beach_bar",
-                }),
-                latitude: schema_1.stringArg({
-                    required: false,
-                    description: "The latitude of the location of the #beach_bar",
-                }),
-                longitude: schema_1.stringArg({
-                    required: false,
-                    description: "The longitude of the location of the #beach_bar",
-                }),
-                countryId: schema_1.intArg({
-                    required: false,
-                    description: "The ID value of the country the #beach_bar is located at",
-                }),
-                cityId: schema_1.intArg({
-                    required: false,
-                    description: "The ID value of the city the #beach_bar is located at",
-                }),
-                regionId: schema_1.intArg({
-                    required: false,
-                    description: "The ID value of the #beach_bar region",
-                }),
+                })),
+                latitude: nexus_1.nullable(nexus_1.stringArg({ description: "The latitude of the location of the #beach_bar" })),
+                longitude: nexus_1.nullable(nexus_1.stringArg({ description: "The longitude of the location of the #beach_bar" })),
+                countryId: nexus_1.nullable(nexus_1.intArg({ description: "The ID value of the country the #beach_bar is located at" })),
+                cityId: nexus_1.nullable(nexus_1.intArg({ description: "The ID value of the city the #beach_bar is located at" })),
+                regionId: nexus_1.nullable(nexus_1.intArg({ description: "The ID value of the #beach_bar region" })),
             },
             resolve: (_, { locationId, address, zipCode, latitude, longitude, countryId, cityId, regionId }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -204,4 +158,3 @@ exports.BeachBarLocationCrudMutation = schema_1.extendType({
         });
     },
 });
-//# sourceMappingURL=mutation.js.map

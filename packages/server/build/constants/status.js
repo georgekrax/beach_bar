@@ -6,4 +6,3 @@ exports.payment = Object.freeze({
     PAID: "PAID",
     REFUNDED: "REFUNDED",
 });
-//# sourceMappingURL=status.js.map

@@ -51,4 +51,3 @@ Vote = __decorate([
     typeorm_1.Check(`"rating" IN ('y', 'n')`)
 ], Vote);
 exports.Vote = Vote;
-//# sourceMappingURL=Vote.js.map

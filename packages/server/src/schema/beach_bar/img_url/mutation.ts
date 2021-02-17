@@ -1,8 +1,8 @@
 import { errors, MyContext } from "@beach_bar/common";
-import { UrlScalar } from "@georgekrax-hashtag/common";
-import { arg, extendType, idArg, intArg, stringArg } from "@nexus/schema";
+import { UrlScalar } from "@the_hashtag/common/dist/graphql";
 import { BeachBar } from "entity/BeachBar";
 import { BeachBarImgUrl } from "entity/BeachBarImgUrl";
+import { arg, extendType, idArg, intArg, nullable, stringArg } from "nexus";
 import { DeleteResult } from "schema/types";
 import { DeleteType } from "typings/.index";
 import { AddBeachBarImgUrlType, UpdateBeachBarImgUrlType } from "typings/beach_bar/img_url";
@@ -15,22 +15,18 @@ export const BeachBarImgUrlCrudMutation = extendType({
     t.field("addBeachBarImgUrl", {
       type: AddBeachBarImgUrlResult,
       description: "Add an image (URL) to a #beach_bar",
-      nullable: false,
       args: {
-        beachBarId: intArg({
-          required: true,
-          description: "The ID value of the #beach_bar",
-        }),
+        beachBarId: intArg({ description: "The ID value of the #beach_bar" }),
         imgUrl: arg({
           type: UrlScalar,
-          required: true,
           description: "The URL value of the image",
         }),
-        description: stringArg({
-          required: false,
-          description:
-            "A short description about what the image represents. The characters of the description should not exceed the number 175",
-        }),
+        description: nullable(
+          stringArg({
+            description:
+              "A short description about what the image represents. The characters of the description should not exceed the number 175",
+          })
+        ),
       },
       resolve: async (_, { beachBarId, imgUrl, description }, { payload }: MyContext): Promise<AddBeachBarImgUrlType> => {
         if (!payload) {
@@ -69,22 +65,16 @@ export const BeachBarImgUrlCrudMutation = extendType({
     t.field("updateBeachBaImgUrl", {
       type: UpdateBeachBarImgUrlResult,
       description: "Update the details of a #beach_bar's image",
-      nullable: false,
       args: {
-        imgUrlId: idArg({
-          required: true,
-          description: "The ID value of the #beach_bar's image",
-        }),
-        imgUrl: arg({
+        imgUrlId: idArg({ description: "The ID value of the #beach_bar's image" }),
+        imgUrl: nullable(arg({
           type: UrlScalar,
-          required: false,
           description: "The URL value of the image",
-        }),
-        description: stringArg({
-          required: false,
+        })),
+        description: nullable(stringArg({
           description:
             "A short description about what the image represents. The characters of the description should not exceed the number 175",
-        }),
+        })),
       },
       resolve: async (_, { imgUrlId, imgUrl, description }, { payload }: MyContext): Promise<UpdateBeachBarImgUrlType> => {
         if (!payload) {
@@ -119,12 +109,8 @@ export const BeachBarImgUrlCrudMutation = extendType({
     t.field("deleteBeachBarImgUrl", {
       type: DeleteResult,
       description: "Delete an image (URL) from a #beach_bar",
-      nullable: false,
       args: {
-        imgUrlId: idArg({
-          required: true,
-          description: "The ID value of the #beach_bar's image",
-        }),
+        imgUrlId: idArg({ description: "The ID value of the #beach_bar's image" }),
       },
       resolve: async (_, { imgUrlId }, { payload }: MyContext): Promise<DeleteType> => {
         if (!payload) {

@@ -20,7 +20,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 var OfferCampaignCode_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OfferCampaignCode = void 0;
-const common_1 = require("@georgekrax-hashtag/common");
+const common_1 = require("@the_hashtag/common");
 const _index_1 = require("constants/_index");
 const dayjs_1 = require("dayjs");
 const typeorm_1 = require("typeorm");
@@ -88,4 +88,3 @@ OfferCampaignCode = OfferCampaignCode_1 = __decorate([
     typeorm_1.Check(`"percentageUsed" >= 0 AND "percentageUsed" <= 100`)
 ], OfferCampaignCode);
 exports.OfferCampaignCode = OfferCampaignCode;
-//# sourceMappingURL=OfferCampaignCode.js.map

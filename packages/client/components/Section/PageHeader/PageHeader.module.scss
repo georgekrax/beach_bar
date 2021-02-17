@@ -1,0 +1,23 @@
+.container {
+  margin-top: map-get($em-spacers, 40);
+  margin-bottom: map-get($em-spacers, 16);
+
+  & > div {
+    a {
+      @extend .body-14;
+      text-decoration: none;
+      outline: none;
+      margin-right: 0.375em;
+      color: $secondary;
+    }
+
+    svg {
+      // align-self: flex-end;
+      margin-top: 3%;
+
+      path {
+        stroke: $secondary;
+      }
+    }
+  }
+}

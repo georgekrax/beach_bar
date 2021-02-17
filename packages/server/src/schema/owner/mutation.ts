@@ -1,10 +1,10 @@
 import { errors, MyContext } from "@beach_bar/common";
-import { booleanArg, extendType, intArg } from "@nexus/schema";
 import { user } from "constants/scopes";
 import { BeachBar } from "entity/BeachBar";
 import { BeachBarOwner } from "entity/BeachBarOwner";
 import { Owner } from "entity/Owner";
 import { KeyType } from "ioredis";
+import { booleanArg, extendType, intArg, nullable } from "nexus";
 import { DeleteType } from "typings/.index";
 import { AddBeachBarOwnerType, UpdateBeachBarOwnerType } from "typings/owner";
 import arrDiff from "utils/arrDiff";
@@ -17,22 +17,20 @@ export const OwnerCrudMutation = extendType({
     t.field("addBeachBarOwner", {
       type: AddBeachBarOwnerResult,
       description: "Add (assign) another owner to a #beach_bar too. Only available for the primary owner of a #beach_bar",
-      nullable: false,
       args: {
-        beachBarId: intArg({
-          required: true,
-          description: "The ID value of the #beach_bar the owner will be added (assigned) to",
-        }),
-        userId: intArg({
-          required: false,
-          description: "The user to add (assign) to the #beach_bar, to become one of its owners",
-        }),
-        isPrimary: booleanArg({
-          required: false,
-          description:
-            "Set to true if the user will become the or one of the primary owners of the #beach_bar. It is set to false by default",
-          default: false,
-        }),
+        beachBarId: intArg({ description: "The ID value of the #beach_bar the owner will be added (assigned) to" }),
+        userId: nullable(
+          intArg({
+            description: "The user to add (assign) to the #beach_bar, to become one of its owners",
+          })
+        ),
+        isPrimary: nullable(
+          booleanArg({
+            description:
+              "Set to true if the user will become the or one of the primary owners of the #beach_bar. It is set to false by default",
+            default: false,
+          })
+        ),
       },
       resolve: async (_, { userId, beachBarId, isPrimary }, { payload }: MyContext): Promise<AddBeachBarOwnerType> => {
         if (!payload) {
@@ -133,26 +131,25 @@ export const OwnerCrudMutation = extendType({
     t.field("updateBeachBarOwner", {
       type: UpdateBeachBarOwnerResult,
       description: "Update a #beach_bar's owner info",
-      nullable: false,
       args: {
-        beachBarId: intArg({
-          required: true,
-          description: "The ID value of the #beach_bar the owner is added (assigned) to",
-        }),
-        userId: intArg({
-          required: false,
-          description: "The user to update its info. It should not be null or 0, if a primary owner wants to update another owner",
-        }),
-        publicInfo: booleanArg({
-          required: false,
-          description: "A boolean that indicates if the owner info (contact details) are meant to be presented online to the public",
-        }),
-        isPrimary: booleanArg({
-          required: false,
-          description:
-            "Set to true if the user will become the or one of the primary owners of the #beach_bar. It is set to false by default",
-          default: false,
-        }),
+        beachBarId: intArg({ description: "The ID value of the #beach_bar the owner is added (assigned) to" }),
+        userId: nullable(
+          intArg({
+            description: "The user to update its info. It should not be null or 0, if a primary owner wants to update another owner",
+          })
+        ),
+        publicInfo: nullable(
+          booleanArg({
+            description: "A boolean that indicates if the owner info (contact details) are meant to be presented online to the public",
+          })
+        ),
+        isPrimary: nullable(
+          booleanArg({
+            description:
+              "Set to true if the user will become the or one of the primary owners of the #beach_bar. It is set to false by default",
+            default: false,
+          })
+        ),
       },
       resolve: async (
         _,
@@ -258,17 +255,14 @@ export const OwnerCrudMutation = extendType({
     t.field("deleteBeachBarOwner", {
       type: DeleteResult,
       description: "Delete (remove) an owner from a #beach_bar",
-      nullable: false,
       args: {
-        beachBarId: intArg({
-          required: true,
-          description: "The ID value of the #beach_bar the owner is added (assigned) to",
-        }),
-        userId: intArg({
-          required: false,
-          description:
-            "The owner with its userId to delete (remove) from the #beach_bar. Its value should not be null or 0, if a primary owner wants to update another primary owner",
-        }),
+        beachBarId: intArg({ description: "The ID value of the #beach_bar the owner is added (assigned) to" }),
+        userId: nullable(
+          intArg({
+            description:
+              "The owner with its userId to delete (remove) from the #beach_bar. Its value should not be null or 0, if a primary owner wants to update another primary owner",
+          })
+        ),
       },
       resolve: async (_, { beachBarId, userId }, { payload, redis }: MyContext): Promise<DeleteType | any> => {
         if (!payload) {

@@ -1,10 +1,10 @@
 import { errors, MyContext } from "@beach_bar/common";
-import { DateScalar } from "@georgekrax-hashtag/common";
-import { arg, extendType, intArg } from "@nexus/schema";
+import { DateScalar } from "@the_hashtag/common/dist/graphql";
 import { CartRepository } from "entity/Cart";
 import { CartProduct } from "entity/CartProduct";
 import { Product } from "entity/Product";
 import { HourTime } from "entity/Time";
+import { arg, extendType, intArg, nullable } from "nexus";
 import { getCustomRepository } from "typeorm";
 import { DeleteType } from "typings/.index";
 import { AddCartProductType, UpdateCartProductType } from "typings/cart/product";
@@ -17,21 +17,22 @@ export const CartProductCrudMutation = extendType({
     t.field("addCartProduct", {
       type: AddCartProductResult,
       description: "Add a product to a shopping cart",
-      nullable: false,
       args: {
-        cartId: intArg({ required: true, description: "The ID value of the shopping cart" }),
-        productId: intArg({ required: true, description: "The ID value of the product to add" }),
-        quantity: intArg({
-          required: false,
-          description: "The number that indicates how many times to add the product to the cart. Its default value is 1",
-          default: 1,
-        }),
-        timeId: intArg({ required: true, description: "The ID value of the hour time of product use" }),
-        date: arg({
-          type: DateScalar,
-          required: false,
-          description: "The date to purchase the product. Its default value its the current date",
-        }),
+        cartId: intArg({ description: "The ID value of the shopping cart" }),
+        productId: intArg({ description: "The ID value of the product to add" }),
+        quantity: nullable(
+          intArg({
+            description: "The number that indicates how many times to add the product to the cart. Its default value is 1",
+            default: 1,
+          })
+        ),
+        timeId: intArg({ description: "The ID value of the hour time of product use" }),
+        date: nullable(
+          arg({
+            type: DateScalar,
+            description: "The date to purchase the product. Its default value its the current date",
+          })
+        ),
       },
       resolve: async (_, { cartId, productId, quantity, date, timeId }, { payload }: MyContext): Promise<AddCartProductType> => {
         if (!cartId || cartId <= 0) {
@@ -97,14 +98,14 @@ export const CartProductCrudMutation = extendType({
     t.field("updateCartProduct", {
       type: UpdateCartProductResult,
       description: "Update the quantity of a product in a shopping cart",
-      nullable: false,
       args: {
-        cartId: intArg({ required: true, description: "The ID value of the shopping cart" }),
-        productId: intArg({ required: true, description: "The ID value of the product to update its quantity" }),
-        quantity: intArg({
-          required: false,
-          description: "The number that indicates how many times to add the product to the cart",
-        }),
+        cartId: intArg({ description: "The ID value of the shopping cart" }),
+        productId: intArg({ description: "The ID value of the product to update its quantity" }),
+        quantity: nullable(
+          intArg({
+            description: "The number that indicates how many times to add the product to the cart",
+          })
+        ),
       },
       resolve: async (_, { cartId, productId, quantity }): Promise<UpdateCartProductType> => {
         if (!cartId || cartId <= 0) {
@@ -156,10 +157,9 @@ export const CartProductCrudMutation = extendType({
     t.field("deleteCartProduct", {
       type: DeleteResult,
       description: "Delete (remove) a product from a shopping cart",
-      nullable: false,
       args: {
-        cartId: intArg({ required: true, description: "The ID value of the shopping cart" }),
-        productId: intArg({ required: true, description: "The ID value of the product to delete (remove)" }),
+        cartId: intArg({ description: "The ID value of the shopping cart" }),
+        productId: intArg({ description: "The ID value of the product to delete (remove)" }),
       },
       resolve: async (_, { cartId, productId }): Promise<DeleteType> => {
         if (!cartId || cartId <= 0) {

@@ -1,1 +1,0 @@
-{"version":3,"file":"createDBConnection.js","sourceRoot":"","sources":["../../src/utils/createDBConnection.ts"],"names":[],"mappings":";;;;;;;;;;;;AAAA,qCAAiE;AAEpD,QAAA,kBAAkB,GAAG,GAAuB,EAAE;IACzD,MAAM,iBAAiB,GAAG,MAAM,8BAAoB,CAAC,OAAO,CAAC,GAAG,CAAC,QAAQ,CAAC,CAAC;IAC3E,OAAO,MAAM,0BAAgB,iCAAM,iBAAiB,KAAE,IAAI,EAAE,SAAS,IAAG,CAAC;AAC3E,CAAC,CAAA,CAAC"}

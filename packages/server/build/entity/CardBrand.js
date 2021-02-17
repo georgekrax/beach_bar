@@ -30,4 +30,3 @@ CardBrand = __decorate([
     typeorm_1.Entity({ name: "card_brand", schema: "public" })
 ], CardBrand);
 exports.CardBrand = CardBrand;
-//# sourceMappingURL=CardBrand.js.map

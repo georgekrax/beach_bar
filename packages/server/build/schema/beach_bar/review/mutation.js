@@ -11,56 +11,41 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BeachBarReviewVoteMutation = exports.BeachBarReviewCrudMutation = void 0;
 const common_1 = require("@beach_bar/common");
-const common_2 = require("@georgekrax-hashtag/common");
-const schema_1 = require("@nexus/schema");
+const graphql_1 = require("@the_hashtag/common/dist/graphql");
 const _index_1 = require("constants/_index");
 const BeachBar_1 = require("entity/BeachBar");
 const BeachBarReview_1 = require("entity/BeachBarReview");
 const ReviewVisitType_1 = require("entity/ReviewVisitType");
 const Time_1 = require("entity/Time");
+const nexus_1 = require("nexus");
 const verifyUserPaymentReview_1 = require("utils/beach_bar/verifyUserPaymentReview");
 const types_1 = require("../../types");
 const types_2 = require("./types");
-exports.BeachBarReviewCrudMutation = schema_1.extendType({
+exports.BeachBarReviewCrudMutation = nexus_1.extendType({
     type: "Mutation",
     definition(t) {
         t.field("addBeachBarReview", {
             type: types_2.AddBeachBarReviewResult,
             description: "Add a customer's review on a #beach_bar",
-            nullable: false,
             args: {
-                beachBarId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the #beach_bar, to submit the review",
-                }),
-                paymentRefCode: schema_1.stringArg({
-                    required: false,
-                    description: "The referral code of the customer payment, to find",
-                }),
-                ratingValue: schema_1.intArg({
-                    required: true,
-                    description: "The rating value between 1 to 10, the customers rates the #beach_bar",
-                }),
-                visitTypeId: schema_1.intArg({
-                    required: false,
+                beachBarId: nexus_1.intArg({ description: "The ID value of the #beach_bar, to submit the review" }),
+                paymentRefCode: nexus_1.nullable(nexus_1.stringArg({ description: "The referral code of the customer payment, to find" })),
+                ratingValue: nexus_1.intArg({ description: "The rating value between 1 to 10, the customers rates the #beach_bar" }),
+                visitTypeId: nexus_1.nullable(nexus_1.intArg({
                     description: "The ID value of the customer's visit type",
-                }),
-                monthTimeId: schema_1.intArg({
-                    required: false,
+                })),
+                monthTimeId: nexus_1.nullable(nexus_1.intArg({
                     description: "The ID value of the month time",
-                }),
-                positiveComment: schema_1.stringArg({
-                    required: false,
+                })),
+                positiveComment: nexus_1.nullable(nexus_1.stringArg({
                     description: "A positive comment about the #beach_bar",
-                }),
-                negativeComment: schema_1.stringArg({
-                    required: false,
+                })),
+                negativeComment: nexus_1.nullable(nexus_1.stringArg({
                     description: "A negative comment about the #beach_bar",
-                }),
-                review: schema_1.stringArg({
-                    required: false,
+                })),
+                review: nexus_1.nullable(nexus_1.stringArg({
                     description: "A summary (description) of the user's overall review",
-                }),
+                })),
             },
             resolve: (_, { beachBarId, paymentRefCode, monthTimeId, ratingValue, visitTypeId, positiveComment, negativeComment, review }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!beachBarId || beachBarId <= 0) {
@@ -146,37 +131,27 @@ exports.BeachBarReviewCrudMutation = schema_1.extendType({
         t.field("updateBeachBarReview", {
             type: types_2.UpdateBeachBarReviewResult,
             description: "Update a customer's review on a #beach_bar",
-            nullable: false,
             args: {
-                reviewId: schema_1.arg({
-                    type: common_2.BigIntScalar,
-                    required: true,
+                reviewId: nexus_1.arg({
+                    type: graphql_1.BigIntScalar,
                     description: "The ID value of the customer's review",
                 }),
-                ratingValue: schema_1.intArg({
-                    required: false,
+                ratingValue: nexus_1.nullable(nexus_1.intArg({
                     description: "The rating value between 1 to 10, the customers rates the #beach_bar",
-                }),
-                visitTypeId: schema_1.intArg({
-                    required: false,
-                    description: "The ID value of the customer's visit type",
-                }),
-                monthTimeId: schema_1.intArg({
-                    required: false,
+                })),
+                visitTypeId: nexus_1.nullable(nexus_1.intArg({ description: "The ID value of the customer's visit type" })),
+                monthTimeId: nexus_1.nullable(nexus_1.intArg({
                     description: "The ID value of the month time",
-                }),
-                positiveComment: schema_1.stringArg({
-                    required: false,
+                })),
+                positiveComment: nexus_1.nullable(nexus_1.stringArg({
                     description: "A positive comment about the #beach_bar",
-                }),
-                negativeComment: schema_1.stringArg({
-                    required: false,
+                })),
+                negativeComment: nexus_1.nullable(nexus_1.stringArg({
                     description: "A negative comment about the #beach_bar",
-                }),
-                review: schema_1.stringArg({
-                    required: false,
+                })),
+                review: nexus_1.nullable(nexus_1.stringArg({
                     description: "A summary (description) of the user's overall review",
-                }),
+                })),
             },
             resolve: (_, { reviewId, ratingValue, visitTypeId, monthTimeId, positiveComment, negativeComment, review }) => __awaiter(this, void 0, void 0, function* () {
                 if (!reviewId || reviewId <= 0) {
@@ -225,11 +200,9 @@ exports.BeachBarReviewCrudMutation = schema_1.extendType({
         t.field("deleteBeachBarReview", {
             type: types_1.DeleteResult,
             description: "Delete a customer's review on a #beach_bar",
-            nullable: false,
             args: {
-                reviewId: schema_1.arg({
-                    type: common_2.BigIntScalar,
-                    required: true,
+                reviewId: nexus_1.arg({
+                    type: graphql_1.BigIntScalar,
                     description: "The ID value of the customer's review",
                 }),
             },
@@ -254,27 +227,19 @@ exports.BeachBarReviewCrudMutation = schema_1.extendType({
         });
     },
 });
-exports.BeachBarReviewVoteMutation = schema_1.extendType({
+exports.BeachBarReviewVoteMutation = nexus_1.extendType({
     type: "Mutation",
     definition(t) {
         t.field("voteBeachBarReview", {
             type: types_2.UpdateBeachBarReviewResult,
             description: "Upvote or downvote a customer's review on a #beach_bar",
-            nullable: false,
             args: {
-                reviewId: schema_1.arg({
-                    type: common_2.BigIntScalar,
-                    required: true,
+                reviewId: nexus_1.arg({
+                    type: graphql_1.BigIntScalar,
                     description: "The ID value of the customer's review",
                 }),
-                upvote: schema_1.booleanArg({
-                    required: false,
-                    description: "Set to true if to increment the review's votes",
-                }),
-                downvote: schema_1.booleanArg({
-                    required: false,
-                    description: "Set to true if to decrement the review's votes",
-                }),
+                upvote: nexus_1.nullable(nexus_1.booleanArg({ description: "Set to true if to increment the review's votes" })),
+                downvote: nexus_1.nullable(nexus_1.booleanArg({ description: "Set to true if to decrement the review's votes" })),
             },
             resolve: (_, { reviewId, upvote, downvote }) => __awaiter(this, void 0, void 0, function* () {
                 if (!reviewId || reviewId <= 0) {
@@ -309,4 +274,3 @@ exports.BeachBarReviewVoteMutation = schema_1.extendType({
         });
     },
 });
-//# sourceMappingURL=mutation.js.map

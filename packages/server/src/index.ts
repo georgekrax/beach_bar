@@ -38,7 +38,7 @@ export let stripe: Stripe;
 
     await createDBConnection();
   } catch (err) {
-    console.log(err);
+    console.error(err);
     process.exit(0);
   }
 
@@ -63,8 +63,11 @@ export let stripe: Stripe;
 
   sgClient.setApiKey(process.env.SENDGRID_API_KEY!.toString());
   sgMail.setApiKey(process.env.SENDGRID_API_KEY!.toString());
+
+  const notIsProd = !(process.env.NODE_ENV === "production");
   const server = new ApolloServer({
-    tracing: !(process.env.NODE_ENV === "production"),
+    // tracing: notIsProd,
+    playground: notIsProd,
     // engine: {
     //   reportSchema: true,
     //   graphVariant: "current",

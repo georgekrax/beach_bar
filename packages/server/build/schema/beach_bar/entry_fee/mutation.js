@@ -11,36 +11,27 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BeachBarEntryFeeCrudMutation = void 0;
 const common_1 = require("@beach_bar/common");
-const common_2 = require("@georgekrax-hashtag/common");
-const schema_1 = require("@nexus/schema");
+const graphql_1 = require("@the_hashtag/common/dist/graphql");
 const BeachBar_1 = require("entity/BeachBar");
 const BeachBarEntryFee_1 = require("entity/BeachBarEntryFee");
+const nexus_1 = require("nexus");
 const typeorm_1 = require("typeorm");
 const checkScopes_1 = require("utils/checkScopes");
 const types_1 = require("../../types");
 const types_2 = require("./types");
-exports.BeachBarEntryFeeCrudMutation = schema_1.extendType({
+exports.BeachBarEntryFeeCrudMutation = nexus_1.extendType({
     type: "Mutation",
     definition(t) {
         t.field("addBeachBarEntryFee", {
             type: types_2.AddBeachBarEntryFeeResult,
             description: "Add an entry fee(s) to a #beach_bar",
-            nullable: false,
             args: {
-                beachBarId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the #beach_bar to add the entry fee(s)",
-                }),
-                fee: schema_1.floatArg({
-                    required: true,
-                    description: "The price value of the entry fee. Its value cannot be less than 0",
-                }),
-                dates: schema_1.arg({
-                    type: common_2.DateScalar,
-                    required: true,
-                    list: true,
+                beachBarId: nexus_1.intArg({ description: "The ID value of the #beach_bar to add the entry fee(s)" }),
+                fee: nexus_1.floatArg({ description: "The price value of the entry fee. Its value cannot be less than 0" }),
+                dates: nexus_1.list(nexus_1.arg({
+                    type: graphql_1.DateScalar,
                     description: "A list with all the dates to add (assign) the entry fee",
-                }),
+                })),
             },
             resolve: (_, { beachBarId, fee, dates }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -99,15 +90,12 @@ exports.BeachBarEntryFeeCrudMutation = schema_1.extendType({
         t.field("updateBeachBarEntryFee", {
             type: types_2.UpdateBeachBarEntryFeeResult,
             description: "Update an or many entry fee(s) of a #beach_bar",
-            nullable: false,
             args: {
-                entryFeeIds: schema_1.arg({
-                    type: common_2.BigIntScalar,
-                    required: true,
-                    list: true,
+                entryFeeIds: nexus_1.list(nexus_1.arg({
+                    type: graphql_1.BigIntScalar,
                     description: "A list with all the entry fess to update",
-                }),
-                fee: schema_1.floatArg({ required: false, description: "The price value to update the entry fees" }),
+                })),
+                fee: nexus_1.nullable(nexus_1.floatArg({ description: "The price value to update the entry fees" })),
             },
             resolve: (_, { entryFeeIds, price }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -165,14 +153,11 @@ exports.BeachBarEntryFeeCrudMutation = schema_1.extendType({
         t.field("deleteBeachBarEntryFee", {
             type: types_1.DeleteResult,
             description: "Delete (remove) an or some entry fees from a #beach_bar",
-            nullable: false,
             args: {
-                entryFeeIds: schema_1.arg({
-                    type: common_2.BigIntScalar,
-                    required: true,
-                    list: true,
+                entryFeeIds: nexus_1.list(nexus_1.arg({
+                    type: graphql_1.BigIntScalar,
                     description: "A list with all the ID values of entry fee(s) to delete (remove) from a #beach_bar",
-                }),
+                })),
             },
             resolve: (_, { entryFeeIds }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -203,4 +188,3 @@ exports.BeachBarEntryFeeCrudMutation = schema_1.extendType({
         });
     },
 });
-//# sourceMappingURL=mutation.js.map

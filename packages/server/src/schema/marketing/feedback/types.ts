@@ -1,13 +1,13 @@
-import { objectType } from "@nexus/schema";
+import { objectType } from "nexus";
 
 export const VoteCategoryType = objectType({
   name: "VoteCategory",
   description: "Represents a voting category",
   definition(t) {
-    t.int("id", { nullable: false });
-    t.string("title", { nullable: false });
-    t.string("description", { nullable: false });
-    t.string("refCode", { nullable: false });
+    t.id("id");
+    t.string("title");
+    t.string("description");
+    t.string("refCode");
   },
 });
 
@@ -15,14 +15,13 @@ export const VoteTagType = objectType({
   name: "VoteTag",
   description: "Represents the votes (voting result) of a voting category",
   definition(t) {
-    t.int("id", { nullable: false });
-    t.int("upvotes", { nullable: false });
-    t.int("downvotes", { nullable: false });
-    t.int("totalVotes", { nullable: true });
+    t.id("id");
+    t.int("upvotes");
+    t.int("downvotes");
+    t.nullable.int("totalVotes");
     t.field("category", {
       type: VoteCategoryType,
       description: "The voting category these vote results are assigned to",
-      nullable: false,
       resolve: o => o.category,
     });
   },

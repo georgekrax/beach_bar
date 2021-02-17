@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getReservationLimits = void 0;
 const common_1 = require("@beach_bar/common");
 const dayjs_1 = __importDefault(require("dayjs"));
-exports.getReservationLimits = (beachBar, date, timeId) => {
+const getReservationLimits = (beachBar, date, timeId) => {
     if (beachBar.products.some(product => product.reservationLimits && product.reservationLimits.length > 0)) {
         let reservationLimits = beachBar.products
             .filter(product => product !== undefined && product !== null)
@@ -24,4 +24,4 @@ exports.getReservationLimits = (beachBar, date, timeId) => {
     }
     return undefined;
 };
-//# sourceMappingURL=getReservationLimits.js.map
+exports.getReservationLimits = getReservationLimits;

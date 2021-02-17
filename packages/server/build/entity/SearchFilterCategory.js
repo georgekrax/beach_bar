@@ -34,4 +34,3 @@ SearchFilterCategory = __decorate([
     typeorm_1.Entity({ name: "search_filter_category", schema: "public" })
 ], SearchFilterCategory);
 exports.SearchFilterCategory = SearchFilterCategory;
-//# sourceMappingURL=SearchFilterCategory.js.map

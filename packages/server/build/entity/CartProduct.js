@@ -85,4 +85,3 @@ CartProduct = CartProduct_1 = __decorate([
     typeorm_1.Check(`"quantity" >= 0 AND "quantity" <= 20`)
 ], CartProduct);
 exports.CartProduct = CartProduct;
-//# sourceMappingURL=CartProduct.js.map

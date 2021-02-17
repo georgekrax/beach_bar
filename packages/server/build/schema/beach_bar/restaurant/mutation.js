@@ -11,36 +11,25 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BeachBarRestaurantCrudMutation = void 0;
 const common_1 = require("@beach_bar/common");
-const schema_1 = require("@nexus/schema");
 const BeachBar_1 = require("entity/BeachBar");
 const BeachBarRestaurant_1 = require("entity/BeachBarRestaurant");
+const nexus_1 = require("nexus");
 const types_1 = require("../../types");
 const types_2 = require("./types");
-exports.BeachBarRestaurantCrudMutation = schema_1.extendType({
+exports.BeachBarRestaurantCrudMutation = nexus_1.extendType({
     type: "Mutation",
     definition(t) {
         t.field("addBeachBarRestaurant", {
             type: types_2.AddBeachBarRestaurantResult,
             description: "Add a restaurant of a #beach_bar",
-            nullable: false,
             args: {
-                beachBarId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the #beach_bar the restaurant will be added to",
-                }),
-                name: schema_1.stringArg({
-                    required: true,
-                    description: "The name of the restaurant",
-                }),
-                description: schema_1.stringArg({
-                    required: false,
-                    description: "A short description, info text, about the restaurant itself",
-                }),
-                isActive: schema_1.booleanArg({
-                    required: false,
+                beachBarId: nexus_1.intArg({ description: "The ID value of the #beach_bar the restaurant will be added to" }),
+                name: nexus_1.stringArg({ description: "The name of the restaurant" }),
+                description: nexus_1.nullable(nexus_1.stringArg({ description: "A short description, info text, about the restaurant itself" })),
+                isActive: nexus_1.nullable(nexus_1.booleanArg({
                     description: "A boolean that indicates if the restaurant is active or not. Its default value is false",
                     default: false,
-                }),
+                })),
             },
             resolve: (_, { beachBarId, name, description, isActive }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -94,24 +83,11 @@ exports.BeachBarRestaurantCrudMutation = schema_1.extendType({
         t.field("updateBeachBarRestaurant", {
             type: types_2.UpdateBeachBarRestaurantResult,
             description: "Update the restaurant details of a #beach_bar",
-            nullable: false,
             args: {
-                restaurantId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the restaurant",
-                }),
-                name: schema_1.stringArg({
-                    required: false,
-                    description: "The name of the restaurant",
-                }),
-                description: schema_1.stringArg({
-                    required: false,
-                    description: "A short description, info text, about the restaurant itself",
-                }),
-                isActive: schema_1.booleanArg({
-                    required: false,
-                    description: "A boolean that indicates if the restaurant is active or not",
-                }),
+                restaurantId: nexus_1.intArg({ description: "The ID value of the restaurant" }),
+                name: nexus_1.nullable(nexus_1.stringArg({ description: "The name of the restaurant" })),
+                description: nexus_1.nullable(nexus_1.stringArg({ description: "A short description, info text, about the restaurant itself" })),
+                isActive: nexus_1.nullable(nexus_1.booleanArg({ description: "A boolean that indicates if the restaurant is active or not" })),
             },
             resolve: (_, { restaurantId, name, description, isActive }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -151,12 +127,8 @@ exports.BeachBarRestaurantCrudMutation = schema_1.extendType({
         t.field("deleteBeachBarRestaurant", {
             type: types_1.DeleteResult,
             description: "Delete (remove) a restaurant from a #beach_bar",
-            nullable: false,
             args: {
-                restaurantId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the #beach_bar restaurant",
-                }),
+                restaurantId: nexus_1.intArg({ description: "The ID value of the #beach_bar restaurant" }),
             },
             resolve: (_, { restaurantId }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -190,4 +162,3 @@ exports.BeachBarRestaurantCrudMutation = schema_1.extendType({
         });
     },
 });
-//# sourceMappingURL=mutation.js.map

@@ -1,6 +1,6 @@
-import { UploadScalar } from "@georgekrax-hashtag/common";
-import { arg, mutationType, stringArg } from "@nexus/schema";
+import { UploadScalar } from "@the_hashtag/common/dist/graphql";
 import { createWriteStream } from "fs";
+import { arg, mutationType, nullable, stringArg } from "nexus";
 import path from "path";
 import { FileType } from "typings/aws";
 import { v4 as uuid } from "uuid";
@@ -9,14 +9,12 @@ import { FileGraphQlType } from "./types";
 export const Mutation = mutationType({
   description: "Mutation",
   definition(t) {
-    t.field("uploadSingleFile", {
+    t.nullable.field("uploadSingleFile", {
       type: FileGraphQlType,
       description: "Upload a single file",
-      nullable: true,
       args: {
         file: arg({
           type: UploadScalar,
-          required: true,
           description: "The file to upload",
         }),
       },
@@ -35,7 +33,7 @@ export const Mutation = mutationType({
     t.string("hello", {
       description: "Sample mutation",
       args: {
-        name: stringArg({ nullable: true }),
+        name: nullable(stringArg()),
       },
       resolve: (_, { name }): string => {
         if (name) {

@@ -120,4 +120,3 @@ RestaurantFoodItem = RestaurantFoodItem_1 = __decorate([
     typeorm_1.Entity({ name: "restaurant_food_item", schema: "public" })
 ], RestaurantFoodItem);
 exports.RestaurantFoodItem = RestaurantFoodItem;
-//# sourceMappingURL=RestaurantFoodItem.js.map

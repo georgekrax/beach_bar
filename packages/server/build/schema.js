@@ -23,16 +23,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.schema = void 0;
-const schema_1 = require("@nexus/schema");
+const nexus_1 = require("nexus");
 const path_1 = __importDefault(require("path"));
 const types = __importStar(require("./schema/index"));
-exports.schema = schema_1.makeSchema({
+exports.schema = nexus_1.makeSchema({
+    nonNullDefaults: {
+        input: true,
+        output: true,
+    },
     types,
-    shouldGenerateArtifacts: process.env.NODE_ENV === "production",
+    shouldGenerateArtifacts: true,
     outputs: {
-        schema: path_1.default.join(__dirname, "generated/schema.graphql"),
-        typegen: path_1.default.join(__dirname, "generated/nexusTypes.ts"),
+        schema: path_1.default.join(__dirname, "graphql/__generated__/schema.graphql"),
+        typegen: path_1.default.join(__dirname, "graphql/__generated__/nexusTypes.ts"),
     },
     prettierConfig: require.resolve("../.prettierrc.json"),
 });
-//# sourceMappingURL=schema.js.map

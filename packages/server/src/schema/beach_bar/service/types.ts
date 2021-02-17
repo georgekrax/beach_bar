@@ -1,24 +1,17 @@
-import { DateTimeScalar } from "@georgekrax-hashtag/common";
-import { objectType, unionType } from "@nexus/schema";
+import { DateTimeScalar } from "@the_hashtag/common/dist/graphql";
+import { objectType, unionType } from "nexus";
 import { BeachBarType } from "../types";
 
 export const BeachBarServiceType = objectType({
   name: "BeachBarService",
   description: "Represents a service (feature), which a #beach_bar can provide",
   definition(t) {
-    t.int("id", {
-      nullable: false,
+    t.id("id", {
       description: "The ID value of the feature",
     });
-    t.string("name", { nullable: false, description: "The name of the feature" });
-    t.string("iconUrl", {
-      nullable: false,
-      description: "The URL value of the icon image of the feature",
-    });
-    t.string("iconUrl", {
-      nullable: true,
-      description: "The URL value of the icon colored image of the feature, with color",
-    });
+    t.string("name", { description: "The name of the feature" });
+    t.string("iconUrl", { description: "The URL value of the icon image of the feature" });
+    t.nullable.string("iconUrl", { description: "The URL value of the icon colored image of the feature, with color" });
   },
 });
 
@@ -29,27 +22,23 @@ export const BeachBarFeatureType = objectType({
     t.field("service", {
       type: BeachBarServiceType,
       description: "The feature (service) the #beach_bar provides",
-      nullable: false,
       resolve: o => o.service,
     });
     t.field("beachBar", {
       type: BeachBarType,
       description: "The #beach_bar that provides the feature (service)",
-      nullable: false,
       resolve: o => o.beachBar,
     });
     t.int("quantity", {
-      nullable: false,
       description: "An integer that indicates the quantity of the service, a #beach_bar provides",
       resolve: o => o.quantity,
     });
-    t.string("description", {
-      nullable: true,
+    t.nullable.string("description", {
       description: "A short description about the service",
       resolve: o => o.description,
     });
-    t.field("updatedAt", { type: DateTimeScalar, nullable: false });
-    t.field("timestamp", { type: DateTimeScalar, nullable: false });
+    t.field("updatedAt", { type: DateTimeScalar });
+    t.field("timestamp", { type: DateTimeScalar });
   },
 });
 
@@ -60,11 +49,9 @@ export const AddBeachBarFeatureType = objectType({
     t.field("feature", {
       type: BeachBarFeatureType,
       description: "The feature that will be added (assigned) to the #beach_bar",
-      nullable: false,
       resolve: o => o.feature,
     });
     t.boolean("added", {
-      nullable: false,
       description: "A boolean that indicates if the feature has been successfully added (assigned) to the #beach_bar",
     });
   },
@@ -74,13 +61,13 @@ export const AddBeachBarFeatureResult = unionType({
   name: "AddBeachBarFeatureResult",
   definition(t) {
     t.members("AddBeachBarFeature", "Error");
-    t.resolveType(item => {
-      if (item.error) {
-        return "Error";
-      } else {
-        return "AddBeachBarFeature";
-      }
-    });
+  },
+  resolveType: item => {
+    if (item.name === "Error") {
+      return "Error";
+    } else {
+      return "AddBeachBarFeature";
+    }
   },
 });
 
@@ -91,11 +78,9 @@ export const UpdateBeachBarFeatureType = objectType({
     t.field("feature", {
       type: BeachBarFeatureType,
       description: "The feature that will be updated",
-      nullable: false,
       resolve: o => o.feature,
     });
     t.boolean("updated", {
-      nullable: false,
       description: "A boolean that indicates if the feature has been successfully updated",
     });
   },
@@ -105,12 +90,12 @@ export const UpdateBeachBarFeatureResult = unionType({
   name: "UpdateBeachBarFeatureResult",
   definition(t) {
     t.members("UpdateBeachBarFeature", "Error");
-    t.resolveType(item => {
-      if (item.error) {
-        return "Error";
-      } else {
-        return "UpdateBeachBarFeature";
-      }
-    });
+  },
+  resolveType: item => {
+    if (item.name === "Error") {
+      return "Error";
+    } else {
+      return "UpdateBeachBarFeature";
+    }
   },
 });

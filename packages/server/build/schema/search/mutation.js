@@ -13,29 +13,25 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SearchUpdateMutation = void 0;
-const schema_1 = require("@nexus/schema");
 const SearchFilter_1 = require("entity/SearchFilter");
 const UserSearch_1 = require("entity/UserSearch");
+const nexus_1 = require("nexus");
 const typeorm_1 = require("typeorm");
 const arrEquals_1 = __importDefault(require("utils/arrEquals"));
 const types_1 = require("./types");
-exports.SearchUpdateMutation = schema_1.extendType({
+exports.SearchUpdateMutation = nexus_1.extendType({
     type: "Mutation",
     definition(t) {
-        t.field("updateSearch", {
+        t.nullable.field("updateSearch", {
             type: types_1.UserSearchType,
             description: "Update a previous user's search",
-            nullable: true,
             args: {
-                searchId: schema_1.idArg({
-                    required: true,
+                searchId: nexus_1.idArg({
                     description: "The ID value of a previous user search",
                 }),
-                filterIds: schema_1.stringArg({
-                    required: false,
-                    list: true,
+                filterIds: nexus_1.list(nexus_1.nullable(nexus_1.stringArg({
                     description: "A list with the filter IDs to add in the search, found in the documentation",
-                }),
+                }))),
             },
             resolve: (_, { searchId, filterIds }, { payload, redis }) => __awaiter(this, void 0, void 0, function* () {
                 var _a;
@@ -71,4 +67,3 @@ exports.SearchUpdateMutation = schema_1.extendType({
         });
     },
 });
-//# sourceMappingURL=mutation.js.map

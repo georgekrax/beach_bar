@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.findCountry = exports.findBrowser = exports.findOs = exports.createUserLoginDetails = exports.findLoginDetails = void 0;
 const LoginDetails_1 = require("entity/LoginDetails");
 const fs_1 = __importDefault(require("fs"));
-exports.findLoginDetails = ({ details, uaParser }) => {
+const findLoginDetails = ({ details, uaParser }) => {
     const obj = {
         osId: undefined,
         browserId: undefined,
@@ -37,7 +37,8 @@ exports.findLoginDetails = ({ details, uaParser }) => {
     }
     return obj;
 };
-exports.createUserLoginDetails = (status, platform, account, osId, browserId, countryId, cityId, ipAddr) => __awaiter(void 0, void 0, void 0, function* () {
+exports.findLoginDetails = findLoginDetails;
+const createUserLoginDetails = (status, platform, account, osId, browserId, countryId, cityId, ipAddr) => __awaiter(void 0, void 0, void 0, function* () {
     const loginDetails = LoginDetails_1.LoginDetails.create({
         account,
         platformId: platform.id,
@@ -55,7 +56,8 @@ exports.createUserLoginDetails = (status, platform, account, osId, browserId, co
         throw new Error(err.message);
     }
 });
-exports.findOs = (osName) => {
+exports.createUserLoginDetails = createUserLoginDetails;
+const findOs = (osName) => {
     if (!osName) {
         return undefined;
     }
@@ -68,7 +70,8 @@ exports.findOs = (osName) => {
     }
     return os.id;
 };
-exports.findBrowser = (browserName) => {
+exports.findOs = findOs;
+const findBrowser = (browserName) => {
     if (!browserName) {
         return undefined;
     }
@@ -81,7 +84,8 @@ exports.findBrowser = (browserName) => {
     }
     return browser.id;
 };
-exports.findCountry = (countryId) => {
+exports.findBrowser = findBrowser;
+const findCountry = (countryId) => {
     if (!countryId) {
         return undefined;
     }
@@ -94,4 +98,4 @@ exports.findCountry = (countryId) => {
     }
     return country.id;
 };
-//# sourceMappingURL=userCommon.js.map
+exports.findCountry = findCountry;

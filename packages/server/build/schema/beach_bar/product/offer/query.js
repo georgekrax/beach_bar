@@ -11,26 +11,22 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.VoucherCoderQuery = void 0;
 const common_1 = require("@beach_bar/common");
-const common_2 = require("@georgekrax-hashtag/common");
-const schema_1 = require("@nexus/schema");
+const graphql_1 = require("@the_hashtag/common/dist/graphql");
 const BeachBar_1 = require("entity/BeachBar");
 const CouponCode_1 = require("entity/CouponCode");
 const OfferCampaignCode_1 = require("entity/OfferCampaignCode");
+const nexus_1 = require("nexus");
 const checkScopes_1 = require("utils/checkScopes");
 const checkVoucherCode_1 = require("utils/checkVoucherCode");
 const types_1 = require("./types");
-exports.VoucherCoderQuery = schema_1.extendType({
+exports.VoucherCoderQuery = nexus_1.extendType({
     type: "Query",
     definition(t) {
-        t.field("getVoucherCode", {
+        t.nullable.field("getVoucherCode", {
             type: types_1.VoucherCodeQueryResult,
             description: "Get the product offer or coupon, based on its referral code",
-            nullable: true,
             args: {
-                refCode: schema_1.stringArg({
-                    required: true,
-                    description: "The referral code of the product offer or coupon",
-                }),
+                refCode: nexus_1.stringArg({ description: "The referral code of the product offer or coupon" }),
             },
             resolve: (_, { refCode }) => __awaiter(this, void 0, void 0, function* () {
                 if (!refCode || refCode.trim().length === 0) {
@@ -46,15 +42,11 @@ exports.VoucherCoderQuery = schema_1.extendType({
                 return res.error;
             }),
         });
-        t.list.field("getBeachBarOfferCampaigns", {
+        t.nullable.list.field("getBeachBarOfferCampaigns", {
             type: types_1.OfferCampaignType,
             description: "Get a list with all the offer campaigns of a #beach_bar",
-            nullable: true,
             args: {
-                beachBarId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the #beach_bar",
-                }),
+                beachBarId: nexus_1.intArg({ description: "The ID value of the #beach_bar" }),
             },
             resolve: (_, { beachBarId }) => __awaiter(this, void 0, void 0, function* () {
                 if (!beachBarId || beachBarId <= 0) {
@@ -75,11 +67,9 @@ exports.VoucherCoderQuery = schema_1.extendType({
         t.field("revealCouponCode", {
             type: types_1.CouponCodeRevealResult,
             description: "Get a coupon's code details & its referral code",
-            nullable: false,
             args: {
-                couponCodeId: schema_1.arg({
-                    type: common_2.BigIntScalar,
-                    required: true,
+                couponCodeId: nexus_1.arg({
+                    type: graphql_1.BigIntScalar,
                     description: "The ID value of the coupon code",
                 }),
             },
@@ -105,11 +95,9 @@ exports.VoucherCoderQuery = schema_1.extendType({
         t.field("revealOfferCampaignCode", {
             type: types_1.OfferCampaignCodeRevealResult,
             description: "Get an offer's campaign code details + its referral code",
-            nullable: false,
             args: {
-                offerCampaignCodeId: schema_1.arg({
-                    type: common_2.BigIntScalar,
-                    required: true,
+                offerCampaignCodeId: nexus_1.arg({
+                    type: graphql_1.BigIntScalar,
                     description: "The ID value of the offer campaign code",
                 }),
             },
@@ -134,4 +122,3 @@ exports.VoucherCoderQuery = schema_1.extendType({
         });
     },
 });
-//# sourceMappingURL=query.js.map

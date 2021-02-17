@@ -1,10 +1,10 @@
 import { errors, MyContext } from "@beach_bar/common";
-import { UrlScalar } from "@georgekrax-hashtag/common";
-import { arg, booleanArg, extendType, floatArg, intArg, stringArg } from "@nexus/schema";
+import { UrlScalar } from "@the_hashtag/common/dist/graphql";
 import { BeachBar } from "entity/BeachBar";
 import { Product } from "entity/Product";
 import { ProductCategory } from "entity/ProductCategory";
 import { ProductPriceHistory } from "entity/ProductPriceHistory";
+import { arg, booleanArg, extendType, floatArg, intArg, nullable, stringArg } from "nexus";
 import { DeleteType } from "typings/.index";
 import { AddProductType, UpdateProductType } from "typings/beach_bar/product";
 import { checkMinimumProductPrice } from "utils/beach_bar/checkMinimumProductPrice";
@@ -18,34 +18,21 @@ export const ProductCrudMutation = extendType({
     t.field("addProduct", {
       type: AddProductResult,
       description: "Add a product to a #beach_bar",
-      nullable: false,
       args: {
-        beachBarId: intArg({
-          required: true,
-          description: "The ID value of the #beach_bar to add the product to",
-        }),
-        name: stringArg({
-          required: true,
-          description: "The name of the product",
-        }),
-        description: stringArg({
-          required: false,
-          description: "A short description of the product",
-        }),
-        categoryId: intArg({ required: true, description: "The ID value of the category of the product" }),
-        price: floatArg({ required: true, description: "The price of the product" }),
-        isActive: booleanArg({
-          required: false,
-          description: "A boolean that indicates if the product is active & can be purchased by a user or a customer",
-          default: false,
-        }),
-        maxPeople: intArg({
-          required: true,
-          description: "How many people can use this specific product",
-        }),
+        beachBarId: intArg({ description: "The ID value of the #beach_bar to add the product to" }),
+        name: stringArg({ description: "The name of the product" }),
+        description: nullable(stringArg({ description: "A short description of the product" })),
+        categoryId: intArg({ description: "The ID value of the category of the product" }),
+        price: floatArg({ description: "The price of the product" }),
+        isActive: nullable(
+          booleanArg({
+            description: "A boolean that indicates if the product is active & can be purchased by a user or a customer",
+            default: false,
+          })
+        ),
+        maxPeople: intArg({ description: "How many people can use this specific product" }),
         imgUrl: arg({
           type: UrlScalar,
-          required: false,
           description: "An image for the #beach_bar's product",
         }),
       },
@@ -162,35 +149,24 @@ export const ProductCrudMutation = extendType({
     t.field("updateProduct", {
       type: UpdateProductResult,
       description: "Update a #beach_bar's product info",
-      nullable: false,
       args: {
-        productId: intArg({
-          required: true,
-          description: "The ID value of the product",
-        }),
-        name: stringArg({
-          required: true,
-          description: "The name of the product",
-        }),
-        description: stringArg({
-          required: false,
-          description: "A short description of the product",
-        }),
-        categoryId: intArg({ required: false, description: "The ID value of the category of the product" }),
-        price: floatArg({ required: false, description: "The price of the product" }),
-        isActive: booleanArg({
-          required: false,
-          description: "A boolean that indicates if the product is active & can be purchased by a user or a customer",
-        }),
+        productId: intArg({ description: "The ID value of the product" }),
+        name: stringArg({ description: "The name of the product" }),
+        description: nullable(stringArg({ description: "A short description of the product" })),
+        categoryId: nullable(intArg({ description: "The ID value of the category of the product" })),
+        price: nullable(floatArg({ description: "The price of the product" })),
+        isActive: nullable(
+          booleanArg({
+            description: "A boolean that indicates if the product is active & can be purchased by a user or a customer",
+          })
+        ),
         maxPeople: intArg({
-          required: true,
           description: "How many people can use this specific product",
         }),
-        imgUrl: arg({
+        imgUrl: nullable(arg({
           type: UrlScalar,
-          required: false,
           description: "An image for the #beach_bar's product",
-        }),
+        })),
       },
       resolve: async (
         _,
@@ -264,12 +240,8 @@ export const ProductCrudMutation = extendType({
     t.field("deleteProduct", {
       type: DeleteResult,
       description: "Delete (remove) a product from a #beach_bar",
-      nullable: false,
       args: {
-        productId: intArg({
-          required: true,
-          description: "The ID value of the product",
-        }),
+        productId: intArg({ description: "The ID value of the product" }),
       },
       resolve: async (_, { productId }, { payload }: MyContext): Promise<DeleteType> => {
         if (!payload) {
@@ -313,12 +285,8 @@ export const ProductRestoreMutation = extendType({
     t.field("restoreBeachBarProduct", {
       type: UpdateProductResult,
       description: "Restore a (soft) deleted #beach_bar product",
-      nullable: false,
       args: {
-        productId: intArg({
-          required: true,
-          description: "The ID value of the product",
-        }),
+        productId: intArg({ description: "The ID value of the product" }),
       },
       resolve: async (_, { productId }, { payload }: MyContext): Promise<UpdateProductType> => {
         if (!payload) {

@@ -1,9 +1,9 @@
 import { errors, MyContext } from "@beach_bar/common";
-import { extendType, intArg } from "@nexus/schema";
 import redisKeys from "constants/redisKeys";
 import { BeachBar } from "entity/BeachBar";
 import { User } from "entity/User";
 import { UserFavoriteBar } from "entity/UserFavoriteBar";
+import { extendType, intArg } from "nexus";
 import { DeleteResult } from "schema/types";
 import { DeleteType } from "typings/.index";
 import { AddUserFavoriteBarType } from "typings/user/favoriteBars";
@@ -16,12 +16,8 @@ export const UserFavoriteBarCrudMutation = extendType({
     t.field("addUserFavoriteBar", {
       type: AddUserFavoriteBarResult,
       description: "Add a #beach_bar to user's favorites list",
-      nullable: false,
       args: {
-        beachBarId: intArg({
-          required: true,
-          description: "The ID value of the #beach_bar, to add to the user's favorites list",
-        }),
+        beachBarId: intArg({ description: "The ID value of the #beach_bar, to add to the user's favorites list" }),
       },
       resolve: async (_, { beachBarId }, { payload, redis }: MyContext): Promise<AddUserFavoriteBarType> => {
         if (!payload) {
@@ -64,12 +60,8 @@ export const UserFavoriteBarCrudMutation = extendType({
     t.field("deleteUserFavoriteBar", {
       type: DeleteResult,
       description: "Remove a #beach_bar from a user's favorites list",
-      nullable: false,
       args: {
-        beachBarId: intArg({
-          required: true,
-          description: "The ID value of the #beach_bar, to add to the user's favorites list",
-        }),
+        beachBarId: intArg({ description: "The ID value of the #beach_bar, to add to the user's favorites list" }),
       },
       resolve: async (_, { beachBarId }, { payload }: MyContext): Promise<DeleteType> => {
         if (!payload) {

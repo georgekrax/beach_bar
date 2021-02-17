@@ -50,4 +50,3 @@ BundleProductComponent = __decorate([
     typeorm_1.Entity({ name: "bundle_product_component", schema: "public" })
 ], BundleProductComponent);
 exports.BundleProductComponent = BundleProductComponent;
-//# sourceMappingURL=BundleProductComponent.js.map

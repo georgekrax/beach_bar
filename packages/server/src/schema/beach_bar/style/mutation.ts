@@ -1,8 +1,8 @@
 import { errors, MyContext } from "@beach_bar/common";
-import { extendType, idArg } from "@nexus/schema";
 import { BeachBar } from "entity/BeachBar";
 import { BeachBarStyle } from "entity/BeachBarStyle";
 import { BeachBarType } from "entity/BeachBarType";
+import { extendType, idArg } from "nexus";
 import { DeleteResult, SuccessResult } from "schema/types";
 import { DeleteType, SuccessType } from "typings/.index";
 import { checkScopes } from "utils/checkScopes";
@@ -13,16 +13,9 @@ export const BeachBarTypeCrudMutation = extendType({
     t.field("addBeachBarType", {
       type: SuccessResult,
       description: "Add (assign) a style to a #beach_bar",
-      nullable: false,
       args: {
-        beachBarId: idArg({
-          required: true,
-          description: "The ID value of the #beach_bar, to assign the style",
-        }),
-        styleId: idArg({
-          required: true,
-          description: "The ID value of the style to assign",
-        }),
+        beachBarId: idArg({ description: "The ID value of the #beach_bar, to assign the style" }),
+        styleId: idArg({ description: "The ID value of the style to assign" }),
       },
       resolve: async (_, { beachBarId, styleId }, { payload }: MyContext): Promise<SuccessType> => {
         if (!payload) {
@@ -63,16 +56,9 @@ export const BeachBarTypeCrudMutation = extendType({
     t.field("deleteBeachBarType", {
       type: DeleteResult,
       description: "Delete (remove) a style from a #beach_bar",
-      nullable: false,
       args: {
-        beachBarId: idArg({
-          required: true,
-          description: "The ID value of the #beach_bar, to remove the style",
-        }),
-        styleId: idArg({
-          required: true,
-          description: "The ID value of the style to remove",
-        }),
+        beachBarId: idArg({ description: "The ID value of the #beach_bar, to remove the style" }),
+        styleId: idArg({ description: "The ID value of the style to remove" }),
       },
       resolve: async (_, { beachBarId, styleId }, { payload }: MyContext): Promise<DeleteType> => {
         if (!payload) {

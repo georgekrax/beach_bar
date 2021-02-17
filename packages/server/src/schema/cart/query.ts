@@ -1,18 +1,16 @@
-import { BigIntScalar } from "@georgekrax-hashtag/common";
-import { arg, extendType } from "@nexus/schema";
+import { BigIntScalar } from "@the_hashtag/common/dist/graphql";
 import { Cart } from "entity/Cart";
+import { arg, extendType, nullable } from "nexus";
 
 export const CartQuery = extendType({
   type: "Query",
   definition(t) {
-    t.float("getCartEntryFees", {
-      nullable: true,
+    t.nullable.float("getCartEntryFees", {
       args: {
-        cartId: arg({
+        cartId: nullable(arg({
           type: BigIntScalar,
-          required: false,
           description: "The ID values of the shopping cart",
-        }),
+        })),
       },
       resolve: async (_, { cartId }): Promise<number | undefined> => {
         if (!cartId || cartId <= 0) {
@@ -31,12 +29,10 @@ export const CartQuery = extendType({
         return cartEntryFeeTotal;
       },
     });
-    t.boolean("verifyZeroCartTotal", {
-      nullable: true,
+    t.nullable.boolean("verifyZeroCartTotal", {
       args: {
         cartId: arg({
           type: BigIntScalar,
-          required: true,
           description: "The ID values of the shopping cart",
         }),
       },

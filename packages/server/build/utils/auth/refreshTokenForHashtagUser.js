@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.refreshTokenForHashtagUser = void 0;
 const common_1 = require("@beach_bar/common");
 const node_fetch_1 = __importDefault(require("node-fetch"));
-exports.refreshTokenForHashtagUser = (user, redis) => __awaiter(void 0, void 0, void 0, function* () {
+const refreshTokenForHashtagUser = (user, redis) => __awaiter(void 0, void 0, void 0, function* () {
     const redisUser = yield redis.hgetall(user.getRedisKey());
     if (!redisUser || !redisUser.refresh_token) {
         throw new Error(common_1.errors.INVALID_REFRESH_TOKEN);
@@ -90,4 +90,4 @@ exports.refreshTokenForHashtagUser = (user, redis) => __awaiter(void 0, void 0, 
         throw new Error(common_1.errors.SOMETHING_WENT_WRONG);
     }
 });
-//# sourceMappingURL=refreshTokenForHashtagUser.js.map
+exports.refreshTokenForHashtagUser = refreshTokenForHashtagUser;

@@ -75,4 +75,3 @@ BeachBarFeature = BeachBarFeature_1 = __decorate([
     typeorm_1.Entity({ name: "beach_bar_feature", schema: "public" })
 ], BeachBarFeature);
 exports.BeachBarFeature = BeachBarFeature;
-//# sourceMappingURL=BeachBarFeature.js.map

@@ -14,42 +14,37 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CardCrudMutation = void 0;
 const common_1 = require("@beach_bar/common");
-const common_2 = require("@georgekrax-hashtag/common");
-const schema_1 = require("@nexus/schema");
+const graphql_1 = require("@the_hashtag/common/dist/graphql");
 const dayjs_1 = __importDefault(require("dayjs"));
 const Card_1 = require("entity/Card");
 const CardBrand_1 = require("entity/CardBrand");
 const Country_1 = require("entity/Country");
 const Customer_1 = require("entity/Customer");
+const nexus_1 = require("nexus");
 const typeorm_1 = require("typeorm");
 const types_1 = require("../../types");
 const types_2 = require("./types");
-exports.CardCrudMutation = schema_1.extendType({
+exports.CardCrudMutation = nexus_1.extendType({
     type: "Mutation",
     definition(t) {
         t.field("addCustomerCard", {
             type: types_2.AddCardResult,
             description: "Add a credit / debit card to a customer",
-            nullable: false,
             args: {
-                source: schema_1.stringArg({
-                    required: true,
+                source: nexus_1.stringArg({
                     description: "A token returned by Stripe (Stripe.js & Elements), which will automatically validate the card",
                 }),
-                customerId: schema_1.arg({
-                    type: common_2.BigIntScalar,
-                    required: false,
+                customerId: nexus_1.nullable(nexus_1.arg({
+                    type: graphql_1.BigIntScalar,
                     description: "The ID value of the registered customer",
-                }),
-                cardholderName: schema_1.stringArg({
-                    required: false,
+                })),
+                cardholderName: nexus_1.nullable(nexus_1.stringArg({
                     description: "The (full) name of the cardholder of the card registered",
-                }),
-                isDefault: schema_1.booleanArg({
-                    required: false,
+                })),
+                isDefault: nexus_1.nullable(nexus_1.booleanArg({
                     description: "A boolean that indicates if the card registered is the default one for the customer, to use in its transactions. Its default value is false",
                     default: false,
-                }),
+                })),
             },
             resolve: (_, { source, customerId, cardholderName, isDefault }, { payload, stripe }) => __awaiter(this, void 0, void 0, function* () {
                 if (!source || source.trim().length === 0) {
@@ -97,29 +92,23 @@ exports.CardCrudMutation = schema_1.extendType({
         t.field("updateCustomerCard", {
             type: types_2.UpdateCardResult,
             description: "Update the details of customer's card",
-            nullable: false,
             args: {
-                cardId: schema_1.arg({
-                    type: common_2.BigIntScalar,
-                    required: true,
+                cardId: nexus_1.arg({
+                    type: graphql_1.BigIntScalar,
                     description: "The ID values of the card to update",
                 }),
-                cardholderName: schema_1.stringArg({
-                    required: false,
+                cardholderName: nexus_1.nullable(nexus_1.stringArg({
                     description: "The (full) name of the cardholder of the card",
-                }),
-                expMonth: schema_1.intArg({
-                    required: false,
+                })),
+                expMonth: nexus_1.nullable(nexus_1.intArg({
                     description: "The expiration month of the card",
-                }),
-                expYear: schema_1.intArg({
-                    required: false,
+                })),
+                expYear: nexus_1.nullable(nexus_1.intArg({
                     description: "The expiration year of the card",
-                }),
-                isDefault: schema_1.booleanArg({
-                    required: false,
+                })),
+                isDefault: nexus_1.nullable(nexus_1.booleanArg({
                     description: "A boolean that indicates if the card is the default one for the customer, to use in its transactions",
-                }),
+                })),
             },
             resolve: (_, { cardId, cardholderName, expMonth, expYear, isDefault }, { stripe }) => __awaiter(this, void 0, void 0, function* () {
                 var _a, _b;
@@ -170,11 +159,9 @@ exports.CardCrudMutation = schema_1.extendType({
         t.field("deleteCustomerCard", {
             type: types_1.DeleteResult,
             description: "Delete (remove) a card from a customer",
-            nullable: false,
             args: {
-                cardId: schema_1.arg({
-                    type: common_2.BigIntScalar,
-                    required: true,
+                cardId: nexus_1.arg({
+                    type: graphql_1.BigIntScalar,
                     description: "The ID values of the card to delete",
                 }),
             },
@@ -199,4 +186,3 @@ exports.CardCrudMutation = schema_1.extendType({
         });
     },
 });
-//# sourceMappingURL=mutation.js.map

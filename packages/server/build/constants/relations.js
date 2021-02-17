@@ -55,4 +55,3 @@ exports.default = Object.freeze({
         "restaurants.foodItems.menuCategory",
     ],
 });
-//# sourceMappingURL=relations.js.map

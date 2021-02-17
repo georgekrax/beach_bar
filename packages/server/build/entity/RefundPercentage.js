@@ -33,4 +33,3 @@ RefundPercentage = __decorate([
     typeorm_1.Entity({ name: "refund_percentage", schema: "public" })
 ], RefundPercentage);
 exports.RefundPercentage = RefundPercentage;
-//# sourceMappingURL=RefundPercentage.js.map

@@ -1,5 +1,5 @@
 import { errors } from "@beach_bar/common";
-import { validateEmailSchema } from "@georgekrax-hashtag/common";
+import { validateEmailSchema } from "@the_hashtag/common";
 import { Dayjs } from "dayjs";
 import { Stripe } from "stripe";
 import {
@@ -15,7 +15,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
   Repository,
-  UpdateDateColumn,
+  UpdateDateColumn
 } from "typeorm";
 import { AddCustomerType } from "typings/customer";
 import { softRemove } from "utils/softRemove";

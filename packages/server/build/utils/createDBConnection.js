@@ -11,8 +11,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createDBConnection = void 0;
 const typeorm_1 = require("typeorm");
-exports.createDBConnection = () => __awaiter(void 0, void 0, void 0, function* () {
+const createDBConnection = () => __awaiter(void 0, void 0, void 0, function* () {
     const connectionOptions = yield typeorm_1.getConnectionOptions(process.env.NODE_ENV);
     return yield typeorm_1.createConnection(Object.assign(Object.assign({}, connectionOptions), { name: "default" }));
 });
-//# sourceMappingURL=createDBConnection.js.map
+exports.createDBConnection = createDBConnection;

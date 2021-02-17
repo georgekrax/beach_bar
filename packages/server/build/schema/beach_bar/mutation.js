@@ -14,62 +14,38 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BeachBarUpdateStatusMutation = exports.BeachBarCrudMutation = void 0;
 const common_1 = require("@beach_bar/common");
-const schema_1 = require("@nexus/schema");
 const redisKeys_1 = __importDefault(require("constants/redisKeys"));
 const BeachBar_1 = require("entity/BeachBar");
 const BeachBarCategory_1 = require("entity/BeachBarCategory");
 const Currency_1 = require("entity/Currency");
 const User_1 = require("entity/User");
+const nexus_1 = require("nexus");
 const checkScopes_1 = require("utils/checkScopes");
 const types_1 = require("../types");
 const types_2 = require("./types");
-exports.BeachBarCrudMutation = schema_1.extendType({
+exports.BeachBarCrudMutation = nexus_1.extendType({
     type: "Mutation",
     definition(t) {
         t.field("addBeachBar", {
             type: types_2.AddBeachBarResult,
             description: "Add (register) a new #beach_bar to the platform",
-            nullable: false,
             args: {
-                name: schema_1.stringArg({
-                    required: true,
-                    description: "The name to register the #beach_bar. It should be unique among other ones",
-                }),
-                description: schema_1.stringArg({
-                    required: false,
-                    description: "A description of the #beach_bar",
-                }),
-                thumbnailUrl: schema_1.stringArg({
-                    required: false,
-                    description: "A thumbnail URL value of the #beach_bar's image to show in search results",
-                }),
-                contactPhoneNumber: schema_1.stringArg({
-                    required: true,
-                    description: "A phone number to contact the #beach_bar directly",
-                }),
-                hidePhoneNumber: schema_1.booleanArg({
-                    required: true,
+                name: nexus_1.stringArg({ description: "The name to register the #beach_bar. It should be unique among other ones" }),
+                description: nexus_1.nullable(nexus_1.stringArg({ description: "A description of the #beach_bar" })),
+                thumbnailUrl: nexus_1.nullable(nexus_1.stringArg({ description: "A thumbnail URL value of the #beach_bar's image to show in search results" })),
+                contactPhoneNumber: nexus_1.stringArg({ description: "A phone number to contact the #beach_bar directly" }),
+                hidePhoneNumber: nexus_1.booleanArg({
                     description: "A boolean that indicates if to NOT display the phone number when retrieving #beach_bar info. Its default value is set to false",
                     default: false,
                 }),
-                zeroCartTotal: schema_1.booleanArg({
-                    required: true,
+                zeroCartTotal: nexus_1.booleanArg({
                     description: "Set to true if the #beach_bar accepts for a customer / user to have less than the #beach_bar minimum currency price",
                 }),
-                categoryId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the category of the #beach_bar",
-                }),
-                openingTimeId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the opening quarter time of the #beach_bar, in its country time zone",
-                }),
-                closingTimeId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the closing quarter time of the #beach_bar, in its country time zone",
-                }),
-                code: schema_1.stringArg({ required: true, description: "The response code from Google's OAuth callback" }),
-                state: schema_1.stringArg({ required: true, description: "The response state, to check if everything went correct" }),
+                categoryId: nexus_1.intArg({ description: "The ID value of the category of the #beach_bar" }),
+                openingTimeId: nexus_1.intArg({ description: "The ID value of the opening quarter time of the #beach_bar, in its country time zone" }),
+                closingTimeId: nexus_1.intArg({ description: "The ID value of the closing quarter time of the #beach_bar, in its country time zone" }),
+                code: nexus_1.stringArg({ description: "The response code from Google's OAuth callback" }),
+                state: nexus_1.stringArg({ description: "The response state, to check if everything went correct" }),
             },
             resolve: (_, { name, description, thumbnailUrl, contactPhoneNumber, hidePhoneNumber, zeroCartTotal, categoryId, openingTimeId, closingTimeId, code, state, }, { payload, req, res, stripe, redis }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -177,52 +153,24 @@ exports.BeachBarCrudMutation = schema_1.extendType({
         t.field("updateBeachBar", {
             type: types_2.UpdateBeachBarResult,
             description: "Update a #beach_bar details",
-            nullable: false,
             args: {
-                beachBarId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the #beach_bar",
-                }),
-                name: schema_1.stringArg({
-                    required: false,
-                    description: "The name to register the #beach_bar. It should be unique among other ones",
-                }),
-                description: schema_1.stringArg({
-                    required: false,
-                    description: "A description of the #beach_bar",
-                }),
-                thumbnailUrl: schema_1.stringArg({
-                    required: false,
-                    description: "A thumbnail URL value of the #beach_bar's image to show in search results",
-                }),
-                contactPhoneNumber: schema_1.stringArg({
-                    required: false,
-                    description: "A phone number to contact the #beach_bar directly",
-                }),
-                hidePhoneNumber: schema_1.booleanArg({
-                    required: false,
+                beachBarId: nexus_1.intArg({ description: "The ID value of the #beach_bar" }),
+                name: nexus_1.nullable(nexus_1.stringArg({ description: "The name to register the #beach_bar. It should be unique among other ones" })),
+                description: nexus_1.nullable(nexus_1.stringArg({ description: "A description of the #beach_bar" })),
+                thumbnailUrl: nexus_1.nullable(nexus_1.stringArg({ description: "A thumbnail URL value of the #beach_bar's image to show in search results" })),
+                contactPhoneNumber: nexus_1.nullable(nexus_1.stringArg({ description: "A phone number to contact the #beach_bar directly" })),
+                hidePhoneNumber: nexus_1.nullable(nexus_1.booleanArg({
                     description: "A boolean that indicates if to NOT display the phone number when retrieving #beach_bar info. Its default value is set to false",
-                }),
-                zeroCartTotal: schema_1.booleanArg({
-                    required: false,
+                })),
+                zeroCartTotal: nexus_1.nullable(nexus_1.booleanArg({
                     description: "Set to true if the #beach_bar accepts for a customer / user to have less than the #beach_bar minimum currency price",
-                }),
-                isAvailable: schema_1.booleanArg({
-                    required: false,
+                })),
+                isAvailable: nexus_1.nullable(nexus_1.booleanArg({
                     description: "Set to true, if to show #beach_bar in the search results, even if it has no availability",
-                }),
-                categoryId: schema_1.intArg({
-                    required: false,
-                    description: "The ID value of the category of the #beach_bar",
-                }),
-                openingTimeId: schema_1.intArg({
-                    required: false,
-                    description: "The ID value of the opening quarter time of the #beach_bar, in its country time zone",
-                }),
-                closingTimeId: schema_1.intArg({
-                    required: false,
-                    description: "The ID value of the closing quarter time of the #beach_bar, in its country time zone",
-                }),
+                })),
+                categoryId: nexus_1.nullable(nexus_1.intArg({ description: "The ID value of the category of the #beach_bar" })),
+                openingTimeId: nexus_1.nullable(nexus_1.intArg({ description: "The ID value of the opening quarter time of the #beach_bar, in its country zone" })),
+                closingTimeId: nexus_1.nullable(nexus_1.intArg({ description: "The ID value of the closing quarter time of the #beach_bar, in its country zone" })),
             },
             resolve: (_, { beachBarId, name, description, thumbnailUrl, contactPhoneNumber, hidePhoneNumber, zeroCartTotal, isAvailable, categoryId, openingTimeId, closingTimeId, }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -260,12 +208,8 @@ exports.BeachBarCrudMutation = schema_1.extendType({
         t.field("deleteBeachBar", {
             type: types_1.DeleteResult,
             description: "Delete (remove) a #beach_bar from the platform",
-            nullable: false,
             args: {
-                beachBarId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the #beach_bar",
-                }),
+                beachBarId: nexus_1.intArg({ description: "The ID value of the #beach_bar" }),
             },
             resolve: (_, { beachBarId }, { payload, redis, stripe }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -308,22 +252,15 @@ exports.BeachBarCrudMutation = schema_1.extendType({
         });
     },
 });
-exports.BeachBarUpdateStatusMutation = schema_1.extendType({
+exports.BeachBarUpdateStatusMutation = nexus_1.extendType({
     type: "Mutation",
     definition(t) {
         t.field("updateBeachBarStatus", {
             type: types_2.UpdateBeachBarResult,
             description: "Update the status of a #beach_bar. If it is active or not",
-            nullable: false,
             args: {
-                beachBarId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the #beach_bar",
-                }),
-                isActive: schema_1.booleanArg({
-                    required: true,
-                    description: "Set to true if the #beach_bar is active",
-                }),
+                beachBarId: nexus_1.intArg({ description: "The ID value of the #beach_bar" }),
+                isActive: nexus_1.booleanArg({ description: "Set to true if the #beach_bar is active" }),
             },
             resolve: (_, { beachBarId, isActive }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -361,4 +298,3 @@ exports.BeachBarUpdateStatusMutation = schema_1.extendType({
         });
     },
 });
-//# sourceMappingURL=mutation.js.map

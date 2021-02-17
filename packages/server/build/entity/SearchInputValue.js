@@ -138,4 +138,3 @@ SearchInputValue = SearchInputValue_1 = __decorate([
     typeorm_1.Entity({ name: "search_input_value", schema: "public" })
 ], SearchInputValue);
 exports.SearchInputValue = SearchInputValue;
-//# sourceMappingURL=SearchInputValue.js.map

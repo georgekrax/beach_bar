@@ -1,1 +1,0 @@
-{"version":3,"file":"checkScopes.js","sourceRoot":"","sources":["../../src/utils/checkScopes.ts"],"names":[],"mappings":";;;AAAa,QAAA,WAAW,GAAG,CAAC,OAAY,EAAE,MAAgB,EAAW,EAAE;IACrE,OAAO,OAAQ,CAAC,KAAK,CAAC,IAAI,CAAC,CAAC,KAAa,EAAE,EAAE,CAAC,MAAM,CAAC,QAAQ,CAAC,KAAK,CAAC,CAAC,CAAC;AACxE,CAAC,CAAC"}

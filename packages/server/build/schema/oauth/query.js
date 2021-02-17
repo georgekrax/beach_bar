@@ -10,17 +10,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OAuthQuery = void 0;
-const common_1 = require("@georgekrax-hashtag/common");
-const schema_1 = require("@nexus/schema");
+const graphql_1 = require("@the_hashtag/common/dist/graphql");
 const crypto_1 = require("crypto");
 const User_1 = require("entity/User");
 const google_auth_library_1 = require("google-auth-library");
-exports.OAuthQuery = schema_1.extendType({
+const nexus_1 = require("nexus");
+exports.OAuthQuery = nexus_1.extendType({
     type: "Query",
     definition(t) {
-        t.field("getStripeConnectOAuthUrl", {
-            type: common_1.UrlScalar,
-            nullable: true,
+        t.nullable.field("getStripeConnectOAuthUrl", {
+            type: graphql_1.UrlScalar,
             description: "Returns the URL where the #beach_bar (owner) will be redirected to authorize and register with Stripe, for its connect account",
             resolve: (_, __, { payload, res, stripe }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -59,8 +58,7 @@ exports.OAuthQuery = schema_1.extendType({
             }),
         });
         t.field("getGoogleOAuthUrl", {
-            type: common_1.UrlScalar,
-            nullable: false,
+            type: graphql_1.UrlScalar,
             description: "Returns the URL where the user will be redirected to login with Google",
             resolve: (_, __, { res, googleOAuth2Client }) => __awaiter(this, void 0, void 0, function* () {
                 const state = crypto_1.createHash("sha256").update(crypto_1.randomBytes(1024)).digest("hex");
@@ -87,8 +85,7 @@ exports.OAuthQuery = schema_1.extendType({
             }),
         });
         t.field("getFacebookOAuthUrl", {
-            type: common_1.UrlScalar,
-            nullable: false,
+            type: graphql_1.UrlScalar,
             description: "Returns the URL where the user will be redirected to login with Facebook",
             resolve: (_, __, { res }) => __awaiter(this, void 0, void 0, function* () {
                 const state = crypto_1.createHash("sha256").update(crypto_1.randomBytes(1024)).digest("hex");
@@ -102,8 +99,7 @@ exports.OAuthQuery = schema_1.extendType({
             }),
         });
         t.field("getInstagramOAuthUrl", {
-            type: common_1.UrlScalar,
-            nullable: false,
+            type: graphql_1.UrlScalar,
             description: "Returns the URL where the user will be redirected to login with Instagram",
             resolve: (_, __, { res }) => __awaiter(this, void 0, void 0, function* () {
                 const state = crypto_1.createHash("sha256").update(crypto_1.randomBytes(1024)).digest("hex");
@@ -118,4 +114,3 @@ exports.OAuthQuery = schema_1.extendType({
         });
     },
 });
-//# sourceMappingURL=query.js.map

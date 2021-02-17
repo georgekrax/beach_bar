@@ -30,4 +30,3 @@ BeachBarStyle = __decorate([
     typeorm_1.Entity({ name: "beach_bar_style", schema: "public" })
 ], BeachBarStyle);
 exports.BeachBarStyle = BeachBarStyle;
-//# sourceMappingURL=BeachBarStyle.js.map

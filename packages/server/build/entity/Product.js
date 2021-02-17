@@ -295,4 +295,3 @@ Product = Product_1 = __decorate([
     typeorm_1.Entity({ name: "product", schema: "public" })
 ], Product);
 exports.Product = Product;
-//# sourceMappingURL=Product.js.map

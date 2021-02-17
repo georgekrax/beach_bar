@@ -79,4 +79,3 @@ BeachBarOwner = BeachBarOwner_1 = __decorate([
     typeorm_1.Entity({ name: "beach_bar_owner", schema: "public" })
 ], BeachBarOwner);
 exports.BeachBarOwner = BeachBarOwner;
-//# sourceMappingURL=BeachBarOwner.js.map

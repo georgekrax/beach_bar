@@ -1,6 +1,6 @@
 import { MyContext } from "@beach_bar/common";
-import { extendType, intArg, stringArg } from "@nexus/schema";
 import { MonthTime } from "entity/Time";
+import { extendType, intArg, nullable, stringArg } from "nexus";
 import { In } from "typeorm";
 import { verifyUserPaymentReview } from "utils/beach_bar/verifyUserPaymentReview";
 import { MonthTimeType } from "../../details/time/types";
@@ -10,16 +10,9 @@ export const BeachBarReviewQuery = extendType({
   definition(t) {
     t.boolean("verifyUserPaymentReview", {
       description: "Verify a user's payment to submit review",
-      nullable: false,
       args: {
-        beachBarId: intArg({
-          required: true,
-          description: "The ID value of the #beach_bar to submit the review",
-        }),
-        refCode: stringArg({
-          required: false,
-          description: "The referral code of the customer payment, to find",
-        }),
+        beachBarId: intArg({ description: "The ID value of the #beach_bar to submit the review" }),
+        refCode: nullable(stringArg({ description: "The referral code of the customer payment, to find" })),
       },
       resolve: async (_, { beachBarId, refCode }, { payload }: MyContext): Promise<boolean> => {
         if (!beachBarId || beachBarId <= 0) {
@@ -35,19 +28,12 @@ export const BeachBarReviewQuery = extendType({
         return boolean;
       },
     });
-    t.list.field("getPaymentProductsMonth", {
+    t.nullable.list.field("getPaymentProductsMonth", {
       type: MonthTimeType,
       description: "Get a list with all the months in a review, by the product purchase",
-      nullable: true,
       args: {
-        beachBarId: intArg({
-          required: true,
-          description: "The ID value of the #beach_bar to submit the review",
-        }),
-        refCode: stringArg({
-          required: false,
-          description: "The referral code of the customer payment, to find",
-        }),
+        beachBarId: intArg({ description: "The ID value of the #beach_bar to submit the review" }),
+        refCode: nullable(stringArg({ description: "The referral code of the customer payment, to find" })),
       },
       resolve: async (_, { beachBarId, refCode }, { payload }: MyContext): Promise<MonthTime[] | null> => {
         if (!beachBarId || beachBarId <= 0) {

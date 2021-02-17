@@ -1,0 +1,16 @@
+.no-scrollbar {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.w-100 {
+  width: 100%;
+}
+
+.iw-100 {
+  width: 100%;
+} 

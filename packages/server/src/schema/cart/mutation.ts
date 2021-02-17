@@ -1,7 +1,7 @@
-import {  errors, MyContext } from "@beach_bar/common";
-import { BigIntScalar } from "@georgekrax-hashtag/common";
-import { arg, extendType } from "@nexus/schema";
+import { errors, MyContext } from "@beach_bar/common";
+import { BigIntScalar } from "@the_hashtag/common/dist/graphql";
 import { Cart, CartRepository } from "entity/Cart";
+import { arg, extendType, nullable } from "nexus";
 import { getCustomRepository } from "typeorm";
 import { DeleteType } from "typings/.index";
 import { DeleteResult } from "../types";
@@ -13,13 +13,11 @@ export const CartCrudMutation = extendType({
     t.field("getOrCreateCart", {
       type: CartType,
       description: "Get the latest cart of an authenticated user or create one",
-      nullable: false,
       args: {
-        cartId: arg({
+        cartId: nullable(arg({
           type: BigIntScalar,
-          required: false,
           description: "The ID values of the shopping cart, if it is created previously",
-        }),
+        })),
       },
       resolve: async (_, { cartId }, { payload }: MyContext): Promise<Cart | null> => {
         // ! order the products by timestamp in the frontend
@@ -34,9 +32,8 @@ export const CartCrudMutation = extendType({
       type: DeleteResult,
       description:
         "Delete a cart after a transition. This mutation is also called if the user is not authenticated & closes the browser tab",
-      nullable: false,
       args: {
-        cartId: arg({ type: BigIntScalar, required: true, description: "The ID values of the shopping cart" }),
+        cartId: arg({ type: BigIntScalar, description: "The ID values of the shopping cart" }),
       },
       resolve: async (_, { cartId }, { payload }: MyContext): Promise<DeleteType> => {
         if (!cartId || cartId <= 0) {

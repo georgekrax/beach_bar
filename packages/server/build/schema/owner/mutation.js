@@ -14,35 +14,29 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OwnerCrudMutation = void 0;
 const common_1 = require("@beach_bar/common");
-const schema_1 = require("@nexus/schema");
 const scopes_1 = require("constants/scopes");
 const BeachBar_1 = require("entity/BeachBar");
 const BeachBarOwner_1 = require("entity/BeachBarOwner");
 const Owner_1 = require("entity/Owner");
+const nexus_1 = require("nexus");
 const arrDiff_1 = __importDefault(require("utils/arrDiff"));
 const types_1 = require("../types");
 const types_2 = require("./types");
-exports.OwnerCrudMutation = schema_1.extendType({
+exports.OwnerCrudMutation = nexus_1.extendType({
     type: "Mutation",
     definition(t) {
         t.field("addBeachBarOwner", {
             type: types_2.AddBeachBarOwnerResult,
             description: "Add (assign) another owner to a #beach_bar too. Only available for the primary owner of a #beach_bar",
-            nullable: false,
             args: {
-                beachBarId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the #beach_bar the owner will be added (assigned) to",
-                }),
-                userId: schema_1.intArg({
-                    required: false,
+                beachBarId: nexus_1.intArg({ description: "The ID value of the #beach_bar the owner will be added (assigned) to" }),
+                userId: nexus_1.nullable(nexus_1.intArg({
                     description: "The user to add (assign) to the #beach_bar, to become one of its owners",
-                }),
-                isPrimary: schema_1.booleanArg({
-                    required: false,
+                })),
+                isPrimary: nexus_1.nullable(nexus_1.booleanArg({
                     description: "Set to true if the user will become the or one of the primary owners of the #beach_bar. It is set to false by default",
                     default: false,
-                }),
+                })),
             },
             resolve: (_, { userId, beachBarId, isPrimary }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -143,25 +137,18 @@ exports.OwnerCrudMutation = schema_1.extendType({
         t.field("updateBeachBarOwner", {
             type: types_2.UpdateBeachBarOwnerResult,
             description: "Update a #beach_bar's owner info",
-            nullable: false,
             args: {
-                beachBarId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the #beach_bar the owner is added (assigned) to",
-                }),
-                userId: schema_1.intArg({
-                    required: false,
+                beachBarId: nexus_1.intArg({ description: "The ID value of the #beach_bar the owner is added (assigned) to" }),
+                userId: nexus_1.nullable(nexus_1.intArg({
                     description: "The user to update its info. It should not be null or 0, if a primary owner wants to update another owner",
-                }),
-                publicInfo: schema_1.booleanArg({
-                    required: false,
+                })),
+                publicInfo: nexus_1.nullable(nexus_1.booleanArg({
                     description: "A boolean that indicates if the owner info (contact details) are meant to be presented online to the public",
-                }),
-                isPrimary: schema_1.booleanArg({
-                    required: false,
+                })),
+                isPrimary: nexus_1.nullable(nexus_1.booleanArg({
                     description: "Set to true if the user will become the or one of the primary owners of the #beach_bar. It is set to false by default",
                     default: false,
-                }),
+                })),
             },
             resolve: (_, { beachBarId, userId, publicInfo, isPrimary }, { payload, redis }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -261,16 +248,11 @@ exports.OwnerCrudMutation = schema_1.extendType({
         t.field("deleteBeachBarOwner", {
             type: types_1.DeleteResult,
             description: "Delete (remove) an owner from a #beach_bar",
-            nullable: false,
             args: {
-                beachBarId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the #beach_bar the owner is added (assigned) to",
-                }),
-                userId: schema_1.intArg({
-                    required: false,
+                beachBarId: nexus_1.intArg({ description: "The ID value of the #beach_bar the owner is added (assigned) to" }),
+                userId: nexus_1.nullable(nexus_1.intArg({
                     description: "The owner with its userId to delete (remove) from the #beach_bar. Its value should not be null or 0, if a primary owner wants to update another primary owner",
-                }),
+                })),
             },
             resolve: (_, { beachBarId, userId }, { payload, redis }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -352,4 +334,3 @@ exports.OwnerCrudMutation = schema_1.extendType({
         });
     },
 });
-//# sourceMappingURL=mutation.js.map

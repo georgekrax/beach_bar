@@ -1,5 +1,5 @@
 import { dayjsFormat } from "@beach_bar/common";
-import { generateId } from "@georgekrax-hashtag/common";
+import { generateId } from "@the_hashtag/common";
 import redisKeys from "constants/redisKeys";
 import relations from "constants/relations";
 import { beachBarReviewRatingMaxValue } from "constants/_index";
@@ -24,7 +24,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
   Repository,
-  UpdateDateColumn
+  UpdateDateColumn,
 } from "typeorm";
 import { BeachBarAvailabilityReturnType, GetBeachBarPaymentDetails, GetFullPricingReturnType } from "typings/beach_bar";
 import { checkAvailability } from "utils/beach_bar/checkAvailability";

@@ -1,5 +1,4 @@
 import { dayjsFormat, errors, MyContext } from "@beach_bar/common";
-import { arg, extendType, idArg, stringArg } from "@nexus/schema";
 import redisKeys from "constants/redisKeys";
 import { historyActivity } from "constants/_index";
 import dayjs from "dayjs";
@@ -11,6 +10,7 @@ import { SearchFilter } from "entity/SearchFilter";
 import { SearchInputValue } from "entity/SearchInputValue";
 import { UserHistory } from "entity/UserHistory";
 import { UserSearch } from "entity/UserSearch";
+import { arg, extendType, idArg, list, nullable, stringArg } from "nexus";
 import { getCustomRepository, In } from "typeorm";
 import { RedisSearchReturnType, SearchResultReturnType, SearchReturnType } from "typings/search";
 import { checkAvailability } from "utils/beach_bar/checkAvailability";
@@ -22,16 +22,14 @@ export const SearchQuery = extendType({
     t.list.field("getSearchInputValues", {
       type: FormattedSearchInputValueType,
       description: "Returns a list of formatted search input values",
-      nullable: false,
       resolve: async (): Promise<SearchInputValue[]> => {
         const inputValues = await SearchInputValue.find({ relations: ["country", "city", "region", "beachBar"] });
         return inputValues;
       },
     });
-    t.list.field("getLatestUserSearches", {
+    t.nullable.list.field("getLatestUserSearches", {
       type: UserSearchType,
       description: "Get a list with a user's latest searches",
-      nullable: true,
       resolve: async (_, __, { payload, redis }: MyContext): Promise<UserSearch[] | null> => {
         if (!payload) {
           return null;
@@ -54,32 +52,25 @@ export const SearchQuery = extendType({
         return result;
       },
     });
-    t.field("search", {
+    t.nullable.field("search", {
       type: SearchResult,
       description: "Search for available #beach_bars",
-      nullable: true,
       args: {
-        inputId: stringArg({
-          required: false,
-          description: "The ID value of the search input value, found in the documentation",
-        }),
-        inputValue: stringArg({
-          required: false,
-          description: "The search input value, found in the documentation",
-        }),
-        availability: arg({
-          type: SearchInputType,
-          required: false,
-        }),
-        filterIds: stringArg({
-          required: false,
-          list: true,
-          description: "A list with the filter IDs to add in the search, found in the documentation",
-        }),
-        searchId: idArg({
-          required: false,
-          description: "The ID value of a previous user search",
-        }),
+        inputId: nullable(
+          stringArg({
+            description: "The ID value of the search input value, found in the documentation",
+          })
+        ),
+        inputValue: nullable(
+          stringArg({
+            description: "The search input value, found in the documentation",
+          })
+        ),
+        availability: nullable(arg({ type: SearchInputType })),
+        filterIds: list(
+          nullable(stringArg({ description: "A list with the filter IDs to add in the search, found in the documentation" }))
+        ),
+        searchId: nullable(idArg({ description: "The ID value of a previous user search" })),
       },
       resolve: async (
         _,

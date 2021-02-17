@@ -55,4 +55,3 @@ Region = __decorate([
     typeorm_1.Entity({ name: "region", schema: "public" })
 ], Region);
 exports.Region = Region;
-//# sourceMappingURL=Region.js.map

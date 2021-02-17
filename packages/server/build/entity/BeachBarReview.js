@@ -191,4 +191,3 @@ BeachBarReview = BeachBarReview_1 = __decorate([
     typeorm_1.Check(`"ratingValue" >= 0 AND "ratingValue" <= ${_index_1.beachBarReviewRatingMaxValue}`)
 ], BeachBarReview);
 exports.BeachBarReview = BeachBarReview;
-//# sourceMappingURL=BeachBarReview.js.map

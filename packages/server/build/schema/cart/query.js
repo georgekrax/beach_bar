@@ -10,20 +10,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CartQuery = void 0;
-const common_1 = require("@georgekrax-hashtag/common");
-const schema_1 = require("@nexus/schema");
+const graphql_1 = require("@the_hashtag/common/dist/graphql");
 const Cart_1 = require("entity/Cart");
-exports.CartQuery = schema_1.extendType({
+const nexus_1 = require("nexus");
+exports.CartQuery = nexus_1.extendType({
     type: "Query",
     definition(t) {
-        t.float("getCartEntryFees", {
-            nullable: true,
+        t.nullable.float("getCartEntryFees", {
             args: {
-                cartId: schema_1.arg({
-                    type: common_1.BigIntScalar,
-                    required: false,
+                cartId: nexus_1.nullable(nexus_1.arg({
+                    type: graphql_1.BigIntScalar,
                     description: "The ID values of the shopping cart",
-                }),
+                })),
             },
             resolve: (_, { cartId }) => __awaiter(this, void 0, void 0, function* () {
                 if (!cartId || cartId <= 0) {
@@ -40,12 +38,10 @@ exports.CartQuery = schema_1.extendType({
                 return cartEntryFeeTotal;
             }),
         });
-        t.boolean("verifyZeroCartTotal", {
-            nullable: true,
+        t.nullable.boolean("verifyZeroCartTotal", {
             args: {
-                cartId: schema_1.arg({
-                    type: common_1.BigIntScalar,
-                    required: true,
+                cartId: nexus_1.arg({
+                    type: graphql_1.BigIntScalar,
                     description: "The ID values of the shopping cart",
                 }),
             },
@@ -78,4 +74,3 @@ exports.CartQuery = schema_1.extendType({
         });
     },
 });
-//# sourceMappingURL=query.js.map

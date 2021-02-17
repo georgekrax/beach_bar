@@ -264,4 +264,3 @@ CardRepository = __decorate([
     typeorm_1.EntityRepository(Card)
 ], CardRepository);
 exports.CardRepository = CardRepository;
-//# sourceMappingURL=Card.js.map

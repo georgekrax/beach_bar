@@ -11,32 +11,27 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProductReservationLimitCrudMutation = void 0;
 const common_1 = require("@beach_bar/common");
-const common_2 = require("@georgekrax-hashtag/common");
-const schema_1 = require("@nexus/schema");
+const graphql_1 = require("@the_hashtag/common/dist/graphql");
 const Product_1 = require("entity/Product");
 const ProductReservationLimit_1 = require("entity/ProductReservationLimit");
 const Time_1 = require("entity/Time");
+const nexus_1 = require("nexus");
 const typeorm_1 = require("typeorm");
 const checkScopes_1 = require("utils/checkScopes");
 const types_1 = require("../../../types");
 const types_2 = require("./types");
-exports.ProductReservationLimitCrudMutation = schema_1.extendType({
+exports.ProductReservationLimitCrudMutation = nexus_1.extendType({
     type: "Mutation",
     definition(t) {
         t.field("addProductReservationLimit", {
             type: types_2.AddProductReservationLimitResult,
             description: "Add a reservation limit to a #beach_bar product",
-            nullable: false,
             args: {
-                productId: schema_1.intArg({ required: true, description: "The ID value of the product to add this reservation limit" }),
-                limit: schema_1.intArg({
-                    required: true,
-                    description: "The number to add as a limit a #beach_bar can provide the product, for specific date(s)",
-                }),
-                dates: schema_1.arg({ type: common_2.DateScalar, required: true, list: true, description: "A list of days this limit is applicable for" }),
-                startTimeId: schema_1.intArg({ required: true, description: "The ID value of the hour time from when this limit is applicable" }),
-                endTimeId: schema_1.intArg({
-                    required: true,
+                productId: nexus_1.intArg({ description: "The ID value of the product to add this reservation limit" }),
+                limit: nexus_1.intArg({ description: "The number to add as a limit a #beach_bar can provide the product, for specific date(s)" }),
+                dates: nexus_1.list(nexus_1.arg({ type: graphql_1.DateScalar, description: "A list of days this limit is applicable for" })),
+                startTimeId: nexus_1.intArg({ description: "The ID value of the hour time from when this limit is applicable" }),
+                endTimeId: nexus_1.intArg({
                     description: "The ID value of the hour time from when this limit is terminated (is not applicable anymore)",
                 }),
             },
@@ -94,23 +89,18 @@ exports.ProductReservationLimitCrudMutation = schema_1.extendType({
         t.field("updateProductReservationLimit", {
             type: types_2.UpdateProductReservationLimitResult,
             description: "Update a #beach_bar's product reservation limit",
-            nullable: false,
             args: {
-                reservationLimitIds: schema_1.arg({
-                    type: common_2.BigIntScalar,
-                    required: true,
-                    list: true,
+                reservationLimitIds: nexus_1.list(nexus_1.arg({
+                    type: graphql_1.BigIntScalar,
                     description: "A list with all the reservation limits to update",
-                }),
-                limit: schema_1.intArg({
-                    required: false,
+                })),
+                limit: nexus_1.nullable(nexus_1.intArg({
                     description: "The number to add as a limit a #beach_bar can provide the product, for specific date(s)",
-                }),
-                startTimeId: schema_1.intArg({ required: false, description: "The ID value of the hour time from when this limit is applicable" }),
-                endTimeId: schema_1.intArg({
-                    required: false,
+                })),
+                startTimeId: nexus_1.nullable(nexus_1.intArg({ description: "The ID value of the hour time from when this limit is applicable" })),
+                endTimeId: nexus_1.nullable(nexus_1.intArg({
                     description: "The ID value of the hour time from when this limit is terminated (is not applicable anymore)",
-                }),
+                })),
             },
             resolve: (_, { reservationLimitIds, limit, startTimeId, endTimeId }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -160,14 +150,11 @@ exports.ProductReservationLimitCrudMutation = schema_1.extendType({
         t.field("deleteProductReservationLimit", {
             type: types_1.DeleteResult,
             description: "Delete a or some reservation limit(s) from a #beach_bar's product",
-            nullable: false,
             args: {
-                reservationLimitIds: schema_1.arg({
-                    type: common_2.BigIntScalar,
-                    required: true,
-                    list: true,
+                reservationLimitIds: nexus_1.list(nexus_1.arg({
+                    type: graphql_1.BigIntScalar,
                     description: "A list with all the reservation limits to delete",
-                }),
+                })),
             },
             resolve: (_, { reservationLimitIds }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -204,4 +191,3 @@ exports.ProductReservationLimitCrudMutation = schema_1.extendType({
         });
     },
 });
-//# sourceMappingURL=mutation.js.map

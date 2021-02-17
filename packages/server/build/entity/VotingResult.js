@@ -46,4 +46,3 @@ VotingResult = __decorate([
     typeorm_1.Entity({ name: "voting_result", schema: "public" })
 ], VotingResult);
 exports.VotingResult = VotingResult;
-//# sourceMappingURL=VotingResult.js.map

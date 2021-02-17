@@ -4,7 +4,7 @@ exports.generateRefreshToken = exports.generateAccessToken = void 0;
 const common_1 = require("@beach_bar/common");
 const jsonwebtoken_1 = require("jsonwebtoken");
 const uuid_1 = require("uuid");
-exports.generateAccessToken = (user, scope) => {
+const generateAccessToken = (user, scope) => {
     const token = jsonwebtoken_1.sign({
         scope,
     }, process.env.ACCESS_TOKEN_SECRET, {
@@ -27,7 +27,8 @@ exports.generateAccessToken = (user, scope) => {
         iss: tokenPayload.iss,
     };
 };
-exports.generateRefreshToken = (user) => {
+exports.generateAccessToken = generateAccessToken;
+const generateRefreshToken = (user) => {
     const token = jsonwebtoken_1.sign({
         tokenVersion: user.tokenVersion,
     }, process.env.REFRESH_TOKEN_SECRET, {
@@ -50,4 +51,4 @@ exports.generateRefreshToken = (user) => {
         iss: tokenPayload.iss,
     };
 };
-//# sourceMappingURL=generateAuthTokens.js.map
+exports.generateRefreshToken = generateRefreshToken;

@@ -1,5 +1,5 @@
-import { BigIntScalar, DateScalar, DateTimeScalar, UrlScalar } from "@georgekrax-hashtag/common";
-import { inputObjectType, objectType, unionType } from "@nexus/schema";
+import { BigIntScalar, DateScalar, DateTimeScalar, UrlScalar } from "@the_hashtag/common/dist/graphql";
+import { inputObjectType, objectType, unionType } from "nexus";
 import { BeachBarAvailabilityType, BeachBarType } from "../beach_bar/types";
 import { CityType } from "../details/cityTypes";
 import { CountryType } from "../details/countryTypes";
@@ -10,30 +10,27 @@ export const UserSearchType = objectType({
   name: "UserSearch",
   description: "Represents a user search",
   definition(t) {
-    t.field("id", { type: BigIntScalar, nullable: false });
-    t.field("searchDate", { type: DateScalar, nullable: true });
-    t.int("searchAdults", { nullable: true });
-    t.int("searchChildren", { nullable: true });
-    t.field("user", {
+    t.field("id", { type: BigIntScalar });
+    t.nullable.field("searchDate", { type: DateScalar });
+    t.nullable.int("searchAdults");
+    t.nullable.int("searchChildren");
+    t.nullable.field("user", {
       type: UserType,
       description: "The user that made the search",
-      nullable: true,
       resolve: o => o.user,
     });
-    t.field("inputValue", {
+    t.nullable.field("inputValue", {
       type: SearchInputValueType,
       description: "The input value that the user searched for",
-      nullable: true,
       resolve: o => o.inputValue,
     });
-    t.list.field("filters", {
+    t.nullable.list.field("filters", {
       type: SearchFilterType,
       description: "A list with the filters being added to the user's search",
-      nullable: true,
       resolve: o => o.filters,
     });
-    t.field("updatedAt", { type: DateTimeScalar, nullable: false });
-    t.field("timestamp", { type: DateTimeScalar, nullable: false });
+    t.field("updatedAt", { type: DateTimeScalar });
+    t.field("timestamp", { type: DateTimeScalar });
   },
 });
 
@@ -44,12 +41,10 @@ export const SearchResultType = objectType({
     t.field("beachBar", {
       type: BeachBarType,
       description: "The #beach_bar found in the search",
-      nullable: false,
       resolve: o => o.beachBar,
     });
     t.field("availability", {
       type: BeachBarAvailabilityType,
-      nullable: false,
       resolve: o => o.availability,
     });
   },
@@ -62,10 +57,9 @@ export const SearchType = objectType({
     t.list.field("results", {
       type: SearchResultType,
       description: "The results of the user search",
-      nullable: false,
       resolve: o => o.results,
     });
-    t.field("search", { type: UserSearchType, nullable: false, description: "The details of the search, made by a user" });
+    t.field("search", { type: UserSearchType, description: "The details of the search, made by a user" });
   },
 });
 
@@ -73,13 +67,13 @@ export const SearchResult = unionType({
   name: "SearchResult",
   definition(t) {
     t.members("Search", "Error");
-    t.resolveType(item => {
-      if (item.error) {
-        return "Error";
-      } else {
-        return "Search";
-      }
-    });
+  },
+  resolveType: item => {
+    if (item.name === "Error") {
+      return "Error";
+    } else {
+      return "Search";
+    }
   },
 });
 
@@ -87,14 +81,12 @@ export const SearchInputType = inputObjectType({
   name: "SearchInput",
   description: "The arguments (args) used at #beach_bar search or availability",
   definition(t) {
-    t.field("date", { type: DateScalar, required: false, description: "The date to search availability at #beach_bars" });
-    t.int("timeId", { required: false, description: "The ID value of the hour time to search availability for" });
-    t.int("adults", {
-      required: false,
+    t.nullable.field("date", { type: DateScalar, description: "The date to search availability at #beach_bars" });
+    t.nullable.int("timeId", { description: "The ID value of the hour time to search availability for" });
+    t.nullable.int("adults", {
       description: "The number of adults to search availability at #beach_bars. Its value should be less or equal to 12 adults",
     });
-    t.int("children", {
-      required: false,
+    t.nullable.int("children", {
       description: "The number of children to search availability at #beach_bars. Its value should be less or equal to 8 children",
     });
   },
@@ -104,35 +96,30 @@ export const SearchInputValueType = objectType({
   name: "SearchInputValue",
   description: "Represents a potential input value of a user's search",
   definition(t) {
-    t.field("id", { type: BigIntScalar, nullable: false });
-    t.string("publicId", { nullable: false, description: "A unique identifier (ID) for public use" });
+    t.field("id", { type: BigIntScalar,  });
+    t.string("publicId", { description: "A unique identifier (ID) for public use" });
     t.string("formattedValue", {
-      nullable: false,
       description: "The search input value formatted into a string",
       resolve: o => o.format(),
     });
-    t.field("country", {
+    t.nullable.field("country", {
       type: CountryType,
       description: "The country of the input value",
-      nullable: true,
       resolve: o => o.country,
     });
-    t.field("city", {
+    t.nullable.field("city", {
       type: CityType,
       description: "The city of the input value",
-      nullable: true,
       resolve: o => o.city,
     });
-    t.field("region", {
+    t.nullable.field("region", {
       type: RegionType,
       description: "The region of the input value",
-      nullable: true,
       resolve: o => o.region,
     });
-    t.field("beachBar", {
+    t.nullable.field("beachBar", {
       type: BeachBarType,
       description: "The #beach_bar of the input value",
-      nullable: true,
       resolve: o => o.beachBar,
     });
   },
@@ -142,11 +129,10 @@ export const SearchFilterType = objectType({
   name: "SearchFilter",
   description: "Represents a filter used by users when searching for (availability at) #beach_bars",
   definition(t) {
-    t.int("id", { nullable: false });
-    t.string("publicId", { nullable: false, description: "A unique identifier (ID) for public use" });
-    t.string("name", { nullable: false });
-    t.string("description", {
-      nullable: true,
+    t.id("id");
+    t.string("publicId", {  description: "A unique identifier (ID) for public use" });
+    t.string("name");
+    t.nullable.string("description", {
       description: "A short description about the filter, what is its value, and when to use",
     });
   },
@@ -159,12 +145,10 @@ export const FormattedSearchInputValueType = objectType({
     t.field("inputValue", {
       type: SearchInputValueType,
       description: "The search input value",
-      nullable: false,
       resolve: o => o,
     });
-    t.field("beachBarThumbnailUrl", {
+    t.nullable.field("beachBarThumbnailUrl", {
       type: UrlScalar,
-      nullable: true,
       description: 'The URL value of the #beach_bar thumbnail image to show, at search "dropdown results"',
       resolve: o => o.beachBar && o.beachBar.thumbnailUrl,
     });

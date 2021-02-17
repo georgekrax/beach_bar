@@ -1,4 +1,4 @@
-import { generateId } from "@georgekrax-hashtag/common";
+import { generateId } from "@the_hashtag/common";
 import { generateIdSpecialCharacters, voucherCodeLength } from "constants/_index";
 import { Dayjs } from "dayjs";
 import {
@@ -13,7 +13,7 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
+  UpdateDateColumn
 } from "typeorm";
 import { softRemove } from "utils/softRemove";
 import { BeachBar } from "./BeachBar";

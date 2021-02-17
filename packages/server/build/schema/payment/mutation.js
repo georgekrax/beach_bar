@@ -14,8 +14,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PaymentCrudMutation = void 0;
 const common_1 = require("@beach_bar/common");
-const common_2 = require("@georgekrax-hashtag/common");
-const schema_1 = require("@nexus/schema");
+const common_2 = require("@the_hashtag/common");
+const graphql_1 = require("@the_hashtag/common/dist/graphql");
 const prefixes_1 = __importDefault(require("constants/prefixes"));
 const status_1 = require("constants/status");
 const _index_1 = require("constants/_index");
@@ -27,35 +27,32 @@ const Payment_1 = require("entity/Payment");
 const PaymentStatus_1 = require("entity/PaymentStatus");
 const PaymentVoucherCode_1 = require("entity/PaymentVoucherCode");
 const StripeMinimumCurrency_1 = require("entity/StripeMinimumCurrency");
+const nexus_1 = require("nexus");
 const typeorm_1 = require("typeorm");
 const checkVoucherCode_1 = require("utils/checkVoucherCode");
 const types_1 = require("../types");
 const types_2 = require("./types");
-exports.PaymentCrudMutation = schema_1.extendType({
+exports.PaymentCrudMutation = nexus_1.extendType({
     type: "Mutation",
     definition(t) {
         t.field("checkout", {
             type: types_2.AddPaymentResult,
             description: "Create (make) a payment for a customer's shopping cart",
-            nullable: false,
             args: {
-                cartId: schema_1.arg({
-                    type: common_2.BigIntScalar,
-                    required: true,
+                cartId: nexus_1.arg({
+                    type: graphql_1.BigIntScalar,
                     description: "The ID value of the shopping cart with the products to purchase",
                 }),
-                cardId: schema_1.arg({
-                    type: common_2.BigIntScalar,
-                    required: true,
+                cardId: nexus_1.arg({
+                    type: graphql_1.BigIntScalar,
                     description: "The ID value of the credit or debit card of the customer",
                 }),
-                voucherCode: schema_1.stringArg({
-                    required: false,
+                voucherCode: nexus_1.nullable(nexus_1.stringArg({
                     description: "A coupon or offer campaign code to make a discount to the shopping cart's or payment's price",
-                }),
+                })),
             },
             resolve: (_, { cartId, cardId, voucherCode }, { stripe }) => __awaiter(this, void 0, void 0, function* () {
-                var _a, _b, _c, _d, _e;
+                var _a, _b, _c, _d;
                 if (!cartId || cartId <= 0) {
                     return { error: { code: common_1.errors.INVALID_ARGUMENTS, message: "Please provide a valid shopping cart" } };
                 }
@@ -217,22 +214,18 @@ exports.PaymentCrudMutation = schema_1.extendType({
                             discountPerBeachBar = beachBarCouponCodeDiscount / uniqueBeachBars.length;
                         }
                     }
-                    console.log(`Discount per #beach_bar: ${discountPerBeachBar}`);
                     for (let i = 0; i < uniqueBeachBars.length; i++) {
                         const beachBar = uniqueBeachBars[i];
                         const cartBeachBarTotal = yield cart.getBeachBarTotalPrice(beachBar.id, discountPerBeachBar);
                         if (cartBeachBarTotal === undefined) {
                             return { error: { message: common_1.errors.SOMETHING_WENT_WRONG } };
                         }
-                        console.log(cartBeachBarTotal);
                         const { totalWithEntryFees } = cartBeachBarTotal;
                         let discountAmount = 0;
                         const paymentVoucherCode = newPayment.voucherCode;
                         if (paymentVoucherCode && paymentVoucherCode.offerCode) {
                             discountAmount = (totalWithEntryFees * paymentVoucherCode.offerCode.campaign.discountPercentage) / 100;
                         }
-                        console.log((_c = paymentVoucherCode === null || paymentVoucherCode === void 0 ? void 0 : paymentVoucherCode.couponCode) === null || _c === void 0 ? void 0 : _c.beachBarId);
-                        console.log(beachBar.id);
                         if (paymentVoucherCode &&
                             paymentVoucherCode.couponCode &&
                             paymentVoucherCode.couponCode.beachBarId &&
@@ -241,8 +234,6 @@ exports.PaymentCrudMutation = schema_1.extendType({
                             discountAmount += couponCodeDiscount;
                         }
                         const beachBarTotal = parseFloat((totalWithEntryFees - discountAmount).toFixed(2));
-                        console.log(`Discount amount: ${discountAmount}`);
-                        console.log(`#beach_bar total: ${beachBarTotal}`);
                         if (beachBarTotal > 0) {
                             const beachBarStripeFee = yield cart.getStripeFee(card.country.isEu, beachBarTotal);
                             if (beachBarStripeFee === undefined) {
@@ -253,13 +244,8 @@ exports.PaymentCrudMutation = schema_1.extendType({
                                 return { error: { message: common_1.errors.SOMETHING_WENT_WRONG } };
                             }
                             const { beachBarAppFee, transferAmount: beachBarTransferAmount } = pricingFee;
-                            console.log(`App fee: ${pricingFee.beachBarAppFee}`);
-                            console.log(`Transfer amount: ${pricingFee.transferAmount}`);
-                            console.log(`Total: ${pricingFee.total}`);
                             beachBarPricingFee += beachBarAppFee;
                             transferAmount += beachBarTransferAmount;
-                            console.log(`Stripe fee: ${beachBarStripeFee}`);
-                            console.log(stripePayment.currency.toLowerCase());
                             if (beachBarTransferAmount * 100 > 1) {
                                 const stripeTransfer = yield stripe.transfers.create({
                                     amount: Math.round(beachBarTransferAmount * 100),
@@ -281,10 +267,10 @@ exports.PaymentCrudMutation = schema_1.extendType({
                                             ? JSON.stringify({
                                                 id: newPayment.voucherCode.couponCode
                                                     ? newPayment.voucherCode.couponCode.id
-                                                    : (_d = newPayment.voucherCode.offerCode) === null || _d === void 0 ? void 0 : _d.id,
+                                                    : (_c = newPayment.voucherCode.offerCode) === null || _c === void 0 ? void 0 : _c.id,
                                                 discount_percentage: newPayment.voucherCode.couponCode
                                                     ? newPayment.voucherCode.couponCode.discountPercentage
-                                                    : (_e = newPayment.voucherCode.offerCode) === null || _e === void 0 ? void 0 : _e.campaign.discountPercentage,
+                                                    : (_d = newPayment.voucherCode.offerCode) === null || _d === void 0 ? void 0 : _d.campaign.discountPercentage,
                                                 type: newPayment.voucherCode.couponCode ? "coupon_code" : "offer_campaign_code",
                                             })
                                                 .toString()
@@ -327,11 +313,9 @@ exports.PaymentCrudMutation = schema_1.extendType({
         t.field("refundPayment", {
             type: types_1.DeleteResult,
             description: "Refund a payment",
-            nullable: false,
             args: {
-                paymentId: schema_1.arg({
-                    type: common_2.BigIntScalar,
-                    required: true,
+                paymentId: nexus_1.arg({
+                    type: graphql_1.BigIntScalar,
                     description: "The ID value of the payment to update",
                 }),
             },
@@ -388,4 +372,3 @@ exports.PaymentCrudMutation = schema_1.extendType({
         });
     },
 });
-//# sourceMappingURL=mutation.js.map

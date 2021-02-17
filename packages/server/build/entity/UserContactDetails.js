@@ -84,4 +84,3 @@ UserContactDetails = UserContactDetails_1 = __decorate([
     typeorm_1.Unique("contact_details_phone_number_secondary_email_key", ["accountId", "secondaryEmail", "phoneNumber"])
 ], UserContactDetails);
 exports.UserContactDetails = UserContactDetails;
-//# sourceMappingURL=UserContactDetails.js.map

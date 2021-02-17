@@ -1,0 +1,125 @@
+.tapbar {
+  $bg: $grey-1;
+  $icon-color: $primary;
+  $indicator-size: 3.75em;
+  $container-padding: 1.25em;
+
+  &__container {
+    position: fixed;
+    bottom: 0;
+    padding: $container-padding 0;
+    padding-bottom: $container-padding * 1.75;
+    background-color: $bg;
+    box-shadow: 0px -2px 8px $grey-4;
+    border-radius: $tapbar-border-radius $tapbar-border-radius 0 0;
+    height: $tapbar-height;
+    z-index: 99;
+  }
+
+  &__indicator {
+    z-index: 1;
+    width: $indicator-size;
+    height: $indicator-size;
+
+    path {
+      fill: $icon-color;
+    }
+
+    &.overlap {
+      position: absolute;
+      bottom: 0;
+    }
+  }
+
+  &__menu-list {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+
+    @supports (display: grid) {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax($indicator-size, 1fr));
+    }
+
+    @supports not (display: grid) {
+      @extend .flex-row-space-around-center;
+    }
+
+    // Big thanks to -> https://codepen.io/aaroniker/pen/rNMmZvq
+    & > li {
+      display: inline-block;
+      align-self: center;
+      justify-self: center;
+      position: relative;
+      @include transition-2s("ease-in", "transform");
+
+      &:hover {
+        transform: scale(1.2);
+      }
+
+      svg > * {
+        stroke: $icon-color;
+      }
+
+      &:first-child {
+        svg path {
+          fill: $icon-color;
+          stroke: none;
+          stroke-width: 0;
+        }
+      }
+
+      svg:last-child {
+        position: absolute;
+        z-index: 1;
+        top: 0;
+        left: 0;
+
+        // Exclude shopping cart icon 2nd path
+        & > *:not(:nth-of-type(2)) {
+          fill: $icon-color;
+        }
+      }
+    }
+  }
+
+  // Big thanks to -> https://www.youtube.com/watch?v=7TDpMMB9DCE&t=3s
+  &__gooey {
+    &__ball {
+      position: absolute;
+      left: 50%;
+      bottom: -50%;
+      border-radius: 50%;
+      transform: translateX(-50%);
+      width: 1.25em;
+      height: 1.25em;
+      background-color: $primary;
+    }
+
+    @keyframes moving {
+      0% {
+        bottom: 0;
+      }
+
+      100% {
+        bottom: 50%;
+      }
+    }
+
+    &__container {
+      position: absolute;
+      bottom: 0;
+      left: 7%;
+      z-index: -1;
+      width: fit-content;
+      height: auto;
+      transform: translateX(-25%);
+
+      &--effect {
+        $blur: 7;
+        background-color: $bg;
+        filter: blur(#{$blur}px) contrast($blur * 3);
+      }
+    }
+  }
+}

@@ -1,10 +1,10 @@
 import { errors, MyContext } from "@beach_bar/common";
-import { DateScalar, EmailScalar, UrlScalar } from "@georgekrax-hashtag/common";
-import { arg, booleanArg, extendType, intArg, stringArg } from "@nexus/schema";
+import { DateScalar, EmailScalar, UrlScalar } from "@the_hashtag/common/dist/graphql";
 import { execute, makePromise } from "apollo-link";
 import { createHash, randomBytes } from "crypto";
 import { LoginDetailStatus } from "entity/LoginDetails";
 import { KeyType } from "ioredis";
+import { arg, booleanArg, extendType, intArg, nullable, stringArg } from "nexus";
 import { link } from "../../config/apolloLink";
 import platformNames from "../../config/platformNames";
 import redisKeys from "../../constants/redisKeys";
@@ -35,18 +35,17 @@ export const UserSignUpAndLoginMutation = extendType({
     t.field("signUp", {
       type: UserSignUpResult,
       description: "Sign up a user",
-      nullable: false,
       args: {
         userCredentials: arg({
           type: UserCredentialsInput,
-          required: true,
           description: "Credential for signing up a user",
         }),
-        isPrimaryOwner: booleanArg({
-          required: false,
-          default: false,
-          description: "Set to true if you want to sign up an owner for a #beach_bar",
-        }),
+        isPrimaryOwner: nullable(
+          booleanArg({
+            default: false,
+            description: "Set to true if you want to sign up an owner for a #beach_bar",
+          })
+        ),
       },
       resolve: async (_, { userCredentials, isPrimaryOwner }, { redis }: MyContext): Promise<UserSignUpType> => {
         const { email, password } = userCredentials;
@@ -126,16 +125,13 @@ export const UserSignUpAndLoginMutation = extendType({
     t.field("login", {
       type: UserLoginResult,
       description: "Login a user",
-      nullable: false,
       args: {
-        loginDetails: arg({
+        loginDetails: nullable(arg({
           type: UserLoginDetailsInput,
-          required: false,
           description: "User details in login",
-        }),
+        })),
         userCredentials: arg({
           type: UserCredentialsInput,
-          required: true,
           description: "Credential for signing up a user",
         }),
       },
@@ -426,7 +422,6 @@ export const UserLogoutMutation = extendType({
     t.field("logout", {
       type: SuccessResult,
       description: "Logout a user",
-      nullable: false,
       resolve: async (_, __, { res, payload, redis }: MyContext): Promise<SuccessType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
@@ -496,11 +491,9 @@ export const UserForgotPasswordMutation = extendType({
     t.field("sendForgotPasswordLink", {
       type: SuccessResult,
       description: "Sends a link to the user's email address to change its password",
-      nullable: false,
       args: {
         email: arg({
           type: EmailScalar,
-          required: true,
           description: "The email address of user",
         }),
       },
@@ -572,19 +565,15 @@ export const UserForgotPasswordMutation = extendType({
     t.field("changeUserPassword", {
       type: SuccessResult,
       description: "Change a user's password",
-      nullable: false,
       args: {
         email: arg({
           type: EmailScalar,
-          required: true,
           description: "Email of user to retrieve OAuth Client applications",
         }),
         key: stringArg({
-          required: true,
           description: "The key in the URL to identify and verify user. Each key lasts 20 minutes",
         }),
         newPassword: stringArg({
-          required: true,
           description: "User's new password",
         }),
       },
@@ -662,51 +651,23 @@ export const UserCrudMutation = extendType({
     t.field("updateUser", {
       type: UserUpdateResult,
       description: "Update a user's info",
-      nullable: false,
       args: {
-        email: arg({
-          type: EmailScalar,
-          required: false,
-        }),
-        firstName: stringArg({
-          required: false,
-        }),
-        lastName: stringArg({
-          required: false,
-        }),
-        imgUrl: arg({
-          type: UrlScalar,
-          required: false,
-        }),
-        personTitle: stringArg({
-          required: false,
-          description: "The honorific title of the user",
-        }),
-        birthday: arg({
-          type: DateScalar,
-          required: false,
-          description: "User's birthday in the date format",
-        }),
-        countryId: intArg({
-          required: false,
-          description: "The country of user",
-        }),
-        cityId: intArg({
-          required: false,
-          description: "The city or hometown of user",
-        }),
-        address: stringArg({
-          required: false,
-          description: "User's house or office street address",
-        }),
-        zipCode: stringArg({
-          required: false,
-          description: "User's house or office zip code",
-        }),
-        trackHistory: booleanArg({
-          required: false,
-          description: "Indicates if to track user's history",
-        }),
+        email: nullable(arg({ type: EmailScalar })),
+        firstName: nullable(stringArg()),
+        lastName: nullable(stringArg()),
+        imgUrl: nullable(arg({ type: UrlScalar })),
+        personTitle: nullable(stringArg({ description: "The honorific title of the user" })),
+        birthday: nullable(
+          arg({
+            type: DateScalar,
+            description: "User's birthday in the date format",
+          })
+        ),
+        countryId: nullable(intArg({ description: "The country of user" })),
+        cityId: nullable(intArg({ description: "The city or hometown of user" })),
+        address: nullable(stringArg({ description: "User's house or office street address" })),
+        zipCode: nullable(stringArg({ description: "User's house or office zip code" })),
+        trackHistory: nullable(booleanArg({ description: "Indicates if to track user's history" })),
       },
       resolve: async (
         _,
@@ -847,7 +808,6 @@ export const UserCrudMutation = extendType({
     t.field("deleteUser", {
       type: DeleteResult,
       description: "Delete a user & its account",
-      nullable: false,
       resolve: async (_, __, { payload, redis, stripe }: MyContext): Promise<DeleteType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };

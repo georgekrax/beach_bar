@@ -80,4 +80,3 @@ ReviewAnswer = ReviewAnswer_1 = __decorate([
     typeorm_1.Entity({ name: "review_answer", schema: "public" })
 ], ReviewAnswer);
 exports.ReviewAnswer = ReviewAnswer;
-//# sourceMappingURL=ReviewAnswer.js.map

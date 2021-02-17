@@ -10,28 +10,23 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProductQuery = void 0;
-const common_1 = require("@georgekrax-hashtag/common");
-const schema_1 = require("@nexus/schema");
+const graphql_1 = require("@the_hashtag/common/dist/graphql");
 const Product_1 = require("entity/Product");
 const Time_1 = require("entity/Time");
+const nexus_1 = require("nexus");
 const types_1 = require("./types");
-exports.ProductQuery = schema_1.extendType({
+exports.ProductQuery = nexus_1.extendType({
     type: "Query",
     definition(t) {
         t.list.field("hasProductReservationLimit", {
             type: types_1.AvailableProductType,
             description: "Get a list with all the hours this product has reservation limits",
-            nullable: false,
             args: {
-                productId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the product, to search if available",
-                }),
-                date: schema_1.arg({
-                    type: common_1.DateScalar,
-                    required: false,
+                productId: nexus_1.intArg({ description: "The ID value of the product, to search if available" }),
+                date: nexus_1.nullable(nexus_1.arg({
+                    type: graphql_1.DateScalar,
                     description: "The date to purchase the product. Its default value its the current date",
-                }),
+                })),
             },
             resolve: (_, { productId, date }) => __awaiter(this, void 0, void 0, function* () {
                 if (!productId || productId <= 0) {
@@ -58,4 +53,3 @@ exports.ProductQuery = schema_1.extendType({
         });
     },
 });
-//# sourceMappingURL=query.js.map

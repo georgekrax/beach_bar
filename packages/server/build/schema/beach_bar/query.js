@@ -13,30 +13,25 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BeachBarQuery = void 0;
-const schema_1 = require("@nexus/schema");
 const redisKeys_1 = __importDefault(require("constants/redisKeys"));
 const _index_1 = require("constants/_index");
 const BeachBar_1 = require("entity/BeachBar");
 const UserHistory_1 = require("entity/UserHistory");
+const nexus_1 = require("nexus");
 const types_1 = require("../search/types");
 const types_2 = require("./types");
-exports.BeachBarQuery = schema_1.extendType({
+exports.BeachBarQuery = nexus_1.extendType({
     type: "Query",
     definition(t) {
-        t.field("getBeachBar", {
+        t.nullable.field("getBeachBar", {
             type: types_2.BeachBarType,
             description: "Get the detail info of a #beach_bar",
-            nullable: true,
             args: {
-                beachBarId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the #beach_bar",
-                }),
-                userVisit: schema_1.booleanArg({
-                    required: false,
+                beachBarId: nexus_1.intArg({ description: "The ID value of the #beach_bar" }),
+                userVisit: nexus_1.nullable(nexus_1.booleanArg({
                     description: "Indicates if to retrieve information for user search. Its default value is set to true",
                     default: true,
-                }),
+                })),
             },
             resolve: (_, { beachBarId, userVisit }, { redis, ipAddr, payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!beachBarId || beachBarId <= 0) {
@@ -58,19 +53,12 @@ exports.BeachBarQuery = schema_1.extendType({
                 return beachBar;
             }),
         });
-        t.field("checkBeachBarAvailability", {
+        t.nullable.field("checkBeachBarAvailability", {
             type: types_2.BeachBarAvailabilityType,
             description: "Check a #beach_bar's availability",
-            nullable: true,
             args: {
-                beachBarId: schema_1.intArg({
-                    required: true,
-                    description: "The ID value of the #beach_bar, to check for availability",
-                }),
-                availability: schema_1.arg({
-                    type: types_1.SearchInputType,
-                    required: false,
-                }),
+                beachBarId: nexus_1.intArg({ description: "The ID value of the #beach_bar, to check for availability" }),
+                availability: nexus_1.nullable(nexus_1.arg({ type: types_1.SearchInputType })),
             },
             resolve: (_, { beachBarId, availability }, { redis }) => __awaiter(this, void 0, void 0, function* () {
                 if (!beachBarId || beachBarId <= 0) {
@@ -98,10 +86,9 @@ exports.BeachBarQuery = schema_1.extendType({
                 };
             }),
         });
-        t.list.field("getAllBeachBars", {
+        t.nullable.list.field("getAllBeachBars", {
             type: types_2.BeachBarType,
             description: "A list with all the available #beach_bars",
-            nullable: true,
             resolve: () => __awaiter(this, void 0, void 0, function* () {
                 const beachBars = yield BeachBar_1.BeachBar.find({
                     relations: [
@@ -123,4 +110,3 @@ exports.BeachBarQuery = schema_1.extendType({
         });
     },
 });
-//# sourceMappingURL=query.js.map

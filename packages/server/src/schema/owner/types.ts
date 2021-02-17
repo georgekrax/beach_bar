@@ -1,5 +1,5 @@
-import { DateTimeScalar } from "@georgekrax-hashtag/common";
-import { objectType, unionType } from "@nexus/schema";
+import { DateTimeScalar } from "@the_hashtag/common/dist/graphql";
+import { objectType, unionType } from "nexus";
 import { BeachBarType } from "../beach_bar/types";
 import { UserType } from "../user/types";
 
@@ -7,11 +7,10 @@ export const OwnerType = objectType({
   name: "Owner",
   description: "Represents a user that is an owner of a #beach_bar",
   definition(t) {
-    t.int("id", { nullable: false });
+    t.id("id");
     t.field("user", {
       type: UserType,
       description: "The user that is the owner or one of the owners of the #beach_bar",
-      nullable: false,
       resolve: o => o.user,
     });
   },
@@ -22,28 +21,23 @@ export const BeachBarOwnerType = objectType({
   description: "Represents a #beach_bar's owner",
   definition(t) {
     t.boolean("isPrimary", {
-      nullable: false,
       description: "A boolean that indicates if the owner is the user that also created the #beach_bar & can make modifications",
     });
     t.boolean("publicInfo", {
-      nullable: false,
       description: "A boolean that indicates if the owner info (contact details) are allowed to be presented to the public",
     });
     t.field("beachBar", {
       type: BeachBarType,
       description: "The #beach_bar the user is assigned to as an owner, either as a primary one or not",
-      nullable: false,
       resolve: o => o.beachBar,
     });
     t.field("owner", {
       type: OwnerType,
       description: "The owner of the #beach_bar",
-      nullable: false,
       resolve: o => o.owner,
     });
     t.field("timestamp", {
       type: DateTimeScalar,
-      nullable: false,
       description: "The date and time the owner was added (assigned) to the #beach_bar",
     });
   },
@@ -53,14 +47,12 @@ export const AddBeachBarOwnerType = objectType({
   name: "AddBeachBarOwner",
   description: "Info to be returned when an owner is added (assigned) to a #beach_bar",
   definition(t) {
-    t.field("owner", {
+    t.nullable.field("owner", {
       type: BeachBarOwnerType,
       description: "The owner being added & its info",
-      nullable: false,
       resolve: o => o.owner,
     });
-    t.boolean("added", {
-      nullable: false,
+    t.nullable.boolean("added", {
       description: "A boolean that indicates if the owner has been successfully being added (assigned) to a #beach_bar",
     });
   },
@@ -70,13 +62,13 @@ export const AddBeachBarOwnerResult = unionType({
   name: "AddBeachBarOwnerResult",
   definition(t) {
     t.members("AddBeachBarOwner", "Error");
-    t.resolveType(item => {
-      if (item.error) {
-        return "Error";
-      } else {
-        return "AddBeachBarOwner";
-      }
-    });
+  },
+  resolveType: item => {
+    if (item.name === "Error") {
+      return "Error";
+    } else {
+      return "AddBeachBarOwner";
+    }
   },
 });
 
@@ -87,11 +79,9 @@ export const UpdateBeachBarOwnerType = objectType({
     t.field("owner", {
       type: BeachBarOwnerType,
       description: "The owner being added & its info",
-      nullable: false,
       resolve: o => o.owner,
     });
     t.boolean("updated", {
-      nullable: false,
       description: "A boolean that indicates if the owner info have been successfully updated",
     });
   },
@@ -101,12 +91,12 @@ export const UpdateBeachBarOwnerResult = unionType({
   name: "UpdateBeachBarOwnerResult",
   definition(t) {
     t.members("UpdateBeachBarOwner", "Error");
-    t.resolveType(item => {
-      if (item.error) {
-        return "Error";
-      } else {
-        return "UpdateBeachBarOwner";
-      }
-    });
+  },
+  resolveType: item => {
+    if (item.name === "Error") {
+      return "Error";
+    } else {
+      return "UpdateBeachBarOwner";
+    }
   },
 });

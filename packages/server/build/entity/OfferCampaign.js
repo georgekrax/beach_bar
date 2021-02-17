@@ -125,4 +125,3 @@ OfferCampaign = OfferCampaign_1 = __decorate([
     typeorm_1.Entity({ name: "offer_campaign", schema: "public" })
 ], OfferCampaign);
 exports.OfferCampaign = OfferCampaign;
-//# sourceMappingURL=OfferCampaign.js.map

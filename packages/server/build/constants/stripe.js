@@ -11,4 +11,3 @@ exports.webhook = Object.freeze({
     CUSTOMER_UPDATED: "customer.updated",
     CUSTOMER_DELETED: "customer.deleted",
 });
-//# sourceMappingURL=stripe.js.map

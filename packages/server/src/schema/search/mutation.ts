@@ -1,7 +1,7 @@
 import { MyContext } from "@beach_bar/common";
-import { extendType, idArg, stringArg } from "@nexus/schema";
 import { SearchFilter } from "entity/SearchFilter";
 import { UserSearch } from "entity/UserSearch";
+import { extendType, idArg, list, nullable, stringArg } from "nexus";
 import { In } from "typeorm";
 import arrEquals from "utils/arrEquals";
 import { UserSearchType } from "./types";
@@ -9,20 +9,16 @@ import { UserSearchType } from "./types";
 export const SearchUpdateMutation = extendType({
   type: "Mutation",
   definition(t) {
-    t.field("updateSearch", {
+    t.nullable.field("updateSearch", {
       type: UserSearchType,
       description: "Update a previous user's search",
-      nullable: true,
       args: {
         searchId: idArg({
-          required: true,
           description: "The ID value of a previous user search",
         }),
-        filterIds: stringArg({
-          required: false,
-          list: true,
+        filterIds: list(nullable(stringArg({
           description: "A list with the filter IDs to add in the search, found in the documentation",
-        }),
+        }))),
       },
       resolve: async (_, { searchId, filterIds }, { payload, redis }: MyContext): Promise<UserSearch | null> => {
         if (!searchId || searchId <= 0) {

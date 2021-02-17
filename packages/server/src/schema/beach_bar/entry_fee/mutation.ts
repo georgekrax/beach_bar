@@ -1,8 +1,8 @@
 import { errors, MyContext } from "@beach_bar/common";
-import { BigIntScalar, DateScalar } from "@georgekrax-hashtag/common";
-import { arg, extendType, floatArg, intArg } from "@nexus/schema";
+import { BigIntScalar, DateScalar } from "@the_hashtag/common/dist/graphql";
 import { BeachBar } from "entity/BeachBar";
 import { BeachBarEntryFee } from "entity/BeachBarEntryFee";
+import { arg, extendType, floatArg, intArg, nullable, list } from "nexus";
 import { In } from "typeorm";
 import { DeleteType } from "typings/.index";
 import { AddBeachBarEntryFeeType, UpdateBeachBarEntryFeeType } from "typings/beach_bar/entry_fee";
@@ -16,22 +16,13 @@ export const BeachBarEntryFeeCrudMutation = extendType({
     t.field("addBeachBarEntryFee", {
       type: AddBeachBarEntryFeeResult,
       description: "Add an entry fee(s) to a #beach_bar",
-      nullable: false,
       args: {
-        beachBarId: intArg({
-          required: true,
-          description: "The ID value of the #beach_bar to add the entry fee(s)",
-        }),
-        fee: floatArg({
-          required: true,
-          description: "The price value of the entry fee. Its value cannot be less than 0",
-        }),
-        dates: arg({
+        beachBarId: intArg({ description: "The ID value of the #beach_bar to add the entry fee(s)" }),
+        fee: floatArg({  description: "The price value of the entry fee. Its value cannot be less than 0" }),
+        dates: list(arg({
           type: DateScalar,
-          required: true,
-          list: true,
           description: "A list with all the dates to add (assign) the entry fee",
-        }),
+        })),
       },
       resolve: async (_, { beachBarId, fee, dates }, { payload }: MyContext): Promise<AddBeachBarEntryFeeType> => {
         if (!payload) {
@@ -92,15 +83,12 @@ export const BeachBarEntryFeeCrudMutation = extendType({
     t.field("updateBeachBarEntryFee", {
       type: UpdateBeachBarEntryFeeResult,
       description: "Update an or many entry fee(s) of a #beach_bar",
-      nullable: false,
       args: {
-        entryFeeIds: arg({
+        entryFeeIds: list(arg({
           type: BigIntScalar,
-          required: true,
-          list: true,
           description: "A list with all the entry fess to update",
-        }),
-        fee: floatArg({ required: false, description: "The price value to update the entry fees" }),
+        })),
+        fee: nullable(floatArg({ description: "The price value to update the entry fees" })),
       },
       resolve: async (_, { entryFeeIds, price }, { payload }: MyContext): Promise<UpdateBeachBarEntryFeeType> => {
         if (!payload) {
@@ -162,14 +150,11 @@ export const BeachBarEntryFeeCrudMutation = extendType({
     t.field("deleteBeachBarEntryFee", {
       type: DeleteResult,
       description: "Delete (remove) an or some entry fees from a #beach_bar",
-      nullable: false,
       args: {
-        entryFeeIds: arg({
+        entryFeeIds: list(arg({
           type: BigIntScalar,
-          required: true,
-          list: true,
           description: "A list with all the ID values of entry fee(s) to delete (remove) from a #beach_bar",
-        }),
+        })),
       },
       resolve: async (_, { entryFeeIds }, { payload }: MyContext): Promise<DeleteType> => {
         if (!payload) {
