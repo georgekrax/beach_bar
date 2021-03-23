@@ -13,11 +13,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BeachBarQuery = void 0;
+const common_1 = require("@beach_bar/common");
 const redisKeys_1 = __importDefault(require("constants/redisKeys"));
-const _index_1 = require("constants/_index");
 const BeachBar_1 = require("entity/BeachBar");
+const Payment_1 = require("entity/Payment");
+const UserFavoriteBar_1 = require("entity/UserFavoriteBar");
 const UserHistory_1 = require("entity/UserHistory");
+const uniqby_1 = __importDefault(require("lodash/uniqby"));
 const nexus_1 = require("nexus");
+const typeorm_1 = require("typeorm");
 const types_1 = require("../search/types");
 const types_2 = require("./types");
 exports.BeachBarQuery = nexus_1.extendType({
@@ -44,7 +48,7 @@ exports.BeachBarQuery = nexus_1.extendType({
                 }
                 if (userVisit) {
                     yield UserHistory_1.UserHistory.create({
-                        activityId: _index_1.historyActivity.BEACH_BAR_QUERY_ID,
+                        activityId: common_1.COMMON_CONFIG.HISTORY_ACTIVITY.BEACH_BAR_QUERY_ID,
                         objectId: BigInt(beachBar.id),
                         userId: payload ? payload.sub : undefined,
                         ipAddr,
@@ -86,7 +90,7 @@ exports.BeachBarQuery = nexus_1.extendType({
                 };
             }),
         });
-        t.nullable.list.field("getAllBeachBars", {
+        t.list.field("getAllBeachBars", {
             type: types_2.BeachBarType,
             description: "A list with all the available #beach_bars",
             resolve: () => __awaiter(this, void 0, void 0, function* () {
@@ -102,10 +106,75 @@ exports.BeachBarQuery = nexus_1.extendType({
                         "products",
                         "features",
                         "features.service",
+                        "location",
+                        "location.country",
+                        "location.city",
+                        "location.region",
                     ],
                 });
                 beachBars.forEach(beachBar => (beachBar.features = beachBar.features.filter(feature => !feature.deletedAt)));
                 return beachBars;
+            }),
+        });
+        t.list.field("getPersonalizedBeachBars", {
+            type: types_2.BeachBarType,
+            description: "A list with all the #beach_bars, related to a user or are top selections",
+            resolve: (_, __, { payload }) => __awaiter(this, void 0, void 0, function* () {
+                const maxLength = parseInt(process.env.USER_PERSONALIZED_BEACH_BARS_LENGTH);
+                let userPayments = [];
+                const userId = payload === null || payload === void 0 ? void 0 : payload.sub;
+                if (payload) {
+                    userPayments = yield typeorm_1.getConnection()
+                        .getRepository(Payment_1.Payment)
+                        .createQueryBuilder("payment")
+                        .leftJoinAndSelect("payment.cart", "cart")
+                        .leftJoinAndSelect("cart.products", "cartProducts")
+                        .leftJoinAndSelect("cartProducts.product", "cartProductsProduct")
+                        .leftJoinAndSelect("cartProductsProduct.beachBar", "cartProductsProductBeachBar")
+                        .leftJoinAndSelect("cartProductsProductBeachBar.location", "cartProductsProductBeachBarLocation")
+                        .leftJoinAndSelect("cartProductsProductBeachBarLocation.city", "cartProductsProductBeachBarLocationCity")
+                        .leftJoinAndSelect("cartProductsProductBeachBarLocation.region", "cartProductsProductBeachBarLocationRegion")
+                        .where("cart.user_id = :userId", { userId: userId })
+                        .orderBy("payment.timestamp", "DESC")
+                        .limit(maxLength)
+                        .getMany();
+                }
+                const favouriteBeachBars = yield UserFavoriteBar_1.UserFavoriteBar.find({
+                    take: maxLength - userPayments.length,
+                    where: userId ? { userId } : undefined,
+                    relations: ["beachBar", "beachBar.location", "beachBar.location.city", "beachBar.location.region"],
+                });
+                const uniqueFavouriteBeachBars = uniqby_1.default(favouriteBeachBars.map(favourite => favourite.beachBar), "id");
+                const payments = yield Payment_1.Payment.find({
+                    take: maxLength - userPayments.length - (userId ? Math.round((favouriteBeachBars.length * 30) / 100) : 0),
+                    order: { timestamp: "DESC" },
+                    relations: [
+                        "cart",
+                        "cart.products",
+                        "cart.products.product",
+                        "cart.products.product.beachBar",
+                        "cart.products.product.beachBar.location",
+                        "cart.products.product.beachBar.location.city",
+                        "cart.products.product.beachBar.location.region",
+                    ],
+                });
+                const paymentsBeachBars = payments.map(payment => payment.getBeachBars());
+                const flatBeachBarArr = paymentsBeachBars.flat();
+                const beachBarsPayments = flatBeachBarArr.reduce((obj, b) => {
+                    obj[b.id] = ++obj[b.id] || 1;
+                    return obj;
+                }, {});
+                const uniquePaymentsBeachBars = uniqby_1.default(flatBeachBarArr, "id");
+                uniquePaymentsBeachBars.sort((a, b) => (beachBarsPayments[a.id] > beachBarsPayments[b.id] ? -1 : 1));
+                let finalArr = uniqby_1.default([...uniqueFavouriteBeachBars, ...uniquePaymentsBeachBars], "id");
+                if (finalArr.length < maxLength) {
+                    const otherBeachBars = yield BeachBar_1.BeachBar.find({
+                        where: { id: typeorm_1.Not(typeorm_1.In(finalArr.map(({ id }) => id))) },
+                        relations: ["location", "location.city", "location.region"],
+                    });
+                    finalArr = finalArr.concat(otherBeachBars);
+                }
+                return finalArr;
             }),
         });
     },

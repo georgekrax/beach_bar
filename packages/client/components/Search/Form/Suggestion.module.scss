@@ -1,0 +1,29 @@
+.container {
+  padding: map-get($em-spacers, 12) $wrapper-padding;
+  margin: map-get($em-spacers, 4) 0;
+  background-color: transparent;
+  user-select: none;
+  border-radius: 8px;
+  cursor: pointer;
+  @include transition-2s("ease-out", "background-color");
+  transition-duration: 0.2s !important;
+
+  &:active {
+    background-color: $grey-3;
+  }
+}
+
+.itemContent > div {
+  &:first-child {
+    color: $grey-9;
+  }
+
+  &:not(:only-of-type):last-child {
+    margin-top: map-get($em-spacers, 4);
+    color: $grey-8;
+  }
+}
+
+.img {
+  border-radius: 8px;
+}

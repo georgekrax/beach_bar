@@ -37,33 +37,21 @@ let SearchInputValue = SearchInputValue_1 = class SearchInputValue extends typeo
         }
         else {
             if (this.country) {
-                if (this.country.shortName && this.country.shortName.trim().length > 0) {
-                    formattedString = this.country.shortName;
-                }
-                else {
-                    formattedString = this.country.name;
-                }
+                formattedString = this.country.name;
             }
             if (this.city) {
                 formattedString = this.city.name;
-                if (this.city.secondName && this.city.secondName.trim().length > 0) {
-                    formattedString.concat(`(${this.city.secondName})`);
-                }
-                if (this.country) {
+                if (this.country)
                     formattedString = formattedString.concat(`, ${this.country.name}`);
-                }
             }
             if (this.region) {
                 formattedString = this.region.name;
-                if (this.city && this.country) {
+                if (this.city && this.country)
                     formattedString = formattedString.concat(`, ${this.city.name}`).concat(`, ${this.country.name}`);
-                }
-                else if (this.city) {
+                else if (this.city)
                     formattedString = formattedString.concat(`, ${this.city.name}`);
-                }
-                else if (this.country) {
+                else if (this.country)
                     formattedString = formattedString.concat(`, ${this.country.name}`);
-                }
             }
         }
         return formattedString;

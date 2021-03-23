@@ -1,10 +1,10 @@
 import { BeachBarLocation } from "entity/BeachBarLocation";
-import { AddType, ErrorType, UpdateType } from "typings/.index";
+import { AddType, UpdateType } from "typings/.index";
 
 type BeachBarLocationType = {
   location: BeachBarLocation;
 };
 
-export type AddBeachBarLocationType = (AddType & BeachBarLocationType) | ErrorType;
+export type TAddBeachBarLocation = AddType & BeachBarLocationType;
 
-export type UpdateBeachBarLocationType = (UpdateType & BeachBarLocationType) | ErrorType;
+export type TUpdateBeachBarLocation = UpdateType & BeachBarLocationType;

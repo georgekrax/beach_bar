@@ -50,7 +50,7 @@ exports.AddProductResult = nexus_1.unionType({
         t.members("AddProduct", "Error");
     },
     resolveType: item => {
-        if (item.name === "Error") {
+        if (item.error) {
             return "Error";
         }
         else {
@@ -76,7 +76,7 @@ exports.UpdateProductResult = nexus_1.unionType({
         t.members("UpdateProduct", "Error");
     },
     resolveType: item => {
-        if (item.name === "Error") {
+        if (item.error) {
             return "Error";
         }
         else {

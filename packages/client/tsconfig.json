@@ -12,16 +12,26 @@
     "jsx": "preserve",
     "outDir": "dist",
     "rootDir": ".",
+    "allowSyntheticDefaultImports": true,
     "isolatedModules": true,
     "baseUrl": ".",
     "paths": {
-      "@/styles/*": ["styles/*"],
       "@/components/*": ["components/*"],
+      "@/graphql/*": ["graphql/*"],
+      "@/styles/*": ["styles/*"],
       "@/utils/*": ["utils/*"],
       "@/config/*": ["config/*"],
       "@/typings/*": ["typings/*"],
+      "@/lib/*": ["lib/*"]
     }
   },
   "exclude": ["node_modules", ".next", "out"],
-  "include": ["next-env.d.ts", "**/*.ts", "**/.*.tsx", "**/*.js"]
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "components/Icons/Chevron/index.tsx",
+    "components/pages/Map/index.tsx",
+    "components/Icons/MapMarker/index.tsx"
+  ]
 }

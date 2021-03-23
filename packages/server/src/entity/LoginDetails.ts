@@ -1,7 +1,6 @@
 import { Dayjs } from "dayjs";
 import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Account } from "./Account";
-import { City } from "./City";
 import { ClientBrowser, ClientOs } from "./ClientOs&Browser";
 import { Country } from "./Country";
 import { LoginPlatform } from "./LoginPlatform";
@@ -35,8 +34,8 @@ export class LoginDetails extends BaseEntity {
   @Column({ name: "country_id", type: "integer", nullable: true })
   countryId?: number;
 
-  @Column({ name: "city_id", type: "bigint", nullable: true })
-  cityId?: bigint;
+  @Column("varchar", { length: 255, name: "city", nullable: true })
+  city?: string;
 
   @Column({ type: "cidr", name: "ip_addr", nullable: true })
   ipAddr?: string;
@@ -63,8 +62,4 @@ export class LoginDetails extends BaseEntity {
   @ManyToOne(() => Country, country => country.loginDetails, { nullable: true })
   @JoinColumn({ name: "country_id" })
   country?: Country;
-
-  @ManyToOne(() => City, city => city.loginDetails, { nullable: true })
-  @JoinColumn({ name: "city_id" })
-  city?: City;
 }

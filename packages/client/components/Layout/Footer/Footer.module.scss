@@ -1,6 +1,23 @@
 .container {
-  @extend .layout--padding;
-  height: calc(50px + #{$tapbar-height} + #{$layout-padding});
-  background-color: $grey-4;
-  margin-top: map-get($em-spacers, 20);
+  // $padding: 12px;
+  // @extend .layout--padding;
+  height: fit-content;
+  background-color: rgba($grey-2, 0.75);
+  margin-top: map-get($em-spacers, 64);
+  // margin-bottom: calc(#{$tapbar-height} - #{$padding});
+  // padding-bottom: calc(#{$layout-padding} + #{$padding});
+  // position: absolute;
+  // bottom: 0;
+
+  & > svg > path {
+    stroke: $grey-9;
+  }
+}
+
+.box {
+  margin-top: map-get($em-spacers, 4);
+
+  small {
+    width: inherit;
+  }
 }

@@ -1,0 +1,8 @@
+.container {
+  margin: map-get($em-spacers, 64) 0;
+}
+
+.emoji {
+  transform: scale(1.5);
+  margin-bottom: map-get($em-spacers, 20);
+}

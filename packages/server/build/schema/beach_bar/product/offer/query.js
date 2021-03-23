@@ -11,7 +11,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.VoucherCoderQuery = void 0;
 const common_1 = require("@beach_bar/common");
-const graphql_1 = require("@the_hashtag/common/dist/graphql");
 const BeachBar_1 = require("entity/BeachBar");
 const CouponCode_1 = require("entity/CouponCode");
 const OfferCampaignCode_1 = require("entity/OfferCampaignCode");
@@ -68,10 +67,7 @@ exports.VoucherCoderQuery = nexus_1.extendType({
             type: types_1.CouponCodeRevealResult,
             description: "Get a coupon's code details & its referral code",
             args: {
-                couponCodeId: nexus_1.arg({
-                    type: graphql_1.BigIntScalar,
-                    description: "The ID value of the coupon code",
-                }),
+                couponCodeId: nexus_1.idArg({ description: "The ID value of the coupon code" }),
             },
             resolve: (_, { couponCodeId }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -96,10 +92,7 @@ exports.VoucherCoderQuery = nexus_1.extendType({
             type: types_1.OfferCampaignCodeRevealResult,
             description: "Get an offer's campaign code details + its referral code",
             args: {
-                offerCampaignCodeId: nexus_1.arg({
-                    type: graphql_1.BigIntScalar,
-                    description: "The ID value of the offer campaign code",
-                }),
+                offerCampaignCodeId: nexus_1.idArg({ description: "The ID value of the offer campaign code" }),
             },
             resolve: (_, { offerCampaignCodeId }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {

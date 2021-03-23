@@ -39,4 +39,3 @@ exports.errors = Object.freeze({
     INVALID_PRODUCT_OFFER_CODE: "invalid_product_offer",
     INVALID_REF_CODE_MESSAGE: "Specified referral code is invalid",
 });
-//# sourceMappingURL=errors.js.map

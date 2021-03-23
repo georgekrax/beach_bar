@@ -73,48 +73,55 @@ export class BeachBarLocation extends BaseEntity {
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Dayjs;
 
-  async update(
-    address?: string,
-    zipCode?: string,
-    latitude?: number,
-    longitude?: number,
-    countryId?: number,
-    cityId?: bigint,
-    regionId?: number
-  ): Promise<BeachBarLocation | any> {
+  async update({
+    address,
+    zipCode,
+    latitude,
+    longitude,
+    countryId,
+    city,
+    region,
+  }: Partial<Pick<BeachBarLocation, "address" | "zipCode" | "latitude" | "longitude" | "countryId">> & {
+    city?: string;
+    region?: string;
+  }): Promise<BeachBarLocation | any> {
     try {
-      if (address && address !== this.address) {
-        this.address = address;
-      }
-      if (zipCode && zipCode !== this.zipCode) {
-        this.zipCode = zipCode;
-      }
-      if (latitude && latitude !== this.latitude) {
-        this.latitude = latitude;
-      }
-      if (longitude && longitude !== this.longitude) {
-        this.longitude = longitude;
-      }
+      if (address && address !== this.address) this.address = address;
+      if (zipCode && zipCode !== this.zipCode) this.zipCode = zipCode;
+      if (latitude && latitude !== this.latitude) this.latitude = latitude;
+      if (longitude && longitude !== this.longitude) this.longitude = longitude;
       if (countryId && countryId !== this.countryId) {
         const country = await Country.findOne(countryId);
-        if (!country) {
-          throw new Error("Invalid country");
-        }
+        if (!country) throw new Error("Invalid country");
         this.country = country;
       }
-      if (cityId && cityId !== this.cityId) {
-        const city = await City.findOne({ id: cityId });
-        if (!city) {
-          throw new Error("Invalid city");
+      if (city && city.toLowerCase() !== this.city.name.toLowerCase()) {
+        let newCity = await City.findOne({ where: `"name" ILIKE '${city}'` });
+        if (!newCity) {
+          newCity = City.create({
+            name: city,
+            countryId: this.country.id,
+            country: this.country,
+          });
+          await newCity.save();
         }
-        this.city = city;
+        this.city = newCity;
+        await this.save();
       }
-      if (regionId && regionId !== this.regionId) {
-        const region = await Region.findOne(regionId);
-        if (!region) {
-          throw new Error("Invalid region");
+
+      if (region && region.toLowerCase() !== this.region?.name.toLowerCase()) {
+        let newRegion = await Region.findOne({ where: `"name" ILIKE '${region}'` });
+        if (!newRegion) {
+          newRegion = Region.create({
+            name: region,
+            countryId: this.country.id,
+            country: this.country,
+            cityId: this.city.id,
+            city: this.city,
+          });
+          await newRegion.save();
         }
-        this.region = region;
+        this.region = newRegion;
       }
 
       await this.save();

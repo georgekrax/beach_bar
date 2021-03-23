@@ -1,5 +1,6 @@
 import { errors, MyContext } from "@beach_bar/common";
 import { EmailScalar } from "@the_hashtag/common/dist/graphql";
+import { ApolloError } from "apollo-server-express";
 import platformNames from "config/platformNames";
 import dayjs from "dayjs";
 import { LoginDetailStatus } from "entity/LoginDetails";
@@ -8,24 +9,24 @@ import { arg, booleanArg, extendType, nullable, stringArg } from "nexus";
 import fetch from "node-fetch";
 import { AuthorizeWithOAuthType } from "typings/oauth";
 import { generateAccessToken, generateRefreshToken } from "utils/auth/generateAuthTokens";
-import { sendRefreshToken } from "utils/auth/sendRefreshToken";
+import { sendCookieToken } from "utils/auth/sendCookieToken";
 import { signUpUser } from "utils/auth/signUpUser";
 import { createUserLoginDetails, findLoginDetails } from "utils/auth/userCommon";
-import { UserLoginDetailsInput } from "../user/types";
-import { OAuthAuthorizationResult } from "./types";
+import { UserLoginDetails } from "../user/types";
+import { OAuthAuthorizationType } from "./types";
 
 export const AuthorizeWithOAuthProviders = extendType({
   type: "Mutation",
   definition(t) {
     t.field("authorizeWithGoogle", {
-      type: OAuthAuthorizationResult,
+      type: OAuthAuthorizationType,
       description: "Authorize a user with Google",
       args: {
         code: stringArg({ description: "The response code from Google's OAuth callback" }),
         state: stringArg({ description: "The response state, to check if everything went correct" }),
         loginDetails: nullable(
           arg({
-            type: UserLoginDetailsInput,
+            type: UserLoginDetails,
             description: "User details in login",
           })
         ),
@@ -41,32 +42,15 @@ export const AuthorizeWithOAuthProviders = extendType({
         { code, state, loginDetails, isPrimaryOwner },
         { req, res, googleOAuth2Client, uaParser, redis, ipAddr }: MyContext
       ): Promise<AuthorizeWithOAuthType> => {
-        if (!code || code.trim().length === 0) {
-          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
-        }
-        if (!state || state.trim().length === 0) {
-          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
-        }
-        if (state !== req.cookies.gstate) {
-          return {
-            error: {
-              code: errors.INTERNAL_SERVER_ERROR,
-              message: `${errors.SOMETHING_WENT_WRONG}. Please try again`,
-            },
-          };
-        }
+        if (!code || code.trim().length === 0 || !state || state.trim().length === 0)
+          throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.INTERNAL_SERVER_ERROR);
+        if (state !== req.cookies.gstate)
+          throw new ApolloError(errors.SOMETHING_WENT_WRONG + ". Please try again.", errors.INTERNAL_SERVER_ERROR);
 
         const codeVerifier = req.cookies.gcode_verifier;
         const tokens = await googleOAuth2Client.getToken({ code, codeVerifier });
 
-        if (!tokens) {
-          return {
-            error: {
-              code: errors.INTERNAL_SERVER_ERROR,
-              message: errors.SOMETHING_WENT_WRONG,
-            },
-          };
-        }
+        if (!tokens) throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.INTERNAL_SERVER_ERROR);
 
         let response: any = null;
         try {
@@ -74,32 +58,19 @@ export const AuthorizeWithOAuthProviders = extendType({
 
           const url = "https://www.googleapis.com/oauth2/v3/userinfo?alt=json";
           response = await googleOAuth2Client.request({ url });
-          if (!response.data) {
-            return {
-              error: {
-                code: errors.INTERNAL_SERVER_ERROR,
-                message: "Something went wrong",
-              },
-            };
-          }
+          if (!response.data) throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.INTERNAL_SERVER_ERROR);
         } catch (err) {
-          return { error: { message: `${errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
+          throw new ApolloError(errors.SOMETHING_WENT_WRONG + `: ${err.message}`, errors.SOMETHING_WENT_WRONG);
         }
 
         const { sub: googleId, given_name: firstName, family_name: lastName, email } = response.data;
 
-        if (!googleId || googleId === ("" || " ") || !email || email === ("" || " ")) {
-          return {
-            error: {
-              code: errors.INTERNAL_SERVER_ERROR,
-              message: "Something went wrong",
-            },
-          };
-        }
+        if (!googleId || googleId.trim().length === 0 || !email || email.trim().length === 0)
+          throw new ApolloError(errors.SOMETHING_WENT_WRONG + ". Please try again.", errors.INTERNAL_SERVER_ERROR);
 
-        const { osId, browserId, countryId, cityId } = findLoginDetails({ details: loginDetails, uaParser });
+        const { osId, browserId, countryId, city } = findLoginDetails({ details: loginDetails, uaParser });
 
-        // search for user in DB
+        // Search for user in DB
         let user: User | undefined = await User.findOne({ where: { email }, relations: ["account"] });
         let signedUp = false;
         if (!user) {
@@ -112,30 +83,18 @@ export const AuthorizeWithOAuthProviders = extendType({
             firstName,
             lastName,
             countryId,
-            cityId,
+            city,
           });
-          // @ts-ignore
-          if (response.error && !response.user) {
-            // @ts-ignore
-            return { error: { code: response.error.code, message: response.error.message } };
-          }
+          if (response.error && !response.user) throw new ApolloError(response.error.message, response.error.code);
           user = await User.findOne({ where: { email }, relations: ["account"] });
         }
 
-        if (!user) {
-          return {
-            error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG },
-          };
-        }
+        // Check user & its account
+        if (!user || !user.account) throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.INTERNAL_SERVER_ERROR);
 
-        // check user's account
-        if (!user.account) {
-          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: "Something went wrong" } };
-        }
-
-        // logined successfully
+        // Logined successfully
         try {
-          // create user login details
+          // Create user login details
           await createUserLoginDetails(
             LoginDetailStatus.loggedIn,
             platformNames.GOOGLE,
@@ -143,17 +102,19 @@ export const AuthorizeWithOAuthProviders = extendType({
             osId,
             browserId,
             countryId,
-            cityId,
+            city,
             ipAddr
           );
         } catch (err) {
-          return { error: { message: `${errors.SOMETHING_WENT_WRONG}${err.message && err.message !== "" ? err.message : ""}` } };
+          throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.SOMETHING_WENT_WRONG);
         }
-        // get user's scopes from Redis
+
+        // Get user's scopes from Redis
         const scope = await redis.smembers(user.getRedisKey(true) as KeyType);
-        const refreshToken = generateRefreshToken(user);
+        const refreshToken = generateRefreshToken(user, "Google");
         const accessToken = generateAccessToken(user, scope);
-        sendRefreshToken(res, refreshToken.token);
+        sendCookieToken(res, refreshToken.token, "refresh");
+        sendCookieToken(res, accessToken.token, "access");
 
         try {
           await redis.hset(user.getRedisKey() as KeyType, "access_token", accessToken.token);
@@ -163,15 +124,13 @@ export const AuthorizeWithOAuthProviders = extendType({
           user.account.isActive = true;
           await user.save();
           await user.account.save();
-          if (googleId !== String(user.googleId)) {
-            return { error: { code: errors.INTERNAL_SERVER_ERROR, message: "Something went wrong" } };
-          }
+          if (googleId !== String(user.googleId)) throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.SOMETHING_WENT_WRONG);
         } catch (err) {
-          return { error: { message: `Something went wrong: ${err.message}` } };
+          throw new ApolloError(errors.SOMETHING_WENT_WRONG + `: ${err.message}`, errors.SOMETHING_WENT_WRONG);
         }
 
-        res.clearCookie("gstate", { httpOnly: true, maxAge: 310000 });
-        res.clearCookie("gcode_verifier", { httpOnly: true, maxAge: 310000 });
+        res.clearCookie("gstate", { httpOnly: true });
+        res.clearCookie("gcode_verifier", { httpOnly: true });
         googleOAuth2Client.revokeCredentials();
 
         return {
@@ -183,14 +142,14 @@ export const AuthorizeWithOAuthProviders = extendType({
       },
     });
     t.field("authorizeWithFacebook", {
-      type: OAuthAuthorizationResult,
+      type: OAuthAuthorizationType,
       description: "Authorize a user with Facebook",
       args: {
         code: stringArg({ description: "The response code from Google's OAuth callback" }),
         state: stringArg({ description: "The response state, to check if everything went correct" }),
         loginDetails: nullable(
           arg({
-            type: UserLoginDetailsInput,
+            type: UserLoginDetails,
             description: "User details in login",
           })
         ),
@@ -206,20 +165,10 @@ export const AuthorizeWithOAuthProviders = extendType({
         { code, state, loginDetails, isPrimaryOwner },
         { req, res, uaParser, redis, ipAddr }: MyContext
       ): Promise<AuthorizeWithOAuthType> => {
-        if (!code || code.trim().length === 0) {
-          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
-        }
-        if (!state || state.trim().length === 0) {
-          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
-        }
-        if (state !== req.cookies.fbstate) {
-          return {
-            error: {
-              code: errors.INTERNAL_SERVER_ERROR,
-              message: `${errors.SOMETHING_WENT_WRONG}. Please try again`,
-            },
-          };
-        }
+        if (!code || code.trim().length === 0 || !state || state.trim().length === 0)
+          throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.SOMETHING_WENT_WRONG);
+        if (state !== req.cookies.fbstate)
+          throw new ApolloError(errors.SOMETHING_WENT_WRONG + ". Please try again.", errors.INTERNAL_SERVER_ERROR);
 
         let requestStatus: number | undefined = undefined,
           success = false,
@@ -238,17 +187,13 @@ export const AuthorizeWithOAuthProviders = extendType({
             if (data.access_token && data.token_type == "bearer" && requestStatus === 200) {
               success = true;
               facebookAccessToken = data.access_token;
-            } else {
-              success = false;
-            }
+            } else success = false;
           })
           .catch(err => {
-            return { error: { message: `${errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
+            throw new ApolloError(`${errors.SOMETHING_WENT_WRONG}: ${err.message}`, errors.SOMETHING_WENT_WRONG);
           });
 
-        if (!success || !facebookAccessToken) {
-          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
-        }
+        if (!success || !facebookAccessToken) throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.INTERNAL_SERVER_ERROR);
 
         requestStatus = undefined;
         success = false;
@@ -269,19 +214,15 @@ export const AuthorizeWithOAuthProviders = extendType({
               data.type !== "USER" ||
               data.application !== process.env.FACEBOOK_APP_NAME!.toString() ||
               !data.is_valid
-            ) {
+            )
               success = false;
-            } else {
-              success = true;
-            }
+            else success = true;
           })
           .catch(err => {
-            return { error: { message: `Something went wrong: ${err.message}` } };
+            throw new ApolloError(errors.SOMETHING_WENT_WRONG + `: ${err.message}`, errors.SOMETHING_WENT_WRONG);
           });
 
-        if (!success) {
-          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
-        }
+        if (!success) throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.INTERNAL_SERVER_ERROR);
 
         let facebookId: string | undefined = undefined,
           facebookEmail: string | undefined = undefined,
@@ -302,33 +243,27 @@ export const AuthorizeWithOAuthProviders = extendType({
             return res.json();
           })
           .then(data => {
-            if (!data || !data.id || data.id === ("" || " ") || data.email === ("" || " ")) {
-              success = false;
-            } else {
+            if (!data || !data.id || data.id.trim().length === 0 || data.email.trim().length === 0) success = false;
+            else {
               success = true;
               facebookId = data.id;
               facebookEmail = data.email;
               firstName = data.first_name;
               lastName = data.last_name;
-              if (data.birthday) {
-                birthday = dayjs(data.birthday).toDate();
-              }
-              if (data.picture && !data.picture.is_silhouette) {
-                pictureUrl = data.picture.data.url;
-              }
+              if (data.birthday) birthday = dayjs(data.birthday).toDate();
+              if (data.picture && !data.picture.is_silhouette) pictureUrl = data.picture.data.url;
             }
           })
           .catch(err => {
-            return { error: { message: `Something went wrong: ${err.message}` } };
+            throw new ApolloError(errors.SOMETHING_WENT_WRONG + `: ${err.message}`, errors.SOMETHING_WENT_WRONG);
           });
 
-        if (!success || !facebookEmail || !facebookId) {
-          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
-        }
+        if (!success || !facebookEmail || !facebookId)
+          throw new ApolloError(errors.INTERNAL_SERVER_ERROR, errors.INTERNAL_SERVER_ERROR);
 
-        const { osId, browserId, countryId, cityId } = findLoginDetails({ details: loginDetails, uaParser });
+        const { osId, browserId, countryId, city } = findLoginDetails({ details: loginDetails, uaParser });
 
-        // search for user in DB
+        // Search for user in DB
         let user: User | undefined = await User.findOne({ where: { email: facebookEmail }, relations: ["account"] });
         let signedUp = false;
         if (!user) {
@@ -341,30 +276,18 @@ export const AuthorizeWithOAuthProviders = extendType({
             firstName,
             lastName,
             countryId,
-            cityId,
+            city,
             birthday,
           });
-          // @ts-ignore
-          if (response.error && !response.user) {
-            // @ts-ignore
-            return { error: { code: response.error.code, message: response.error.message } };
-          }
+          if (response.error && !response.user) throw new ApolloError(response.error.message, response.error.code);
           user = await User.findOne({ where: { email: facebookEmail }, relations: ["account"] });
         }
 
-        if (!user) {
-          return {
-            error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG },
-          };
-        }
+        // Check user & its account
+        if (!user || !user.account) throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.INTERNAL_SERVER_ERROR);
 
-        // check user's account
-        if (!user.account) {
-          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: "Something went wrong" } };
-        }
-
-        // logined successfully
-        // create user login details
+        // Logined successfully
+        // Create user login details
         await createUserLoginDetails(
           LoginDetailStatus.loggedIn,
           platformNames.FACEBOOK,
@@ -372,15 +295,16 @@ export const AuthorizeWithOAuthProviders = extendType({
           osId,
           browserId,
           countryId,
-          cityId,
+          city,
           ipAddr
         );
 
-        // get user's scopes from Redis
+        // Get user's scopes from Redis
         const scope = await redis.smembers(user.getRedisKey(true) as KeyType);
-        const refreshToken = generateRefreshToken(user);
+        const refreshToken = generateRefreshToken(user, "Facebook");
         const accessToken = generateAccessToken(user, scope);
-        sendRefreshToken(res, refreshToken.token);
+        sendCookieToken(res, refreshToken.token, "refresh");
+        sendCookieToken(res, accessToken.token, "access");
 
         try {
           await redis.hset(user.getRedisKey() as KeyType, "access_token", accessToken.token);
@@ -388,17 +312,11 @@ export const AuthorizeWithOAuthProviders = extendType({
 
           user.facebookId = facebookId;
           user.account.isActive = true;
-          if (birthday && !user.account.birthday) {
-            user.account.birthday = birthday;
-          }
-          if (pictureUrl && !user.account.imgUrl) {
-            user.account.imgUrl = pictureUrl;
-          }
+          if (birthday && !user.account.birthday) user.account.birthday = birthday;
+          if (pictureUrl && !user.account.imgUrl) user.account.imgUrl = pictureUrl;
           await user.save();
           await user.account.save();
-          if (facebookId !== String(user.facebookId)) {
-            return { error: { code: errors.INTERNAL_SERVER_ERROR, message: "Something went wrong" } };
-          }
+          if (facebookId !== String(user.facebookId)) throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.INTERNAL_SERVER_ERROR);
         } catch (err) {
           await createUserLoginDetails(
             LoginDetailStatus.failed,
@@ -407,13 +325,13 @@ export const AuthorizeWithOAuthProviders = extendType({
             osId,
             browserId,
             countryId,
-            cityId,
+            city,
             ipAddr
           );
-          return { error: { message: `${errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
+          throw new ApolloError(errors.SOMETHING_WENT_WRONG + `: ${err.message}`);
         }
 
-        res.clearCookie("fbstate", { httpOnly: true, maxAge: 310000 });
+        res.clearCookie("fbstate", { httpOnly: true });
 
         return {
           user,
@@ -424,7 +342,7 @@ export const AuthorizeWithOAuthProviders = extendType({
       },
     });
     t.field("authorizeWithInstagram", {
-      type: OAuthAuthorizationResult,
+      type: OAuthAuthorizationType,
       description: "Authorize a user with Instagram",
       args: {
         email: arg({ type: EmailScalar, description: "Email address of user to authorize with Instagram" }),
@@ -432,7 +350,7 @@ export const AuthorizeWithOAuthProviders = extendType({
         state: stringArg({ description: "The response state, to check if everything went correct" }),
         loginDetails: nullable(
           arg({
-            type: UserLoginDetailsInput,
+            type: UserLoginDetails,
             description: "User details in login",
           })
         ),
@@ -448,23 +366,12 @@ export const AuthorizeWithOAuthProviders = extendType({
         { email, code, state, loginDetails, isPrimaryOwner },
         { req, res, uaParser, redis, ipAddr }: MyContext
       ): Promise<AuthorizeWithOAuthType> => {
-        if (!email || email.trim().length === 0) {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid email address" } };
-        }
-        if (!code || code.trim().length === 0) {
-          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
-        }
-        if (!state || state.trim().length === 0) {
-          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
-        }
-        if (state !== req.cookies.instastate) {
-          return {
-            error: {
-              code: errors.INTERNAL_SERVER_ERROR,
-              message: `${errors.SOMETHING_WENT_WRONG}. Please try again`,
-            },
-          };
-        }
+        if (!email || email.trim().length === 0)
+          throw new ApolloError("Please provide a valid email address", errors.INVALID_ARGUMENTS);
+        if (!code || code.trim().length === 0 || !state || state.trim().length === 0)
+          throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.INTERNAL_SERVER_ERROR);
+        if (state !== req.cookies.instastate)
+          throw new ApolloError(errors.SOMETHING_WENT_WRONG + ". Please try again.", errors.INTERNAL_SERVER_ERROR);
 
         const requestBody = new URLSearchParams();
         requestBody.append("client_id", process.env.INSTAGRAM_APP_ID!.toString());
@@ -482,7 +389,7 @@ export const AuthorizeWithOAuthProviders = extendType({
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
           },
-          // @ts-ignore
+          // @ts-expect-error
           body: requestBody,
         })
           .then(res => {
@@ -494,17 +401,14 @@ export const AuthorizeWithOAuthProviders = extendType({
               success = true;
               instagramAccessToken = data.access_token;
               instagramUserId = data.user_id;
-            } else {
-              success = false;
-            }
+            } else success = false;
           })
           .catch(err => {
-            return { error: { message: `Something went wrong: ${err.message}` } };
+            throw new ApolloError(errors.SOMETHING_WENT_WRONG + `: ${err.message}`, errors.SOMETHING_WENT_WRONG);
           });
 
-        if (!success || !instagramAccessToken || !instagramUserId) {
-          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
-        }
+        if (!success || !instagramAccessToken || !instagramUserId)
+          throw new ApolloError(errors.INTERNAL_SERVER_ERROR, errors.INTERNAL_SERVER_ERROR);
 
         let instagramId: string | undefined = undefined,
           instagramUsername: string | undefined = undefined;
@@ -521,25 +425,23 @@ export const AuthorizeWithOAuthProviders = extendType({
             return res.json();
           })
           .then(data => {
-            if (!data || !data.id || data.id === ("" || " ")) {
-              success = false;
-            } else {
+            if (!data || !data.id || data.id.trim().length === 0) success = false;
+            else {
               success = true;
               instagramId = data.id;
               instagramUsername = data.username;
             }
           })
           .catch(err => {
-            return { error: { message: `Something went wrong: ${err.message}` } };
+            throw new ApolloError(errors.SOMETHING_WENT_WRONG + `: ${err.message}`, errors.SOMETHING_WENT_WRONG);
           });
 
-        if (!success || !instagramId || String(instagramId) !== String(instagramUserId)) {
-          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
-        }
+        if (!success || !instagramId || String(instagramId) !== String(instagramUserId))
+          throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.INTERNAL_SERVER_ERROR);
 
-        const { osId, browserId, countryId, cityId } = findLoginDetails({ details: loginDetails, uaParser });
+        const { osId, browserId, countryId, city } = findLoginDetails({ details: loginDetails, uaParser });
 
-        // search for user in DB
+        // Search for user in DB
         let user: User | undefined = await User.findOne({
           where: { email },
           relations: ["account"],
@@ -554,26 +456,17 @@ export const AuthorizeWithOAuthProviders = extendType({
             instagramId,
             instagramUsername,
             countryId,
-            cityId,
+            city,
           });
-
-          // @ts-ignore
-          if (response.error && !response.user) {
-            // @ts-ignore
-            return { error: { code: response.error.code, message: response.error.message } };
-          }
+          if (response.error && !response.user) throw new ApolloError(response.error.message, response.error.code);
           user = await User.findOne({ where: { email, instagramUsername }, relations: ["account"] });
         }
 
-        // check again for user & its account
-        if (!user || !user.account) {
-          return {
-            error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG },
-          };
-        }
+        // Check again user & its account
+        if (!user || !user.account) throw new ApolloError(errors.INTERNAL_SERVER_ERROR, errors.SOMETHING_WENT_WRONG);
 
-        // logined successfully
-        // create user login details
+        // Logined successfully
+        // Create user login details
         await createUserLoginDetails(
           LoginDetailStatus.loggedIn,
           platformNames.INSTAGRAM,
@@ -581,15 +474,16 @@ export const AuthorizeWithOAuthProviders = extendType({
           osId,
           browserId,
           countryId,
-          cityId,
+          city,
           ipAddr
         );
 
-        // get user's scopes from Redis
-        const scope = await redis.smembers(user.getRedisKey() as KeyType);
-        const refreshToken = generateRefreshToken(user);
+        // Get user's scopes from Redis
+        const scope = await redis.smembers(user.getRedisKey(true) as KeyType);
+        const refreshToken = generateRefreshToken(user, "Instagram");
         const accessToken = generateAccessToken(user, scope);
-        sendRefreshToken(res, refreshToken.token);
+        sendCookieToken(res, refreshToken.token, "refresh");
+        sendCookieToken(res, accessToken.token, "access");
 
         try {
           await redis.hset(user.getRedisKey() as KeyType, "access_token", accessToken.token);
@@ -602,9 +496,8 @@ export const AuthorizeWithOAuthProviders = extendType({
           }
           await user.save();
           await user.account.save();
-          if (instagramId !== String(user.instagramId)) {
-            return { error: { code: errors.INTERNAL_SERVER_ERROR, message: "Something went wrong" } };
-          }
+          if (instagramId !== String(user.instagramId))
+            throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.SOMETHING_WENT_WRONG);
         } catch (err) {
           await createUserLoginDetails(
             LoginDetailStatus.failed,
@@ -613,13 +506,13 @@ export const AuthorizeWithOAuthProviders = extendType({
             osId,
             browserId,
             countryId,
-            cityId,
+            city,
             ipAddr
           );
-          return { error: { message: `${errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
+          throw new ApolloError(errors.SOMETHING_WENT_WRONG + `: ${err.message}`, errors.SOMETHING_WENT_WRONG);
         }
 
-        res.clearCookie("instastate", { httpOnly: true, maxAge: 310000 });
+        res.clearCookie("instastate", { httpOnly: true });
 
         return {
           user,

@@ -1,8 +1,8 @@
+import { COMMON_CONFIG } from "@beach_bar/common";
 import { Dayjs } from "dayjs";
 import {
   BaseEntity,
   Check,
-  Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
@@ -17,7 +17,7 @@ import { Product } from "./Product";
 import { HourTime } from "./Time";
 
 @Entity({ name: "cart_product", schema: "public" })
-@Check(`"quantity" >= 0 AND "quantity" <= 20`)
+@Check(`"quantity" >= ${COMMON_CONFIG.DATA.cartProductQuantity.min} AND "quantity" <= ${COMMON_CONFIG.DATA.cartProductQuantity.max}`)
 export class CartProduct extends BaseEntity {
   @PrimaryColumn({ type: "bigint", name: "cart_id" })
   cartId: bigint;
@@ -25,13 +25,13 @@ export class CartProduct extends BaseEntity {
   @PrimaryColumn({ type: "integer", name: "product_id" })
   productId: number;
 
-  @Column({ type: "smallint", name: "quantity", default: () => 1 })
+  @PrimaryColumn({ type: "smallint", name: "quantity", default: () => 1 })
   quantity: number;
 
-  @Column({ type: "date", name: "date", default: () => `CURRENT_DATE` })
+  @PrimaryColumn({ type: "date", name: "date", default: () => `CURRENT_DATE` })
   date: Dayjs;
 
-  @Column({ type: "integer", name: "time_id" })
+  @PrimaryColumn({ type: "integer", name: "time_id" })
   timeId: number;
 
   @ManyToOne(() => Cart, cart => cart.products, { nullable: false, cascade: ["soft-remove", "recover"] })

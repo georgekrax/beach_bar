@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const apollo_server_express_1 = require("apollo-server-express");
-const query = apollo_server_express_1.gql `
+const graphql_request_1 = require("graphql-request");
+const query = graphql_request_1.gql `
   mutation authorizeWithHashtag(
     $clientId: String!
     $scope: [String!]!

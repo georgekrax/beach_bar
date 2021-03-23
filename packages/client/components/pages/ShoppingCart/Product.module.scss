@@ -1,0 +1,55 @@
+:import("./Bar.module.scss") {
+  borderHeight: borderHeight;
+  borderColor: borderColor;
+}
+
+.container {
+  position: relative;
+  padding: map-get($em-spacers, 24) 0;
+  border-bottom: borderHeight solid borderColor;
+  // margin: map-get($em-spacers, 12) 0;
+  // box-shadow: 0px 1px 6px $grey-4;
+
+  & > * {
+    color: $grey-9;
+  }
+
+  &:last-of-type {
+    border-bottom: none;
+  }
+
+  & > div:first-child:not(.details) {
+    margin-right: map-get($em-spacers, 20) !important;
+  }
+}
+
+.img {
+  border-radius: 14px;
+}
+
+.details {
+  align-self: stretch;
+  height: auto;
+  flex: 1 0;
+
+  & > div:not(.quantity) > div > span:first-child {
+    @extend .semibold;
+    margin-bottom: map-get($em-spacers, 4);
+  }
+
+  & > div:last-child {
+    margin-top: map-get($em-spacers, 8);
+  }
+}
+
+.quantity {
+  margin-top: map-get($em-spacers, 16);
+
+  & > div:first-child {
+    font-size: 1.25rem;
+
+    & > span {
+      color: $grey-8;
+    }
+  }
+}

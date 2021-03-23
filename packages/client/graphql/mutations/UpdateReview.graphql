@@ -1,0 +1,57 @@
+mutation UpdateReview(
+  $reviewId: ID!
+  $ratingValue: Int
+  $visitTypeId: ID
+  $monthTimeId: ID
+  $positiveComment: String
+  $negativeComment: String
+  $review: String
+) {
+  updateReview(
+    reviewId: $reviewId
+    ratingValue: $ratingValue
+    visitTypeId: $visitTypeId
+    monthTimeId: $monthTimeId
+    positiveComment: $positiveComment
+    negativeComment: $negativeComment
+    review: $review
+  ) {
+    review {
+      id
+      ratingValue
+      positiveComment
+      negativeComment
+      review
+      updatedAt
+      timestamp
+      votes {
+        id
+        user {
+          id
+        }
+        type {
+          id
+          value
+        }
+      }
+      answer {
+        id
+        body
+      }
+      beachBar {
+        id
+        name
+        formattedLocation
+      }
+      visitType {
+        id
+        name
+      }
+      month {
+        id
+        value
+      }
+    }
+    updated
+  }
+}

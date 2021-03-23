@@ -11,4 +11,3 @@ exports.S3ACLPermissions = Object.freeze({
     BUCKET_OWNER_FULL_CONTROL: "bucket-owner-full-control",
     LOG_DELIVERY_WRITE: "log-delivery-write",
 });
-//# sourceMappingURL=aws.js.map

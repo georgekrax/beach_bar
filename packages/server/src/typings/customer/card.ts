@@ -1,10 +1,10 @@
 import { Card } from "entity/Card";
-import { AddType, ErrorType, UpdateType } from "typings/.index";
+import { AddType, UpdateType } from "typings/.index";
 
 type CardType = {
   card: Card;
 };
 
-export type AddCardType = (AddType & CardType) | ErrorType;
+export type TAddCard = AddType & CardType;
 
-export type UpdateCardType = (UpdateType & CardType) | ErrorType;
+export type TUpdateCard = UpdateType & CardType;

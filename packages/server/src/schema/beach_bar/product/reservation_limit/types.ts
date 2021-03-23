@@ -49,7 +49,7 @@ export const AddProductReservationLimitResult = unionType({
     t.members("AddProductReservationLimit", "Error");
   },
   resolveType: item => {
-    if (item.name === "Error") {
+    if (item.error) {
       return "Error";
     } else {
       return "AddProductReservationLimit";
@@ -76,7 +76,7 @@ export const UpdateProductReservationLimitResult = unionType({
     t.members("UpdateProductReservationLimit", "Error");
   },
   resolveType: item => {
-    if (item.name === "Error") {
+    if (item.error) {
       return "Error";
     } else {
       return "UpdateProductReservationLimit";

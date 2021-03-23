@@ -1,7 +1,7 @@
 import { errors } from "@beach_bar/common";
 import { User } from "entity/User";
 import { decode, sign } from "jsonwebtoken";
-import { v4 as uuidv4 } from "uuid";
+import { nanoid } from "nanoid";
 import { GeneratedTokenType } from "../returnTypes";
 
 export const generateAccessToken = (user: User, scope: string[]): GeneratedTokenType => {
@@ -15,14 +15,12 @@ export const generateAccessToken = (user: User, scope: string[]): GeneratedToken
       issuer: process.env.TOKEN_ISSUER!.toString(),
       subject: user.id.toString(),
       expiresIn: process.env.ACCESS_TOKEN_EXPIRATION!.toString(),
-      jwtid: uuidv4(),
+      jwtid: nanoid(),
     }
   );
 
   const tokenPayload: any = decode(token);
-  if (tokenPayload === null) {
-    throw new Error(errors.SOMETHING_WENT_WRONG);
-  }
+  if (tokenPayload === null) throw new Error(errors.SOMETHING_WENT_WRONG);
   return {
     token,
     exp: tokenPayload.exp * 1000,
@@ -33,10 +31,14 @@ export const generateAccessToken = (user: User, scope: string[]): GeneratedToken
   };
 };
 
-export const generateRefreshToken = (user: User): GeneratedTokenType => {
+export const generateRefreshToken = (
+  user: User,
+  oauthProvider: "#beach_bar" | "Google" | "Facebook" | "Instagram"
+): GeneratedTokenType => {
   const token = sign(
     {
       tokenVersion: user.tokenVersion,
+      oauth: oauthProvider,
     },
     process.env.REFRESH_TOKEN_SECRET!,
     {
@@ -44,7 +46,7 @@ export const generateRefreshToken = (user: User): GeneratedTokenType => {
       issuer: process.env.TOKEN_ISSUER!.toString(),
       subject: user.id.toString(),
       expiresIn: process.env.REFRESH_TOKEN_EXPIRATION!.toString(),
-      jwtid: uuidv4(),
+      jwtid: nanoid(),
     }
   );
 

@@ -1,0 +1,12 @@
+.btn {
+  align-self: flex-end;
+  margin-top: map-get($em-spacers, 20);
+
+  &.danger {
+    &:not(:hover),
+    &:not(:focus) {
+      color: $grey-10;
+      background-color: $grey-1;
+    }
+  }
+}

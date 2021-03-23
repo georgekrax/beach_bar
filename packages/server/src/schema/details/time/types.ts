@@ -7,10 +7,7 @@ export const HourTimeType = objectType({
   definition(t) {
     t.id("id");
     t.string("value");
-    t.field("utcValue", {
-      type: TimeScalar,
-      description: "The time value in the UTC format and corresponding value",
-    });
+    t.field("utcValue", { type: TimeScalar, resolve: o => o.value });
   },
 });
 
@@ -20,10 +17,7 @@ export const QuarterTimeType = objectType({
   definition(t) {
     t.id("id");
     t.string("value");
-    t.field("utcValue", {
-      type: TimeScalar,
-      description: "The time value in the UTC format and corresponding value",
-    });
+    t.field("utcValue", { type: TimeScalar, resolve: o => o.value });
   },
 });
 

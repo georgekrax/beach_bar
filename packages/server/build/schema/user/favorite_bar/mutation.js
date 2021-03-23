@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserFavoriteBarCrudMutation = void 0;
 const common_1 = require("@beach_bar/common");
+const apollo_server_express_1 = require("apollo-server-express");
 const redisKeys_1 = __importDefault(require("constants/redisKeys"));
 const User_1 = require("entity/User");
 const UserFavoriteBar_1 = require("entity/UserFavoriteBar");
@@ -24,44 +25,48 @@ const types_2 = require("./types");
 exports.UserFavoriteBarCrudMutation = nexus_1.extendType({
     type: "Mutation",
     definition(t) {
-        t.field("addUserFavoriteBar", {
-            type: types_2.AddUserFavoriteBarResult,
-            description: "Add a #beach_bar to user's favorites list",
-            args: {
-                beachBarId: nexus_1.intArg({ description: "The ID value of the #beach_bar, to add to the user's favorites list" }),
-            },
+        t.field("updateFavouriteBeachBar", {
+            type: types_2.UpdateUserFavoriteBarType,
+            description: "Update a user's #beach_bar favourites list",
+            args: { beachBarId: nexus_1.idArg({ description: "The ID value of the #beach_bar, to add / remove from the user's favourites list" }) },
             resolve: (_, { beachBarId }, { payload, redis }) => __awaiter(this, void 0, void 0, function* () {
-                if (!payload) {
-                    return { error: { code: common_1.errors.NOT_AUTHENTICATED_CODE, message: common_1.errors.NOT_AUTHENTICATED_MESSAGE } };
-                }
-                if (!checkScopes_1.checkScopes(payload, ["beach_bar@crud:user"])) {
-                    return {
-                        error: { code: common_1.errors.UNAUTHORIZED_CODE, message: common_1.errors.NOT_AUTHENTICATED_MESSAGE },
-                    };
-                }
-                const user = yield User_1.User.findOne(payload.sub);
-                if (!user) {
-                    return { error: { code: common_1.errors.CONFLICT, message: common_1.errors.SOMETHING_WENT_WRONG } };
-                }
+                var _a;
+                if (!payload || !payload.sub)
+                    throw new apollo_server_express_1.ApolloError(common_1.errors.NOT_AUTHENTICATED_MESSAGE, common_1.errors.NOT_AUTHENTICATED_CODE);
+                if (!checkScopes_1.checkScopes(payload, ["beach_bar@crud:user"]))
+                    throw new apollo_server_express_1.ApolloError(common_1.errors.NOT_AUTHENTICATED_MESSAGE, common_1.errors.UNAUTHORIZED_CODE);
+                const user = yield User_1.User.findOne({
+                    where: { id: payload.sub },
+                    withDeleted: true,
+                    relations: ["favoriteBars", "favoriteBars.user", "favoriteBars.beachBar"],
+                });
+                if (!user)
+                    throw new apollo_server_express_1.ApolloError(common_1.errors.USER_NOT_FOUND_MESSAGE, common_1.errors.NOT_FOUND);
                 const beachBars = (yield redis.lrange(redisKeys_1.default.BEACH_BAR_CACHE_KEY, 0, -1)).map((x) => JSON.parse(x));
                 const beachBar = beachBars.find(bar => String(bar.id) === String(beachBarId));
-                if (!beachBar) {
-                    return { error: { code: common_1.errors.CONFLICT, message: common_1.errors.SOMETHING_WENT_WRONG } };
-                }
-                const newFavoriteBar = UserFavoriteBar_1.UserFavoriteBar.create({
-                    beachBar,
-                    user,
-                });
+                if (!beachBar)
+                    throw new apollo_server_express_1.ApolloError(common_1.errors.BEACH_BAR_DOES_NOT_EXIST, common_1.errors.NOT_FOUND);
                 try {
-                    yield newFavoriteBar.save();
+                    let favouriteBar = (_a = user.favoriteBars) === null || _a === void 0 ? void 0 : _a.find(bar => bar.beachBarId.toString() === beachBarId.toString());
+                    if (!favouriteBar) {
+                        favouriteBar = UserFavoriteBar_1.UserFavoriteBar.create({
+                            beachBar,
+                            user,
+                        });
+                        yield favouriteBar.save();
+                    }
+                    else
+                        yield favouriteBar.softRemove();
+                    if (!favouriteBar)
+                        throw new apollo_server_express_1.ApolloError(common_1.errors.SOMETHING_WENT_WRONG);
+                    return {
+                        favouriteBar,
+                        updated: true,
+                    };
                 }
                 catch (err) {
-                    return { error: { message: `${common_1.errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
+                    throw new apollo_server_express_1.ApolloError(common_1.errors.SOMETHING_WENT_WRONG + ": " + err.message);
                 }
-                return {
-                    favoriteBar: newFavoriteBar,
-                    added: true,
-                };
             }),
         });
         t.field("deleteUserFavoriteBar", {
@@ -70,6 +75,7 @@ exports.UserFavoriteBarCrudMutation = nexus_1.extendType({
             args: {
                 beachBarId: nexus_1.intArg({ description: "The ID value of the #beach_bar, to add to the user's favorites list" }),
             },
+            deprecation: "You should use the `updateUserFavoriteBar` mutation operation, which handles automatically the creation and removement of a user's #beach_bar",
             resolve: (_, { beachBarId }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
                     return { error: { code: common_1.errors.NOT_AUTHENTICATED_CODE, message: common_1.errors.NOT_AUTHENTICATED_MESSAGE } };

@@ -5,4 +5,3 @@ exports.tableNames = Object.freeze({
     USER: "user",
     ACCOUNT: "account",
 });
-//# sourceMappingURL=tableNames.js.map

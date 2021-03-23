@@ -42,11 +42,9 @@ exports.Account = exports.personHonorificTitle = void 0;
 const dayjs_1 = __importStar(require("dayjs"));
 const typeorm_1 = require("typeorm");
 const softRemove_1 = require("utils/softRemove");
-const City_1 = require("./City");
 const Country_1 = require("./Country");
 const LoginDetails_1 = require("./LoginDetails");
 const User_1 = require("./User");
-const UserContactDetails_1 = require("./UserContactDetails");
 var personHonorificTitle;
 (function (personHonorificTitle) {
     personHonorificTitle["dr"] = "Dr";
@@ -68,7 +66,7 @@ let Account = Account_1 = class Account extends typeorm_1.BaseEntity {
     softRemove() {
         return __awaiter(this, void 0, void 0, function* () {
             const findOptions = { accountId: this.id };
-            yield softRemove_1.softRemove(Account_1, { id: this.id }, [UserContactDetails_1.UserContactDetails], findOptions);
+            yield softRemove_1.softRemove(Account_1, { id: this.id }, [], findOptions);
         });
     }
 };
@@ -81,16 +79,16 @@ __decorate([
     __metadata("design:type", Number)
 ], Account.prototype, "userId", void 0);
 __decorate([
-    typeorm_1.Column({ name: "person_title", type: "enum", enum: personHonorificTitle, enumName: "person_honorific_title", nullable: true }),
-    __metadata("design:type", String)
-], Account.prototype, "personTitle", void 0);
+    typeorm_1.Column({ name: "honorific_title", type: "enum", enum: personHonorificTitle, enumName: "person_honorific_title", nullable: true }),
+    __metadata("design:type", Object)
+], Account.prototype, "honorificTitle", void 0);
 __decorate([
     typeorm_1.Column({ name: "img_url", type: "text", nullable: true }),
     __metadata("design:type", String)
 ], Account.prototype, "imgUrl", void 0);
 __decorate([
     typeorm_1.Column({ name: "birthday", type: "date", nullable: true }),
-    __metadata("design:type", dayjs_1.Dayjs)
+    __metadata("design:type", Object)
 ], Account.prototype, "birthday", void 0);
 __decorate([
     typeorm_1.Column({ name: "age", type: "smallint", nullable: true }),
@@ -101,9 +99,17 @@ __decorate([
     __metadata("design:type", Number)
 ], Account.prototype, "countryId", void 0);
 __decorate([
-    typeorm_1.Column({ name: "city_id", type: "integer", nullable: true }),
-    __metadata("design:type", typeof BigInt === "function" ? BigInt : Object)
-], Account.prototype, "cityId", void 0);
+    typeorm_1.Column("varchar", { length: 255, name: "city", nullable: true }),
+    __metadata("design:type", String)
+], Account.prototype, "city", void 0);
+__decorate([
+    typeorm_1.Column("varchar", { length: 20, name: "phone_number", nullable: true }),
+    __metadata("design:type", String)
+], Account.prototype, "phoneNumber", void 0);
+__decorate([
+    typeorm_1.Column({ name: "tel_country_id", type: "integer", nullable: true }),
+    __metadata("design:type", Number)
+], Account.prototype, "telCountryId", void 0);
 __decorate([
     typeorm_1.Column("varchar", { length: 100, name: "address", nullable: true }),
     __metadata("design:type", String)
@@ -123,15 +129,15 @@ __decorate([
 __decorate([
     typeorm_1.ManyToOne(() => Country_1.Country, country => country.accounts, { nullable: true }),
     typeorm_1.JoinColumn({ name: "country_id" }),
-    __metadata("design:type", Country_1.Country)
+    __metadata("design:type", Object)
 ], Account.prototype, "country", void 0);
 __decorate([
-    typeorm_1.ManyToOne(() => City_1.City, city => city.accounts, { nullable: true }),
-    typeorm_1.JoinColumn({ name: "city_id" }),
-    __metadata("design:type", City_1.City)
-], Account.prototype, "city", void 0);
+    typeorm_1.ManyToOne(() => Country_1.Country, country => country.accounts, { nullable: true }),
+    typeorm_1.JoinColumn({ name: "tel_country_id" }),
+    __metadata("design:type", Object)
+], Account.prototype, "telCountry", void 0);
 __decorate([
-    typeorm_1.OneToOne(() => User_1.User, { nullable: false, cascade: ["soft-remove", "recover"] }),
+    typeorm_1.OneToOne(() => User_1.User, user => user.account, { nullable: false, cascade: ["soft-remove", "recover"] }),
     typeorm_1.JoinColumn({ name: "user_id" }),
     __metadata("design:type", User_1.User)
 ], Account.prototype, "user", void 0);
@@ -139,10 +145,6 @@ __decorate([
     typeorm_1.OneToMany(() => LoginDetails_1.LoginDetails, loginDetails => loginDetails.account, { nullable: true }),
     __metadata("design:type", Array)
 ], Account.prototype, "loginDetails", void 0);
-__decorate([
-    typeorm_1.OneToMany(() => UserContactDetails_1.UserContactDetails, userContactDetails => userContactDetails.account, { nullable: true }),
-    __metadata("design:type", Array)
-], Account.prototype, "contactDetails", void 0);
 __decorate([
     typeorm_1.UpdateDateColumn({ name: "updated_at", type: "timestamptz", default: () => `NOW()` }),
     __metadata("design:type", dayjs_1.Dayjs)

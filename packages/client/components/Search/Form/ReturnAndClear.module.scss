@@ -1,0 +1,13 @@
+.container {
+  composes: wrapperMargin from "./Form.module.scss";
+
+  div {
+    color: $secondary;
+    border-color: $secondary;
+    cursor: pointer;
+  }
+
+  // div path {
+    // stroke: $secondary;
+  // }
+}

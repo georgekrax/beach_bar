@@ -8,7 +8,7 @@ exports.BeachBarEntryFeeType = nexus_1.objectType({
     name: "BeachBarEntryFee",
     description: "Represents an entry fee for a #beach_bar",
     definition(t) {
-        t.field("id", { type: graphql_1.BigIntScalar });
+        t.id("id");
         t.float("fee");
         t.field("date", { type: graphql_1.DateScalar, description: "The date this entry fee is applicable for" });
         t.field("beachBar", {
@@ -36,7 +36,7 @@ exports.AddBeachBarEntryFeeResult = nexus_1.unionType({
         t.members("AddBeachBarEntryFee", "Error");
     },
     resolveType: item => {
-        if (item.name === "Error") {
+        if (item.error) {
             return "Error";
         }
         else {
@@ -62,7 +62,7 @@ exports.UpdateBeachBarEntryFeeResult = nexus_1.unionType({
         t.members("UpdateBeachBarEntryFee", "Error");
     },
     resolveType: item => {
-        if (item.name === "Error") {
+        if (item.error) {
             return "Error";
         }
         else {

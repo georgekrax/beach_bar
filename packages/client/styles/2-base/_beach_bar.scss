@@ -1,0 +1,16 @@
+.beach_bar {
+  &__header {
+    color: $grey-9;
+    text-transform: none;
+  }
+
+  &__name-and-location {
+    svg {
+      margin-right: 0.3em;
+    }
+
+    .beach_bar__header {
+      margin-bottom: map-get($em-spacers, 4);
+    }
+  }
+}

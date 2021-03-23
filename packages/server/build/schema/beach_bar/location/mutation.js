@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BeachBarLocationCrudMutation = void 0;
 const common_1 = require("@beach_bar/common");
+const apollo_server_express_1 = require("apollo-server-express");
 const BeachBar_1 = require("entity/BeachBar");
 const BeachBarLocation_1 = require("entity/BeachBarLocation");
 const City_1 = require("entity/City");
@@ -23,10 +24,10 @@ exports.BeachBarLocationCrudMutation = nexus_1.extendType({
     type: "Mutation",
     definition(t) {
         t.field("addBeachBarLocation", {
-            type: types_1.AddBeachBarLocationResult,
+            type: types_1.AddBeachBarLocationType,
             description: "Add (assign) a location to a #beach_bar",
             args: {
-                beachBarId: nexus_1.intArg({ description: "The ID value of the #beach_bar" }),
+                beachBarId: nexus_1.idArg({ description: "The ID value of the #beach_bar" }),
                 address: nexus_1.stringArg({ description: "The address of the #beach_bar" }),
                 zipCode: nexus_1.nullable(nexus_1.stringArg({
                     description: "The zip (postal) code of the #beach_bar",
@@ -34,55 +35,48 @@ exports.BeachBarLocationCrudMutation = nexus_1.extendType({
                 latitude: nexus_1.stringArg({ description: "The latitude of the location of the #beach_bar" }),
                 longitude: nexus_1.stringArg({ description: "The longitude of the location of the #beach_bar" }),
                 countryId: nexus_1.idArg({ description: "The ID value of the country the #beach_bar is located at" }),
-                cityId: nexus_1.idArg({ description: "The ID value of the city the #beach_bar is located at" }),
-                regionId: nexus_1.nullable(nexus_1.intArg({ description: "The ID value of the #beach_bar region" })),
+                city: nexus_1.stringArg({ description: "The city the #beach_bar is located at" }),
+                region: nexus_1.nullable(nexus_1.idArg({ description: "The #beach_bar's region" })),
             },
-            resolve: (_, { beachBarId, address, zipCode, latitude, longitude, countryId, cityId, regionId }, { payload }) => __awaiter(this, void 0, void 0, function* () {
-                if (!payload) {
-                    return { error: { code: common_1.errors.NOT_AUTHENTICATED_CODE, message: common_1.errors.NOT_AUTHENTICATED_MESSAGE } };
-                }
-                if (!checkScopes_1.checkScopes(payload, ["beach_bar@crud:beach_bar"])) {
-                    return {
-                        error: { code: common_1.errors.UNAUTHORIZED_CODE, message: common_1.errors.NOT_REGISTERED_PRIMARY_OWNER },
-                    };
-                }
-                if (!beachBarId || beachBarId <= 0) {
-                    return { error: { code: common_1.errors.INVALID_ARGUMENTS, message: common_1.errors.SOMETHING_WENT_WRONG } };
-                }
-                if (!latitude || latitude.length > 16) {
-                    return { error: { code: common_1.errors.INVALID_ARGUMENTS, message: common_1.errors.SOMETHING_WENT_WRONG } };
-                }
-                if (!longitude || longitude.length > 16) {
-                    return { error: { code: common_1.errors.INVALID_ARGUMENTS, message: common_1.errors.SOMETHING_WENT_WRONG } };
-                }
-                if (!countryId || countryId <= 0) {
-                    return { error: { code: common_1.errors.INVALID_ARGUMENTS, message: "Please provide a valid country" } };
-                }
-                if (!cityId || cityId <= 0) {
-                    return { error: { code: common_1.errors.INVALID_ARGUMENTS, message: "Please provide a valid city" } };
-                }
+            resolve: (_, { beachBarId, address, zipCode, latitude, longitude, countryId, city, region }, { payload }) => __awaiter(this, void 0, void 0, function* () {
+                if (!payload || !payload.sub)
+                    throw new apollo_server_express_1.ApolloError(common_1.errors.NOT_AUTHENTICATED_MESSAGE, common_1.errors.NOT_AUTHENTICATED_CODE);
+                if (!checkScopes_1.checkScopes(payload, ["beach_bar@crud:beach_bar"]))
+                    throw new apollo_server_express_1.ApolloError(common_1.errors.NOT_AUTHENTICATED_CODE, common_1.errors.NOT_REGISTERED_PRIMARY_OWNER);
+                if (!beachBarId || beachBarId.trim().length === 0 || !latitude || latitude.length > 16 || !longitude || longitude.length > 16)
+                    throw new apollo_server_express_1.ApolloError(common_1.errors.SOMETHING_WENT_WRONG, common_1.errors.INVALID_ARGUMENTS);
                 const beachBar = yield BeachBar_1.BeachBar.findOne({
                     where: { id: beachBarId },
                     relations: ["location", "reviews", "features", "products", "entryFees", "restaurants"],
                 });
-                if (!beachBar) {
-                    return { error: { code: common_1.errors.CONFLICT, message: common_1.errors.BEACH_BAR_DOES_NOT_EXIST } };
-                }
+                if (!beachBar)
+                    throw new apollo_server_express_1.ApolloError(common_1.errors.BEACH_BAR_DOES_NOT_EXIST, common_1.errors.NOT_FOUND);
                 const country = yield Country_1.Country.findOne(countryId);
-                if (!country) {
-                    return { error: { code: common_1.errors.CONFLICT, message: "Specified country does not exist" } };
+                if (!country)
+                    throw new apollo_server_express_1.ApolloError("Specified country does not exist", common_1.errors.NOT_FOUND);
+                let newCity = undefined;
+                newCity = yield City_1.City.findOne({ where: `"name" ILIKE '${city}'` });
+                if (!newCity) {
+                    newCity = City_1.City.create({
+                        name: city,
+                        countryId: country.id,
+                        country,
+                    });
+                    yield newCity.save();
                 }
-                const city = yield City_1.City.findOne(cityId);
-                if (!city) {
-                    return { error: { code: common_1.errors.CONFLICT, message: "Specified city does not exist" } };
-                }
-                let region = undefined;
-                if (regionId) {
-                    const beachBarRegion = yield Region_1.Region.findOne(regionId);
-                    if (!region) {
-                        return { error: { code: common_1.errors.CONFLICT, message: "Specified region does not exist" } };
+                let newRegion = undefined;
+                if (region) {
+                    newRegion = yield Region_1.Region.findOne({ where: `"name" ILIKE '${region}'` });
+                    if (!newRegion) {
+                        newRegion = Region_1.Region.create({
+                            name: region,
+                            countryId: country.id,
+                            country: country,
+                            cityId: city.id,
+                            city: newCity,
+                        });
+                        yield newRegion.save();
                     }
-                    region = beachBarRegion;
                 }
                 const newLocation = BeachBarLocation_1.BeachBarLocation.create({
                     beachBar,
@@ -91,18 +85,17 @@ exports.BeachBarLocationCrudMutation = nexus_1.extendType({
                     latitude,
                     longitude,
                     country,
-                    city,
-                    region,
+                    city: newCity,
+                    region: newRegion,
                 });
                 try {
                     yield newLocation.save();
                     yield beachBar.updateRedis();
                 }
                 catch (err) {
-                    if (err.message === 'duplicate key value violates unique constraint "beach_bar_location_beach_bar_id_key"') {
-                        return { error: { code: common_1.errors.CONFLICT, message: "You have already set the location of this #beach_bar" } };
-                    }
-                    return { error: { message: `${common_1.errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
+                    if (err.message === 'duplicate key value violates unique constraint "beach_bar_location_beach_bar_id_key"')
+                        throw new apollo_server_express_1.ApolloError("You have already set the location of this #beach_bar.", common_1.errors.CONFLICT);
+                    throw new apollo_server_express_1.ApolloError(common_1.errors.SOMETHING_WENT_WRONG + ": " + err.message);
                 }
                 return {
                     location: newLocation,
@@ -111,48 +104,40 @@ exports.BeachBarLocationCrudMutation = nexus_1.extendType({
             }),
         });
         t.field("updateBeachBarLocation", {
-            type: types_1.UpdateBeachBarLocationResult,
+            type: types_1.UpdateBeachBarLocationType,
             description: "Update the location details of a #beach_bar",
             args: {
-                locationId: nexus_1.intArg({ description: "The ID value of the #beach_bar location" }),
+                locationId: nexus_1.idArg({ description: "The ID value of the #beach_bar location" }),
                 address: nexus_1.nullable(nexus_1.stringArg({ description: "The address of the #beach_bar" })),
                 zipCode: nexus_1.nullable(nexus_1.stringArg({
                     description: "The zip (postal) code of the #beach_bar",
                 })),
                 latitude: nexus_1.nullable(nexus_1.stringArg({ description: "The latitude of the location of the #beach_bar" })),
                 longitude: nexus_1.nullable(nexus_1.stringArg({ description: "The longitude of the location of the #beach_bar" })),
-                countryId: nexus_1.nullable(nexus_1.intArg({ description: "The ID value of the country the #beach_bar is located at" })),
-                cityId: nexus_1.nullable(nexus_1.intArg({ description: "The ID value of the city the #beach_bar is located at" })),
-                regionId: nexus_1.nullable(nexus_1.intArg({ description: "The ID value of the #beach_bar region" })),
+                countryId: nexus_1.nullable(nexus_1.idArg({ description: "The ID value of the country the #beach_bar is located at" })),
+                city: nexus_1.nullable(nexus_1.stringArg({ description: "The city the #beach_bar is located at" })),
+                region: nexus_1.nullable(nexus_1.stringArg({ description: "The #beach_bar's region" })),
             },
-            resolve: (_, { locationId, address, zipCode, latitude, longitude, countryId, cityId, regionId }, { payload }) => __awaiter(this, void 0, void 0, function* () {
-                if (!payload) {
-                    return { error: { code: common_1.errors.NOT_AUTHENTICATED_CODE, message: common_1.errors.NOT_AUTHENTICATED_MESSAGE } };
-                }
-                if (!checkScopes_1.checkScopes(payload, ["beach_bar@crud:beach_bar", "beach_bar@update:beach_bar"])) {
-                    return {
-                        error: { code: common_1.errors.UNAUTHORIZED_CODE, message: "You are not allowed to update 'this' #beach_bar location details" },
-                    };
-                }
-                if (!locationId || locationId <= 0) {
-                    return { error: { code: common_1.errors.INVALID_ARGUMENTS, message: common_1.errors.SOMETHING_WENT_WRONG } };
-                }
+            resolve: (_, { locationId, address, zipCode, latitude, longitude, countryId, city, region }, { payload }) => __awaiter(this, void 0, void 0, function* () {
+                if (!payload || !payload.sub)
+                    throw new apollo_server_express_1.ApolloError(common_1.errors.NOT_AUTHENTICATED_MESSAGE, common_1.errors.NOT_AUTHENTICATED_CODE);
+                if (!checkScopes_1.checkScopes(payload, ["beach_bar@crud:beach_bar", "beach_bar@update:beach_bar"]))
+                    throw new apollo_server_express_1.ApolloError("You are not allowed to update 'this' #beach_bar location details", common_1.errors.UNAUTHORIZED_CODE);
                 const location = yield BeachBarLocation_1.BeachBarLocation.findOne({
                     where: { id: locationId },
                     relations: ["beachBar", "country", "city", "region"],
                 });
-                if (!location) {
-                    return { error: { code: common_1.errors.CONFLICT, message: common_1.errors.SOMETHING_WENT_WRONG } };
-                }
+                if (!location)
+                    throw new apollo_server_express_1.ApolloError("#beach_bar location does not exist", common_1.errors.NOT_FOUND);
                 try {
-                    const updatedLocation = yield location.update(address, zipCode, latitude, longitude, countryId, cityId, regionId);
+                    const updatedLocation = yield location.update({ address, zipCode, latitude, longitude, countryId, city, region });
                     return {
                         location: updatedLocation,
                         updated: true,
                     };
                 }
                 catch (err) {
-                    return { error: { message: `${common_1.errors.SOMETHING_WENT_WRONG}${err.message ? `: ${err.message}` : ""}}` } };
+                    throw new apollo_server_express_1.ApolloError(common_1.errors.SOMETHING_WENT_WRONG + ": " + err.message);
                 }
             }),
         });

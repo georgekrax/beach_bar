@@ -1,0 +1,8 @@
+mutation AuthorizeWithGoogle($code: String!, $state: String!, $isPrimaryOwner: Boolean = false, $loginDetails: UserLoginDetails) {
+  authorizeWithGoogle(code: $code, state: $state, isPrimaryOwner: $isPrimaryOwner, loginDetails: $loginDetails) {
+    user {
+      id
+      email
+    }
+  }
+}

@@ -13,7 +13,6 @@ exports.LoginDetails = exports.LoginDetailStatus = void 0;
 const dayjs_1 = require("dayjs");
 const typeorm_1 = require("typeorm");
 const Account_1 = require("./Account");
-const City_1 = require("./City");
 const ClientOs_Browser_1 = require("./ClientOs&Browser");
 const Country_1 = require("./Country");
 const LoginPlatform_1 = require("./LoginPlatform");
@@ -54,9 +53,9 @@ __decorate([
     __metadata("design:type", Number)
 ], LoginDetails.prototype, "countryId", void 0);
 __decorate([
-    typeorm_1.Column({ name: "city_id", type: "bigint", nullable: true }),
-    __metadata("design:type", typeof BigInt === "function" ? BigInt : Object)
-], LoginDetails.prototype, "cityId", void 0);
+    typeorm_1.Column("varchar", { length: 255, name: "city", nullable: true }),
+    __metadata("design:type", String)
+], LoginDetails.prototype, "city", void 0);
 __decorate([
     typeorm_1.Column({ type: "cidr", name: "ip_addr", nullable: true }),
     __metadata("design:type", String)
@@ -90,11 +89,6 @@ __decorate([
     typeorm_1.JoinColumn({ name: "country_id" }),
     __metadata("design:type", Country_1.Country)
 ], LoginDetails.prototype, "country", void 0);
-__decorate([
-    typeorm_1.ManyToOne(() => City_1.City, city => city.loginDetails, { nullable: true }),
-    typeorm_1.JoinColumn({ name: "city_id" }),
-    __metadata("design:type", City_1.City)
-], LoginDetails.prototype, "city", void 0);
 LoginDetails = __decorate([
     typeorm_1.Entity({ name: "login_details", schema: "public" })
 ], LoginDetails);

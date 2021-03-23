@@ -40,7 +40,7 @@ const jsonwebtoken_1 = require("jsonwebtoken");
 const url_1 = require("url");
 const generateAuthTokens_1 = require("utils/auth/generateAuthTokens");
 const refreshTokenForHashtagUser_1 = require("utils/auth/refreshTokenForHashtagUser");
-const sendRefreshToken_1 = require("utils/auth/sendRefreshToken");
+const sendCookieToken_1 = require("utils/auth/sendCookieToken");
 const index_1 = require("../index");
 exports.router = express.Router();
 exports.router.get("/google/callback", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -62,7 +62,7 @@ exports.router.get("/instagram/callback", (req, res) => __awaiter(void 0, void 0
     res.send(`<h2>Redirected from Instagram</h2><p>Code: ${code}</p><br><p>State: ${state}</p>`);
 }));
 exports.router.post("/refresh_token", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const refreshToken = req.cookies.me;
+    const refreshToken = req.cookies[process.env.REFRESH_TOKEN_COOKIE_NAME.toString()] || req.headers["x-refetch-token"];
     if (!refreshToken) {
         return res.status(422).send({
             success: false,
@@ -77,41 +77,37 @@ exports.router.post("/refresh_token", (req, res) => __awaiter(void 0, void 0, vo
     catch (err) {
         if (err.name === "TokenExpiredError" || err.message === "jwt expired") {
             const decodedRefreshTokenPayload = jsonwebtoken_1.decode(refreshToken);
-            if (!decodedRefreshTokenPayload) {
+            if (!decodedRefreshTokenPayload)
                 return res.status(500).send({
                     success: false,
                     accessToken: null,
-                    error: "Something went wrong",
+                    error: common_1.errors.JWT_EXPIRED,
                 });
-            }
             const user = yield User_1.User.findOne({
                 where: { id: decodedRefreshTokenPayload.sub },
                 select: ["id", "email", "tokenVersion"],
                 relations: ["account"],
             });
-            if (!user) {
+            if (!user)
                 return res.status(500).send({
                     success: false,
                     accessToken: null,
-                    error: "Something went wrong",
+                    error: common_1.errors.USER_NOT_FOUND_MESSAGE,
                 });
-            }
-            if (user.tokenVersion !== payload.tokenVersion) {
+            if (user.tokenVersion !== payload.tokenVersion)
                 return res.status(422).send({
                     success: false,
                     accessToken: null,
                     error: "Invalid refresh token",
                 });
-            }
             const userAccount = user.account;
-            if (!userAccount) {
+            if (!userAccount)
                 return res.status(404).send({
                     success: false,
                     accessToken: null,
                     error: common_1.errors.SOMETHING_WENT_WRONG,
                 });
-            }
-            if (user.hashtagId) {
+            if (user.hashtagId)
                 try {
                     yield refreshTokenForHashtagUser_1.refreshTokenForHashtagUser(user, index_1.redis);
                 }
@@ -122,16 +118,15 @@ exports.router.post("/refresh_token", (req, res) => __awaiter(void 0, void 0, vo
                         error: err.message,
                     });
                 }
-            }
-            const newRefreshToken = generateAuthTokens_1.generateRefreshToken(user);
+            const newRefreshToken = generateAuthTokens_1.generateRefreshToken(user, payload.oauth);
             yield index_1.redis.hset(user.getRedisKey(), "refresh_token", newRefreshToken.token);
-            sendRefreshToken_1.sendRefreshToken(res, newRefreshToken.token);
+            sendCookieToken_1.sendCookieToken(res, newRefreshToken.token, "refresh");
         }
         else {
             return res.send({
                 success: false,
                 accessToken: null,
-                error: `${common_1.errors.SOMETHING_WENT_WRONG}. ${err.message}`,
+                error: `${common_1.errors.SOMETHING_WENT_WRONG}: ${err.message}`,
             });
         }
     }
@@ -151,21 +146,19 @@ exports.router.post("/refresh_token", (req, res) => __awaiter(void 0, void 0, vo
         });
     }
     const user = yield User_1.User.findOne(payload.sub);
-    if (!user) {
+    if (!user)
         return res.status(404).send({
             success: false,
             accessToken: null,
             error: common_1.errors.USER_DOES_NOT_EXIST,
         });
-    }
-    if (user.tokenVersion !== payload.tokenVersion) {
+    if (user.tokenVersion !== payload.tokenVersion)
         return res.status(422).send({
             success: false,
             accessToken: null,
             error: common_1.errors.INVALID_REFRESH_TOKEN,
         });
-    }
-    if (user.hashtagId) {
+    if (user.hashtagId && payload.oauth === "#beach_bar")
         try {
             yield refreshTokenForHashtagUser_1.refreshTokenForHashtagUser(user, index_1.redis);
         }
@@ -176,10 +169,19 @@ exports.router.post("/refresh_token", (req, res) => __awaiter(void 0, void 0, vo
                 error: err.message,
             });
         }
-    }
     const scope = yield index_1.redis.smembers(user.getRedisKey(true));
     const newAccessToken = generateAuthTokens_1.generateAccessToken(user, scope);
-    yield index_1.redis.hset(user.getRedisKey(), "access_token", newAccessToken.token);
+    try {
+        yield index_1.redis.hset(user.getRedisKey(), "access_token", newAccessToken.token);
+    }
+    catch (err) {
+        return res.send({
+            success: false,
+            accessToken: null,
+            error: err.message,
+        });
+    }
+    sendCookieToken_1.sendCookieToken(res, newAccessToken.token, "access");
     return res.send({
         success: true,
         accessToken: {

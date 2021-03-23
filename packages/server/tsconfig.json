@@ -8,6 +8,7 @@
     "outDir": "./build",
     "rootDir": "src",
     "moduleResolution": "node",
+    "experimentalDecorators": true,
     "baseUrl": "./src",
     "paths": {
       "entity/*": ["entity/*"],
@@ -17,5 +18,5 @@
     }
   },
   "exclude": ["node_modules", "build"],
-  "include": ["./src/**/*.ts"]
+  "include": ["./src/**/*.ts", "src/schema/user/contact_details"]
 }

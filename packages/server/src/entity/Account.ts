@@ -15,11 +15,9 @@ import {
   UpdateDateColumn,
 } from "typeorm";
 import { softRemove } from "utils/softRemove";
-import { City } from "./City";
 import { Country } from "./Country";
 import { LoginDetails } from "./LoginDetails";
 import { User } from "./User";
-import { UserContactDetails } from "./UserContactDetails";
 
 export enum personHonorificTitle {
   dr = "Dr",
@@ -39,14 +37,14 @@ export class Account extends BaseEntity {
   @Column({ name: "user_id", unique: true, type: "integer" })
   userId: number;
 
-  @Column({ name: "person_title", type: "enum", enum: personHonorificTitle, enumName: "person_honorific_title", nullable: true })
-  personTitle?: string;
+  @Column({ name: "honorific_title", type: "enum", enum: personHonorificTitle, enumName: "person_honorific_title", nullable: true })
+  honorificTitle?: string | null;
 
   @Column({ name: "img_url", type: "text", nullable: true })
   imgUrl?: string;
 
   @Column({ name: "birthday", type: "date", nullable: true })
-  birthday?: Dayjs;
+  birthday?: Dayjs | "none" | null;
 
   @Column({ name: "age", type: "smallint", nullable: true })
   age?: number;
@@ -54,8 +52,14 @@ export class Account extends BaseEntity {
   @Column({ name: "country_id", type: "integer", nullable: true })
   countryId?: number;
 
-  @Column({ name: "city_id", type: "integer", nullable: true })
-  cityId?: bigint;
+  @Column("varchar", { length: 255, name: "city", nullable: true })
+  city?: string;
+
+  @Column("varchar", { length: 20, name: "phone_number", nullable: true })
+  phoneNumber?: string;
+
+  @Column({ name: "tel_country_id", type: "integer", nullable: true })
+  telCountryId?: number;
 
   @Column("varchar", { length: 100, name: "address", nullable: true })
   address?: string;
@@ -71,21 +75,18 @@ export class Account extends BaseEntity {
 
   @ManyToOne(() => Country, country => country.accounts, { nullable: true })
   @JoinColumn({ name: "country_id" })
-  country?: Country;
+  country?: Country | null;
 
-  @ManyToOne(() => City, city => city.accounts, { nullable: true })
-  @JoinColumn({ name: "city_id" })
-  city?: City;
+  @ManyToOne(() => Country, country => country.accounts, { nullable: true })
+  @JoinColumn({ name: "tel_country_id" })
+  telCountry?: Country | null;
 
-  @OneToOne(() => User, { nullable: false, cascade: ["soft-remove", "recover"] })
+  @OneToOne(() => User, user => user.account, { nullable: false, cascade: ["soft-remove", "recover"] })
   @JoinColumn({ name: "user_id" })
   user: User;
 
   @OneToMany(() => LoginDetails, loginDetails => loginDetails.account, { nullable: true })
   loginDetails?: LoginDetails[];
-
-  @OneToMany(() => UserContactDetails, userContactDetails => userContactDetails.account, { nullable: true })
-  contactDetails?: UserContactDetails[];
 
   @UpdateDateColumn({ name: "updated_at", type: "timestamptz", default: () => `NOW()` })
   updatedAt: Dayjs;
@@ -108,6 +109,6 @@ export class Account extends BaseEntity {
 
   async softRemove(): Promise<any> {
     const findOptions: any = { accountId: this.id };
-    await softRemove(Account, { id: this.id }, [UserContactDetails], findOptions);
+    await softRemove(Account, { id: this.id }, [], findOptions);
   }
 }

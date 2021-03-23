@@ -1,0 +1,54 @@
+$padding: map-get($em-spacers, 16);
+
+.container {
+  height: auto;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 5px 6px 18px $grey-6;
+  max-width: 480px;
+
+  &:not(:last-child) {
+    margin-bottom: map-get($em-spacers, 40);
+  }
+}
+
+.cardContainer {
+  background: linear-gradient(to right, #ec008c, #fc6767);
+  padding: $padding;
+  box-shadow: inset 0px 0px 12px rgba($grey-10, 35%);
+
+  & > div {
+    @extend .w-100;
+    height: min(40vw, 200px);
+
+    :global {
+      @include path-classNames() {
+        stroke: $grey-1;
+        stroke-width: 0.5px;
+      }
+    }
+  }
+}
+
+.edit {
+  background-color: $grey-4;
+  padding: calc(#{$padding} * 0.75) $padding;
+
+  & > div:first-child > h6 {
+    margin-left: map-get($em-spacers, 8);
+    margin-bottom: 0.1em;
+    color: $secondary;
+  }
+}
+
+.actions > button {
+  padding: 0.4em;
+
+  &:not(:last-child) {
+    margin-right: map-get($em-spacers, 12);
+  }
+
+  &:hover > svg > * {
+    stroke: $grey-1;
+  }
+}

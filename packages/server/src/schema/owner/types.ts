@@ -64,7 +64,7 @@ export const AddBeachBarOwnerResult = unionType({
     t.members("AddBeachBarOwner", "Error");
   },
   resolveType: item => {
-    if (item.name === "Error") {
+    if (item.error) {
       return "Error";
     } else {
       return "AddBeachBarOwner";
@@ -93,7 +93,7 @@ export const UpdateBeachBarOwnerResult = unionType({
     t.members("UpdateBeachBarOwner", "Error");
   },
   resolveType: item => {
-    if (item.name === "Error") {
+    if (item.error) {
       return "Error";
     } else {
       return "UpdateBeachBarOwner";

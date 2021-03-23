@@ -1,0 +1,5 @@
+.box {
+  border: 1px solid $grey-7;
+  border-radius: 14px;
+  padding: map-get($em-spacers, 8);
+}

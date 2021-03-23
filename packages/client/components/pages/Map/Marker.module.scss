@@ -1,0 +1,22 @@
+.btn {
+  width: auto;
+  height: auto;
+  appearance: none;
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  box-shadow: none;
+  pointer-events: all;
+
+  @include hover-classNames() {
+    background-color: transparent;
+    border: none;
+  }
+
+  :global {
+    @include path--filled-classNames() {
+      fill: $volcano-5;
+      stroke: $volcano-5;
+    }
+  }
+}

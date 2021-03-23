@@ -2,7 +2,7 @@ import { gql } from "apollo-server-express";
 
 const query = gql`
   mutation updateUser(
-    $email: EmailAddress
+    $email: Email
     $firstName: String
     $lastName: String
     $pictureUrl: URL

@@ -1,5 +1,10 @@
 $wrapper-padding: 1.5em;
 $layout-padding: $wrapper-padding/1.25;
+$layout-login-shape-size: 100px;
 $tapbar-height: 72px;
 $tapbar-border-radius: 20px;
+$searchbar-bg: scale-color($grey-4, $lightness: 60%);
+
 $home-list-gap: map-get($em-spacers, 16);
+$home-img-height: 80vw;
+$home-img-content-width: 86%;

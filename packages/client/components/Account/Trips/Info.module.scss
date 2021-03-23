@@ -1,0 +1,9 @@
+.container {
+  margin-bottom: map-get($em-spacers, 12);
+
+  & > div {
+    &:first-child {
+      color: $grey-8;
+    }
+  }
+}

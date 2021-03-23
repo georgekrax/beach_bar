@@ -1,15 +1,27 @@
 import { Dayjs } from "dayjs";
-import { BaseEntity, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
+import {
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from "typeorm";
 import { softRemove } from "utils/softRemove";
 import { BeachBar } from "./BeachBar";
 import { User } from "./User";
 
 @Entity({ name: "user_favorite_bar", schema: "public" })
 export class UserFavoriteBar extends BaseEntity {
-  @PrimaryColumn({ type: "integer", name: "user_id" })
+  @PrimaryGeneratedColumn({ type: "bigint" })
+  id: bigint;
+
+  @Column({ type: "integer", name: "user_id" })
   userId: number;
 
-  @PrimaryColumn({ type: "integer", name: "beach_bar_id" })
+  @Column({ type: "integer", name: "beach_bar_id" })
   beachBarId: number;
 
   @ManyToOne(() => User, user => user.favoriteBars, { nullable: false })
@@ -17,7 +29,7 @@ export class UserFavoriteBar extends BaseEntity {
   user: User;
 
   @ManyToOne(() => BeachBar, beachBar => beachBar.usersFavorite, { nullable: false })
-  @JoinColumn({ name: "bar_id" })
+  @JoinColumn({ name: "beach_bar_id" })
   beachBar: BeachBar;
 
   @CreateDateColumn({ name: "timestamp", type: "timestamptz", default: () => `NOW()` })

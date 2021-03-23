@@ -28,6 +28,7 @@ const typeorm_1 = require("typeorm");
 const SearchFilter_1 = require("./SearchFilter");
 const SearchInputValue_1 = require("./SearchInputValue");
 const User_1 = require("./User");
+const SearchSort_1 = require("./SearchSort");
 let UserSearch = class UserSearch extends typeorm_1.BaseEntity {
     getRedisKey(userId) {
         if (userId !== undefined) {
@@ -70,6 +71,10 @@ __decorate([
     __metadata("design:type", typeof BigInt === "function" ? BigInt : Object)
 ], UserSearch.prototype, "inputValueId", void 0);
 __decorate([
+    typeorm_1.Column({ type: "smallint", name: "sort_id", nullable: true }),
+    __metadata("design:type", Number)
+], UserSearch.prototype, "sortId", void 0);
+__decorate([
     typeorm_1.ManyToOne(() => User_1.User, user => user.searches, { nullable: true, cascade: ["soft-remove", "recover"] }),
     typeorm_1.JoinColumn({ name: "user_id" }),
     __metadata("design:type", User_1.User)
@@ -79,6 +84,11 @@ __decorate([
     typeorm_1.JoinColumn({ name: "input_value_id" }),
     __metadata("design:type", SearchInputValue_1.SearchInputValue)
 ], UserSearch.prototype, "inputValue", void 0);
+__decorate([
+    typeorm_1.ManyToOne(() => SearchSort_1.SearchSort, searchSort => searchSort.searches, { nullable: true }),
+    typeorm_1.JoinColumn({ name: "input_value_id" }),
+    __metadata("design:type", SearchSort_1.SearchSort)
+], UserSearch.prototype, "sort", void 0);
 __decorate([
     typeorm_1.ManyToMany(() => SearchFilter_1.SearchFilter, searchFilter => searchFilter.userSearches, { nullable: true }),
     typeorm_1.JoinTable({

@@ -11,52 +11,42 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserQuery = void 0;
 const common_1 = require("@beach_bar/common");
-const nexus_1 = require("nexus");
+const apollo_server_express_1 = require("apollo-server-express");
 const User_1 = require("entity/User");
+const nexus_1 = require("nexus");
 const userInfoPayloadScope_1 = require("utils/userInfoPayloadScope");
 const types_1 = require("./types");
 exports.UserQuery = nexus_1.extendType({
     type: "Query",
     definition(t) {
-        t.field("me", {
-            type: types_1.UserResult,
+        t.nullable.field("me", {
+            type: types_1.UserType,
             description: "Returns current authenticated user",
             resolve: (_, __, { payload }) => __awaiter(this, void 0, void 0, function* () {
-                if (!payload) {
-                    return { error: { code: common_1.errors.NOT_AUTHENTICATED_CODE, message: common_1.errors.NOT_AUTHENTICATED_MESSAGE } };
-                }
+                if (!payload)
+                    return null;
                 if (!payload.scope.some(scope => ["profile", "beach_bar@crud:user", "beach_bar@read:user"].includes(scope)) ||
-                    !payload.scope.includes("email")) {
-                    return {
-                        error: {
-                            code: common_1.errors.UNAUTHORIZED_CODE,
-                            message: "You are not allowed to access 'this' user's info",
-                        },
-                    };
-                }
+                    !payload.scope.includes("email"))
+                    throw new apollo_server_express_1.ApolloError("You are not allowed to access this user's info", common_1.errors.UNAUTHORIZED_CODE);
                 const user = yield User_1.User.findOne({
                     where: { id: payload.sub },
                     relations: [
                         "account",
-                        "account.contactDetails",
                         "account.country",
                         "account.country.currency",
-                        "account.city",
                         "customer",
                         "customer.reviews",
                         "customer.reviews.beachBar",
                         "customer.reviews.monthTime",
                         "customer.reviews.visitType",
+                        "reviewVotes",
+                        "reviewVotes.type",
+                        "reviewVotes.review",
+                        "reviewVotes.user",
                     ],
                 });
-                if (!user) {
-                    return {
-                        error: {
-                            code: common_1.errors.NOT_FOUND,
-                            message: common_1.errors.USER_NOT_FOUND_MESSAGE,
-                        },
-                    };
-                }
+                if (!user)
+                    return null;
                 return userInfoPayloadScope_1.userInfoPayloadScope(payload, user);
             }),
         });

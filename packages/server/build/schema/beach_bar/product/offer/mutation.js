@@ -93,10 +93,7 @@ exports.CouponCodeCrudMutation = nexus_1.extendType({
             type: types_2.UpdateCouponCodeResult,
             description: "Update a coupon code",
             args: {
-                couponCodeId: nexus_1.arg({
-                    type: graphql_1.BigIntScalar,
-                    description: "The ID value of the coupon code",
-                }),
+                couponCodeId: nexus_1.idArg({ description: "The ID value of the coupon code" }),
                 title: nexus_1.nullable(nexus_1.stringArg({ description: "The name or a short description of the coupon code" })),
                 discountPercentage: nexus_1.nullable(nexus_1.floatArg({ description: "The percentage of the coupon code discount" })),
                 validUntil: nexus_1.nullable(nexus_1.arg({
@@ -158,10 +155,7 @@ exports.CouponCodeCrudMutation = nexus_1.extendType({
         t.field("deleteCouponCode", {
             type: types_1.DeleteResult,
             args: {
-                couponCodeId: nexus_1.arg({
-                    type: graphql_1.BigIntScalar,
-                    description: "The ID value of the coupon code",
-                }),
+                couponCodeId: nexus_1.idArg({ description: "The ID value of the coupon code" }),
             },
             resolve: (_, { couponCodeId }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -259,10 +253,7 @@ exports.OfferCampaignCrudMutation = nexus_1.extendType({
             type: types_2.UpdateOfferCampaignResult,
             description: "Update the details of an offer campaign of a #beach_bar",
             args: {
-                offerCampaignId: nexus_1.arg({
-                    type: graphql_1.BigIntScalar,
-                    description: "The ID value of the offer campaign",
-                }),
+                offerCampaignId: nexus_1.idArg({ description: "The ID value of the offer campaign" }),
                 productIds: nexus_1.list(nexus_1.nullable(nexus_1.intArg({
                     description: "The ID value of the product",
                 }))),
@@ -323,10 +314,7 @@ exports.OfferCampaignCrudMutation = nexus_1.extendType({
             type: types_1.DeleteResult,
             description: "Delete an offer campaign of a #beach_bar",
             args: {
-                offerCampaignId: nexus_1.arg({
-                    type: graphql_1.BigIntScalar,
-                    description: "The ID value of the offer campaign",
-                }),
+                offerCampaignId: nexus_1.idArg({ description: "The ID value of the offer campaign" }),
             },
             resolve: (_, { offerCampaignId }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -367,10 +355,7 @@ exports.OfferCampaignCodeCrudMutation = nexus_1.extendType({
             type: types_2.AddOfferCampaignCodeResult,
             description: "Add (issue) a new offer code",
             args: {
-                offerCampaignId: nexus_1.arg({
-                    type: graphql_1.BigIntScalar,
-                    description: "The ID value of the offer campaign",
-                }),
+                offerCampaignId: nexus_1.idArg({ description: "The ID value of the offer campaign" }),
             },
             resolve: (_, { offerCampaignId }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {
@@ -408,10 +393,7 @@ exports.OfferCampaignCodeCrudMutation = nexus_1.extendType({
             type: types_1.DeleteResult,
             description: "Delete (invalidate) an offer code of an offer campaign",
             args: {
-                offerCodeId: nexus_1.arg({
-                    type: graphql_1.BigIntScalar,
-                    description: "The ID value of the offer campaign",
-                }),
+                offerCodeId: nexus_1.idArg({ description: "The ID value of the offer campaign" }),
             },
             resolve: (_, { offerCodeId }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {

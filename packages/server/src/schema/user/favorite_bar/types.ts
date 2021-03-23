@@ -1,4 +1,4 @@
-import { objectType, unionType } from "nexus";
+import { objectType } from "nexus";
 import { BeachBarType } from "schema/beach_bar/types";
 import { UserType } from "../types";
 
@@ -19,31 +19,31 @@ export const UserFavoriteBarType = objectType({
   },
 });
 
-export const AddUserFavoriteBarType = objectType({
-  name: "AddUserFavoriteBar",
-  description: "Info to be returned when a user add #beach_bar to his / her favorite list",
+export const UpdateUserFavoriteBarType = objectType({
+  name: "UpdateUserFavoriteBar",
+  description: "Info to be returned when a user's #beach_bar favourite list is updated",
   definition(t) {
-    t.field("beachBar", {
+    t.field("favouriteBar", {
       type: UserFavoriteBarType,
-      description: "The #beach_bar that is added",
-      resolve: o => o.beachBar,
+      description: "The #beach_bar that is added / removed",
+      resolve: o => o.favouriteBar,
     });
-    t.boolean("added", {
-      description: "A boolean that indicates if the #beach_bar has been successfully being added to the user's favorites",
+    t.boolean("updated", {
+      description: "A boolean that indicates if the user's favorites #beach_bar list is updated",
     });
   },
 });
 
-export const AddUserFavoriteBarResult = unionType({
-  name: "AddUserFavoriteBarResult",
-  definition(t) {
-    t.members("AddUserFavoriteBar", "Error");
-  },
-  resolveType: item => {
-    if (item.name === "Error") {
-      return "Error";
-    } else {
-      return "AddUserFavoriteBar";
-    }
-  },
-});
+// export const AddUserFavoriteBarResult = unionType({
+//   name: "AddUserFavoriteBarResult",
+//   definition(t) {
+//     t.members("AddUserFavoriteBar", "Error");
+//   },
+//   resolveType: item => {
+//     if (item.error) {
+//       return "Error";
+//     } else {
+//       return "AddUserFavoriteBar";
+//     }
+//   },
+// });

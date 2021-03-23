@@ -11,37 +11,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CartCrudMutation = void 0;
 const common_1 = require("@beach_bar/common");
-const graphql_1 = require("@the_hashtag/common/dist/graphql");
 const Cart_1 = require("entity/Cart");
 const nexus_1 = require("nexus");
-const typeorm_1 = require("typeorm");
 const types_1 = require("../types");
-const types_2 = require("./types");
 exports.CartCrudMutation = nexus_1.extendType({
     type: "Mutation",
     definition(t) {
-        t.field("getOrCreateCart", {
-            type: types_2.CartType,
-            description: "Get the latest cart of an authenticated user or create one",
-            args: {
-                cartId: nexus_1.nullable(nexus_1.arg({
-                    type: graphql_1.BigIntScalar,
-                    description: "The ID values of the shopping cart, if it is created previously",
-                })),
-            },
-            resolve: (_, { cartId }, { payload }) => __awaiter(this, void 0, void 0, function* () {
-                const cart = yield typeorm_1.getCustomRepository(Cart_1.CartRepository).getOrCreateCart(payload, cartId);
-                if (!cart) {
-                    return null;
-                }
-                return cart;
-            }),
-        });
         t.field("deleteCart", {
             type: types_1.DeleteResult,
-            description: "Delete a cart after a transition. This mutation is also called if the user is not authenticated & closes the browser tab",
+            description: "Delete a cart after a transaction. This mutation is also called if the user is not authenticated & closes the browser tab",
             args: {
-                cartId: nexus_1.arg({ type: graphql_1.BigIntScalar, description: "The ID values of the shopping cart" }),
+                cartId: nexus_1.idArg({ description: "The ID values of the shopping cart" }),
             },
             resolve: (_, { cartId }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!cartId || cartId <= 0) {

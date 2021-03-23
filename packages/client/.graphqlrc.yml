@@ -1,8 +1,26 @@
-schema: http://localhost:4000/graphql/
+schema: "http://localhost:4000/graphql"
+documents: ./graphql/**/*.graphql
 extensions:
   codegen:
     generates:
+      ./graphql/generated.ts:
+        config:
+          avoidOptionals: true
+          immutableTypes: true
+          maybeValue: T | undefined
+          namingConvention:
+            - transformUnderscore: false
+          reactApolloVersion: 3
+          withComponent: false
+          withHOC: false
+          withHooks: true
+        plugins:
+          - typescript
+          - typescript-operations
+          - typescript-react-apollo
       ./graphql/schema.graphql:
         plugins:
           - schema-ast
-# documents: ./src/components/**/*.jsx
+      ./lib/apollo/apollo-helpers.ts:
+        plugins:
+          - typescript-apollo-client-helpers

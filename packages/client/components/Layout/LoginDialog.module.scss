@@ -1,0 +1,106 @@
+.loginDialog {
+  width: min(90%, 32em);
+  overflow: visible;
+  min-height: 7em;
+}
+
+.imgContainer {
+  position: absolute;
+  top: -8vh;
+  left: -36px;
+  z-index: 1;
+  overflow: visible;
+}
+
+.rectangle {
+  position: absolute;
+  top: 8%;
+  right: 15%;
+  transform: rotate(-20deg);
+  border-radius: 10px;
+  background-color: #ffcb10;
+}
+
+.ellipse {
+  $half-size: calc(-#{$layout-login-shape-size} / 2);
+  position: absolute;
+  top: $half-size;
+  right: $half-size;
+  border-radius: 50%;
+  background-color: $blue-6;
+
+  &#{Container} {
+    position: absolute;
+    height: $layout-login-shape-size;
+    overflow: hidden;
+    border-top-right-radius: 20px;
+  }
+}
+
+.content {
+  position: relative;
+  margin-top: 5em;
+  padding: map-get($em-spacers, 20);
+  border-radius: 24px;
+  box-shadow: 0px -4px 16px rgba($grey-10, 8%);
+  background-color: $grey-1;
+  z-index: 2;
+  min-height: 20em;
+}
+
+.container {
+  @extend .w-100;
+  @extend .flex-row-flex-start-center;
+  overflow: hidden;
+  margin-top: -(map-get($em-spacers, 4));
+
+  & > div {
+    @extend .w-100;
+    @extend .flex-column-center-center;
+    flex-shrink: 0;
+    margin-top: map-get($em-spacers, 8);
+  }
+}
+
+.oauth {
+  padding: 0.8em;
+  margin: map-get($em-spacers, 8);
+  border: none;
+  background-color: $grey-4;
+
+  &:first-of-type:hover {
+    background-color: $blue-4;
+  }
+
+  &:not(:first-of-type):hover {
+    background-color: $grey-5;
+  }
+
+  &#{Container} {
+    flex-wrap: wrap;
+  }
+}
+
+.orContainer {
+  max-width: 25em;
+
+  & > span {
+    &:first-of-type,
+    &:last-of-type {
+      height: 1px;
+      background-color: $grey-6;
+      border-radius: 8px;
+      flex: 1;
+    }
+
+    &:nth-of-type(2) {
+      margin: 0 map-get($em-spacers, 12) map-get($em-spacers, 4);
+    }
+  }
+}
+
+@include breakpoint("xs", "max-width") {
+  .oauth:first-of-type {
+    flex-basis: 85%;
+  }
+}

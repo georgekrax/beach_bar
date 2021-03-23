@@ -1,0 +1,27 @@
+mutation AddCustomerPaymentMethod(
+  $token: String!
+  $customerId: ID!
+  $cardholderName: String!
+  $isDefault: Boolean = false
+) {
+  addCustomerPaymentMethod(
+    source: $token
+    customerId: $customerId
+    cardholderName: $cardholderName
+    isDefault: $isDefault
+  ) {
+    card {
+      id
+      expMonth
+      expYear
+      last4
+      cardholderName
+      isDefault
+      brand {
+        id
+        name
+      }
+    }
+    added
+  }
+}

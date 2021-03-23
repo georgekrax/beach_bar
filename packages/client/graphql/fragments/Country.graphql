@@ -1,0 +1,19 @@
+fragment Country on Country {
+  id
+  name
+  alpha2Code
+  alpha3Code
+  callingCode
+  isEu
+  cities {
+    id
+    name
+  }
+  currency {
+    id
+    name
+    isoCode
+    symbol
+    secondSymbol
+  }
+}

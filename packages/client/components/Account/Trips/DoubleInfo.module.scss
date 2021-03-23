@@ -1,0 +1,15 @@
+.container {
+  & > div:last-child,
+  & > svg:last-child,
+  & > span:last-child {
+    color: $grey-8;
+  }
+
+  &.row {
+    & > div:last-child,
+    & > svg:last-child,
+    & > span:last-child {
+      margin-left: map-get($em-spacers, 4);
+    }
+  }
+}

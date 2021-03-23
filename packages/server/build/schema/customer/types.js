@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UpdateCustomerResult = exports.UpdateCustomerType = exports.AddCustomerResult = exports.AddCustomerType = exports.CustomerType = void 0;
+exports.UpdateCustomerType = exports.AddCustomerType = exports.CustomerType = void 0;
 const graphql_1 = require("@the_hashtag/common/dist/graphql");
 const nexus_1 = require("nexus");
 const countryTypes_1 = require("../details/countryTypes");
@@ -10,9 +10,9 @@ exports.CustomerType = nexus_1.objectType({
     name: "Customer",
     description: "Represents a customer",
     definition(t) {
-        t.field("id", { type: graphql_1.BigIntScalar });
+        t.id("id");
         t.field("email", { type: graphql_1.EmailScalar });
-        t.string("phoneNumber");
+        t.nullable.string("phoneNumber");
         t.nullable.field("user", {
             type: types_1.UserType,
             description: "The user that is a customer too",
@@ -44,20 +44,6 @@ exports.AddCustomerType = nexus_1.objectType({
         });
     },
 });
-exports.AddCustomerResult = nexus_1.unionType({
-    name: "AddCustomerResult",
-    definition(t) {
-        t.members("AddCustomer", "Error");
-    },
-    resolveType: item => {
-        if (item.name === "Error") {
-            return "Error";
-        }
-        else {
-            return "AddCustomer";
-        }
-    },
-});
 exports.UpdateCustomerType = nexus_1.objectType({
     name: "UpdateCustomer",
     description: "Info to be returned when a customer details are updated",
@@ -70,19 +56,5 @@ exports.UpdateCustomerType = nexus_1.objectType({
         t.boolean("updated", {
             description: "A boolean that indicates if the customer details have been successfully updated",
         });
-    },
-});
-exports.UpdateCustomerResult = nexus_1.unionType({
-    name: "UpdateCustomerResult",
-    definition(t) {
-        t.members("UpdateCustomer", "Error");
-    },
-    resolveType: item => {
-        if (item.name === "Error") {
-            return "Error";
-        }
-        else {
-            return "UpdateCustomer";
-        }
     },
 });

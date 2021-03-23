@@ -1,26 +1,40 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.BeachBarAvailabilityType = exports.UpdateBeachBarResult = exports.UpdateBeachBarType = exports.AddBeachBarResult = exports.AddBeachBarType = exports.BeachBarResult = exports.BeachBarType = void 0;
+exports.BeachBarAvailabilityType = exports.UpdateBeachBarType = exports.AddBeachBarType = exports.BeachBarResult = exports.BeachBarType = void 0;
 const graphql_1 = require("@the_hashtag/common/dist/graphql");
 const nexus_1 = require("nexus");
 const countryTypes_1 = require("../details/countryTypes");
 const types_1 = require("../details/time/types");
 const types_2 = require("../details/types");
 const types_3 = require("../owner/types");
-const types_4 = require("./img_url/types");
-const types_5 = require("./location/types");
-const types_6 = require("./restaurant/types");
-const types_7 = require("./review/types");
-const types_8 = require("./service/types");
-const types_9 = require("./style/types");
+const types_4 = require("../payment/types");
+const types_5 = require("./img_url/types");
+const types_6 = require("./location/types");
+const types_7 = require("./restaurant/types");
+const types_8 = require("./review/types");
+const types_9 = require("./service/types");
+const types_10 = require("./style/types");
 exports.BeachBarType = nexus_1.objectType({
     name: "BeachBar",
     description: "Represents a #beach_bar",
     definition(t) {
         t.id("id", { description: "The ID value of the #beach_bar" });
         t.string("name", { description: "The name of the #beach_bar" });
+        t.string("slug", { description: 'The "slugified" name of the #beach_bar, in a URL friendly way' });
         t.nullable.string("description", { description: "A description text about the #beach_bar" });
-        t.nullable.float("avgRating", { description: "The average rating of all the user reviews for this #beach_bar" });
+        t.float("avgRating", {
+            description: "The average rating of all the user reviews for this #beach_bar",
+            resolve: o => o.avgRating || 0,
+        });
         t.nullable.field("thumbnailUrl", {
             type: graphql_1.UrlScalar,
         });
@@ -35,9 +49,30 @@ exports.BeachBarType = nexus_1.objectType({
             description: "A boolean that indicates if the #beach_bar is shown in the search results, even if it has no availability",
         });
         t.field("location", {
-            type: types_5.BeachBarLocationType,
+            type: types_6.BeachBarLocationType,
             description: "The location of the #beach_bar",
             resolve: o => o.location,
+        });
+        t.string("formattedLocation", {
+            description: "Get the location of the #beach_bar in a formatted string",
+            resolve: (o) => {
+                if (!o.location)
+                    return "";
+                const location = o.location;
+                let formattedLocation = "";
+                if (location.country)
+                    formattedLocation = location.country.alpha2Code + formattedLocation;
+                if (location.city)
+                    formattedLocation = location.city.name + ", " + formattedLocation;
+                if (location.region)
+                    formattedLocation = location.region.name + ", " + formattedLocation;
+                return formattedLocation;
+            },
+        });
+        t.list.field("payments", {
+            type: types_4.PaymentType,
+            description: "A list with all the payments of a #beach_bar",
+            resolve: (o) => __awaiter(this, void 0, void 0, function* () { return yield o.getPayments(); }),
         });
         t.field("category", {
             type: types_2.BeachBarCategoryType,
@@ -45,27 +80,27 @@ exports.BeachBarType = nexus_1.objectType({
             resolve: o => o.category,
         });
         t.nullable.list.field("imgUrls", {
-            type: types_4.BeachBarImgUrlType,
+            type: types_5.BeachBarImgUrlType,
             description: "A list with all the #beach_bar's images (URL values)",
             resolve: o => o.imgUrls,
         });
         t.nullable.list.field("reviews", {
-            type: types_7.BeachBarReviewType,
+            type: types_8.BeachBarReviewType,
             description: "A list of all the reviews of the #beach_bar",
             resolve: o => o.reviews,
         });
         t.list.nullable.field("features", {
-            type: types_8.BeachBarFeatureType,
+            type: types_9.BeachBarFeatureType,
             description: "A list of all the #beach_bar's features",
             resolve: o => o.features,
         });
         t.nullable.list.field("styles", {
-            type: types_9.BeachBarStyleType,
+            type: types_10.BeachBarStyleType,
             description: "A list of all the styles the #beach_bar is associated with",
             resolve: o => o.styles,
         });
         t.nullable.list.field("restaurants", {
-            type: types_6.BeachBarRestaurantType,
+            type: types_7.BeachBarRestaurantType,
             description: "A list of all the restaurants of a #beach_bar",
             resolve: o => o.restaurants,
         });
@@ -105,7 +140,7 @@ exports.BeachBarResult = nexus_1.unionType({
         t.members("BeachBar", "Error");
     },
     resolveType: item => {
-        if (item.name === "Error") {
+        if (item.error) {
             return "Error";
         }
         else {
@@ -127,20 +162,6 @@ exports.AddBeachBarType = nexus_1.objectType({
         });
     },
 });
-exports.AddBeachBarResult = nexus_1.unionType({
-    name: "AddBeachBarResult",
-    definition(t) {
-        t.members("AddBeachBar", "Error");
-    },
-    resolveType: item => {
-        if (item.name === "Error") {
-            return "Error";
-        }
-        else {
-            return "AddBeachBar";
-        }
-    },
-});
 exports.UpdateBeachBarType = nexus_1.objectType({
     name: "UpdateBeachBar",
     description: "Info to be returned when the details of #beach_bar are updated",
@@ -153,20 +174,6 @@ exports.UpdateBeachBarType = nexus_1.objectType({
         t.boolean("updated", {
             description: "A boolean that indicates if the #beach_bar details have been successfully updated",
         });
-    },
-});
-exports.UpdateBeachBarResult = nexus_1.unionType({
-    name: "UpdateBeachBarResult",
-    definition(t) {
-        t.members("UpdateBeachBar", "Error");
-    },
-    resolveType: item => {
-        if (item.name === "Error") {
-            return "Error";
-        }
-        else {
-            return "UpdateBeachBar";
-        }
     },
 });
 exports.BeachBarAvailabilityType = nexus_1.objectType({

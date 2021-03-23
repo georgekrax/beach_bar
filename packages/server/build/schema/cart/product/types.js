@@ -1,12 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UpdateCartProductResult = exports.UpdateCartProductType = exports.AddCartProductResult = exports.AddCartProductType = exports.CartProductType = void 0;
+exports.UpdateCartProduct = exports.AddCartProduct = exports.CartProduct = void 0;
 const graphql_1 = require("@the_hashtag/common/dist/graphql");
 const nexus_1 = require("nexus");
 const types_1 = require("../../beach_bar/product/types");
 const types_2 = require("../../details/time/types");
 const types_3 = require("../types");
-exports.CartProductType = nexus_1.objectType({
+exports.CartProduct = nexus_1.objectType({
     name: "CartProduct",
     description: "Represents a shopping cart with its products",
     definition(t) {
@@ -30,12 +30,12 @@ exports.CartProductType = nexus_1.objectType({
         });
     },
 });
-exports.AddCartProductType = nexus_1.objectType({
+exports.AddCartProduct = nexus_1.objectType({
     name: "AddCartProduct",
     description: "Info to be returned when a product is added to a shopping cart",
     definition(t) {
         t.field("product", {
-            type: exports.CartProductType,
+            type: exports.CartProduct,
             description: "The product that is added to the cart",
             resolve: o => o.product,
         });
@@ -44,45 +44,17 @@ exports.AddCartProductType = nexus_1.objectType({
         });
     },
 });
-exports.AddCartProductResult = nexus_1.unionType({
-    name: "AddCartProductResult",
-    definition(t) {
-        t.members("AddCartProduct", "Error");
-    },
-    resolveType: item => {
-        if (item.name === "Error") {
-            return "Error";
-        }
-        else {
-            return "AddCartProduct";
-        }
-    },
-});
-exports.UpdateCartProductType = nexus_1.objectType({
+exports.UpdateCartProduct = nexus_1.objectType({
     name: "UpdateCartProduct",
     description: "Info to be returned when a product of a shopping cart is updated",
     definition(t) {
         t.field("product", {
-            type: exports.CartProductType,
+            type: exports.CartProduct,
             description: "The product that is updated",
             resolve: o => o.product,
         });
         t.boolean("updated", {
             description: "A boolean that indicates if the product has been successfully updated",
         });
-    },
-});
-exports.UpdateCartProductResult = nexus_1.unionType({
-    name: "UpdateCartProductResult",
-    definition(t) {
-        t.members("UpdateCartProduct", "Error");
-    },
-    resolveType: item => {
-        if (item.name === "Error") {
-            return "Error";
-        }
-        else {
-            return "UpdateCartProduct";
-        }
     },
 });

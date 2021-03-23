@@ -1,0 +1,14 @@
+query GetCustomerPaymentMethods {
+  getCustomerPaymentMethods {
+    id
+    expMonth
+    expYear
+    last4
+    cardholderName
+    isDefault
+    brand {
+      id
+      name
+    }
+  }
+}

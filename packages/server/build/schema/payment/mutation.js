@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PaymentCrudMutation = void 0;
 const common_1 = require("@beach_bar/common");
 const common_2 = require("@the_hashtag/common");
-const graphql_1 = require("@the_hashtag/common/dist/graphql");
+const apollo_server_express_1 = require("apollo-server-express");
 const prefixes_1 = __importDefault(require("constants/prefixes"));
 const status_1 = require("constants/status");
 const _index_1 = require("constants/_index");
@@ -39,26 +39,18 @@ exports.PaymentCrudMutation = nexus_1.extendType({
             type: types_2.AddPaymentResult,
             description: "Create (make) a payment for a customer's shopping cart",
             args: {
-                cartId: nexus_1.arg({
-                    type: graphql_1.BigIntScalar,
-                    description: "The ID value of the shopping cart with the products to purchase",
-                }),
-                cardId: nexus_1.arg({
-                    type: graphql_1.BigIntScalar,
-                    description: "The ID value of the credit or debit card of the customer",
-                }),
+                cartId: nexus_1.idArg({ description: "The ID value of the shopping cart with the products to purchase" }),
+                cardId: nexus_1.idArg({ description: "The ID value of the credit or debit card of the customer" }),
                 voucherCode: nexus_1.nullable(nexus_1.stringArg({
                     description: "A coupon or offer campaign code to make a discount to the shopping cart's or payment's price",
                 })),
             },
             resolve: (_, { cartId, cardId, voucherCode }, { stripe }) => __awaiter(this, void 0, void 0, function* () {
                 var _a, _b, _c, _d;
-                if (!cartId || cartId <= 0) {
+                if (!cartId || cartId.trim().length === 0)
                     return { error: { code: common_1.errors.INVALID_ARGUMENTS, message: "Please provide a valid shopping cart" } };
-                }
-                if (!cardId || cardId <= 0) {
+                if (!cardId || cardId.trim().length === 0)
                     return { error: { code: common_1.errors.INVALID_ARGUMENTS, message: "Please provide a valid credit or debit card" } };
-                }
                 const cart = yield Cart_1.Cart.findOne({
                     where: { id: cartId },
                     relations: [
@@ -69,17 +61,14 @@ exports.PaymentCrudMutation = nexus_1.extendType({
                         "products.product.beachBar.defaultCurrency",
                     ],
                 });
-                if (!cart || !cart.products || cart.products.length === 0) {
+                if (!cart || !cart.products || cart.products.length === 0)
                     return { error: { code: common_1.errors.CONFLICT, message: "Specified shopping cart does not exist" } };
-                }
                 const uniqueBeachBars = cart.getUniqueBeachBars();
-                if (!uniqueBeachBars || uniqueBeachBars.length === 0) {
+                if (!uniqueBeachBars || uniqueBeachBars.length === 0)
                     return { error: { code: common_1.errors.INTERNAL_SERVER_ERROR, message: common_1.errors.SOMETHING_WENT_WRONG } };
-                }
                 const cartTotal = yield cart.getTotalPrice();
-                if (cartTotal === undefined || cartTotal.totalWithoutEntryFees !== parseFloat(cart.total.toString())) {
+                if (cartTotal === undefined || cartTotal.totalWithoutEntryFees !== parseFloat(cart.total.toString()))
                     return { error: { message: common_1.errors.SOMETHING_WENT_WRONG } };
-                }
                 const card = yield Card_1.Card.findOne({ where: { id: cardId }, relations: ["customer", "country", "country.currency"] });
                 if (!card || !card.customer || !card.country) {
                     return {
@@ -87,13 +76,11 @@ exports.PaymentCrudMutation = nexus_1.extendType({
                     };
                 }
                 const customer = card.customer;
-                if (!customer) {
+                if (!customer)
                     return { error: { message: common_1.errors.SOMETHING_WENT_WRONG } };
-                }
                 const status = yield PaymentStatus_1.PaymentStatus.findOne({ status: status_1.payment.CREATED });
-                if (!status) {
+                if (!status)
                     return { error: { message: common_1.errors.SOMETHING_WENT_WRONG } };
-                }
                 const refCode = common_2.generateId({ length: 16, specialCharacters: _index_1.generateIdSpecialCharacters.PAYMENT });
                 const transferGroupCode = `${prefixes_1.default.PAYMENT_TARGET_GROUP}${common_2.generateId({ length: 16 })}`;
                 const newPayment = Payment_1.Payment.create({
@@ -108,18 +95,13 @@ exports.PaymentCrudMutation = nexus_1.extendType({
                 let paymentVoucherCode = undefined;
                 if (voucherCode) {
                     const res = yield checkVoucherCode_1.checkVoucherCode(voucherCode);
-                    if (res.error) {
+                    if (res.error)
                         return res.error;
-                    }
-                    const newPaymentOfferCode = PaymentVoucherCode_1.PaymentVoucherCode.create({
-                        payment: newPayment,
-                    });
-                    if (res.couponCode) {
+                    const newPaymentOfferCode = PaymentVoucherCode_1.PaymentVoucherCode.create({ payment: newPayment });
+                    if (res.couponCode)
                         newPaymentOfferCode.couponCode = res.couponCode;
-                    }
-                    else if (res.offerCode) {
+                    else if (res.offerCode)
                         newPaymentOfferCode.offerCode = res.offerCode;
-                    }
                     const discountPercentage = res.couponCode
                         ? res.couponCode.discountPercentage
                         : res.offerCode
@@ -135,9 +117,8 @@ exports.PaymentCrudMutation = nexus_1.extendType({
                         const beachBar = uniqueBeachBars[i];
                         const isZeroCartTotal = cart.verifyZeroCartTotal(beachBar);
                         const minimumCurrency = yield StripeMinimumCurrency_1.StripeMinimumCurrency.findOne({ currencyId: beachBar.defaultCurrencyId });
-                        if (!minimumCurrency) {
+                        if (!minimumCurrency)
                             return { error: { code: common_1.errors.INTERNAL_SERVER_ERROR, message: common_1.errors.SOMETHING_WENT_WRONG } };
-                        }
                         const boolean = total <= parseFloat(minimumCurrency.chargeAmount.toString());
                         if (!beachBar.zeroCartTotal && boolean) {
                             return {
@@ -201,9 +182,8 @@ exports.PaymentCrudMutation = nexus_1.extendType({
                         },
                         transfer_group: transferGroupCode,
                     });
-                    if (!stripePayment) {
+                    if (!stripePayment)
                         return { error: { message: common_1.errors.SOMETHING_WENT_WRONG } };
-                    }
                     let beachBarPricingFee = 0;
                     let transferAmount = 0;
                     let discountPerBeachBar = 0;
@@ -217,15 +197,13 @@ exports.PaymentCrudMutation = nexus_1.extendType({
                     for (let i = 0; i < uniqueBeachBars.length; i++) {
                         const beachBar = uniqueBeachBars[i];
                         const cartBeachBarTotal = yield cart.getBeachBarTotalPrice(beachBar.id, discountPerBeachBar);
-                        if (cartBeachBarTotal === undefined) {
+                        if (cartBeachBarTotal === undefined)
                             return { error: { message: common_1.errors.SOMETHING_WENT_WRONG } };
-                        }
                         const { totalWithEntryFees } = cartBeachBarTotal;
                         let discountAmount = 0;
                         const paymentVoucherCode = newPayment.voucherCode;
-                        if (paymentVoucherCode && paymentVoucherCode.offerCode) {
+                        if (paymentVoucherCode && paymentVoucherCode.offerCode)
                             discountAmount = (totalWithEntryFees * paymentVoucherCode.offerCode.campaign.discountPercentage) / 100;
-                        }
                         if (paymentVoucherCode &&
                             paymentVoucherCode.couponCode &&
                             paymentVoucherCode.couponCode.beachBarId &&
@@ -236,13 +214,11 @@ exports.PaymentCrudMutation = nexus_1.extendType({
                         const beachBarTotal = parseFloat((totalWithEntryFees - discountAmount).toFixed(2));
                         if (beachBarTotal > 0) {
                             const beachBarStripeFee = yield cart.getStripeFee(card.country.isEu, beachBarTotal);
-                            if (beachBarStripeFee === undefined) {
+                            if (beachBarStripeFee === undefined)
                                 return { error: { message: common_1.errors.SOMETHING_WENT_WRONG } };
-                            }
                             const pricingFee = yield beachBar.getBeachBarPaymentDetails(beachBarTotal, beachBarStripeFee);
-                            if (pricingFee === undefined) {
+                            if (pricingFee === undefined)
                                 return { error: { message: common_1.errors.SOMETHING_WENT_WRONG } };
-                            }
                             const { beachBarAppFee, transferAmount: beachBarTransferAmount } = pricingFee;
                             beachBarPricingFee += beachBarAppFee;
                             transferAmount += beachBarTransferAmount;
@@ -281,9 +257,8 @@ exports.PaymentCrudMutation = nexus_1.extendType({
                                             : null,
                                     },
                                 });
-                                if (!stripeTransfer) {
+                                if (!stripeTransfer)
                                     return { error: { message: common_1.errors.SOMETHING_WENT_WRONG } };
-                                }
                             }
                         }
                     }
@@ -293,12 +268,10 @@ exports.PaymentCrudMutation = nexus_1.extendType({
                     yield newPayment.save();
                     if (newPayment.voucherCode) {
                         const paymentVoucherCode = newPayment.voucherCode;
-                        if (paymentVoucherCode.couponCode) {
+                        if (paymentVoucherCode.couponCode)
                             yield typeorm_1.getManager().increment(CouponCode_1.CouponCode, { id: paymentVoucherCode.couponCode.id }, "timesUsed", 1);
-                        }
-                        else if (paymentVoucherCode.offerCode) {
+                        else if (paymentVoucherCode.offerCode)
                             yield typeorm_1.getManager().increment(OfferCampaignCode_1.OfferCampaignCode, { id: paymentVoucherCode.offerCode.id }, "timesUsed", 1);
-                        }
                     }
                     return {
                         payment: newPayment,
@@ -311,43 +284,32 @@ exports.PaymentCrudMutation = nexus_1.extendType({
             }),
         });
         t.field("refundPayment", {
-            type: types_1.DeleteResult,
+            type: types_1.DeleteGraphQlType,
             description: "Refund a payment",
-            args: {
-                paymentId: nexus_1.arg({
-                    type: graphql_1.BigIntScalar,
-                    description: "The ID value of the payment to update",
-                }),
-            },
+            args: { paymentId: nexus_1.idArg({ description: "The ID of the payment to refund" }) },
             resolve: (_, { paymentId }, { stripe }) => __awaiter(this, void 0, void 0, function* () {
-                if (!paymentId || paymentId <= 0) {
-                    return { error: { code: common_1.errors.INVALID_ARGUMENTS, message: "Please provide a valid payment" } };
-                }
+                if (!paymentId || paymentId.trim().length === 0)
+                    throw new apollo_server_express_1.UserInputError("Please provide a valid payment", { code: common_1.errors.INVALID_ARGUMENTS });
                 const payment = yield Payment_1.Payment.findOne({
                     where: { id: paymentId },
                     relations: ["cart", "cart.products", "cart.products.product", "cart.products.product.beachBar"],
                 });
-                if (!payment) {
-                    return { error: { code: common_1.errors.CONFLICT, message: "Specified payment does not exist" } };
-                }
-                if (payment.isRefunded) {
-                    return { error: { code: common_1.errors.CONFLICT, message: "Specified payment has already been refunded" } };
-                }
+                if (!payment)
+                    throw new apollo_server_express_1.ApolloError("Specified payment does not exist", common_1.errors.CONFLICT);
+                if (payment.isRefunded)
+                    throw new apollo_server_express_1.ApolloError("Specified payment has already been refunded", common_1.errors.CONFLICT);
                 try {
                     const refund = yield payment.getRefundPercentage();
-                    if (!refund) {
-                        return { error: { message: common_1.errors.SOMETHING_WENT_WRONG } };
-                    }
+                    if (!refund)
+                        throw new apollo_server_express_1.ApolloError(common_1.errors.SOMETHING_WENT_WRONG, common_1.errors.SOMETHING_WENT_WRONG);
                     const { refundPercentage, daysDiff } = refund;
-                    const cartTotal = yield payment.cart.getTotalPrice();
-                    if (cartTotal === undefined) {
-                        return { error: { message: common_1.errors.SOMETHING_WENT_WRONG } };
-                    }
+                    const cartTotal = yield payment.cart.getTotalPrice(true);
+                    if (cartTotal === undefined)
+                        throw new apollo_server_express_1.ApolloError(common_1.errors.SOMETHING_WENT_WRONG, common_1.errors.SOMETHING_WENT_WRONG);
                     const { totalWithEntryFees } = cartTotal;
-                    if (totalWithEntryFees === 0) {
-                        return { error: { message: "You shopping cart total was 0" } };
-                    }
-                    const refundedAmount = totalWithEntryFees * parseInt(refundPercentage.percentageValue.toString());
+                    if (totalWithEntryFees === 0)
+                        throw new apollo_server_express_1.ApolloError("Your shopping cart total was 0", common_1.errors.CONFLICT);
+                    const refundedAmount = parseInt((totalWithEntryFees * parseInt(refundPercentage.percentageValue.toString())).toString());
                     if (daysDiff >= 86400000) {
                         const stripeRefund = yield stripe.refunds.create({
                             payment_intent: payment.stripeId,
@@ -356,14 +318,13 @@ exports.PaymentCrudMutation = nexus_1.extendType({
                             reverse_transfer: true,
                             refund_application_fee: false,
                         });
-                        if (!stripeRefund) {
-                            return { error: { message: common_1.errors.SOMETHING_WENT_WRONG } };
-                        }
+                        if (!stripeRefund)
+                            throw new apollo_server_express_1.ApolloError(common_1.errors.SOMETHING_WENT_WRONG, common_1.errors.SOMETHING_WENT_WRONG);
                     }
                     yield payment.softRemove();
                 }
                 catch (err) {
-                    return { error: { message: `${common_1.errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
+                    throw new apollo_server_express_1.ApolloError(common_1.errors.SOMETHING_WENT_WRONG + ": " + err.message);
                 }
                 return {
                     deleted: true,

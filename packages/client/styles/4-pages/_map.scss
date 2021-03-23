@@ -1,0 +1,80 @@
+.map {
+  $searchbar-margin-top: map-get($em-spacers, 64);
+
+  & > .mapboxgl-control-container {
+    @extend .flex-row-flex-end-flex-end;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    // width: calc(100% - #{$wrapper-padding * 2});
+    width: 100%;
+
+    .mapboxgl-ctrl-bottom-left,
+    .mapboxgl-ctrl-bottom-right {
+      position: static;
+    }
+
+    .mapboxgl-ctrl-bottom {
+      &-left {
+        order: 2;
+        margin-left: -(map-get($em-spacers, 8));
+      }
+
+      &-right {
+        order: 1;
+      }
+    }
+
+    @include breakpoint("sm") {
+      align-items: flex-start;
+
+      .mapboxgl-ctrl-bottom {
+        &-left {
+          margin-left: 0;
+        }
+
+        &-right {
+          margin-right: map-get($em-spacers, 8);
+        }
+      }
+    }
+  }
+
+  &__searchbar {
+    margin: $searchbar-margin-top $wrapper-padding 0;
+
+    & > div:first-child {
+      background-color: $searchbar-bg;
+      margin-top: map-get($em-spacers, 4);
+      margin-right: map-get($em-spacers, 16);
+    }
+
+    & > div:last-child {
+      margin: 0;
+    }
+  }
+
+  &__wrapper {
+    padding: 0;
+
+    main {
+      @extend .ih-100;
+    }
+  }
+
+  &__navigation-control {
+    @extend .zi--md;
+    // + <Input /> component's height
+    top: calc(#{$searchbar-margin-top} + 3em);
+    left: calc(#{$wrapper-padding} * 1.25);
+    margin-top: map-get($em-spacers, 24);
+  }
+
+  &__suggestions {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    background: linear-gradient(to top, $grey-1 50%, rgba($grey-1, 0) 70%);
+  }
+}

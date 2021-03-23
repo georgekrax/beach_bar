@@ -1,8 +1,8 @@
 import { UserFavoriteBar } from "entity/UserFavoriteBar";
-import { AddType, ErrorType } from "typings/.index";
+import { UpdateType } from "typings/.index";
 
 type UserFavoriteBarType = {
-  favoriteBar: UserFavoriteBar;
+  favouriteBar: UserFavoriteBar;
 };
 
-export type AddUserFavoriteBarType = (AddType & UserFavoriteBarType) | ErrorType;
+export type TUpdateUserFavoriteBarType = UpdateType & UserFavoriteBarType;

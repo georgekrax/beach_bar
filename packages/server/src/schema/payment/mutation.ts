@@ -1,6 +1,6 @@
 import { errors, MyContext } from "@beach_bar/common";
 import { generateId } from "@the_hashtag/common";
-import { BigIntScalar } from "@the_hashtag/common/dist/graphql";
+import { ApolloError, UserInputError } from "apollo-server-express";
 import prefixes from "constants/prefixes";
 import { payment as paymentStatus } from "constants/status";
 import { generateIdSpecialCharacters } from "constants/_index";
@@ -12,12 +12,12 @@ import { Payment } from "entity/Payment";
 import { PaymentStatus } from "entity/PaymentStatus";
 import { PaymentVoucherCode } from "entity/PaymentVoucherCode";
 import { StripeMinimumCurrency } from "entity/StripeMinimumCurrency";
-import { arg, extendType, nullable, stringArg } from "nexus";
+import { extendType, idArg, nullable, stringArg } from "nexus";
 import { getManager } from "typeorm";
-import { DeleteType } from "typings/.index";
+import { TDelete } from "typings/.index";
 import { AddPaymentType } from "typings/payment";
 import { checkVoucherCode } from "utils/checkVoucherCode";
-import { DeleteResult } from "../types";
+import { DeleteGraphQlType } from "../types";
 import { AddPaymentResult } from "./types";
 
 export const PaymentCrudMutation = extendType({
@@ -27,14 +27,8 @@ export const PaymentCrudMutation = extendType({
       type: AddPaymentResult,
       description: "Create (make) a payment for a customer's shopping cart",
       args: {
-        cartId: arg({
-          type: BigIntScalar,
-          description: "The ID value of the shopping cart with the products to purchase",
-        }),
-        cardId: arg({
-          type: BigIntScalar,
-          description: "The ID value of the credit or debit card of the customer",
-        }),
+        cartId: idArg({ description: "The ID value of the shopping cart with the products to purchase" }),
+        cardId: idArg({ description: "The ID value of the credit or debit card of the customer" }),
         voucherCode: nullable(
           stringArg({
             description: "A coupon or offer campaign code to make a discount to the shopping cart's or payment's price",
@@ -42,12 +36,10 @@ export const PaymentCrudMutation = extendType({
         ),
       },
       resolve: async (_, { cartId, cardId, voucherCode }, { stripe }: MyContext): Promise<AddPaymentType> => {
-        if (!cartId || cartId <= 0) {
+        if (!cartId || cartId.trim().length === 0)
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid shopping cart" } };
-        }
-        if (!cardId || cardId <= 0) {
+        if (!cardId || cardId.trim().length === 0)
           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid credit or debit card" } };
-        }
 
         const cart = await Cart.findOne({
           where: { id: cartId },
@@ -59,18 +51,15 @@ export const PaymentCrudMutation = extendType({
             "products.product.beachBar.defaultCurrency",
           ],
         });
-        if (!cart || !cart.products || cart.products.length === 0) {
+        if (!cart || !cart.products || cart.products.length === 0)
           return { error: { code: errors.CONFLICT, message: "Specified shopping cart does not exist" } };
-        }
         const uniqueBeachBars = cart.getUniqueBeachBars();
-        if (!uniqueBeachBars || uniqueBeachBars.length === 0) {
+        if (!uniqueBeachBars || uniqueBeachBars.length === 0)
           return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
-        }
 
         const cartTotal = await cart.getTotalPrice();
-        if (cartTotal === undefined || cartTotal.totalWithoutEntryFees !== parseFloat(cart.total.toString())) {
+        if (cartTotal === undefined || cartTotal.totalWithoutEntryFees !== parseFloat(cart.total.toString()))
           return { error: { message: errors.SOMETHING_WENT_WRONG } };
-        }
 
         const card = await Card.findOne({ where: { id: cardId }, relations: ["customer", "country", "country.currency"] });
         if (!card || !card.customer || !card.country) {
@@ -80,14 +69,10 @@ export const PaymentCrudMutation = extendType({
         }
 
         const customer = card.customer;
-        if (!customer) {
-          return { error: { message: errors.SOMETHING_WENT_WRONG } };
-        }
+        if (!customer) return { error: { message: errors.SOMETHING_WENT_WRONG } };
 
         const status = await PaymentStatus.findOne({ status: paymentStatus.CREATED });
-        if (!status) {
-          return { error: { message: errors.SOMETHING_WENT_WRONG } };
-        }
+        if (!status) return { error: { message: errors.SOMETHING_WENT_WRONG } };
 
         const refCode = generateId({ length: 16, specialCharacters: generateIdSpecialCharacters.PAYMENT });
         const transferGroupCode = `${prefixes.PAYMENT_TARGET_GROUP}${generateId({ length: 16 })}`;
@@ -106,17 +91,10 @@ export const PaymentCrudMutation = extendType({
 
         if (voucherCode) {
           const res = await checkVoucherCode(voucherCode);
-          if (res.error) {
-            return res.error;
-          }
-          const newPaymentOfferCode = PaymentVoucherCode.create({
-            payment: newPayment,
-          });
-          if (res.couponCode) {
-            newPaymentOfferCode.couponCode = res.couponCode;
-          } else if (res.offerCode) {
-            newPaymentOfferCode.offerCode = res.offerCode;
-          }
+          if (res.error) return res.error;
+          const newPaymentOfferCode = PaymentVoucherCode.create({ payment: newPayment });
+          if (res.couponCode) newPaymentOfferCode.couponCode = res.couponCode;
+          else if (res.offerCode) newPaymentOfferCode.offerCode = res.offerCode;
           const discountPercentage: number = res.couponCode
             ? res.couponCode.discountPercentage
             : res.offerCode
@@ -135,9 +113,7 @@ export const PaymentCrudMutation = extendType({
             const beachBar = uniqueBeachBars[i];
             const isZeroCartTotal = cart.verifyZeroCartTotal(beachBar);
             const minimumCurrency = await StripeMinimumCurrency.findOne({ currencyId: beachBar.defaultCurrencyId });
-            if (!minimumCurrency) {
-              return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
-            }
+            if (!minimumCurrency) return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
             const boolean = total <= parseFloat(minimumCurrency.chargeAmount.toString());
             if (!beachBar.zeroCartTotal && boolean) {
               return {
@@ -203,9 +179,7 @@ export const PaymentCrudMutation = extendType({
             transfer_group: transferGroupCode,
           });
 
-          if (!stripePayment) {
-            return { error: { message: errors.SOMETHING_WENT_WRONG } };
-          }
+          if (!stripePayment) return { error: { message: errors.SOMETHING_WENT_WRONG } };
 
           let beachBarPricingFee = 0;
           let transferAmount = 0;
@@ -222,16 +196,13 @@ export const PaymentCrudMutation = extendType({
             const beachBar = uniqueBeachBars[i];
 
             const cartBeachBarTotal = await cart.getBeachBarTotalPrice(beachBar.id, discountPerBeachBar);
-            if (cartBeachBarTotal === undefined) {
-              return { error: { message: errors.SOMETHING_WENT_WRONG } };
-            }
+            if (cartBeachBarTotal === undefined) return { error: { message: errors.SOMETHING_WENT_WRONG } };
             // console.log(cartBeachBarTotal);
             const { totalWithEntryFees } = cartBeachBarTotal;
             let discountAmount = 0;
             const paymentVoucherCode = newPayment.voucherCode;
-            if (paymentVoucherCode && paymentVoucherCode.offerCode) {
+            if (paymentVoucherCode && paymentVoucherCode.offerCode)
               discountAmount = (totalWithEntryFees * paymentVoucherCode.offerCode.campaign.discountPercentage) / 100;
-            }
             // console.log(paymentVoucherCode?.couponCode?.beachBarId);
             // console.log(beachBar.id);
             if (
@@ -248,13 +219,9 @@ export const PaymentCrudMutation = extendType({
             // console.log(`#beach_bar total: ${beachBarTotal}`);
             if (beachBarTotal > 0) {
               const beachBarStripeFee = await cart.getStripeFee(card.country.isEu, beachBarTotal);
-              if (beachBarStripeFee === undefined) {
-                return { error: { message: errors.SOMETHING_WENT_WRONG } };
-              }
+              if (beachBarStripeFee === undefined) return { error: { message: errors.SOMETHING_WENT_WRONG } };
               const pricingFee = await beachBar.getBeachBarPaymentDetails(beachBarTotal, beachBarStripeFee);
-              if (pricingFee === undefined) {
-                return { error: { message: errors.SOMETHING_WENT_WRONG } };
-              }
+              if (pricingFee === undefined) return { error: { message: errors.SOMETHING_WENT_WRONG } };
 
               const { beachBarAppFee, transferAmount: beachBarTransferAmount } = pricingFee;
               // console.log(`App fee: ${pricingFee.beachBarAppFee}`);
@@ -299,9 +266,7 @@ export const PaymentCrudMutation = extendType({
                       : null,
                   },
                 });
-                if (!stripeTransfer) {
-                  return { error: { message: errors.SOMETHING_WENT_WRONG } };
-                }
+                if (!stripeTransfer) return { error: { message: errors.SOMETHING_WENT_WRONG } };
               }
             }
           }
@@ -314,11 +279,10 @@ export const PaymentCrudMutation = extendType({
 
           if (newPayment.voucherCode) {
             const paymentVoucherCode = newPayment.voucherCode;
-            if (paymentVoucherCode.couponCode) {
+            if (paymentVoucherCode.couponCode)
               await getManager().increment(CouponCode, { id: paymentVoucherCode.couponCode.id }, "timesUsed", 1);
-            } else if (paymentVoucherCode.offerCode) {
+            else if (paymentVoucherCode.offerCode)
               await getManager().increment(OfferCampaignCode, { id: paymentVoucherCode.offerCode.id }, "timesUsed", 1);
-            }
           }
 
           // * Reserved products are created after a successful payment, via Stripe webhook events
@@ -333,45 +297,30 @@ export const PaymentCrudMutation = extendType({
       },
     });
     t.field("refundPayment", {
-      type: DeleteResult,
+      type: DeleteGraphQlType,
       description: "Refund a payment",
-      args: {
-        paymentId: arg({
-          type: BigIntScalar,
-          description: "The ID value of the payment to update",
-        }),
-      },
-      resolve: async (_, { paymentId }, { stripe }: MyContext): Promise<DeleteType> => {
-        if (!paymentId || paymentId <= 0) {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid payment" } };
-        }
+      args: { paymentId: idArg({ description: "The ID of the payment to refund" }) },
+      resolve: async (_, { paymentId }, { stripe }: MyContext): Promise<TDelete> => {
+        if (!paymentId || paymentId.trim().length === 0)
+          throw new UserInputError("Please provide a valid payment", { code: errors.INVALID_ARGUMENTS });
 
         const payment = await Payment.findOne({
           where: { id: paymentId },
           relations: ["cart", "cart.products", "cart.products.product", "cart.products.product.beachBar"],
         });
-        if (!payment) {
-          return { error: { code: errors.CONFLICT, message: "Specified payment does not exist" } };
-        }
-        if (payment.isRefunded) {
-          return { error: { code: errors.CONFLICT, message: "Specified payment has already been refunded" } };
-        }
+        if (!payment) throw new ApolloError("Specified payment does not exist", errors.CONFLICT);
+        if (payment.isRefunded) throw new ApolloError("Specified payment has already been refunded", errors.CONFLICT);
+
         try {
           const refund = await payment.getRefundPercentage();
-          if (!refund) {
-            return { error: { message: errors.SOMETHING_WENT_WRONG } };
-          }
+          if (!refund) throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.SOMETHING_WENT_WRONG);
           const { refundPercentage, daysDiff } = refund;
-          const cartTotal = await payment.cart.getTotalPrice();
-          if (cartTotal === undefined) {
-            return { error: { message: errors.SOMETHING_WENT_WRONG } };
-          }
+          const cartTotal = await payment.cart.getTotalPrice(true);
+          if (cartTotal === undefined) throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.SOMETHING_WENT_WRONG);
           const { totalWithEntryFees } = cartTotal;
-          if (totalWithEntryFees === 0) {
-            return { error: { message: "You shopping cart total was 0" } };
-          }
+          if (totalWithEntryFees === 0) throw new ApolloError("Your shopping cart total was 0", errors.CONFLICT);
           // ! Do not divide by 100, because Stipe processes cents, and the number will be automatically in cents
-          const refundedAmount = totalWithEntryFees * parseInt(refundPercentage.percentageValue.toString());
+          const refundedAmount = parseInt((totalWithEntryFees * parseInt(refundPercentage.percentageValue.toString())).toString());
           if (daysDiff >= 86400000) {
             const stripeRefund = await stripe.refunds.create({
               payment_intent: payment.stripeId,
@@ -380,13 +329,11 @@ export const PaymentCrudMutation = extendType({
               reverse_transfer: true,
               refund_application_fee: false,
             });
-            if (!stripeRefund) {
-              return { error: { message: errors.SOMETHING_WENT_WRONG } };
-            }
+            if (!stripeRefund) throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.SOMETHING_WENT_WRONG);
           }
           await payment.softRemove();
         } catch (err) {
-          return { error: { message: `${errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
+          throw new ApolloError(errors.SOMETHING_WENT_WRONG + ": " + err.message);
         }
         return {
           deleted: true,

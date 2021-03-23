@@ -35,7 +35,7 @@ export const AddBeachBarImgUrlResult = unionType({
     t.members("AddBeachBarImgUrl", "Error");
   },
   resolveType: item => {
-    if (item.name === "Error") {
+    if (item.error) {
       return "Error";
     } else {
       return "AddBeachBarImgUrl";
@@ -62,7 +62,7 @@ export const UpdateBeachBarImgUrlResult = unionType({
     t.members("UpdateBeachBarImgUrl", "Error");
   },
   resolveType: item => {
-    if (item.name === "Error") {
+    if (item.error) {
       return "Error";
     } else {
       return "UpdateBeachBarImgUrl";

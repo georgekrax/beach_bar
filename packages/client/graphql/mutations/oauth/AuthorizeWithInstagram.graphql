@@ -1,0 +1,8 @@
+mutation AuthorizeWithInstagram($code: String!, $state: String!, $email: Email!, $isPrimaryOwner: Boolean = false, $loginDetails: UserLoginDetails) {
+  authorizeWithInstagram(code: $code, state: $state, email: $email, isPrimaryOwner: $isPrimaryOwner, loginDetails: $loginDetails) {
+    user {
+      id
+      email
+    }
+  }
+}

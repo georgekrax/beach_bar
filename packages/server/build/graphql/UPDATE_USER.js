@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const apollo_server_express_1 = require("apollo-server-express");
 const query = apollo_server_express_1.gql `
   mutation updateUser(
-    $email: EmailAddress
+    $email: Email
     $firstName: String
     $lastName: String
     $pictureUrl: URL

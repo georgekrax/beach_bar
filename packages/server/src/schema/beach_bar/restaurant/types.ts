@@ -46,7 +46,7 @@ export const AddBeachBarRestaurantResult = unionType({
     t.members("AddBeachBarRestaurant", "Error");
   },
   resolveType: item => {
-    if (item.name === "Error") {
+    if (item.error) {
       return "Error";
     } else {
       return "AddBeachBarRestaurant";
@@ -75,7 +75,7 @@ export const UpdateBeachBarRestaurantResult = unionType({
     t.members("UpdateBeachBarRestaurant", "Error");
   },
   resolveType: item => {
-    if (item.name === "Error") {
+    if (item.error) {
       return "Error";
     } else {
       return "UpdateBeachBarRestaurant";

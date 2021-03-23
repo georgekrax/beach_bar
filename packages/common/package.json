@@ -1,13 +1,14 @@
 {
   "name": "@beach_bar/common",
-  "version": "1.0.0",
+  "version": "1.0.8",
   "license": "UNLICENSED",
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "author": "George Krachtopoulos <@georgekrax>",
   "scripts": {
     "build": "rm -rf ./build && tsc",
-    "build:watch": "rm -rf ./build && tsc"
+    "build:watch": "rm -rf ./build && tsc -w",
+    "prepublish": "yarn build"
   },
   "devDependencies": {
     "@types/node": "^14.14.27",

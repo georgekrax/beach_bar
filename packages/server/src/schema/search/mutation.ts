@@ -16,19 +16,21 @@ export const SearchUpdateMutation = extendType({
         searchId: idArg({
           description: "The ID value of a previous user search",
         }),
-        filterIds: list(nullable(stringArg({
-          description: "A list with the filter IDs to add in the search, found in the documentation",
-        }))),
+        filterIds: nullable(
+          list(
+            stringArg({
+              description: "A list with the filter IDs to add in the search, found in the documentation",
+            })
+          )
+        ),
       },
-      resolve: async (_, { searchId, filterIds }, { payload, redis }: MyContext): Promise<UserSearch | null> => {
+      resolve: async (_, { searchId, filterIds = [] }, { payload, redis }: MyContext): Promise<UserSearch | null> => {
         if (!searchId || searchId <= 0) {
           return null;
         }
 
-        const userSearch = await UserSearch.findOne({ where: { id: searchId }, relations: ["filters"] });
-        if (!userSearch) {
-          return null;
-        }
+        const userSearch = await UserSearch.findOne({ where: { id: searchId }, relations: ["filters", "sort"] });
+        if (!userSearch) return null;
 
         if (
           (userSearch.filters &&
@@ -37,15 +39,12 @@ export const SearchUpdateMutation = extendType({
               userSearch.filters.map(filter => filter.publicId)
             )) ||
           filterIds.length === 0 ||
-          // @ts-ignore
           userSearch.filters?.length === 0
         ) {
           if (filterIds) {
             const filters = await SearchFilter.find({ where: { publicId: In(filterIds) } });
             userSearch.filters = filters;
-          } else {
-            userSearch.filters = [];
-          }
+          } else userSearch.filters = [];
           try {
             await userSearch.save();
             const idx = await userSearch.getRedisIdx(redis, payload ? payload.sub : undefined);

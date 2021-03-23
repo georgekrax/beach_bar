@@ -1,0 +1,14 @@
+query GetUserFavouriteBeachBars {
+  favouriteBeachBars {
+    beachBar {
+      id
+      name
+      thumbnailUrl
+      location {
+        city {
+          name
+        }
+      }
+    }
+  }
+}

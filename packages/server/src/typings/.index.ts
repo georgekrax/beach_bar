@@ -26,15 +26,24 @@ export type DeleteType =
     }
   | ErrorType;
 
+export type TDelete = {
+  deleted: boolean;
+};
+
 export type SuccessType =
   | ErrorType
   | {
       success: boolean;
     };
 
+export type SuccessObjectType = {
+  success: boolean;
+};
+
 export type LoginDetailsType = {
   osId?: number;
   browserId?: number;
+  countryAlpha2Code?: string;
   countryId?: number;
-  cityId?: bigint;
+  city?: string;
 };

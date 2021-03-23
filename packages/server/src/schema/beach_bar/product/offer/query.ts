@@ -1,10 +1,9 @@
 import { errors, MyContext } from "@beach_bar/common";
-import { BigIntScalar } from "@the_hashtag/common/dist/graphql";
 import { BeachBar } from "entity/BeachBar";
 import { CouponCode } from "entity/CouponCode";
 import { OfferCampaign } from "entity/OfferCampaign";
 import { OfferCampaignCode } from "entity/OfferCampaignCode";
-import { arg, extendType, intArg, stringArg } from "nexus";
+import { extendType, idArg, intArg, stringArg } from "nexus";
 import { ErrorType } from "typings/.index";
 import { ProductOfferType } from "typings/beach_bar/product/offer";
 import { checkScopes } from "utils/checkScopes";
@@ -63,10 +62,7 @@ export const VoucherCoderQuery = extendType({
       type: CouponCodeRevealResult,
       description: "Get a coupon's code details & its referral code",
       args: {
-        couponCodeId: arg({
-          type: BigIntScalar,
-          description: "The ID value of the coupon code",
-        }),
+        couponCodeId: idArg({ description: "The ID value of the coupon code" }),
       },
       resolve: async (_, { couponCodeId }, { payload }: MyContext): Promise<CouponCode | ErrorType> => {
         if (!payload) {
@@ -93,10 +89,7 @@ export const VoucherCoderQuery = extendType({
       type: OfferCampaignCodeRevealResult,
       description: "Get an offer's campaign code details + its referral code",
       args: {
-        offerCampaignCodeId: arg({
-          type: BigIntScalar,
-          description: "The ID value of the offer campaign code",
-        }),
+        offerCampaignCodeId: idArg({ description: "The ID value of the offer campaign code" }),
       },
       resolve: async (_, { offerCampaignCodeId }, { payload }: MyContext): Promise<OfferCampaignCode | ErrorType> => {
         if (!payload) {

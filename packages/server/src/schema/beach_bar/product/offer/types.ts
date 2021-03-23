@@ -1,4 +1,4 @@
-import { BigIntScalar, DateTimeScalar } from "@the_hashtag/common/dist/graphql";
+import { DateTimeScalar } from "@the_hashtag/common/dist/graphql";
 import { interfaceType, objectType, unionType } from "nexus";
 import { BeachBarType } from "schema/beach_bar/types";
 import { ProductType } from "../types";
@@ -7,7 +7,8 @@ export const CouponCodeInterface = interfaceType({
   name: "CouponCodeInterface",
   description: "Represents a coupon code interface for a #beach_bar",
   definition(t) {
-    t.field("id", { type: BigIntScalar });
+    t.id("id");
+    t.string("refCode");
     t.string("title");
     t.float("discountPercentage");
     t.boolean("isActive");
@@ -27,7 +28,8 @@ export const OfferCampaignCodeInterface = interfaceType({
   name: "OfferCampaignCodeInterface",
   description: "Represents an offer code interface for an offer campaign",
   definition(t) {
-    t.field("id", { type: BigIntScalar });
+    t.id("id");
+    t.string("refCode");
     t.float("totalAmount", {
       description: "The total amount to make a discount from",
       resolve: o => o.campaign.calculateTotalProductPrice(),
@@ -83,9 +85,9 @@ export const VoucherCodeQueryResult = unionType({
     t.members("CouponCode", "OfferCampaignCode", "Error");
   },
   resolveType: item => {
-    if (item.name === "Error") {
+    if (item.error) {
       return "Error";
-    } else if (item.name === "OfferCampaignCode") {
+    } else if (item.totalAmount) {
       return "OfferCampaignCode";
     } else {
       return "CouponCode";
@@ -112,7 +114,7 @@ export const AddCouponCodeResult = unionType({
     t.members("AddCouponCode", "Error");
   },
   resolveType: item => {
-    if (item.name === "Error") {
+    if (item.error) {
       return "Error";
     } else {
       return "AddCouponCode";
@@ -140,9 +142,9 @@ export const UpdateCouponCodeResult = unionType({
     t.members("UpdateCouponCode", "Delete", "Error");
   },
   resolveType: item => {
-    if (item.name === "Error") {
+    if (item.error) {
       return "Error";
-    } else if (item.name === "Delete") {
+    } else if (item.deleted) {
       return "Delete";
     } else {
       return "UpdateCouponCode";
@@ -169,7 +171,7 @@ export const AddOfferCampaignResult = unionType({
     t.members("AddOfferCampaign", "Error");
   },
   resolveType: item => {
-    if (item.name === "Error") {
+    if (item.error) {
       return "Error";
     } else {
       return "AddOfferCampaign";
@@ -196,7 +198,7 @@ export const UpdateOfferCampaignResult = unionType({
     t.members("UpdateOfferCampaign", "Error");
   },
   resolveType: item => {
-    if (item.name === "Error") {
+    if (item.error) {
       return "Error";
     } else {
       return "UpdateOfferCampaign";
@@ -223,7 +225,7 @@ export const AddOfferCampaignCodeResult = unionType({
     t.members("AddOfferCampaignCode", "Error");
   },
   resolveType: item => {
-    if (item.name === "Error") {
+    if (item.error) {
       return "Error";
     } else {
       return "AddOfferCampaignCode";
@@ -246,7 +248,7 @@ export const CouponCodeRevealResult = unionType({
     t.members("CouponCodeReveal", "Error");
   },
   resolveType: item => {
-    if (item.name === "Error") {
+    if (item.error) {
       return "Error";
     } else {
       return "CouponCodeReveal";
@@ -269,7 +271,7 @@ export const OfferCampaignCodeRevealResult = unionType({
     t.members("OfferCampaignCodeReveal", "Error");
   },
   resolveType: item => {
-    if (item.name === "Error") {
+    if (item.error) {
       return "Error";
     } else {
       return "OfferCampaignCodeReveal";

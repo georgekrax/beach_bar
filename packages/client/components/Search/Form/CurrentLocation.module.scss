@@ -1,0 +1,20 @@
+.container {
+  composes: wrapperMargin from "./Form.module.scss";
+  margin-top: map-get($em-spacers, 24);
+  margin-bottom: map-get($em-spacers, 32);
+
+  & > svg {
+    transform: rotate(-45deg);
+    margin-right: map-get($em-spacers, 8);
+
+    & > path {
+      stroke: $volcano-5;
+    }
+  }
+
+  & > div {
+    color: $volcano-5;
+    margin-left: map-get($em-spacers, 4);
+    transform: translateY(-3px);
+  }
+}

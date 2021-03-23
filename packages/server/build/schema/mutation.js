@@ -15,9 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Mutation = void 0;
 const graphql_1 = require("@the_hashtag/common/dist/graphql");
 const fs_1 = require("fs");
+const nanoid_1 = require("nanoid");
 const nexus_1 = require("nexus");
 const path_1 = __importDefault(require("path"));
-const uuid_1 = require("uuid");
 const types_1 = require("./types");
 exports.Mutation = nexus_1.mutationType({
     description: "Mutation",
@@ -34,7 +34,7 @@ exports.Mutation = nexus_1.mutationType({
             resolve: (_, { file }) => __awaiter(this, void 0, void 0, function* () {
                 const { createReadStream, filename, mimetype, encoding } = yield file;
                 yield new Promise(res => createReadStream()
-                    .pipe(fs_1.createWriteStream(path_1.default.join(__dirname, "../../images", `${filename}_${uuid_1.v4()}`)))
+                    .pipe(fs_1.createWriteStream(path_1.default.join(__dirname, "../../images", `${filename}_${nanoid_1.nanoid()}`)))
                     .on("close", res));
                 return { filename, mimetype, encoding };
             }),

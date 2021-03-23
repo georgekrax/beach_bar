@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AddUserFavoriteBarResult = exports.AddUserFavoriteBarType = exports.UserFavoriteBarType = void 0;
+exports.UpdateUserFavoriteBarType = exports.UserFavoriteBarType = void 0;
 const nexus_1 = require("nexus");
 const types_1 = require("schema/beach_bar/types");
 const types_2 = require("../types");
@@ -20,31 +20,17 @@ exports.UserFavoriteBarType = nexus_1.objectType({
         });
     },
 });
-exports.AddUserFavoriteBarType = nexus_1.objectType({
-    name: "AddUserFavoriteBar",
-    description: "Info to be returned when a user add #beach_bar to his / her favorite list",
+exports.UpdateUserFavoriteBarType = nexus_1.objectType({
+    name: "UpdateUserFavoriteBar",
+    description: "Info to be returned when a user's #beach_bar favourite list is updated",
     definition(t) {
-        t.field("beachBar", {
+        t.field("favouriteBar", {
             type: exports.UserFavoriteBarType,
-            description: "The #beach_bar that is added",
-            resolve: o => o.beachBar,
+            description: "The #beach_bar that is added / removed",
+            resolve: o => o.favouriteBar,
         });
-        t.boolean("added", {
-            description: "A boolean that indicates if the #beach_bar has been successfully being added to the user's favorites",
+        t.boolean("updated", {
+            description: "A boolean that indicates if the user's favorites #beach_bar list is updated",
         });
-    },
-});
-exports.AddUserFavoriteBarResult = nexus_1.unionType({
-    name: "AddUserFavoriteBarResult",
-    definition(t) {
-        t.members("AddUserFavoriteBar", "Error");
-    },
-    resolveType: item => {
-        if (item.name === "Error") {
-            return "Error";
-        }
-        else {
-            return "AddUserFavoriteBar";
-        }
     },
 });

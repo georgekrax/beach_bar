@@ -66,6 +66,7 @@ const BeachBarReview_1 = require("./BeachBarReview");
 const BeachBarType_1 = require("./BeachBarType");
 const CouponCode_1 = require("./CouponCode");
 const Currency_1 = require("./Currency");
+const Payment_1 = require("./Payment");
 const PricingFee_1 = require("./PricingFee");
 const PricingFeeCurrency_1 = require("./PricingFeeCurrency");
 const Product_1 = require("./Product");
@@ -80,19 +81,50 @@ let BeachBar = BeachBar_1 = class BeachBar extends typeorm_1.BaseEntity {
         return __awaiter(this, void 0, void 0, function* () {
             const inputValue = yield SearchInputValue_1.SearchInputValue.findOne({ beachBarId: this.id });
             if (this.isActive) {
-                const res = yield typeorm_1.getRepository(SearchInputValue_1.SearchInputValue).restore({ beachBarId: this.id });
-                if (res.affected === 0) {
-                    yield SearchInputValue_1.SearchInputValue.create({
-                        beachBarId: this.id,
-                        publicId: common_2.generateId({ length: 5, numbersOnly: true }),
-                    }).save();
+                yield typeorm_1.getRepository(SearchInputValue_1.SearchInputValue).restore({ beachBarId: this.id });
+                try {
+                    const { countryId, cityId, regionId } = this.location;
+                    const searchInputs = yield SearchInputValue_1.SearchInputValue.find({
+                        where: [{ beachBarId: this.id }, { countryId }, { countryId, cityId }, { countryId, cityId, regionId }],
+                    });
+                    if (!searchInputs.find(input => { var _a; return ((_a = input.beachBarId) === null || _a === void 0 ? void 0 : _a.toString()) === this.id.toString(); })) {
+                        yield SearchInputValue_1.SearchInputValue.create({
+                            beachBarId: this.id,
+                            publicId: common_2.generateId({ length: 5, numbersOnly: true }),
+                        }).save();
+                    }
+                    if (!searchInputs.find(input => { var _a; return ((_a = input.countryId) === null || _a === void 0 ? void 0 : _a.toString()) === countryId.toString(); })) {
+                        yield SearchInputValue_1.SearchInputValue.create({
+                            countryId,
+                            publicId: common_2.generateId({ length: 5, numbersOnly: true }),
+                        }).save();
+                    }
+                    if (!searchInputs.find(input => { var _a, _b; return ((_a = input.cityId) === null || _a === void 0 ? void 0 : _a.toString()) === cityId.toString() && ((_b = input.countryId) === null || _b === void 0 ? void 0 : _b.toString()) === countryId.toString(); })) {
+                        yield SearchInputValue_1.SearchInputValue.create({
+                            countryId,
+                            cityId,
+                            publicId: common_2.generateId({ length: 5, numbersOnly: true }),
+                        }).save();
+                    }
+                    if (regionId &&
+                        !searchInputs.find(input => {
+                            var _a, _b, _c;
+                            return ((_a = input.regionId) === null || _a === void 0 ? void 0 : _a.toString()) === regionId.toString() &&
+                                ((_b = input.cityId) === null || _b === void 0 ? void 0 : _b.toString()) === cityId.toString() &&
+                                ((_c = input.countryId) === null || _c === void 0 ? void 0 : _c.toString()) === countryId.toString();
+                        })) {
+                        yield SearchInputValue_1.SearchInputValue.create({
+                            countryId,
+                            cityId,
+                            regionId,
+                            publicId: common_2.generateId({ length: 5, numbersOnly: true }),
+                        }).save();
+                    }
                 }
+                catch (_a) { }
             }
-            else {
-                if (inputValue) {
-                    yield inputValue.softRemove();
-                }
-            }
+            else if (inputValue)
+                yield inputValue.softRemove();
         });
     }
     getRedisKey() {
@@ -107,6 +139,20 @@ let BeachBar = BeachBar_1 = class BeachBar extends typeorm_1.BaseEntity {
             return reservedProducts;
         });
     }
+    getPayments() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const payments = yield typeorm_1.getConnection()
+                .createQueryBuilder(Payment_1.Payment, "payment")
+                .leftJoinAndSelect("payment.cart", "paymentCart")
+                .leftJoinAndSelect("paymentCart.products", "products")
+                .leftJoinAndSelect("products.product", "cartProduct")
+                .leftJoinAndSelect("cartProduct.beachBar", "beachBar")
+                .where("payment.isRefunded IS FALSE")
+                .andWhere("beachBar.id = :id", { id: this.id })
+                .getMany();
+            return payments;
+        });
+    }
     getRedisIdx(redis) {
         return __awaiter(this, void 0, void 0, function* () {
             const beachBars = yield redis.lrange(this.getRedisKey(), 0, -1);
@@ -114,47 +160,42 @@ let BeachBar = BeachBar_1 = class BeachBar extends typeorm_1.BaseEntity {
             return idx;
         });
     }
-    update(name, description, thumbnailUrl, contactPhoneNumber, hidePhoneNumber, zeroCartTotal, isAvailable, categoryId, openingTimeId, closingTimeId) {
+    update(name, description, thumbnailUrl, contactPhoneNumber, hidePhoneNumber, zeroCartTotal, isAvailable, isActive, categoryId, openingTimeId, closingTimeId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 if (name && name !== this.name) {
                     this.name = name;
+                    this.slug = common_1.toSlug(name);
                 }
-                if (description && description !== this.description) {
+                ;
+                if (description && description !== this.description)
                     this.description = description;
-                }
-                if (thumbnailUrl && thumbnailUrl !== this.thumbnailUrl) {
+                if (thumbnailUrl && thumbnailUrl !== this.thumbnailUrl)
                     this.thumbnailUrl = thumbnailUrl.toString();
-                }
-                if (contactPhoneNumber && contactPhoneNumber !== this.contactPhoneNumber) {
+                if (contactPhoneNumber && contactPhoneNumber !== this.contactPhoneNumber)
                     this.contactPhoneNumber = contactPhoneNumber;
-                }
-                if (hidePhoneNumber !== null && hidePhoneNumber !== undefined && hidePhoneNumber !== this.hidePhoneNumber) {
+                if (hidePhoneNumber !== null && hidePhoneNumber !== undefined && hidePhoneNumber !== this.hidePhoneNumber)
                     this.hidePhoneNumber = hidePhoneNumber;
-                }
-                if (zeroCartTotal !== null && zeroCartTotal !== undefined && zeroCartTotal !== this.zeroCartTotal) {
+                if (zeroCartTotal !== null && zeroCartTotal !== undefined && zeroCartTotal !== this.zeroCartTotal)
                     this.zeroCartTotal = zeroCartTotal;
-                }
-                if (isAvailable !== null && isAvailable !== undefined && isAvailable !== this.isAvailable) {
+                if (isAvailable !== null && isAvailable !== undefined && isAvailable !== this.isAvailable)
                     this.isAvailable = isAvailable;
-                }
+                if (isActive !== null && isActive !== undefined && isActive !== this.isActive)
+                    this.isActive = isActive;
                 if (categoryId && categoryId !== this.categoryId) {
                     const category = yield BeachBarCategory_1.BeachBarCategory.findOne(categoryId);
-                    if (category) {
+                    if (category)
                         this.category = category;
-                    }
                 }
                 if (openingTimeId && openingTimeId !== this.openingTimeId) {
                     const quarterTime = yield Time_1.QuarterTime.findOne(openingTimeId);
-                    if (quarterTime) {
+                    if (quarterTime)
                         this.openingTime = quarterTime;
-                    }
                 }
                 if (closingTimeId && closingTimeId !== this.closingTimeId) {
                     const quarterTime = yield Time_1.QuarterTime.findOne(closingTimeId);
-                    if (quarterTime) {
+                    if (quarterTime)
                         this.closingTime = quarterTime;
-                    }
                 }
                 yield this.save();
                 yield this.updateRedis();
@@ -172,16 +213,14 @@ let BeachBar = BeachBar_1 = class BeachBar extends typeorm_1.BaseEntity {
                     where: { id: this.id },
                     relations: relations_1.default.BEACH_BAR_EXTENSIVE,
                 });
-                if (!beachBar) {
+                if (!beachBar)
                     throw new Error();
-                }
                 beachBar.features = beachBar.features.filter(feature => !feature.deletedAt);
                 beachBar.products = beachBar.products.filter(product => !product.deletedAt);
                 beachBar.products.forEach(product => {
                     var _a;
-                    if (product.reservationLimits && ((_a = product.reservationLimits) === null || _a === void 0 ? void 0 : _a.length) > 0) {
+                    if (product.reservationLimits && ((_a = product.reservationLimits) === null || _a === void 0 ? void 0 : _a.length) > 0)
                         product.reservationLimits = product.reservationLimits.filter(limit => !limit.deletedAt);
-                    }
                 });
                 const idx = yield beachBar.getRedisIdx(index_1.redis);
                 yield index_1.redis.lset(beachBar.getRedisKey(), idx, JSON.stringify(beachBar));
@@ -200,14 +239,12 @@ let BeachBar = BeachBar_1 = class BeachBar extends typeorm_1.BaseEntity {
                     const avg = entryFeeValues.reduce((a, b) => a + b) / entryFeeValues.length;
                     return avg;
                 }
-                else {
+                else
                     return undefined;
-                }
             }
             const entryFees = yield BeachBarEntryFee_1.BeachBarEntryFee.findOne({ beachBar: this, date: date ? date : dayjs_1.default() });
-            if (entryFees) {
+            if (entryFees)
                 return entryFees;
-            }
             return undefined;
         });
     }
@@ -253,9 +290,8 @@ let BeachBar = BeachBar_1 = class BeachBar extends typeorm_1.BaseEntity {
         return __awaiter(this, void 0, void 0, function* () {
             const pricingFee = yield this.getPricingFee();
             const currencyFee = yield PricingFeeCurrency_1.PricingFeeCurrency.findOne({ currencyId: this.defaultCurrencyId });
-            if (!pricingFee || !currencyFee) {
+            if (!pricingFee || !currencyFee)
                 return undefined;
-            }
             return {
                 pricingFee,
                 currencyFee,
@@ -265,9 +301,8 @@ let BeachBar = BeachBar_1 = class BeachBar extends typeorm_1.BaseEntity {
     getBeachBarPaymentDetails(total, stripeFee) {
         return __awaiter(this, void 0, void 0, function* () {
             const beachBarPricingFee = yield this.getFullPricingFee();
-            if (!beachBarPricingFee) {
+            if (!beachBarPricingFee)
                 return undefined;
-            }
             const { pricingFee, currencyFee } = beachBarPricingFee;
             const percentageFee = parseFloat(((total * parseFloat(pricingFee.percentageValue.toString())) / 100).toFixed(2));
             const beachBarAppFee = parseFloat((percentageFee + parseFloat(currencyFee.numericValue.toString())).toFixed(2));
@@ -283,41 +318,10 @@ let BeachBar = BeachBar_1 = class BeachBar extends typeorm_1.BaseEntity {
     getMinimumCurrency() {
         return __awaiter(this, void 0, void 0, function* () {
             const minimumCurrency = yield StripeMinimumCurrency_1.StripeMinimumCurrency.findOne({ currencyId: this.defaultCurrencyId });
-            if (!minimumCurrency) {
+            if (!minimumCurrency)
                 return undefined;
-            }
-            else {
+            else
                 return minimumCurrency;
-            }
-        });
-    }
-    checkMinimumCurrency(total) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const minimumCurrency = yield this.getMinimumCurrency();
-            if (!minimumCurrency) {
-                return undefined;
-            }
-            if (total <= minimumCurrency.chargeAmount) {
-                return false;
-            }
-            else {
-                return true;
-            }
-        });
-    }
-    setIsActive(isActive) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                if (isActive !== null && isActive !== undefined && isActive !== this.isActive) {
-                    this.isActive = isActive;
-                }
-                yield this.save();
-                yield this.updateRedis();
-                return this;
-            }
-            catch (err) {
-                throw new Error(err.message);
-            }
         });
     }
     checkAvailability(redis, date, timeId, totalPeople) {
@@ -329,9 +333,8 @@ let BeachBar = BeachBar_1 = class BeachBar extends typeorm_1.BaseEntity {
     customSoftRemove(redis) {
         return __awaiter(this, void 0, void 0, function* () {
             const inputValues = yield SearchInputValue_1.SearchInputValue.findOne({ beachBarId: this.id });
-            if (inputValues) {
+            if (inputValues)
                 yield SearchInputValue_1.SearchInputValue.softRemove(inputValues);
-            }
             try {
                 const idx = yield this.getRedisIdx(redis);
                 yield redis.lset(this.getRedisKey(), idx, "");
@@ -365,6 +368,10 @@ __decorate([
     typeorm_1.Column("varchar", { length: 255, name: "name", unique: true }),
     __metadata("design:type", String)
 ], BeachBar.prototype, "name", void 0);
+__decorate([
+    typeorm_1.Column("varchar", { length: 255, name: "slug", unique: true }),
+    __metadata("design:type", String)
+], BeachBar.prototype, "slug", void 0);
 __decorate([
     typeorm_1.Column({ type: "text", name: "description", nullable: true }),
     __metadata("design:type", String)
@@ -552,9 +559,8 @@ let BeachBarRepository = class BeachBarRepository extends typeorm_1.Repository {
             });
             return maxLimit;
         }
-        else {
+        else
             return undefined;
-        }
     }
 };
 BeachBarRepository = __decorate([

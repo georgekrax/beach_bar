@@ -8,7 +8,6 @@ import { Customer } from "./Customer";
 import { LoginDetails } from "./LoginDetails";
 import { Region } from "./Region";
 import { SearchInputValue } from "./SearchInputValue";
-import { UserContactDetails } from "./UserContactDetails";
 
 @Entity({ name: "country", schema: "public" })
 export class Country extends BaseEntity {
@@ -18,30 +17,20 @@ export class Country extends BaseEntity {
   @Column("varchar", { length: 100, name: "name", unique: true })
   name: string;
 
-  @Column("varchar", { length: 100, name: "short_name", unique: true, nullable: true })
-  shortName?: string;
-
-  @Column("varchar", { length: 10, name: "calling_code", unique: true })
-  callingCode: string;
-
-  @Column("varchar", { length: 2, name: "iso_code", unique: true })
-  isoCode: string;
+  @Column("varchar", { length: 2, name: "alpha_2_code", unique: true})
+  alpha2Code: string;
 
   @Column("varchar", { length: 3, name: "alpha_3_code", unique: true })
   alpha3Code: string;
 
+  @Column("varchar", { length: 10, name: "calling_code", unique: true })
+  callingCode: string;
+
   @Column({ type: "boolean", name: "is_eu" })
   isEu: boolean;
 
-  @Column("varchar", { length: 5, name: "language_identifier", unique: false })
-  languageIdentifier: string;
-
   @Column({ type: "integer", name: "currency_id" })
   currencyId: number;
-
-  // TODO: Change in DB, to be NOT NULL (add NOT NULL constraint)
-  @Column({ type: "text", name: "flag_28x20", unique: true })
-  flag28x20: string;
 
   @ManyToOne(() => Currency, currency => currency.countries, { nullable: false })
   @JoinColumn({ name: "currency_id" })
@@ -53,8 +42,8 @@ export class Country extends BaseEntity {
   @OneToMany(() => Account, account => account.country)
   accounts?: Account[];
 
-  @OneToMany(() => UserContactDetails, userContactDetails => userContactDetails.country)
-  userContactDetails?: UserContactDetails[];
+  @OneToMany(() => Account, account => account.telCountry)
+  accountsTel?: Account[];
 
   @OneToMany(() => Region, region => region.country)
   regions?: Region[];

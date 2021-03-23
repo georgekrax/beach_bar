@@ -1,15 +1,15 @@
 import { BeachBarReview } from "entity/BeachBarReview";
 import { Customer } from "entity/Customer";
 import { Payment } from "entity/Payment";
-import { AddType, ErrorType, UpdateType } from "typings/.index";
+import { AddType, UpdateType } from "typings/.index";
 
 type BeachBarReviewType = {
   review: BeachBarReview;
 };
 
-export type AddBeachBarReviewType = (AddType & BeachBarReviewType) | ErrorType;
+export type TAddBeachBarReview = AddType & BeachBarReviewType;
 
-export type UpdateBeachBarReviewType = (UpdateType & BeachBarReviewType) | ErrorType;
+export type TUpdateBeachBarReview = UpdateType & BeachBarReviewType;
 
 export interface VerifyUserPaymentReviewReturnResult {
   boolean: boolean;

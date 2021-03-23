@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import { OAuth2Client } from "google-auth-library";
 import { Redis } from "ioredis";
 import { Stripe } from "stripe";
-import { UAParser } from "ua-parser-js";
+import UAParser from "ua-parser-js";
 
 export interface MyContext {
   req: Request;

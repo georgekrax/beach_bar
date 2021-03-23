@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UpdateBeachBarLocationResult = exports.UpdateBeachBarLocationType = exports.AddBeachBarLocationResult = exports.AddBeachBarLocationType = exports.BeachBarLocationType = void 0;
+exports.UpdateBeachBarLocationType = exports.AddBeachBarLocationType = exports.BeachBarLocationType = void 0;
 const nexus_1 = require("nexus");
 const cityTypes_1 = require("../../details/cityTypes");
 const countryTypes_1 = require("../../details/countryTypes");
@@ -54,20 +54,6 @@ exports.AddBeachBarLocationType = nexus_1.objectType({
         t.boolean("added", { description: "A boolean that indicates if the #beach_bar locations has been successfully being added" });
     },
 });
-exports.AddBeachBarLocationResult = nexus_1.unionType({
-    name: "AddBeachBarLocationResult",
-    definition(t) {
-        t.members("AddBeachBarLocation", "Error");
-    },
-    resolveType: item => {
-        if (item.name === "Error") {
-            return "Error";
-        }
-        else {
-            return "AddBeachBarLocation";
-        }
-    },
-});
 exports.UpdateBeachBarLocationType = nexus_1.objectType({
     name: "UpdateBeachBarLocation",
     description: "Info to be returned when the details of #beach_bar location are updated",
@@ -80,19 +66,5 @@ exports.UpdateBeachBarLocationType = nexus_1.objectType({
         t.boolean("updated", {
             description: "A boolean that indicates if the #beach_bar location details have been successfully updated",
         });
-    },
-});
-exports.UpdateBeachBarLocationResult = nexus_1.unionType({
-    name: "UpdateBeachBarLocationResult",
-    definition(t) {
-        t.members("UpdateBeachBarLocation", "Error");
-    },
-    resolveType: item => {
-        if (item.name === "Error") {
-            return "Error";
-        }
-        else {
-            return "UpdateBeachBarLocation";
-        }
     },
 });

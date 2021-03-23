@@ -55,11 +55,11 @@ const ProductReservationLimit_1 = require("./ProductReservationLimit");
 const ReservedProduct_1 = require("./ReservedProduct");
 const Time_1 = require("./Time");
 let Product = Product_1 = class Product extends typeorm_1.BaseEntity {
-    getReservationLimit(timeId, date) {
+    getReservationLimit(timeId, date = dayjs_1.default()) {
         return __awaiter(this, void 0, void 0, function* () {
-            const formattedDate = date ? dayjs_1.default(date).format(common_1.dayjsFormat.ISO_STRING) : dayjs_1.default().format(common_1.dayjsFormat.ISO_STRING);
+            const formattedDate = dayjs_1.default(date).format(common_1.dayjsFormat.ISO_STRING);
             const reservationLimit = yield ProductReservationLimit_1.ProductReservationLimit.find({ product: this, date: formattedDate });
-            if (reservationLimit) {
+            if (reservationLimit.length > 0) {
                 const limitNumber = reservationLimit.find(limit => timeId >= limit.startTimeId && timeId <= limit.endTimeId);
                 if (limitNumber) {
                     return limitNumber.limitNumber;
@@ -73,14 +73,12 @@ let Product = Product_1 = class Product extends typeorm_1.BaseEntity {
             }
         });
     }
-    getReservedProducts(timeId, date) {
+    getReservedProducts(timeId, date = dayjs_1.default()) {
         return __awaiter(this, void 0, void 0, function* () {
             const reservedProductsNumber = yield typeorm_1.getManager()
                 .createQueryBuilder(ReservedProduct_1.ReservedProduct, "reservedProduct")
                 .select("COUNT(*)", "count")
-                .where("reservedProduct.date = :date", {
-                date: date ? date.format(common_1.dayjsFormat.ISO_STRING) : dayjs_1.default().format(common_1.dayjsFormat.ISO_STRING),
-            })
+                .where("reservedProduct.date = :searchDate", { searchDate: dayjs_1.default(date).format(common_1.dayjsFormat.ISO_STRING) })
                 .andWhere("reservedProduct.timeId = :timeId", { timeId })
                 .getRawOne();
             if (reservedProductsNumber) {

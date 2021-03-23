@@ -6,8 +6,3 @@ export const link: any = new HttpLink({
   fetch: fetch as any,
   credentials: "include",
 });
-
-// export const client = new ApolloClient({
-//   link,
-//   cache: new InMemoryCache(),
-// });

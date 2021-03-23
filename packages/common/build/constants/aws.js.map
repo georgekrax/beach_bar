@@ -1,1 +1,0 @@
-{"version":3,"file":"aws.js","sourceRoot":"","sources":["../../src/constants/aws.ts"],"names":[],"mappings":";;;AAAa,QAAA,gBAAgB,GAAG,MAAM,CAAC,MAAM,CAAC;IAC5C,OAAO,EAAE,SAAS;IAClB,WAAW,EAAE,aAAa;IAC1B,iBAAiB,EAAE,mBAAmB;IACtC,aAAa,EAAE,eAAe;IAC9B,kBAAkB,EAAE,oBAAoB;IACxC,iBAAiB,EAAE,mBAAmB;IACtC,yBAAyB,EAAE,2BAA2B;IACtD,kBAAkB,EAAE,oBAAoB;CACzC,CAAC,CAAC"}

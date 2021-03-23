@@ -1,0 +1,20 @@
+query GetLatestUserSearches {
+  getLatestUserSearches {
+    id
+    searchDate
+    searchAdults
+    searchChildren
+    inputValue {
+      city {
+        name
+      }
+      region {
+        name
+      }
+      beachBar {
+        name
+        thumbnailUrl
+      }
+    }
+  }
+}

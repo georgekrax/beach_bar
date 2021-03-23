@@ -1,0 +1,9 @@
+.container {
+  &:not(:first-child) {
+    margin-top: map-get($em-spacers, 40);
+  }
+
+  & > h5 {
+    margin-bottom: map-get($em-spacers, 12);
+  }
+}

@@ -26,41 +26,50 @@ const City_1 = require("./City");
 const Country_1 = require("./Country");
 const Region_1 = require("./Region");
 let BeachBarLocation = class BeachBarLocation extends typeorm_1.BaseEntity {
-    update(address, zipCode, latitude, longitude, countryId, cityId, regionId) {
+    update({ address, zipCode, latitude, longitude, countryId, city, region, }) {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                if (address && address !== this.address) {
+                if (address && address !== this.address)
                     this.address = address;
-                }
-                if (zipCode && zipCode !== this.zipCode) {
+                if (zipCode && zipCode !== this.zipCode)
                     this.zipCode = zipCode;
-                }
-                if (latitude && latitude !== this.latitude) {
+                if (latitude && latitude !== this.latitude)
                     this.latitude = latitude;
-                }
-                if (longitude && longitude !== this.longitude) {
+                if (longitude && longitude !== this.longitude)
                     this.longitude = longitude;
-                }
                 if (countryId && countryId !== this.countryId) {
                     const country = yield Country_1.Country.findOne(countryId);
-                    if (!country) {
+                    if (!country)
                         throw new Error("Invalid country");
-                    }
                     this.country = country;
                 }
-                if (cityId && cityId !== this.cityId) {
-                    const city = yield City_1.City.findOne({ id: cityId });
-                    if (!city) {
-                        throw new Error("Invalid city");
+                if (city && city.toLowerCase() !== this.city.name.toLowerCase()) {
+                    let newCity = yield City_1.City.findOne({ where: `"name" ILIKE '${city}'` });
+                    if (!newCity) {
+                        newCity = City_1.City.create({
+                            name: city,
+                            countryId: this.country.id,
+                            country: this.country,
+                        });
+                        yield newCity.save();
                     }
-                    this.city = city;
+                    this.city = newCity;
+                    yield this.save();
                 }
-                if (regionId && regionId !== this.regionId) {
-                    const region = yield Region_1.Region.findOne(regionId);
-                    if (!region) {
-                        throw new Error("Invalid region");
+                if (region && region.toLowerCase() !== ((_a = this.region) === null || _a === void 0 ? void 0 : _a.name.toLowerCase())) {
+                    let newRegion = yield Region_1.Region.findOne({ where: `"name" ILIKE '${region}'` });
+                    if (!newRegion) {
+                        newRegion = Region_1.Region.create({
+                            name: region,
+                            countryId: this.country.id,
+                            country: this.country,
+                            cityId: this.city.id,
+                            city: this.city,
+                        });
+                        yield newRegion.save();
                     }
-                    this.region = region;
+                    this.region = newRegion;
                 }
                 yield this.save();
                 yield this.beachBar.updateRedis();

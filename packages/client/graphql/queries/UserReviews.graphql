@@ -1,0 +1,37 @@
+query UserReviews {
+  userReviews {
+    id
+    ratingValue
+    positiveComment
+    negativeComment
+    review
+    updatedAt
+    timestamp
+    votes {
+      id
+      user {
+        id
+      }
+      type {
+        id
+        value
+      }
+    }
+    answer {
+      id
+      body
+    }
+    beachBar {
+      id
+      name
+    }
+    visitType {
+      id
+      name
+    }
+    month {
+      id
+      value
+    }
+  }
+}

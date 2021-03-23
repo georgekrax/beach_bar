@@ -27,10 +27,6 @@ __decorate([
     __metadata("design:type", String)
 ], HourTime.prototype, "value", void 0);
 __decorate([
-    typeorm_1.Column("varchar", { length: 9, name: "utc_value" }),
-    __metadata("design:type", String)
-], HourTime.prototype, "utcValue", void 0);
-__decorate([
     typeorm_1.OneToMany(() => ProductReservationLimit_1.ProductReservationLimit, productReservationLimit => productReservationLimit.startTime, { nullable: true }),
     __metadata("design:type", Array)
 ], HourTime.prototype, "reservationLimitStartTimes", void 0);
@@ -48,8 +44,7 @@ __decorate([
 ], HourTime.prototype, "reservedProductTimes", void 0);
 HourTime = __decorate([
     typeorm_1.Entity({ name: "hour_time", schema: "public" }),
-    typeorm_1.Check(`length("value"::text) = 8`),
-    typeorm_1.Check(`length("utcValue") = 9`)
+    typeorm_1.Check(`length("value"::text) = 8`)
 ], HourTime);
 exports.HourTime = HourTime;
 let MonthTime = class MonthTime extends typeorm_1.BaseEntity {
@@ -85,10 +80,6 @@ __decorate([
     __metadata("design:type", String)
 ], QuarterTime.prototype, "value", void 0);
 __decorate([
-    typeorm_1.Column("varchar", { length: 9, name: "utc_value" }),
-    __metadata("design:type", String)
-], QuarterTime.prototype, "utcValue", void 0);
-__decorate([
     typeorm_1.OneToMany(() => BeachBar_1.BeachBar, beachBar => beachBar.openingTime, { nullable: true }),
     __metadata("design:type", Array)
 ], QuarterTime.prototype, "beachBarsOpeningTime", void 0);
@@ -98,7 +89,6 @@ __decorate([
 ], QuarterTime.prototype, "beachBarsClosingTime", void 0);
 QuarterTime = __decorate([
     typeorm_1.Entity({ name: "quarter_time", schema: "public" }),
-    typeorm_1.Check(`length("value"::text) = 8`),
-    typeorm_1.Check(`length("utcValue") = 9`)
+    typeorm_1.Check(`length("value"::text) = 8`)
 ], QuarterTime);
 exports.QuarterTime = QuarterTime;

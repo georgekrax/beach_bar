@@ -4,6 +4,7 @@ import { CurrencyType } from "../details/countryTypes";
 import { QuarterTimeType } from "../details/time/types";
 import { BeachBarCategoryType } from "../details/types";
 import { BeachBarOwnerType } from "../owner/types";
+import { PaymentType } from "../payment/types";
 import { BeachBarImgUrlType } from "./img_url/types";
 import { BeachBarLocationType } from "./location/types";
 import { BeachBarRestaurantType } from "./restaurant/types";
@@ -17,8 +18,12 @@ export const BeachBarType = objectType({
   definition(t) {
     t.id("id", { description: "The ID value of the #beach_bar" });
     t.string("name", { description: "The name of the #beach_bar" });
+    t.string("slug", { description: 'The "slugified" name of the #beach_bar, in a URL friendly way' });
     t.nullable.string("description", { description: "A description text about the #beach_bar" });
-    t.nullable.float("avgRating", { description: "The average rating of all the user reviews for this #beach_bar" });
+    t.float("avgRating", {
+      description: "The average rating of all the user reviews for this #beach_bar",
+      resolve: o => o.avgRating || 0,
+    });
     t.nullable.field("thumbnailUrl", {
       type: UrlScalar,
     });
@@ -36,6 +41,23 @@ export const BeachBarType = objectType({
       type: BeachBarLocationType,
       description: "The location of the #beach_bar",
       resolve: o => o.location,
+    });
+    t.string("formattedLocation", {
+      description: "Get the location of the #beach_bar in a formatted string",
+      resolve: (o): string => {
+        if (!o.location) return "";
+        const location = o.location;
+        let formattedLocation = "";
+        if (location.country) formattedLocation = location.country.alpha2Code + formattedLocation;
+        if (location.city) formattedLocation = location.city.name + ", " + formattedLocation;
+        if (location.region) formattedLocation = location.region.name + ", " + formattedLocation;
+        return formattedLocation;
+      },
+    });
+    t.list.field("payments", {
+      type: PaymentType,
+      description: "A list with all the payments of a #beach_bar",
+      resolve: async o => await o.getPayments(),
     });
     t.field("category", {
       type: BeachBarCategoryType,
@@ -104,7 +126,7 @@ export const BeachBarResult = unionType({
     t.members("BeachBar", "Error");
   },
   resolveType: item => {
-    if (item.name === "Error") {
+    if (item.error) {
       return "Error";
     } else {
       return "BeachBar";
@@ -127,19 +149,19 @@ export const AddBeachBarType = objectType({
   },
 });
 
-export const AddBeachBarResult = unionType({
-  name: "AddBeachBarResult",
-  definition(t) {
-    t.members("AddBeachBar", "Error");
-  },
-  resolveType: item => {
-    if (item.name === "Error") {
-      return "Error";
-    } else {
-      return "AddBeachBar";
-    }
-  },
-});
+// export const AddBeachBarResult = unionType({
+//   name: "AddBeachBarResult",
+//   definition(t) {
+//     t.members("AddBeachBar", "Error");
+//   },
+//   resolveType: item => {
+//     if (item.error) {
+//       return "Error";
+//     } else {
+//       return "AddBeachBar";
+//     }
+//   },
+// });
 
 export const UpdateBeachBarType = objectType({
   name: "UpdateBeachBar",
@@ -156,19 +178,19 @@ export const UpdateBeachBarType = objectType({
   },
 });
 
-export const UpdateBeachBarResult = unionType({
-  name: "UpdateBeachBarResult",
-  definition(t) {
-    t.members("UpdateBeachBar", "Error");
-  },
-  resolveType: item => {
-    if (item.name === "Error") {
-      return "Error";
-    } else {
-      return "UpdateBeachBar";
-    }
-  },
-});
+// export const UpdateBeachBarResult = unionType({
+//   name: "UpdateBeachBarResult",
+//   definition(t) {
+//     t.members("UpdateBeachBar", "Error");
+//   },
+//   resolveType: item => {
+//     if (item.error) {
+//       return "Error";
+//     } else {
+//       return "UpdateBeachBar";
+//     }
+//   },
+// });
 
 export const BeachBarAvailabilityType = objectType({
   name: "BeachBarAvailability",

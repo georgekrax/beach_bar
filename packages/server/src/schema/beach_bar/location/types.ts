@@ -1,4 +1,4 @@
-import { objectType, unionType } from "nexus";
+import { objectType } from "nexus";
 import { CityType } from "../../details/cityTypes";
 import { CountryType } from "../../details/countryTypes";
 import { RegionType } from "../../details/regionTypes";
@@ -54,19 +54,19 @@ export const AddBeachBarLocationType = objectType({
   },
 });
 
-export const AddBeachBarLocationResult = unionType({
-  name: "AddBeachBarLocationResult",
-  definition(t) {
-    t.members("AddBeachBarLocation", "Error");
-  },
-  resolveType: item => {
-    if (item.name === "Error") {
-      return "Error";
-    } else {
-      return "AddBeachBarLocation";
-    }
-  },
-});
+// export const AddBeachBarLocationResult = unionType({
+//   name: "AddBeachBarLocationResult",
+//   definition(t) {
+//     t.members("AddBeachBarLocation", "Error");
+//   },
+//   resolveType: item => {
+//     if (item.error) {
+//       return "Error";
+//     } else {
+//       return "AddBeachBarLocation";
+//     }
+//   },
+// });
 
 export const UpdateBeachBarLocationType = objectType({
   name: "UpdateBeachBarLocation",
@@ -83,16 +83,16 @@ export const UpdateBeachBarLocationType = objectType({
   },
 });
 
-export const UpdateBeachBarLocationResult = unionType({
-  name: "UpdateBeachBarLocationResult",
-  definition(t) {
-    t.members("UpdateBeachBarLocation", "Error");
-  },
-  resolveType: item => {
-    if (item.name === "Error") {
-      return "Error";
-    } else {
-      return "UpdateBeachBarLocation";
-    }
-  },
-});
+// export const UpdateBeachBarLocationResult = unionType({
+//   name: "UpdateBeachBarLocationResult",
+//   definition(t) {
+//     t.members("UpdateBeachBarLocation", "Error");
+//   },
+//   resolveType: item => {
+//     if (item.error) {
+//       return "Error";
+//     } else {
+//       return "UpdateBeachBarLocation";
+//     }
+//   },
+// });

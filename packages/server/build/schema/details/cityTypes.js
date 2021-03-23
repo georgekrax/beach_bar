@@ -9,7 +9,6 @@ exports.CityType = nexus_1.objectType({
     definition(t) {
         t.id("id", { description: "The ID of the city" });
         t.string("name", { description: "The name of the city" });
-        t.nullable.string("secondName", { description: "A second name of the city" });
         t.nullable.field("country", {
             type: countryTypes_1.CountryType,
             description: "The country of the city",

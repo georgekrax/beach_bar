@@ -72,35 +72,35 @@ let Payment = Payment_1 = class Payment extends typeorm_1.BaseEntity {
                     yield newReservedProduct.save();
                     newReservedProducts.push(newReservedProduct);
                 }
-                if (newReservedProducts.length === 0) {
+                if (newReservedProducts.length === 0)
                     throw new Error(common_1.errors.SOMETHING_WENT_WRONG);
-                }
                 const status = yield PaymentStatus_1.PaymentStatus.findOne({ status: status_1.payment.PAID });
-                if (!status) {
+                if (!status)
                     throw new Error(common_1.errors.SOMETHING_WENT_WRONG);
-                }
                 this.status = status;
                 yield this.save();
                 return newReservedProducts;
             }
-            else {
+            else
                 throw new Error(common_1.errors.SOMETHING_WENT_WRONG);
-            }
         });
     }
     getRefundPercentage() {
         return __awaiter(this, void 0, void 0, function* () {
             dayjs_1.default.extend(minMax_1.default);
             const products = this.cart.products;
-            if (!products) {
+            if (!products)
                 return undefined;
-            }
-            const minDate = dayjs_1.default.min(products.map(product => dayjs_1.default(product.date)));
-            const daysDiff = dayjs_1.default().toDate().getTime() - dayjs_1.default(minDate).toDate().getTime();
-            const refundPercentage = yield RefundPercentage_1.RefundPercentage.findOne({ daysMilliseconds: typeorm_1.MoreThanOrEqual(daysDiff) });
-            if (!refundPercentage) {
+            const minDate = dayjs_1.default.min(products.map(product => dayjs_1.default(product.date)).filter(date => date.isAfter(dayjs_1.default())));
+            const daysDiff = dayjs_1.default(minDate).toDate().getTime() - dayjs_1.default().toDate().getTime();
+            const refundPercentage = yield RefundPercentage_1.RefundPercentage.findOne({
+                where: { daysMilliseconds: typeorm_1.LessThanOrEqual(daysDiff) },
+                order: {
+                    daysMilliseconds: "DESC",
+                },
+            });
+            if (!refundPercentage)
                 return undefined;
-            }
             return {
                 refundPercentage,
                 daysDiff,
@@ -108,31 +108,31 @@ let Payment = Payment_1 = class Payment extends typeorm_1.BaseEntity {
         });
     }
     hasBeachBarProduct(beachBarId) {
-        if (this.cart.products) {
+        if (this.cart.products)
             return this.cart.products.some(product => product.product.beachBarId === beachBarId && !product.product.deletedAt);
-        }
-        else {
+        else
             return false;
-        }
     }
     getProductsMonth(beachBarId) {
-        if (!this.cart.products) {
+        if (!this.cart.products)
             return undefined;
-        }
         return this.cart.products
             .filter(product => product.product.beachBarId === beachBarId)
             .map(product => dayjs_1.default(product.date).month() + 1);
     }
     getBeachBarProducts(beachBarId) {
-        if (!this.hasBeachBarProduct(beachBarId) || !this.cart.products) {
+        if (!this.hasBeachBarProduct(beachBarId) || !this.cart.products)
             return undefined;
-        }
         const beachBarProducts = this.cart.products.map(product => product.product).filter(product => product.beachBarId === beachBarId);
         return beachBarProducts;
     }
+    getBeachBars() {
+        var _a;
+        const beachBars = (_a = this.cart.products) === null || _a === void 0 ? void 0 : _a.map(({ product }) => product.beachBar);
+        return beachBars || [];
+    }
     softRemove() {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.cart.customSoftRemove(false);
             const refundedStatus = yield PaymentStatus_1.PaymentStatus.findOne({ status: status_1.payment.REFUNDED });
             if (refundedStatus) {
                 this.status = refundedStatus;

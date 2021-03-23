@@ -1,9 +1,9 @@
 import { UploadScalar } from "@the_hashtag/common/dist/graphql";
 import { createWriteStream } from "fs";
+import { nanoid } from "nanoid";
 import { arg, mutationType, nullable, stringArg } from "nexus";
 import path from "path";
 import { FileType } from "typings/aws";
-import { v4 as uuid } from "uuid";
 import { FileGraphQlType } from "./types";
 
 export const Mutation = mutationType({
@@ -23,7 +23,7 @@ export const Mutation = mutationType({
 
         await new Promise(res =>
           createReadStream()
-            .pipe(createWriteStream(path.join(__dirname, "../../images", `${filename}_${uuid()}`)))
+            .pipe(createWriteStream(path.join(__dirname, "../../images", `${filename}_${nanoid()}`)))
             .on("close", res)
         );
 

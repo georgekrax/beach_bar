@@ -1,4 +1,14 @@
-import { objectType, unionType } from "nexus";
+import { DateTimeScalar } from "@the_hashtag/common/dist/graphql";
+import { interfaceType, objectType, unionType } from "nexus";
+
+export const Node = interfaceType({
+  name: "Node",
+  description: "The base of a GraphQL Node",
+  definition(t) {
+    t.id("id");
+  },
+  resolveType: o => o.id,
+});
 
 export const FileGraphQlType = objectType({
   name: "File",
@@ -10,12 +20,21 @@ export const FileGraphQlType = objectType({
   },
 });
 
-export const SuccessGraphQlType = objectType({
+export const SuccessGraphQLType = objectType({
   name: "Success",
   description: "Info to be returned upon successful operation",
   definition(t) {
     t.boolean("success", { description: "A boolean that indicates if the operation was successful" });
   },
+});
+
+export const UpdateGraphQLType = interfaceType({
+  name: "Update",
+  description: "Info to be returned upon successful UPDATE operation",
+  definition(t) {
+    t.boolean("updated", { description: "A boolean that indicates if the information were updated" });
+  },
+  resolveType: o => o.updated,
 });
 
 export const SuccessResult = unionType({
@@ -24,7 +43,7 @@ export const SuccessResult = unionType({
     t.members("Success", "Error");
   },
   resolveType: item => {
-    if (item.name === "Errro") {
+    if (item.error) {
       return "Error";
     } else {
       return "Success";
@@ -46,10 +65,19 @@ export const DeleteResult = unionType({
     t.members("Delete", "Error");
   },
   resolveType: item => {
-    if (item.name === "Errro") {
+    if (item.error) {
       return "Error";
     } else {
       return "Delete";
     }
   },
+});
+
+export const TimestampGraphQLType = interfaceType({
+  name: "Timestamp",
+  description: "The timestamp of when something was created",
+  definition(t) {
+    t.field("timestamp", { type: DateTimeScalar });
+  },
+  resolveType: o => o.timestamp,
 });

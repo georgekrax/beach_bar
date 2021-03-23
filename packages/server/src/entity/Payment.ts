@@ -8,8 +8,8 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  LessThanOrEqual,
   ManyToOne,
-  MoreThanOrEqual,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -17,6 +17,7 @@ import {
 } from "typeorm";
 import { GetRefundPercentage } from "typings/payment";
 import { softRemove } from "utils/softRemove";
+import { BeachBar } from "./BeachBar";
 import { BeachBarReview } from "./BeachBarReview";
 import { Card } from "./Card";
 import { Cart } from "./Cart";
@@ -101,37 +102,32 @@ export class Payment extends BaseEntity {
         newReservedProducts.push(newReservedProduct);
       }
 
-      if (newReservedProducts.length === 0) {
-        throw new Error(errors.SOMETHING_WENT_WRONG);
-      }
+      if (newReservedProducts.length === 0) throw new Error(errors.SOMETHING_WENT_WRONG);
 
       const status = await PaymentStatus.findOne({ status: payment.PAID });
-      if (!status) {
-        throw new Error(errors.SOMETHING_WENT_WRONG);
-      }
+      if (!status) throw new Error(errors.SOMETHING_WENT_WRONG);
 
       this.status = status;
       await this.save();
 
       return newReservedProducts;
-    } else {
-      throw new Error(errors.SOMETHING_WENT_WRONG);
-    }
+    } else throw new Error(errors.SOMETHING_WENT_WRONG);
   }
 
   async getRefundPercentage(): Promise<GetRefundPercentage | undefined> {
     dayjs.extend(minMax);
 
     const products = this.cart.products;
-    if (!products) {
-      return undefined;
-    }
-    const minDate = dayjs.min(products.map(product => dayjs(product.date)));
-    const daysDiff = dayjs().toDate().getTime() - dayjs(minDate).toDate().getTime();
-    const refundPercentage = await RefundPercentage.findOne({ daysMilliseconds: MoreThanOrEqual(daysDiff) });
-    if (!refundPercentage) {
-      return undefined;
-    }
+    if (!products) return undefined;
+    const minDate = dayjs.min(products.map(product => dayjs(product.date)).filter(date => date.isAfter(dayjs())));
+    const daysDiff = dayjs(minDate).toDate().getTime() - dayjs().toDate().getTime();
+    const refundPercentage = await RefundPercentage.findOne({
+      where: { daysMilliseconds: LessThanOrEqual(daysDiff) },
+      order: {
+        daysMilliseconds: "DESC",
+      },
+    });
+    if (!refundPercentage) return undefined;
 
     return {
       refundPercentage,
@@ -140,32 +136,31 @@ export class Payment extends BaseEntity {
   }
 
   hasBeachBarProduct(beachBarId: number): boolean {
-    if (this.cart.products) {
+    if (this.cart.products)
       return this.cart.products.some(product => product.product.beachBarId === beachBarId && !product.product.deletedAt);
-    } else {
-      return false;
-    }
+    else return false;
   }
 
   getProductsMonth(beachBarId: number): number[] | undefined {
-    if (!this.cart.products) {
-      return undefined;
-    }
+    if (!this.cart.products) return undefined;
     return this.cart.products
       .filter(product => product.product.beachBarId === beachBarId)
       .map(product => dayjs(product.date).month() + 1);
   }
 
   getBeachBarProducts(beachBarId: number): Product[] | undefined {
-    if (!this.hasBeachBarProduct(beachBarId) || !this.cart.products) {
-      return undefined;
-    }
+    if (!this.hasBeachBarProduct(beachBarId) || !this.cart.products) return undefined;
     const beachBarProducts = this.cart.products.map(product => product.product).filter(product => product.beachBarId === beachBarId);
     return beachBarProducts;
   }
 
+  getBeachBars(): BeachBar[] {
+    const beachBars = this.cart.products?.map(({ product }) => product.beachBar);
+    return beachBars || [];
+  }
+
   async softRemove(): Promise<any> {
-    await this.cart.customSoftRemove(false);
+    // await this.cart.customSoftRemove(false);
     const refundedStatus = await PaymentStatus.findOne({ status: paymentStatus.REFUNDED });
     if (refundedStatus) {
       this.status = refundedStatus;

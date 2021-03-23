@@ -63,7 +63,7 @@ exports.AddBeachBarOwnerResult = nexus_1.unionType({
         t.members("AddBeachBarOwner", "Error");
     },
     resolveType: item => {
-        if (item.name === "Error") {
+        if (item.error) {
             return "Error";
         }
         else {
@@ -91,7 +91,7 @@ exports.UpdateBeachBarOwnerResult = nexus_1.unionType({
         t.members("UpdateBeachBarOwner", "Error");
     },
     resolveType: item => {
-        if (item.name === "Error") {
+        if (item.error) {
             return "Error";
         }
         else {

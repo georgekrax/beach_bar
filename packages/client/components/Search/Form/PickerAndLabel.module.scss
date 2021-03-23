@@ -1,0 +1,15 @@
+.container {
+  position: relative;
+
+  summary {
+    &::marker {
+      content: "";
+    }
+  }
+
+  & > label {
+    position: static;
+    margin-bottom: map-get($em-spacers, 8);
+    transform: none;
+  }
+}

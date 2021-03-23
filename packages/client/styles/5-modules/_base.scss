@@ -1,0 +1,32 @@
+.link {
+  text-decoration: none;
+  outline: none;
+  color: $blue-5;
+  cursor: pointer;
+
+  &:active {
+    color: $blue-7;
+  }
+}
+
+.feedback {
+  @extend .d--block;
+  align-self: center;
+  text-align: center;
+}
+
+.error {
+  color: $red-6;
+}
+
+.ierror {
+  color: $red-6 !important;
+}
+
+.success {
+  color: $green-7;
+}
+
+.isuccess {
+  color: $green-7 !important;
+}

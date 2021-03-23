@@ -1,0 +1,91 @@
+$border-height: 2px;
+
+.wrapperMargin {
+  margin-right: $wrapper-padding;
+  margin-left: $wrapper-padding;
+}
+
+.formItem {
+  margin-bottom: map-get($em-spacers, 48);
+}
+
+.container {
+  padding-top: map-get($em-spacers, 32);
+  height: 100vh;
+}
+
+.searchBar {
+  position: relative;
+  margin-top: map-get($em-spacers, 24);
+
+  input {
+    $border-color: $grey-5;
+    @extend .w-100;
+    @extend .header-5;
+    @extend .semibold;
+    margin: 0;
+    padding: map-get($rem-spacers, 20) 0 map-get($rem-spacers, 8) 0;
+    background: none;
+    color: rgba($grey-10, 0.85);
+    outline: none;
+    border: none;
+    border-radius: 0;
+    border-bottom: $border-height solid $border-color;
+
+    &::placeholder {
+      color: $grey-7;
+    }
+
+    &:focus {
+      border-color: $border-color;
+    }
+
+    + label {
+      top: 65%;
+      left: 0;
+      font-size: 1.6rem;
+      color: $grey-7;
+    }
+  }
+
+  &#{Container} {
+    margin-top: map-get($em-spacers, 8);
+    z-index: 99;
+  }
+}
+
+.borderBottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: $border-height;
+  width: 0;
+  background-color: $volcano-5;
+}
+
+.suggestions {
+  & > div {
+    margin-top: map-get($em-spacers, 8);
+    margin-bottom: map-get($em-spacers, 8);
+
+    span {
+      color: $grey-7;
+    }
+  }
+
+  & > ul {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+    max-height: 544px;
+    overflow-y: scroll;
+  }
+}
+
+button.cta {
+  @extend .w-100;
+  @extend .header-6;
+  padding: map-get($rem-spacers, 12) map-get($rem-spacers, 16);
+  background-color: $volcano-5;
+  margin-top: map-get($rem-spacers, 96);
+}

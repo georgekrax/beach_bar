@@ -1,4 +1,4 @@
-import { getConnectionOptions, createConnection } from "typeorm";
+import { createConnection, getConnectionOptions } from "typeorm";
 
 export const createDBConnection = async (): Promise<any> => {
   const connectionOptions = await getConnectionOptions(process.env.NODE_ENV);

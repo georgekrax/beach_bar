@@ -1,9 +1,28 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
 };
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
@@ -20,7 +39,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 var Cart_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CartRepository = exports.Cart = void 0;
-const dayjs_1 = require("dayjs");
+const dayjs_1 = __importStar(require("dayjs"));
 const typeorm_1 = require("typeorm");
 const softRemove_1 = require("utils/softRemove");
 const BeachBarEntryFee_1 = require("./BeachBarEntryFee");
@@ -47,20 +66,21 @@ let Cart = Cart_1 = class Cart extends typeorm_1.BaseEntity {
             return undefined;
         }
     }
-    getTotalPrice() {
+    getTotalPrice(afterToday = false) {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.products) {
-                const filteredProducts = this.products.filter(product => !product.deletedAt);
+                let filteredProducts = this.products.filter(product => !product.deletedAt);
+                if (afterToday)
+                    filteredProducts = filteredProducts.filter(product => dayjs_1.default(product.date).isAfter(dayjs_1.default()));
                 const total = filteredProducts.reduce((sum, i) => {
                     return sum + i.product.price * i.quantity;
                 }, 0);
                 const entryFeesTotal = yield this.getBeachBarsEntryFeeTotal();
-                if (entryFeesTotal === undefined) {
+                if (entryFeesTotal === undefined)
                     return undefined;
-                }
                 return {
-                    totalWithoutEntryFees: total,
-                    totalWithEntryFees: total + entryFeesTotal,
+                    totalWithoutEntryFees: parseFloat(total.toFixed(2)),
+                    totalWithEntryFees: parseFloat((total + entryFeesTotal).toFixed(2)),
                 };
             }
             return undefined;
@@ -253,6 +273,9 @@ let CartRepository = class CartRepository extends typeorm_1.Repository {
                     .leftJoinAndSelect("cart.user", "user")
                     .leftJoinAndSelect("cart.products", "products", "products.deletedAt IS NULL")
                     .leftJoinAndSelect("products.product", "cartProduct", "cartProduct.deletedAt IS NULL")
+                    .leftJoinAndSelect("cartProduct.beachBar", "cartProductBeachBar", "cartProductBeachBar.deletedAt IS NULL")
+                    .leftJoinAndSelect("cartProductBeachBar.defaultCurrency", "cartProductBeachBarCurrency")
+                    .leftJoinAndSelect("products.time", "productsTime")
                     .orderBy("cart.timestamp", "DESC")
                     .getOne();
                 if (!cart && !getOnly) {
@@ -275,6 +298,9 @@ let CartRepository = class CartRepository extends typeorm_1.Repository {
                     .leftJoinAndSelect("cart.user", "user")
                     .leftJoinAndSelect("cart.products", "products", "products.deletedAt IS NULL")
                     .leftJoinAndSelect("products.product", "cartProduct", "cartProduct.deletedAt IS NULL")
+                    .leftJoinAndSelect("cartProduct.beachBar", "cartProductBeachBar", "cartProductBeachBar.deletedAt IS NULL")
+                    .leftJoinAndSelect("cartProductBeachBar.defaultCurrency", "cartProductBeachBarCurrency")
+                    .leftJoinAndSelect("products.time", "productsTime")
                     .orderBy("cart.timestamp", "DESC")
                     .getOne();
                 if (!cart && !getOnly) {

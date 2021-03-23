@@ -1,0 +1,29 @@
+query Search(
+  $inputId: ID
+  $inputValue: String
+  $availability: SearchInput
+  $searchId: ID
+  $filterIds: [String!]
+  $sortId: ID
+) {
+  search(
+    inputId: $inputId
+    inputValue: $inputValue
+    availability: $availability
+    searchId: $searchId
+    filterIds: $filterIds
+    sortId: $sortId
+  ) {
+    results {
+      beachBar {
+        id
+        name
+        thumbnailUrl
+      }
+      availability {
+        hasAvailability
+        hasCapacity
+      }
+    }
+  }
+}

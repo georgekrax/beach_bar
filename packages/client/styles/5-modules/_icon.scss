@@ -1,0 +1,66 @@
+.icon {
+  &__filled-path {
+    &--white {
+      stroke: $grey-1 !important;
+    }
+  }
+
+  &-stroke {
+    &--success {
+      stroke: $success-color !important;
+    }
+
+    &--error {
+      stroke: $error-color !important;
+    }
+  }
+
+  &-save {
+    & > mask {
+      fill: $grey-1;
+
+      & > path {
+        stroke-width: 0px;
+      }
+    }
+
+    & > path {
+      fill: $grey-10;
+      stroke: none !important;
+    }
+  }
+
+  &-chechmark {
+    &__path--filled {
+      stroke: $grey-1 !important;
+    }
+
+    &__circle--colored {
+      stroke: none !important;
+      fill: rgba($green-7, 0.8) !important;
+    }
+  }
+
+  &-close {
+    &__path--filled {
+      stroke: $grey-1 !important;
+    }
+
+    &__circle--colored {
+      stroke: none !important;
+      fill: rgba($red-6, 0.8) !important;
+    }
+  }
+
+  &-star {
+    &--filled {
+      stroke: $yellow-5 !important;
+      fill: $yellow-5 !important;
+    }
+
+    &--grey {
+      stroke: none !important;
+      fill: $grey-4 !important;
+    }
+  }
+}

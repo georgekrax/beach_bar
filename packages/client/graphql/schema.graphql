@@ -61,7 +61,7 @@ type S3Payload {
 
 """Represents an entry fee for a #beach_bar"""
 type BeachBarEntryFee {
-  id: BigInt!
+  id: ID!
   fee: Float!
 
   """The date this entry fee is applicable for"""
@@ -179,8 +179,6 @@ type AddBeachBarLocation {
   added: Boolean!
 }
 
-union AddBeachBarLocationResult = AddBeachBarLocation | Error
-
 """
 Info to be returned when the details of #beach_bar location are updated
 """
@@ -194,11 +192,10 @@ type UpdateBeachBarLocation {
   updated: Boolean!
 }
 
-union UpdateBeachBarLocationResult = UpdateBeachBarLocation | Error
-
 """Represents a coupon code interface for a #beach_bar"""
 interface CouponCodeInterface {
-  id: BigInt!
+  id: ID!
+  refCode: String!
   title: String!
   discountPercentage: Float!
   isActive: Boolean!
@@ -216,7 +213,8 @@ interface CouponCodeInterface {
 
 """Represents an offer code interface for an offer campaign"""
 interface OfferCampaignCodeInterface {
-  id: BigInt!
+  id: ID!
+  refCode: String!
 
   """The total amount to make a discount from"""
   totalAmount: Float!
@@ -232,7 +230,8 @@ interface OfferCampaignCodeInterface {
 
 """Represents a coupon code"""
 type CouponCode implements CouponCodeInterface {
-  id: BigInt!
+  id: ID!
+  refCode: String!
   title: String!
   discountPercentage: Float!
   isActive: Boolean!
@@ -262,7 +261,8 @@ type OfferCampaign {
 
 """Represents an offer code for a campaign of a product"""
 type OfferCampaignCode implements OfferCampaignCodeInterface {
-  id: BigInt!
+  id: ID!
+  refCode: String!
 
   """The total amount to make a discount from"""
   totalAmount: Float!
@@ -339,7 +339,10 @@ union AddOfferCampaignCodeResult = AddOfferCampaignCode | Error
 
 """Represents a coupon code, with its referral code revealed"""
 type CouponCodeReveal implements CouponCodeInterface {
-  id: BigInt!
+  id: ID!
+
+  """The referral code of the coupon code, to use and get a discount"""
+  refCode: String!
   title: String!
   discountPercentage: Float!
   isActive: Boolean!
@@ -353,16 +356,18 @@ type CouponCodeReveal implements CouponCodeInterface {
 
   """The #beach_bar this coupon code applies to"""
   beachBar: BeachBar
-
-  """The referral code of the coupon code, to use and get a discount"""
-  refCode: String!
 }
 
 union CouponCodeRevealResult = CouponCodeReveal | Error
 
 """Represents an offer campaign code, with its referral code revealed"""
 type OfferCampaignCodeReveal implements OfferCampaignCodeInterface {
-  id: BigInt!
+  id: ID!
+
+  """
+  The referral code of the offer campaign code, to use and get a discount
+  """
+  refCode: String!
 
   """The total amount to make a discount from"""
   totalAmount: Float!
@@ -374,11 +379,6 @@ type OfferCampaignCodeReveal implements OfferCampaignCodeInterface {
   campaign: OfferCampaign!
   timestamp: DateTime!
   deletedAt: DateTime
-
-  """
-  The referral code of the offer campaign code, to use and get a discount
-  """
-  refCode: String!
 }
 
 union OfferCampaignCodeRevealResult = OfferCampaignCodeReveal | Error
@@ -609,10 +609,40 @@ type UpdateBeachBarRestaurant {
 
 union UpdateBeachBarRestaurantResult = UpdateBeachBarRestaurant | Error
 
+"""Represents a vote for a user's review"""
+type ReviewVoteType {
+  """The ID value of the vote type"""
+  id: ID!
+
+  """The type value of the vote"""
+  value: String!
+}
+
+"""Represents a vote for a user's review"""
+type ReviewVote {
+  """The ID value of the vote"""
+  id: ID!
+
+  """The review of where the vote is added"""
+  review: BeachBarReview!
+
+  """The user that added the vote"""
+  user: User!
+
+  """The type of the vote"""
+  type: ReviewVoteType!
+
+  """The last time the vote was updated, in the format of a timestamp"""
+  updatedAt: DateTime!
+
+  """The timestamp recorded, when the vote was created"""
+  timestamp: DateTime!
+}
+
 """Represents an answer for a review of a #beach_bar, by the owner"""
 type ReviewAnswer {
   """The ID value of the particular review answer"""
-  id: BigInt!
+  id: ID!
 
   """
   The body (content) of the review answer, written by the reviewed #beach_bar's owner
@@ -658,18 +688,10 @@ union UpdateReviewAnswerResult = UpdateReviewAnswer | Error
 """Represents a #beach_bar's review, by a customer"""
 type BeachBarReview {
   """The ID value of the review"""
-  id: BigInt!
+  id: ID!
 
   """The user's rating, between 0 and 10"""
   ratingValue: Int!
-
-  """The time the particular review was voted to be helpful, by other users"""
-  upvotes: Int
-
-  """
-  The time the particular review was voted not to be helpful, by other users
-  """
-  downvotes: Int
 
   """A positive comment for the #beach_bar"""
   positiveComment: String
@@ -680,14 +702,14 @@ type BeachBarReview {
   """A summary (description) of the user's overall review"""
   review: String
 
-  """The last time user's account was updated, in the format of a timestamp"""
-  updatedAt: DateTime!
-
-  """The timestamp recorded, when the user's account was created"""
-  timestamp: DateTime!
-
   """The #beach_bar of the review"""
   beachBar: BeachBar!
+
+  """The votes os users for this review"""
+  votes: [ReviewVote!]!
+
+  """The answer of the #beach_bar to this review"""
+  answer: ReviewAnswer
 
   """The customer that submitted the particular review for the #beach_bar"""
   customer: Customer!
@@ -697,6 +719,12 @@ type BeachBarReview {
 
   """The visited month of the customer visited the #beach_bar"""
   month: MonthTime
+
+  """The last time user's account was updated, in the format of a timestamp"""
+  updatedAt: DateTime!
+
+  """The timestamp recorded, when the user's account was created"""
+  timestamp: DateTime!
 }
 
 """Info to be returned when a review is added to a #beach_bar"""
@@ -710,8 +738,6 @@ type AddBeachBarReview {
   added: Boolean!
 }
 
-union AddBeachBarReviewResult = AddBeachBarReview | Error
-
 """
 Info to be returned when the details of a customer's review, are updated
 """
@@ -723,8 +749,6 @@ type UpdateBeachBarReview {
   updated: Boolean!
 }
 
-union UpdateBeachBarReviewResult = UpdateBeachBarReview | Error
-
 """Represents a service (feature), which a #beach_bar can provide"""
 type BeachBarService {
   """The ID value of the feature"""
@@ -732,9 +756,6 @@ type BeachBarService {
 
   """The name of the feature"""
   name: String!
-
-  """The URL value of the icon colored image of the feature, with color"""
-  iconUrl: String
 }
 
 """Represents a #beach_bar's feature (service) & its details"""
@@ -790,11 +811,14 @@ type BeachBar {
   """The name of the #beach_bar"""
   name: String!
 
+  """The "slugified" name of the #beach_bar, in a URL friendly way"""
+  slug: String!
+
   """A description text about the #beach_bar"""
   description: String
 
   """The average rating of all the user reviews for this #beach_bar"""
-  avgRating: Float
+  avgRating: Float!
   thumbnailUrl: URL
 
   """A phone number to contact the #beach_bar directly"""
@@ -815,6 +839,12 @@ type BeachBar {
 
   """The location of the #beach_bar"""
   location: BeachBarLocation!
+
+  """Get the location of the #beach_bar in a formatted string"""
+  formattedLocation: String!
+
+  """A list with all the payments of a #beach_bar"""
+  payments: [Payment!]!
 
   """The category (type) of the #beach_bar"""
   category: BeachBarCategory!
@@ -872,8 +902,6 @@ type AddBeachBar {
   added: Boolean!
 }
 
-union AddBeachBarResult = AddBeachBar | Error
-
 """Info to be returned when the details of #beach_bar are updated"""
 type UpdateBeachBar {
   """The #beach_bar that is updated"""
@@ -884,8 +912,6 @@ type UpdateBeachBar {
   """
   updated: Boolean!
 }
-
-union UpdateBeachBarResult = UpdateBeachBar | Error
 
 """Boolean values to show if the #beach_bar is available"""
 type BeachBarAvailability {
@@ -929,8 +955,6 @@ type AddCartProduct {
   added: Boolean!
 }
 
-union AddCartProductResult = AddCartProduct | Error
-
 """Info to be returned when a product of a shopping cart is updated"""
 type UpdateCartProduct {
   """The product that is updated"""
@@ -940,11 +964,9 @@ type UpdateCartProduct {
   updated: Boolean!
 }
 
-union UpdateCartProductResult = UpdateCartProduct | Error
-
 """Represents a shopping cart"""
-type Cart {
-  id: BigInt!
+type Cart implements Node {
+  id: ID!
   total: Float!
 
   """The use that has created this shopping cart"""
@@ -956,12 +978,12 @@ type Cart {
 
 """Represents a customer's credit or debit card"""
 type Card {
-  id: BigInt!
+  id: ID!
   type: String!
-  expMonth: Int
-  expYear: Int
+  expMonth: Int!
+  expYear: Int!
   last4: String!
-  cardholderName: String
+  cardholderName: String!
   isDefault: Boolean!
   stripeId: String!
 
@@ -984,8 +1006,6 @@ type AddCard {
   added: Boolean!
 }
 
-union AddCardResult = AddCard | Error
-
 """Info to be returned when a customer card details are updated"""
 type UpdateCard {
   """The card that is updated"""
@@ -997,13 +1017,11 @@ type UpdateCard {
   updated: Boolean!
 }
 
-union UpdateCardResult = UpdateCard | Error
-
 """Represents a customer"""
 type Customer {
-  id: BigInt!
+  id: ID!
   email: Email!
-  phoneNumber: String!
+  phoneNumber: String
 
   """The user that is a customer too"""
   user: User
@@ -1026,8 +1044,6 @@ type AddCustomer {
   added: Boolean!
 }
 
-union AddCustomerResult = AddCustomer | Error
-
 """Info to be returned when a customer details are updated"""
 type UpdateCustomer {
   """The customer that is updated"""
@@ -1038,8 +1054,6 @@ type UpdateCustomer {
   """
   updated: Boolean!
 }
-
-union UpdateCustomerResult = UpdateCustomer | Error
 
 """Represents the brand of a credit or debit card"""
 type CardBrand {
@@ -1054,9 +1068,6 @@ type City {
 
   """The name of the city"""
   name: String!
-
-  """A second name of the city"""
-  secondName: String
 
   """The country of the city"""
   country: Country
@@ -1079,18 +1090,6 @@ type Currency {
   secondSymbol: String
 }
 
-"""Represents the info of an icon for a country's flag"""
-type CountryFlagIcon {
-  """The ID value of the flag icon"""
-  id: ID!
-
-  """The URL value of the flag icon image"""
-  urlValue: String!
-
-  """The size of the flag icon"""
-  size: IconSize!
-}
-
 """Represents a country"""
 type Country {
   """The ID of the country"""
@@ -1099,17 +1098,14 @@ type Country {
   """The name of the country"""
   name: String!
 
-  """A short name (abbreviation) of the country"""
-  shortName: String
+  """The ISO 2 Alpha registered code of the country"""
+  alpha2Code: String!
+
+  """The ISO 3 Alpha registered code of the country"""
+  alpha3Code: String!
 
   """The calling code of the country"""
   callingCode: String!
-
-  """The ISO registered code of the country"""
-  isoCode: String!
-
-  """The language identifier (locale) of the country"""
-  languageId: String!
 
   """A boolean that indicates if the country is part of European Union (EU)"""
   isEu: Boolean!
@@ -1119,9 +1115,6 @@ type Country {
 
   """The currency of the country"""
   currency: Currency!
-
-  """The flag icons in a variety of sizes of a country"""
-  flagIcon: [CountryFlagIcon!]!
 }
 
 """Represents the status of a payment"""
@@ -1171,8 +1164,6 @@ type ReviewVisitType {
 type HourTime {
   id: ID!
   value: String!
-
-  """The time value in the UTC format and corresponding value"""
   utcValue: Time!
 }
 
@@ -1180,8 +1171,6 @@ type HourTime {
 type QuarterTime {
   id: ID!
   value: String!
-
-  """The time value in the UTC format and corresponding value"""
   utcValue: Time!
 }
 
@@ -1199,21 +1188,6 @@ type BeachBarCategory {
   id: ID!
   name: String!
   description: String
-}
-
-"""Represents an icon size (dimensions)"""
-type IconSize {
-  id: ID!
-
-  """
-  The size as an "Integer"
-  """
-  value: Int!
-
-  """
-  The formatted value of the icon size, in as a "String"
-  """
-  formattedValue: String!
 }
 
 """Represents a voting category"""
@@ -1245,6 +1219,8 @@ type Mutation {
 
   """Sample mutation"""
   hello(name: String): String!
+
+  """Sign the S3 URL for an object"""
   signS3(
     """The name of the file to sign (upload)"""
     filename: String!
@@ -1252,9 +1228,9 @@ type Mutation {
     """The type of the file to sign (upload)"""
     filetype: String!
 
-    """The name of the table in PostgreSQL"""
-    tableName: String!
-  ): S3Payload
+    """The name of bucket in AWS S3"""
+    s3Bucket: String!
+  ): S3Payload!
 
   """Add an entry fee(s) to a #beach_bar"""
   addBeachBarEntryFee(
@@ -1271,7 +1247,7 @@ type Mutation {
   """Update an or many entry fee(s) of a #beach_bar"""
   updateBeachBarEntryFee(
     """A list with all the entry fess to update"""
-    entryFeeIds: [BigInt!]!
+    entryFeeIds: [ID!]!
 
     """The price value to update the entry fees"""
     fee: Float
@@ -1282,7 +1258,7 @@ type Mutation {
     """
     A list with all the ID values of entry fee(s) to delete (remove) from a #beach_bar
     """
-    entryFeeIds: [BigInt!]!
+    entryFeeIds: [ID!]!
   ): DeleteResult!
 
   """Add an image (URL) to a #beach_bar"""
@@ -1322,7 +1298,7 @@ type Mutation {
   """Add (assign) a location to a #beach_bar"""
   addBeachBarLocation(
     """The ID value of the #beach_bar"""
-    beachBarId: Int!
+    beachBarId: ID!
 
     """The address of the #beach_bar"""
     address: String!
@@ -1339,17 +1315,17 @@ type Mutation {
     """The ID value of the country the #beach_bar is located at"""
     countryId: ID!
 
-    """The ID value of the city the #beach_bar is located at"""
-    cityId: ID!
+    """The city the #beach_bar is located at"""
+    city: String!
 
-    """The ID value of the #beach_bar region"""
-    regionId: Int
-  ): AddBeachBarLocationResult!
+    """The #beach_bar's region"""
+    region: ID
+  ): AddBeachBarLocation!
 
   """Update the location details of a #beach_bar"""
   updateBeachBarLocation(
     """The ID value of the #beach_bar location"""
-    locationId: Int!
+    locationId: ID!
 
     """The address of the #beach_bar"""
     address: String
@@ -1364,14 +1340,14 @@ type Mutation {
     longitude: String
 
     """The ID value of the country the #beach_bar is located at"""
-    countryId: Int
+    countryId: ID
 
-    """The ID value of the city the #beach_bar is located at"""
-    cityId: Int
+    """The city the #beach_bar is located at"""
+    city: String
 
-    """The ID value of the #beach_bar region"""
-    regionId: Int
-  ): UpdateBeachBarLocationResult!
+    """The #beach_bar's region"""
+    region: String
+  ): UpdateBeachBarLocation!
 
   """Add (register) a new #beach_bar to the platform"""
   addBeachBar(
@@ -1402,29 +1378,29 @@ type Mutation {
     zeroCartTotal: Boolean!
 
     """The ID value of the category of the #beach_bar"""
-    categoryId: Int!
+    categoryId: ID!
 
     """
     The ID value of the opening quarter time of the #beach_bar, in its country time zone
     """
-    openingTimeId: Int!
+    openingTimeId: ID!
 
     """
     The ID value of the closing quarter time of the #beach_bar, in its country time zone
     """
-    closingTimeId: Int!
+    closingTimeId: ID!
 
     """The response code from Google's OAuth callback"""
     code: String!
 
     """The response state, to check if everything went correct"""
     state: String!
-  ): AddBeachBarResult!
+  ): AddBeachBar!
 
   """Update a #beach_bar details"""
   updateBeachBar(
     """The ID value of the #beach_bar"""
-    beachBarId: Int!
+    beachBarId: ID!
 
     """
     The name to register the #beach_bar. It should be unique among other ones
@@ -1457,34 +1433,28 @@ type Mutation {
     """
     isAvailable: Boolean
 
+    """Set to true if the #beach_bar is active"""
+    isActive: Boolean
+
     """The ID value of the category of the #beach_bar"""
-    categoryId: Int
+    categoryId: ID
 
     """
     The ID value of the opening quarter time of the #beach_bar, in its country zone
     """
-    openingTimeId: Int
+    openingTimeId: ID
 
     """
     The ID value of the closing quarter time of the #beach_bar, in its country zone
     """
-    closingTimeId: Int
-  ): UpdateBeachBarResult!
+    closingTimeId: ID
+  ): UpdateBeachBar!
 
   """Delete (remove) a #beach_bar from the platform"""
   deleteBeachBar(
     """The ID value of the #beach_bar"""
     beachBarId: Int!
   ): DeleteResult!
-
-  """Update the status of a #beach_bar. If it is active or not"""
-  updateBeachBarStatus(
-    """The ID value of the #beach_bar"""
-    beachBarId: Int!
-
-    """Set to true if the #beach_bar is active"""
-    isActive: Boolean!
-  ): UpdateBeachBarResult!
 
   """Add a product to a #beach_bar"""
   addProduct(
@@ -1584,7 +1554,7 @@ type Mutation {
   """Update a coupon code"""
   updateCouponCode(
     """The ID value of the coupon code"""
-    couponCodeId: BigInt!
+    couponCodeId: ID!
 
     """The name or a short description of the coupon code"""
     title: String
@@ -1607,7 +1577,7 @@ type Mutation {
   ): UpdateCouponCodeResult!
   deleteCouponCode(
     """The ID value of the coupon code"""
-    couponCodeId: BigInt!
+    couponCodeId: ID!
   ): DeleteResult!
 
   """Add an offer campaign to a #beach_bar"""
@@ -1635,7 +1605,7 @@ type Mutation {
   """Update the details of an offer campaign of a #beach_bar"""
   updateOfferCampaign(
     """The ID value of the offer campaign"""
-    offerCampaignId: BigInt!
+    offerCampaignId: ID!
 
     """The ID value of the product"""
     productIds: [Int]!
@@ -1660,19 +1630,19 @@ type Mutation {
   """Delete an offer campaign of a #beach_bar"""
   deleteOfferCampaign(
     """The ID value of the offer campaign"""
-    offerCampaignId: BigInt!
+    offerCampaignId: ID!
   ): DeleteResult!
 
   """Add (issue) a new offer code"""
   addOfferCampaignCode(
     """The ID value of the offer campaign"""
-    offerCampaignId: BigInt!
+    offerCampaignId: ID!
   ): AddOfferCampaignCodeResult!
 
   """Delete (invalidate) an offer code of an offer campaign"""
   deleteOfferCode(
     """The ID value of the offer campaign"""
-    offerCodeId: BigInt!
+    offerCodeId: ID!
   ): DeleteResult!
 
   """Add a reservation limit to a #beach_bar product"""
@@ -1806,6 +1776,18 @@ type Mutation {
     restaurantId: Int!
   ): DeleteResult!
 
+  """Upvote or downvote a customer's review on a #beach_bar"""
+  updateReviewVote(
+    """The ID value of the customer's review"""
+    reviewId: ID!
+
+    """Set to true if to increment the review's votes"""
+    upvote: Boolean
+
+    """Set to true if to decrement the review's votes"""
+    downvote: Boolean
+  ): UpdateBeachBarReview!
+
   """Add a reply to a #beach_bar's review, by its owner"""
   addReviewAnswer(
     """The ID value of the customer's review"""
@@ -1831,21 +1813,21 @@ type Mutation {
   ): DeleteResult!
 
   """Add a customer's review on a #beach_bar"""
-  addBeachBarReview(
+  addReview(
     """The ID value of the #beach_bar, to submit the review"""
     beachBarId: Int!
 
-    """The referral code of the customer payment, to find"""
+    """The referral code of the payment, to find"""
     paymentRefCode: String
 
     """The rating value between 1 to 10, the customers rates the #beach_bar"""
     ratingValue: Int!
 
     """The ID value of the customer's visit type"""
-    visitTypeId: Int
+    visitTypeId: ID
 
     """The ID value of the month time"""
-    monthTimeId: Int
+    monthTimeId: ID
 
     """A positive comment about the #beach_bar"""
     positiveComment: String
@@ -1855,21 +1837,21 @@ type Mutation {
 
     """A summary (description) of the user's overall review"""
     review: String
-  ): AddBeachBarReviewResult!
+  ): AddBeachBarReview!
 
   """Update a customer's review on a #beach_bar"""
-  updateBeachBarReview(
+  updateReview(
     """The ID value of the customer's review"""
-    reviewId: BigInt!
+    reviewId: ID!
 
     """The rating value between 1 to 10, the customers rates the #beach_bar"""
     ratingValue: Int
 
     """The ID value of the customer's visit type"""
-    visitTypeId: Int
+    visitTypeId: ID
 
     """The ID value of the month time"""
-    monthTimeId: Int
+    monthTimeId: ID
 
     """A positive comment about the #beach_bar"""
     positiveComment: String
@@ -1879,25 +1861,13 @@ type Mutation {
 
     """A summary (description) of the user's overall review"""
     review: String
-  ): UpdateBeachBarReviewResult!
+  ): UpdateBeachBarReview!
 
   """Delete a customer's review on a #beach_bar"""
-  deleteBeachBarReview(
+  deleteReview(
     """The ID value of the customer's review"""
-    reviewId: BigInt!
-  ): DeleteResult!
-
-  """Upvote or downvote a customer's review on a #beach_bar"""
-  voteBeachBarReview(
-    """The ID value of the customer's review"""
-    reviewId: BigInt!
-
-    """Set to true if to increment the review's votes"""
-    upvote: Boolean
-
-    """Set to true if to decrement the review's votes"""
-    downvote: Boolean
-  ): UpdateBeachBarReviewResult!
+    reviewId: ID!
+  ): Delete!
 
   """Add (assign) a feature to a #beach_bar"""
   addBeachBarFeature(
@@ -1942,24 +1912,18 @@ type Mutation {
     featureId: Int!
   ): DeleteResult!
 
-  """Get the latest cart of an authenticated user or create one"""
-  getOrCreateCart(
-    """The ID values of the shopping cart, if it is created previously"""
-    cartId: BigInt
-  ): Cart!
-
   """
-  Delete a cart after a transition. This mutation is also called if the user is not authenticated & closes the browser tab
+  Delete a cart after a transaction. This mutation is also called if the user is not authenticated & closes the browser tab
   """
   deleteCart(
     """The ID values of the shopping cart"""
-    cartId: BigInt!
+    cartId: ID!
   ): DeleteResult!
 
   """Add a product to a shopping cart"""
   addCartProduct(
     """The ID value of the shopping cart"""
-    cartId: Int!
+    cartId: ID!
 
     """The ID value of the product to add"""
     productId: Int!
@@ -1976,12 +1940,12 @@ type Mutation {
     The date to purchase the product. Its default value its the current date
     """
     date: Date
-  ): AddCartProductResult!
+  ): AddCartProduct!
 
   """Update the quantity of a product in a shopping cart"""
   updateCartProduct(
     """The ID value of the shopping cart"""
-    cartId: Int!
+    cartId: ID!
 
     """The ID value of the product to update its quantity"""
     productId: Int!
@@ -1990,40 +1954,40 @@ type Mutation {
     The number that indicates how many times to add the product to the cart
     """
     quantity: Int
-  ): UpdateCartProductResult!
+  ): UpdateCartProduct!
 
   """Delete (remove) a product from a shopping cart"""
   deleteCartProduct(
     """The ID value of the shopping cart"""
-    cartId: Int!
+    cartId: ID!
 
     """The ID value of the product to delete (remove)"""
     productId: Int!
   ): DeleteResult!
 
-  """Add a credit / debit card to a customer"""
-  addCustomerCard(
+  """Add a payment method (credit / debit card) to a customer"""
+  addCustomerPaymentMethod(
     """
     A token returned by Stripe (Stripe.js & Elements), which will automatically validate the card
     """
     source: String!
 
     """The ID value of the registered customer"""
-    customerId: BigInt
+    customerId: ID
 
     """The (full) name of the cardholder of the card registered"""
-    cardholderName: String
+    cardholderName: String!
 
     """
     A boolean that indicates if the card registered is the default one for the customer, to use in its transactions. Its default value is false
     """
     isDefault: Boolean = false
-  ): AddCardResult!
+  ): AddCard!
 
   """Update the details of customer's card"""
-  updateCustomerCard(
-    """The ID values of the card to update"""
-    cardId: BigInt!
+  updateCustomerPaymentMethod(
+    """The ID of the card to update"""
+    cardId: ID!
 
     """The (full) name of the cardholder of the card"""
     cardholderName: String
@@ -2038,45 +2002,31 @@ type Mutation {
     A boolean that indicates if the card is the default one for the customer, to use in its transactions
     """
     isDefault: Boolean
-  ): UpdateCardResult!
+  ): UpdateCard!
 
-  """Delete (remove) a card from a customer"""
-  deleteCustomerCard(
-    """The ID values of the card to delete"""
-    cardId: BigInt!
-  ): DeleteResult!
-
-  """Add a customer"""
-  getOrAddCustomer(
-    """
-    The email address of an authenticated or non user, to register as a client
-    """
-    email: Email!
-
-    """The phone number of the customer"""
-    phoneNumber: String
-
-    """The ISO code of the country of customer's telephone"""
-    countryIsoCode: String
-  ): AddCustomerResult!
+  """Delete (remove) a payment method (credit / debit card) from a customer"""
+  deleteCustomerPaymentMethod(
+    """The ID value of the card to delete"""
+    cardId: ID!
+  ): Delete!
 
   """Update a customer's details"""
   updateCustomer(
     """The ID value of the customer"""
-    customerId: BigInt!
+    customerId: ID!
 
     """The phone number of the customer"""
     phoneNumber: String
 
     """The ISO code of the country of customer's telephone"""
     countryIsoCode: String
-  ): UpdateCustomerResult!
+  ): UpdateCustomer!
 
   """Delete (remove) a customer"""
   deleteCustomer(
     """The ID value of the registered customer to delete"""
-    customerId: BigInt
-  ): DeleteResult!
+    customerId: ID
+  ): Delete!
 
   """Authorize a user with Google"""
   authorizeWithGoogle(
@@ -2087,11 +2037,11 @@ type Mutation {
     state: String!
 
     """User details in login"""
-    loginDetails: UserLoginDetailsInput
+    loginDetails: UserLoginDetails
 
     """Set to true if you want to sign up an owner for a #beach_bar"""
     isPrimaryOwner: Boolean = false
-  ): OAuthAuthorizationResult!
+  ): OAuthAuthorization!
 
   """Authorize a user with Facebook"""
   authorizeWithFacebook(
@@ -2102,11 +2052,11 @@ type Mutation {
     state: String!
 
     """User details in login"""
-    loginDetails: UserLoginDetailsInput
+    loginDetails: UserLoginDetails
 
     """Set to true if you want to sign up an owner for a #beach_bar"""
     isPrimaryOwner: Boolean = false
-  ): OAuthAuthorizationResult!
+  ): OAuthAuthorization!
 
   """Authorize a user with Instagram"""
   authorizeWithInstagram(
@@ -2120,11 +2070,11 @@ type Mutation {
     state: String!
 
     """User details in login"""
-    loginDetails: UserLoginDetailsInput
+    loginDetails: UserLoginDetails
 
     """Set to true if you want to sign up an owner for a #beach_bar"""
     isPrimaryOwner: Boolean = false
-  ): OAuthAuthorizationResult!
+  ): OAuthAuthorization!
 
   """
   Add (assign) another owner to a #beach_bar too. Only available for the primary owner of a #beach_bar
@@ -2179,10 +2129,10 @@ type Mutation {
   """Create (make) a payment for a customer's shopping cart"""
   checkout(
     """The ID value of the shopping cart with the products to purchase"""
-    cartId: BigInt!
+    cartId: ID!
 
     """The ID value of the credit or debit card of the customer"""
-    cardId: BigInt!
+    cardId: ID!
 
     """
     A coupon or offer campaign code to make a discount to the shopping cart's or payment's price
@@ -2192,9 +2142,9 @@ type Mutation {
 
   """Refund a payment"""
   refundPayment(
-    """The ID value of the payment to update"""
-    paymentId: BigInt!
-  ): DeleteResult!
+    """The ID of the payment to refund"""
+    paymentId: ID!
+  ): Delete!
 
   """Update a previous user's search"""
   updateSearch(
@@ -2204,65 +2154,49 @@ type Mutation {
     """
     A list with the filter IDs to add in the search, found in the documentation
     """
-    filterIds: [String]!
+    filterIds: [String!]
   ): UserSearch
 
-  """Add contact details to a user"""
-  addUserContactDetails(
-    """The ID value of the country of the contact details"""
-    countryId: Int
-
-    """A secondary email address for the user"""
-    secondaryEmail: Email
-
-    """A phone number to call the user"""
-    phoneNumber: String
-  ): AddUserContactDetailsResult!
-
-  """Update specific contact details of a user"""
-  updateUserContactDetails(id: Int!, secondaryEmail: Email, phoneNumber: String): UpdateUserContactDetailsResult!
-
-  """Delete (remove) specific contact details from user"""
-  deleteContactDetails(id: Int): DeleteResult!
-
-  """Add a #beach_bar to user's favorites list"""
-  addUserFavoriteBar(
-    """The ID value of the #beach_bar, to add to the user's favorites list"""
-    beachBarId: Int!
-  ): AddUserFavoriteBarResult!
+  """Update a user's #beach_bar favourites list"""
+  updateFavouriteBeachBar(
+    """
+    The ID value of the #beach_bar, to add / remove from the user's favourites list
+    """
+    beachBarId: ID!
+  ): UpdateUserFavoriteBar!
 
   """Remove a #beach_bar from a user's favorites list"""
   deleteUserFavoriteBar(
     """The ID value of the #beach_bar, to add to the user's favorites list"""
     beachBarId: Int!
-  ): DeleteResult!
+  ): DeleteResult! @deprecated(reason: "You should use the `updateUserFavoriteBar` mutation operation, which handles automatically the creation and removement of a user's #beach_bar")
 
   """Sign up a user"""
   signUp(
     """Credential for signing up a user"""
-    userCredentials: UserCredentialsInput!
+    userCredentials: UserCredentials!
 
     """Set to true if you want to sign up an owner for a #beach_bar"""
     isPrimaryOwner: Boolean = false
-  ): UserSignUpResult!
+  ): User!
 
   """Login a user"""
   login(
-    """User details in login"""
-    loginDetails: UserLoginDetailsInput
-
     """Credential for signing up a user"""
-    userCredentials: UserCredentialsInput!
-  ): UserLoginResult!
+    userCredentials: UserCredentials!
+
+    """User details in login"""
+    loginDetails: UserLoginDetails
+  ): UserLogin!
 
   """Logout a user"""
-  logout: SuccessResult!
+  logout: Success!
 
   """Sends a link to the user's email address to change its password"""
   sendForgotPasswordLink(
     """The email address of user"""
     email: Email!
-  ): SuccessResult!
+  ): Success!
 
   """Change a user's password"""
   changeUserPassword(
@@ -2270,13 +2204,13 @@ type Mutation {
     email: Email!
 
     """
-    The key in the URL to identify and verify user. Each key lasts 20 minutes
+    The token in the URL to identify and verify user. Each key lasts 20 minutes
     """
-    key: String!
+    token: String!
 
     """User's new password"""
     newPassword: String!
-  ): SuccessResult!
+  ): Success!
 
   """Update a user's info"""
   updateUser(
@@ -2286,16 +2220,22 @@ type Mutation {
     imgUrl: URL
 
     """The honorific title of the user"""
-    personTitle: String
+    honorificTitle: String
 
     """User's birthday in the date format"""
-    birthday: Date
+    birthday: String
 
     """The country of user"""
-    countryId: Int
+    countryId: ID
 
     """The city or hometown of user"""
-    cityId: Int
+    city: String
+
+    """The phone number of user"""
+    phoneNumber: String
+
+    """The country of user's phone number"""
+    telCountryId: ID
 
     """User's house or office street address"""
     address: String
@@ -2305,10 +2245,7 @@ type Mutation {
 
     """Indicates if to track user's history"""
     trackHistory: Boolean
-  ): UserUpdateResult!
-
-  """Delete a user & its account"""
-  deleteUser: DeleteResult!
+  ): UserUpdate!
 }
 
 """User info to be returned on Google OAuth authorization"""
@@ -2325,8 +2262,6 @@ type OAuthAuthorization {
   """The user being authorized"""
   user: User!
 }
-
-union OAuthAuthorizationResult = OAuthAuthorization | Error
 
 """Represents a user that is an owner of a #beach_bar"""
 type Owner {
@@ -2461,6 +2396,9 @@ type Payment {
 
   """A list with all the reserved products of the payment"""
   reservedProducts: [ReservedProduct!]
+
+  """The timestamp recorded, when the payment was created / paid"""
+  timestamp: DateTime!
 }
 
 """Info to be returned when a payment is created (made)"""
@@ -2475,6 +2413,26 @@ type AddPayment {
 }
 
 union AddPaymentResult = AddPayment | Error
+
+type Visit {
+  isUpcoming: Boolean!
+  isRefunded: Boolean!
+  time: HourTime!
+  date: Date!
+  payment: Payment!
+}
+
+"""Represents a payment as a user's visit"""
+type PaymentVisits {
+  beachBar: BeachBar!
+  visits: [Visit!]!
+}
+
+"""Represents a user's payment visit month and years list"""
+type PaymentVisitsDates {
+  month: MonthTime!
+  year: Int!
+}
 
 """Query"""
 type Query {
@@ -2512,13 +2470,13 @@ type Query {
   """Get a coupon's code details & its referral code"""
   revealCouponCode(
     """The ID value of the coupon code"""
-    couponCodeId: BigInt!
+    couponCodeId: ID!
   ): CouponCodeRevealResult!
 
   """Get an offer's campaign code details + its referral code"""
   revealOfferCampaignCode(
     """The ID value of the offer campaign code"""
-    offerCampaignCodeId: BigInt!
+    offerCampaignCodeId: ID!
   ): OfferCampaignCodeRevealResult!
 
   """Get all products of a #beach_bar"""
@@ -2584,7 +2542,12 @@ type Query {
   ): BeachBarAvailability
 
   """A list with all the available #beach_bars"""
-  getAllBeachBars: [BeachBar!]
+  getAllBeachBars: [BeachBar!]!
+
+  """
+  A list with all the #beach_bars, related to a user or are top selections
+  """
+  getPersonalizedBeachBars: [BeachBar!]!
 
   """Verify a user's payment to submit review"""
   verifyUserPaymentReview(
@@ -2603,14 +2566,50 @@ type Query {
     """The referral code of the customer payment, to find"""
     refCode: String
   ): [MonthTime!]
+
+  """Get a list of all the reviews of an authenticated user"""
+  userReviews: [BeachBarReview!]!
+
+  """Get the details of a a review of an authenticated user"""
+  review(
+    """The ID value of the review to fetch"""
+    reviewId: ID!
+  ): BeachBarReview!
   getCartEntryFees(
     """The ID values of the shopping cart"""
-    cartId: BigInt
+    cartId: ID
   ): Float
   verifyZeroCartTotal(
     """The ID values of the shopping cart"""
-    cartId: BigInt!
+    cartId: ID!
   ): Boolean
+
+  """Get the latest cart of an authenticated user or create one"""
+  getCart(
+    """The ID values of the shopping cart, if it is created previously"""
+    cartId: ID
+  ): Cart
+
+  """
+  Get a list with all the payments methods (credit / debit cards) of the current authenticated user
+  """
+  getCustomerPaymentMethods: [Card!]
+
+  """
+  Get or create a customer, depending on current authenticated or not user
+  """
+  getOrCreateCustomer(
+    """
+    The email address of an authenticated or not user, to register as a client
+    """
+    email: Email
+
+    """The phone number of the customer"""
+    phoneNumber: String
+
+    """The ISO code of the country of customer's telephone"""
+    countryAlpha2Code: String
+  ): AddCustomer!
 
   """
   Returns the URL where the #beach_bar (owner) will be redirected to authorize and register with Stripe, for its connect account
@@ -2630,51 +2629,102 @@ type Query {
   """
   getInstagramOAuthUrl: URL!
 
+  """
+  Get a list of payments for a specific / latest month of an authenticated user
+  """
+  getPayments(
+    """The ID of the month of the payments to fetch"""
+    monthId: ID
+
+    """The year of the payments to fetch"""
+    year: Int
+  ): [PaymentVisits!]
+
+  """Get the details of a specific payment / trip"""
+  payment(
+    """The referral code of the payment to fetch"""
+    refCode: String!
+  ): Payment!
+
+  """Get the amount of refuned of a specific payment / trip"""
+  paymentRefundAmount(
+    """The referral code of the payment to fetch"""
+    refCode: String!
+  ): Float!
+
+  """
+  Get a list with the months and years of the cart products in all the payments of an authenticated user
+  """
+  getPaymentsDates: [PaymentVisitsDates!]!
+
   """Returns a list of formatted search input values"""
-  getSearchInputValues: [FormattedSearchInputValue!]!
+  searchInputValues: [FormattedSearchInputValue!]!
 
   """Get a list with a user's latest searches"""
-  getLatestUserSearches: [UserSearch!]
+  getLatestUserSearches: [UserSearch!]!
 
   """Search for available #beach_bars"""
   search(
     """The ID value of the search input value, found in the documentation"""
-    inputId: String
+    inputId: ID
 
     """The search input value, found in the documentation"""
     inputValue: String
     availability: SearchInput
 
+    """The ID value of a previous user search"""
+    searchId: ID
+
     """
     A list with the filter IDs to add in the search, found in the documentation
     """
-    filterIds: [String]!
+    filterIds: [String!]
 
-    """The ID value of a previous user search"""
-    searchId: ID
-  ): SearchResult
+    """
+    A ID of the sort filter the user has selected, found in the documentation
+    """
+    sortId: ID
+  ): Search
+
+  """Returns a list of user's recorded / saved history"""
+  userHistory: [UserHistoryExtended!]!
+
+  """Get a user's favourite #beach_bars list"""
+  favouriteBeachBars(
+    """How many data to fetch?"""
+    limit: Int
+  ): [UserFavoriteBar!]!
 
   """Returns current authenticated user"""
-  me: UserTypeResult!
+  me: User
 }
 
 """Represents a user search"""
 type UserSearch {
-  id: BigInt!
-  searchDate: Date
-  searchAdults: Int
+  id: ID!
+  searchDate: Date!
+  searchAdults: Int!
   searchChildren: Int
 
   """The user that made the search"""
   user: User
 
   """The input value that the user searched for"""
-  inputValue: SearchInputValue
+  inputValue: SearchInputValue!
 
-  """A list with the filters being added to the user's search"""
-  filters: [SearchFilter!]
+  """The input value that the user searched for"""
+  sort: SearchSort
+
+  """A sort filter used by the user, in its search"""
+  filters: [SearchSort!]
   updatedAt: DateTime!
   timestamp: DateTime!
+}
+
+"""Represents a type of user's search sort filter"""
+type SearchSort {
+  id: ID!
+  name: String!
 }
 
 """Represents the info (results) to be returned on user search"""
@@ -2695,20 +2745,18 @@ type Search {
   search: UserSearch!
 }
 
-union SearchResult = Search | Error
-
 """The arguments (args) used at #beach_bar search or availability"""
 input SearchInput {
   """The date to search availability at #beach_bars"""
-  date: Date
+  date: Date!
 
   """The ID value of the hour time to search availability for"""
-  timeId: Int
+  timeId: ID
 
   """
   The number of adults to search availability at #beach_bars. Its value should be less or equal to 12 adults
   """
-  adults: Int
+  adults: Int!
 
   """
   The number of children to search availability at #beach_bars. Its value should be less or equal to 8 children
@@ -2718,7 +2766,7 @@ input SearchInput {
 
 """Represents a potential input value of a user's search"""
 type SearchInputValue {
-  id: BigInt!
+  id: ID!
 
   """A unique identifier (ID) for public use"""
   publicId: String!
@@ -2766,6 +2814,11 @@ type FormattedSearchInputValue {
   beachBarThumbnailUrl: URL
 }
 
+"""The base of a GraphQL Node"""
+interface Node {
+  id: ID!
+}
+
 """Represents a user's uploaded file"""
 type File {
   """A string representing the name of the uploaded file"""
@@ -2786,6 +2839,12 @@ type Success {
   success: Boolean!
 }
 
+"""Info to be returned upon successful UPDATE operation"""
+interface Update {
+  """A boolean that indicates if the information were updated"""
+  updated: Boolean!
+}
+
 union SuccessResult = Success | Error
 
 """Info to be returned upon successful deletion"""
@@ -2796,6 +2855,11 @@ type Delete {
 
 union DeleteResult = Delete | Error
 
+"""The timestamp of when something was created"""
+interface Timestamp {
+  timestamp: DateTime!
+}
+
 """Represents a user's account"""
 type UserAccount {
   """The ID value of the user's account"""
@@ -2804,7 +2868,7 @@ type UserAccount {
   """
   The user's honorific title. Its value can be null or 'Mr', 'Mrs', 'Ms', 'Miss', 'Sr', 'Dr', 'Lady'
   """
-  personTitle: String
+  honorificTitle: String
 
   """The URL value of user's account profile picture"""
   imgUrl: String
@@ -2821,67 +2885,57 @@ type UserAccount {
   """The zip code of the house or office street address of the user"""
   zipCode: String
 
+  """The city of the user"""
+  city: String
+
+  """The phone number of the user"""
+  phoneNumber: String
+
   """The user info of the particular account"""
   user: User!
 
   """The country of the user"""
   country: Country
 
-  """The city or hometown of the user"""
-  city: City
+  """The country of the user's phone number"""
+  telCountry: Country
 
-  """Indicates if to track user's history """
+  """Indicates if to track some of user's actions"""
   trackHistory: Boolean!
-
-  """User contact details"""
-  contactDetails: [UserContactDetails!]
 }
 
-"""Represents the contact details info of a user"""
-type UserContactDetails {
-  """The ID value of user's account contact details"""
+"""Represents the type of action a user made"""
+type UserHistoryActivity {
+  id: ID!
+  name: String!
+}
+
+"""Represents a user's recorded / saved action"""
+type UserHistory implements Timestamp {
+  timestamp: DateTime!
   id: ID!
 
-  """The account of user"""
-  account: UserAccount!
+  """The action type of the user"""
+  activity: UserHistoryActivity!
 
-  """The country origin of a user"""
-  country: Country
+  """The ID of what the user accessed"""
+  objectId: ID!
 
-  """A secondary email address to contact the user"""
-  secondaryEmail: Email
-
-  """User's phone number"""
-  phoneNumber: String
+  """The user that made the recorded / saved action"""
+  user: User!
 }
 
-"""
-Info to be returned when contact details are added (assigned) to a user
-"""
-type AddUserContactDetails {
-  """The contact details of the user"""
-  contactDetails: UserContactDetails!
+"""Represents a user's action, with details about the objectId"""
+type UserHistoryExtended {
+  """The info of the recorded / saved action of the user"""
+  userHistory: UserHistory!
 
-  """
-  A boolean that indicates if the contact details have been successfully added (assigned) to the user
-  """
-  added: Boolean!
+  """Details about the #beach_bar the user may have visited"""
+  beachBar: BeachBar
+
+  """Details about what the user searched"""
+  search: UserSearch
 }
-
-union AddUserContactDetailsResult = AddUserContactDetails | Error
-
-"""Info to be returned when contact details of a user are updated"""
-type UpdateUserContactDetails {
-  """The contact details of the user"""
-  contactDetails: UserContactDetails!
-
-  """
-  A boolean that indicates if the contact details of the user have been successfully updated
-  """
-  updated: Boolean!
-}
-
-union UpdateUserContactDetailsResult = UpdateUserContactDetails | Error
 
 """A user's favorite #beach_bar"""
 type UserFavoriteBar {
@@ -2892,20 +2946,16 @@ type UserFavoriteBar {
   beachBar: BeachBar!
 }
 
-"""
-Info to be returned when a user add #beach_bar to his / her favorite list
-"""
-type AddUserFavoriteBar {
-  """The #beach_bar that is added"""
-  beachBar: UserFavoriteBar!
+"""Info to be returned when a user's #beach_bar favourite list is updated"""
+type UpdateUserFavoriteBar {
+  """The #beach_bar that is added / removed"""
+  favouriteBar: UserFavoriteBar!
 
   """
-  A boolean that indicates if the #beach_bar has been successfully being added to the user's favorites
+  A boolean that indicates if the user's favorites #beach_bar list is updated
   """
-  added: Boolean!
+  updated: Boolean!
 }
-
-union AddUserFavoriteBarResult = AddUserFavoriteBar | Error
 
 """Represents a user"""
 type User {
@@ -2922,18 +2972,19 @@ type User {
   lastName: String
 
   """User's account info"""
-  account: UserAccount
+  account: UserAccount!
 
   """A user's review on a #beach_bar"""
   reviews: [BeachBarReview!]
 
   """A list with all the user's favorite #beach_bars"""
   favoriteBars: [UserFavoriteBar!]
+
+  """A list of all the votes of the user"""
+  reviewVotes: [ReviewVote!]
 }
 
 union UserTypeResult = User | Error
-
-union UserSignUpResult = User | Error
 
 """User info to be returned on login"""
 type UserLogin {
@@ -2944,10 +2995,8 @@ type UserLogin {
   accessToken: String!
 }
 
-union UserLoginResult = UserLogin | Error
-
 """Credentials of user to sign up / login"""
-input UserCredentialsInput {
+input UserCredentials {
   """Email of user to sign up"""
   email: Email!
 
@@ -2956,15 +3005,20 @@ input UserCredentialsInput {
 }
 
 """User details in login. The user's IP address is passed via the context"""
-input UserLoginDetailsInput {
-  """The ID of the country, user logins from"""
-  countryId: Int!
+input UserLoginDetails {
+  """The city name from where user logins from"""
+  city: String
 
-  """The ID of the city, user logins from"""
-  cityId: Int!
+  """The alpha 2 code of the country, from where the user logins"""
+  countryAlpha2Code: String
 }
 
-union UserUpdateResult = User | Error
+"""User details to be returned on update"""
+type UserUpdate implements Update {
+  """A boolean that indicates if the information were updated"""
+  updated: Boolean!
+  user: User!
+}
 
 """Represents a country's or city's region"""
 type Region {

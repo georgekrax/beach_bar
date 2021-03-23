@@ -14,7 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CardCrudMutation = void 0;
 const common_1 = require("@beach_bar/common");
-const graphql_1 = require("@the_hashtag/common/dist/graphql");
+const apollo_server_express_1 = require("apollo-server-express");
 const dayjs_1 = __importDefault(require("dayjs"));
 const Card_1 = require("entity/Card");
 const CardBrand_1 = require("entity/CardBrand");
@@ -27,57 +27,50 @@ const types_2 = require("./types");
 exports.CardCrudMutation = nexus_1.extendType({
     type: "Mutation",
     definition(t) {
-        t.field("addCustomerCard", {
-            type: types_2.AddCardResult,
-            description: "Add a credit / debit card to a customer",
+        t.field("addCustomerPaymentMethod", {
+            type: types_2.AddCardType,
+            description: "Add a payment method (credit / debit card) to a customer",
             args: {
                 source: nexus_1.stringArg({
                     description: "A token returned by Stripe (Stripe.js & Elements), which will automatically validate the card",
                 }),
-                customerId: nexus_1.nullable(nexus_1.arg({
-                    type: graphql_1.BigIntScalar,
+                customerId: nexus_1.nullable(nexus_1.idArg({
                     description: "The ID value of the registered customer",
                 })),
-                cardholderName: nexus_1.nullable(nexus_1.stringArg({
-                    description: "The (full) name of the cardholder of the card registered",
-                })),
+                cardholderName: nexus_1.stringArg({ description: "The (full) name of the cardholder of the card registered" }),
                 isDefault: nexus_1.nullable(nexus_1.booleanArg({
                     description: "A boolean that indicates if the card registered is the default one for the customer, to use in its transactions. Its default value is false",
                     default: false,
                 })),
             },
             resolve: (_, { source, customerId, cardholderName, isDefault }, { payload, stripe }) => __awaiter(this, void 0, void 0, function* () {
-                if (!source || source.trim().length === 0) {
-                    return { error: { code: common_1.errors.INVALID_ARGUMENTS, message: "Please provide a valid card" } };
-                }
-                if (customerId && customerId <= 0) {
-                    return { error: { code: common_1.errors.INVALID_ARGUMENTS, message: "Please provide a valid customer" } };
-                }
-                if (cardholderName && cardholderName.trim().length === 0) {
-                    return { error: { code: common_1.errors.INVALID_ARGUMENTS, message: "Please provide a valid name" } };
-                }
-                if (!customerId && !payload) {
-                    return {
-                        error: { code: common_1.errors.INVALID_ARGUMENTS, message: common_1.errors.SOMETHING_WENT_WRONG },
-                    };
-                }
+                if (!source || source.trim().length === 0)
+                    throw new apollo_server_express_1.UserInputError("Please provide a valid card", { code: common_1.errors.INVALID_ARGUMENTS });
+                if (customerId && customerId <= 0)
+                    throw new apollo_server_express_1.ApolloError("Please provide a valid customer", common_1.errors.INVALID_ARGUMENTS);
+                if (!cardholderName || cardholderName.trim().length === 0)
+                    throw new apollo_server_express_1.UserInputError("Please provide a valid cardholder name", { code: common_1.errors.INVALID_ARGUMENTS });
+                if (!customerId && !payload)
+                    throw new apollo_server_express_1.ApolloError(common_1.errors.SOMETHING_WENT_WRONG, common_1.errors.INVALID_ARGUMENTS);
                 let customer = undefined;
-                if (payload) {
-                    customer = yield Customer_1.Customer.findOne({ where: { userId: payload.sub }, relations: ["cards", "user"] });
-                }
-                else {
-                    customer = yield Customer_1.Customer.findOne({ where: { id: customerId }, relations: ["cards", "user"] });
-                }
-                if (!customer) {
-                    return { error: { code: common_1.errors.CONFLICT, message: "Specified customer does not exist" } };
-                }
+                if (payload)
+                    customer = yield Customer_1.Customer.findOne({
+                        where: { userId: payload.sub },
+                        relations: ["cards", "cards.customer", "cards.customer.cards", "user"],
+                    });
+                else
+                    customer = yield Customer_1.Customer.findOne({
+                        where: { id: customerId },
+                        relations: ["cards", "cards.customer", "cards.customer.cards", "user"],
+                    });
+                if (!customer)
+                    throw new apollo_server_express_1.ApolloError("Specified customer does not exists", common_1.errors.NOT_FOUND);
                 try {
                     const stripeCard = yield stripe.customers.createSource(customer.stripeCustomerId, { source });
-                    if (!stripeCard || stripeCard.customer !== customer.stripeCustomerId || stripeCard.object !== "card") {
-                        return { error: { message: common_1.errors.SOMETHING_WENT_WRONG } };
-                    }
-                    const brand = yield CardBrand_1.CardBrand.findOne({ name: stripeCard.brand });
-                    const country = yield Country_1.Country.findOne({ isoCode: stripeCard.country });
+                    if (!stripeCard || stripeCard.customer !== customer.stripeCustomerId || stripeCard.object !== "card")
+                        throw new apollo_server_express_1.ApolloError(common_1.errors.SOMETHING_WENT_WRONG);
+                    const brand = yield CardBrand_1.CardBrand.findOne({ where: `"name" ILIKE '${stripeCard.brand}'` });
+                    const country = yield Country_1.Country.findOne({ alpha2Code: stripeCard.country });
                     const newCustomerCard = yield typeorm_1.getCustomRepository(Card_1.CardRepository).createCard(stripe, stripeCard, customer, brand, country, isDefault, cardholderName);
                     return {
                         card: newCustomerCard,
@@ -85,18 +78,15 @@ exports.CardCrudMutation = nexus_1.extendType({
                     };
                 }
                 catch (err) {
-                    return { error: { message: `${common_1.errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
+                    throw new apollo_server_express_1.ApolloError(common_1.errors.SOMETHING_WENT_WRONG + ": " + err.message);
                 }
             }),
         });
-        t.field("updateCustomerCard", {
-            type: types_2.UpdateCardResult,
+        t.field("updateCustomerPaymentMethod", {
+            type: types_2.UpdateCardType,
             description: "Update the details of customer's card",
             args: {
-                cardId: nexus_1.arg({
-                    type: graphql_1.BigIntScalar,
-                    description: "The ID values of the card to update",
-                }),
+                cardId: nexus_1.idArg({ description: "The ID of the card to update" }),
                 cardholderName: nexus_1.nullable(nexus_1.stringArg({
                     description: "The (full) name of the cardholder of the card",
                 })),
@@ -112,28 +102,22 @@ exports.CardCrudMutation = nexus_1.extendType({
             },
             resolve: (_, { cardId, cardholderName, expMonth, expYear, isDefault }, { stripe }) => __awaiter(this, void 0, void 0, function* () {
                 var _a, _b;
-                if (!cardId || cardId <= 0) {
-                    return { error: { code: common_1.errors.INVALID_ARGUMENTS, message: "Please provide a valid card" } };
-                }
-                if (cardholderName && cardholderName.trim().length === 0) {
-                    return { error: { code: common_1.errors.INVALID_ARGUMENTS, message: "Please provide a valid name" } };
-                }
-                if (expMonth && (expMonth < dayjs_1.default().month() + 1 || expMonth < 1 || expMonth > 12)) {
-                    return { error: { code: common_1.errors.INVALID_ARGUMENTS, message: "Please provide a valid expiration month" } };
-                }
-                if (expYear && (expYear < dayjs_1.default().year() || expYear.toString().length !== 4)) {
-                    return { error: { code: common_1.errors.INVALID_ARGUMENTS, message: "Please provide a valid expiration year" } };
-                }
+                if (!cardId || cardId <= 0)
+                    throw new apollo_server_express_1.UserInputError("Please provide a valid card", { code: common_1.errors.INVALID_ARGUMENTS });
+                if (cardholderName && cardholderName.trim().length === 0)
+                    throw new apollo_server_express_1.UserInputError("Please provide a valid cardholder name", { code: common_1.errors.INVALID_ARGUMENTS });
+                if (expMonth && (expMonth < dayjs_1.default().month() + 1 || expMonth < 1 || expMonth > 12))
+                    throw new apollo_server_express_1.UserInputError("Please provide a valid expiration month", { code: common_1.errors.INVALID_ARGUMENTS });
+                if (expYear && (expYear < dayjs_1.default().year() || expYear.toString().length !== 4))
+                    throw new apollo_server_express_1.UserInputError("Please provide a valid expiration year", { code: common_1.errors.INVALID_ARGUMENTS });
                 const card = yield Card_1.Card.findOne({
                     where: { id: cardId },
                     relations: ["brand", "country", "customer", "customer.user", "customer.cards"],
                 });
-                if (!card) {
-                    return { error: { code: common_1.errors.CONFLICT, message: `${common_1.errors.SOMETHING_WENT_WRONG}: We could not find your card` } };
-                }
-                if (card.isExpired) {
-                    return { error: { message: "This card is expired" } };
-                }
+                if (!card)
+                    throw new apollo_server_express_1.ApolloError(common_1.errors.SOMETHING_WENT_WRONG + ": We could not find your card", common_1.errors.NOT_FOUND);
+                if (card.isExpired)
+                    throw new apollo_server_express_1.ApolloError("This card has expired");
                 try {
                     const updatedCard = yield card.updateCard(cardholderName, expMonth, expYear, isDefault);
                     yield stripe.customers.updateSource(updatedCard.customer.stripeCustomerId, updatedCard.stripeId, {
@@ -152,32 +136,27 @@ exports.CardCrudMutation = nexus_1.extendType({
                     };
                 }
                 catch (err) {
-                    return { error: { message: `${common_1.errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
+                    throw new apollo_server_express_1.ApolloError(common_1.errors.SOMETHING_WENT_WRONG + ": " + err.message);
                 }
             }),
         });
-        t.field("deleteCustomerCard", {
-            type: types_1.DeleteResult,
-            description: "Delete (remove) a card from a customer",
+        t.field("deleteCustomerPaymentMethod", {
+            type: types_1.DeleteGraphQlType,
+            description: "Delete (remove) a payment method (credit / debit card) from a customer",
             args: {
-                cardId: nexus_1.arg({
-                    type: graphql_1.BigIntScalar,
-                    description: "The ID values of the card to delete",
-                }),
+                cardId: nexus_1.idArg({ description: "The ID value of the card to delete" }),
             },
             resolve: (_, { cardId }, { stripe }) => __awaiter(this, void 0, void 0, function* () {
-                if (!cardId || cardId <= 0) {
-                    return { error: { code: common_1.errors.INVALID_ARGUMENTS, message: "Please provide a valid card" } };
-                }
+                if (!cardId || cardId <= 0)
+                    throw new apollo_server_express_1.UserInputError("Please provide a valid card", { code: common_1.errors.INVALID_ARGUMENTS });
                 const card = yield Card_1.Card.findOne({ where: { id: cardId }, relations: ["customer"] });
-                if (!card) {
-                    return { error: { code: common_1.errors.CONFLICT, message: "Specified card does not exist" } };
-                }
+                if (!card)
+                    throw new apollo_server_express_1.ApolloError("Specified card does not exist", common_1.errors.NOT_FOUND);
                 try {
                     yield card.customSoftRemove(stripe);
                 }
                 catch (err) {
-                    return { error: { message: `${common_1.errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
+                    throw new apollo_server_express_1.ApolloError(common_1.errors.SOMETHING_WENT_WRONG + ": " + err.message);
                 }
                 return {
                     deleted: true,

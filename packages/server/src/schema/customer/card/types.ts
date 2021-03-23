@@ -1,5 +1,4 @@
-import { BigIntScalar } from "@the_hashtag/common/dist/graphql";
-import { objectType, unionType } from "nexus";
+import { objectType } from "nexus";
 import { CardBrandType } from "../../details/cardBrandTypes";
 import { CountryType } from "../../details/countryTypes";
 import { CustomerType } from "../types";
@@ -8,12 +7,12 @@ export const CardType = objectType({
   name: "Card",
   description: "Represents a customer's credit or debit card",
   definition(t) {
-    t.field("id", { type: BigIntScalar });
-    t.string("type", );
-    t.nullable.int("expMonth");
-    t.nullable.int("expYear");
+    t.id("id");
+    t.string("type");
+    t.int("expMonth");
+    t.int("expYear");
     t.string("last4");
-    t.nullable.string("cardholderName");
+    t.string("cardholderName");
     t.boolean("isDefault");
     t.string("stripeId");
     t.field("customer", {
@@ -49,19 +48,19 @@ export const AddCardType = objectType({
   },
 });
 
-export const AddCardResult = unionType({
-  name: "AddCardResult",
-  definition(t) {
-    t.members("AddCard", "Error");
-  },
-  resolveType: item => {
-    if (item.name === "Error") {
-      return "Error";
-    } else {
-      return "AddCard";
-    }
-  },
-});
+// export const AddCardResult = unionType({
+//   name: "AddCardResult",
+//   definition(t) {
+//     t.members("AddCard", "Error");
+//   },
+//   resolveType: item => {
+//     if (item.error) {
+//       return "Error";
+//     } else {
+//       return "AddCard";
+//     }
+//   },
+// });
 
 export const UpdateCardType = objectType({
   name: "UpdateCard",
@@ -78,16 +77,16 @@ export const UpdateCardType = objectType({
   },
 });
 
-export const UpdateCardResult = unionType({
-  name: "UpdateCardResult",
-  definition(t) {
-    t.members("UpdateCard", "Error");
-  },
-  resolveType: item => {
-    if (item.name === "Error") {
-      return "Error";
-    } else {
-      return "UpdateCard";
-    }
-  },
-});
+// export const UpdateCardResult = unionType({
+//   name: "UpdateCardResult",
+//   definition(t) {
+//     t.members("UpdateCard", "Error");
+//   },
+//   resolveType: item => {
+//     if (item.error) {
+//       return "Error";
+//     } else {
+//       return "UpdateCard";
+//     }
+//   },
+// });

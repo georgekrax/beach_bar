@@ -16,11 +16,10 @@ const Account_1 = require("entity/Account");
 const Owner_1 = require("entity/Owner");
 const User_1 = require("entity/User");
 const signUpUser = (options) => __awaiter(void 0, void 0, void 0, function* () {
-    const { email, redis, isPrimaryOwner, hashtagId, googleId, facebookId, instagramId, instagramUsername, firstName, lastName, countryId, cityId, birthday, } = options;
+    const { email, redis, isPrimaryOwner, hashtagId, googleId, facebookId, instagramId, instagramUsername, firstName, lastName, countryId, city, birthday, } = options;
     const user = yield User_1.User.findOne({ where: { email }, relations: ["account"] });
-    if (user) {
+    if (user)
         return { error: { code: common_1.errors.CONFLICT, message: "User already exists" } };
-    }
     const newUser = User_1.User.create({
         email,
         hashtagId,
@@ -31,7 +30,7 @@ const signUpUser = (options) => __awaiter(void 0, void 0, void 0, function* () {
         firstName,
         lastName,
     });
-    const newUserAccount = Account_1.Account.create({ countryId, cityId, birthday });
+    const newUserAccount = Account_1.Account.create({ countryId, city, birthday });
     try {
         yield newUser.save();
         newUserAccount.user = newUser;
@@ -43,12 +42,10 @@ const signUpUser = (options) => __awaiter(void 0, void 0, void 0, function* () {
     catch (err) {
         return { error: { code: common_1.errors.INTERNAL_SERVER_ERROR, message: `Something went wrong: ${err.message}` } };
     }
-    if (isPrimaryOwner) {
+    if (isPrimaryOwner)
         yield redis.sadd(newUser.getRedisKey(true), scopes_1.user.PRIMARY_OWNER);
-    }
-    else {
+    else
         yield redis.sadd(newUser.getRedisKey(true), scopes_1.user.SIMPLE_USER);
-    }
     return { user: newUser };
 });
 exports.signUpUser = signUpUser;

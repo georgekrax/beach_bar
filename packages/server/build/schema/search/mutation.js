@@ -29,19 +29,18 @@ exports.SearchUpdateMutation = nexus_1.extendType({
                 searchId: nexus_1.idArg({
                     description: "The ID value of a previous user search",
                 }),
-                filterIds: nexus_1.list(nexus_1.nullable(nexus_1.stringArg({
+                filterIds: nexus_1.nullable(nexus_1.list(nexus_1.stringArg({
                     description: "A list with the filter IDs to add in the search, found in the documentation",
                 }))),
             },
-            resolve: (_, { searchId, filterIds }, { payload, redis }) => __awaiter(this, void 0, void 0, function* () {
+            resolve: (_, { searchId, filterIds = [] }, { payload, redis }) => __awaiter(this, void 0, void 0, function* () {
                 var _a;
                 if (!searchId || searchId <= 0) {
                     return null;
                 }
-                const userSearch = yield UserSearch_1.UserSearch.findOne({ where: { id: searchId }, relations: ["filters"] });
-                if (!userSearch) {
+                const userSearch = yield UserSearch_1.UserSearch.findOne({ where: { id: searchId }, relations: ["filters", "sort"] });
+                if (!userSearch)
                     return null;
-                }
                 if ((userSearch.filters &&
                     !arrEquals_1.default(filterIds, userSearch.filters.map(filter => filter.publicId))) ||
                     filterIds.length === 0 ||
@@ -50,9 +49,8 @@ exports.SearchUpdateMutation = nexus_1.extendType({
                         const filters = yield SearchFilter_1.SearchFilter.find({ where: { publicId: typeorm_1.In(filterIds) } });
                         userSearch.filters = filters;
                     }
-                    else {
+                    else
                         userSearch.filters = [];
-                    }
                     try {
                         yield userSearch.save();
                         const idx = yield userSearch.getRedisIdx(redis, payload ? payload.sub : undefined);

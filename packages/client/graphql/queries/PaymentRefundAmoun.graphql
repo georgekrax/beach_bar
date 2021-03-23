@@ -1,0 +1,3 @@
+query PaymentRefundAmount($refCode: String!) {
+  paymentRefundAmount(refCode: $refCode)
+}

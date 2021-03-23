@@ -1,0 +1,9 @@
+query GetPaymentsDates {
+	getPaymentsDates {
+		month {
+			id
+			value
+		}
+		year
+	}
+}

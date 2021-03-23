@@ -1,26 +1,25 @@
-import dayjs from "dayjs";
-import range from "lodash/range";
+import { BeachBar } from "@/graphql/generated";
 import Section from "../Section";
-import { Item } from "./__helpers__";
+import { Item, RecentSearchesItemProps } from "./__helpers__";
 
-const RecentSearches: React.FC = () => {
-  return (
+export type Props = {
+  beachBars: (RecentSearchesItemProps & Pick<BeachBar, "id">)[];
+};
+
+const RecentSearches: React.FC<Props> = ({ beachBars }) => {
+  return beachBars.length > 0 ? (
     <section className="index__section__container">
-      <Section.PageHeader header="Recent searches" link="View history" />
+      {/* TODO: Change pathname later */}
+      <Section.Header href={{ pathname: "/" }} link="View history">
+        Recent searches
+      </Section.Header>
       <div className="index__section__list flex-row-center-flex-start">
-        {range(0, 6).map(num => {
-          return (
-            <Item
-              key={num}
-              date={dayjs()}
-              people={4}
-              searchValue={num === 5 ? { beachBar: { name: "Seaside Paradise", thumbnailUrl: "" } } : "Kikabu"}
-            />
-          );
+        {beachBars.map(({ id, date, people, searchValue }) => {
+          return <Item key={id} date={date} people={people} searchValue={searchValue} />;
         })}
       </div>
     </section>
-  );
+  ) : null;
 };
 
 RecentSearches.displayName = "RecentSearches";

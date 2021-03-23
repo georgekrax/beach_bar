@@ -8,45 +8,39 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.findCountry = exports.findBrowser = exports.findOs = exports.createUserLoginDetails = exports.findLoginDetails = void 0;
+const common_1 = require("@the_hashtag/common");
 const LoginDetails_1 = require("entity/LoginDetails");
-const fs_1 = __importDefault(require("fs"));
 const findLoginDetails = ({ details, uaParser }) => {
     const obj = {
         osId: undefined,
         browserId: undefined,
-        countryId: undefined,
-        cityId: (details === null || details === void 0 ? void 0 : details.cityId) || undefined,
+        countryAlpha2Code: undefined,
+        city: (details === null || details === void 0 ? void 0 : details.city) || undefined,
     };
     if (details) {
         const osName = uaParser.getOS().name || undefined;
-        if (osName) {
+        if (osName)
             obj.osId = exports.findOs(osName);
-        }
         const browserName = uaParser.getBrowser().name || undefined;
-        if (browserName) {
+        if (browserName)
             obj.browserId = exports.findOs(browserName);
-        }
-        if (details.countryId) {
-            obj.countryId = exports.findCountry(details.countryId);
-        }
+        if (details.countryAlpha2Code)
+            obj.countryId = exports.findCountry(details.countryAlpha2Code);
     }
     return obj;
 };
 exports.findLoginDetails = findLoginDetails;
-const createUserLoginDetails = (status, platform, account, osId, browserId, countryId, cityId, ipAddr) => __awaiter(void 0, void 0, void 0, function* () {
+const createUserLoginDetails = (status, platform, account, osId, browserId, countryId, city, ipAddr) => __awaiter(void 0, void 0, void 0, function* () {
     const loginDetails = LoginDetails_1.LoginDetails.create({
         account,
         platformId: platform.id,
         browserId,
         osId,
         countryId,
-        cityId,
-        ipAddr,
+        city,
+        ipAddr: ipAddr || undefined,
         status,
     });
     try {
@@ -58,44 +52,29 @@ const createUserLoginDetails = (status, platform, account, osId, browserId, coun
 });
 exports.createUserLoginDetails = createUserLoginDetails;
 const findOs = (osName) => {
-    if (!osName) {
+    if (!osName)
         return undefined;
-    }
-    console.log(osName);
-    const file = JSON.parse(fs_1.default.readFileSync("../../config/clientOs.json", "utf8"));
-    const os = file.data.find(data => data.name === osName);
-    console.log(os);
-    if (!os) {
+    const os = common_1.OS_ARR.find(({ name }) => name.toLowerCase() === osName.toLowerCase());
+    if (!os)
         return undefined;
-    }
     return os.id;
 };
 exports.findOs = findOs;
 const findBrowser = (browserName) => {
-    if (!browserName) {
+    if (!browserName)
         return undefined;
-    }
-    console.log(browserName);
-    const file = JSON.parse(fs_1.default.readFileSync("../../config/clientBrowser.json.json", "utf8"));
-    const browser = file.data.find(data => data.name === browserName);
-    console.log(browser);
-    if (!browser) {
+    const browser = common_1.BROWSERS_ARR.find(({ name }) => name.toLowerCase() === browserName.toLowerCase());
+    if (!browser)
         return undefined;
-    }
     return browser.id;
 };
 exports.findBrowser = findBrowser;
-const findCountry = (countryId) => {
-    if (!countryId) {
+const findCountry = (countryCode) => {
+    if (!countryCode)
         return undefined;
-    }
-    console.log(countryId);
-    const file = JSON.parse(fs_1.default.readFileSync("../../config/countries.json.json", "utf8"));
-    const country = file.data.find(data => Number(data.id) === Number(countryId));
-    console.log(country);
-    if (!country) {
+    const country = common_1.COUNTRIES_ARR.find(({ alpha2Code }) => alpha2Code === countryCode);
+    if (!country)
         return undefined;
-    }
     return country.id;
 };
 exports.findCountry = findCountry;

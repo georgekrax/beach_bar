@@ -2,8 +2,9 @@ import { errors, MyContext } from "@beach_bar/common";
 import sgClient from "@sendgrid/client";
 import sgMail from "@sendgrid/mail";
 import { execute, makePromise } from "apollo-link";
-import { ApolloServer } from "apollo-server-express";
+import { ApolloError, ApolloServer } from "apollo-server-express";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 import express from "express";
 import Redis from "ioredis";
 import { verify } from "jsonwebtoken";
@@ -50,12 +51,17 @@ export let stripe: Stripe;
   );
 
   // Stripe webhooks routes have to use the "express.raw()", in order to work
+  app.use(
+    cors({
+      credentials: true,
+      // origin: process.env.NODE_ENV === "production" ? String(process.env.TOKEN_AUDIENCE!) : "http://192.168.1.4:3000",
+      origin: "http://192.168.1.8:3000",
+    })
+  );
   app.use((req, res, next) => {
-    if (req.originalUrl.includes(process.env.STRIPE_WEBHOOK_ORIGIN_URL!.toString())) {
+    if (req.originalUrl.includes(process.env.STRIPE_WEBHOOK_ORIGIN_URL!.toString()))
       express.raw({ type: "application/json" })(req, res, next);
-    } else {
-      express.json()(req, res, next);
-    }
+    else express.json()(req, res, next);
   });
   app.use(cookieParser());
   app.use("/stripe", stripeRouter);
@@ -65,7 +71,7 @@ export let stripe: Stripe;
   sgMail.setApiKey(process.env.SENDGRID_API_KEY!.toString());
 
   const notIsProd = !(process.env.NODE_ENV === "production");
-  const server = new ApolloServer({
+  const apolloServer = new ApolloServer({
     // tracing: notIsProd,
     playground: notIsProd,
     // engine: {
@@ -75,21 +81,14 @@ export let stripe: Stripe;
     schema,
     uploads: true,
     formatError: (err): any => {
-      if (
-        err.message == "Context creation failed: jwt expired" ||
-        err.message == "Context creation failed: Something went wrong. jwt expired"
-      ) {
-        return new Error(errors.JWT_EXPIRED);
-      } else if (err.message.startsWith("Context creation failed: ")) {
-        return new Error(err.message.replace("Context creation failed: ", ""));
-      } else if (err.message.startsWith("Something went wrong. ")) {
-        return new Error(err.message.replace("Something went wrong. ", ""));
-      }
+      if (err.message.includes("Context creation failed: "))
+        return new ApolloError(errors.NOT_AUTHENTICATED_MESSAGE, errors.JWT_EXPIRED, { messageCode: errors.NOT_AUTHENTICATED_CODE });
       return err;
     },
     context: async ({ req, res }): Promise<MyContext> => {
       const authHeader = req.headers.authorization || "";
-      const accessToken = authHeader.split(" ")[1];
+      const cookie = req.cookies[process.env.ACCESS_TOKEN_COOKIE_NAME!.toString()];
+      const accessToken = authHeader ? authHeader.split(" ")[1] : cookie;
 
       let payload: any = null;
       if (accessToken) {
@@ -97,16 +96,52 @@ export let stripe: Stripe;
           payload = verify(accessToken, process.env.ACCESS_TOKEN_SECRET!, { issuer: process.env.TOKEN_ISSUER!.toString() });
           if (payload && payload.sub && payload.sub.trim().length !== 0) {
             const redisUser = await redis.hgetall(`${redisKeys.USER}:${payload.sub.toString()}`);
-            if (!redisUser) {
-              payload = null;
-            }
-          } else if (payload.sub.trim().length >= 0) {
-            payload = null;
-          }
+            if (!redisUser) payload = null;
+          } else if (payload.sub.trim().length >= 0) payload = null;
         } catch (err) {
           if (err.message.toString() === "jwt expired") {
-            throw new Error(errors.JWT_EXPIRED);
+            throw new ApolloError(errors.NOT_AUTHENTICATED_MESSAGE, errors.JWT_EXPIRED);
+            // const refreshToken = req.cookies[process.env.REFETCH_TOKEN_COOKIE_NAME!.toString()] || req.headers["x-refetch-token"];
+            // console.log(refreshToken);
+
+            // if (!refreshToken) throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.JWT_EXPIRED);
+
+            // let refreshPayload: any = null;
+            // refreshPayload = verify(refreshToken as string, process.env.REFRESH_TOKEN_SECRET!, {
+            //   issuer: process.env.TOKEN_ISSUER!.toString(),
+            // });
+            // const user = await User.findOne(refreshPayload.sub);
+            // if (user) {
+            //   // get user (new) scopes from Redis
+            //   const scope = await redis.smembers(user.getRedisKey(true) as KeyType);
+
+            //   const newAccessToken = generateAccessToken(user, scope);
+            //   console.log(newAccessToken);
+
+            //   await redis.hset(user.getRedisKey() as KeyType, "access_token", newAccessToken.token);
+
+            //   sendCookieToken(res, newAccessToken.token, "access");
+            //   res.cookie("hey", newAccessToken.token, {
+            //     httpOnly: true,
+            //   })
+
+            //     payload = verify(newAccessToken.token, process.env.ACCESS_TOKEN_SECRET!, {
+            //       issuer: process.env.TOKEN_ISSUER!.toString(),
+            //     });
+            //     console.log(payload);
           }
+          // await fetch("http://192.168.1.4:4000/oauth/refresh_token", {
+          //   method: "POST",
+          //   headers: {
+          //     Cookie: process.env.REFRESH_TOKEN_COOKIE_NAME!.toString() + "=" + refreshToken.accessToken.token,
+          //   },
+          // })
+          //   .then(res => res.json())
+          //   .then(data => {
+          //     console.log(data);
+          //     console.log("HEY");
+          //   })
+          //   .catch(err => console.error(err));
           // check with the 'verifyAccessToken' query
           if (err.message.toString() === "invalid signature") {
             const verifyAccessTokenOperation = {
@@ -151,7 +186,7 @@ export let stripe: Stripe;
               hashtagAud !== process.env.HASHTAG_CLIENT_ID!.toString() ||
               hashtagIss !== process.env.HASHTAG_TOKEN_ISSUER!.toString()
             ) {
-              throw new Error(errorMessage.toString());
+              throw new ApolloError(errorMessage.toString(), errorCode.toString());
             } else if (hashtagSub && (hashtagSub !== "" || " ")) {
               const user = await User.findOne({ where: { hashtagId: hashtagSub } });
               if (!user) {
@@ -172,20 +207,23 @@ export let stripe: Stripe;
             payload = null;
           }
         }
-      }
-      if (payload && payload.sub) {
-        payload.sub = parseInt(payload.sub);
-      }
-
+      } else if (!accessToken && req.cookies[process.env.REFRESH_TOKEN_COOKIE_NAME!.toString()])
+        throw new ApolloError(errors.NOT_AUTHENTICATED_MESSAGE, errors.JWT_EXPIRED);
+      if (payload && payload.sub) payload.sub = parseInt(payload.sub);
       const uaParser = new UAParser(req.headers["user-agent"]);
-      // @ts-ignore
-      const ipAddr: string | undefined = req.ipAddr;
+      
+      type IpAddrType = string | undefined;
+      const ipAddr: IpAddrType = (req.headers.ip_address as IpAddrType) || undefined;
       return { req, res, payload, redis, sgMail, sgClient, stripe, uaParser, googleOAuth2Client, ipAddr };
     },
   });
-  server.applyMiddleware({ app, cors: true });
+
+  apolloServer.applyMiddleware({
+    app,
+    cors: false,
+  });
 
   app.listen({ port: parseInt(process.env.PORT!) || 4000 }, () =>
-    console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`)
+    console.log(`🚀 Server ready at http://localhost:4000${apolloServer.graphqlPath}`)
   );
 })();

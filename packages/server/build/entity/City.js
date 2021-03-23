@@ -11,7 +11,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.City = void 0;
 const typeorm_1 = require("typeorm");
-const Account_1 = require("./Account");
 const BeachBarLocation_1 = require("./BeachBarLocation");
 const Country_1 = require("./Country");
 const LoginDetails_1 = require("./LoginDetails");
@@ -28,10 +27,6 @@ __decorate([
     __metadata("design:type", String)
 ], City.prototype, "name", void 0);
 __decorate([
-    typeorm_1.Column("varchar", { length: 100, name: "second_name", unique: true, nullable: true }),
-    __metadata("design:type", String)
-], City.prototype, "secondName", void 0);
-__decorate([
     typeorm_1.Column({ name: "country_id", type: "integer" }),
     __metadata("design:type", Number)
 ], City.prototype, "countryId", void 0);
@@ -40,10 +35,6 @@ __decorate([
     typeorm_1.JoinColumn({ name: "country_id" }),
     __metadata("design:type", Country_1.Country)
 ], City.prototype, "country", void 0);
-__decorate([
-    typeorm_1.OneToMany(() => Account_1.Account, account => account.city, { nullable: true }),
-    __metadata("design:type", Array)
-], City.prototype, "accounts", void 0);
 __decorate([
     typeorm_1.OneToMany(() => Region_1.Region, region => region.city, { nullable: true }),
     __metadata("design:type", Array)

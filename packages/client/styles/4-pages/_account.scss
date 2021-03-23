@@ -1,0 +1,237 @@
+.account {
+  &__container {
+    margin-top: map-get($em-spacers, 24);
+
+    section .index__carousel__container {
+      transform: translateX(-32px);
+      padding: map-get($em-spacers, 32);
+      padding-right: 0;
+      gap: map-get($em-spacers, 24);
+      width: calc(100vw + #{$wrapper-padding});
+
+      & > div:last-child {
+        width: calc(#{$wrapper-padding * 2});
+      }
+    }
+
+    & > div > div:first-child {
+      margin-bottom: -(map-get($em-spacers, 16));
+      align-items: center;
+
+      h4 {
+        @extend .text-transform--capitalize;
+      }
+    }
+
+    & > div:last-child {
+      margin-top: map-get($em-spacers, 48);
+    }
+  }
+
+  &__birthday {
+    @include breakpoint("xs") {
+      max-width: 15em;
+    }
+
+    & > div {
+      flex: 1;
+
+      &:first-of-type,
+      &:nth-of-type(2) {
+        flex-basis: 27.5%;
+        margin-right: map-get($em-spacers, 16);
+      }
+
+      &:last-of-type {
+        flex-basis: 40%;
+      }
+
+      input {
+        @extend .w-100;
+      }
+    }
+  }
+  &__date-picker {
+    &__content {
+      &::before {
+        @extend .bottom-sheet__title;
+        content: "Select the date of your trip";
+      }
+
+      & > .date-picker__months-container {
+        @extend .d--none;
+      }
+    }
+
+    &[data-ismobile="false"] > div > div {
+      top: 20%;
+
+      & > div:last-child {
+        @extend .account__date-picker__content;
+      }
+    }
+
+    &[data-ismobile="true"] > div:last-child {
+      @extend .account__date-picker__content;
+    }
+  }
+
+  &__select-container {
+    &__content {
+      &::before {
+        @extend .bottom-sheet__title;
+        content: "Select the hour of your trip";
+      }
+    }
+
+    &[data-ismobile="false"] > div > div:last-child {
+      @extend .account__select-container__content;
+    }
+
+    &--bottom-sheet > div > div:last-child {
+      padding-top: 0;
+      @extend .account__select-container__content;
+    }
+  }
+
+  &__upload {
+    & > div {
+      margin-bottom: map-get($em-spacers, 4);
+
+      & > .input__container__field {
+        @extend .d--none;
+      }
+    }
+
+    & > button {
+      border-color: $grey-7;
+    }
+  }
+
+  &-trips {
+    &__container {
+      & > div:first-child {
+        margin-bottom: map-get($em-spacers, 24);
+      }
+    }
+
+    &__details {
+      &__container > div {
+        margin-top: 0 !important;
+      }
+
+      &__status > span {
+        @extend .upper;
+      }
+
+      &__phone-number > span:last-child {
+        color: unset !important;
+      }
+
+      &__card > div:first-child {
+        margin-bottom: map-get($em-spacers, 4);
+        margin-right: map-get($em-spacers, 8);
+
+        & > span:first-child {
+          display: inline-block;
+          transform: translateY(10%);
+        }
+      }
+
+      &__refund {
+        &-dialog {
+          margin-top: map-get($em-spacers, 16);
+          padding-top: map-get($em-spacers, 12);
+          border-top: 1px solid $grey-6;
+
+          & > span {
+            padding-bottom: 0.1em;
+            border-bottom: 1px solid $grey-8;
+          }
+        }
+      }
+    }
+  }
+
+  &-reviews {
+    &__container {
+      flex-wrap: wrap;
+      gap: map-get($em-spacers, 40);
+    }
+
+    &__details__container {
+      & > div:first-child {
+        margin-top: map-get($em-spacers, 16);
+      }
+    }
+
+    &__answer > div {
+      margin: map-get($em-spacers, 16) 0;
+
+      & > svg {
+        margin-bottom: map-get($em-spacers, 12);
+      }
+    }
+
+    &__rating {
+      cursor: pointer;
+
+      &:not(:last-child) {
+        margin-right: map-get($em-spacers, 8);
+      }
+
+      &:not(.colored) > path {
+        stroke: $grey-9 !important;
+        stroke-width: 1px !important;
+      }
+
+      &__container {
+        margin: map-get($em-spacers, 24) 0 map-get($em-spacers, 32);
+      }
+    }
+
+    &__feedback {
+      &:last-child {
+        margin-top: map-get($em-spacers, 16);
+      }
+
+      & > div {
+        max-width: 100%;
+      }
+    }
+
+    &__visit {
+      summary {
+        width: 160px !important;
+      }
+
+      & > div {
+        align-items: center;
+      }
+    }
+  }
+
+  &-favourites {
+    &__container {
+      flex-wrap: wrap;
+      gap: map-get($em-spacers, 24);
+
+      @include breakpoint("sm") {
+        align-items: stretch;
+      }
+    }
+  }
+
+  &-history {
+    &__section {
+      margin-bottom: map-get($em-spacers, 32);
+
+      & > div {
+        margin: map-get($em-spacers, 16) 0;
+        border-radius: 8px;
+        overflow: auto;
+        box-shadow: 0.1px 1px 4px rgba($grey-7, 0.75);
+      }
+    }
+  }
+}

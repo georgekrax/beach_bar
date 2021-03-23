@@ -1,4 +1,4 @@
-import { Dayjs } from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import {
   BaseEntity,
   Column,
@@ -12,7 +12,7 @@ import {
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
-  Repository,
+  Repository
 } from "typeorm";
 import { softRemove } from "utils/softRemove";
 import { BeachBar } from "./BeachBar";
@@ -80,19 +80,18 @@ export class Cart extends BaseEntity {
     }
   }
 
-  async getTotalPrice(): Promise<GetTotalPrice | undefined> {
+  async getTotalPrice(afterToday: boolean = false): Promise<GetTotalPrice | undefined> {
     if (this.products) {
-      const filteredProducts = this.products.filter(product => !product.deletedAt);
+      let filteredProducts = this.products.filter(product => !product.deletedAt);
+      if (afterToday) filteredProducts = filteredProducts.filter(product => dayjs(product.date).isAfter(dayjs()));
       const total = filteredProducts.reduce((sum, i) => {
         return sum + i.product.price * i.quantity;
       }, 0);
       const entryFeesTotal = await this.getBeachBarsEntryFeeTotal();
-      if (entryFeesTotal === undefined) {
-        return undefined;
-      }
+      if (entryFeesTotal === undefined) return undefined;
       return {
-        totalWithoutEntryFees: total,
-        totalWithEntryFees: total + entryFeesTotal,
+        totalWithoutEntryFees: parseFloat(total.toFixed(2)),
+        totalWithEntryFees: parseFloat((total + entryFeesTotal).toFixed(2)),
       };
     }
     return undefined;
@@ -245,6 +244,9 @@ export class CartRepository extends Repository<Cart> {
         .leftJoinAndSelect("cart.user", "user")
         .leftJoinAndSelect("cart.products", "products", "products.deletedAt IS NULL")
         .leftJoinAndSelect("products.product", "cartProduct", "cartProduct.deletedAt IS NULL")
+        .leftJoinAndSelect("cartProduct.beachBar", "cartProductBeachBar", "cartProductBeachBar.deletedAt IS NULL")
+        .leftJoinAndSelect("cartProductBeachBar.defaultCurrency", "cartProductBeachBarCurrency")
+        .leftJoinAndSelect("products.time", "productsTime")
         .orderBy("cart.timestamp", "DESC")
         .getOne();
 
@@ -268,6 +270,9 @@ export class CartRepository extends Repository<Cart> {
         .leftJoinAndSelect("cart.user", "user")
         .leftJoinAndSelect("cart.products", "products", "products.deletedAt IS NULL")
         .leftJoinAndSelect("products.product", "cartProduct", "cartProduct.deletedAt IS NULL")
+        .leftJoinAndSelect("cartProduct.beachBar", "cartProductBeachBar", "cartProductBeachBar.deletedAt IS NULL")
+        .leftJoinAndSelect("cartProductBeachBar.defaultCurrency", "cartProductBeachBarCurrency")
+        .leftJoinAndSelect("products.time", "productsTime")
         .orderBy("cart.timestamp", "DESC")
         .getOne();
 

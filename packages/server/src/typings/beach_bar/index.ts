@@ -1,7 +1,7 @@
 import { BeachBar } from "entity/BeachBar";
 import { PricingFee } from "entity/PricingFee";
 import { PricingFeeCurrency } from "entity/PricingFeeCurrency";
-import { AddType, ErrorType, UpdateType } from "typings/.index";
+import { AddType, UpdateType } from "typings/.index";
 
 export interface GetFullPricingReturnType {
   pricingFee: PricingFee;
@@ -24,6 +24,6 @@ type BeachBarType = {
   beachBar: BeachBar;
 };
 
-export type AddBeachBarType = (AddType & BeachBarType) | ErrorType;
+export type TAddBeachBar = AddType & BeachBarType;
 
-export type UpdateBeachBarType = (UpdateType & BeachBarType) | ErrorType;
+export type TUpdateBeachBar = UpdateType & BeachBarType;

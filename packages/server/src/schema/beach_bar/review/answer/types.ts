@@ -1,4 +1,4 @@
-import { BigIntScalar, DateTimeScalar } from "@the_hashtag/common/dist/graphql";
+import { DateTimeScalar } from "@the_hashtag/common/dist/graphql";
 import { objectType, unionType } from "nexus";
 import { BeachBarReviewType } from "../types";
 
@@ -6,7 +6,7 @@ export const ReviewAnswerType = objectType({
   name: "ReviewAnswer",
   description: "Represents an answer for a review of a #beach_bar, by the owner",
   definition(t) {
-    t.field("id", { type: BigIntScalar, description: "The ID value of the particular review answer" });
+    t.id("id", { description: "The ID value of the particular review answer" });
     t.string("body", { description: "The body (content) of the review answer, written by the reviewed #beach_bar's owner" });
     t.field("review", {
       type: BeachBarReviewType,
@@ -45,7 +45,7 @@ export const AddReviewAnswerResult = unionType({
     t.members("AddReviewAnswer", "Error");
   },
   resolveType: item => {
-    if (item.name === "Error") {
+    if (item.error) {
       return "Error";
     } else {
       return "AddReviewAnswer";
@@ -74,7 +74,7 @@ export const UpdateReviewAnswerResult = unionType({
     t.members("UpdateReviewAnswer", "Error");
   },
   resolveType: item => {
-    if (item.name === "Error") {
+    if (item.error) {
       return "Error";
     } else {
       return "UpdateReviewAnswer";

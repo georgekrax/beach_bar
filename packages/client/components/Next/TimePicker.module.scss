@@ -1,0 +1,16 @@
+.container {
+  flex-wrap: wrap;
+
+  @include breakpoint("md", "max-width") {
+    margin-bottom: map-get($em-spacers, 48);
+  }
+
+  & > button {
+    flex: 0 0 26%;
+    margin: map-get($em-spacers, 12);
+    box-shadow: none;
+    padding-right: map-get($em-spacers, 8);
+    padding-left: map-get($em-spacers, 8);
+    border-color: rgba($secondary, 0.75);
+  }
+}

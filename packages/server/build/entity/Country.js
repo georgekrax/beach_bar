@@ -20,7 +20,6 @@ const Customer_1 = require("./Customer");
 const LoginDetails_1 = require("./LoginDetails");
 const Region_1 = require("./Region");
 const SearchInputValue_1 = require("./SearchInputValue");
-const UserContactDetails_1 = require("./UserContactDetails");
 let Country = class Country extends typeorm_1.BaseEntity {
 };
 __decorate([
@@ -32,37 +31,25 @@ __decorate([
     __metadata("design:type", String)
 ], Country.prototype, "name", void 0);
 __decorate([
-    typeorm_1.Column("varchar", { length: 100, name: "short_name", unique: true, nullable: true }),
+    typeorm_1.Column("varchar", { length: 2, name: "alpha_2_code", unique: true }),
     __metadata("design:type", String)
-], Country.prototype, "shortName", void 0);
-__decorate([
-    typeorm_1.Column("varchar", { length: 10, name: "calling_code", unique: true }),
-    __metadata("design:type", String)
-], Country.prototype, "callingCode", void 0);
-__decorate([
-    typeorm_1.Column("varchar", { length: 2, name: "iso_code", unique: true }),
-    __metadata("design:type", String)
-], Country.prototype, "isoCode", void 0);
+], Country.prototype, "alpha2Code", void 0);
 __decorate([
     typeorm_1.Column("varchar", { length: 3, name: "alpha_3_code", unique: true }),
     __metadata("design:type", String)
 ], Country.prototype, "alpha3Code", void 0);
 __decorate([
+    typeorm_1.Column("varchar", { length: 10, name: "calling_code", unique: true }),
+    __metadata("design:type", String)
+], Country.prototype, "callingCode", void 0);
+__decorate([
     typeorm_1.Column({ type: "boolean", name: "is_eu" }),
     __metadata("design:type", Boolean)
 ], Country.prototype, "isEu", void 0);
 __decorate([
-    typeorm_1.Column("varchar", { length: 5, name: "language_identifier", unique: false }),
-    __metadata("design:type", String)
-], Country.prototype, "languageIdentifier", void 0);
-__decorate([
     typeorm_1.Column({ type: "integer", name: "currency_id" }),
     __metadata("design:type", Number)
 ], Country.prototype, "currencyId", void 0);
-__decorate([
-    typeorm_1.Column({ type: "text", name: "flag_28x20", unique: true }),
-    __metadata("design:type", String)
-], Country.prototype, "flag28x20", void 0);
 __decorate([
     typeorm_1.ManyToOne(() => Currency_1.Currency, currency => currency.countries, { nullable: false }),
     typeorm_1.JoinColumn({ name: "currency_id" }),
@@ -77,9 +64,9 @@ __decorate([
     __metadata("design:type", Array)
 ], Country.prototype, "accounts", void 0);
 __decorate([
-    typeorm_1.OneToMany(() => UserContactDetails_1.UserContactDetails, userContactDetails => userContactDetails.country),
+    typeorm_1.OneToMany(() => Account_1.Account, account => account.telCountry),
     __metadata("design:type", Array)
-], Country.prototype, "userContactDetails", void 0);
+], Country.prototype, "accountsTel", void 0);
 __decorate([
     typeorm_1.OneToMany(() => Region_1.Region, region => region.country),
     __metadata("design:type", Array)

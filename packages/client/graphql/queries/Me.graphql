@@ -1,0 +1,42 @@
+query Me {
+  me {
+    id
+		email
+		firstName
+		lastName
+    account {
+			id
+      honorificTitle
+			birthday
+			age
+			address
+			zipCode
+			imgUrl
+			city
+			trackHistory
+			phoneNumber
+			telCountry {
+				id
+				name
+			}
+      country {
+        id
+				name
+				currency {
+					id
+					symbol
+				}
+      }
+		}
+		reviewVotes {
+			id
+			type {
+				id
+				value
+			}
+			review {
+				id
+			}
+		}
+  }
+}

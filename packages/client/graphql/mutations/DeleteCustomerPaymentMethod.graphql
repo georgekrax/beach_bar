@@ -1,0 +1,5 @@
+mutation DeleteCustomerPaymentMethod($cardId: ID!) {
+	deleteCustomerPaymentMethod(cardId: $cardId) {
+		deleted
+	}
+}

@@ -1,0 +1,57 @@
+mutation UpdateUser(
+  $email: Email
+  $firstName: String
+  $lastName: String
+  $imgUrl: URL
+  $honorificTitle: String
+  $birthday: String
+  $countryId: ID
+  $city: String
+  $phoneNumber: String
+  $telCountryId: ID
+  $address: String
+  $zipCode: String
+  $trackHistory: Boolean
+) {
+  updateUser(
+    email: $email
+    firstName: $firstName
+    lastName: $lastName
+    imgUrl: $imgUrl
+    honorificTitle: $honorificTitle
+    birthday: $birthday
+    countryId: $countryId
+    city: $city
+    phoneNumber: $phoneNumber
+    telCountryId: $telCountryId
+    address: $address
+    zipCode: $zipCode
+    trackHistory: $trackHistory
+  ) {
+    updated
+    user {
+      id
+      email
+      firstName
+      lastName
+      account {
+        id
+        honorificTitle
+        birthday
+        age
+        address
+        zipCode
+        trackHistory
+        imgUrl
+        city
+        phoneNumber
+        telCountry {
+          id
+        }
+        country {
+          id
+        }
+      }
+    }
+  }
+}

@@ -1,7 +1,7 @@
+import { BROWSERS_ARR, COUNTRIES_ARR, OS_ARR } from "@the_hashtag/common";
 import { LoginPlatformType } from "config/platformNames";
 import { Account } from "entity/Account";
 import { LoginDetails, LoginDetailStatus } from "entity/LoginDetails";
-import fs from "fs";
 import { LoginDetailsType } from "typings/.index";
 import UAParser from "ua-parser-js";
 
@@ -15,21 +15,15 @@ export const findLoginDetails = ({ details, uaParser }: findLoginDetailsType): L
   const obj: LoginDetailsType = {
     osId: undefined,
     browserId: undefined,
-    countryId: undefined,
-    cityId: details?.cityId || undefined,
+    countryAlpha2Code: undefined,
+    city: details?.city || undefined,
   };
   if (details) {
     const osName = uaParser.getOS().name || undefined;
-    if (osName) {
-      obj.osId = findOs(osName);
-    }
+    if (osName) obj.osId = findOs(osName);
     const browserName = uaParser.getBrowser().name || undefined;
-    if (browserName) {
-      obj.browserId = findOs(browserName);
-    }
-    if (details.countryId) {
-      obj.countryId = findCountry(details.countryId);
-    }
+    if (browserName) obj.browserId = findOs(browserName);
+    if (details.countryAlpha2Code) obj.countryId = findCountry(details.countryAlpha2Code);
   }
   return obj;
 };
@@ -41,7 +35,7 @@ export const createUserLoginDetails = async (
   osId?: number,
   browserId?: number,
   countryId?: number,
-  cityId?: bigint,
+  city?: string,
   ipAddr?: string
 ): Promise<void> => {
   const loginDetails = LoginDetails.create({
@@ -50,8 +44,8 @@ export const createUserLoginDetails = async (
     browserId,
     osId,
     countryId,
-    cityId,
-    ipAddr,
+    city,
+    ipAddr: ipAddr || undefined,
     status,
   });
 
@@ -62,44 +56,23 @@ export const createUserLoginDetails = async (
   }
 };
 
-export const findOs = (osName: unknown): findDetailsReturnType => {
-  if (!osName) {
-    return undefined;
-  }
-  // console.log(osName);
-  const file = JSON.parse(fs.readFileSync("../../config/clientOs.json", "utf8"));
-  const os = file.data.find(data => data.name === osName);
-  // console.log(os);
-  if (!os) {
-    return undefined;
-  }
+export const findOs = (osName: string): findDetailsReturnType => {
+  if (!osName) return undefined;
+  const os = OS_ARR.find(({ name }) => name.toLowerCase() === osName.toLowerCase());
+  if (!os) return undefined;
   return os.id;
 };
 
-export const findBrowser = (browserName: unknown): findDetailsReturnType => {
-  if (!browserName) {
-    return undefined;
-  }
-  console.log(browserName);
-  const file = JSON.parse(fs.readFileSync("../../config/clientBrowser.json.json", "utf8"));
-  const browser = file.data.find(data => data.name === browserName);
-  console.log(browser);
-  if (!browser) {
-    return undefined;
-  }
+export const findBrowser = (browserName: string): findDetailsReturnType => {
+  if (!browserName) return undefined;
+  const browser = BROWSERS_ARR.find(({ name }) => name.toLowerCase() === browserName.toLowerCase());
+  if (!browser) return undefined;
   return browser.id;
 };
 
-export const findCountry = (countryId: number | undefined): findDetailsReturnType => {
-  if (!countryId) {
-    return undefined;
-  }
-  console.log(countryId);
-  const file = JSON.parse(fs.readFileSync("../../config/countries.json.json", "utf8"));
-  const country = file.data.find(data => Number(data.id) === Number(countryId));
-  console.log(country);
-  if (!country) {
-    return undefined;
-  }
+export const findCountry = (countryCode?: string): findDetailsReturnType => {
+  if (!countryCode) return undefined;
+  const country = COUNTRIES_ARR.find(({ alpha2Code }) => alpha2Code === countryCode);
+  if (!country) return undefined;
   return country.id;
 };

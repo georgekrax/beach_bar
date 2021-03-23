@@ -1,4 +1,4 @@
-import { dayjsFormat } from "@beach_bar/common";
+import { dayjsFormat, toSlug } from "@beach_bar/common";
 import { generateId } from "@the_hashtag/common";
 import redisKeys from "constants/redisKeys";
 import relations from "constants/relations";
@@ -15,6 +15,7 @@ import {
   DeleteDateColumn,
   Entity,
   EntityRepository,
+  getConnection,
   getRepository,
   In,
   JoinColumn,
@@ -44,6 +45,7 @@ import { BeachBarReview } from "./BeachBarReview";
 import { BeachBarType } from "./BeachBarType";
 import { CouponCode } from "./CouponCode";
 import { Currency } from "./Currency";
+import { Payment } from "./Payment";
 import { PricingFee } from "./PricingFee";
 import { PricingFeeCurrency } from "./PricingFeeCurrency";
 import { Product } from "./Product";
@@ -62,6 +64,9 @@ export class BeachBar extends BaseEntity {
 
   @Column("varchar", { length: 255, name: "name", unique: true })
   name: string;
+
+  @Column("varchar", { length: 255, name: "slug", unique: true })
+  slug: string;
 
   @Column({ type: "text", name: "description", nullable: true })
   description: string;
@@ -178,18 +183,53 @@ export class BeachBar extends BaseEntity {
   async updateSearchInputValue(): Promise<void> {
     const inputValue = await SearchInputValue.findOne({ beachBarId: this.id });
     if (this.isActive) {
-      const res = await getRepository(SearchInputValue).restore({ beachBarId: this.id });
-      if (res.affected === 0) {
-        await SearchInputValue.create({
-          beachBarId: this.id,
-          publicId: generateId({ length: 5, numbersOnly: true }),
-        }).save();
-      }
-    } else {
-      if (inputValue) {
-        await inputValue.softRemove();
-      }
-    }
+      await getRepository(SearchInputValue).restore({ beachBarId: this.id });
+      try {
+        const { countryId, cityId, regionId } = this.location;
+        const searchInputs = await SearchInputValue.find({
+          where: [{ beachBarId: this.id }, { countryId }, { countryId, cityId }, { countryId, cityId, regionId }],
+        });
+        if (!searchInputs.find(input => input.beachBarId?.toString() === this.id.toString())) {
+          await SearchInputValue.create({
+            beachBarId: this.id,
+            publicId: generateId({ length: 5, numbersOnly: true }),
+          }).save();
+        }
+        if (!searchInputs.find(input => input.countryId?.toString() === countryId.toString())) {
+          await SearchInputValue.create({
+            countryId,
+            publicId: generateId({ length: 5, numbersOnly: true }),
+          }).save();
+        }
+        if (
+          !searchInputs.find(
+            input => input.cityId?.toString() === cityId.toString() && input.countryId?.toString() === countryId.toString()
+          )
+        ) {
+          await SearchInputValue.create({
+            countryId,
+            cityId,
+            publicId: generateId({ length: 5, numbersOnly: true }),
+          }).save();
+        }
+        if (
+          regionId &&
+          !searchInputs.find(
+            input =>
+              input.regionId?.toString() === regionId.toString() &&
+              input.cityId?.toString() === cityId.toString() &&
+              input.countryId?.toString() === countryId.toString()
+          )
+        ) {
+          await SearchInputValue.create({
+            countryId,
+            cityId,
+            regionId,
+            publicId: generateId({ length: 5, numbersOnly: true }),
+          }).save();
+        }
+      } catch {}
+    } else if (inputValue) await inputValue.softRemove();
   }
 
   getRedisKey(): string {
@@ -203,6 +243,20 @@ export class BeachBar extends BaseEntity {
   async getReservedProducts(redis: Redis, date?: Dayjs, timeId?: number): Promise<ReservedProduct[]> {
     const reservedProducts = await getReservedProducts(redis, this, date, timeId);
     return reservedProducts;
+  }
+
+  async getPayments(): Promise<Payment[]> {
+    const payments = await getConnection()
+      .createQueryBuilder(Payment, "payment")
+      .leftJoinAndSelect("payment.cart", "paymentCart")
+      .leftJoinAndSelect("paymentCart.products", "products")
+      .leftJoinAndSelect("products.product", "cartProduct")
+      .leftJoinAndSelect("cartProduct.beachBar", "beachBar")
+      .where("payment.isRefunded IS FALSE")
+      .andWhere("beachBar.id = :id", { id: this.id })
+      .getMany();
+
+    return payments;
   }
 
   async getRedisIdx(redis: Redis): Promise<number> {
@@ -219,49 +273,36 @@ export class BeachBar extends BaseEntity {
     hidePhoneNumber?: boolean,
     zeroCartTotal?: boolean,
     isAvailable?: boolean,
+    isActive?: boolean,
     categoryId?: number,
     openingTimeId?: number,
     closingTimeId?: number
   ): Promise<BeachBar | any> {
     try {
       if (name && name !== this.name) {
-        this.name = name;
-      }
-      if (description && description !== this.description) {
-        this.description = description;
-      }
-      if (thumbnailUrl && thumbnailUrl !== this.thumbnailUrl) {
-        this.thumbnailUrl = thumbnailUrl.toString();
-      }
-      if (contactPhoneNumber && contactPhoneNumber !== this.contactPhoneNumber) {
-        this.contactPhoneNumber = contactPhoneNumber;
-      }
-      if (hidePhoneNumber !== null && hidePhoneNumber !== undefined && hidePhoneNumber !== this.hidePhoneNumber) {
+        this.name = name
+        this.slug = toSlug(name);
+      };
+      if (description && description !== this.description) this.description = description;
+      if (thumbnailUrl && thumbnailUrl !== this.thumbnailUrl) this.thumbnailUrl = thumbnailUrl.toString();
+      if (contactPhoneNumber && contactPhoneNumber !== this.contactPhoneNumber) this.contactPhoneNumber = contactPhoneNumber;
+      if (hidePhoneNumber !== null && hidePhoneNumber !== undefined && hidePhoneNumber !== this.hidePhoneNumber)
         this.hidePhoneNumber = hidePhoneNumber;
-      }
-      if (zeroCartTotal !== null && zeroCartTotal !== undefined && zeroCartTotal !== this.zeroCartTotal) {
+      if (zeroCartTotal !== null && zeroCartTotal !== undefined && zeroCartTotal !== this.zeroCartTotal)
         this.zeroCartTotal = zeroCartTotal;
-      }
-      if (isAvailable !== null && isAvailable !== undefined && isAvailable !== this.isAvailable) {
-        this.isAvailable = isAvailable;
-      }
+      if (isAvailable !== null && isAvailable !== undefined && isAvailable !== this.isAvailable) this.isAvailable = isAvailable;
+      if (isActive !== null && isActive !== undefined && isActive !== this.isActive) this.isActive = isActive;
       if (categoryId && categoryId !== this.categoryId) {
         const category = await BeachBarCategory.findOne(categoryId);
-        if (category) {
-          this.category = category;
-        }
+        if (category) this.category = category;
       }
       if (openingTimeId && openingTimeId !== this.openingTimeId) {
         const quarterTime = await QuarterTime.findOne(openingTimeId);
-        if (quarterTime) {
-          this.openingTime = quarterTime;
-        }
+        if (quarterTime) this.openingTime = quarterTime;
       }
       if (closingTimeId && closingTimeId !== this.closingTimeId) {
         const quarterTime = await QuarterTime.findOne(closingTimeId);
-        if (quarterTime) {
-          this.closingTime = quarterTime;
-        }
+        if (quarterTime) this.closingTime = quarterTime;
       }
       await this.save();
       await this.updateRedis();
@@ -277,15 +318,12 @@ export class BeachBar extends BaseEntity {
         where: { id: this.id },
         relations: relations.BEACH_BAR_EXTENSIVE,
       });
-      if (!beachBar) {
-        throw new Error();
-      }
+      if (!beachBar) throw new Error();
       beachBar.features = beachBar.features.filter(feature => !feature.deletedAt);
       beachBar.products = beachBar.products.filter(product => !product.deletedAt);
       beachBar.products.forEach(product => {
-        if (product.reservationLimits && product.reservationLimits?.length > 0) {
+        if (product.reservationLimits && product.reservationLimits?.length > 0)
           product.reservationLimits = product.reservationLimits.filter(limit => !limit.deletedAt);
-        }
       });
       const idx = await beachBar.getRedisIdx(redis);
 
@@ -302,14 +340,10 @@ export class BeachBar extends BaseEntity {
         const entryFeeValues = entryFees.map(entryFee => entryFee.fee);
         const avg = entryFeeValues.reduce((a, b) => a + b) / entryFeeValues.length;
         return avg;
-      } else {
-        return undefined;
-      }
+      } else return undefined;
     }
     const entryFees = await BeachBarEntryFee.findOne({ beachBar: this, date: date ? date : dayjs() });
-    if (entryFees) {
-      return entryFees;
-    }
+    if (entryFees) return entryFees;
     return undefined;
   }
 
@@ -350,9 +384,7 @@ export class BeachBar extends BaseEntity {
   async getFullPricingFee(): Promise<GetFullPricingReturnType | undefined> {
     const pricingFee = await this.getPricingFee();
     const currencyFee = await PricingFeeCurrency.findOne({ currencyId: this.defaultCurrencyId });
-    if (!pricingFee || !currencyFee) {
-      return undefined;
-    }
+    if (!pricingFee || !currencyFee) return undefined;
     return {
       pricingFee,
       currencyFee,
@@ -361,9 +393,7 @@ export class BeachBar extends BaseEntity {
 
   async getBeachBarPaymentDetails(total: number, stripeFee: number): Promise<GetBeachBarPaymentDetails | undefined> {
     const beachBarPricingFee = await this.getFullPricingFee();
-    if (!beachBarPricingFee) {
-      return undefined;
-    }
+    if (!beachBarPricingFee) return undefined;
     const { pricingFee, currencyFee } = beachBarPricingFee;
     const percentageFee = parseFloat(((total * parseFloat(pricingFee.percentageValue.toString())) / 100).toFixed(2));
     const beachBarAppFee = parseFloat((percentageFee + parseFloat(currencyFee.numericValue.toString())).toFixed(2));
@@ -378,38 +408,9 @@ export class BeachBar extends BaseEntity {
 
   async getMinimumCurrency(): Promise<StripeMinimumCurrency | undefined> {
     const minimumCurrency = await StripeMinimumCurrency.findOne({ currencyId: this.defaultCurrencyId });
-    if (!minimumCurrency) {
-      return undefined;
-    } else {
-      return minimumCurrency;
-    }
+    if (!minimumCurrency) return undefined;
+    else return minimumCurrency;
   }
-
-  async checkMinimumCurrency(total: number): Promise<boolean | undefined> {
-    const minimumCurrency = await this.getMinimumCurrency();
-    if (!minimumCurrency) {
-      return undefined;
-    }
-    if (total <= minimumCurrency.chargeAmount) {
-      return false;
-    } else {
-      return true;
-    }
-  }
-
-  async setIsActive(isActive?: boolean): Promise<BeachBar | any> {
-    try {
-      if (isActive !== null && isActive !== undefined && isActive !== this.isActive) {
-        this.isActive = isActive;
-      }
-      await this.save();
-      await this.updateRedis();
-      return this;
-    } catch (err) {
-      throw new Error(err.message);
-    }
-  }
-
   async checkAvailability(redis: Redis, date: Dayjs, timeId?: number, totalPeople?: number): Promise<BeachBarAvailabilityReturnType> {
     const res = await checkAvailability(redis, this, date, timeId, totalPeople);
     return res;
@@ -418,9 +419,7 @@ export class BeachBar extends BaseEntity {
   async customSoftRemove(redis: Redis): Promise<any> {
     // delete from search dropdown results
     const inputValues = await SearchInputValue.findOne({ beachBarId: this.id });
-    if (inputValues) {
-      await SearchInputValue.softRemove(inputValues);
-    }
+    if (inputValues) await SearchInputValue.softRemove(inputValues);
 
     // delete #beach_bar in Redis too
     try {
@@ -485,8 +484,6 @@ export class BeachBarRepository extends Repository<BeachBar> {
         return p.limitNumber > v.limitNumber ? p : v;
       });
       return maxLimit;
-    } else {
-      return undefined;
-    }
+    } else return undefined;
   }
 }

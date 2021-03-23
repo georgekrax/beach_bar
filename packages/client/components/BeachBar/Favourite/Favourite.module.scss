@@ -1,0 +1,67 @@
+.container {
+  border-radius: 14px;
+  border: 1px solid $grey-6;
+  padding: map-get($em-spacers, 12);
+
+  & > div:first-child {
+    position: relative;
+    width: 7em;
+    height: auto;
+    min-height: max(7em, 13.5vh);
+    margin-right: map-get($em-spacers, 16);
+    border-radius: 14px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  & > div:last-child > div {
+    & > span {
+      color: $grey-8;
+      margin: 0.15em 0 map-get($em-spacers, 8);
+    }
+
+    & > h6 {
+      color: $grey-9;
+    }
+  }
+}
+
+// .heartBox {
+//   padding: map-get($em-spacers, 8);
+//   border-radius: 14px;
+//   background-color: rgba($volcano-5, 0.25);
+//   align-self: flex-end;
+//   cursor: pointer;
+//   @include transition-2s("ease-out", "opacity");
+
+//   & > svg:last-child {
+//     position: absolute;
+//   }
+
+//   &:active {
+//     opacity: 0.8;
+//   }
+
+//   :global {
+//     @include path--filled-classNames() {
+//       fill: $red-5 !important;
+//     }
+//   }
+// }
+
+@include breakpoint("sm") {
+  .container {
+    max-width: 14em;
+    flex-direction: column;
+
+    & > div:first-child {
+      width: 100%;
+      min-height: 10em;
+      margin-bottom: map-get($em-spacers, 12);
+    }
+
+    & > div:last-child > div {
+      flex: 1;
+    }
+  }
+}

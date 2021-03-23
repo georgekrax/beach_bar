@@ -19,6 +19,7 @@ const mail_1 = __importDefault(require("@sendgrid/mail"));
 const apollo_link_1 = require("apollo-link");
 const apollo_server_express_1 = require("apollo-server-express");
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
+const cors_1 = __importDefault(require("cors"));
 const express_1 = __importDefault(require("express"));
 const ioredis_1 = __importDefault(require("ioredis"));
 const jsonwebtoken_1 = require("jsonwebtoken");
@@ -53,13 +54,15 @@ const schema_1 = require("./schema");
     }
     const app = express_1.default();
     exports.stripe = new stripe_1.Stripe(process.env.NODE_ENV === "production" ? process.env.STRIPE_SECRET_LIVE_KEY.toString() : process.env.STRIPE_SECRET_KEY.toString(), { apiVersion: "2020-08-27", typescript: true });
+    app.use(cors_1.default({
+        credentials: true,
+        origin: "http://192.168.1.8:3000",
+    }));
     app.use((req, res, next) => {
-        if (req.originalUrl.includes(process.env.STRIPE_WEBHOOK_ORIGIN_URL.toString())) {
+        if (req.originalUrl.includes(process.env.STRIPE_WEBHOOK_ORIGIN_URL.toString()))
             express_1.default.raw({ type: "application/json" })(req, res, next);
-        }
-        else {
+        else
             express_1.default.json()(req, res, next);
-        }
     });
     app.use(cookie_parser_1.default());
     app.use("/stripe", stripeWebhooks_1.router);
@@ -67,43 +70,34 @@ const schema_1 = require("./schema");
     client_1.default.setApiKey(process.env.SENDGRID_API_KEY.toString());
     mail_1.default.setApiKey(process.env.SENDGRID_API_KEY.toString());
     const notIsProd = !(process.env.NODE_ENV === "production");
-    const server = new apollo_server_express_1.ApolloServer({
+    const apolloServer = new apollo_server_express_1.ApolloServer({
         playground: notIsProd,
         schema: schema_1.schema,
         uploads: true,
         formatError: (err) => {
-            if (err.message == "Context creation failed: jwt expired" ||
-                err.message == "Context creation failed: Something went wrong. jwt expired") {
-                return new Error(common_1.errors.JWT_EXPIRED);
-            }
-            else if (err.message.startsWith("Context creation failed: ")) {
-                return new Error(err.message.replace("Context creation failed: ", ""));
-            }
-            else if (err.message.startsWith("Something went wrong. ")) {
-                return new Error(err.message.replace("Something went wrong. ", ""));
-            }
+            if (err.message.includes("Context creation failed: "))
+                return new apollo_server_express_1.ApolloError(common_1.errors.NOT_AUTHENTICATED_MESSAGE, common_1.errors.JWT_EXPIRED, { messageCode: common_1.errors.NOT_AUTHENTICATED_CODE });
             return err;
         },
         context: ({ req, res }) => __awaiter(void 0, void 0, void 0, function* () {
             const authHeader = req.headers.authorization || "";
-            const accessToken = authHeader.split(" ")[1];
+            const cookie = req.cookies[process.env.ACCESS_TOKEN_COOKIE_NAME.toString()];
+            const accessToken = authHeader ? authHeader.split(" ")[1] : cookie;
             let payload = null;
             if (accessToken) {
                 try {
                     payload = jsonwebtoken_1.verify(accessToken, process.env.ACCESS_TOKEN_SECRET, { issuer: process.env.TOKEN_ISSUER.toString() });
                     if (payload && payload.sub && payload.sub.trim().length !== 0) {
                         const redisUser = yield exports.redis.hgetall(`${redisKeys_1.default.USER}:${payload.sub.toString()}`);
-                        if (!redisUser) {
+                        if (!redisUser)
                             payload = null;
-                        }
                     }
-                    else if (payload.sub.trim().length >= 0) {
+                    else if (payload.sub.trim().length >= 0)
                         payload = null;
-                    }
                 }
                 catch (err) {
                     if (err.message.toString() === "jwt expired") {
-                        throw new Error(common_1.errors.JWT_EXPIRED);
+                        throw new apollo_server_express_1.ApolloError(common_1.errors.NOT_AUTHENTICATED_MESSAGE, common_1.errors.JWT_EXPIRED);
                     }
                     if (err.message.toString() === "invalid signature") {
                         const verifyAccessTokenOperation = {
@@ -135,7 +129,7 @@ const schema_1 = require("./schema");
                             errorMessage ||
                             hashtagAud !== process.env.HASHTAG_CLIENT_ID.toString() ||
                             hashtagIss !== process.env.HASHTAG_TOKEN_ISSUER.toString()) {
-                            throw new Error(errorMessage.toString());
+                            throw new apollo_server_express_1.ApolloError(errorMessage.toString(), errorCode.toString());
                         }
                         else if (hashtagSub && (hashtagSub !== "" || " ")) {
                             const user = yield User_1.User.findOne({ where: { hashtagId: hashtagSub } });
@@ -160,14 +154,18 @@ const schema_1 = require("./schema");
                     }
                 }
             }
-            if (payload && payload.sub) {
+            else if (!accessToken && req.cookies[process.env.REFRESH_TOKEN_COOKIE_NAME.toString()])
+                throw new apollo_server_express_1.ApolloError(common_1.errors.NOT_AUTHENTICATED_MESSAGE, common_1.errors.JWT_EXPIRED);
+            if (payload && payload.sub)
                 payload.sub = parseInt(payload.sub);
-            }
             const uaParser = new ua_parser_js_1.UAParser(req.headers["user-agent"]);
-            const ipAddr = req.ipAddr;
+            const ipAddr = req.headers.ip_address || undefined;
             return { req, res, payload, redis: exports.redis, sgMail: mail_1.default, sgClient: client_1.default, stripe: exports.stripe, uaParser, googleOAuth2Client: googleOAuth_1.googleOAuth2Client, ipAddr };
         }),
     });
-    server.applyMiddleware({ app, cors: true });
-    app.listen({ port: parseInt(process.env.PORT) || 4000 }, () => console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`));
+    apolloServer.applyMiddleware({
+        app,
+        cors: false,
+    });
+    app.listen({ port: parseInt(process.env.PORT) || 4000 }, () => console.log(`🚀 Server ready at http://localhost:4000${apolloServer.graphqlPath}`));
 }))();

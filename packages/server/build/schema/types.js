@@ -1,7 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DeleteResult = exports.DeleteGraphQlType = exports.SuccessResult = exports.SuccessGraphQlType = exports.FileGraphQlType = void 0;
+exports.TimestampGraphQLType = exports.DeleteResult = exports.DeleteGraphQlType = exports.SuccessResult = exports.UpdateGraphQLType = exports.SuccessGraphQLType = exports.FileGraphQlType = exports.Node = void 0;
+const graphql_1 = require("@the_hashtag/common/dist/graphql");
 const nexus_1 = require("nexus");
+exports.Node = nexus_1.interfaceType({
+    name: "Node",
+    description: "The base of a GraphQL Node",
+    definition(t) {
+        t.id("id");
+    },
+    resolveType: o => o.id,
+});
 exports.FileGraphQlType = nexus_1.objectType({
     name: "File",
     description: "Represents a user's uploaded file",
@@ -11,12 +20,20 @@ exports.FileGraphQlType = nexus_1.objectType({
         t.string("encoding", { description: "A string representing the file encoding, such as 7bit" });
     },
 });
-exports.SuccessGraphQlType = nexus_1.objectType({
+exports.SuccessGraphQLType = nexus_1.objectType({
     name: "Success",
     description: "Info to be returned upon successful operation",
     definition(t) {
         t.boolean("success", { description: "A boolean that indicates if the operation was successful" });
     },
+});
+exports.UpdateGraphQLType = nexus_1.interfaceType({
+    name: "Update",
+    description: "Info to be returned upon successful UPDATE operation",
+    definition(t) {
+        t.boolean("updated", { description: "A boolean that indicates if the information were updated" });
+    },
+    resolveType: o => o.updated,
 });
 exports.SuccessResult = nexus_1.unionType({
     name: "SuccessResult",
@@ -24,7 +41,7 @@ exports.SuccessResult = nexus_1.unionType({
         t.members("Success", "Error");
     },
     resolveType: item => {
-        if (item.name === "Errro") {
+        if (item.error) {
             return "Error";
         }
         else {
@@ -45,11 +62,19 @@ exports.DeleteResult = nexus_1.unionType({
         t.members("Delete", "Error");
     },
     resolveType: item => {
-        if (item.name === "Errro") {
+        if (item.error) {
             return "Error";
         }
         else {
             return "Delete";
         }
     },
+});
+exports.TimestampGraphQLType = nexus_1.interfaceType({
+    name: "Timestamp",
+    description: "The timestamp of when something was created",
+    definition(t) {
+        t.field("timestamp", { type: graphql_1.DateTimeScalar });
+    },
+    resolveType: o => o.timestamp,
 });

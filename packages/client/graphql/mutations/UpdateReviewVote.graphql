@@ -1,0 +1,19 @@
+mutation UpdateReviewVote($reviewId: ID!, $upvote: Boolean, $downvote: Boolean) {
+  updateReviewVote(reviewId: $reviewId, upvote: $upvote, downvote: $downvote) {
+    review {
+      id
+      ratingValue
+      votes {
+        id
+        user {
+          id
+        }
+        type {
+          id
+          value
+        }
+      }
+    }
+    updated
+  }
+}

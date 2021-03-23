@@ -98,10 +98,10 @@ export class Product extends BaseEntity {
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Dayjs;
 
-  async getReservationLimit(timeId: number, date?: Dayjs): Promise<number> {
-    const formattedDate = date ? dayjs(date).format(dayjsFormat.ISO_STRING) : dayjs().format(dayjsFormat.ISO_STRING);
+  async getReservationLimit(timeId: number, date: Dayjs = dayjs()): Promise<number> {
+    const formattedDate = dayjs(date).format(dayjsFormat.ISO_STRING);
     const reservationLimit = await ProductReservationLimit.find({ product: this, date: formattedDate });
-    if (reservationLimit) {
+    if (reservationLimit.length > 0) {
       const limitNumber = reservationLimit.find(limit => timeId >= limit.startTimeId && timeId <= limit.endTimeId);
       if (limitNumber) {
         return limitNumber.limitNumber;
@@ -113,13 +113,11 @@ export class Product extends BaseEntity {
     }
   }
 
-  async getReservedProducts(timeId: number, date?: Dayjs): Promise<number> {
+  async getReservedProducts(timeId: number, date: Dayjs = dayjs()): Promise<number> {
     const reservedProductsNumber = await getManager()
       .createQueryBuilder(ReservedProduct, "reservedProduct")
       .select("COUNT(*)", "count")
-      .where("reservedProduct.date = :date", {
-        date: date ? date.format(dayjsFormat.ISO_STRING) : dayjs().format(dayjsFormat.ISO_STRING),
-      })
+      .where("reservedProduct.date = :searchDate", { searchDate: dayjs(date).format(dayjsFormat.ISO_STRING) })
       .andWhere("reservedProduct.timeId = :timeId", { timeId })
       .getRawOne();
 

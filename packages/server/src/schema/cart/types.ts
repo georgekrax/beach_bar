@@ -1,13 +1,13 @@
-import { BigIntScalar } from "@the_hashtag/common/dist/graphql";
 import { objectType } from "nexus";
 import { UserType } from "../user/types";
-import { CartProductType } from "./product/types";
+import { CartProduct } from "./product/types";
+import { Node } from "../types";
 
 export const CartType = objectType({
   name: "Cart",
   description: "Represents a shopping cart",
   definition(t) {
-    t.field("id", { type: BigIntScalar });
+    t.implements(Node);
     t.float("total");
     t.nullable.field("user", {
       type: UserType,
@@ -15,7 +15,7 @@ export const CartType = objectType({
       resolve: o => o.user,
     });
     t.nullable.list.field("products", {
-      type: CartProductType,
+      type: CartProduct,
       description: "A list with all the cart products",
       resolve: o => o.products,
     });

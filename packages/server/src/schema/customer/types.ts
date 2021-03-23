@@ -1,5 +1,5 @@
-import { BigIntScalar, EmailScalar } from "@the_hashtag/common/dist/graphql";
-import { objectType, unionType } from "nexus";
+import { EmailScalar } from "@the_hashtag/common/dist/graphql";
+import { objectType } from "nexus";
 import { CountryType } from "../details/countryTypes";
 import { UserType } from "../user/types";
 import { CardType } from "./card/types";
@@ -8,9 +8,9 @@ export const CustomerType = objectType({
   name: "Customer",
   description: "Represents a customer",
   definition(t) {
-    t.field("id", { type: BigIntScalar});
-    t.field("email", { type: EmailScalar});
-    t.string("phoneNumber");
+    t.id("id");
+    t.field("email", { type: EmailScalar });
+    t.nullable.string("phoneNumber");
     t.nullable.field("user", {
       type: UserType,
       description: "The user that is a customer too",
@@ -44,19 +44,19 @@ export const AddCustomerType = objectType({
   },
 });
 
-export const AddCustomerResult = unionType({
-  name: "AddCustomerResult",
-  definition(t) {
-    t.members("AddCustomer", "Error");
-  },
-  resolveType: item => {
-    if (item.name === "Error") {
-      return "Error";
-    } else {
-      return "AddCustomer";
-    }
-  },
-});
+// export const AddCustomerResult = unionType({
+//   name: "AddCustomerResult",
+//   definition(t) {
+//     t.members("AddCustomer", "Error");
+//   },
+//   resolveType: item => {
+//     if (item.error) {
+//       return "Error";
+//     } else {
+//       return "AddCustomer";
+//     }
+//   },
+// });
 
 export const UpdateCustomerType = objectType({
   name: "UpdateCustomer",
@@ -73,16 +73,16 @@ export const UpdateCustomerType = objectType({
   },
 });
 
-export const UpdateCustomerResult = unionType({
-  name: "UpdateCustomerResult",
-  definition(t) {
-    t.members("UpdateCustomer", "Error");
-  },
-  resolveType: item => {
-    if (item.name === "Error") {
-      return "Error";
-    } else {
-      return "UpdateCustomer";
-    }
-  },
-});
+// export const UpdateCustomerResult = unionType({
+//   name: "UpdateCustomerResult",
+//   definition(t) {
+//     t.members("UpdateCustomer", "Error");
+//   },
+//   resolveType: item => {
+//     if (item.error) {
+//       return "Error";
+//     } else {
+//       return "UpdateCustomer";
+//     }
+//   },
+// });

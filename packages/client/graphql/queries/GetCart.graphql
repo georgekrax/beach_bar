@@ -1,0 +1,29 @@
+query GetCart($cartId: ID) {
+  getCart(cartId: $cartId) {
+    id
+    total
+    products {
+      quantity
+      date
+      time {
+        id
+        value
+      }
+      timestamp
+      product {
+        id
+        name
+        price
+        imgUrl
+        beachBar {
+          id
+          name
+          thumbnailUrl
+          defaultCurrency {
+            symbol
+          }
+        }
+      }
+    }
+  }
+}

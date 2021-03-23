@@ -1,5 +1,5 @@
 import { errors, MyContext } from "@beach_bar/common";
-import { BigIntScalar, DateTimeScalar } from "@the_hashtag/common/dist/graphql";
+import { DateTimeScalar } from "@the_hashtag/common/dist/graphql";
 import dayjs from "dayjs";
 import { BeachBar } from "entity/BeachBar";
 import { CouponCode } from "entity/CouponCode";
@@ -14,7 +14,7 @@ import {
   AddOfferCampaignCodeType,
   AddOfferCampaignType,
   UpdateCouponCodeType,
-  UpdateOfferCampaignType,
+  UpdateOfferCampaignType
 } from "typings/beach_bar/product/offer";
 import { checkScopes } from "utils/checkScopes";
 import { DeleteResult } from "../../../types";
@@ -23,7 +23,7 @@ import {
   AddOfferCampaignCodeResult,
   AddOfferCampaignResult,
   UpdateCouponCodeResult,
-  UpdateOfferCampaignResult,
+  UpdateOfferCampaignResult
 } from "./types";
 
 export const CouponCodeCrudMutation = extendType({
@@ -101,10 +101,7 @@ export const CouponCodeCrudMutation = extendType({
       type: UpdateCouponCodeResult,
       description: "Update a coupon code",
       args: {
-        couponCodeId: arg({
-          type: BigIntScalar,
-          description: "The ID value of the coupon code",
-        }),
+        couponCodeId: idArg({ description: "The ID value of the coupon code" }),
         title: nullable(stringArg({ description: "The name or a short description of the coupon code" })),
         discountPercentage: nullable(floatArg({ description: "The percentage of the coupon code discount" })),
         validUntil: nullable(
@@ -179,10 +176,7 @@ export const CouponCodeCrudMutation = extendType({
     t.field("deleteCouponCode", {
       type: DeleteResult,
       args: {
-        couponCodeId: arg({
-          type: BigIntScalar,
-          description: "The ID value of the coupon code",
-        }),
+        couponCodeId: idArg({ description: "The ID value of the coupon code" }),
       },
       resolve: async (_, { couponCodeId }, { payload }: MyContext): Promise<DeleteType> => {
         if (!payload) {
@@ -292,10 +286,7 @@ export const OfferCampaignCrudMutation = extendType({
       type: UpdateOfferCampaignResult,
       description: "Update the details of an offer campaign of a #beach_bar",
       args: {
-        offerCampaignId: arg({
-          type: BigIntScalar,
-          description: "The ID value of the offer campaign",
-        }),
+        offerCampaignId: idArg({ description: "The ID value of the offer campaign" }),
         productIds: list(
           nullable(
             intArg({
@@ -373,10 +364,7 @@ export const OfferCampaignCrudMutation = extendType({
       type: DeleteResult,
       description: "Delete an offer campaign of a #beach_bar",
       args: {
-        offerCampaignId: arg({
-          type: BigIntScalar,
-          description: "The ID value of the offer campaign",
-        }),
+        offerCampaignId: idArg({ description: "The ID value of the offer campaign" }),
       },
       resolve: async (_, { offerCampaignId }, { payload }: MyContext): Promise<DeleteType> => {
         if (!payload) {
@@ -421,10 +409,7 @@ export const OfferCampaignCodeCrudMutation = extendType({
       type: AddOfferCampaignCodeResult,
       description: "Add (issue) a new offer code",
       args: {
-        offerCampaignId: arg({
-          type: BigIntScalar,
-          description: "The ID value of the offer campaign",
-        }),
+        offerCampaignId: idArg({ description: "The ID value of the offer campaign" }),
       },
       resolve: async (_, { offerCampaignId }, { payload }: MyContext): Promise<AddOfferCampaignCodeType> => {
         if (!payload) {
@@ -465,10 +450,7 @@ export const OfferCampaignCodeCrudMutation = extendType({
       type: DeleteResult,
       description: "Delete (invalidate) an offer code of an offer campaign",
       args: {
-        offerCodeId: arg({
-          type: BigIntScalar,
-          description: "The ID value of the offer campaign",
-        }),
+        offerCodeId: idArg({ description: "The ID value of the offer campaign" }),
       },
       resolve: async (_, { offerCodeId }, { payload }: MyContext): Promise<DeleteType> => {
         if (!payload) {

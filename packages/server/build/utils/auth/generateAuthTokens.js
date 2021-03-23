@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateRefreshToken = exports.generateAccessToken = void 0;
 const common_1 = require("@beach_bar/common");
 const jsonwebtoken_1 = require("jsonwebtoken");
-const uuid_1 = require("uuid");
+const nanoid_1 = require("nanoid");
 const generateAccessToken = (user, scope) => {
     const token = jsonwebtoken_1.sign({
         scope,
@@ -12,12 +12,11 @@ const generateAccessToken = (user, scope) => {
         issuer: process.env.TOKEN_ISSUER.toString(),
         subject: user.id.toString(),
         expiresIn: process.env.ACCESS_TOKEN_EXPIRATION.toString(),
-        jwtid: uuid_1.v4(),
+        jwtid: nanoid_1.nanoid(),
     });
     const tokenPayload = jsonwebtoken_1.decode(token);
-    if (tokenPayload === null) {
+    if (tokenPayload === null)
         throw new Error(common_1.errors.SOMETHING_WENT_WRONG);
-    }
     return {
         token,
         exp: tokenPayload.exp * 1000,
@@ -28,15 +27,16 @@ const generateAccessToken = (user, scope) => {
     };
 };
 exports.generateAccessToken = generateAccessToken;
-const generateRefreshToken = (user) => {
+const generateRefreshToken = (user, oauthProvider) => {
     const token = jsonwebtoken_1.sign({
         tokenVersion: user.tokenVersion,
+        oauth: oauthProvider,
     }, process.env.REFRESH_TOKEN_SECRET, {
         audience: process.env.TOKEN_AUDIENCE.toString(),
         issuer: process.env.TOKEN_ISSUER.toString(),
         subject: user.id.toString(),
         expiresIn: process.env.REFRESH_TOKEN_EXPIRATION.toString(),
-        jwtid: uuid_1.v4(),
+        jwtid: nanoid_1.nanoid(),
     });
     const tokenPayload = jsonwebtoken_1.decode(token);
     if (tokenPayload === null) {

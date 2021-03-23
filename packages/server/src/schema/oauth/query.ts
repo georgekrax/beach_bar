@@ -24,9 +24,9 @@ export const OAuthQuery = extendType({
         });
         const user = await User.findOne({
           where: { id: payload.sub },
-          relations: ["owner", "account", "account.country", "account.city", "account.contactDetails"],
+          relations: ["owner", "account", "account.country"],
         });
-        if (!user || !user.owner || !user.account || !user.account.country || !user.account.city || !user.account.contactDetails) {
+        if (!user || !user.owner || !user.account || !user.account.country || !user.account.city) {
           return null;
         }
         const url = await stripe.oauth.authorizeUrl({
@@ -39,9 +39,9 @@ export const OAuthQuery = extendType({
             first_name: user.firstName,
             last_name: user.lastName,
             business_type: "company",
-            phone_number: user.account.contactDetails[0].phoneNumber,
-            country: user.account.country.isoCode,
-            city: user.account.city.name,
+            phone_number: user.account.phoneNumber,
+            country: user.account.country.alpha2Code,
+            city: user.account.city,
           },
           suggested_capabilities: ["transfers", "card_payments"],
         });

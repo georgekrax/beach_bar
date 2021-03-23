@@ -50,7 +50,7 @@ export const AddReservedProductResult = unionType({
     t.members("AddReservedProduct", "Error");
   },
   resolveType: item => {
-    if (item.name === "Error") {
+    if (item.error) {
       return "Error";
     } else {
       return "AddReservedProduct";
@@ -79,7 +79,7 @@ export const UpdateReservedProductResult = unionType({
     t.members("UpdateReservedProduct", "Error");
   },
   resolveType: item => {
-    if (item.name === "Error") {
+    if (item.error) {
       return "Error";
     } else {
       return "UpdateReservedProduct";

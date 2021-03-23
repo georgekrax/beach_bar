@@ -1,15 +1,37 @@
 @use "@hashtag-design-system/components/dist/esm/index.scss" as index;
-@import "./4-pages/home";
-@import "./4-pages/search";
+@import "mapbox-gl/dist/mapbox-gl.css";
 
-// TODO: Add to <Fouter /> $tapbar-height
+// 4 - Pages
+@import "./4-pages/home";
+@import "./4-pages/map";
+@import "./4-pages/search";
+@import "./4-pages/shopping_cart";
+@import "./4-pages/account";
+
+// 5 - Modules
+@import "./5-modules/base";
+@import "./5-modules/auth_form";
+@import "./5-modules/icon";
+
+html,
 body {
-  // height: 100vh ;
-  height: calc(100vh + #{$tapbar-height});
+  @extend .h-100;
+}
+
+body {
+  // min-height: 100%;
   background: $grey-1;
   margin: 0;
   padding: 0;
   position: relative;
+}
+
+#__next {
+  @extend .h-100;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 h1,
@@ -35,5 +57,11 @@ p {
 }
 
 @include path--filled-classNames() {
+  stroke: none;
+  fill: $grey-10;
+}
+
+.filled {
+  stroke: none;
   fill: $grey-10;
 }

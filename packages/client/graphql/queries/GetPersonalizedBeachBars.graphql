@@ -1,0 +1,14 @@
+query GetPersonalizedBeachBars {
+  getPersonalizedBeachBars {
+    name
+    thumbnailUrl
+    location {
+      city {
+        name
+      }
+      region {
+        name
+      }
+    }
+  }
+}

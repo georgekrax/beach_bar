@@ -91,10 +91,7 @@ exports.BeachBarEntryFeeCrudMutation = nexus_1.extendType({
             type: types_2.UpdateBeachBarEntryFeeResult,
             description: "Update an or many entry fee(s) of a #beach_bar",
             args: {
-                entryFeeIds: nexus_1.list(nexus_1.arg({
-                    type: graphql_1.BigIntScalar,
-                    description: "A list with all the entry fess to update",
-                })),
+                entryFeeIds: nexus_1.list(nexus_1.idArg({ description: "A list with all the entry fess to update" })),
                 fee: nexus_1.nullable(nexus_1.floatArg({ description: "The price value to update the entry fees" })),
             },
             resolve: (_, { entryFeeIds, price }, { payload }) => __awaiter(this, void 0, void 0, function* () {
@@ -154,10 +151,7 @@ exports.BeachBarEntryFeeCrudMutation = nexus_1.extendType({
             type: types_1.DeleteResult,
             description: "Delete (remove) an or some entry fees from a #beach_bar",
             args: {
-                entryFeeIds: nexus_1.list(nexus_1.arg({
-                    type: graphql_1.BigIntScalar,
-                    description: "A list with all the ID values of entry fee(s) to delete (remove) from a #beach_bar",
-                })),
+                entryFeeIds: nexus_1.list(nexus_1.idArg({ description: "A list with all the ID values of entry fee(s) to delete (remove) from a #beach_bar" })),
             },
             resolve: (_, { entryFeeIds }, { payload }) => __awaiter(this, void 0, void 0, function* () {
                 if (!payload) {

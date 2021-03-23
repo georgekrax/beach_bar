@@ -17,15 +17,10 @@ const common_1 = require("@beach_bar/common");
 const node_fetch_1 = __importDefault(require("node-fetch"));
 const refreshTokenForHashtagUser = (user, redis) => __awaiter(void 0, void 0, void 0, function* () {
     const redisUser = yield redis.hgetall(user.getRedisKey());
-    if (!redisUser || !redisUser.refresh_token) {
+    if (!redisUser || !redisUser.refresh_token)
         throw new Error(common_1.errors.INVALID_REFRESH_TOKEN);
-    }
-    if (!redisUser ||
-        !redisUser.hashtag_refresh_token ||
-        redisUser.hashtag_refresh_token == "" ||
-        redisUser.hashtag_refresh_token === "") {
+    if (!redisUser || !redisUser.hashtag_refresh_token || redisUser.hashtag_refresh_token.trim().length === 0)
         throw new Error(common_1.errors.SOMETHING_WENT_WRONG);
-    }
     const { hashtag_refresh_token: hashtagRefreshToken } = redisUser;
     const requestBody = {
         grant_type: "refresh_token",
@@ -81,13 +76,11 @@ const refreshTokenForHashtagUser = (user, redis) => __awaiter(void 0, void 0, vo
         if (err.message ===
             `request to ${process.env.HASHTAG_API_HOSTNAME}/oauth/refresh_token failed, reason: connect ECONNREFUSED ${process.env
                 .HASHTAG_API_HOSTNAME.replace("https://", "")
-                .replace("http://", "")}`) {
+                .replace("http://", "")}`)
             throw new Error(common_1.errors.SOMETHING_WENT_WRONG);
-        }
         throw new Error(`${common_1.errors.SOMETHING_WENT_WRONG}: ${err.message}`);
     });
-    if (!success) {
+    if (!success)
         throw new Error(common_1.errors.SOMETHING_WENT_WRONG);
-    }
 });
 exports.refreshTokenForHashtagUser = refreshTokenForHashtagUser;

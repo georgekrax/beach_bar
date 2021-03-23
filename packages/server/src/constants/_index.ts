@@ -9,8 +9,3 @@ export const generateIdSpecialCharacters = Object.freeze({
 });
 
 export const beachBarReviewRatingMaxValue = 5;
-
-export const historyActivity: { [key: string]: number } = {
-  SEARCH_ID: 1,
-  BEACH_BAR__QUERY_ID: 2,
-};

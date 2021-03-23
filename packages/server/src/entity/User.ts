@@ -16,10 +16,10 @@ import { softRemove } from "utils/softRemove";
 import { Account } from "./Account";
 import { BeachBarReview } from "./BeachBarReview";
 import { Cart } from "./Cart";
-import { City } from "./City";
 import { Country } from "./Country";
 import { Customer } from "./Customer";
 import { Owner } from "./Owner";
+import { ReviewVote } from "./ReviewVote";
 import { UserFavoriteBar } from "./UserFavoriteBar";
 import { UserHistory } from "./UserHistory";
 import { UserSearch } from "./UserSearch";
@@ -74,6 +74,9 @@ export class User extends BaseEntity {
   @OneToMany(() => Vote, vote => vote.user, { nullable: true })
   votes?: Vote[];
 
+  @OneToMany(() => ReviewVote, vote => vote.user, { nullable: true })
+  reviewVotes?: ReviewVote[];
+
   @OneToOne(() => Owner, owner => owner.user)
   owner: Owner;
 
@@ -97,75 +100,80 @@ export class User extends BaseEntity {
   }
 
   getRedisKey(scope = false): string {
-    if (scope) {
-      return `${redisKeys.USER}:${this.id}:${redisKeys.USER_SCOPE}`;
-    }
+    if (scope) return `${redisKeys.USER}:${this.id}:${redisKeys.USER_SCOPE}`;
     return `${redisKeys.USER}:${this.id}`;
   }
 
   getIsNew(data: UpdateUserInfo): boolean {
     let isNew = false;
-    const { email, firstName, lastName, imgUrl, personTitle, birthday, countryId, cityId, address, zipCode } = data;
+    const { email, firstName, lastName, imgUrl, honorificTitle, birthday, countryId, city, phoneNumber, address, zipCode } = data;
     if (
       email !== this.email ||
       firstName !== this.firstName ||
       lastName !== this.lastName ||
       imgUrl !== this.account.imgUrl ||
-      personTitle !== this.account.personTitle ||
+      honorificTitle !== this.account.honorificTitle ||
       birthday !== this.account.birthday ||
       countryId !== this.account.countryId ||
-      cityId !== this.account.cityId ||
+      city !== this.account.city ||
+      phoneNumber !== this.account.phoneNumber ||
       address !== this.account.address ||
       zipCode !== this.account.zipCode
-    ) {
+    )
       isNew = true;
-    }
     return isNew;
   }
 
   async update(data: UpdateUserInfo): Promise<{ user: User; isNew: boolean } | any> {
     const isNew = this.getIsNew(data);
-    const { email, firstName, lastName, imgUrl, personTitle, birthday, countryId, cityId, address, zipCode, trackHistory } = data;
+    const {
+      email,
+      firstName,
+      lastName,
+      imgUrl,
+      honorificTitle,
+      birthday,
+      countryId,
+      city,
+      phoneNumber,
+      telCountryId,
+      address,
+      zipCode,
+      trackHistory,
+    } = data;
     try {
-      if (email && email !== this.email) {
-        this.email = email;
+      if (email && email !== this.email) this.email = email;
+      if (firstName && firstName !== this.firstName) this.firstName = firstName;
+      if (lastName && lastName !== this.lastName) this.lastName = lastName;
+      if (imgUrl && imgUrl !== this.account.imgUrl) this.account.imgUrl = imgUrl.toString();
+      if (honorificTitle && honorificTitle !== this.account.honorificTitle) {
+        if (honorificTitle.toLowerCase().trim() === "none") this.account.honorificTitle = null;
+        else this.account.honorificTitle = honorificTitle;
       }
-      if (firstName && firstName !== this.firstName) {
-        this.firstName = firstName;
+      if (birthday) {
+        if (birthday.toString().toLowerCase().trim() === "none") this.account.birthday = null;
+        else if (dayjs(birthday) !== (this.account.birthday ? dayjs(this.account.birthday) : undefined))
+          this.account.birthday = birthday;
       }
-      if (lastName && lastName !== this.lastName) {
-        this.lastName = lastName;
-      }
-      if (imgUrl && imgUrl !== this.account.imgUrl) {
-        this.account.imgUrl = imgUrl.toString();
-      }
-      if (personTitle && personTitle !== this.account.personTitle) {
-        this.account.personTitle = personTitle;
-      }
-      if (birthday && dayjs(birthday) !== dayjs(this.account.birthday)) {
-        this.account.birthday = birthday;
-      }
-      if (address && address !== this.account.address) {
-        this.account.address = address;
-      }
-      if (zipCode && zipCode !== this.account.zipCode) {
-        this.account.zipCode = zipCode;
-      }
+      if (address && address !== this.account.address) this.account.address = address;
+      if (zipCode && zipCode !== this.account.zipCode) this.account.zipCode = zipCode;
       if (countryId && countryId !== this.account.countryId) {
-        const country = await Country.findOne(countryId);
-        if (country) {
-          this.account.country = country;
+        if (countryId.toString().toLowerCase().trim() === "none") this.account.country = null;
+        else {
+          const country = await Country.findOne(countryId);
+          if (country) this.account.country = country;
         }
       }
-      if (cityId && cityId !== this.account.cityId) {
-        const city = await City.findOne({ id: cityId });
-        if (city) {
-          this.account.city = city;
+      if (city && city !== this.account.city) this.account.city = city;
+      if (phoneNumber && phoneNumber !== this.account.phoneNumber) this.account.phoneNumber = phoneNumber;
+      if (telCountryId && telCountryId !== this.account.telCountryId) {
+        if (telCountryId.toString().toLowerCase().trim() === "none") this.account.telCountry = null;
+        else {
+          const telCountry = await Country.findOne(telCountryId);
+          if (telCountryId) this.account.telCountry = telCountry;
         }
       }
-      if (trackHistory !== undefined && trackHistory !== this.account.trackHistory) {
-        this.account.trackHistory = trackHistory;
-      }
+      if (trackHistory !== undefined && trackHistory !== this.account.trackHistory) this.account.trackHistory = trackHistory;
       if (isNew) {
         await this.save();
         await this.account.save();
@@ -179,6 +187,11 @@ export class User extends BaseEntity {
   async softRemove(): Promise<any> {
     const findOptions: any = { userId: this.id };
     // delete in Redis, happens within the User mutation resolvers
-    await softRemove(User, { id: this.id }, [Account, BeachBarReview, Cart, UserFavoriteBar, Owner, Customer], findOptions);
+    await softRemove(
+      User,
+      { id: this.id },
+      [Account, BeachBarReview, Cart, UserFavoriteBar, Owner, Customer, ReviewVote],
+      findOptions
+    );
   }
 }

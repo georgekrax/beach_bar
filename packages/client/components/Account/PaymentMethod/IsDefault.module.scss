@@ -1,0 +1,5 @@
+.container > h6 {
+  margin-left: map-get($em-spacers, 8);
+  margin-bottom: 0.1em;
+  color: $secondary;
+}

@@ -1,33 +1,35 @@
-import { BigIntScalar, DateTimeScalar } from "@the_hashtag/common/dist/graphql";
-import { objectType, unionType } from "nexus";
+import { DateTimeScalar } from "@the_hashtag/common/dist/graphql";
+import { objectType } from "nexus";
 import { CustomerType } from "../../customer/types";
 import { ReviewVisitType } from "../../details/review/types";
 import { MonthTimeType } from "../../details/time/types";
 import { BeachBarType } from "../types";
+import { ReviewAnswerType } from "./answer/types";
+import { ReviewVoteType } from "./votes/types";
 
 export const BeachBarReviewType = objectType({
   name: "BeachBarReview",
   description: "Represents a #beach_bar's review, by a customer",
   definition(t) {
-    t.field("id", { type: BigIntScalar, description: "The ID value of the review" });
+    t.id("id", { description: "The ID value of the review" });
     t.int("ratingValue", { description: "The user's rating, between 0 and 10" });
-    t.nullable.int("upvotes", { description: "The time the particular review was voted to be helpful, by other users" });
-    t.nullable.int("downvotes", { description: "The time the particular review was voted not to be helpful, by other users" });
     t.nullable.string("positiveComment", { description: "A positive comment for the #beach_bar" });
     t.nullable.string("negativeComment", { description: "A negative comment for the #beach_bar" });
     t.nullable.string("review", { description: "A summary (description) of the user's overall review" });
-    t.field("updatedAt", {
-      type: DateTimeScalar,
-      description: "The last time user's account was updated, in the format of a timestamp",
-    });
-    t.field("timestamp", {
-      type: DateTimeScalar,
-      description: "The timestamp recorded, when the user's account was created",
-    });
     t.field("beachBar", {
       type: BeachBarType,
       description: "The #beach_bar of the review",
       resolve: o => o.beachBar,
+    });
+    t.list.field("votes", {
+      type: ReviewVoteType,
+      description: "The votes os users for this review",
+      resolve: o => o.votes,
+    });
+    t.nullable.field("answer", {
+      type: ReviewAnswerType,
+      description: "The answer of the #beach_bar to this review",
+      resolve: o => o.answer,
     });
     t.field("customer", {
       type: CustomerType,
@@ -43,6 +45,14 @@ export const BeachBarReviewType = objectType({
       type: MonthTimeType,
       description: "The visited month of the customer visited the #beach_bar",
       resolve: o => o.monthTime,
+    });
+    t.field("updatedAt", {
+      type: DateTimeScalar,
+      description: "The last time user's account was updated, in the format of a timestamp",
+    });
+    t.field("timestamp", {
+      type: DateTimeScalar,
+      description: "The timestamp recorded, when the user's account was created",
     });
   },
 });
@@ -62,19 +72,19 @@ export const AddBeachBarReviewType = objectType({
   },
 });
 
-export const AddBeachBarReviewResult = unionType({
-  name: "AddBeachBarReviewResult",
-  definition(t) {
-    t.members("AddBeachBarReview", "Error");
-  },
-  resolveType: item => {
-    if (item.name === "Error") {
-      return "Error";
-    } else {
-      return "AddBeachBarReview";
-    }
-  },
-});
+// export const AddBeachBarReviewResult = unionType({
+//   name: "AddBeachBarReviewResult",
+//   definition(t) {
+//     t.members("AddBeachBarReview", "Error");
+//   },
+//   resolveType: item => {
+//     if (item.error) {
+//       return "Error";
+//     } else {
+//       return "AddBeachBarReview";
+//     }
+//   },
+// });
 
 export const UpdateBeachBarReviewType = objectType({
   name: "UpdateBeachBarReview",
@@ -91,16 +101,16 @@ export const UpdateBeachBarReviewType = objectType({
   },
 });
 
-export const UpdateBeachBarReviewResult = unionType({
-  name: "UpdateBeachBarReviewResult",
-  definition(t) {
-    t.members("UpdateBeachBarReview", "Error");
-  },
-  resolveType: item => {
-    if (item.name === "Error") {
-      return "Error";
-    } else {
-      return "UpdateBeachBarReview";
-    }
-  },
-});
+// export const UpdateBeachBarReviewResult = unionType({
+//   name: "UpdateBeachBarReviewResult",
+//   definition(t) {
+//     t.members("UpdateBeachBarReview", "Error");
+//   },
+//   resolveType: item => {
+//     if (item.error) {
+//       return "Error";
+//     } else {
+//       return "UpdateBeachBarReview";
+//     }
+//   },
+// });

@@ -17,7 +17,8 @@ export const signUpUser = async (options: {
   firstName?: string;
   lastName?: string;
   countryId?: number;
-  cityId?: bigint;
+  city?: string;
+  phoneNumber?: string;
   birthday?: Date;
 }): Promise<{ user: User } | any> => {
   const {
@@ -32,13 +33,11 @@ export const signUpUser = async (options: {
     firstName,
     lastName,
     countryId,
-    cityId,
+    city,
     birthday,
   } = options;
   const user = await User.findOne({ where: { email }, relations: ["account"] });
-  if (user) {
-    return { error: { code: errors.CONFLICT, message: "User already exists" } };
-  }
+  if (user) return { error: { code: errors.CONFLICT, message: "User already exists" } };
   const newUser = User.create({
     email,
     hashtagId,
@@ -50,7 +49,7 @@ export const signUpUser = async (options: {
     lastName,
   });
 
-  const newUserAccount = Account.create({ countryId, cityId, birthday });
+  const newUserAccount = Account.create({ countryId, city, birthday });
 
   try {
     await newUser.save();
@@ -63,11 +62,8 @@ export const signUpUser = async (options: {
     return { error: { code: errors.INTERNAL_SERVER_ERROR, message: `Something went wrong: ${err.message}` } };
   }
 
-  if (isPrimaryOwner) {
-    await redis.sadd(newUser.getRedisKey(true) as KeyType, userScopes.PRIMARY_OWNER);
-  } else {
-    await redis.sadd(newUser.getRedisKey(true) as KeyType, userScopes.SIMPLE_USER);
-  }
+  if (isPrimaryOwner) await redis.sadd(newUser.getRedisKey(true) as KeyType, userScopes.PRIMARY_OWNER);
+  else await redis.sadd(newUser.getRedisKey(true) as KeyType, userScopes.SIMPLE_USER);
 
   return { user: newUser };
 };

@@ -1,0 +1,1 @@
+export const formatNone = (string: string) => string.toString().toLowerCase().trim();

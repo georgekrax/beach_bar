@@ -10,18 +10,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CartQuery = void 0;
-const graphql_1 = require("@the_hashtag/common/dist/graphql");
 const Cart_1 = require("entity/Cart");
 const nexus_1 = require("nexus");
+const typeorm_1 = require("typeorm");
+const types_1 = require("./types");
 exports.CartQuery = nexus_1.extendType({
     type: "Query",
     definition(t) {
         t.nullable.float("getCartEntryFees", {
             args: {
-                cartId: nexus_1.nullable(nexus_1.arg({
-                    type: graphql_1.BigIntScalar,
-                    description: "The ID values of the shopping cart",
-                })),
+                cartId: nexus_1.nullable(nexus_1.idArg({ description: "The ID values of the shopping cart" })),
             },
             resolve: (_, { cartId }) => __awaiter(this, void 0, void 0, function* () {
                 if (!cartId || cartId <= 0) {
@@ -40,10 +38,7 @@ exports.CartQuery = nexus_1.extendType({
         });
         t.nullable.boolean("verifyZeroCartTotal", {
             args: {
-                cartId: nexus_1.arg({
-                    type: graphql_1.BigIntScalar,
-                    description: "The ID values of the shopping cart",
-                }),
+                cartId: nexus_1.idArg({ description: "The ID values of the shopping cart" }),
             },
             resolve: (_, { cartId }) => __awaiter(this, void 0, void 0, function* () {
                 if (!cartId || cartId <= 0) {
@@ -70,6 +65,20 @@ exports.CartQuery = nexus_1.extendType({
                     return isZeroCartTotal === undefined ? null : isZeroCartTotal;
                 }
                 return null;
+            }),
+        });
+        t.nullable.field("getCart", {
+            type: types_1.CartType,
+            description: "Get the latest cart of an authenticated user or create one",
+            args: {
+                cartId: nexus_1.nullable(nexus_1.idArg({ description: "The ID values of the shopping cart, if it is created previously" })),
+            },
+            resolve: (_, { cartId }, { payload }) => __awaiter(this, void 0, void 0, function* () {
+                const cart = yield typeorm_1.getCustomRepository(Cart_1.CartRepository).getOrCreateCart(payload, cartId, true);
+                if (!cart) {
+                    return null;
+                }
+                return cart;
             }),
         });
     },

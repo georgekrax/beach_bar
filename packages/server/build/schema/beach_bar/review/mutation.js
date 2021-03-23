@@ -9,9 +9,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.BeachBarReviewVoteMutation = exports.BeachBarReviewCrudMutation = void 0;
+exports.BeachBarReviewCrudMutation = void 0;
 const common_1 = require("@beach_bar/common");
-const graphql_1 = require("@the_hashtag/common/dist/graphql");
+const apollo_server_express_1 = require("apollo-server-express");
 const _index_1 = require("constants/_index");
 const BeachBar_1 = require("entity/BeachBar");
 const BeachBarReview_1 = require("entity/BeachBarReview");
@@ -24,17 +24,17 @@ const types_2 = require("./types");
 exports.BeachBarReviewCrudMutation = nexus_1.extendType({
     type: "Mutation",
     definition(t) {
-        t.field("addBeachBarReview", {
-            type: types_2.AddBeachBarReviewResult,
+        t.field("addReview", {
+            type: types_2.AddBeachBarReviewType,
             description: "Add a customer's review on a #beach_bar",
             args: {
                 beachBarId: nexus_1.intArg({ description: "The ID value of the #beach_bar, to submit the review" }),
-                paymentRefCode: nexus_1.nullable(nexus_1.stringArg({ description: "The referral code of the customer payment, to find" })),
+                paymentRefCode: nexus_1.nullable(nexus_1.stringArg({ description: "The referral code of the payment, to find" })),
                 ratingValue: nexus_1.intArg({ description: "The rating value between 1 to 10, the customers rates the #beach_bar" }),
-                visitTypeId: nexus_1.nullable(nexus_1.intArg({
+                visitTypeId: nexus_1.nullable(nexus_1.idArg({
                     description: "The ID value of the customer's visit type",
                 })),
-                monthTimeId: nexus_1.nullable(nexus_1.intArg({
+                monthTimeId: nexus_1.nullable(nexus_1.idArg({
                     description: "The ID value of the month time",
                 })),
                 positiveComment: nexus_1.nullable(nexus_1.stringArg({
@@ -48,61 +48,39 @@ exports.BeachBarReviewCrudMutation = nexus_1.extendType({
                 })),
             },
             resolve: (_, { beachBarId, paymentRefCode, monthTimeId, ratingValue, visitTypeId, positiveComment, negativeComment, review }, { payload }) => __awaiter(this, void 0, void 0, function* () {
-                if (!beachBarId || beachBarId <= 0) {
-                    return { error: { code: common_1.errors.INVALID_ARGUMENTS, message: "Please provide a valid #beach_bar" } };
-                }
-                if (!ratingValue || ratingValue < 1 || ratingValue > _index_1.beachBarReviewRatingMaxValue) {
-                    return {
-                        error: {
-                            code: common_1.errors.INVALID_ARGUMENTS,
-                            message: `Please provide a valid rating value, between 1 and ${_index_1.beachBarReviewRatingMaxValue}`,
-                        },
-                    };
-                }
-                if (visitTypeId && visitTypeId <= 0) {
-                    return { error: { code: common_1.errors.INVALID_ARGUMENTS, message: "Please provide a valid visit type" } };
-                }
-                if (monthTimeId && monthTimeId <= 0) {
-                    return { error: { code: common_1.errors.INVALID_ARGUMENTS, message: "Please provide a valid month" } };
-                }
+                if (!payload || !payload.sub)
+                    throw new apollo_server_express_1.ApolloError(common_1.errors.NOT_AUTHENTICATED_MESSAGE, common_1.errors.NOT_AUTHENTICATED_CODE);
+                if (!beachBarId || beachBarId.trim().length === 0)
+                    throw new apollo_server_express_1.UserInputError("Please provide a valid #beach_bar", { code: common_1.errors.INVALID_ARGUMENTS });
+                if (!ratingValue || ratingValue < 1 || ratingValue > _index_1.beachBarReviewRatingMaxValue)
+                    throw new apollo_server_express_1.UserInputError(`Please provide a valid rating value, between 1 and ${_index_1.beachBarReviewRatingMaxValue}`, {
+                        code: common_1.errors.INVALID_ARGUMENTS,
+                    });
+                if (visitTypeId && visitTypeId <= 0)
+                    throw new apollo_server_express_1.UserInputError("Please provide a valid visit type", { code: common_1.errors.INVALID_ARGUMENTS });
+                if (monthTimeId && monthTimeId <= 0)
+                    throw new apollo_server_express_1.UserInputError("Please provide a valid month", { code: common_1.errors.INVALID_ARGUMENTS });
                 const { boolean: res, customer, payment } = yield verifyUserPaymentReview_1.verifyUserPaymentReview(beachBarId, paymentRefCode, payload);
-                if (!res || !payment || !customer) {
-                    return {
-                        error: {
-                            code: common_1.errors.UNAUTHORIZED_CODE,
-                            message: "You have not purchased any products from this #beach_bar, to submit a review for it",
-                        },
-                    };
-                }
-                if (!customer.checkReviewsQuantity(beachBarId, payment)) {
-                    return {
-                        error: {
-                            code: common_1.errors.UNAUTHORIZED_CODE,
-                            message: "You are not allowed to submit more reviews than your purchased products / services",
-                        },
-                    };
-                }
+                if (!res || !payment || !customer)
+                    throw new apollo_server_express_1.ApolloError("You have not purchased any products from this #beach_bar, to submit a review for it", common_1.errors.UNAUTHORIZED_CODE);
+                if (!customer.checkReviewsQuantity(beachBarId, payment))
+                    throw new apollo_server_express_1.ApolloError("You are not allowed to submit more reviews than your purchased products / services", common_1.errors.UNAUTHORIZED_CODE);
                 const beachBar = yield BeachBar_1.BeachBar.findOne({ id: beachBarId, isActive: true });
-                if (!beachBar) {
-                    return { error: { code: common_1.errors.CONFLICT, message: common_1.errors.BEACH_BAR_DOES_NOT_EXIST } };
-                }
+                if (!beachBar)
+                    throw new apollo_server_express_1.ApolloError(common_1.errors.BEACH_BAR_DOES_NOT_EXIST, common_1.errors.NOT_FOUND);
                 const visitType = yield ReviewVisitType_1.ReviewVisitType.findOne(visitTypeId);
-                if (!visitType && visitTypeId) {
-                    return { error: { code: common_1.errors.CONFLICT, message: "Invalid visit type" } };
-                }
+                if (!visitType && visitTypeId)
+                    throw new apollo_server_express_1.ApolloError("Invalid visit type", common_1.errors.NOT_FOUND);
                 const monthTime = yield Time_1.MonthTime.findOne(monthTimeId);
-                if (!monthTime && monthTimeId) {
-                    return { error: { code: common_1.errors.CONFLICT, message: "Invalid visit month" } };
-                }
+                if (!monthTime && monthTimeId)
+                    throw new apollo_server_express_1.ApolloError("Invalid visit month", common_1.errors.NOT_FOUND);
                 else if (monthTime && monthTimeId) {
                     const paymentProductsMonth = payment.getProductsMonth(beachBarId);
-                    if (!paymentProductsMonth) {
-                        return { error: { message: common_1.errors.SOMETHING_WENT_WRONG } };
-                    }
+                    if (!paymentProductsMonth)
+                        throw new apollo_server_express_1.ApolloError(common_1.errors.SOMETHING_WENT_WRONG);
                     const isIncluded = paymentProductsMonth.includes(monthTime.id);
-                    if (!isIncluded) {
-                        return { error: { message: common_1.errors.SOMETHING_WENT_WRONG } };
-                    }
+                    if (!isIncluded)
+                        throw new apollo_server_express_1.ApolloError(common_1.errors.SOMETHING_WENT_WRONG);
                 }
                 const newReview = BeachBarReview_1.BeachBarReview.create({
                     beachBar,
@@ -120,7 +98,7 @@ exports.BeachBarReviewCrudMutation = nexus_1.extendType({
                     yield beachBar.updateRedis();
                 }
                 catch (err) {
-                    return { error: { message: `${common_1.errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
+                    throw new apollo_server_express_1.ApolloError(common_1.errors.SOMETHING_WENT_WRONG + ": " + err.message);
                 }
                 return {
                     review: newReview,
@@ -128,19 +106,16 @@ exports.BeachBarReviewCrudMutation = nexus_1.extendType({
                 };
             }),
         });
-        t.field("updateBeachBarReview", {
-            type: types_2.UpdateBeachBarReviewResult,
+        t.field("updateReview", {
+            type: types_2.UpdateBeachBarReviewType,
             description: "Update a customer's review on a #beach_bar",
             args: {
-                reviewId: nexus_1.arg({
-                    type: graphql_1.BigIntScalar,
-                    description: "The ID value of the customer's review",
-                }),
+                reviewId: nexus_1.idArg({ description: "The ID value of the customer's review" }),
                 ratingValue: nexus_1.nullable(nexus_1.intArg({
                     description: "The rating value between 1 to 10, the customers rates the #beach_bar",
                 })),
-                visitTypeId: nexus_1.nullable(nexus_1.intArg({ description: "The ID value of the customer's visit type" })),
-                monthTimeId: nexus_1.nullable(nexus_1.intArg({
+                visitTypeId: nexus_1.nullable(nexus_1.idArg({ description: "The ID value of the customer's visit type" })),
+                monthTimeId: nexus_1.nullable(nexus_1.idArg({
                     description: "The ID value of the month time",
                 })),
                 positiveComment: nexus_1.nullable(nexus_1.stringArg({
@@ -153,28 +128,28 @@ exports.BeachBarReviewCrudMutation = nexus_1.extendType({
                     description: "A summary (description) of the user's overall review",
                 })),
             },
-            resolve: (_, { reviewId, ratingValue, visitTypeId, monthTimeId, positiveComment, negativeComment, review }) => __awaiter(this, void 0, void 0, function* () {
-                if (!reviewId || reviewId <= 0) {
-                    return { error: { code: common_1.errors.INVALID_ARGUMENTS, message: "Please provide a valid customer's review" } };
-                }
-                if (ratingValue && (ratingValue < 1 || ratingValue > _index_1.beachBarReviewRatingMaxValue)) {
-                    return {
-                        error: {
-                            code: common_1.errors.INVALID_ARGUMENTS,
-                            message: `Please provide a valid rating value, between 1 and ${_index_1.beachBarReviewRatingMaxValue}`,
-                        },
-                    };
-                }
-                if (visitTypeId && visitTypeId <= 0) {
-                    return { error: { code: common_1.errors.INVALID_ARGUMENTS, message: "Please provide a valid visit type" } };
-                }
-                if (monthTimeId && monthTimeId <= 0) {
-                    return { error: { code: common_1.errors.INVALID_ARGUMENTS, message: "Please provide a valid month" } };
-                }
-                const usersReview = yield BeachBarReview_1.BeachBarReview.findOne({ where: { id: reviewId }, relations: ["beachBar", "customer"] });
-                if (!usersReview) {
-                    return { error: { code: common_1.errors.CONFLICT, message: "Specified review does not exist" } };
-                }
+            resolve: (_, { reviewId, ratingValue, visitTypeId, monthTimeId, positiveComment, negativeComment, review }, { payload }) => __awaiter(this, void 0, void 0, function* () {
+                var _a;
+                if (!payload || !payload.sub)
+                    throw new apollo_server_express_1.ApolloError(common_1.errors.NOT_AUTHENTICATED_MESSAGE, common_1.errors.NOT_AUTHENTICATED_CODE);
+                if (!reviewId || reviewId.trim().length === 0)
+                    throw new apollo_server_express_1.UserInputError("Please provide a valid review ID", { code: common_1.errors.INVALID_ARGUMENTS });
+                if (ratingValue && (ratingValue < 1 || ratingValue > _index_1.beachBarReviewRatingMaxValue))
+                    throw new apollo_server_express_1.UserInputError(`Please provide a valid rating value, between 1 and ${_index_1.beachBarReviewRatingMaxValue}`, {
+                        code: common_1.errors.INVALID_ARGUMENTS,
+                    });
+                if (visitTypeId && visitTypeId.trim().length === 0)
+                    throw new apollo_server_express_1.UserInputError("Please provide a valid visit type", { code: common_1.errors.INVALID_ARGUMENTS });
+                if (monthTimeId && monthTimeId.trim().length === 0)
+                    throw new apollo_server_express_1.UserInputError("Please provide a valid month", { code: common_1.errors.INVALID_ARGUMENTS });
+                const usersReview = yield BeachBarReview_1.BeachBarReview.findOne({
+                    where: { id: reviewId },
+                    relations: ["beachBar", "customer", "votes", "votes.type"],
+                });
+                if (!usersReview)
+                    throw new apollo_server_express_1.ApolloError("Specified review does not exist", common_1.errors.NOT_FOUND);
+                if (((_a = usersReview.customer.userId) === null || _a === void 0 ? void 0 : _a.toString()) !== payload.sub.toString())
+                    throw new apollo_server_express_1.ApolloError("You are not allow to edit another's user review", common_1.errors.UNAUTHORIZED_CODE);
                 try {
                     const updatedReview = yield usersReview.update({
                         ratingValue,
@@ -184,92 +159,39 @@ exports.BeachBarReviewCrudMutation = nexus_1.extendType({
                         negativeComment,
                         review,
                     });
-                    if (!updatedReview) {
-                        return { error: { message: common_1.errors.SOMETHING_WENT_WRONG } };
-                    }
+                    if (!updatedReview)
+                        throw new apollo_server_express_1.ApolloError(common_1.errors.SOMETHING_WENT_WRONG);
                     return {
                         review: updatedReview,
                         updated: true,
                     };
                 }
                 catch (err) {
-                    return { error: { message: `${common_1.errors.SOMETHING_WENT_WRONG}${err.message.trim().length > 0 ? `: ${err.message}` : ""} ` } };
+                    throw new apollo_server_express_1.ApolloError(common_1.errors.SOMETHING_WENT_WRONG + ": " + err.message);
                 }
             }),
         });
-        t.field("deleteBeachBarReview", {
-            type: types_1.DeleteResult,
+        t.field("deleteReview", {
+            type: types_1.DeleteGraphQlType,
             description: "Delete a customer's review on a #beach_bar",
             args: {
-                reviewId: nexus_1.arg({
-                    type: graphql_1.BigIntScalar,
-                    description: "The ID value of the customer's review",
-                }),
+                reviewId: nexus_1.idArg({ description: "The ID value of the customer's review" }),
             },
             resolve: (_, { reviewId }) => __awaiter(this, void 0, void 0, function* () {
-                if (!reviewId || reviewId <= 0) {
-                    return { error: { code: common_1.errors.INVALID_ARGUMENTS, message: "Please provide a valid customer's review" } };
-                }
+                if (!reviewId || reviewId.trim().length === 0)
+                    throw new apollo_server_express_1.UserInputError("Please provide a valid review ID", { code: common_1.errors.INVALID_ARGUMENTS });
                 const review = yield BeachBarReview_1.BeachBarReview.findOne({ where: { id: reviewId }, relations: ["beachBar"] });
-                if (!review) {
-                    return { error: { code: common_1.errors.CONFLICT, message: "Specified review does not exist" } };
-                }
+                if (!review)
+                    throw new apollo_server_express_1.ApolloError("Specified reviews does not exist", common_1.errors.NOT_FOUND);
                 try {
                     yield review.softRemove();
                 }
                 catch (err) {
-                    return { error: { message: `${common_1.errors.SOMETHING_WENT_WRONG}${err.message.trim().length > 0 ? `: ${err.message}` : ""}` } };
+                    throw new apollo_server_express_1.ApolloError(common_1.errors.SOMETHING_WENT_WRONG + ": " + err.message);
                 }
                 return {
                     deleted: true,
                 };
-            }),
-        });
-    },
-});
-exports.BeachBarReviewVoteMutation = nexus_1.extendType({
-    type: "Mutation",
-    definition(t) {
-        t.field("voteBeachBarReview", {
-            type: types_2.UpdateBeachBarReviewResult,
-            description: "Upvote or downvote a customer's review on a #beach_bar",
-            args: {
-                reviewId: nexus_1.arg({
-                    type: graphql_1.BigIntScalar,
-                    description: "The ID value of the customer's review",
-                }),
-                upvote: nexus_1.nullable(nexus_1.booleanArg({ description: "Set to true if to increment the review's votes" })),
-                downvote: nexus_1.nullable(nexus_1.booleanArg({ description: "Set to true if to decrement the review's votes" })),
-            },
-            resolve: (_, { reviewId, upvote, downvote }) => __awaiter(this, void 0, void 0, function* () {
-                if (!reviewId || reviewId <= 0) {
-                    return { error: { code: common_1.errors.INVALID_ARGUMENTS, message: "Please provide a valid customer's review" } };
-                }
-                if (upvote !== undefined && downvote !== undefined) {
-                    return {
-                        error: { code: common_1.errors.INVALID_ARGUMENTS, message: "You cannot upvote and downvote a customer's review simultaneously" },
-                    };
-                }
-                if (upvote === false || downvote === false) {
-                    return { error: { code: common_1.errors.INVALID_ARGUMENTS, message: common_1.errors.SOMETHING_WENT_WRONG } };
-                }
-                const review = yield BeachBarReview_1.BeachBarReview.findOne({ where: { id: reviewId }, relations: ["beachBar", "customer"] });
-                if (!review) {
-                    return { error: { code: common_1.errors.CONFLICT, message: "Specified review does not exist" } };
-                }
-                try {
-                    const updatedReview = yield review.vote(upvote, downvote);
-                    if (!updatedReview) {
-                        return { error: { message: common_1.errors.SOMETHING_WENT_WRONG } };
-                    }
-                    return {
-                        review: updatedReview,
-                        updated: true,
-                    };
-                }
-                catch (err) {
-                    return { error: { message: `${common_1.errors.SOMETHING_WENT_WRONG}${err.message.trim().length > 0 ? `: ${err.message}` : ""} ` } };
-                }
             }),
         });
     },

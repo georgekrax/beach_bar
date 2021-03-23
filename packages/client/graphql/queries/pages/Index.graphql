@@ -1,0 +1,27 @@
+query IndexPage {
+  getPersonalizedBeachBars {
+    name
+    thumbnailUrl
+    location {
+      city {
+        name
+      }
+      region {
+        name
+      }
+    }
+  }
+
+  favouriteBeachBars {
+    beachBar {
+      id
+      name
+      thumbnailUrl
+      location {
+        city {
+          name
+        }
+      }
+    }
+  }
+}

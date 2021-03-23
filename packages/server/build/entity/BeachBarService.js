@@ -23,14 +23,6 @@ __decorate([
     __metadata("design:type", String)
 ], BeachBarService.prototype, "name", void 0);
 __decorate([
-    typeorm_1.Column({ type: "text", name: "icon_url" }),
-    __metadata("design:type", String)
-], BeachBarService.prototype, "iconUrl", void 0);
-__decorate([
-    typeorm_1.Column({ type: "text", name: "colored_icon_url", nullable: true }),
-    __metadata("design:type", String)
-], BeachBarService.prototype, "coloredIconUrl", void 0);
-__decorate([
     typeorm_1.OneToMany(() => BeachBarFeature_1.BeachBarFeature, beachBarFeature => beachBarFeature.service, { nullable: true }),
     __metadata("design:type", Array)
 ], BeachBarService.prototype, "beachBars", void 0);

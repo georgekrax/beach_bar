@@ -1,11 +1,12 @@
 import { errors, MyContext } from "@beach_bar/common";
-import { DateScalar, EmailScalar, UrlScalar } from "@the_hashtag/common/dist/graphql";
-import { execute, makePromise } from "apollo-link";
+import { EmailScalar, UrlScalar } from "@the_hashtag/common/dist/graphql";
+import { ApolloError, AuthenticationError, UserInputError } from "apollo-server-express";
 import { createHash, randomBytes } from "crypto";
 import { LoginDetailStatus } from "entity/LoginDetails";
 import { KeyType } from "ioredis";
-import { arg, booleanArg, extendType, intArg, nullable, stringArg } from "nexus";
-import { link } from "../../config/apolloLink";
+import { graphqlClient } from "lib";
+import { arg, booleanArg, extendType, idArg, nullable, stringArg } from "nexus";
+import { signUpUser as registerUser } from "utils/auth/signUpUser";
 import platformNames from "../../config/platformNames";
 import redisKeys from "../../constants/redisKeys";
 import { City } from "../../entity/City";
@@ -15,29 +16,28 @@ import authorizeWithHashtagQuery from "../../graphql/AUTHORIZE_WITH_HASHTAG";
 import changeUserPasswordQuery from "../../graphql/CHANGE_USER_PASSWORD";
 import exchangeCodeQuery from "../../graphql/EXCHANGE_CODE";
 import logoutQuery from "../../graphql/LOGOUT_USER";
-import sendForgotPasswordLinkQuery from "../../graphql/SEND_FORGOT_PASSWORD_LINK";
+import sendForgotPasswordLinkMutation from "../../graphql/SEND_FORGOT_PASSWORD_LINK";
 import signUpUserQuery from "../../graphql/SIGN_UP_USER";
 import tokenInfoQuery from "../../graphql/TOKEN_INFO";
 import updateUserQuery from "../../graphql/UPDATE_USER";
-import { DeleteType, SuccessType } from "../../typings/.index";
-import { UpdateUserType, UserLoginType, UserSignUpType } from "../../typings/user";
+import { SuccessObjectType } from "../../typings/.index";
+import { TUser, TUserLogin, UpdateUserType } from "../../typings/user";
 import { generateAccessToken, generateRefreshToken } from "../../utils/auth/generateAuthTokens";
-import { sendRefreshToken } from "../../utils/auth/sendRefreshToken";
-import { signUpUser } from "../../utils/auth/signUpUser";
+import { sendCookieToken } from "../../utils/auth/sendCookieToken";
 import { createUserLoginDetails, findLoginDetails } from "../../utils/auth/userCommon";
 import { removeUserSessions } from "../../utils/removeUserSessions";
-import { DeleteResult, SuccessResult } from "../types";
-import { UserCredentialsInput, UserLoginDetailsInput, UserLoginResult, UserSignUpResult, UserUpdateResult } from "./types";
+import { SuccessGraphQLType } from "../types";
+import { UserCredentials, UserLoginDetails, UserLoginType, UserType, UserUpdateType } from "./types";
 
 export const UserSignUpAndLoginMutation = extendType({
   type: "Mutation",
   definition(t) {
     t.field("signUp", {
-      type: UserSignUpResult,
+      type: UserType,
       description: "Sign up a user",
       args: {
         userCredentials: arg({
-          type: UserCredentialsInput,
+          type: UserCredentials,
           description: "Credential for signing up a user",
         }),
         isPrimaryOwner: nullable(
@@ -47,136 +47,94 @@ export const UserSignUpAndLoginMutation = extendType({
           })
         ),
       },
-      resolve: async (_, { userCredentials, isPrimaryOwner }, { redis }: MyContext): Promise<UserSignUpType> => {
+      resolve: async (_, { userCredentials, isPrimaryOwner }, { redis }: MyContext): Promise<TUser> => {
         const { email, password } = userCredentials;
-        if (!email || email.trim().length === 0) {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid email address" } };
-        }
-        if (!password || password.trim().length === 0) {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid password" } };
-        }
+        if (!email || email.trim().length === 0)
+          throw new UserInputError("Please provide a valid email address", { code: errors.INVALID_ARGUMENTS });
+        if (!password || password.trim().length === 0)
+          throw new UserInputError("Please provide a valid password", { code: errors.INVALID_ARGUMENTS });
 
-        const operation = {
-          query: signUpUserQuery,
-          variables: {
+        try {
+          const { signUpUser } = await graphqlClient.request(signUpUserQuery, {
             clientId: process.env.HASHTAG_CLIENT_ID!.toString(),
             clientSecret: process.env.HASHTAG_CLIENT_SECRET!.toString(),
             email,
             password,
-          },
-        };
-
-        let hashtagUser, added, errorCode, errorMessage;
-
-        await makePromise(execute(link, operation))
-          .then(res => res.data?.signUpUser)
-          .then(data => {
-            if (data.error) {
-              errorCode = data.error.code;
-              errorMessage = data.error.message;
-            }
-            hashtagUser = data.user;
-            added = data.added;
-          })
-          .catch(err => {
-            return { error: { message: `Something went wrong: ${err.message}` } };
           });
 
-        if (
-          (errorCode || errorMessage) &&
-          errorCode !== errors.CONFLICT &&
-          errorMessage !== "User already exists" &&
-          !added &&
-          !hashtagUser
-        ) {
-          return { error: { code: errorCode, message: errorMessage } };
-        }
-        if (email !== hashtagUser.email || hashtagUser.id.trim().length === 0) {
-          return { error: { message: errors.SOMETHING_WENT_WRONG } };
-        }
+          if (signUpUser.error) {
+            const { message, code } = signUpUser.error;
+            if (message || code) throw new ApolloError(message, code);
+          }
 
-        let country, city;
-        if (hashtagUser.country && hashtagUser.country.id) {
-          country = await Country.findOne(hashtagUser.country.id);
-        }
-        if (hashtagUser.city && hashtagUser.city.id) {
-          city = await City.findOne(hashtagUser.city.id);
-        }
+          const { user: hashtagUser } = signUpUser;
 
-        const response = await signUpUser({
-          email: hashtagUser.email,
-          redis,
-          isPrimaryOwner,
-          hashtagId: hashtagUser.id,
-          countryId: country ? country.id : undefined,
-          cityId: city ? city.id : undefined,
-          birthday: hashtagUser.birthday,
-        });
-        if (response.error && !response.user) {
-          // @ts-ignore
-          return { error: { code: response.error.code, message: response.error.message } };
-        }
+          if (!hashtagUser || email !== hashtagUser.email || String(hashtagUser.id).trim().length === 0)
+            throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.INTERNAL_SERVER_ERROR);
 
-        return {
-          user: response.user,
-        };
+          let country, city;
+          if (hashtagUser.country && hashtagUser.country.id) country = await Country.findOne(hashtagUser.country.id);
+          if (hashtagUser.city && hashtagUser.city.id) city = await City.findOne(hashtagUser.city.id);
+
+          const response = await registerUser({
+            email: hashtagUser.email,
+            redis,
+            isPrimaryOwner,
+            hashtagId: hashtagUser.id,
+            countryId: country ? country.id : undefined,
+            city: city ? city : undefined,
+            birthday: hashtagUser.birthday,
+          });
+          if (response.error && !response.user) throw new ApolloError(response.error.message, response.error.code);
+
+          return response.user;
+        } catch (err) {
+          return err;
+        }
       },
     });
     t.field("login", {
-      type: UserLoginResult,
+      type: UserLoginType,
       description: "Login a user",
       args: {
-        loginDetails: nullable(arg({
-          type: UserLoginDetailsInput,
-          description: "User details in login",
-        })),
         userCredentials: arg({
-          type: UserCredentialsInput,
+          type: UserCredentials,
           description: "Credential for signing up a user",
         }),
+        loginDetails: nullable(
+          arg({
+            type: UserLoginDetails,
+            description: "User details in login",
+          })
+        ),
       },
-      resolve: async (_, { loginDetails, userCredentials }, { res, redis, uaParser, ipAddr }: MyContext): Promise<UserLoginType> => {
+      resolve: async (_, { userCredentials, loginDetails }, { res, redis, uaParser, ipAddr }: MyContext): Promise<TUserLogin> => {
         const { email, password } = userCredentials;
-        if (!email || email.length === 0) {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid email address" } };
-        }
-        if (!password || password.length === 0) {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid password" } };
-        }
-        // TODO: Fix loginDetails
-        const { osId, browserId, countryId, cityId } = findLoginDetails({ details: loginDetails, uaParser });
+        if (!email || email.length === 0)
+          throw new UserInputError("Please provide a valid email address", { code: errors.INVALID_ARGUMENTS });
+        if (!password || password.length === 0)
+          throw new UserInputError("Please provide a valid password", { code: errors.INVALID_PASSWORD_CODE });
+
+        const { osId, browserId, countryId, city } = findLoginDetails({ details: loginDetails, uaParser });
 
         // search for user in DB
         const user = await User.findOne({ where: { email }, relations: ["account"] });
-        if (!user) {
-          return {
-            error: {
-              code: errors.NOT_FOUND,
-              message: errors.USER_NOT_FOUND_MESSAGE,
-            },
-          };
-        }
+        if (!user) throw new ApolloError(errors.USER_NOT_FOUND_MESSAGE, errors.NOT_FOUND);
 
-        if (user.googleId && !user.hashtagId) {
-          return {
-            error: { code: errors.GOOGLE_AUTHENTICATED_CODE, message: "You have authenticated with Google" },
-          };
-        } else if (user.facebookId && !user.hashtagId) {
-          return {
-            error: { code: errors.FACEBOOK_AUTHENTICATED_CODE, message: "You have authenticated with Facebook" },
-          };
-        } else if (user.instagramId && !user.hashtagId) {
-          return {
-            error: { code: errors.INSTAGRAM_AUTHENTICATED_CODE, message: "You have authenticated with Instagram" },
-          };
-        }
+        if (user.googleId && !user.hashtagId)
+          throw new ApolloError("You have authenticated with Google", errors.GOOGLE_AUTHENTICATED_CODE);
+        else if (user.facebookId && !user.hashtagId)
+          throw new ApolloError("You have authenticated with Facebook", errors.FACEBOOK_AUTHENTICATED_CODE);
+        else if (user.instagramId && !user.hashtagId)
+          throw new ApolloError("You have authenticated with Instagram", errors.INSTAGRAM_AUTHENTICATED_CODE);
 
         const state = createHash("sha256").update(randomBytes(1024)).digest("hex");
         const scope = await redis.smembers(`${redisKeys.USER}:${user.id}:${redisKeys.USER_SCOPE}` as KeyType);
 
-        const authorizeWithHashtagOperation = {
-          query: authorizeWithHashtagQuery,
-          variables: {
+        let code: string, hashtagAccessToken: any, hashtagRefreshToken: any;
+
+        try {
+          const { authorizeWithHashtag } = await graphqlClient.request(authorizeWithHashtagQuery, {
             clientId: process.env.HASHTAG_CLIENT_ID!.toString(),
             scope,
             redirectUri: process.env.HASHTAG_REDIRECT_URI!.toString(),
@@ -187,195 +145,132 @@ export const UserSignUpAndLoginMutation = extendType({
             osId,
             browserId,
             countryId,
-            cityId,
+            city,
             ipAddr,
-          },
-        };
-
-        let hashtagEmail: string | undefined = undefined,
-          hashtagId: bigint | undefined = undefined,
-          hashtagState: string | undefined = undefined,
-          hashtagScope: string[] | undefined = undefined,
-          code: string | undefined = undefined,
-          prompt: boolean | undefined = undefined,
-          errorCode: string | undefined = undefined,
-          errorMessage: string | any = undefined;
-
-        await makePromise(execute(link, authorizeWithHashtagOperation))
-          .then(res => res.data?.authorizeWithHashtag)
-          .then(data => {
-            if (data.error) {
-              errorCode = data.error.code;
-              errorMessage = data.error.message;
-            }
-            hashtagEmail = data.user.email;
-            hashtagId = data.user.id;
-            hashtagState = data.state;
-            hashtagScope = data.scope;
-            code = data.code;
-            prompt = data.prompt.none;
-          })
-          .catch(err => {
-            return { error: { message: `Something went wrong: ${err.message}` } };
           });
 
-        if (errorCode || errorMessage) {
-          if (errorMessage === errors.INVALID_PASSWORD_MESSAGE || errorCode === errors.INVALID_PASSWORD_CODE) {
-            await createUserLoginDetails(
-              LoginDetailStatus.invalidPassword,
-              platformNames.BEACH_BAR,
-              user.account,
-              osId,
-              browserId,
-              countryId,
-              cityId,
-              ipAddr
-            );
-          } else {
-            await createUserLoginDetails(
-              LoginDetailStatus.failed,
-              platformNames.BEACH_BAR,
-              user.account,
-              osId,
-              browserId,
-              countryId,
-              cityId,
-              ipAddr
-            );
+          if (authorizeWithHashtag.error) {
+            const { message, code } = authorizeWithHashtag.error;
+            if (message === errors.INVALID_PASSWORD_MESSAGE || code === errors.INVALID_PASSWORD_CODE) {
+              await createUserLoginDetails(
+                LoginDetailStatus.invalidPassword,
+                platformNames.BEACH_BAR,
+                user.account,
+                osId,
+                browserId,
+                countryId,
+                city,
+                ipAddr
+              );
+            } else {
+              await createUserLoginDetails(
+                LoginDetailStatus.failed,
+                platformNames.BEACH_BAR,
+                user.account,
+                osId,
+                browserId,
+                countryId,
+                city,
+                ipAddr
+              );
+            }
+            if (code === errors.SCOPE_MISMATCH) throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.INTERNAL_SERVER_ERROR);
+            else throw new ApolloError(message, code);
           }
-          if (errorCode === errors.SCOPE_MISMATCH) {
-            return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
-          }
-          return { error: { code: errorCode, message: errorMessage } };
+
+          const { state: hashtagState, scope: hashtagScope, user: hashtagUser, prompt, code: hashtagCode } = authorizeWithHashtag;
+          code = hashtagCode;
+          if (
+            state !== hashtagState ||
+            !code ||
+            code!.trim().length === 0 ||
+            prompt.none !== true ||
+            JSON.stringify(scope) !== JSON.stringify(hashtagScope)
+          )
+            throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.SOMETHING_WENT_WRONG);
+
+          if (String(hashtagUser.id) !== String(user.hashtagId) || email !== hashtagUser.email)
+            throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.SOMETHING_WENT_WRONG);
+        } catch (err) {
+          return err;
         }
 
-        if (
-          state !== hashtagState ||
-          !code ||
-          code!.trim().length === 0 ||
-          prompt !== true ||
-          JSON.stringify(scope) !== JSON.stringify(hashtagScope)
-        ) {
-          return { error: { message: errors.SOMETHING_WENT_WRONG } };
-        }
-
-        if (String(hashtagId) !== String(user.hashtagId) || email !== hashtagEmail) {
-          return { error: { message: errors.SOMETHING_WENT_WRONG } };
-        }
-
-        // exchange for ID & Access tokens
-        const exchangeCodeOperation = {
-          query: exchangeCodeQuery,
-          variables: {
+        // Exchange code for ID & Access tokens
+        try {
+          const { exchangeCode } = await graphqlClient.request(exchangeCodeQuery, {
             clientId: process.env.HASHTAG_CLIENT_ID!.toString(),
             clientSecret: process.env.HASHTAG_CLIENT_SECRET!.toString(),
             code,
-          },
-        };
-
-        let hashtagAccessToken: any = undefined,
-          hashtagRefreshToken: any = undefined,
-          idToken: any = undefined;
-
-        await makePromise(execute(link, exchangeCodeOperation))
-          .then(res => res.data?.exchangeCode)
-          .then(data => {
-            if (data.error) {
-              errorCode = data.error.code;
-              errorMessage = data.error.message;
-            }
-            hashtagAccessToken = data.tokens[0];
-            hashtagRefreshToken = data.tokens[1];
-            idToken = data.tokens[2];
-          })
-          .catch(err => {
-            return { error: { message: `${errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
           });
 
-        if (errorCode || errorMessage) {
-          await createUserLoginDetails(
-            LoginDetailStatus.failed,
-            platformNames.BEACH_BAR,
-            user.account,
-            osId,
-            browserId,
-            countryId,
-            cityId,
-            ipAddr
-          );
-          return {
-            error: { code: errorCode, message: errorMessage },
-          };
-        }
-
-        if (!hashtagAccessToken || !hashtagRefreshToken || !idToken) {
-          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
-        }
-
-        // logined successfully
-        // get user info from ID token
-        const tokenInfoOperation = {
-          query: tokenInfoQuery,
-          variables: {
-            token: idToken.token,
-          },
-        };
-
-        let tokenInfo: any = undefined;
-
-        await makePromise(execute(link, tokenInfoOperation))
-          .then(res => res.data?.tokenInfo)
-          .then(data => {
-            if (data.error) {
-              errorCode = data.error.code;
-              errorMessage = data.error.message;
+          if (exchangeCode.error) {
+            const { message, code } = exchangeCode.error;
+            if (code || message) {
+              await createUserLoginDetails(
+                LoginDetailStatus.failed,
+                platformNames.BEACH_BAR,
+                user.account,
+                osId,
+                browserId,
+                countryId,
+                city,
+                ipAddr
+              );
+              throw new ApolloError(message, code);
             }
-            tokenInfo = data;
-          })
-          .catch(err => {
-            return { error: { message: `${errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
+          }
+
+          const { tokens } = exchangeCode;
+          hashtagAccessToken = tokens[0];
+          hashtagRefreshToken = tokens[1];
+          const hashtagIdToken = tokens[2];
+
+          if (!hashtagAccessToken || !hashtagRefreshToken || !hashtagIdToken)
+            throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.INTERNAL_SERVER_ERROR);
+
+          // Logined successfully
+          // Get user info from ID token
+          const { tokenInfo } = await graphqlClient.request(tokenInfoQuery, {
+            token: hashtagIdToken.token,
           });
 
-        if (errorCode || errorMessage) {
-          await createUserLoginDetails(
-            LoginDetailStatus.failed,
-            platformNames.BEACH_BAR,
-            user.account,
-            osId,
-            browserId,
-            countryId,
-            cityId,
-            ipAddr
-          );
-          return { error: { code: errorCode, message: errorMessage as any } };
-        }
-
-        if (
-          !tokenInfo ||
-          tokenInfo.email !== user.email ||
-          tokenInfo.sub !== user.hashtagId ||
-          tokenInfo.iss !== process.env.HASHTAG_TOKEN_ISSUER!.toString() ||
-          tokenInfo.aud !== process.env.HASHTAG_CLIENT_ID!.toString()
-        ) {
-          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
-        }
-
-        if (tokenInfo.firstName || tokenInfo.lastName || tokenInfo.pictureUrl || tokenInfo.locale) {
-          if (tokenInfo.firstName && !user.firstName) {
-            user.firstName = tokenInfo.firstName;
-          }
-          if (tokenInfo.lastName && !user.lastName) {
-            user.lastName = tokenInfo.lastName;
-          }
-          if (tokenInfo.pictureUrl && !user.account.imgUrl) {
-            user.account.imgUrl = tokenInfo.pictureUrl;
-          }
-          if (tokenInfo.locale && !user.account.country) {
-            const country = await Country.findOne({ where: { languageIdentifier: tokenInfo.locale } });
-            if (country) {
-              user.account.country = country;
+          if (tokenInfo.error) {
+            const { message, code } = exchangeCode.error;
+            if (code || message) {
+              await createUserLoginDetails(
+                LoginDetailStatus.failed,
+                platformNames.BEACH_BAR,
+                user.account,
+                osId,
+                browserId,
+                countryId,
+                city,
+                ipAddr
+              );
+              throw new ApolloError(message, code);
             }
           }
+
+          if (
+            !tokenInfo ||
+            tokenInfo.email !== user.email ||
+            tokenInfo.sub !== user.hashtagId ||
+            tokenInfo.iss !== process.env.HASHTAG_TOKEN_ISSUER!.toString() ||
+            tokenInfo.aud !== process.env.HASHTAG_CLIENT_ID!.toString()
+          )
+            throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.INTERNAL_SERVER_ERROR);
+
+          if (tokenInfo.firstName || tokenInfo.lastName || tokenInfo.pictureUrl || tokenInfo.locale) {
+            if (tokenInfo.firstName && !user.firstName) user.firstName = tokenInfo.firstName;
+            if (tokenInfo.lastName && !user.lastName) user.lastName = tokenInfo.lastName;
+            if (tokenInfo.pictureUrl && !user.account.imgUrl) user.account.imgUrl = tokenInfo.pictureUrl;
+            if (tokenInfo.locale && !user.account.country) {
+              const country = await Country.findOne({ where: { languageIdentifier: tokenInfo.locale } });
+              if (country) user.account.country = country;
+            }
+          }
+        } catch (err) {
+          return err;
         }
 
         // create user login details
@@ -386,13 +281,14 @@ export const UserSignUpAndLoginMutation = extendType({
           osId,
           browserId,
           countryId,
-          cityId,
+          city,
           ipAddr
         );
 
-        const refreshToken = generateRefreshToken(user);
+        const refreshToken = generateRefreshToken(user, "#beach_bar");
         const accessToken = generateAccessToken(user, scope);
-        sendRefreshToken(res, refreshToken.token);
+        sendCookieToken(res, refreshToken.token, "refresh");
+        sendCookieToken(res, accessToken.token, "access");
 
         try {
           await redis.hset(user.getRedisKey() as KeyType, "access_token", accessToken.token);
@@ -404,7 +300,7 @@ export const UserSignUpAndLoginMutation = extendType({
           await user.save();
           await user.account.save();
         } catch (err) {
-          return { error: { message: `Something went wrong. ${err}` } };
+          throw new ApolloError(err, errors.SOMETHING_WENT_WRONG);
         }
 
         return {
@@ -420,62 +316,43 @@ export const UserLogoutMutation = extendType({
   type: "Mutation",
   definition(t) {
     t.field("logout", {
-      type: SuccessResult,
+      type: SuccessGraphQLType,
       description: "Logout a user",
-      resolve: async (_, __, { res, payload, redis }: MyContext): Promise<SuccessType> => {
-        if (!payload) {
-          return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
-        }
+      resolve: async (_, __, { res, payload, redis }: MyContext): Promise<SuccessObjectType> => {
+        if (!payload) throw new AuthenticationError(errors.NOT_AUTHENTICATED_MESSAGE);
 
         const redisUser = await redis.hgetall(`${redisKeys.USER}:${payload.sub.toString()}` as KeyType);
-        if (!redisUser) {
-          return { error: { message: "Something went wrong" } };
-        }
-
-        if (redisUser.hashtag_access_token && redisUser.hashtag_access_token !== "" && redisUser.hashtag_access_token !== " ") {
-          const hashtagAccessToken = redisUser.hashtag_access_token;
-          const logoutOperation = {
-            query: logoutQuery,
-            variables: {
-              clientId: process.env.HASHTAG_CLIENT_ID!.toString(),
-              clientSecret: process.env.HASHTAG_CLIENT_SECRET!.toString(),
-            },
-            context: {
-              headers: {
-                authorization: `Bearer ${hashtagAccessToken}`,
-              },
-            },
-          };
-
-          let success: boolean | undefined = undefined,
-            errorCode: string | undefined = undefined,
-            errorMessage: string | any = undefined;
-
-          await makePromise(execute(link, logoutOperation))
-            .then(res => res.data?.logoutUser)
-            .then(data => {
-              if (data.error) {
-                errorCode = data.error.code;
-                errorMessage = data.error.message;
-              }
-              success = data.success;
-            })
-            .catch(err => {
-              return { error: { message: `Something went wrong. ${err}` } };
-            });
-
-          if ((errorCode || errorMessage) && !success) {
-            return { error: { code: errorCode, message: errorMessage } };
-          }
-        }
+        if (!redisUser) throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.SOMETHING_WENT_WRONG);
 
         try {
+          if (redisUser.hashtag_access_token && redisUser.hashtag_access_token !== "" && redisUser.hashtag_access_token !== " ") {
+            const hashtagAccessToken = redisUser.hashtag_access_token;
+
+            const { logoutUser } = await graphqlClient.request(
+              logoutQuery,
+              {
+                clientId: process.env.HASHTAG_CLIENT_ID!.toString(),
+                clientSecret: process.env.HASHTAG_CLIENT_SECRET!.toString(),
+              },
+              {
+                authorization: `Bearer ${hashtagAccessToken}`,
+              }
+            );
+
+            const success: boolean = logoutUser.success;
+            if (logoutUser.error) {
+              const { message, code } = logoutUser.error;
+              if ((message || code) && !success) throw new ApolloError(message, code);
+            }
+            if (!success) throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.SOMETHING_WENT_WRONG);
+          }
           await removeUserSessions(payload.sub, redis);
         } catch (err) {
-          return { error: { message: `Something went wrong. ${err}` } };
+          return err;
         }
 
         res.clearCookie(process.env.REFRESH_TOKEN_COOKIE_NAME!.toString(), { httpOnly: true });
+        res.clearCookie(process.env.ACCESS_TOKEN_COOKIE_NAME!.toString(), { httpOnly: true });
 
         return {
           success: true,
@@ -489,7 +366,7 @@ export const UserForgotPasswordMutation = extendType({
   type: "Mutation",
   definition(t) {
     t.field("sendForgotPasswordLink", {
-      type: SuccessResult,
+      type: SuccessGraphQLType,
       description: "Sends a link to the user's email address to change its password",
       args: {
         email: arg({
@@ -497,148 +374,93 @@ export const UserForgotPasswordMutation = extendType({
           description: "The email address of user",
         }),
       },
-      resolve: async (_, { email }, { res, redis }): Promise<SuccessType> => {
-        if (!email || email.trim().length === 0) {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid email address" } };
-        }
+      resolve: async (_, { email }, { res, redis }): Promise<SuccessObjectType> => {
+        if (!email || email.trim().length === 0)
+          throw new UserInputError("Please provide a valid email address", { code: errors.INVALID_ARGUMENTS });
 
         const user = await User.findOne({
           where: { email },
           relations: ["account"],
         });
-        if (!user) {
-          return {
-            error: { code: errors.NOT_FOUND, message: "User does not exist" },
-          };
-        }
+        if (!user) throw new ApolloError(errors.USER_NOT_FOUND_MESSAGE, errors.NOT_FOUND);
 
-        if (!user.hashtagId) {
-          return {
-            error: { code: errors.HASHTAG_NOT_AUTHENTICATED_CODE, message: "You have not authenticated with #hashtag" },
-          };
-        }
-
-        const sendForgotPasswordLinkOperation = {
-          query: sendForgotPasswordLinkQuery,
-          variables: {
-            email,
-          },
-        };
-
-        let success: boolean | undefined = undefined,
-          errorCode: string | undefined = undefined,
-          errorMessage: string | any = undefined;
-
-        await makePromise(execute(link, sendForgotPasswordLinkOperation))
-          .then(res => res.data?.sendForgotPasswordLink)
-          .then(data => {
-            if (data.error) {
-              errorCode = data.error.code;
-              errorMessage = data.error.message;
-            }
-            success = data.success;
-          })
-          .catch(err => {
-            return { error: { message: `Something went wrong. ${err}` } };
-          });
-
-        if (errorCode || errorMessage) {
-          return { error: { code: errorCode, message: errorMessage } };
-        }
-
-        if (!success) {
-          return { error: { message: "Something went wrong" } };
-        }
+        if (!user.hashtagId) throw new ApolloError("You have not authenticated with #hashtag", errors.HASHTAG_NOT_AUTHENTICATED_CODE);
 
         try {
+          const { sendForgotPasswordLink } = await graphqlClient.request(sendForgotPasswordLinkMutation, {
+            email,
+          });
+
+          if (sendForgotPasswordLink.error) {
+            const { message, code } = sendForgotPasswordLink.error;
+            if (message || code) throw new ApolloError(message, code);
+          }
+          const success: boolean = sendForgotPasswordLink.success;
+          if (!success) throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.SOMETHING_WENT_WRONG);
+
           await removeUserSessions(user.id, redis);
         } catch (err) {
-          return { error: { message: `Something went wrong. ${err}` } };
+          return err;
         }
+
         res.clearCookie(process.env.REFRESH_TOKEN_COOKIE_NAME!.toString(), { httpOnly: true });
+        res.clearCookie(process.env.ACCESS_TOKEN_COOKIE_NAME!.toString(), { httpOnly: true });
 
         return {
-          success,
+          success: true,
         };
       },
     });
     t.field("changeUserPassword", {
-      type: SuccessResult,
+      type: SuccessGraphQLType,
       description: "Change a user's password",
       args: {
         email: arg({
           type: EmailScalar,
           description: "Email of user to retrieve OAuth Client applications",
         }),
-        key: stringArg({
-          description: "The key in the URL to identify and verify user. Each key lasts 20 minutes",
+        token: stringArg({
+          description: "The token in the URL to identify and verify user. Each key lasts 20 minutes",
         }),
         newPassword: stringArg({
           description: "User's new password",
         }),
       },
-      resolve: async (_, { email, key, newPassword }): Promise<SuccessType> => {
-        if (!email || email.trim().length === 0) {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid email address" } };
-        }
-        if (!newPassword || newPassword.trim().length === 0) {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid newPassword" } };
-        }
-        if (!key || key.trim().length === 0) {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid key" } };
-        }
+      resolve: async (_, { email, token, newPassword }): Promise<SuccessObjectType> => {
+        if (!email || email.trim().length === 0)
+          throw new UserInputError("Please provide a valid email address", { code: errors.INVALID_ARGUMENTS });
+        if (!newPassword || newPassword.trim().length === 0)
+          throw new UserInputError("Please provide a valid new password", { code: errors.INVALID_ARGUMENTS });
+        if (!token || token.trim().length === 0)
+          throw new UserInputError("Please provide a valid token", { code: errors.INVALID_ARGUMENTS });
 
         const user = await User.findOne({
           where: { email },
           relations: ["account"],
         });
-        if (!user) {
-          return {
-            error: { code: errors.NOT_FOUND, message: "User does not exist" },
-          };
-        }
+        if (!user) throw new ApolloError(errors.USER_NOT_FOUND_MESSAGE, errors.NOT_FOUND);
 
-        if (!user.hashtagId) {
-          return {
-            error: { code: errors.HASHTAG_NOT_AUTHENTICATED_CODE, message: "You have not authenticated with #hashtag" },
-          };
-        }
+        if (!user.hashtagId) throw new ApolloError("You have not authenticated with #hashtag", errors.HASHTAG_NOT_AUTHENTICATED_CODE);
 
-        const changeUserPasswordOperation = {
-          query: changeUserPasswordQuery,
-          variables: {
+        try {
+          const { changeUserPassword } = await graphqlClient.request(changeUserPasswordQuery, {
             email,
-            key,
+            token,
             newPassword,
-          },
-        };
-
-        let success: boolean | undefined = undefined,
-          errorCode: string | undefined = undefined,
-          errorMessage: string | any = undefined;
-
-        await makePromise(execute(link, changeUserPasswordOperation))
-          .then(res => res.data?.changeUserPassword)
-          .then(data => {
-            if (data.error) {
-              errorCode = data.error.code;
-              errorMessage = data.error.message;
-            }
-            success = data.success;
-          })
-          .catch(err => {
-            return { error: { message: `Something went wrong. ${err}` } };
           });
 
-        if (errorCode || errorMessage) {
-          return { error: { code: errorCode, message: errorMessage } };
-        }
-        if (!success) {
-          return { error: { message: "Something went wrong" } };
+          if (changeUserPassword.error) {
+            const { message, code } = changeUserPassword.error;
+            if (message || code) throw new ApolloError(message, code);
+          }
+          const success: boolean = changeUserPassword.success;
+          if (!success) throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.SOMETHING_WENT_WRONG);
+        } catch (err) {
+          return err;
         }
 
         return {
-          success,
+          success: true,
         };
       },
     });
@@ -649,53 +471,53 @@ export const UserCrudMutation = extendType({
   type: "Mutation",
   definition(t) {
     t.field("updateUser", {
-      type: UserUpdateResult,
+      type: UserUpdateType,
       description: "Update a user's info",
       args: {
         email: nullable(arg({ type: EmailScalar })),
         firstName: nullable(stringArg()),
         lastName: nullable(stringArg()),
         imgUrl: nullable(arg({ type: UrlScalar })),
-        personTitle: nullable(stringArg({ description: "The honorific title of the user" })),
-        birthday: nullable(
-          arg({
-            type: DateScalar,
-            description: "User's birthday in the date format",
-          })
-        ),
-        countryId: nullable(intArg({ description: "The country of user" })),
-        cityId: nullable(intArg({ description: "The city or hometown of user" })),
+        honorificTitle: nullable(stringArg({ description: "The honorific title of the user" })),
+        birthday: nullable(stringArg({ description: "User's birthday in the date format" })),
+        countryId: nullable(idArg({ description: "The country of user" })),
+        city: nullable(stringArg({ description: "The city or hometown of user" })),
+        phoneNumber: nullable(stringArg({ description: "The phone number of user" })),
+        telCountryId: nullable(idArg({ description: "The country of user's phone number" })),
         address: nullable(stringArg({ description: "User's house or office street address" })),
         zipCode: nullable(stringArg({ description: "User's house or office zip code" })),
         trackHistory: nullable(booleanArg({ description: "Indicates if to track user's history" })),
       },
       resolve: async (
         _,
-        { email, firstName, lastName, imgUrl, personTitle, birthday, countryId, cityId, address, zipCode, trackHistory },
+        {
+          email,
+          firstName,
+          lastName,
+          imgUrl,
+          honorificTitle,
+          birthday,
+          countryId,
+          city,
+          phoneNumber,
+          telCountryId,
+          address,
+          zipCode,
+          trackHistory,
+        },
         { payload, redis, stripe }: MyContext
       ): Promise<UpdateUserType> => {
-        if (!payload) {
-          return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
-        }
-        if (!payload.scope.some(scope => ["beach_bar@crud:user"].includes(scope))) {
-          return {
-            error: {
-              code: errors.UNAUTHORIZED_CODE,
-              message: "You are not allowed to update a user",
-            },
-          };
-        }
-
-        if (email && email.trim().length === 0) {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid email address" } };
-        }
+        if (!payload) throw new AuthenticationError(errors.NOT_AUTHENTICATED_MESSAGE);
+        if (!payload.scope.some(scope => ["beach_bar@crud:user"].includes(scope)))
+          throw new AuthenticationError("You are not allowed, do not have permission, to update this user's information");
+        if (email && email.trim().length === 0) throw new UserInputError("Please provide a valid email address");
 
         const user = await User.findOne({
           where: { id: payload.sub },
-          relations: ["account", "account.country", "account.city", "account.preferences", "customer", "reviews", "reviews.visitType"],
+          relations: ["account", "account.country"],
         });
         if (!user) {
-          return { error: { code: errors.NOT_FOUND, message: errors.USER_NOT_FOUND_MESSAGE } };
+          throw new ApolloError(errors.USER_NOT_FOUND_MESSAGE);
         }
 
         let isNew = false;
@@ -706,14 +528,17 @@ export const UserCrudMutation = extendType({
             firstName,
             lastName,
             imgUrl,
-            personTitle,
+            honorificTitle,
             birthday,
             address,
             zipCode,
             countryId,
-            cityId,
+            city,
+            phoneNumber,
+            telCountryId,
             trackHistory,
           });
+
           const { user: updatedUser, isNew: updated } = response;
           isNew = updated;
           // if user is customer also, update its info in Stripe too
@@ -729,120 +554,94 @@ export const UserCrudMutation = extendType({
               address: {
                 line1: uAccount.address || "",
                 country: uAccount.country?.isoCode || undefined,
-                city: uAccount.city?.name || undefined,
+                city: uAccount.city || undefined,
                 postal_code: uAccount.zipCode || undefined,
               },
-              // @ts-ignore
-              phone: uAccount.contactDetails ? (uAccount.contactDetails?.[0].phoneNumber as any) : undefined,
+              phone: uAccount.phoneNumber,
             });
           }
         } catch (err) {
-          return {
-            error: { message: `Something went wrong: ${err.message}` },
-          };
+          throw new ApolloError(`Something went wrong: ${err.message}`, errors.SOMETHING_WENT_WRONG);
         }
 
         const redisUser = await redis.hgetall(user.getRedisKey() as KeyType);
-        if (!redisUser) {
-          return { error: { message: errors.SOMETHING_WENT_WRONG } };
-        }
+        if (!redisUser) throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.SOMETHING_WENT_WRONG);
 
-        if (
-          redisUser.hashtag_access_token &&
-          redisUser.hashtag_access_token !== "" &&
-          redisUser.hashtag_access_token !== " " &&
-          isNew
-        ) {
-          const hashtagAccessToken = redisUser.hashtag_access_token;
-          const updateUserOperation = {
-            query: updateUserQuery,
-            variables: {
-              email: user.email,
-              firstName: user.firstName,
-              lastName: user.lastName,
-              pictureUrl: user.account.imgUrl,
-              countryId: user.account.countryId,
-              cityId: user.account.cityId,
-              birthday: user.account.birthday,
-            },
-            context: {
-              headers: {
-                authorization: `Bearer ${hashtagAccessToken}`,
+        if (redisUser.hashtag_access_token && redisUser.hashtag_access_token.trim().length !== 0 && isNew) {
+          try {
+            const hashtagAccessToken = redisUser.hashtag_access_token;
+            const { updateUser } = await graphqlClient.request(
+              updateUserQuery,
+              {
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                pictureUrl: user.account.imgUrl,
+                countryId: user.account.countryId,
+                // city: user.account.city,
+                birthday: user.account.birthday,
               },
-            },
-          };
-
-          let hashtagUser: any = undefined,
-            updated: boolean | undefined = undefined,
-            errorCode: string | undefined = undefined,
-            errorMessage: string | any = undefined;
-
-          await makePromise(execute(link, updateUserOperation))
-            .then(res => res.data?.updateUser)
-            .then(data => {
-              if (data.error) {
-                errorCode = data.error.code;
-                errorMessage = data.error.message;
+              {
+                authorization: `Bearer ${hashtagAccessToken}`,
               }
-              hashtagUser = data.user;
-              updated = data.updated;
-            })
-            .catch(err => {
-              return { error: { message: `Something went wrong. ${err}` } };
-            });
+            );
 
-          if (errorCode || errorMessage) {
-            return { error: { code: errorCode, message: errorMessage } };
-          }
+            if (updateUser.error) {
+              const { message, code } = updateUser.error;
+              if (message || code) throw new ApolloError(message, code);
+            }
 
-          if (!hashtagUser || String(hashtagUser.id) !== String(user.hashtagId) || !updated) {
-            return { error: { message: errors.SOMETHING_WENT_WRONG } };
+            if (!updateUser || String(updateUser.user.id) !== String(user.hashtagId) || !updateUser.updated)
+              throw new ApolloError(errors.SOMETHING_WENT_WRONG);
+          } catch (err) {
+            if (!err.message.includes("jwt expired")) return err;
           }
         }
 
         return {
           user,
+          updated: true,
         };
       },
     });
-    t.field("deleteUser", {
-      type: DeleteResult,
-      description: "Delete a user & its account",
-      resolve: async (_, __, { payload, redis, stripe }: MyContext): Promise<DeleteType> => {
-        if (!payload) {
-          return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
-        }
-        if (!payload.scope.some(scope => ["hashtag@delete:user_account", "beach_bar@crud:user"].includes(scope))) {
-          return {
-            error: {
-              code: errors.UNAUTHORIZED_CODE,
-              message: "You are not allowed to delete 'this' user's account",
-            },
-          };
-        }
+    // t.field("deleteUser", {
+    //   type: DeleteResult,
+    //   description: "Delete a user & its account",
+    //   resolve: async (_, __, { payload, redis, stripe }: MyContext): Promise<DeleteType> => {
+    //     if (!payload) {
+    //       return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
+    //     }
+    //     if (!payload.scope.some(scope => ["hashtag@delete:user_account", "beach_bar@crud:user"].includes(scope))) {
+    //       return {
+    //         error: {
+    //           code: errors.UNAUTHORIZED_CODE,
+    //           message: "You are not allowed to delete 'this' user's account",
+    //         },
+    //       };
+    //     }
 
-        const user = await User.findOne({ where: { id: payload.sub }, relations: ["account", "customer"] });
-        if (!user) {
-          return { error: { code: errors.NOT_FOUND, message: errors.USER_NOT_FOUND_MESSAGE } };
-        }
+    //     const user = await User.findOne({ where: { id: payload.sub }, relations: ["account", "customer"] });
+    //     if (!user) {
+    //       return { error: { code: errors.NOT_FOUND, message: errors.USER_NOT_FOUND_MESSAGE } };
+    //     }
 
-        try {
-          if (user.customer) {
-            await user.customer.customSoftRemove(stripe);
-          }
-          await user.account.softRemove();
-          await user.softRemove();
+    //     try {
+    //       if (user.customer) {
+    //         await user.customer.customSoftRemove(stripe);
+    //       }
+    //       await user.account.softRemove();
+    //       await user.softRemove();
 
-          // delete the user in Redis too
-          await removeUserSessions(user.id, redis);
-        } catch (err) {
-          return { error: { message: `Something went wrong: ${err.message}` } };
-        }
+    //       // delete the user in Redis too
+    //       await removeUserSessions(user.id, redis);
+    //     } catch (err) {
+    //       return { error: { message: `Something went wrong: ${err.message}` } };
+    //     }
 
-        return {
-          deleted: true,
-        };
-      },
-    });
+    //     return {
+    //       deleted: true,
+    //     };
+    //   },
+    // });
   },
 });

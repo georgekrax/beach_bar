@@ -1,0 +1,31 @@
+.container {
+  padding: map-get($em-spacers, 20) map-get($em-spacers, 16);
+  cursor: pointer;
+  background-color: $grey-1;
+  @include transition-2s("ease-out", "background-color");
+
+  &:not(:last-child) {
+    border-bottom: 1px solid $grey-6;
+  }
+
+  & > div:first-child > svg {
+    margin-right: map-get($em-spacers, 16);
+  }
+
+  &:hover {
+    background-color: $grey-3;
+  }
+
+  &:active {
+    background-color: $grey-4;
+  }
+}
+
+.details {
+  flex: 1;
+
+  & > span:last-child {
+    color: $grey-8;
+    margin-top: 0.15em;
+  }
+}

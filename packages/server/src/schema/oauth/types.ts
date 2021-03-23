@@ -1,4 +1,4 @@
-import { objectType, unionType } from "nexus";
+import { objectType } from "nexus";
 import { UserType } from "../user/types";
 
 export const OAuthAuthorizationType = objectType({
@@ -16,16 +16,16 @@ export const OAuthAuthorizationType = objectType({
   },
 });
 
-export const OAuthAuthorizationResult = unionType({
-  name: "OAuthAuthorizationResult",
-  definition(t) {
-    t.members("OAuthAuthorization", "Error");
-  },
-  resolveType: item => {
-    if (item.name === "Error") {
-      return "Error";
-    } else {
-      return "OAuthAuthorization";
-    }
-  },
-});
+// export const OAuthAuthorizationResult = unionType({
+//   name: "OAuthAuthorizationResult",
+//   definition(t) {
+//     t.members("OAuthAuthorization", "Error");
+//   },
+//   resolveType: item => {
+//     if (item.error) {
+//       return "Error";
+//     } else {
+//       return "OAuthAuthorization";
+//     }
+//   },
+// });

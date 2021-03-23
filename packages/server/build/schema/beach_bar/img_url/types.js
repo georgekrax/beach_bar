@@ -34,7 +34,7 @@ exports.AddBeachBarImgUrlResult = nexus_1.unionType({
         t.members("AddBeachBarImgUrl", "Error");
     },
     resolveType: item => {
-        if (item.name === "Error") {
+        if (item.error) {
             return "Error";
         }
         else {
@@ -60,7 +60,7 @@ exports.UpdateBeachBarImgUrlResult = nexus_1.unionType({
         t.members("UpdateBeachBarImgUrl", "Error");
     },
     resolveType: item => {
-        if (item.name === "Error") {
+        if (item.error) {
             return "Error";
         }
         else {

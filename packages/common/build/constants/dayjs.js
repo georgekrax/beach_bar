@@ -4,4 +4,3 @@ exports.dayjsFormat = void 0;
 exports.dayjsFormat = Object.freeze({
     ISO_STRING: "YYYY-MM-DD",
 });
-//# sourceMappingURL=dayjs.js.map

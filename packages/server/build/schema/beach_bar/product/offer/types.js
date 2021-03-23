@@ -9,7 +9,8 @@ exports.CouponCodeInterface = nexus_1.interfaceType({
     name: "CouponCodeInterface",
     description: "Represents a coupon code interface for a #beach_bar",
     definition(t) {
-        t.field("id", { type: graphql_1.BigIntScalar });
+        t.id("id");
+        t.string("refCode");
         t.string("title");
         t.float("discountPercentage");
         t.boolean("isActive");
@@ -28,7 +29,8 @@ exports.OfferCampaignCodeInterface = nexus_1.interfaceType({
     name: "OfferCampaignCodeInterface",
     description: "Represents an offer code interface for an offer campaign",
     definition(t) {
-        t.field("id", { type: graphql_1.BigIntScalar });
+        t.id("id");
+        t.string("refCode");
         t.float("totalAmount", {
             description: "The total amount to make a discount from",
             resolve: o => o.campaign.calculateTotalProductPrice(),
@@ -80,10 +82,10 @@ exports.VoucherCodeQueryResult = nexus_1.unionType({
         t.members("CouponCode", "OfferCampaignCode", "Error");
     },
     resolveType: item => {
-        if (item.name === "Error") {
+        if (item.error) {
             return "Error";
         }
-        else if (item.name === "OfferCampaignCode") {
+        else if (item.totalAmount) {
             return "OfferCampaignCode";
         }
         else {
@@ -109,7 +111,7 @@ exports.AddCouponCodeResult = nexus_1.unionType({
         t.members("AddCouponCode", "Error");
     },
     resolveType: item => {
-        if (item.name === "Error") {
+        if (item.error) {
             return "Error";
         }
         else {
@@ -135,10 +137,10 @@ exports.UpdateCouponCodeResult = nexus_1.unionType({
         t.members("UpdateCouponCode", "Delete", "Error");
     },
     resolveType: item => {
-        if (item.name === "Error") {
+        if (item.error) {
             return "Error";
         }
-        else if (item.name === "Delete") {
+        else if (item.deleted) {
             return "Delete";
         }
         else {
@@ -164,7 +166,7 @@ exports.AddOfferCampaignResult = nexus_1.unionType({
         t.members("AddOfferCampaign", "Error");
     },
     resolveType: item => {
-        if (item.name === "Error") {
+        if (item.error) {
             return "Error";
         }
         else {
@@ -190,7 +192,7 @@ exports.UpdateOfferCampaignResult = nexus_1.unionType({
         t.members("UpdateOfferCampaign", "Error");
     },
     resolveType: item => {
-        if (item.name === "Error") {
+        if (item.error) {
             return "Error";
         }
         else {
@@ -216,7 +218,7 @@ exports.AddOfferCampaignCodeResult = nexus_1.unionType({
         t.members("AddOfferCampaignCode", "Error");
     },
     resolveType: item => {
-        if (item.name === "Error") {
+        if (item.error) {
             return "Error";
         }
         else {
@@ -238,7 +240,7 @@ exports.CouponCodeRevealResult = nexus_1.unionType({
         t.members("CouponCodeReveal", "Error");
     },
     resolveType: item => {
-        if (item.name === "Error") {
+        if (item.error) {
             return "Error";
         }
         else {
@@ -260,7 +262,7 @@ exports.OfferCampaignCodeRevealResult = nexus_1.unionType({
         t.members("OfferCampaignCodeReveal", "Error");
     },
     resolveType: item => {
-        if (item.name === "Error") {
+        if (item.error) {
             return "Error";
         }
         else {

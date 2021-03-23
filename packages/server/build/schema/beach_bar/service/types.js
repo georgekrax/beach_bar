@@ -12,8 +12,6 @@ exports.BeachBarServiceType = nexus_1.objectType({
             description: "The ID value of the feature",
         });
         t.string("name", { description: "The name of the feature" });
-        t.string("iconUrl", { description: "The URL value of the icon image of the feature" });
-        t.nullable.string("iconUrl", { description: "The URL value of the icon colored image of the feature, with color" });
     },
 });
 exports.BeachBarFeatureType = nexus_1.objectType({
@@ -62,7 +60,7 @@ exports.AddBeachBarFeatureResult = nexus_1.unionType({
         t.members("AddBeachBarFeature", "Error");
     },
     resolveType: item => {
-        if (item.name === "Error") {
+        if (item.error) {
             return "Error";
         }
         else {
@@ -90,7 +88,7 @@ exports.UpdateBeachBarFeatureResult = nexus_1.unionType({
         t.members("UpdateBeachBarFeature", "Error");
     },
     resolveType: item => {
-        if (item.name === "Error") {
+        if (item.error) {
             return "Error";
         }
         else {

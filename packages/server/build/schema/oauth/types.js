@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.OAuthAuthorizationResult = exports.OAuthAuthorizationType = void 0;
+exports.OAuthAuthorizationType = void 0;
 const nexus_1 = require("nexus");
 const types_1 = require("../user/types");
 exports.OAuthAuthorizationType = nexus_1.objectType({
@@ -15,19 +15,5 @@ exports.OAuthAuthorizationType = nexus_1.objectType({
             description: "The user being authorized",
             resolve: o => o.user,
         });
-    },
-});
-exports.OAuthAuthorizationResult = nexus_1.unionType({
-    name: "OAuthAuthorizationResult",
-    definition(t) {
-        t.members("OAuthAuthorization", "Error");
-    },
-    resolveType: item => {
-        if (item.name === "Error") {
-            return "Error";
-        }
-        else {
-            return "OAuthAuthorization";
-        }
     },
 });

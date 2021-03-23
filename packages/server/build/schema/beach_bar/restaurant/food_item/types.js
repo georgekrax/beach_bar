@@ -44,7 +44,7 @@ exports.AddRestaurantFoodItemResult = nexus_1.unionType({
         t.members("AddRestaurantFoodItem", "Error");
     },
     resolveType: item => {
-        if (item.name === "Error") {
+        if (item.error) {
             return "Error";
         }
         else {
@@ -70,7 +70,7 @@ exports.UpdateRestaurantFoodItemResult = nexus_1.unionType({
         t.members("UpdateRestaurantFoodItem", "Error");
     },
     resolveType: item => {
-        if (item.name === "Error") {
+        if (item.error) {
             return "Error";
         }
         else {

@@ -1,0 +1,79 @@
+query Payment($refCode: String!) {
+  payment(refCode: $refCode) {
+    id
+    refCode
+    isRefunded
+    timestamp
+    cart {
+      id
+      total
+      products {
+        quantity
+        date
+        time {
+          id
+          value
+        }
+        product {
+          id
+          name
+          price
+          imgUrl
+          beachBar {
+            id
+            name
+            formattedLocation
+            defaultCurrency {
+              symbol
+            }
+          }
+        }
+      }
+    }
+    card {
+      id
+      last4
+      brand {
+        id
+        name
+      }
+      country {
+        id
+        currency {
+          id
+          symbol
+        }
+      }
+      customer {
+        id
+        email
+        phoneNumber
+        country {
+          id
+          callingCode
+        }
+      }
+    }
+    status {
+      id
+      status
+    }
+    voucherCode {
+      id
+      couponCode {
+        id
+        refCode
+        discountPercentage
+      }
+      offerCode {
+        id
+        refCode
+        totalAmount
+        timesUsed
+        campaign {
+          id
+        }
+      }
+    }
+  }
+}

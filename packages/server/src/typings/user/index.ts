@@ -1,55 +1,61 @@
-import { Dayjs } from "dayjs";
+import { Account } from "entity/Account";
+import { BeachBar } from "entity/BeachBar";
 import { BeachBarReview } from "entity/BeachBarReview";
-import { City } from "entity/City";
-import { Country } from "entity/Country";
 import { User } from "entity/User";
-import { UserContactDetails } from "entity/UserContactDetails";
-import { ErrorType } from "typings/.index";
+import { UserHistory } from "entity/UserHistory";
+import { UserSearch } from "entity/UserSearch";
+import { UpdateType } from "typings/.index";
 
-export type UserType = {
-  id: number;
-  email: string;
-  firstName?: string;
-  lastName?: string;
+export type TUser = {
   reviews?: BeachBarReview[];
-  account?: {
-    id: number;
-    user: User;
-    userId: number;
-    personTitle?: string;
-    imgUrl?: string;
-    birthday?: Dayjs;
-    age?: number;
-    country?: Country;
-    countryId?: number;
-    city?: City;
-    cityId?: bigint;
-    address?: string;
-    zipCode?: string;
-    contactDetails?: UserContactDetails[];
-  };
-};
+  account?: Partial<
+    Pick<
+      Account,
+      | "birthday"
+      | "phoneNumber"
+      | "city"
+      | "trackHistory"
+      | "zipCode"
+      | "address"
+      | "country"
+      | "countryId"
+      | "age"
+      | "imgUrl"
+      | "honorificTitle"
+      | "user"
+      | "userId"
+      | "id"
+    >
+  >;
+} & Pick<User, "id" | "email" | "firstName" | "lastName" | "reviewVotes">;
 
-export interface UpdateUserInfo {
-  email: string;
-  firstName?: string;
-  lastName?: string;
-  imgUrl?: string;
-  personTitle?: string;
-  birthday?: Dayjs;
-  address?: string;
-  zipCode?: string;
-  countryId?: number;
-  cityId?: bigint;
-  trackHistory?: boolean;
-}
+export type UpdateUserInfo = Partial<
+  Pick<
+    Account,
+    | "birthday"
+    | "phoneNumber"
+    | "telCountryId"
+    | "zipCode"
+    | "trackHistory"
+    | "city"
+    | "countryId"
+    | "address"
+    | "honorificTitle"
+    | "imgUrl"
+  >
+> &
+  Pick<User, "firstName" | "lastName" | "email">;
 
-type UserReturnType = {
+export type TUserReturn = {
   user: User;
 };
 
-export type UserLoginType = (UserReturnType & { accessToken: string }) | ErrorType;
+export type TUserLogin = TUserReturn & { accessToken: string };
 
-export type UserSignUpType = UserReturnType | ErrorType;
+export type UpdateUserType = TUserReturn & UpdateType;
 
-export type UpdateUserType = UserReturnType | ErrorType;
+export type TUserHistoryExtended = {
+  userHistory: UserHistory;
+  beachBar?: BeachBar;
+  search?: UserSearch;
+};

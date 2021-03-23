@@ -1,3 +1,4 @@
+import { errors } from "@beach_bar/common";
 import { beachBarReviewRatingMaxValue } from "constants/_index";
 import { Dayjs } from "dayjs";
 import {
@@ -9,6 +10,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -19,7 +21,10 @@ import { Customer } from "./Customer";
 import { Payment } from "./Payment";
 import { ReviewAnswer } from "./ReviewAnswer";
 import { ReviewVisitType } from "./ReviewVisitType";
+import { ReviewVote } from "./ReviewVote";
+import { ReviewVoteType } from "./ReviewVoteType";
 import { MonthTime } from "./Time";
+import { User } from "./User";
 
 @Entity({ name: "beach_bar_review", schema: "public" })
 @Check(`"ratingValue" >= 0 AND "ratingValue" <= ${beachBarReviewRatingMaxValue}`)
@@ -45,12 +50,6 @@ export class BeachBarReview extends BaseEntity {
   @Column({ type: "integer", name: "month_time_id", nullable: true })
   monthTimeId?: number;
 
-  @Column({ type: "integer", name: "upvotes", default: () => 0 })
-  upvotes: number;
-
-  @Column({ type: "integer", name: "downvotes", default: () => 0 })
-  downvotes: number;
-
   @Column({ type: "text", name: "positive_comment", nullable: true })
   positiveComment?: string;
 
@@ -59,6 +58,9 @@ export class BeachBarReview extends BaseEntity {
 
   @Column({ type: "text", name: "review", nullable: true })
   review?: string;
+
+  @OneToMany(() => ReviewVote, vote => vote.review, { nullable: false, cascade: ["soft-remove", "recover"] })
+  votes: ReviewVote[];
 
   @ManyToOne(() => BeachBar, beachBar => beachBar.reviews, { nullable: false, cascade: ["soft-remove", "recover"] })
   @JoinColumn({ name: "beach_bar_id" })
@@ -74,11 +76,11 @@ export class BeachBarReview extends BaseEntity {
 
   @ManyToOne(() => ReviewVisitType, reviewVisitType => reviewVisitType.reviews, { nullable: true })
   @JoinColumn({ name: "visit_type_id" })
-  visitType?: ReviewVisitType;
+  visitType?: ReviewVisitType | null;
 
   @ManyToOne(() => MonthTime, monthTime => monthTime.reviews, { nullable: true })
   @JoinColumn({ name: "month_time_id" })
-  monthTime?: MonthTime;
+  monthTime?: MonthTime | null;
 
   @OneToOne(() => ReviewAnswer, reviewAnswer => reviewAnswer.review)
   answer: ReviewAnswer;
@@ -94,59 +96,73 @@ export class BeachBarReview extends BaseEntity {
 
   async update(options: {
     ratingValue?: number;
-    visitTypeId?: number;
-    monthTimeId?: number;
+    visitTypeId?: string;
+    monthTimeId?: string;
     positiveComment?: string;
     negativeComment?: string;
     review?: string;
-  }): Promise<BeachBarReview | any> {
+  }): Promise<BeachBarReview> {
     const { ratingValue, visitTypeId, monthTimeId, positiveComment, negativeComment, review } = options;
     try {
-      if (ratingValue && ratingValue !== this.ratingValue && ratingValue >= 1 && ratingValue <= 10) {
+      if (ratingValue && ratingValue !== this.ratingValue && ratingValue >= 1 && ratingValue <= beachBarReviewRatingMaxValue)
         this.ratingValue = ratingValue;
-      }
-      if (visitTypeId && visitTypeId !== this.visitTypeId) {
-        const visitType = await ReviewVisitType.findOne(visitTypeId);
-        if (!visitType) {
-          throw new Error();
+      if (visitTypeId && visitTypeId !== this.visitTypeId?.toString()) {
+        if (visitTypeId.toLowerCase() === "none") this.visitType = null;
+        else {
+          const visitType = await ReviewVisitType.findOne(visitTypeId);
+          if (!visitType) throw new Error();
+          this.visitType = visitType;
         }
-        this.visitType = visitType;
       }
-      if (monthTimeId && monthTimeId !== this.monthTimeId) {
-        const monthTime = await MonthTime.findOne(monthTimeId);
-        if (!monthTime) {
-          throw new Error();
+      if (monthTimeId && monthTimeId !== this.monthTimeId?.toString()) {
+        if (monthTimeId.toLowerCase() === "none") this.monthTime = null;
+        else {
+          const monthTime = await MonthTime.findOne(monthTimeId);
+          if (!monthTime) throw new Error();
+          this.monthTime = monthTime;
         }
-        this.monthTime = monthTime;
       }
-      if (positiveComment && positiveComment !== this.positiveComment) {
-        this.positiveComment = positiveComment;
-      }
-      if (negativeComment && negativeComment !== this.negativeComment) {
-        this.negativeComment = negativeComment;
-      }
-      if (review && review !== this.review) {
-        this.review = review;
-      }
+      if (positiveComment && positiveComment !== this.positiveComment) this.positiveComment = positiveComment;
+      if (negativeComment && negativeComment !== this.negativeComment) this.negativeComment = negativeComment;
+      if (review && review !== this.review) this.review = review;
       await this.save();
-      await this.beachBar.updateRedis();
+      // TODO: Change later
+      // await this.beachBar.updateRedis();
       return this;
     } catch (err) {
       throw new Error(err.message);
     }
   }
 
-  async vote(upvote?: boolean, downvote?: boolean): Promise<BeachBarReview | any> {
+  async vote(userId: number, upvote?: boolean, downvote?: boolean): Promise<void> {
+    const user = await User.findOne({ where: { id: userId }, relations: ["reviewVotes"] });
+    if (!user) throw new Error(errors.USER_NOT_FOUND_MESSAGE);
+    const userVoteForThisReview = await ReviewVote.findOne({
+      where: { reviewId: this.id, userId },
+      relations: ["review", "type", "user"],
+    });
+
     try {
-      if (upvote) {
-        this.upvotes = this.upvotes + 1;
-        await this.save();
-      } else if (downvote) {
-        this.downvotes = this.downvotes + 1;
-        await this.save();
+      if (!userVoteForThisReview)
+        await ReviewVote.create({
+          typeId: upvote ? 1 : 2,
+          userId,
+          review: this,
+        }).save();
+      else if (
+        (userVoteForThisReview.typeId.toString() === "1" && upvote) ||
+        (userVoteForThisReview.typeId.toString() === "2" && downvote)
+      )
+        await userVoteForThisReview.softRemove();
+      else if (upvote || downvote) {
+        const type = await ReviewVoteType.findOne({ where: { value: upvote ? "upvote" : "downvote" } });
+        if (type) {
+          userVoteForThisReview.type = type;
+          await userVoteForThisReview.save();
+        }
       }
-      await this.beachBar.updateRedis();
-      return this;
+      // TODO: Change later
+      // await this.beachBar.updateRedis();
     } catch (err) {
       throw new Error(err.message);
     }
@@ -155,6 +171,7 @@ export class BeachBarReview extends BaseEntity {
   async softRemove(): Promise<any> {
     const findOptions: any = { reviewId: this.id };
     await softRemove(BeachBarReview, { id: this.id }, [ReviewAnswer], findOptions);
-    await this.beachBar.updateRedis();
+    // TODO: Change later
+    // await this.beachBar.updateRedis();
   }
 }

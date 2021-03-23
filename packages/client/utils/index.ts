@@ -1,2 +1,1 @@
-// Hooks
-export { useLocalStorage } from "./hooks/useLocalStorage";
+export { avg } from "./arr";

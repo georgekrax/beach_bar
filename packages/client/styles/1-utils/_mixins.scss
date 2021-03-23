@@ -7,7 +7,7 @@
 }
 
 @mixin masonry-item--small($elem: 1) {
-  .item {
+  .item:not([data-length="1"]) {
     &:nth-child(#{$elem}) {
       @extend .item--small;
     }

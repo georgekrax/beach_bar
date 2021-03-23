@@ -1,23 +1,10 @@
-.container {
-  margin-top: map-get($em-spacers, 40);
-  margin-bottom: map-get($em-spacers, 16);
+.header {
+  max-width: 65%;
+  width: fit-content;
+  height: fit-content;
 
-  & > div {
-    a {
-      @extend .body-14;
-      text-decoration: none;
-      outline: none;
-      margin-right: 0.375em;
-      color: $secondary;
-    }
-
-    svg {
-      // align-self: flex-end;
-      margin-top: 3%;
-
-      path {
-        stroke: $secondary;
-      }
-    }
+  h4 {
+    text-transform: none;
+    margin-bottom: map-get($em-spacers, 4);
   }
 }

@@ -1,0 +1,8 @@
+mutation UpdateCartProduct($cartId: ID!, $productId: Int!, $quantity: Int) {
+  updateCartProduct(cartId: $cartId, productId: $productId, quantity: $quantity) {
+    updated
+    product {
+      quantity
+    }
+  }
+}

@@ -1,0 +1,14 @@
+mutation DeleteCartProduct($cartId: ID!, $productId: Int!) {
+  deleteCartProduct(cartId: $cartId, productId: $productId) {
+    ... on Delete {
+      deleted
+    }
+
+    ... on Error {
+      error {
+        code
+        message
+      }
+    }
+  }
+}

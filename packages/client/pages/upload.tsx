@@ -1,10 +1,8 @@
+import { gql } from "@apollo/client";
 import { useState } from "react";
-import { FileWithPath, useDropzone } from "react-dropzone";
-import { graphql } from "react-relay";
-// import { uploadMutation } from "../generated/uploadMutation.graphql";
-import { initEnvironment } from "../lib/createEnvironment";
+import { FileWithPath } from "react-dropzone";
 
-const mutation = graphql`
+const mutation = gql`
   mutation uploadMutation($filename: String!, $filetype: String!, $tableName: String!) {
     signS3(filename: $filename, filetype: $filetype, tableName: $tableName) {
       signedRequest
@@ -13,13 +11,13 @@ const mutation = graphql`
   }
 `;
 
-export const Upload: any = ({ environment }) => {
+export const Upload: any = () => {
   const [loading, setLoading] = useState(false);
   const [uploaded, setUploaded] = useState(0);
   const [files, setFiles] = useState([]);
 
   const onDrop = (me: FileWithPath[]) => {
-    setFiles(me);
+    // setFiles(me);
     // for (let i = 0; i < files.length; i++) {
     //   const file = files[i]
     //   setLoading(true);
@@ -51,11 +49,12 @@ export const Upload: any = ({ environment }) => {
     //   setUploaded(uploaded + 1);
     // }
   };
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, multiple: true });
+  // const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, multiple: true });
 
   return (
-    <div {...getRootProps()}>
-      <input {...getInputProps()} />
+    <div>
+      <div>hey</div>
+      {/* <input {...getInputProps()} />
       {isDragActive || (loading && uploaded < files.length) ? (
         <p>Please wait to upload file(s)</p>
       ) : (
@@ -64,17 +63,9 @@ export const Upload: any = ({ environment }) => {
           <span>Or click to select files</span>
         </>
       )}
-      {uploaded > files.length && <p>File(s) successfully have been uploaded</p>}
+      {uploaded > files.length && <p>File(s) successfully have been uploaded</p>} */}
     </div>
   );
 };
-
-export async function getStaticProps() {
-  const { environment } = initEnvironment();
-
-  const records = environment.getStore().getSource().toJSON();
-
-  return { props: { records } };
-}
 
 export default Upload;

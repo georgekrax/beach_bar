@@ -49,10 +49,10 @@ const softRemove_1 = require("utils/softRemove");
 const Account_1 = require("./Account");
 const BeachBarReview_1 = require("./BeachBarReview");
 const Cart_1 = require("./Cart");
-const City_1 = require("./City");
 const Country_1 = require("./Country");
 const Customer_1 = require("./Customer");
 const Owner_1 = require("./Owner");
+const ReviewVote_1 = require("./ReviewVote");
 const UserFavoriteBar_1 = require("./UserFavoriteBar");
 const UserHistory_1 = require("./UserHistory");
 const UserSearch_1 = require("./UserSearch");
@@ -62,72 +62,80 @@ let User = User_1 = class User extends typeorm_1.BaseEntity {
         return `${this.firstName ? this.firstName : ""}${this.firstName && this.lastName ? " " : ""}${this.lastName ? this.lastName : ""}`;
     }
     getRedisKey(scope = false) {
-        if (scope) {
+        if (scope)
             return `${redisKeys_1.default.USER}:${this.id}:${redisKeys_1.default.USER_SCOPE}`;
-        }
         return `${redisKeys_1.default.USER}:${this.id}`;
     }
     getIsNew(data) {
         let isNew = false;
-        const { email, firstName, lastName, imgUrl, personTitle, birthday, countryId, cityId, address, zipCode } = data;
+        const { email, firstName, lastName, imgUrl, honorificTitle, birthday, countryId, city, phoneNumber, address, zipCode } = data;
         if (email !== this.email ||
             firstName !== this.firstName ||
             lastName !== this.lastName ||
             imgUrl !== this.account.imgUrl ||
-            personTitle !== this.account.personTitle ||
+            honorificTitle !== this.account.honorificTitle ||
             birthday !== this.account.birthday ||
             countryId !== this.account.countryId ||
-            cityId !== this.account.cityId ||
+            city !== this.account.city ||
+            phoneNumber !== this.account.phoneNumber ||
             address !== this.account.address ||
-            zipCode !== this.account.zipCode) {
+            zipCode !== this.account.zipCode)
             isNew = true;
-        }
         return isNew;
     }
     update(data) {
         return __awaiter(this, void 0, void 0, function* () {
             const isNew = this.getIsNew(data);
-            const { email, firstName, lastName, imgUrl, personTitle, birthday, countryId, cityId, address, zipCode, trackHistory } = data;
+            const { email, firstName, lastName, imgUrl, honorificTitle, birthday, countryId, city, phoneNumber, telCountryId, address, zipCode, trackHistory, } = data;
             try {
-                if (email && email !== this.email) {
+                if (email && email !== this.email)
                     this.email = email;
-                }
-                if (firstName && firstName !== this.firstName) {
+                if (firstName && firstName !== this.firstName)
                     this.firstName = firstName;
-                }
-                if (lastName && lastName !== this.lastName) {
+                if (lastName && lastName !== this.lastName)
                     this.lastName = lastName;
-                }
-                if (imgUrl && imgUrl !== this.account.imgUrl) {
+                if (imgUrl && imgUrl !== this.account.imgUrl)
                     this.account.imgUrl = imgUrl.toString();
+                if (honorificTitle && honorificTitle !== this.account.honorificTitle) {
+                    if (honorificTitle.toLowerCase().trim() === "none")
+                        this.account.honorificTitle = null;
+                    else
+                        this.account.honorificTitle = honorificTitle;
                 }
-                if (personTitle && personTitle !== this.account.personTitle) {
-                    this.account.personTitle = personTitle;
+                if (birthday) {
+                    if (birthday.toString().toLowerCase().trim() === "none")
+                        this.account.birthday = null;
+                    else if (dayjs_1.default(birthday) !== (this.account.birthday ? dayjs_1.default(this.account.birthday) : undefined))
+                        this.account.birthday = birthday;
                 }
-                if (birthday && dayjs_1.default(birthday) !== dayjs_1.default(this.account.birthday)) {
-                    this.account.birthday = birthday;
-                }
-                if (address && address !== this.account.address) {
+                if (address && address !== this.account.address)
                     this.account.address = address;
-                }
-                if (zipCode && zipCode !== this.account.zipCode) {
+                if (zipCode && zipCode !== this.account.zipCode)
                     this.account.zipCode = zipCode;
-                }
                 if (countryId && countryId !== this.account.countryId) {
-                    const country = yield Country_1.Country.findOne(countryId);
-                    if (country) {
-                        this.account.country = country;
+                    if (countryId.toString().toLowerCase().trim() === "none")
+                        this.account.country = null;
+                    else {
+                        const country = yield Country_1.Country.findOne(countryId);
+                        if (country)
+                            this.account.country = country;
                     }
                 }
-                if (cityId && cityId !== this.account.cityId) {
-                    const city = yield City_1.City.findOne({ id: cityId });
-                    if (city) {
-                        this.account.city = city;
+                if (city && city !== this.account.city)
+                    this.account.city = city;
+                if (phoneNumber && phoneNumber !== this.account.phoneNumber)
+                    this.account.phoneNumber = phoneNumber;
+                if (telCountryId && telCountryId !== this.account.telCountryId) {
+                    if (telCountryId.toString().toLowerCase().trim() === "none")
+                        this.account.telCountry = null;
+                    else {
+                        const telCountry = yield Country_1.Country.findOne(telCountryId);
+                        if (telCountryId)
+                            this.account.telCountry = telCountry;
                     }
                 }
-                if (trackHistory !== undefined && trackHistory !== this.account.trackHistory) {
+                if (trackHistory !== undefined && trackHistory !== this.account.trackHistory)
                     this.account.trackHistory = trackHistory;
-                }
                 if (isNew) {
                     yield this.save();
                     yield this.account.save();
@@ -142,7 +150,7 @@ let User = User_1 = class User extends typeorm_1.BaseEntity {
     softRemove() {
         return __awaiter(this, void 0, void 0, function* () {
             const findOptions = { userId: this.id };
-            yield softRemove_1.softRemove(User_1, { id: this.id }, [Account_1.Account, BeachBarReview_1.BeachBarReview, Cart_1.Cart, UserFavoriteBar_1.UserFavoriteBar, Owner_1.Owner, Customer_1.Customer], findOptions);
+            yield softRemove_1.softRemove(User_1, { id: this.id }, [Account_1.Account, BeachBarReview_1.BeachBarReview, Cart_1.Cart, UserFavoriteBar_1.UserFavoriteBar, Owner_1.Owner, Customer_1.Customer, ReviewVote_1.ReviewVote], findOptions);
         });
     }
 };
@@ -206,6 +214,10 @@ __decorate([
     typeorm_1.OneToMany(() => Vote_1.Vote, vote => vote.user, { nullable: true }),
     __metadata("design:type", Array)
 ], User.prototype, "votes", void 0);
+__decorate([
+    typeorm_1.OneToMany(() => ReviewVote_1.ReviewVote, vote => vote.user, { nullable: true }),
+    __metadata("design:type", Array)
+], User.prototype, "reviewVotes", void 0);
 __decorate([
     typeorm_1.OneToOne(() => Owner_1.Owner, owner => owner.user),
     __metadata("design:type", Owner_1.Owner)

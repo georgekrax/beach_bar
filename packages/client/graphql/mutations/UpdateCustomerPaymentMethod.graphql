@@ -1,0 +1,29 @@
+mutation UpdateCustomerPaymentMethod(
+  $cardId: ID!
+  $expMonth: Int
+  $expYear: Int
+  $cardholderName: String
+  $isDefault: Boolean
+) {
+  updateCustomerPaymentMethod(
+    cardId: $cardId
+    expMonth: $expMonth
+    expYear: $expYear
+    cardholderName: $cardholderName
+    isDefault: $isDefault
+  ) {
+    card {
+      id
+      expMonth
+      expYear
+      cardholderName
+      isDefault
+      last4
+      brand {
+        id
+        name
+      }
+    }
+    updated
+  }
+}

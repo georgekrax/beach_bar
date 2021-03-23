@@ -20,6 +20,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 var CartProduct_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CartProduct = void 0;
+const common_1 = require("@beach_bar/common");
 const dayjs_1 = require("dayjs");
 const typeorm_1 = require("typeorm");
 const softRemove_1 = require("utils/softRemove");
@@ -42,15 +43,15 @@ __decorate([
     __metadata("design:type", Number)
 ], CartProduct.prototype, "productId", void 0);
 __decorate([
-    typeorm_1.Column({ type: "smallint", name: "quantity", default: () => 1 }),
+    typeorm_1.PrimaryColumn({ type: "smallint", name: "quantity", default: () => 1 }),
     __metadata("design:type", Number)
 ], CartProduct.prototype, "quantity", void 0);
 __decorate([
-    typeorm_1.Column({ type: "date", name: "date", default: () => `CURRENT_DATE` }),
+    typeorm_1.PrimaryColumn({ type: "date", name: "date", default: () => `CURRENT_DATE` }),
     __metadata("design:type", dayjs_1.Dayjs)
 ], CartProduct.prototype, "date", void 0);
 __decorate([
-    typeorm_1.Column({ type: "integer", name: "time_id" }),
+    typeorm_1.PrimaryColumn({ type: "integer", name: "time_id" }),
     __metadata("design:type", Number)
 ], CartProduct.prototype, "timeId", void 0);
 __decorate([
@@ -82,6 +83,6 @@ __decorate([
 ], CartProduct.prototype, "deletedAt", void 0);
 CartProduct = CartProduct_1 = __decorate([
     typeorm_1.Entity({ name: "cart_product", schema: "public" }),
-    typeorm_1.Check(`"quantity" >= 0 AND "quantity" <= 20`)
+    typeorm_1.Check(`"quantity" >= ${common_1.COMMON_CONFIG.DATA.cartProductQuantity.min} AND "quantity" <= ${common_1.COMMON_CONFIG.DATA.cartProductQuantity.max}`)
 ], CartProduct);
 exports.CartProduct = CartProduct;

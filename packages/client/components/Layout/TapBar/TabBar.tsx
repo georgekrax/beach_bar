@@ -1,11 +1,12 @@
+import { useHasMounted } from "@hashtag-design-system/components";
 import { animate, motion, useAnimation, useMotionValue } from "framer-motion";
 import range from "lodash/range";
 import { useRouter } from "next/router";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { CONFIG } from "../../../config";
 import Icons, { TapBarIndicatorIconPath } from "../../Icons";
-import styles from "./TapBar.module.scss";
 import { MenuItem } from "./MenuItem";
+import styles from "./TapBar.module.scss";
 
 const CLIP_PATH_VALUES = {
   "0%": "circle(0% at 50% 100%)",
@@ -18,24 +19,30 @@ export type Props = {
   active?: 1 | 2 | 3 | 4;
 };
 
-const TabBar: React.FC<Props> = ({ active, children }) => {
+const TabBar: React.FC<Props> = React.memo(({ active, children }) => {
   const indicatorAnimation = useAnimation();
   const svgAnimation = useAnimation();
   const ballAnimation = useAnimation();
   const overlayAnimation = range(0, 4).map(() => useAnimation());
   const ref = useRef<HTMLLIElement[] | null[]>([]);
   const [left, setLeft] = useState(0);
-  const { pathname } = useRouter();
-  const currentId = useMemo(() => (active ? active - 1 : CONFIG.TapBarPageIdx[pathname]), [active, pathname]);
+  const { pathname, push } = useRouter();
+  const currentId = useMemo(() => (active ? active - 1 : CONFIG.TapBarPageIdx["/" + pathname.split("/")[1]]), [
+    active,
+    pathname,
+  ]);
+
   const opacity = useMotionValue(1);
+  const [hasMounted] = useHasMounted();
   const pagesArr: { pathname: TapBarPage; children: React.ReactNode }[] = useMemo(
     () => [
       {
         pathname: "/",
         children: (
           <>
-            <Icons.Search />
+            <Icons.Search large />
             <Icons.Search.Filled
+              large
               initial={{ clipPath: CLIP_PATH_VALUES["0%"] }}
               animate={overlayAnimation[CONFIG.TapBarPageIdx["/"]]}
             />
@@ -46,8 +53,9 @@ const TabBar: React.FC<Props> = ({ active, children }) => {
         pathname: "/map",
         children: (
           <>
-            <Icons.Map />
+            <Icons.Map large />
             <Icons.Map.Filled
+              large
               initial={{ clipPath: CLIP_PATH_VALUES["0%"] }}
               animate={overlayAnimation[CONFIG.TapBarPageIdx["/map"]]}
             />
@@ -58,8 +66,9 @@ const TabBar: React.FC<Props> = ({ active, children }) => {
         pathname: "/shopping_cart",
         children: (
           <>
-            <Icons.ShoppingCart />
+            <Icons.ShoppingCart large />
             <Icons.ShoppingCart.Filled
+              large
               initial={{ clipPath: CLIP_PATH_VALUES["0%"] }}
               animate={overlayAnimation[CONFIG.TapBarPageIdx["/shopping_cart"]]}
             />
@@ -67,13 +76,14 @@ const TabBar: React.FC<Props> = ({ active, children }) => {
         ),
       },
       {
-        pathname: "/user",
+        pathname: "/account",
         children: (
           <>
-            <Icons.UserAvatar />
+            <Icons.UserAvatar large />
             <Icons.UserAvatar.Filled
+              large
               initial={{ clipPath: CLIP_PATH_VALUES["0%"] }}
-              animate={overlayAnimation[CONFIG.TapBarPageIdx["/user"]]}
+              animate={overlayAnimation[CONFIG.TapBarPageIdx["/account"]]}
             />
           </>
         ),
@@ -85,62 +95,50 @@ const TabBar: React.FC<Props> = ({ active, children }) => {
   const handleClick = async (e: React.MouseEvent<HTMLLIElement>, nextId: number) => {
     const { currentTarget } = e;
     const newLeft = currentTarget.getBoundingClientRect().left;
-
     // Animation
     // * Specific animation duration is important here
     // By iterating on all animations, we check / ensure that all are hidden
-    overlayAnimation.forEach(animation => animation.start({ clipPath: CLIP_PATH_VALUES["0%"] }, { duration: 0.5 }));
+    overlayAnimation.forEach(animation => animation.start({ clipPath: CLIP_PATH_VALUES["0%"] }, { duration: 0.35 }));
     animate(opacity, 0);
-    if (nextId > currentId) {
-      svgAnimation.start({ d: TapBarIndicatorIconPath.fluid.right });
-    } else if (nextId < currentId) {
-      svgAnimation.start({ d: TapBarIndicatorIconPath.fluid.left });
-    } else {
-      svgAnimation.start({ d: TapBarIndicatorIconPath.fluid.middle });
-    }
+    if (nextId > currentId) svgAnimation.start({ d: TapBarIndicatorIconPath.fluid.right });
+    else if (nextId < currentId) svgAnimation.start({ d: TapBarIndicatorIconPath.fluid.left });
+    else svgAnimation.start({ d: TapBarIndicatorIconPath.fluid.middle });
     await indicatorAnimation.start({ left: newLeft }, { type: "tween", duration: 0.2 });
     svgAnimation.start({ d: TapBarIndicatorIconPath.default });
     animate(opacity, 1);
-    await ballAnimation.start(
-      { bottom: nextId === 3 ? "40%" : "50%" },
-      { type: "tween", ease: "easeInOut", duration: 0.5 }
-    );
-    ballAnimation.set({ visibility: "hidden" });
-    overlayAnimation[nextId].start({ clipPath: CLIP_PATH_VALUES["100%"] });
-    ballAnimation.set({ bottom: "-50%" });
-    ballAnimation.set({ visibility: "visible" });
+
+    await ballAnimation.start({ bottom: nextId === 3 ? "40%" : "50%" }, { type: "tween", ease: "easeInOut" });
+    push({ pathname: pagesArr[nextId].pathname });
+
+    if (hasMounted) {
+      ballAnimation.set({ visibility: "hidden" });
+      overlayAnimation[nextId].start({ clipPath: CLIP_PATH_VALUES["100%"] });
+      ballAnimation.set({ bottom: "-50%" });
+      ballAnimation.set({ visibility: "visible" });
+    }
   };
 
   useLayoutEffect(() => {
     async function promiseFunc() {
-      const activeLeft = ref.current[currentId]?.getBoundingClientRect().left;
-      if (activeLeft) {
-        setLeft(activeLeft);
-      }
+      const activeLeft = ref.current[currentId || 0]?.getBoundingClientRect().left;
+      if (activeLeft) setLeft(activeLeft);
     }
     promiseFunc();
   }, []);
 
   useEffect(() => {
     ballAnimation.set({ bottom: "-50%" });
-    overlayAnimation[currentId].set({ clipPath: CLIP_PATH_VALUES["100%"] });
+    overlayAnimation[currentId || 0].set({ clipPath: CLIP_PATH_VALUES["100%"] });
   }, []);
 
   return (
     <>
       <nav className={styles["tapbar__container"] + " w-100 flex-column-center-center"}>
         <ul className={styles["tapbar__menu-list"] + " w-100"}>
-          {pagesArr.map(({ pathname, children }) => {
-            const id = CONFIG.TapBarPageIdx[pathname];
-
+          {pagesArr.map(({ pathname: pagePathname, children }) => {
+            const id = CONFIG.TapBarPageIdx[pagePathname];
             return (
-              <MenuItem
-                key={id}
-                id={id}
-                pathname={pathname}
-                ref={el => (ref.current[id] = el)}
-                handleClick={handleClick}
-              >
+              <MenuItem key={id} id={id} ref={el => (ref.current[id] = el)} handleClick={handleClick}>
                 {children}
               </MenuItem>
             );
@@ -149,16 +147,21 @@ const TabBar: React.FC<Props> = ({ active, children }) => {
         <motion.div className={styles["tapbar__gooey__container"]} style={{ left }} animate={indicatorAnimation}>
           <div className={styles["tapbar__gooey__container--effect"] + " flex-column-flex-end-center"}>
             <motion.div className={styles["tapbar__gooey__ball"]} animate={ballAnimation} />
-            <Icons.TapBarIndicator style={{ opacity }} transition={{ duration: 2 }} className={styles["tapbar__indicator"]} />
+            <Icons.TapBarIndicator
+              style={{ opacity }}
+              transition={{ duration: 2 }}
+              className={styles["tapbar__indicator"]}
+            />
           </div>
-          <Icons.TapBarIndicator animate={svgAnimation} className={styles["tapbar__indicator"] + " " + styles["overlap"]} />
+          <Icons.TapBarIndicator
+            animate={svgAnimation}
+            className={styles["tapbar__indicator"] + " " + styles["overlap"]}
+          />
         </motion.div>
       </nav>
       {children}
     </>
   );
-};
-
-TabBar.displayName = "TabBar";
+});
 
 export default TabBar;

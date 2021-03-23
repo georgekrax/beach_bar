@@ -9,10 +9,7 @@ exports.HourTimeType = nexus_1.objectType({
     definition(t) {
         t.id("id");
         t.string("value");
-        t.field("utcValue", {
-            type: graphql_1.TimeScalar,
-            description: "The time value in the UTC format and corresponding value",
-        });
+        t.field("utcValue", { type: graphql_1.TimeScalar, resolve: o => o.value });
     },
 });
 exports.QuarterTimeType = nexus_1.objectType({
@@ -21,10 +18,7 @@ exports.QuarterTimeType = nexus_1.objectType({
     definition(t) {
         t.id("id");
         t.string("value");
-        t.field("utcValue", {
-            type: graphql_1.TimeScalar,
-            description: "The time value in the UTC format and corresponding value",
-        });
+        t.field("utcValue", { type: graphql_1.TimeScalar, resolve: o => o.value });
     },
 });
 exports.MonthTimeType = nexus_1.objectType({

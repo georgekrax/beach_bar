@@ -1,0 +1,11 @@
+query GetOrCreateCustomer($email: Email, $phoneNumber: String, $countryAlpha2Code: String) {
+  getOrCreateCustomer(email: $email, phoneNumber: $phoneNumber, countryAlpha2Code: $countryAlpha2Code) {
+    customer {
+      id
+      user {
+        id
+      }
+    }
+    added
+  }
+}

@@ -1,4 +1,4 @@
-import { gql } from "apollo-server-express";
+import { gql } from "graphql-request";
 
 const query = gql`
   mutation authorizeWithHashtag(

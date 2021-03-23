@@ -9,7 +9,7 @@ export {
   JSONScalar,
   TimeScalar,
   UploadScalar,
-  UrlScalar,
+  UrlScalar
 } from "@the_hashtag/common/dist/graphql";
 export * from "./aws/mutation";
 export * from "./aws/types";
@@ -36,6 +36,8 @@ export * from "./beach_bar/restaurant/food_item/mutation";
 export * from "./beach_bar/restaurant/food_item/types";
 export * from "./beach_bar/restaurant/mutation";
 export * from "./beach_bar/restaurant/types";
+export * from "./beach_bar/review/votes/mutation";
+export * from "./beach_bar/review/votes/types";
 export * from "./beach_bar/review/answer/mutation";
 export * from "./beach_bar/review/answer/types";
 export * from "./beach_bar/review/mutation";
@@ -50,9 +52,11 @@ export * from "./cart/product/types";
 export * from "./cart/query";
 export * from "./cart/types";
 export * from "./customer/card/mutation";
+export * from "./customer/card/query";
 export * from "./customer/card/types";
-export * from "./customer/mutation";
 export * from "./customer/types";
+export * from "./customer/query";
+export * from "./customer/mutation";
 export * from "./details/cardBrandTypes";
 export * from "./details/cityTypes";
 export * from "./details/countryTypes";
@@ -69,6 +73,7 @@ export * from "./oauth/types";
 export * from "./owner/mutation";
 export * from "./owner/types";
 export * from "./payment/mutation";
+export * from "./payment/query";
 export * from "./payment/reserved_product/types";
 export * from "./payment/types";
 export * from "./query";
@@ -77,10 +82,12 @@ export * from "./search/query";
 export * from "./search/types";
 export * from "./types";
 export * from "./user/account/types";
-export * from "./user/contact_details.ts/mutation";
-export * from "./user/contact_details.ts/types";
+export * from "./user/account/query";
+export * from "./user/contact_details/mutation";
 export * from "./user/favorite_bar/mutation";
+export * from "./user/favorite_bar/query";
 export * from "./user/favorite_bar/types";
 export * from "./user/mutation";
 export * from "./user/query";
 export * from "./user/types";
+

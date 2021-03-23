@@ -46,27 +46,20 @@ let Card = Card_1 = class Card extends typeorm_1.BaseEntity {
         var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                if (cardholderName && cardholderName !== this.cardholderName) {
+                if (cardholderName && cardholderName !== this.cardholderName)
                     this.cardholderName = cardholderName;
-                }
-                if (expMonth && expMonth !== this.expMonth) {
+                if (expMonth && expMonth !== this.expMonth)
                     this.expMonth = expMonth;
-                }
-                if (expYear && expYear !== this.expYear) {
+                if (expYear && expYear !== this.expYear)
                     this.expYear = expYear;
-                }
                 if (isDefault !== null && isDefault !== undefined && isDefault !== this.isDefault) {
                     if (this.customer.cards) {
-                        const defaultCard = this.customer.cards.find(card => card.isDefault === true && card.isExpired === false);
-                        if (!webhook && defaultCard) {
-                            throw new Error("You are not allowed to have more than one default card");
-                        }
-                        else if (webhook && defaultCard) {
-                            defaultCard.isDefault = false;
-                            yield defaultCard.save();
-                        }
-                        this.isDefault = isDefault;
+                        const defaultCards = this.customer.cards.filter(card => card.isDefault === true && card.isExpired === false);
+                        yield Promise.all(defaultCards.map((card) => __awaiter(this, void 0, void 0, function* () {
+                            return yield typeorm_1.getRepository(Card_1).save(Object.assign(Object.assign({}, card), { isDefault: false }));
+                        })));
                     }
+                    this.isDefault = isDefault;
                 }
                 yield this.save();
                 if (!webhook) {
@@ -75,11 +68,8 @@ let Card = Card_1 = class Card extends typeorm_1.BaseEntity {
                         exp_month: ((_a = this.expMonth) === null || _a === void 0 ? void 0 : _a.toString()) || undefined,
                         exp_year: ((_b = this.expYear) === null || _b === void 0 ? void 0 : _b.toString()) || undefined,
                     });
-                    if (isDefault && this.isDefault) {
-                        yield __1.stripe.customers.update(this.customer.stripeCustomerId, {
-                            default_source: this.stripeId,
-                        });
-                    }
+                    if (isDefault && this.isDefault)
+                        yield __1.stripe.customers.update(this.customer.stripeCustomerId, { default_source: this.stripeId });
                 }
                 return this;
             }
@@ -104,7 +94,7 @@ let Card = Card_1 = class Card extends typeorm_1.BaseEntity {
                     throw new Error(err.message);
                 }
             }
-            yield softRemove_1.softRemove(Card_1, { id: this.id }, [Payment_1.Payment], { cardId: this.id });
+            yield softRemove_1.softRemove(Card_1, { id: this.id }, undefined, { cardId: this.id });
         });
     }
 };
@@ -129,11 +119,11 @@ __decorate([
     __metadata("design:type", Number)
 ], Card.prototype, "countryId", void 0);
 __decorate([
-    typeorm_1.Column({ type: "smallint", name: "exp_month", nullable: true }),
+    typeorm_1.Column({ type: "smallint", name: "exp_month" }),
     __metadata("design:type", Number)
 ], Card.prototype, "expMonth", void 0);
 __decorate([
-    typeorm_1.Column({ type: "smallint", name: "exp_year", nullable: true }),
+    typeorm_1.Column({ type: "smallint", name: "exp_year" }),
     __metadata("design:type", Number)
 ], Card.prototype, "expYear", void 0);
 __decorate([
@@ -141,7 +131,7 @@ __decorate([
     __metadata("design:type", String)
 ], Card.prototype, "last4", void 0);
 __decorate([
-    typeorm_1.Column("varchar", { length: 255, name: "cardholder_name", nullable: true }),
+    typeorm_1.Column("varchar", { length: 255, name: "cardholder_name" }),
     __metadata("design:type", String)
 ], Card.prototype, "cardholderName", void 0);
 __decorate([
@@ -202,6 +192,14 @@ let CardRepository = class CardRepository extends typeorm_1.Repository {
     createCard(stripe, stripeCard, customer, brand, country, isDefault, cardholderName) {
         var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
+            const cards = customer.cards && customer.cards;
+            if (isDefault && cards && cards.length > 0) {
+                const defaultCards = cards.filter(card => card.isDefault) || [];
+                if (defaultCards.length > 0)
+                    yield Promise.all(defaultCards.map((card) => __awaiter(this, void 0, void 0, function* () {
+                        yield typeorm_1.getRepository(Card).save(Object.assign(Object.assign({}, card), { isDefault: false }));
+                    })));
+            }
             try {
                 const newCustomerCard = Card.create({
                     brand,
@@ -211,13 +209,12 @@ let CardRepository = class CardRepository extends typeorm_1.Repository {
                     expMonth: stripeCard.exp_month,
                     expYear: stripeCard.exp_year,
                     last4: stripeCard.last4,
-                    isDefault: customer.cards && isDefault && customer.cards.length === 0 ? true : false,
+                    isDefault: (cards && cards.length === 0) || !(cards === null || cards === void 0 ? void 0 : cards.find(({ isDefault }) => isDefault)) ? true : isDefault,
                     cardholderName: ((_a = customer.user) === null || _a === void 0 ? void 0 : _a.getFullName()) && !cardholderName ? (_b = customer.user) === null || _b === void 0 ? void 0 : _b.getFullName() : cardholderName ? cardholderName : undefined,
                 });
                 yield newCustomerCard.save();
-                if (newCustomerCard.isDefault) {
+                if (newCustomerCard.isDefault)
                     yield stripe.customers.update(customer.stripeCustomerId, { default_source: newCustomerCard.stripeId });
-                }
                 return newCustomerCard;
             }
             catch (err) {
@@ -228,11 +225,12 @@ let CardRepository = class CardRepository extends typeorm_1.Repository {
     createStripeWebhookCard(stripe, stripeCard) {
         return __awaiter(this, void 0, void 0, function* () {
             const customer = yield Customer_1.Customer.findOne({ stripeCustomerId: stripeCard.customer });
-            if (!customer) {
+            if (!customer)
                 throw new Error("Specified customer does not exist");
-            }
-            const brand = yield CardBrand_1.CardBrand.findOne({ name: stripeCard.brand });
-            const country = yield Country_1.Country.findOne({ isoCode: stripeCard.country });
+            const brand = yield CardBrand_1.CardBrand.findOne({
+                where: `"name" ILIKE '${stripeCard.brand.toLowerCase() === "american express" ? "AMEX" : stripeCard.brand}'`,
+            });
+            const country = yield Country_1.Country.findOne({ alpha2Code: stripeCard.country });
             try {
                 yield this.createCard(stripe, stripeCard, customer, brand, country, undefined, stripeCard.name);
             }
@@ -248,9 +246,8 @@ let CardRepository = class CardRepository extends typeorm_1.Repository {
                 where: { stripeId: id, isExpired: false },
                 relations: ["customer"],
             });
-            if (!card) {
+            if (!card)
                 throw new Error("Card does not exist");
-            }
             try {
                 yield card.updateCard(name, expMonth, expYear);
             }

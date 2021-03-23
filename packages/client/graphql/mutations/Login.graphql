@@ -1,0 +1,9 @@
+mutation Login($userCredentials: UserCredentials!, $loginDetails: UserLoginDetails) {
+  login(userCredentials: $userCredentials, loginDetails: $loginDetails) {
+    user {
+      id
+      email
+    }
+    accessToken
+  }
+}

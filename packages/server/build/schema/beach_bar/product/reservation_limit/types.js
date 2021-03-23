@@ -49,7 +49,7 @@ exports.AddProductReservationLimitResult = nexus_1.unionType({
         t.members("AddProductReservationLimit", "Error");
     },
     resolveType: item => {
-        if (item.name === "Error") {
+        if (item.error) {
             return "Error";
         }
         else {
@@ -75,7 +75,7 @@ exports.UpdateProductReservationLimitResult = nexus_1.unionType({
         t.members("UpdateProductReservationLimit", "Error");
     },
     resolveType: item => {
-        if (item.name === "Error") {
+        if (item.error) {
             return "Error";
         }
         else {

@@ -1,60 +1,56 @@
 import { errors, MyContext } from "@beach_bar/common";
+import { ApolloError } from "apollo-server-express";
 import redisKeys from "constants/redisKeys";
 import { BeachBar } from "entity/BeachBar";
 import { User } from "entity/User";
 import { UserFavoriteBar } from "entity/UserFavoriteBar";
-import { extendType, intArg } from "nexus";
+import { extendType, idArg, intArg } from "nexus";
 import { DeleteResult } from "schema/types";
 import { DeleteType } from "typings/.index";
-import { AddUserFavoriteBarType } from "typings/user/favoriteBars";
+import { TUpdateUserFavoriteBarType } from "typings/user/favoriteBars";
 import { checkScopes } from "utils/checkScopes";
-import { AddUserFavoriteBarResult } from "./types";
+import { UpdateUserFavoriteBarType } from "./types";
 
 export const UserFavoriteBarCrudMutation = extendType({
   type: "Mutation",
   definition(t) {
-    t.field("addUserFavoriteBar", {
-      type: AddUserFavoriteBarResult,
-      description: "Add a #beach_bar to user's favorites list",
-      args: {
-        beachBarId: intArg({ description: "The ID value of the #beach_bar, to add to the user's favorites list" }),
-      },
-      resolve: async (_, { beachBarId }, { payload, redis }: MyContext): Promise<AddUserFavoriteBarType> => {
-        if (!payload) {
-          return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
-        }
-        if (!checkScopes(payload, ["beach_bar@crud:user"])) {
-          return {
-            error: { code: errors.UNAUTHORIZED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE },
-          };
-        }
+    t.field("updateFavouriteBeachBar", {
+      type: UpdateUserFavoriteBarType,
+      description: "Update a user's #beach_bar favourites list",
+      args: { beachBarId: idArg({ description: "The ID value of the #beach_bar, to add / remove from the user's favourites list" }) },
+      resolve: async (_, { beachBarId }, { payload, redis }: MyContext): Promise<TUpdateUserFavoriteBarType> => {
+        if (!payload || !payload.sub) throw new ApolloError(errors.NOT_AUTHENTICATED_MESSAGE, errors.NOT_AUTHENTICATED_CODE);
+        if (!checkScopes(payload, ["beach_bar@crud:user"]))
+          throw new ApolloError(errors.NOT_AUTHENTICATED_MESSAGE, errors.UNAUTHORIZED_CODE);
 
-        const user = await User.findOne(payload.sub);
-        if (!user) {
-          return { error: { code: errors.CONFLICT, message: errors.SOMETHING_WENT_WRONG } };
-        }
+        const user = await User.findOne({
+          where: { id: payload.sub },
+          withDeleted: true,
+          relations: ["favoriteBars", "favoriteBars.user", "favoriteBars.beachBar"],
+        });
+        if (!user) throw new ApolloError(errors.USER_NOT_FOUND_MESSAGE, errors.NOT_FOUND);
 
         const beachBars: BeachBar[] = (await redis.lrange(redisKeys.BEACH_BAR_CACHE_KEY, 0, -1)).map((x: string) => JSON.parse(x));
         const beachBar = beachBars.find(bar => String(bar.id) === String(beachBarId));
-        if (!beachBar) {
-          return { error: { code: errors.CONFLICT, message: errors.SOMETHING_WENT_WRONG } };
-        }
-
-        const newFavoriteBar = UserFavoriteBar.create({
-          beachBar,
-          user,
-        });
+        if (!beachBar) throw new ApolloError(errors.BEACH_BAR_DOES_NOT_EXIST, errors.NOT_FOUND);
 
         try {
-          await newFavoriteBar.save();
+          let favouriteBar = user.favoriteBars?.find(bar => bar.beachBarId.toString() === beachBarId.toString());
+          if (!favouriteBar) {
+            favouriteBar = UserFavoriteBar.create({
+              beachBar,
+              user,
+            });
+            await favouriteBar.save();
+          } else await favouriteBar.softRemove();
+          if (!favouriteBar) throw new ApolloError(errors.SOMETHING_WENT_WRONG);
+          return {
+            favouriteBar,
+            updated: true,
+          };
         } catch (err) {
-          return { error: { message: `${errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
+          throw new ApolloError(errors.SOMETHING_WENT_WRONG + ": " + err.message);
         }
-
-        return {
-          favoriteBar: newFavoriteBar,
-          added: true,
-        };
       },
     });
     t.field("deleteUserFavoriteBar", {
@@ -63,6 +59,8 @@ export const UserFavoriteBarCrudMutation = extendType({
       args: {
         beachBarId: intArg({ description: "The ID value of the #beach_bar, to add to the user's favorites list" }),
       },
+      deprecation:
+        "You should use the `updateUserFavoriteBar` mutation operation, which handles automatically the creation and removement of a user's #beach_bar",
       resolve: async (_, { beachBarId }, { payload }: MyContext): Promise<DeleteType> => {
         if (!payload) {
           return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };

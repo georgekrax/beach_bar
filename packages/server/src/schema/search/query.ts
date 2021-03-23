@@ -1,9 +1,9 @@
-import { dayjsFormat, errors, MyContext } from "@beach_bar/common";
+import { COMMON_CONFIG, dayjsFormat, errors, MyContext } from "@beach_bar/common";
+import { ApolloError, UserInputError } from "apollo-server-express";
 import redisKeys from "constants/redisKeys";
-import { historyActivity } from "constants/_index";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
-import { BeachBar, BeachBarRepository } from "entity/BeachBar";
+import { BeachBar } from "entity/BeachBar";
 import { BeachBarFeature } from "entity/BeachBarFeature";
 import { Product } from "entity/Product";
 import { SearchFilter } from "entity/SearchFilter";
@@ -11,53 +11,98 @@ import { SearchInputValue } from "entity/SearchInputValue";
 import { UserHistory } from "entity/UserHistory";
 import { UserSearch } from "entity/UserSearch";
 import { arg, extendType, idArg, list, nullable, stringArg } from "nexus";
-import { getCustomRepository, In } from "typeorm";
-import { RedisSearchReturnType, SearchResultReturnType, SearchReturnType } from "typings/search";
+import { In } from "typeorm";
+import { RedisSearchReturnType, SearchResultReturnType, TSearch } from "typings/search";
 import { checkAvailability } from "utils/beach_bar/checkAvailability";
-import { FormattedSearchInputValueType, SearchInputType, SearchResult, UserSearchType } from "./types";
+import { FormattedSearchInputValueType, SearchInputType, SearchType, UserSearchType } from "./types";
 
 export const SearchQuery = extendType({
   type: "Query",
   definition(t) {
-    t.list.field("getSearchInputValues", {
+    t.list.field("searchInputValues", {
       type: FormattedSearchInputValueType,
       description: "Returns a list of formatted search input values",
       resolve: async (): Promise<SearchInputValue[]> => {
-        const inputValues = await SearchInputValue.find({ relations: ["country", "city", "region", "beachBar"] });
-        return inputValues;
+        const inputValues = await SearchInputValue.find({
+          relations: [
+            "country",
+            "city",
+            "city.country",
+            "region",
+            "region.country",
+            "beachBar",
+            "beachBar.location",
+            "beachBar.location.country",
+            "beachBar.location.city",
+            "beachBar.location.city.country",
+            "beachBar.location.region",
+            "beachBar.location.region.country",
+          ],
+        });
+        const beachBarsWithPayments = await Promise.all(
+          inputValues
+            .filter(({ beachBar }) => beachBar)
+            .map(async ({ beachBar }) => {
+              const payments = await beachBar!.getPayments();
+              return { ...beachBar, payments };
+            })
+        );
+        const sortedBeachBarsLocations = beachBarsWithPayments
+          .sort((a, b) => b.payments.length - a.payments.length)
+          .map(({ location }) => location);
+        const sortedResults = inputValues.sort((a, b) => {
+          if ((a.countryId && !a.cityId) || (b.countryId && !b.cityId)) return 0;
+          if (a.beachBarId || b.beachBarId) return 1;
+
+          // ! Although descending order (b - a), and not ascending (a - b),
+          // ! the previous array (`sortedBeachBarsLocations`) is sorted in a descending order,
+          // ! so the smaller the idx, the most popular the location
+          const aCountryIdx = sortedBeachBarsLocations.findIndex(
+            location => location.countryId.toString() === a.countryId?.toString()
+          );
+          const bCountryIdx = sortedBeachBarsLocations.findIndex(
+            location => location.countryId.toString() === b.countryId?.toString()
+          );
+          let res = bCountryIdx - aCountryIdx;
+          const aCityIdx = sortedBeachBarsLocations.findIndex(location => location.cityId.toString() === a.cityId?.toString());
+          const bCityIdx = sortedBeachBarsLocations.findIndex(location => location.cityId.toString() === b.cityId?.toString());
+          res = bCityIdx - aCityIdx;
+          return res;
+        });
+        return [...sortedResults];
       },
     });
-    t.nullable.list.field("getLatestUserSearches", {
+    t.list.field("getLatestUserSearches", {
       type: UserSearchType,
       description: "Get a list with a user's latest searches",
-      resolve: async (_, __, { payload, redis }: MyContext): Promise<UserSearch[] | null> => {
-        if (!payload) {
-          return null;
-        }
+      resolve: async (_, __, { payload, redis }: MyContext): Promise<UserSearch[]> => {
+        if (!payload || !payload.sub) return [];
 
-        const searches: UserSearch[] = (
+        const searches: RedisSearchReturnType[] = (
           await redis.lrange(`${redisKeys.USER}:${payload.sub}:${redisKeys.USER_SEARCH}`, 0, -1)
         ).map((x: string) => JSON.parse(x));
-        const userSearches = searches.filter(search => search.userId && parseInt(search.userId.toString()) === payload.sub);
+        const userSearches = searches.filter(
+          search => search.search.userId && parseInt(search.search.userId.toString()) === payload.sub
+        );
 
         const result: UserSearch[] = [];
         const map = new Map();
         for (let i = 0; i < userSearches.length; i++) {
-          if (!map.has(userSearches[i].inputValueId)) {
-            map.set(userSearches[i].inputValueId, true);
-            result.push(userSearches[i]);
+          if (!map.has(userSearches[i].search.inputValueId)) {
+            map.set(userSearches[i].search.inputValueId, true);
+            result.push(userSearches[i].search);
           }
         }
 
-        return result;
+        return result.sort((a, b) => (dayjs(a.updatedAt) > dayjs(b.updatedAt) ? -1 : 1));
       },
     });
     t.nullable.field("search", {
-      type: SearchResult,
+      type: SearchType,
       description: "Search for available #beach_bars",
       args: {
         inputId: nullable(
-          stringArg({
+          idArg({
             description: "The ID value of the search input value, found in the documentation",
           })
         ),
@@ -67,16 +112,17 @@ export const SearchQuery = extendType({
           })
         ),
         availability: nullable(arg({ type: SearchInputType })),
-        filterIds: list(
-          nullable(stringArg({ description: "A list with the filter IDs to add in the search, found in the documentation" }))
-        ),
         searchId: nullable(idArg({ description: "The ID value of a previous user search" })),
+        filterIds: nullable(
+          list(stringArg({ description: "A list with the filter IDs to add in the search, found in the documentation" }))
+        ),
+        sortId: nullable(idArg({ description: "A ID of the sort filter the user has selected, found in the documentation" })),
       },
       resolve: async (
         _,
-        { inputId, inputValue, availability, filterIds, searchId },
+        { inputId, inputValue, availability, searchId, filterIds, sortId },
         { payload, redis, ipAddr }: MyContext
-      ): Promise<SearchReturnType> => {
+      ): Promise<TSearch> => {
         dayjs.extend(utc);
 
         if (searchId && !payload) {
@@ -84,11 +130,9 @@ export const SearchQuery = extendType({
             JSON.parse(x)
           );
           const userSearch = searches.find(search => BigInt(search.search.id) === BigInt(searchId));
-          if (!userSearch) {
-            return { error: { code: errors.CONFLICT, message: errors.SOMETHING_WENT_WRONG } };
-          }
+          if (!userSearch) throw new ApolloError(`User search with ID ${searchId} was not found`, errors.NOT_FOUND);
           await UserHistory.create({
-            activityId: historyActivity.SEARCH_ID,
+            activityId: COMMON_CONFIG.HISTORY_ACTIVITY.SEARCH_ID,
             objectId: userSearch.search.id,
             userId: undefined,
             ipAddr,
@@ -100,53 +144,41 @@ export const SearchQuery = extendType({
           ).map((x: string) => JSON.parse(x));
           const userSearch = searches.find(search => BigInt(search.search.id) === BigInt(searchId));
 
-          if (!userSearch) {
-            return { error: { code: errors.CONFLICT, message: errors.SOMETHING_WENT_WRONG } };
-          }
+          if (!userSearch) throw new ApolloError(`User search with ID ${searchId} was not found`, errors.NOT_FOUND);
 
           await UserHistory.create({
-            activityId: historyActivity.SEARCH_ID,
+            activityId: COMMON_CONFIG.HISTORY_ACTIVITY.SEARCH_ID,
             objectId: userSearch.search.id,
             userId: payload.sub,
             ipAddr,
           }).save();
           return userSearch;
         } else {
-          if (!inputId && !inputValue) {
-            return { error: { code: errors.INVALID_ARGUMENTS, message: "You should specify either an inputId or an inputValue" } };
-          }
+          if (!inputId && !inputValue) throw new UserInputError("You should specify either an inputId or an inputValue");
 
-          if (inputId && (inputId.trim().length === 0 || inputId.length !== 5)) {
-            return { error: { code: errors.INVALID_ARGUMENTS, message: "Invalid inputId" } };
-          }
-          if (inputValue && inputValue.trim().length === 0) {
-            return { error: { code: errors.INVALID_ARGUMENTS, message: "Invalid inputValue" } };
-          }
+          if (inputId && (inputId.trim().length === 0 || inputId.length !== 5)) throw new UserInputError("Invalid inputId");
+          if (inputValue && inputValue.trim().length === 0) throw new UserInputError("Invalid inputValue");
 
           if (availability) {
-            if (availability.date && availability.date.add(1, "day") < dayjs()) {
-              return { error: { code: errors.LATER_DATE_ERROR_CODE, message: "Please provide a date later or equal to today" } };
-            }
-            if (availability.adults !== undefined && availability.adults > 12) {
-              return { error: { code: errors.MAX_ADULTS_ERROR_CODE, message: "You cannot search for more than 12 adults" } };
-            }
-            if (availability.children !== undefined && availability.children > 8) {
-              return { error: { code: errors.MAX_CHILDREN_ERROR_CODE, message: "You cannot search for more than 8 children" } };
-            }
+            if (availability.date && dayjs(availability.date).add(1, "day") < dayjs())
+              throw new ApolloError("Please provide a date later or equal to today", errors.LATER_DATE_ERROR_CODE);
+            if (availability.adults !== undefined && availability.adults > 12)
+              throw new ApolloError("You cannot search for more than 12 adults", errors.MAX_ADULTS_ERROR_CODE);
+            if (availability.children !== undefined && availability.children > 8)
+              throw new ApolloError("You cannot search for more than 8 children", errors.MAX_CHILDREN_ERROR_CODE);
           }
 
           let searchInput: SearchInputValue | undefined;
-          if (inputId) {
-            searchInput = await SearchInputValue.findOne({ publicId: inputId.trim() });
-          } else if (inputValue) {
+          if (inputId) searchInput = await SearchInputValue.findOne({ publicId: inputId.trim() });
+          else if (inputValue) {
             const allSearchInputs = await SearchInputValue.find({ relations: ["country", "city", "region", "beachBar"] });
-            searchInput = allSearchInputs.find(input => input.format().toLowerCase() === inputValue.toLowerCase());
-          }
-          if (!searchInput) {
-            return { error: { code: errors.CONFLICT, message: "Invalid search input" } };
+            searchInput = allSearchInputs.find(input => input.format().toLowerCase().includes(inputValue.toLowerCase()));
           }
 
-          const redisResults: BeachBar[] = (await getCustomRepository(BeachBarRepository).findInRedis()).filter(bar => bar.isActive);
+          if (!searchInput) throw new ApolloError("Invalid search input", errors.NOT_FOUND);
+
+          // const redisResults: BeachBar[] = (await getCustomRepository(BeachBarRepository).findInRedis()).filter(bar => bar.isActive);
+          const redisResults = await BeachBar.find({ where: { isActive: true }, relations: ["features", "products", "location"] });
           redisResults.forEach(
             beachBar => (beachBar.features = beachBar.features.filter((feature: BeachBarFeature) => !feature.deletedAt))
           );
@@ -156,20 +188,17 @@ export const SearchQuery = extendType({
             beachBars = redisResults.filter(beachBar => beachBar.id === searchInput!.beachBarId);
             beachBars = beachBars.slice(0, beachBars.length);
           } else {
-            if (searchInput.countryId) {
+            if (searchInput.countryId)
               beachBars = redisResults.filter(beachBar => beachBar.location.countryId === searchInput!.countryId);
-            }
-            if (searchInput.cityId) {
-              beachBars = redisResults.filter(beachBar => beachBar.location.cityId === searchInput!.cityId);
-            }
-            if (searchInput.regionId) {
+            if (searchInput.cityId) beachBars = redisResults.filter(beachBar => beachBar.location.cityId === searchInput!.cityId);
+            if (searchInput.regionId)
               beachBars = redisResults.filter(beachBar => beachBar.location.regionId === searchInput!.regionId);
-            }
           }
 
-          let results: SearchResultReturnType[] = beachBars.map(bar => {
-            return { beachBar: bar, availability: { hasAvailability: undefined, hasCapacity: undefined } };
-          });
+          let results: SearchResultReturnType[] = beachBars.map(bar => ({
+            beachBar: bar,
+            availability: { hasAvailability: undefined, hasCapacity: undefined },
+          }));
           if (availability && availability.date) {
             const { date } = availability;
             const timeId = availability.timeId ? availability.timeId : undefined;
@@ -180,56 +209,47 @@ export const SearchQuery = extendType({
 
             for (let i = 0; i < beachBars.length; i++) {
               const { hasAvailability, hasCapacity } = await checkAvailability(redis, beachBars[i], date, timeId, totalPeople);
-              results.push({
-                beachBar: beachBars[i],
-                availability: {
-                  hasAvailability,
-                  hasCapacity,
-                },
-              });
+              results.push({ beachBar: beachBars[i], availability: { hasAvailability, hasCapacity } });
             }
           }
 
           let filters: SearchFilter[] = [];
-          if (filterIds && filterIds.length > 0) {
-            filters = await SearchFilter.find({ where: { publicId: In(filterIds) } });
-          }
+          if (filterIds && filterIds.length > 0) filters = await SearchFilter.find({ where: { publicId: In(filterIds) } });
 
           const userSearch = UserSearch.create({
-            searchDate: availability && availability.date ? availability.date.format(dayjsFormat.ISO_STRING) : undefined,
+            searchDate: availability && availability.date ? dayjs(availability.date).format(dayjsFormat.ISO_STRING) : undefined,
             searchAdults: availability && availability.adults,
             searchChildren: availability && availability.children,
             userId: payload ? payload.sub : undefined,
             inputValue: searchInput,
+            inputValueId: searchInput.id,
             filters,
+            sortId,
           });
 
           try {
             await userSearch.save();
 
-            const returnResult = { results, search: userSearch };
+            const res = { results, search: userSearch };
 
             // cache in Redis
             // * store in general user searches, even if the user is not authenticated
-            if (payload && payload.sub) {
-              await redis.lpush(`${redisKeys.USER}:${payload.sub}:${redisKeys.USER_SEARCH}`, JSON.stringify(returnResult));
-            }
-            await redis.lpush(redisKeys.USER_SEARCH, JSON.stringify(returnResult));
+            if (payload && payload.sub)
+              await redis.lpush(`${redisKeys.USER}:${payload.sub}:${redisKeys.USER_SEARCH}`, JSON.stringify(res));
+
+            await redis.lpush(redisKeys.USER_SEARCH, JSON.stringify(res));
 
             await UserHistory.create({
-              activityId: historyActivity.SEARCH_ID,
+              activityId: COMMON_CONFIG.HISTORY_ACTIVITY.SEARCH_ID,
               objectId: userSearch.id,
               userId: payload ? payload.sub : undefined,
               ipAddr,
             }).save();
-          } catch (err) {
-            return { error: { code: errors.INTERNAL_SERVER_ERROR, message: `${errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
-          }
 
-          return {
-            results,
-            search: userSearch,
-          };
+            return res;
+          } catch (err) {
+            throw new ApolloError(errors.SOMETHING_WENT_WRONG + ": " + err.message, errors.INTERNAL_SERVER_ERROR);
+          }
         }
       },
     });

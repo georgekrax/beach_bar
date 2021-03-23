@@ -27,32 +27,32 @@ export class SearchInputValue extends BaseEntity {
   publicId: string;
 
   @Column({ type: "integer", name: "country_id", nullable: true })
-  countryId: number;
+  countryId?: number;
 
   @Column({ type: "integer", name: "city_id", nullable: true })
-  cityId: bigint;
+  cityId?: bigint;
 
   @Column({ type: "integer", name: "region_id", nullable: true })
-  regionId: number;
+  regionId?: number;
 
   @Column({ type: "integer", name: "beach_bar_id", nullable: true })
-  beachBarId: number;
+  beachBarId?: number;
 
   @ManyToOne(() => Country, country => country.searchInputValues, { nullable: true })
   @JoinColumn({ name: "country_id" })
-  country: Country;
+  country?: Country;
 
   @ManyToOne(() => City, city => city.searchInputValues, { nullable: true })
   @JoinColumn({ name: "city_id" })
-  city: City;
+  city?: City;
 
   @ManyToOne(() => Region, region => region.searchInputValues, { nullable: true })
   @JoinColumn({ name: "region_id" })
-  region: Region;
+  region?: Region;
 
   @ManyToOne(() => BeachBar, beachBar => beachBar.searchInputValues, { nullable: true })
   @JoinColumn({ name: "beach_bar_id" })
-  beachBar: BeachBar;
+  beachBar?: BeachBar;
 
   // * excluded in softRemove, as it does not have a deletedAt column
   @OneToMany(() => UserSearch, userSearch => userSearch.inputValue, { nullable: true })
@@ -74,34 +74,22 @@ export class SearchInputValue extends BaseEntity {
       return formattedString;
     } else {
       if (this.country) {
-        if (this.country.shortName && this.country.shortName.trim().length > 0) {
-          formattedString = this.country.shortName;
-        } else {
-          formattedString = this.country.name;
-        }
+        // if (this.country.alpha2Code && this.country.alpha2Code.trim().length > 0) {
+        //   formattedString = this.country.alpha2Code;
+        // } else {
+        formattedString = this.country.name;
+        // }
       }
       if (this.city) {
         formattedString = this.city.name;
-        if (this.city.secondName && this.city.secondName.trim().length > 0) {
-          formattedString.concat(`(${this.city.secondName})`);
-        }
-        if (this.country) {
-          // @ts-ignore
-          formattedString = formattedString.concat(`, ${this.country.name}`);
-        }
+        if (this.country) formattedString = formattedString.concat(`, ${this.country.name}`);
       }
       if (this.region) {
         formattedString = this.region.name;
-        if (this.city && this.country) {
-          // @ts-ignore
+        if (this.city && this.country)
           formattedString = formattedString.concat(`, ${this.city.name}`).concat(`, ${this.country.name}`);
-        } else if (this.city) {
-          // @ts-ignore
-          formattedString = formattedString.concat(`, ${this.city.name}`);
-        } else if (this.country) {
-          // @ts-ignore
-          formattedString = formattedString.concat(`, ${this.country.name}`);
-        }
+        else if (this.city) formattedString = formattedString.concat(`, ${this.city.name}`);
+        else if (this.country) formattedString = formattedString.concat(`, ${this.country.name}`);
       }
     }
     return formattedString;

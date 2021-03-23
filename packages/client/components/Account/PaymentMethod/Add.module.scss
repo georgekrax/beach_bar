@@ -1,0 +1,31 @@
+.container {
+  margin-bottom: map-get($em-spacers, 20);
+
+  & > button {
+    @extend .semibold;
+    margin-left: auto;
+    padding: 0.5em;
+
+    & > span {
+      transform: translateY(-0.125em);
+    }
+
+    &:hover {
+      :global {
+        @include path-classNames() {
+          stroke: $grey-1;
+        }
+      }
+    }
+  }
+}
+
+.form {
+  & > div:first-child {
+    order: -1;
+
+    & > div {
+      @extend .w-100;
+    }
+  }
+}

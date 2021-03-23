@@ -33,11 +33,15 @@ let UserFavoriteBar = UserFavoriteBar_1 = class UserFavoriteBar extends typeorm_
     }
 };
 __decorate([
-    typeorm_1.PrimaryColumn({ type: "integer", name: "user_id" }),
+    typeorm_1.PrimaryGeneratedColumn({ type: "bigint" }),
+    __metadata("design:type", typeof BigInt === "function" ? BigInt : Object)
+], UserFavoriteBar.prototype, "id", void 0);
+__decorate([
+    typeorm_1.Column({ type: "integer", name: "user_id" }),
     __metadata("design:type", Number)
 ], UserFavoriteBar.prototype, "userId", void 0);
 __decorate([
-    typeorm_1.PrimaryColumn({ type: "integer", name: "beach_bar_id" }),
+    typeorm_1.Column({ type: "integer", name: "beach_bar_id" }),
     __metadata("design:type", Number)
 ], UserFavoriteBar.prototype, "beachBarId", void 0);
 __decorate([
@@ -47,7 +51,7 @@ __decorate([
 ], UserFavoriteBar.prototype, "user", void 0);
 __decorate([
     typeorm_1.ManyToOne(() => BeachBar_1.BeachBar, beachBar => beachBar.usersFavorite, { nullable: false }),
-    typeorm_1.JoinColumn({ name: "bar_id" }),
+    typeorm_1.JoinColumn({ name: "beach_bar_id" }),
     __metadata("design:type", BeachBar_1.BeachBar)
 ], UserFavoriteBar.prototype, "beachBar", void 0);
 __decorate([

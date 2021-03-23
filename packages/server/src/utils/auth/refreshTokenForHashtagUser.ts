@@ -5,17 +5,9 @@ import fetch from "node-fetch";
 
 export const refreshTokenForHashtagUser = async (user: User, redis: Redis): Promise<void | Error> => {
   const redisUser = await redis.hgetall(user.getRedisKey() as KeyType);
-  if (!redisUser || !redisUser.refresh_token) {
-    throw new Error(errors.INVALID_REFRESH_TOKEN);
-  }
-  if (
-    !redisUser ||
-    !redisUser.hashtag_refresh_token ||
-    redisUser.hashtag_refresh_token == "" ||
-    redisUser.hashtag_refresh_token === ""
-  ) {
+  if (!redisUser || !redisUser.refresh_token) throw new Error(errors.INVALID_REFRESH_TOKEN);
+  if (!redisUser || !redisUser.hashtag_refresh_token || redisUser.hashtag_refresh_token.trim().length === 0)
     throw new Error(errors.SOMETHING_WENT_WRONG);
-  }
   const { hashtag_refresh_token: hashtagRefreshToken } = redisUser;
 
   const requestBody = {
@@ -76,13 +68,10 @@ export const refreshTokenForHashtagUser = async (user: User, redis: Redis): Prom
         }/oauth/refresh_token failed, reason: connect ECONNREFUSED ${process.env
           .HASHTAG_API_HOSTNAME!.replace("https://", "")
           .replace("http://", "")}`
-      ) {
+      )
         throw new Error(errors.SOMETHING_WENT_WRONG);
-      }
       throw new Error(`${errors.SOMETHING_WENT_WRONG}: ${err.message}`);
     });
 
-  if (!success) {
-    throw new Error(errors.SOMETHING_WENT_WRONG);
-  }
+  if (!success) throw new Error(errors.SOMETHING_WENT_WRONG);
 };

@@ -27,7 +27,6 @@ const typeorm_1 = require("typeorm");
 const softRemove_1 = require("utils/softRemove");
 const BeachBarReview_1 = require("./BeachBarReview");
 const Card_1 = require("./Card");
-const City_1 = require("./City");
 const Country_1 = require("./Country");
 const User_1 = require("./User");
 let Customer = Customer_1 = class Customer extends typeorm_1.BaseEntity {
@@ -45,14 +44,14 @@ let Customer = Customer_1 = class Customer extends typeorm_1.BaseEntity {
         }
         return true;
     }
-    update(phoneNumber, countryIsoCode) {
+    update(phoneNumber, countryAlpha2Code) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 if (phoneNumber && phoneNumber !== this.phoneNumber && phoneNumber.trim().length !== 0) {
                     this.phoneNumber = phoneNumber;
                 }
-                if (countryIsoCode && countryIsoCode.trim().length !== 0) {
-                    const country = yield Country_1.Country.findOne({ isoCode: countryIsoCode });
+                if (countryAlpha2Code && countryAlpha2Code.trim().length !== 0) {
+                    const country = yield Country_1.Country.findOne({ alpha2Code: countryAlpha2Code });
                     if (country) {
                         this.country = country;
                     }
@@ -139,55 +138,34 @@ Customer = Customer_1 = __decorate([
 ], Customer);
 exports.Customer = Customer;
 let CustomerRepository = class CustomerRepository extends typeorm_1.Repository {
-    getOrCreateCustomer(stripe, email, phoneNumber, countryIsoCode, payload) {
-        var _a, _b;
+    getOrCreateCustomer(stripe, email, phoneNumber, countryAlpha2Code, payload) {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             let user = undefined;
             if (payload && payload.sub) {
                 user = yield User_1.User.findOne({
                     where: [{ id: payload.sub }, { email }],
-                    relations: [
-                        "account",
-                        "account.city",
-                        "account.country",
-                        "account.contactDetails",
-                        "customer",
-                        "customer.user",
-                        "customer.cards",
-                        "customer.country",
-                    ],
+                    relations: ["account", "account.country", "customer", "customer.user", "customer.cards", "customer.country"],
                 });
-                if (!user) {
-                    return { error: { code: common_1.errors.CONFLICT, message: common_1.errors.USER_DOES_NOT_EXIST } };
-                }
+                if (!user)
+                    throw new Error(common_1.errors.USER_NOT_FOUND_MESSAGE);
             }
-            else {
+            else
                 user = yield User_1.User.findOne({
                     where: { email },
-                    relations: [
-                        "account",
-                        "account.city",
-                        "account.country",
-                        "account.contactDetails",
-                        "customer",
-                        "customer.user",
-                        "customer.cards",
-                        "customer.country",
-                    ],
+                    relations: ["account", "account.country", "customer", "customer.user", "customer.cards", "customer.country"],
                 });
-            }
-            if (user && user.customer) {
+            if (user && user.customer)
                 return {
                     customer: user.customer,
                     added: false,
                 };
-            }
             if (email && !user) {
                 try {
                     yield common_2.validateEmailSchema(email);
                 }
                 catch (err) {
-                    return { error: { code: common_1.errors.INVALID_ARGUMENTS, message: err.message } };
+                    throw new Error(err.message);
                 }
             }
             const newCustomer = Customer.create({
@@ -195,22 +173,18 @@ let CustomerRepository = class CustomerRepository extends typeorm_1.Repository {
                 email: user ? user.email : email,
             });
             try {
-                if (user && user.account && user.account.contactDetails && user.account.contactDetails[0]) {
-                    newCustomer.phoneNumber = user.account.contactDetails[0].phoneNumber;
-                }
-                else {
+                if (user && user.account && user.account && user.account.phoneNumber)
+                    newCustomer.phoneNumber = user.account.phoneNumber;
+                else
                     newCustomer.phoneNumber = phoneNumber;
-                }
-                if (countryIsoCode) {
-                    const country = yield Country_1.Country.findOne({ isoCode: countryIsoCode });
-                    if (country) {
+                if (countryAlpha2Code) {
+                    const country = yield Country_1.Country.findOne({ alpha2Code: countryAlpha2Code });
+                    if (country)
                         newCustomer.country = country;
-                    }
                 }
                 let userAccount = undefined;
-                if (user && user.account) {
+                if (user && user.account)
                     userAccount = user.account;
-                }
                 const stripeCustomer = yield stripe.customers.create({
                     email: newCustomer.email,
                     description: user ? "#beach_bar user" : undefined,
@@ -218,8 +192,8 @@ let CustomerRepository = class CustomerRepository extends typeorm_1.Repository {
                     address: userAccount
                         ? {
                             line1: userAccount.address || "",
-                            country: ((_a = userAccount.country) === null || _a === void 0 ? void 0 : _a.isoCode) || undefined,
-                            city: ((_b = userAccount.city) === null || _b === void 0 ? void 0 : _b.name) || undefined,
+                            country: ((_a = userAccount.country) === null || _a === void 0 ? void 0 : _a.alpha2Code) || undefined,
+                            city: userAccount.city || undefined,
                             postal_code: userAccount.zipCode || undefined,
                         }
                         : undefined,
@@ -228,14 +202,13 @@ let CustomerRepository = class CustomerRepository extends typeorm_1.Repository {
                         is_signed_up: user ? "true" : "false",
                     },
                 });
-                if (!stripeCustomer && (stripeCustomer.email !== email || stripeCustomer.email !== (user === null || user === void 0 ? void 0 : user.email))) {
-                    return { error: { message: common_1.errors.SOMETHING_WENT_WRONG } };
-                }
+                if (!stripeCustomer && (stripeCustomer.email !== email || stripeCustomer.email !== (user === null || user === void 0 ? void 0 : user.email)))
+                    throw new Error(common_1.errors.SOMETHING_WENT_WRONG);
                 newCustomer.stripeCustomerId = stripeCustomer.id;
                 yield newCustomer.save();
             }
             catch (err) {
-                return { error: { message: `${common_1.errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
+                throw new Error(common_1.errors.SOMETHING_WENT_WRONG + ": " + err.message);
             }
             return {
                 customer: newCustomer,
@@ -248,15 +221,7 @@ let CustomerRepository = class CustomerRepository extends typeorm_1.Repository {
             const { email, id } = stripeCustomer;
             const user = yield User_1.User.findOne({
                 where: { email },
-                relations: [
-                    "account",
-                    "account.city",
-                    "account.country",
-                    "account.contactDetails",
-                    "customer",
-                    "customer.user",
-                    "customer.cards",
-                ],
+                relations: ["account", "account.country", "customer", "customer.user", "customer.cards"],
             });
             if (email && !user) {
                 try {
@@ -284,27 +249,21 @@ let CustomerRepository = class CustomerRepository extends typeorm_1.Repository {
             const { email, address, name, phone, default_source: defaultSource } = stripeCustomer;
             const customer = yield Customer.findOne({
                 where: { stripeCustomerId: stripeCustomer.id },
-                relations: ["user", "user.account", "user.account.contactDetails", "cards", "cards.customer", "cards.customer.cards"],
+                relations: ["user", "user.account", "cards", "cards.customer", "cards.customer.cards"],
             });
-            if (!customer) {
+            if (!customer)
                 throw new Error("Customer does not exist");
-            }
             if (customer.user) {
                 let country = undefined;
-                if (address.country) {
-                    country = yield Country_1.Country.findOne({ isoCode: address.country });
-                }
-                let city = undefined;
-                if (address.city) {
-                    city = yield City_1.City.findOne({ name: address.city });
-                }
+                if (address.country)
+                    country = yield Country_1.Country.findOne({ alpha2Code: address.country });
                 yield customer.user.update({
                     email,
                     firstName: name.split(" ")[0],
                     lastName: name.split(" ")[1],
                     address: address.line1,
                     countryId: country ? country.id : undefined,
-                    cityId: city ? city.id : undefined,
+                    city: customer.user.account.city ? customer.user.account.city : undefined,
                     zipCode: address.zipCode ? address.zipCode : undefined,
                 });
                 if (phone) {
@@ -313,9 +272,8 @@ let CustomerRepository = class CustomerRepository extends typeorm_1.Repository {
                 }
                 if (defaultSource && customer.cards) {
                     const defaultCard = customer.cards.find(card => card.stripeId === defaultSource && card.isExpired === false);
-                    if (defaultCard) {
+                    if (defaultCard)
                         yield defaultCard.updateCard(undefined, undefined, undefined, true, true);
-                    }
                 }
             }
         });

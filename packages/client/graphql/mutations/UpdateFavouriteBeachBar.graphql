@@ -1,0 +1,13 @@
+mutation UpdateFavouriteBeachBar($beachBarId: ID!) {
+  updateFavouriteBeachBar(beachBarId: $beachBarId) {
+    # favouriteBar {
+    #   beachBar {
+    #     id
+    #     name
+    #     thumbnailUrl
+    #     formattedLocation
+    #   }
+    # }
+    updated
+  }
+}

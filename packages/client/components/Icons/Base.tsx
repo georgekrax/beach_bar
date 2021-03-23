@@ -1,17 +1,25 @@
 import { useClassnames } from "@hashtag-design-system/components";
 import { motion, SVGMotionProps } from "framer-motion";
+import React from "react";
+import { DATA } from "@/config/data";
 
-export type IconBaseFProps = SVGMotionProps<"svg">;
+const { ICON_SIZE, ICON_SIZE_LG } = DATA;
 
-export const Base: React.FC<IconBaseFProps> = ({ children, ...props }) => {
+export type Props = {
+  large?: boolean;
+};
+
+export type IconBaseFProps = Props & SVGMotionProps<"svg">;
+
+export const Base: React.FC<IconBaseFProps> = React.memo(({ large, children, ...props }) => {
   const [classNames, rest] = useClassnames("icon", props);
 
   return (
     <motion.svg
       className={classNames}
-      width={28}
-      height={28}
-      viewBox="0 0 24 24"
+      width={large ? ICON_SIZE_LG : ICON_SIZE}
+      height={large ? ICON_SIZE_LG : ICON_SIZE}
+      viewBox={`0 0 ${ICON_SIZE} ${ICON_SIZE}`}
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       {...rest}
@@ -19,7 +27,7 @@ export const Base: React.FC<IconBaseFProps> = ({ children, ...props }) => {
       {children}
     </motion.svg>
   );
-};
+});
 
 Base.displayName = "IconBase";
 

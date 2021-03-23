@@ -7,16 +7,12 @@ import { ReservedProduct } from "./ReservedProduct";
 
 @Entity({ name: "hour_time", schema: "public" })
 @Check(`length("value"::text) = 8`)
-@Check(`length("utcValue") = 9`)
 export class HourTime extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ type: "time without time zone", scale: 0, name: "value" })
   value: string;
-
-  @Column("varchar", { length: 9, name: "utc_value" })
-  utcValue: string;
 
   @OneToMany(() => ProductReservationLimit, productReservationLimit => productReservationLimit.startTime, { nullable: true })
   reservationLimitStartTimes?: ProductReservationLimit[];
@@ -48,16 +44,12 @@ export class MonthTime extends BaseEntity {
 
 @Entity({ name: "quarter_time", schema: "public" })
 @Check(`length("value"::text) = 8`)
-@Check(`length("utcValue") = 9`)
 export class QuarterTime extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ type: "time without time zone", scale: 0, name: "value" })
   value: string;
-
-  @Column("varchar", { length: 9, name: "utc_value" })
-  utcValue: string;
 
   @OneToMany(() => BeachBar, beachBar => beachBar.openingTime, { nullable: true })
   beachBarsOpeningTime?: BeachBar[];

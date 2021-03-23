@@ -46,7 +46,7 @@ exports.AddBeachBarRestaurantResult = nexus_1.unionType({
         t.members("AddBeachBarRestaurant", "Error");
     },
     resolveType: item => {
-        if (item.name === "Error") {
+        if (item.error) {
             return "Error";
         }
         else {
@@ -74,7 +74,7 @@ exports.UpdateBeachBarRestaurantResult = nexus_1.unionType({
         t.members("UpdateBeachBarRestaurant", "Error");
     },
     resolveType: item => {
-        if (item.name === "Error") {
+        if (item.error) {
             return "Error";
         }
         else {

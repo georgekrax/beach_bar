@@ -1,11 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserUpdateResult = exports.UserLoginDetailsInput = exports.UserCredentialsInput = exports.UserLoginResult = exports.UserLoginType = exports.UserSignUpResult = exports.UserResult = exports.UserType = void 0;
+exports.UserUpdateType = exports.UserLoginDetails = exports.UserCredentials = exports.UserLoginType = exports.UserResult = exports.UserType = void 0;
 const graphql_1 = require("@the_hashtag/common/dist/graphql");
 const nexus_1 = require("nexus");
 const types_1 = require("../beach_bar/review/types");
-const types_2 = require("./account/types");
-const types_3 = require("./favorite_bar/types");
+const types_2 = require("../beach_bar/review/votes/types");
+const types_3 = require("../types");
+const types_4 = require("./account/types");
+const types_5 = require("./favorite_bar/types");
 exports.UserType = nexus_1.objectType({
     name: "User",
     description: "Represents a user",
@@ -14,8 +16,8 @@ exports.UserType = nexus_1.objectType({
         t.field("email", { type: graphql_1.EmailScalar, description: "User's email address" });
         t.nullable.string("firstName", { description: "User's first (given) name" });
         t.nullable.string("lastName", { description: "User's last (family) name" });
-        t.nullable.field("account", {
-            type: types_2.UserAccountType,
+        t.field("account", {
+            type: types_4.UserAccountType,
             description: "User's account info",
             resolve: o => o.account,
         });
@@ -25,9 +27,14 @@ exports.UserType = nexus_1.objectType({
             resolve: o => o.reviews,
         });
         t.nullable.list.field("favoriteBars", {
-            type: types_3.UserFavoriteBarType,
+            type: types_5.UserFavoriteBarType,
             description: "A list with all the user's favorite #beach_bars",
             resolve: o => o.favoriteBars,
+        });
+        t.nullable.list.field("reviewVotes", {
+            type: types_2.ReviewVoteType,
+            description: "A list of all the votes of the user",
+            resolve: o => o.reviewVotes,
         });
     },
 });
@@ -37,21 +44,7 @@ exports.UserResult = nexus_1.unionType({
         t.members("User", "Error");
     },
     resolveType: item => {
-        if (item.name === "Error") {
-            return "Error";
-        }
-        else {
-            return "User";
-        }
-    },
-});
-exports.UserSignUpResult = nexus_1.unionType({
-    name: "UserSignUpResult",
-    definition(t) {
-        t.members("User", "Error");
-    },
-    resolveType: item => {
-        if (item.name === "Error") {
+        if (item.error) {
             return "Error";
         }
         else {
@@ -71,47 +64,27 @@ exports.UserLoginType = nexus_1.objectType({
         t.string("accessToken", { description: "The access token to authenticate & authorize the user" });
     },
 });
-exports.UserLoginResult = nexus_1.unionType({
-    name: "UserLoginResult",
-    definition(t) {
-        t.members("UserLogin", "Error");
-    },
-    resolveType: item => {
-        if (item.name === "Error") {
-            return "Error";
-        }
-        else {
-            return "UserLogin";
-        }
-    },
-});
-exports.UserCredentialsInput = nexus_1.inputObjectType({
-    name: "UserCredentialsInput",
+exports.UserCredentials = nexus_1.inputObjectType({
+    name: "UserCredentials",
     description: "Credentials of user to sign up / login",
     definition(t) {
         t.field("email", { type: graphql_1.EmailScalar, description: "Email of user to sign up" });
         t.string("password", { description: "Password of user" });
     },
 });
-exports.UserLoginDetailsInput = nexus_1.inputObjectType({
-    name: "UserLoginDetailsInput",
+exports.UserLoginDetails = nexus_1.inputObjectType({
+    name: "UserLoginDetails",
     description: "User details in login. The user's IP address is passed via the context",
     definition(t) {
-        t.int("countryId", { description: "The ID of the country, user logins from" });
-        t.int("cityId", { description: "The ID of the city, user logins from" });
+        t.nullable.string("city", { description: "The city name from where user logins from" });
+        t.nullable.string("countryAlpha2Code", { description: "The alpha 2 code of the country, from where the user logins" });
     },
 });
-exports.UserUpdateResult = nexus_1.unionType({
-    name: "UserUpdateResult",
+exports.UserUpdateType = nexus_1.objectType({
+    name: "UserUpdate",
+    description: "User details to be returned on update",
     definition(t) {
-        t.members("User", "Error");
-    },
-    resolveType: item => {
-        if (item.name === "Error") {
-            return "Error";
-        }
-        else {
-            return "User";
-        }
+        t.implements(types_3.UpdateGraphQLType);
+        t.field("user", { type: exports.UserType });
     },
 });

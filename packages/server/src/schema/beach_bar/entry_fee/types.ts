@@ -1,4 +1,4 @@
-import { BigIntScalar, DateScalar } from "@the_hashtag/common/dist/graphql";
+import { DateScalar } from "@the_hashtag/common/dist/graphql";
 import { objectType, unionType } from "nexus";
 import { BeachBarType } from "../types";
 
@@ -6,7 +6,7 @@ export const BeachBarEntryFeeType = objectType({
   name: "BeachBarEntryFee",
   description: "Represents an entry fee for a #beach_bar",
   definition(t) {
-    t.field("id", { type: BigIntScalar });
+    t.id("id");
     t.float("fee");
     t.field("date", { type: DateScalar, description: "The date this entry fee is applicable for" });
     t.field("beachBar", {
@@ -36,7 +36,7 @@ export const AddBeachBarEntryFeeResult = unionType({
     t.members("AddBeachBarEntryFee", "Error");
   },
   resolveType: item => {
-    if (item.name === "Error") {
+    if (item.error) {
       return "Error";
     } else {
       return "AddBeachBarEntryFee";
@@ -63,7 +63,7 @@ export const UpdateBeachBarEntryFeeResult = unionType({
     t.members("UpdateBeachBarEntryFee", "Error");
   },
   resolveType: item => {
-    if (item.name === "Error") {
+    if (item.error) {
       return "Error";
     } else {
       return "UpdateBeachBarEntryFee";

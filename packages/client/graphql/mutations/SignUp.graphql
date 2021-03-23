@@ -1,0 +1,5 @@
+mutation SignUp($userCredentials: UserCredentials!, $isPrimaryOwner: Boolean = false) {
+  signUp(userCredentials: $userCredentials, isPrimaryOwner: $isPrimaryOwner) {
+    id
+  }
+}

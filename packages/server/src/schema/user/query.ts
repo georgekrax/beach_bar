@@ -1,56 +1,50 @@
 import { errors, MyContext } from "@beach_bar/common";
-import { extendType } from "nexus";
+import { ApolloError } from "apollo-server-express";
 import { User } from "entity/User";
-import { ErrorType } from "typings/.index";
-import { UserType } from "typings/user";
+import { extendType } from "nexus";
+import { TUser } from "typings/user";
 import { userInfoPayloadScope } from "utils/userInfoPayloadScope";
-import { UserResult } from "./types";
+import { UserType } from "./types";
 
 export const UserQuery = extendType({
   type: "Query",
   definition(t) {
-    t.field("me", {
-      type: UserResult,
+    // t.string("accessToken", {
+    //   resolve: async (_, __, { redis }) => {
+    //     const user = await User.findOne(107);
+    //     if (!user) return "";
+    //     const scope = await redis.smembers(`${redisKeys.USER}:${user.id}:${redisKeys.USER_SCOPE}` as KeyType);
+    //     return generateAccessToken(user, scope).token;
+    //   }
+    // })
+    t.nullable.field("me", {
+      type: UserType,
       description: "Returns current authenticated user",
-      resolve: async (_, __, { payload }: MyContext): Promise<UserType | ErrorType> => {
-        if (!payload) {
-          return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
-        }
+      resolve: async (_, __, { payload }: MyContext): Promise<TUser | null> => {
+        if (!payload) return null;
         if (
           !payload.scope.some(scope => ["profile", "beach_bar@crud:user", "beach_bar@read:user"].includes(scope)) ||
           !payload.scope.includes("email")
-        ) {
-          return {
-            error: {
-              code: errors.UNAUTHORIZED_CODE,
-              message: "You are not allowed to access 'this' user's info",
-            },
-          };
-        }
+        ) throw new ApolloError("You are not allowed to access this user's info", errors.UNAUTHORIZED_CODE);
 
         const user = await User.findOne({
           where: { id: payload.sub },
           relations: [
             "account",
-            "account.contactDetails",
             "account.country",
             "account.country.currency",
-            "account.city",
             "customer",
             "customer.reviews",
             "customer.reviews.beachBar",
             "customer.reviews.monthTime",
             "customer.reviews.visitType",
+            "reviewVotes",
+            "reviewVotes.type",
+            "reviewVotes.review",
+            "reviewVotes.user",
           ],
         });
-        if (!user) {
-          return {
-            error: {
-              code: errors.NOT_FOUND,
-              message: errors.USER_NOT_FOUND_MESSAGE,
-            },
-          };
-        }
+        if (!user) return null;
 
         return userInfoPayloadScope(payload, user);
       },
