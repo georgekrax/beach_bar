@@ -7,7 +7,7 @@ import { Country } from "entity/Country";
 import { Region } from "entity/Region";
 import { extendType, idArg, nullable, stringArg } from "nexus";
 import { TAddBeachBarLocation, TUpdateBeachBarLocation } from "typings/beach_bar/location";
-import { checkScopes } from "utils/checkScopes";
+import { isAuth, throwScopesUnauthorized } from "utils/auth/payload";
 import { AddBeachBarLocationType, UpdateBeachBarLocationType } from "./types";
 
 export const BeachBarLocationCrudMutation = extendType({
@@ -17,7 +17,7 @@ export const BeachBarLocationCrudMutation = extendType({
       type: AddBeachBarLocationType,
       description: "Add (assign) a location to a #beach_bar",
       args: {
-        beachBarId: idArg({ description: "The ID value of the #beach_bar" }),
+        beachBarId: idArg(),
         address: stringArg({ description: "The address of the #beach_bar" }),
         zipCode: nullable(
           stringArg({
@@ -35,21 +35,20 @@ export const BeachBarLocationCrudMutation = extendType({
         { beachBarId, address, zipCode, latitude, longitude, countryId, city, region },
         { payload }: MyContext
       ): Promise<TAddBeachBarLocation> => {
-        if (!payload || !payload.sub) throw new ApolloError(errors.NOT_AUTHENTICATED_MESSAGE, errors.NOT_AUTHENTICATED_CODE);
-        if (!checkScopes(payload, ["beach_bar@crud:beach_bar"]))
-          throw new ApolloError(errors.NOT_AUTHENTICATED_CODE, errors.NOT_REGISTERED_PRIMARY_OWNER);
+        isAuth(payload);
+        throwScopesUnauthorized(payload, errors.YOU_ARE_NOT_BEACH_BAR_PRIMARY_OWNER, ["beach_bar@crud:beach_bar"]);
 
-        if (!beachBarId || beachBarId.trim().length === 0 || !latitude || latitude.length > 16 || !longitude || longitude.length > 16)
+        if (!latitude || latitude.length > 16 || !longitude || longitude.length > 16)
           throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.INVALID_ARGUMENTS);
 
         const beachBar = await BeachBar.findOne({
           where: { id: beachBarId },
-          relations: ["location", "reviews", "features", "products", "entryFees", "restaurants"],
+          relations: ["location", "reviews", "features", "products", "restaurants"],
         });
         if (!beachBar) throw new ApolloError(errors.BEACH_BAR_DOES_NOT_EXIST, errors.NOT_FOUND);
 
         const country = await Country.findOne(countryId);
-        if (!country) throw new ApolloError("Specified country does not exist", errors.NOT_FOUND);
+        if (!country) throw new ApolloError("Country does not exist", errors.NOT_FOUND);
 
         let newCity: City | undefined = undefined;
         newCity = await City.findOne({ where: `"name" ILIKE '${city}'` });
@@ -94,40 +93,35 @@ export const BeachBarLocationCrudMutation = extendType({
         } catch (err) {
           if (err.message === 'duplicate key value violates unique constraint "beach_bar_location_beach_bar_id_key"')
             throw new ApolloError("You have already set the location of this #beach_bar.", errors.CONFLICT);
-          throw new ApolloError(errors.SOMETHING_WENT_WRONG + ": " + err.message);
+          throw new ApolloError(err.message);
         }
 
-        return {
-          location: newLocation,
-          added: true,
-        };
+        return { location: newLocation, added: true };
       },
     });
     t.field("updateBeachBarLocation", {
       type: UpdateBeachBarLocationType,
       description: "Update the location details of a #beach_bar",
       args: {
-        locationId: idArg({ description: "The ID value of the #beach_bar location" }),
-        address: nullable(stringArg({ description: "The address of the #beach_bar" })),
-        zipCode: nullable(
-          stringArg({
-            description: "The zip (postal) code of the #beach_bar",
-          })
-        ),
-        latitude: nullable(stringArg({ description: "The latitude of the location of the #beach_bar" })),
-        longitude: nullable(stringArg({ description: "The longitude of the location of the #beach_bar" })),
-        countryId: nullable(idArg({ description: "The ID value of the country the #beach_bar is located at" })),
-        city: nullable(stringArg({ description: "The city the #beach_bar is located at" })),
-        region: nullable(stringArg({ description: "The #beach_bar's region" })),
+        locationId: idArg(),
+        address: nullable(stringArg()),
+        zipCode: nullable(stringArg()),
+        latitude: nullable(stringArg()),
+        longitude: nullable(stringArg()),
+        countryId: nullable(idArg()),
+        city: nullable(stringArg()),
+        region: nullable(stringArg()),
       },
       resolve: async (
         _,
         { locationId, address, zipCode, latitude, longitude, countryId, city, region },
         { payload }: MyContext
       ): Promise<TUpdateBeachBarLocation> => {
-        if (!payload || !payload.sub) throw new ApolloError(errors.NOT_AUTHENTICATED_MESSAGE, errors.NOT_AUTHENTICATED_CODE);
-        if (!checkScopes(payload, ["beach_bar@crud:beach_bar", "beach_bar@update:beach_bar"]))
-          throw new ApolloError("You are not allowed to update 'this' #beach_bar location details", errors.UNAUTHORIZED_CODE);
+        isAuth(payload);
+        throwScopesUnauthorized(payload, 'You are not allowed to update "this" #beach_bar location details', [
+          "beach_bar@crud:beach_bar",
+          "beach_bar@update:beach_bar",
+        ]);
 
         const location = await BeachBarLocation.findOne({
           where: { id: locationId },
@@ -138,12 +132,9 @@ export const BeachBarLocationCrudMutation = extendType({
         try {
           const updatedLocation = await location.update({ address, zipCode, latitude, longitude, countryId, city, region });
 
-          return {
-            location: updatedLocation,
-            updated: true,
-          };
+          return { location: updatedLocation, updated: true };
         } catch (err) {
-          throw new ApolloError(errors.SOMETHING_WENT_WRONG + ": " + err.message);
+          throw new ApolloError(err.message);
         }
       },
     });

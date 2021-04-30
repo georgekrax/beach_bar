@@ -1,0 +1,9 @@
+query Cart($cartId: ID) {
+  cart(cartId: $cartId) {
+    id
+    total
+    products {
+      ...BasicCartProduct
+    }
+  }
+}

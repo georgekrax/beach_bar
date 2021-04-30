@@ -10,6 +10,7 @@ import { Face } from "./Face";
 import Filters from "./Filters";
 import { Flame } from "./Flame";
 import { Logo } from "./Logo";
+import { Share } from "./Share";
 import Map from "./Map";
 import MapMarker from "./MapMarker";
 import { Save } from "./Save";
@@ -19,7 +20,18 @@ import ShoppingCart from "./ShoppingCart";
 import { Star } from "./Star";
 import TapBarIndicator from "./TapBarIndicator";
 import { Thumb } from "./Thumb";
+import { BeachBall } from "./BeachBall";
 import { Navigation } from "./Navigation";
+import { Beach } from "./Beach";
+import { WaterSlides } from "./WaterSlides";
+import { Snacks } from "./Snacks";
+import { SwimmingPool } from "./SwimmingPool";
+import { ParkingSign } from "./ParkingSign";
+import { History } from "./History";
+import { Chair } from "./Chair";
+import { Sunbed } from "./Sunbed";
+import { BeachUmbrella } from "./BeachUmbrella";
+import { People } from "./People";
 import UserAvatar from "./UserAvatar";
 
 type SubComponents = {
@@ -47,6 +59,18 @@ type SubComponents = {
   Star: typeof Star;
   Heart: typeof Heart;
   Navigation: typeof Navigation;
+  BeachBall: typeof BeachBall;
+  WaterSlides: typeof WaterSlides;
+  Snacks: typeof Snacks;
+  ParkingSign: typeof ParkingSign;
+  SwimmingPool: typeof SwimmingPool;
+  Beach: typeof Beach;
+  History: typeof History;
+  Share: typeof Share;
+  People: typeof People;
+  Chair: typeof Chair;
+  Sunbed: typeof Sunbed;
+  BeachUmbrella: typeof BeachUmbrella;
 };
 
 const Icons: React.FC & SubComponents = () => {
@@ -79,6 +103,18 @@ Icons.Face = Face;
 Icons.Star = Star;
 Icons.Heart = Heart;
 Icons.Navigation = Navigation;
+Icons.BeachBall = BeachBall;
+Icons.WaterSlides = WaterSlides;
+Icons.Snacks = Snacks;
+Icons.ParkingSign = ParkingSign;
+Icons.SwimmingPool = SwimmingPool;
+Icons.Beach = Beach;
+Icons.History = History;
+Icons.Share = Share;
+Icons.People = People;
+Icons.Chair = Chair;
+Icons.Sunbed = Sunbed;
+Icons.BeachUmbrella = BeachUmbrella;
 
 export default Icons;
 

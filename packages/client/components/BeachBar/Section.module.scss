@@ -1,0 +1,12 @@
+.container {
+  margin: map-get($em-spacers, 48) 0;
+
+  & > h6 {
+    margin-bottom: map-get($em-spacers, 12);
+    color: $grey-9;
+  }
+}
+
+.contact {
+  margin-bottom: map-get($em-spacers, 12);
+}

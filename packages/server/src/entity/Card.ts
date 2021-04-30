@@ -14,7 +14,8 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
   Repository,
-  UpdateDateColumn,
+  AfterLoad,
+  UpdateDateColumn
 } from "typeorm";
 import { softRemove } from "utils/softRemove";
 import { stripe } from "..";
@@ -71,6 +72,9 @@ export class Card extends BaseEntity {
   @Column({ type: "boolean", name: "is_default", default: () => false })
   isDefault: boolean;
 
+  @Column({ type: "boolean", name: "saved_for_future", default: () => true })
+  savedForFuture: boolean;
+
   @Column({ type: "boolean", name: "is_expired", default: () => false })
   isExpired: boolean;
 
@@ -104,6 +108,12 @@ export class Card extends BaseEntity {
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Dayjs;
 
+  @AfterLoad()
+  async updateOnLoad() {
+    if (!this.savedForFuture) await softRemove(Card, { id: this.id }, undefined, { cardId: this.id })
+  }
+
+
   async updateCard(cardholderName?: string, expMonth?: number, expYear?: number, isDefault?: boolean, webhook = false): Promise<Card> {
     try {
       if (cardholderName && cardholderName !== this.cardholderName) this.cardholderName = cardholderName;
@@ -112,15 +122,7 @@ export class Card extends BaseEntity {
       if (isDefault !== null && isDefault !== undefined && isDefault !== this.isDefault) {
         if (this.customer.cards) {
           const defaultCards = this.customer.cards.filter(card => card.isDefault === true && card.isExpired === false);
-          await Promise.all(
-            defaultCards.map(
-              async card =>
-                await getRepository(Card).save({
-                  ...card,
-                  isDefault: false,
-                })
-            )
-          );
+          await Promise.all(defaultCards.map(async card => await getRepository(Card).save({ ...card, isDefault: false })));
         }
         this.isDefault = isDefault;
       }
@@ -167,6 +169,7 @@ export class CardRepository extends Repository<Card> {
     brand?: CardBrand,
     country?: Country,
     isDefault?: boolean,
+    savedForFuture?: boolean,
     cardholderName?: string
   ): Promise<Card> {
     const cards = customer.cards && customer.cards;
@@ -174,14 +177,7 @@ export class CardRepository extends Repository<Card> {
       const defaultCards = cards.filter(card => card.isDefault) || [];
 
       if (defaultCards.length > 0)
-        await Promise.all(
-          defaultCards.map(async card => {
-            await getRepository(Card).save({
-              ...card,
-              isDefault: false,
-            });
-          })
-        );
+        await Promise.all(defaultCards.map(async card => await getRepository(Card).save({ ...card, isDefault: false })));
     }
     try {
       const newCustomerCard = Card.create({
@@ -193,6 +189,7 @@ export class CardRepository extends Repository<Card> {
         expYear: stripeCard.exp_year,
         last4: stripeCard.last4,
         isDefault: (cards && cards.length === 0) || !cards?.find(({ isDefault }) => isDefault) ? true : isDefault,
+        savedForFuture,
         cardholderName:
           customer.user?.getFullName() && !cardholderName ? customer.user?.getFullName() : cardholderName ? cardholderName : undefined,
       });
@@ -224,10 +221,7 @@ export class CardRepository extends Repository<Card> {
 
   async updateStripeWebhookCard(stripeCard: any): Promise<void | Error> {
     const { id, name, exp_month: expMonth, exp_year: expYear } = stripeCard;
-    const card = await Card.findOne({
-      where: { stripeId: id, isExpired: false },
-      relations: ["customer"],
-    });
+    const card = await Card.findOne({ where: { stripeId: id, isExpired: false }, relations: ["customer"] });
     if (!card) throw new Error("Card does not exist");
 
     try {

@@ -1,10 +1,19 @@
 var path = require("path");
 
 module.exports = {
+  typescript: {
+    transpileOnly: true,
+  },
+  reactStrictMode: true,
+  future: {
+    webpack5: true,
+    strictPostcssConfiguration: true,
+  },
   images: {
     domains: [
       "images.unsplash.com",
       "source.unsplash.com",
+      "api.mapbox.com",
       "r-cf.bstatic.com",
       "user-account-images.s3.amazonaws.com",
       // The ones below do not work, because they are not protected with HTTPS and SSL,
@@ -28,6 +37,14 @@ module.exports = {
       exclude: /node_modules/,
       loader: "graphql-tag/loader",
     });
+
+    if (isServer) config.plugins.push(new webpack.IgnorePlugin(/\/.scss\//));
+    // config.plugins.push(
+    //   new webpack.ProgressPlugin((percentage, message, ...args) => {
+    //     // e.g. Output each progress message directly to the console:
+    //     console.info(percentage, message, ...args);
+    //   })
+    // );
 
     // ! Important: return the modified config
     return config;

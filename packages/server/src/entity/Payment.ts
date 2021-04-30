@@ -1,5 +1,5 @@
 import { errors } from "@beach_bar/common";
-import { payment, payment as paymentStatus } from "constants/status";
+import { DATA } from "constants/data";
 import dayjs, { Dayjs } from "dayjs";
 import minMax from "dayjs/plugin/minMax";
 import {
@@ -27,6 +27,8 @@ import { Product } from "./Product";
 import { RefundPercentage } from "./RefundPercentage";
 import { ReservedProduct } from "./ReservedProduct";
 
+const { STATUSES } = DATA.PAYMENT;
+
 @Entity({ name: "payment", schema: "public" })
 export class Payment extends BaseEntity {
   @PrimaryGeneratedColumn({ type: "bigint" })
@@ -53,11 +55,14 @@ export class Payment extends BaseEntity {
   @Column({ type: "boolean", name: "is_refunded", default: () => false })
   isRefunded: boolean;
 
-  @Column({ type: "decimal", precision: 12, scale: 2, name: "app_fee", nullable: true })
+  @Column({ type: "decimal", precision: 12, scale: 2, name: "app_fee" })
   appFee: number;
 
-  @Column({ type: "decimal", precision: 12, scale: 2, name: "transfer_amount", nullable: true })
+  @Column({ type: "decimal", precision: 12, scale: 2, name: "transfer_amount" })
   transferAmount: number;
+
+  @Column({ type: "decimal", precision: 12, scale: 2, name: "stripe_proccessing_fee" })
+  stripeProccessingFee: number;
 
   @ManyToOne(() => Cart, cart => cart.payment, { nullable: false })
   @JoinColumn({ name: "cart_id" })
@@ -104,12 +109,10 @@ export class Payment extends BaseEntity {
 
       if (newReservedProducts.length === 0) throw new Error(errors.SOMETHING_WENT_WRONG);
 
-      const status = await PaymentStatus.findOne({ status: payment.PAID });
-      if (!status) throw new Error(errors.SOMETHING_WENT_WRONG);
+      const status = STATUSES.PAID;
 
-      this.status = status;
+      this.statusId = status.id;
       await this.save();
-
       return newReservedProducts;
     } else throw new Error(errors.SOMETHING_WENT_WRONG);
   }
@@ -135,10 +138,10 @@ export class Payment extends BaseEntity {
     };
   }
 
-  hasBeachBarProduct(beachBarId: number): boolean {
-    if (this.cart.products)
-      return this.cart.products.some(product => product.product.beachBarId === beachBarId && !product.product.deletedAt);
-    else return false;
+  hasBeachBarProduct(beachBarId: string): boolean {
+    if ((this.cart.products?.length || 0) > 0) {
+      return this.cart.products!.some(product => product.product.beachBarId.toString() === beachBarId && !product.product.deletedAt);
+    } else return false;
   }
 
   getProductsMonth(beachBarId: number): number[] | undefined {
@@ -148,24 +151,22 @@ export class Payment extends BaseEntity {
       .map(product => dayjs(product.date).month() + 1);
   }
 
-  getBeachBarProducts(beachBarId: number): Product[] | undefined {
+  getBeachBarProducts(beachBarId: string): Product[] | undefined {
     if (!this.hasBeachBarProduct(beachBarId) || !this.cart.products) return undefined;
-    const beachBarProducts = this.cart.products.map(product => product.product).filter(product => product.beachBarId === beachBarId);
+    const beachBarProducts = this.cart.products
+      .map(product => product.product)
+      .filter(product => product.beachBarId.toString() === beachBarId);
     return beachBarProducts;
   }
 
   getBeachBars(): BeachBar[] {
-    const beachBars = this.cart.products?.map(({ product }) => product.beachBar);
-    return beachBars || [];
+    return this.cart.products?.map(({ product }) => product.beachBar) || [];
   }
 
   async softRemove(): Promise<any> {
     // await this.cart.customSoftRemove(false);
-    const refundedStatus = await PaymentStatus.findOne({ status: paymentStatus.REFUNDED });
-    if (refundedStatus) {
-      this.status = refundedStatus;
-      await this.save();
-    }
+    this.statusId = STATUSES.REFUNDED.id;
+    await this.save();
     const findOptions: any = { paymentId: this.id };
     await softRemove(Payment, { id: this.id }, [ReservedProduct], findOptions);
   }

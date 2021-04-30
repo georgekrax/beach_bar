@@ -1,16 +1,24 @@
 import { useClassnames } from "@hashtag-design-system/components";
-import NextLink, { LinkProps } from "next/link";
+import NextJSLink, { LinkProps } from "next/link";
 
 type Props = {
-  as?: "a";
+  a?: boolean;
 };
 
-type FProps = Props & LinkProps;
-
-export const Link: React.FC<FProps> = ({ as = "a", children,...props }) => {
+export const Link: React.FC<Props & LinkProps & Pick<React.ComponentPropsWithoutRef<"a">, "className">> = ({
+  a = true,
+  children,
+  ...props
+}) => {
   const [classNames, rest] = useClassnames("link", props);
 
-  return <NextLink {...rest}>{as === "a" ? <a className={classNames}>{children}</a> : children}</NextLink>;
+  return (
+    <NextJSLink passHref {...rest}>
+      {a ? <a className={classNames}>{children}</a> : children}
+    </NextJSLink>
+  );
 };
 
 Link.displayName = "NextLink";
+
+export const NextLink = Link;

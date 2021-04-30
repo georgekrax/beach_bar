@@ -59,14 +59,8 @@ export class UserSearch extends BaseEntity {
   @ManyToMany(() => SearchFilter, searchFilter => searchFilter.userSearches, { nullable: true })
   @JoinTable({
     name: "user_search_filter",
-    joinColumn: {
-      name: "search_id",
-      referencedColumnName: "id",
-    },
-    inverseJoinColumn: {
-      name: "filter_id",
-      referencedColumnName: "id",
-    },
+    joinColumn: { name: "search_id", referencedColumnName: "id" },
+    inverseJoinColumn: { name: "filter_id", referencedColumnName: "id" },
   })
   filters?: SearchFilter[];
 
@@ -77,11 +71,8 @@ export class UserSearch extends BaseEntity {
   timestamp: Dayjs;
 
   getRedisKey(userId?: number): string {
-    if (userId !== undefined) {
-      return `${redisKeys.USER}:${userId}:${redisKeys.USER_SEARCH}`;
-    } else {
-      return redisKeys.USER_SEARCH;
-    }
+    if (userId !== undefined) return redisKeys.USER  +":"  + userId + ":" + redisKeys.USER_SEARCH;
+    else return redisKeys.USER_SEARCH;
   }
 
   async getRedisIdx(redis: Redis, userId?: number): Promise<number> {

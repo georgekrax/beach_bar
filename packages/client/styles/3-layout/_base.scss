@@ -3,12 +3,24 @@
   padding-top: calc(#{$wrapper-padding}/ 1.5);
 }
 
-.wrapper {
-  @extend .flex-column-space-between-unset;
-  @extend .h-100;
-  padding: $wrapper-padding;
-  padding-top: calc(#{$wrapper-padding}/ 1.5);
-  overflow-x: hidden;
-  box-sizing: content-box;
-  position: relative;
+.container--padding {
+  padding: 0 $wrapper-padding;
+}
+
+.container--mw {
+  max-width: map-get($breakpoints, "xl");
+}
+
+.container {
+  @extend .w100;
+  @extend .container--mw;
+  @extend .container--padding;
+  display: inherit;
+  flex-direction: inherit;
+  margin: 0 auto;
+  flex: 1;
+
+  & > main {
+    flex: inherit;
+  }
 }

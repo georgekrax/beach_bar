@@ -1,14 +1,14 @@
 import { ProductReservationLimit } from "entity/ProductReservationLimit";
 import { HourTime } from "entity/Time";
-import { AddType, ErrorType, UpdateType } from "typings/.index";
+import { AddType, UpdateType } from "typings/.index";
 
 type ProductReservationLimitType = {
   reservationLimit: ProductReservationLimit[];
 };
 
-export type AddProductReservationLimitType = (AddType & ProductReservationLimitType) | ErrorType;
+export type TAddProductReservationLimit = AddType & ProductReservationLimitType;
 
-export type UpdateProductReservationLimitType = (UpdateType & ProductReservationLimitType) | ErrorType;
+export type TUpdateProductReservationLimit = UpdateType & ProductReservationLimitType;
 
 export type AvailableProductReturnType = {
   hourTime: HourTime;

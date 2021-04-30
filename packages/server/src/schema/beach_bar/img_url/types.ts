@@ -1,5 +1,5 @@
-import { UrlScalar } from "@the_hashtag/common/dist/graphql";
-import { objectType, unionType } from "nexus";
+import { DateTimeScalar, UrlScalar } from "@the_hashtag/common/dist/graphql";
+import { objectType } from "nexus";
 import { BeachBarType } from "../types";
 
 export const BeachBarImgUrlType = objectType({
@@ -12,7 +12,9 @@ export const BeachBarImgUrlType = objectType({
       description:
         "A short description about what the image represents. The characters of the description should not exceed the number 175",
     });
-    t.field("beachBar", { type: BeachBarType, resolve: o => o.beachBar });
+    t.field("beachBar", { type: BeachBarType });
+    t.field("updatedAt", { type: DateTimeScalar });
+    t.field("timestamp", { type: DateTimeScalar });
   },
 });
 
@@ -20,52 +22,38 @@ export const AddBeachBarImgUrlType = objectType({
   name: "AddBeachBarImgUrl",
   description: "Info to be returned when an image (URL) is added to a #beach_bar",
   definition(t) {
-    t.field("imgUrl", {
-      type: BeachBarImgUrlType,
-      description: "The image that is added",
-      resolve: o => o.imgUrl,
-    });
+    t.field("imgUrl", { type: BeachBarImgUrlType, description: "The image that is added" });
     t.boolean("added", { description: "Indicates if the image (URL) has been successfully been added to the #beach_bar" });
   },
 });
 
-export const AddBeachBarImgUrlResult = unionType({
-  name: "AddBeachBarImgUrlResult",
-  definition(t) {
-    t.members("AddBeachBarImgUrl", "Error");
-  },
-  resolveType: item => {
-    if (item.error) {
-      return "Error";
-    } else {
-      return "AddBeachBarImgUrl";
-    }
-  },
-});
+// export const AddBeachBarImgUrlResult = unionType({
+//   name: "AddBeachBarImgUrlResult",
+//   definition(t) {
+//     t.members("AddBeachBarImgUrl", "Error");
+//   },
+//   resolveType: item => {
+//     if (item.error) return "Error";
+//     else return "AddBeachBarImgUrl";
+//   },
+// });
 
 export const UpdateBeachBarImgUrlType = objectType({
   name: "UpdateBeachBarImgUrl",
   description: "Info to be returned when the details of #beach_bar's image, are updated",
   definition(t) {
-    t.field("imgUrl", {
-      type: BeachBarImgUrlType,
-      description: "The image that is updated",
-      resolve: o => o.imgUrl,
-    });
+    t.field("imgUrl", { type: BeachBarImgUrlType, description: "The image that is updated" });
     t.boolean("updated", { description: "Indicates if the image details have been successfully updated" });
   },
 });
 
-export const UpdateBeachBarImgUrlResult = unionType({
-  name: "UpdateBeachBarImgUrlResult",
-  definition(t) {
-    t.members("UpdateBeachBarImgUrl", "Error");
-  },
-  resolveType: item => {
-    if (item.error) {
-      return "Error";
-    } else {
-      return "UpdateBeachBarImgUrl";
-    }
-  },
-});
+// export const UpdateBeachBarImgUrlResult = unionType({
+//   name: "UpdateBeachBarImgUrlResult",
+//   definition(t) {
+//     t.members("UpdateBeachBarImgUrl", "Error");
+//   },
+//   resolveType: item => {
+//     if (item.error) return "Error";
+//     else return "UpdateBeachBarImgUrl";
+//   },
+// });

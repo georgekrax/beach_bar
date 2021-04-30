@@ -1,0 +1,5 @@
+.btn {
+  // @extend .semibold;
+  color: $grey-9;
+  padding: 0.6em map-get($em-spacers, 12);
+}

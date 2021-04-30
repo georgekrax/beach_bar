@@ -1,11 +1,13 @@
+@use "2-base/base" as *;
+
 $padding: map-get($em-spacers, 16);
 
 .container {
   height: auto;
   border-radius: 14px;
   overflow: hidden;
-  box-shadow: 5px 6px 18px $grey-6;
-  max-width: 480px;
+  max-width: 320px;
+  flex-shrink: 0;
 
   &:not(:last-child) {
     margin-bottom: map-get($em-spacers, 40);
@@ -13,26 +15,33 @@ $padding: map-get($em-spacers, 16);
 }
 
 .cardContainer {
+  position: relative;
   background: linear-gradient(to right, #ec008c, #fc6767);
   padding: $padding;
   box-shadow: inset 0px 0px 12px rgba($grey-10, 35%);
+  border-radius: inherit;
 
   & > div {
-    @extend .w-100;
-    height: min(40vw, 200px);
+    @extend .w100;
+    height: min(40vw, 160px);
 
-    :global {
-      @include path-classNames() {
-        stroke: $grey-1;
-        stroke-width: 0.5px;
-      }
+    path {
+      stroke: $grey-1;
+      stroke-width: 0.5px;
     }
   }
 }
 
 .edit {
+  width: 84%;
   background-color: $grey-4;
-  padding: calc(#{$padding} * 0.75) $padding;
+  padding: calc(#{$padding} * 0.6) $padding;
+  transform: translateY(-2px);
+  border-radius: inherit;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  margin: 0 auto;
+  cursor: pointer;
 
   & > div:first-child > h6 {
     margin-left: map-get($em-spacers, 8);
@@ -41,7 +50,7 @@ $padding: map-get($em-spacers, 16);
   }
 }
 
-.actions > button {
+.actions button {
   padding: 0.4em;
 
   &:not(:last-child) {

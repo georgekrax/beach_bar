@@ -1,0 +1,25 @@
+fragment BasicCartProduct on CartProduct {
+  id
+  quantity
+  date
+  timestamp
+  time {
+    id
+    value
+  }
+  product {
+    id
+    name
+    price
+    imgUrl
+    beachBar {
+      id
+      name
+      thumbnailUrl
+      formattedLocation
+      defaultCurrency {
+        symbol
+      }
+    }
+  }
+}

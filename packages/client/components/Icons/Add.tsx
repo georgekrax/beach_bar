@@ -5,7 +5,7 @@ type SubComponents = {
   Circle: typeof Circle;
 };
 
-export const Path: React.FC<IconPathBaseFProps> = ({ ...props }) => {
+const Path: React.FC<IconPathBaseFProps> = ({ ...props }) => {
   return <PathBase d="M3 12h18m-9 9V3" strokeLinecap="round" {...props} />;
 };
 
@@ -17,7 +17,7 @@ export const Add: React.FC<IconBaseFProps> & SubComponents = ({ ...props }) => {
   );
 };
 
-export const Circle: React.FC<IconBaseFProps> = ({ ...props }) => {
+const Circle: React.FC<IconBaseFProps> = ({ ...props }) => {
   return (
     <Base {...props}>
       <circle cx={12} cy={12} r={9.25} />
@@ -26,9 +26,10 @@ export const Circle: React.FC<IconBaseFProps> = ({ ...props }) => {
   );
 };
 
+Add.Path = Path;
+Add.Circle = Circle;
+
 Add.displayName = "IconAdd";
 Path.displayName = "IconAddPath";
 Circle.displayName = "IconAddCircle";
 
-Add.Path = Path;
-Add.Circle = Circle;

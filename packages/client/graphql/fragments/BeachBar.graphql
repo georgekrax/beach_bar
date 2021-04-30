@@ -1,0 +1,60 @@
+fragment DetailsBeachBar on BeachBar {
+  id
+  name
+  slug
+  thumbnailUrl
+  description
+  avgRating
+  isAvailable
+  formattedLocation
+  contactPhoneNumber
+  hidePhoneNumber
+  location {
+    id
+    address
+    zipCode
+    longitude
+    latitude
+    country {
+      id
+      name
+      callingCode
+    }
+    city {
+      id
+      name
+    }
+    region {
+      id
+      name
+    }
+  }
+  features {
+    quantity
+    service {
+      id
+      name
+      icon {
+        id
+        publicId
+      }
+    }
+  }
+  styles {
+    id
+    name
+  }
+  restaurants {
+    id
+  }
+}
+
+fragment SearchBeachBar on BeachBar {
+  ...DetailsBeachBar
+  reviews {
+    id
+  }
+  payments {
+    id
+  }
+}

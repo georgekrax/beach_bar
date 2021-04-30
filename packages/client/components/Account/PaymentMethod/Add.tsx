@@ -2,167 +2,215 @@ import Feedback from "@/components/Feedback";
 import Header from "@/components/Header";
 import Icons from "@/components/Icons";
 import {
-  GetCustomerPaymentMethodsDocument,
-  GetCustomerPaymentMethodsQuery,
+  CustomerPaymentMethodsDocument,
+  CustomerPaymentMethodsQuery,
   useAddCustomerPaymentMethodMutation,
 } from "@/graphql/generated";
+import { PaymentMethodFormData } from "@/pages/account/billing";
 import { useAuth, useConfig } from "@/utils/hooks";
 import { notify } from "@/utils/notify";
-import { Button, Form, Input } from "@hashtag-design-system/components";
+import { Form } from "@hashtag-design-system/components";
+import { Button, Input, Switch, useClassnames } from "@hashtag-design-system/components";
 import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
-import { useState } from "react";
-import { useController, useForm } from "react-hook-form";
-import { PaymentMethodFormData } from "../../../pages/account/billing";
+import { memo, useEffect, useState } from "react";
+import { FormState, useController, useForm } from "react-hook-form";
 import styles from "./Add.module.scss";
 import { PaymentMethod } from "./PaymentMethod";
 
 type FormData = Pick<PaymentMethodFormData, "cardholderName" | "isDefault">;
 
-type Props = {
+export type Props = {
   customerId: string;
   cardsLength: number;
+  defaultBtn?: boolean;
+  saveForFuturePayments?: boolean;
+  bottomSheet?: boolean;
+  notifyOnSuccess?: boolean;
+  onSubmit?: () => void;
+  onSubmitId?: (cardId: string) => void;
+  onFormState?: (formState: FormState<FormData>) => void;
 };
 
-export const Add: React.FC<Props> = ({ customerId, cardsLength }) => {
-  const [isShown, setIsShown] = useState(false);
-  const { data: meData } = useAuth();
-  const [addPaymentMethod] = useAddCustomerPaymentMethodMutation();
+export const Add: React.FC<Props & Pick<React.ComponentPropsWithoutRef<"div">, "className">> = memo(
+  ({
+    customerId,
+    cardsLength,
+    defaultBtn = true,
+    saveForFuturePayments = false,
+    bottomSheet = true,
+    notifyOnSuccess = true,
+    children,
+    onSubmit: onPropsSubmit,
+    onSubmitId,
+    onFormState,
+    ...props
+  }) => {
+    const [savedForFuture, setSavedForFuture] = useState(false);
+    const [isShown, setIsShown] = useState(false);
+    const [classNames, rest] = useClassnames(styles.container + " w100", props);
 
-  const { register, handleSubmit, control, errors } = useForm<FormData>();
-  const {
-    field: { ref: isDefaultRef, onChange, ...isDefaultProps },
-  } = useController({
-    name: "isDefault",
-    control,
-    // defaultValue: cardsLength === 0,
-  });
+    const { data: meData } = useAuth();
+    const [addPaymentMethod] = useAddCustomerPaymentMethodMutation();
 
-  const stripe = useStripe();
-  const elements = useElements();
+    const { handleSubmit, control, formState } = useForm<FormData>({
+      mode: "onBlur",
+      defaultValues: {
+        cardholderName: meData?.me?.fullName || "",
+        isDefault: cardsLength === 0,
+      },
+    });
+    const { field: cardholderName } = useController<FormData, "cardholderName">({ name: "cardholderName", control });
+    const {
+      field: { value, ...isDefault },
+    } = useController<FormData, "isDefault">({
+      name: "isDefault",
+      control,
+      defaultValue: cardsLength === 0,
+    });
 
-  const {
-    colors: { red, grey },
-    variables: { primary },
-  } = useConfig();
+    const stripe = useStripe();
+    const elements = useElements();
 
-  const onSubmit = async (
-    { cardholderName, isDefault }: FormData,
-    e: React.BaseSyntheticEvent<object, any, any> | undefined
-  ): Promise<boolean> => {
-    e?.preventDefault();
-    // Stripe.js has not loaded yet. Make sure to disable
-    // form submission until Stripe.js has loaded.
-    if (!stripe || !elements) {
-      notify("error", "");
-      return false;
-    }
+    const {
+      colors: { red, grey },
+      variables: { primary },
+    } = useConfig();
 
-    // Get a reference to a mounted CardElement. Elements knows how
-    // to find your CardElement because there can only ever be one of
-    // each type of element.
-    const card = elements.getElement(CardElement);
-    if (!card) {
-      notify("error", "");
-      return false;
-    }
-    const result = await stripe.createToken(card);
-
-    if (result.error) {
-      notify("error", result.error.message || "", { somethingWentWrong: { onlyWhenUndefined: true } });
-      return false;
-    } else {
-      const { errors } = await addPaymentMethod({
-        variables: {
-          token: result.token.id,
-          customerId,
-          cardholderName,
-          isDefault,
-        },
-        update: (cache, { data }) => {
-          const cachedData = cache.readQuery<GetCustomerPaymentMethodsQuery>({
-            query: GetCustomerPaymentMethodsDocument,
-          });
-          cache.writeQuery({
-            query: GetCustomerPaymentMethodsDocument,
-            data: {
-              getCustomerPaymentMethods: [
-                ...Array.from(cachedData?.getCustomerPaymentMethods || []),
-                data?.addCustomerPaymentMethod.card,
-              ],
-            },
-          });
-        },
-      });
-      if (errors) {
-        errors.forEach(({ message }) => notify("error", message));
-        return false;
-      } else {
-        notify("success", "Success! Your payment method was added.");
-        return true;
+    const onSubmit = async (
+      { cardholderName, isDefault }: FormData,
+      e: React.BaseSyntheticEvent<object, any, any> | undefined
+    ): Promise<{ id: string | undefined }> => {
+      e?.preventDefault();
+      // Stripe.js has not loaded yet. Make sure to disable
+      // form submission until Stripe.js has loaded.
+      if (!stripe || !elements) {
+        notify("error", "");
+        return { id: undefined };
       }
-    }
-  };
 
-  return (
-    <div className={styles.container + " w-100"}>
-      <Button className={styles.btn} variant="secondary" aria-label="Add" onClick={() => setIsShown(true)}>
-        <Icons.Add className="icon--bold" width={16} height={16} />
-        <span>Add</span>
-      </Button>
-      <Header.Crud
-        bottomSheet={{
-          isShown,
-          onDismiss: () => setIsShown(false),
-        }}
-        cta={{
-          children: "Add",
-          icon: <Icons.Add className="icon--bold" width={16} height={16} />,
-          onClick: async (_, dismiss) =>
-            handleSubmit(async (data, e) => {
-              const res = await onSubmit(data, e);
-              if (res) await dismiss();
-            })(),
-        }}
-        title="Add payment method"
-      >
-        <Form.Group className={styles.form + " w-100"}>
-          <CardElement
-            className="w-100 input"
-            options={{
-              style: {
-                base: {
-                  iconColor: primary,
-                  fontSize: "16px",
-                  color: grey["1000"],
-                  "::placeholder": { color: grey["900"] },
-                },
-                invalid: { color: red["600"] },
+      // Get a reference to a mounted CardElement. Elements knows how
+      // to find your CardElement because there can only ever be one of
+      // each type of element.
+      const card = elements.getElement(CardElement);
+      if (!card) {
+        notify("error", "");
+        return { id: undefined };
+      }
+      const result = await stripe.createToken(card);
+
+      if (result.error) {
+        notify("error", result.error.message || "", { somethingWentWrong: { onlyWhenUndefined: true } });
+        return { id: undefined };
+      } else {
+        if (onPropsSubmit) onPropsSubmit();
+        const { data: res, errors } = await addPaymentMethod({
+          variables: {
+            token: result.token.id,
+            customerId,
+            cardholderName,
+            isDefault: saveForFuturePayments || isDefault,
+            savedForFuture,
+          },
+          update: (cache, { data }) => {
+            const cachedData = cache.readQuery<CustomerPaymentMethodsQuery>({
+              query: CustomerPaymentMethodsDocument,
+            });
+            cache.writeQuery<CustomerPaymentMethodsQuery>({
+              query: CustomerPaymentMethodsDocument,
+              data: {
+                customerPaymentMethods: [
+                  ...(Array.from(cachedData?.customerPaymentMethods || []) || []),
+                  data?.addCustomerPaymentMethod.card || [],
+                ].flat(),
               },
-            }}
-          />
-          <Input
-            name="cardholderName"
-            placeholder="Cardholder name"
-            defaultValue={meData && meData.me ? meData.me.firstName + " " + meData.me.lastName : undefined}
-            forwardref={register}
-            secondhelptext={{ error: true, value: errors.cardholderName?.message }}
-          />
-          <div className="flex-column-center-flex-start">
-            <PaymentMethod.IsDefault
-              showDefault
-              ref={isDefaultRef as any}
-              onValue={newVal => onChange(newVal)}
-              defaultChecked={cardsLength === 0}
-              {...isDefaultProps}
+            });
+          },
+        });
+        if (errors) {
+          errors.forEach(({ message }) => notify("error", message));
+          return { id: undefined };
+        } else {
+          const id = res?.addCustomerPaymentMethod.card.id || "";
+          if (notifyOnSuccess) notify("success", "Success! Your payment method was added.");
+          if (onSubmitId) onSubmitId(id);
+          return { id: res?.addCustomerPaymentMethod.card.id || undefined };
+        }
+      }
+    };
+
+    useEffect(() => {
+      if (onFormState) onFormState(formState);
+    }, [formState]);
+
+    const { errors } = formState;
+    return (
+      <div className={classNames} {...rest}>
+        <Button className={styles.btn} variant="secondary" aria-label="Add" onClick={() => setIsShown(true)}>
+          <Icons.Add className="icon--bold" width={16} height={16} />
+          <div>Add</div>
+        </Button>
+        <Header.Crud
+          bottomSheet={bottomSheet ? { isShown, onDismiss: () => setIsShown(false) } : undefined}
+          cta={{
+            children: "Add",
+            icon: <Icons.Add className="icon--bold" width={16} height={16} />,
+            onClick: async (_, dismiss) =>
+              handleSubmit(async (data, e) => {
+                const res = await onSubmit(data, e);
+                if (res.id) await dismiss();
+              })(),
+          }}
+          title="Add payment method"
+        >
+          <Form.Group className={styles.form + " w100"} onSubmit={handleSubmit(onSubmit)}>
+            <CardElement
+              className="w100 input"
+              options={{
+                style: {
+                  base: {
+                    iconColor: primary,
+                    fontSize: "16px",
+                    color: grey["1000"],
+                    "::placeholder": { color: grey["900"] },
+                  },
+                  invalid: { color: red["600"] },
+                },
+              }}
             />
-            {errors.isDefault && (
-              <Feedback.Error style={{ alignSelf: "flex-start" }}>{errors.isDefault.message}</Feedback.Error>
-            )}
-          </div>
-        </Form.Group>
-      </Header.Crud>
-    </div>
-  );
-};
+            <Input
+              {...cardholderName}
+              placeholder="Cardholder name"
+              defaultValue={meData?.me?.fullName}
+              forwardref={cardholderName.ref}
+              secondhelptext={{ error: true, value: errors.cardholderName?.message }}
+            />
+            <div className="w100 flex-column-center-flex-start">
+              {defaultBtn && (
+                <PaymentMethod.IsDefault
+                  {...isDefault}
+                  showDefault
+                  ref={isDefault.ref as any}
+                  onValue={newVal => isDefault.onChange(newVal)}
+                  defaultChecked={cardsLength === 0}
+                />
+              )}
+              {saveForFuturePayments && (
+                <Switch
+                  defaultChecked
+                  label={{ position: "right", value: "Save this card for future payment" }}
+                  onChange={e => setSavedForFuture(e.target.value === "true" ? false : true)}
+                />
+              )}
+              {errors.isDefault && (
+                <Feedback.Error style={{ alignSelf: "flex-start" }}>{errors.isDefault.message}</Feedback.Error>
+              )}
+              {children}
+            </div>
+          </Form.Group>
+        </Header.Crud>
+      </div>
+    );
+  }
+);
 
 Add.displayName = "Add";

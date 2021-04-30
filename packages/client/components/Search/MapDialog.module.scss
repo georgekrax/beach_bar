@@ -1,0 +1,50 @@
+.dialog {
+  $top: 5%;
+  width: min(100vw, 56em);
+  top: $top !important;
+  // transform: translateY(-15%)
+  height: calc(100% - #{$top * 2});
+  padding: map-get($em-spacers, 12);
+
+  & > div {
+    border-radius: 14px;
+    overflow: hidden;
+  }
+}
+
+.map {
+  :global {
+    .mapboxgl-control-container {
+      flex-direction: column;
+      align-items: flex-end;
+      left: auto;
+      right: 0;
+      top: auto;
+      bottom: 0;
+
+      & > div:nth-last-child(2) {
+        transform: scale(0.8);
+        transform-origin: 100% 100%;
+      }
+    }
+  }
+}
+
+.map + div > div {
+  $margin: $wrapper-padding * 0.75;
+
+  &:first-child {
+    margin-left: $margin;
+  }
+
+  &:last-child {
+    align-items: flex-start;
+    min-height: 10.5em;
+
+    & > div:first-child {
+      padding: 0 $margin;
+    }
+    // padding-top: 0;
+    // padding-bottom: 0;
+  }
+}

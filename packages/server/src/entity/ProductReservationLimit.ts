@@ -29,7 +29,7 @@ export class ProductReservationLimit extends BaseEntity {
   productId: number;
 
   @Column({ type: "date", name: "date" })
-  date: Dayjs;
+  date: string;
 
   @Column({ type: "integer", name: "start_time_id" })
   startTimeId: number;

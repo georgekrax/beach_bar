@@ -13,3 +13,23 @@
     }
   }
 }
+
+@mixin text-overflow($numberOfLines: 5) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: $numberOfLines; /* number of lines to show */
+  -webkit-box-orient: vertical;
+}
+
+@mixin breakpoint--max($width: "min-width") {
+  @include breakpoint("lg", $width) {
+    @content;
+  }
+}
+
+@mixin responsive($width: "min-width") {
+  @include breakpoint("md", $width) {
+    @content;
+  }
+}

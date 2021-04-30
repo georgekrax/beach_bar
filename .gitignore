@@ -10,3 +10,5 @@ tmp/
 temp/
 yarn-error.log
 ormconfig.json
+beach_bar.sql
+hashtag.sql

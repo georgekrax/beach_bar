@@ -1,0 +1,22 @@
+fragment BeachBarProduct on Product {
+  id
+  name
+  description
+  imgUrl
+  price
+  maxPeople
+  category {
+    id
+    components {
+      quantity
+      component {
+        id
+        name
+        icon {
+          id
+          publicId
+        }
+      }
+    }
+  }
+}

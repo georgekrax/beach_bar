@@ -1,0 +1,13 @@
+.bottom_sheet {
+  &__title {
+    @extend .w100;
+    @extend .d--block;
+    @extend .body-16;
+    content: "";
+    height: auto;
+    padding: map-get($em-spacers, 8) 0;
+    color: $grey-10;
+    text-align: center;
+    @include font-semibold();
+  }
+}

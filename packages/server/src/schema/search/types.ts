@@ -1,5 +1,6 @@
-import { DateScalar, DateTimeScalar, UrlScalar } from "@the_hashtag/common/dist/graphql";
+import { DateScalar, DateTimeScalar } from "@the_hashtag/common/dist/graphql";
 import { inputObjectType, objectType } from "nexus";
+import { formatInputValue } from "utils/search";
 import { BeachBarAvailabilityType, BeachBarType } from "../beach_bar/types";
 import { CityType } from "../details/cityTypes";
 import { CountryType } from "../details/countryTypes";
@@ -16,8 +17,8 @@ export const UserSearchType = objectType({
     t.nullable.int("searchChildren");
     t.nullable.field("user", { type: UserType, description: "The user that made the search" });
     t.field("inputValue", { type: SearchInputValueType, description: "The input value that the user searched for" });
+    t.list.field("filters", { type: SearchFilterType, description: "A sort filter used by the user, in its search" });
     t.nullable.field("sort", { type: SearchSortType, description: "The input value that the user searched for" });
-    t.nullable.list.field("filters", { type: SearchSortType, description: "A sort filter used by the user, in its search" });
     t.field("updatedAt", { type: DateTimeScalar });
     t.field("timestamp", { type: DateTimeScalar });
   },
@@ -87,7 +88,7 @@ export const SearchInputValueType = objectType({
     t.string("publicId", { description: "A unique identifier (ID) for public use" });
     t.string("formattedValue", {
       description: "The search input value formatted into a string",
-      resolve: o => o.format(),
+      resolve: o => formatInputValue(o),
     });
     t.nullable.field("country", { type: CountryType, description: "The country of the input value" });
     t.nullable.field("city", { type: CityType, description: "The city of the input value" });
@@ -109,33 +110,19 @@ export const SearchFilterType = objectType({
   },
 });
 
-export const FormattedSearchInputValueType = objectType({
-  name: "FormattedSearchInputValue",
-  description: "Represents a formatted search input value",
-  definition(t) {
-    t.field("inputValue", {
-      type: SearchInputValueType,
-      description: "The search input value",
-      resolve: o => o,
-    });
-    t.nullable.field("beachBarThumbnailUrl", {
-      type: UrlScalar,
-      description: 'The URL value of the #beach_bar thumbnail image to show, at search "dropdown results"',
-      resolve: o => o.beachBar && o.beachBar.thumbnailUrl,
-    });
-  },
-});
-
-// export const FormattedSearchInputValueResult = unionType({
+// export const FormattedSearchInputValueType = objectType({
 //   name: "FormattedSearchInputValue",
+//   description: "Represents a formatted search input value",
 //   definition(t) {
-//     t.members("FormattedSearchInputValueType", "Error");
-//     t.resolveType(item => {
-//       if (item.error) {
-//         return "Error";
-//       } else {
-//         return "FormattedSearchInputValueType";
-//       }
+//     t.field("inputValue", {
+//       type: SearchInputValueType,
+//       description: "The search input value",
+//       resolve: o => o,
+//     });
+//     t.nullable.field("beachBarThumbnailUrl", {
+//       type: UrlScalar,
+//       description: 'The URL value of the #beach_bar thumbnail image to show, at search "dropdown results"',
+//       resolve: o => o.beachBar && o.beachBar.thumbnailUrl,
 //     });
 //   },
 // });

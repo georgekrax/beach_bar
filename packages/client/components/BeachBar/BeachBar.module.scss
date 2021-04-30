@@ -1,0 +1,155 @@
+.container {
+  margin: map-get($em-spacers, 16) 0;
+}
+
+.images {
+  $gap: map-get($em-spacers, 12);
+
+  & > div:first-child {
+    margin-right: $gap;
+    min-width: 36%;
+    @include aspect-ratio(100%);
+
+    &:only-child {
+      margin-right: 0;
+    }
+  }
+}
+
+.restImgs {
+  flex-wrap: wrap;
+  gap: map-get($em-spacers, 12);
+
+  & > div {
+    position: relative;
+    flex: 1 1 30%;
+    max-width: 66%;
+  }
+
+  // & > div:last-child {
+  //   margin-bottom: 0;
+  // }
+
+  // & > div > div {
+  //   @include aspect-ratio(100%);
+  // }
+}
+
+.moreImgs {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: rgba($grey-10, 0.4);
+  color: $grey-1;
+  @include transition-2s("ease-out", "transform");
+
+  &:hover {
+    transform: scale(1.5);
+  }
+}
+
+.viewReviews {
+  margin: map-get($em-spacers, 32) 0 map-get($em-spacers, 20);
+
+  & > div:first-child {
+    & > div {
+      color: $grey-9;
+    }
+
+    & > div > div {
+      margin-left: map-get($em-spacers, 8);
+    }
+  }
+
+  & > div:last-child {
+    margin-top: map-get($em-spacers, 8);
+
+    & > svg {
+      margin-top: map-get($em-spacers, 4);
+      margin-left: map-get($em-spacers, 4);
+
+      path {
+        stroke: $secondary !important;
+      }
+    }
+  }
+
+  .reviewsUserImgs {
+    .reviewUserImg {
+      border: 3px solid $grey-1 !important;
+    }
+
+    & > div {
+      margin-right: -15% !important;
+    }
+  }
+}
+
+.description {
+  margin-top: map-get($em-spacers, 32);
+  color: $grey-8;
+}
+
+.productsPreview {
+  position: relative;
+  border-radius: 14px;
+  margin: map-get($em-spacers, 32) 0;
+  background-color: rgba($blue-3, 0.7);
+
+  .list {
+    padding: map-get($em-spacers, 16);
+    max-height: 23em;
+    overflow: hidden;
+  }
+}
+
+.ctaContainer {
+  $external: 1px;
+  $neg-external: -#{$external};
+  position: absolute;
+  left: $neg-external;
+  bottom: $neg-external;
+  width: calc(100% + (#{$external} * 2));
+  height: min(100%, 12.5em);
+  padding: map-get($em-spacers, 20);
+  background: linear-gradient(to top, $grey-1, transparent);
+
+  & > button {
+    position: absolute;
+    bottom: map-get($em-spacers, 32);
+    border-color: $volcano-5;
+    padding: map-get($em-spacers, 16) 0;
+    background-color: $volcano-5;
+    width: min(calc(100% - (#{$wrapper-padding} * 2)), 18em);
+  }
+}
+
+@include breakpoint("sm") {
+  .container > div:first-child {
+    display: none;
+  }
+
+  .details {
+    flex-direction: row-reverse;
+    margin-top: map-get($em-spacers, 20);
+  }
+
+  .viewReviews {
+    flex: 1 0 11rem;
+    margin-top: inherit;
+    margin-left: map-get($em-spacers, 32);
+  }
+
+  .description {
+    margin-top: inherit;
+  }
+
+  .productsPreview {
+    .list {
+      max-height: none;
+      .ctaContainer {
+        display: none;
+      }
+    }
+  }
+}

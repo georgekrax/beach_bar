@@ -1,5 +1,5 @@
-import { Visit } from "@/components/Carousel";
-import { GetPaymentsQuery } from "@/graphql/generated";
+import { Visit } from "@/components/HeyCarousel";
+import { PaymentsQuery } from "@/graphql/generated";
 import { Details } from "./Details";
 import { DoubleInfo } from "./DoubleInfo";
 import { Info } from "./Info";
@@ -12,13 +12,13 @@ type SubComponents = {
 };
 
 type Props = {
-  data: Required<GetPaymentsQuery>;
+  data: Required<Omit<PaymentsQuery, "__typename">>;
 };
 
 export const Trips: React.FC<Props> & SubComponents = ({ data }) => {
   return (
     <div className={styles.container + " flex-row-center-center"}>
-      {data.getPayments
+      {data.payments
         ?.map(({ visits, beachBar: { id, name, thumbnailUrl, location: { city, region } } }) => ({
           beachBar: { id, name, city: city?.name, region: region?.name },
           imgProps: { src: thumbnailUrl },

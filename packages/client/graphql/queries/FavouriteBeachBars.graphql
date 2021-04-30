@@ -1,8 +1,9 @@
-query FavouriteBeachBars {
-  favouriteBeachBars {
+query FavouriteBeachBars($limit: Int) {
+  favouriteBeachBars(limit: $limit) {
     beachBar {
       id
       name
+      slug
       thumbnailUrl
       formattedLocation
     }

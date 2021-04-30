@@ -1,10 +1,10 @@
 import { BeachBarImgUrl } from "entity/BeachBarImgUrl";
-import { AddType, ErrorType, UpdateType } from "typings/.index";
+import { AddType, UpdateType } from "typings/.index";
 
 type BeachBarImgUrlType = {
   imgUrl: BeachBarImgUrl;
 };
 
-export type AddBeachBarImgUrlType = (AddType & BeachBarImgUrlType) | ErrorType;
+export type TAddBeachBarImgUrl = AddType & BeachBarImgUrlType;
 
-export type UpdateBeachBarImgUrlType = (UpdateType & BeachBarImgUrlType) | ErrorType;
+export type TUpdateBeachBarImgUrl = UpdateType & BeachBarImgUrlType;

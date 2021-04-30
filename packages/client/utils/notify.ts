@@ -22,3 +22,26 @@ export const notify = (
   if (action !== "none") toast[action](msg, options);
   else toast(msg, options);
 };
+
+export const copyToClipboard = (txt: string) => {
+  const inputc = document.body.appendChild(document.createElement("input"));
+  inputc.value = txt;
+  inputc.focus();
+  inputc.select();
+  document.execCommand("copy");
+  inputc.parentNode?.removeChild(inputc);
+};
+
+export const shareWithSocials = (name?: string, at = "at") => {
+  try {
+    if (navigator)
+      navigator.share({
+        url: window.location.href,
+        text: name ? "Book now your next trip to the beach " + at + " " + name : undefined,
+      });
+  } catch {
+    copyToClipboard(window.location.href);
+    notify("success", "Link copied!");
+    // notify("error", "Unfortunately, sharing is not supported by your system.", { somethingWentWrong: false });
+  }
+};

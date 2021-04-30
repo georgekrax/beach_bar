@@ -1,0 +1,10 @@
+.box {
+  $bg: rating-box-background(abs($rating-boxes-length / 2) + 1);
+  height: 2em;
+  width: 2em;
+  padding: map-get($em-spacers, 8);
+  border-radius: 14px 14px 14px 0px;
+  // background-color: rgba(mix($success-color, $error-color, 80%), 0.85);
+  color: $grey-1;
+  background: linear-gradient(to bottom left, map-get($bg, "first"), map-get($bg, "second"));
+}

@@ -3,6 +3,7 @@ import { Menu } from "./Menu";
 import { PaymentMethod } from "./PaymentMethod";
 import { Trips } from "./Trips";
 import { HistoryAction } from "./HistoryAction";
+import { Avatar } from "./Avatar";
 
 type SubComponents = {
   Menu: typeof Menu;
@@ -10,6 +11,7 @@ type SubComponents = {
   PaymentMethod: typeof PaymentMethod;
   Trips: typeof Trips;
   HistoryAction: typeof HistoryAction;
+  Avatar: typeof Avatar;
 };
 
 type Props = {};
@@ -23,6 +25,7 @@ Account.Header = Header;
 Account.PaymentMethod = PaymentMethod;
 Account.Trips = Trips;
 Account.HistoryAction = HistoryAction;
+Account.Avatar = Avatar;
 
 Account.displayName = "Account";
 

@@ -1,0 +1,8 @@
+query AvailableProducts($beachBarId: ID!, $availability: SearchInput!) {
+  availableProducts(beachBarId: $beachBarId, availability: $availability) {
+    product {
+      ...BeachBarProduct
+    }
+    quantity
+  }
+}

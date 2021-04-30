@@ -1,8 +1,8 @@
+import Auth from "@/components/Auth";
+import { LoginDialog } from "@/components/Layout/LoginDialog";
+import { useChangeUserPasswordMutation } from "@/graphql/generated";
+import { SignUpFormData } from "@/typings/user";
 import { useRouter } from "next/router";
-import AuthForm from "../../components/AuthForm";
-import Layout from "../../components/Layout";
-import { useChangeUserPasswordMutation } from "../../graphql/generated";
-import { SignUpFormData } from "../../typings/user";
 
 const Token: React.FC = () => {
   const router = useRouter();
@@ -14,21 +14,21 @@ const Token: React.FC = () => {
       variables: { email, token: token as string, newPassword: password },
     });
     if (errors) return { errors };
-    if (!errors && data.changeUserPassword.success) router.push({ pathname: "/" });
+    if (!errors && data?.changeUserPassword.success) router.push({ pathname: "/" });
   };
 
   return (
-    <Layout.LoginDialog isShown oauth={false} dialogBtn={false} setIsShown={() => {}}>
-      <AuthForm.Container
+    <LoginDialog isShown oauth={false} dialogBtn={false}>
+      <Auth.Container
         initial={false}
         controls={false}
         variants={false}
         description="Type your new password"
         other={false}
         handleClick={false}
-        children={<AuthForm.SignUp forgotPassword btn="Reset password" handleFormSubmit={handleSubmit} />}
+        children={<Auth.SignUp forgotPassword btn="Reset password" handleFormSubmit={handleSubmit} />}
       />
-    </Layout.LoginDialog>
+    </LoginDialog>
   );
 };
 

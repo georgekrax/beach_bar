@@ -1,58 +1,65 @@
+import Auth from "@/components/Auth";
+import { AUTH_ACTIONS } from "@/components/Auth/reducer";
+import { LoginDialog } from "@/components/Layout/LoginDialog";
+import OAuth from "@/components/OAuth";
+import { useAuthorizeWithInstagramMutation } from "@/graphql/generated";
+import { userIpAddr } from "@/lib/apollo/cache";
+import { ApolloGraphQLErrors } from "@/typings/graphql";
+import { LoginFormData } from "@/typings/user";
+import { useAuthContext } from "@/utils/contexts";
+import { emailSchema } from "@/utils/yup";
 import { Input } from "@hashtag-design-system/components";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useRouter } from "next/router";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import AuthForm from "../../components/AuthForm";
-import Layout from "../../components/Layout";
-import OAuth from "../../components/OAuth";
-import { useAuthorizeWithInstagramMutation } from "../../graphql/generated";
-import { userIpAddr } from "../../lib/apollo/cache";
-import { ApolloGraphQLErrors } from "../../typings/graphql";
-import { LoginFormData } from "../../typings/user";
-import { emailSchema } from "../../utils/yup";
+import { useEffect, useState } from "react";
+import { useController, useForm } from "react-hook-form";
 
 type FormData = Pick<LoginFormData, "email">;
 
 const InstagramCallback: React.FC = () => {
-  const [isDialogShown, setIsDialogShown] = useState(true);
   const [graphqlErrors, setGraphqlErrors] = useState<ApolloGraphQLErrors>([]);
-  const { register, handleSubmit, errors } = useForm<FormData>({
-    resolver: yupResolver(emailSchema),
-  });
+  const {
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm<FormData>({ resolver: yupResolver(emailSchema) });
+  const { field: email } = useController<FormData, "email">({ name: "email", control });
+
   const router = useRouter();
   const [authorizeWithInstagram] = useAuthorizeWithInstagramMutation();
+  const { dispatch } = useAuthContext();
 
   const authorize = async ({ email }: FormData) => {
     const { code, state } = router.query;
-    setIsDialogShown(false);
-    const { data, errors: mutationErrors } = await authorizeWithInstagram({
+    dispatch({ type: AUTH_ACTIONS.TOGGLE_LOGIN_DIALOG, payload: { bool: false } });
+    const { errors: mutationErrors } = await authorizeWithInstagram({
       variables: {
         code: code as string,
         state: state as string,
         email,
         isPrimaryOwner: false,
-        loginDetails: {
-          city: userIpAddr().city,
-          countryAlpha2Code: userIpAddr().countryCode,
-        },
+        loginDetails: { city: userIpAddr().city, countryAlpha2Code: userIpAddr().countryCode },
       },
     });
     if (mutationErrors) setGraphqlErrors(mutationErrors);
     router.push("/");
   };
 
+  useEffect(() => {
+    dispatch({ type: AUTH_ACTIONS.TOGGLE_LOGIN_DIALOG, payload: { bool: true } });
+  }, []);
+
   // if (
   //   typeof window !== "undefined" &&
   //   process.env.NODE_ENV !== "production" &&
   //   window.location.href.includes("127.0.0.1")
   // )
-  //   router.replace(window.location.href.replace("127.0.0.1:3000", "192.168.1.4:3000"));
+  //   router.replace(window.location.href.replace("127.0.0.1:3000", "192.168.1.8:3000"));
 
   return (
     <OAuth.Redirect provider="Instagram" errors={graphqlErrors}>
-      <Layout.LoginDialog isShown={isDialogShown} oauth={false} dialogBtn={false} setIsShown={() => {}}>
-        <AuthForm.Container
+      <LoginDialog oauth={false} dialogBtn={false}>
+        <Auth.Container
           initial={false}
           controls={false}
           variants={false}
@@ -60,18 +67,18 @@ const InstagramCallback: React.FC = () => {
           other={false}
           handleClick={false}
           children={
-            <AuthForm.Container.FormGroup onSubmit={handleSubmit(authorize)}>
+            <Auth.Container.FormGroup onSubmit={handleSubmit(authorize)}>
               <Input
+                {...email}
                 placeholder="Email"
-                name="email"
-                forwardref={register}
+                forwardref={email.ref}
                 secondhelptext={{ error: true, value: errors.email?.message }}
               />
-              <AuthForm.CTA btn="Login" errors={graphqlErrors} />
-            </AuthForm.Container.FormGroup>
+              <Auth.CTA btn="Login" errors={graphqlErrors} />
+            </Auth.Container.FormGroup>
           }
         />
-      </Layout.LoginDialog>
+      </LoginDialog>
     </OAuth.Redirect>
   );
 };

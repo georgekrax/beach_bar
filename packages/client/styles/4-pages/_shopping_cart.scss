@@ -30,11 +30,9 @@
     bottom: -24px;
     left: 50%;
     z-index: 9;
-    max-width: 360px;
-    margin-left: auto;
     background-color: $grey-1;
     padding: map-get($em-spacers, 12) 0;
-    margin-bottom: map-get($em-spacers, 24);
+    margin: map-get($em-spacers, 24) 0 map-get($em-spacers, 48);
 
     div {
       margin-right: map-get($em-spacers, 48);
@@ -52,8 +50,10 @@
       padding: map-get($em-spacers, 12) 0;
       flex-grow: 1;
       align-self: center;
+      max-width: 22.5em;
+      margin: auto;
 
-      @include icon-classNames() {
+      svg {
         margin-right: map-get($em-spacers, 8);
 
         path {
@@ -64,16 +64,6 @@
   }
 
   &__total {
-    width: fit-content;
-    margin: map-get($em-spacers, 48) 0 map-get($em-spacers, 4) auto;
-
-    & > h6 {
-      font-size: 2rem;
-    }
-
-    & > span {
-      margin-right: map-get($em-spacers, 4);
-      font-size: 1.25rem;
-    }
+    margin-left: 0;
   }
 }

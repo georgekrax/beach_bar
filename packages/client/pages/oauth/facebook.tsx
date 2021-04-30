@@ -37,7 +37,7 @@ const FacebookCallback: React.FC<Props> = () => {
 
   if (typeof window !== "undefined") {
     if (process.env.NODE_ENV !== "production" && window.location.href.includes("127.0.0.1")) {
-      const localNetworkUrl = window.location.href.replace("127.0.0.1:3000", "192.168.1.4:3000");
+      const localNetworkUrl = window.location.href.replace("127.0.0.1:3000", "192.168.1.8:3000");
       router.replace(localNetworkUrl);
     }
   }

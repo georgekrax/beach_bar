@@ -1,8 +1,13 @@
 query GetPersonalizedBeachBars {
   getPersonalizedBeachBars {
+    id
     name
+    slug
     thumbnailUrl
+    formattedLocation
     location {
+      latitude
+      longitude
       city {
         name
       }

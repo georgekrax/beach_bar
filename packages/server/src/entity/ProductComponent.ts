@@ -1,24 +1,25 @@
-import { BaseEntity, Column, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { BundleProductComponent } from "./BundleProductComponent";
-import { ProductCategory } from "./ProductCategory";
+import { BaseEntity, Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Icon } from "./Icon";
+import { ProductCategoryComponent } from "./ProductCategoryComponent";
 
 @Entity({ name: "product_component", schema: "public" })
 export class ProductComponent extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column("varchar", { length: 50, name: "title", unique: true })
-  title: string;
+  @Column("varchar", { length: 50, name: "name", unique: true })
+  name: string;
 
-  @Column({ type: "text", name: "description" })
-  description: string;
+  @Column({ type: "integer", name: "icon_id", unique: true })
+  iconId: number;
 
-  @Column({ type: "text", name: "icon_url" })
-  iconUrl: string;
+  @OneToOne(() => Icon, icon => icon.component, { nullable: false, cascade: ["soft-remove", "recover"] })
+  @JoinColumn({ name: "icon_id" })
+  icon: Icon;
 
-  @OneToMany(() => BundleProductComponent, bundleProductComponent => bundleProductComponent.component)
-  products: BundleProductComponent[];
+  // @OneToMany(() => BundleProductComponent, bundleProductComponent => bundleProductComponent.component)
+  // products: BundleProductComponent[];
 
-  @ManyToMany(() => ProductCategory, productCategory => productCategory.productComponents)
-  productCategories: ProductCategory[];
+  @OneToMany(() => ProductCategoryComponent, productCategory => productCategory.component)
+  categories: ProductCategoryComponent[];
 }

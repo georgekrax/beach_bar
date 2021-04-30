@@ -26,3 +26,17 @@ $rem-spacers: ();
   $em-spacers: map.set($em-spacers, $key, em($value));
   $rem-spacers: map.set($rem-spacers, $key, rem($value));
 }
+
+@function rating-box-background($rating) {
+  @if $rating == 3 {
+    @return (
+      first: rgba(mix($volcano-5, $success-color, 95%), 0.85),
+      second: rgba(mix($volcano-5, $success-color, 95%), 0.4)
+    );
+  } @else {
+    @return (
+      first: rgba(mix($success-color, $error-color, $rating * 20%), 0.85),
+      second: rgba(mix($success-color, $error-color, $rating * 20%), 0.4)
+    );
+  }
+}

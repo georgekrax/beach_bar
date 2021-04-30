@@ -1,44 +1,41 @@
+import Auth from "@/components/Auth/Auth";
+import { MapDialog } from "@/components/Search/MapDialog";
+import { SEARCH_ACTIONS } from "@/components/Search/reducer";
+import ShoppingCart from "@/components/ShoppingCart/ShoppingCart";
 import { userIpAddr } from "@/lib/apollo/cache";
 import { IpAddrType } from "@/typings/graphql";
-import { useConfig } from "@/utils/hooks";
-import { useIsMobile } from "@hashtag-design-system/components";
+import { useSearchContext } from "@/utils/contexts/SearchContext";
+import { useConfig } from "@/utils/hooks/useConfig";
+import { useIsDesktop } from "@/utils/hooks/useIsDesktop";
+import { BottomSheet, Dialog, useClassnames, useWindowDimensions } from "@hashtag-design-system/components";
 import { AnimatePresence } from "framer-motion";
-import { useEffect, useState, memo } from "react";
-import AuthForm from "../AuthForm";
-import Wrapper from "././Wrapper";
-import Footer, { LayoutFooterProps } from "./Footer";
-import Header, { LayoutHeaderProps } from "./Header";
-import { LayoutWrapperFProps } from "./index";
+import { memo, useEffect, useState } from "react";
+import { Footer, LayoutFooterProps } from "./Footer";
+import { Header, LayoutHeaderProps } from "./Header";
 import { LoginDialog } from "./LoginDialog";
-import { Logo } from "./Logo";
-import TapBar, { LayoutTapBarProps } from "./TapBar";
-
-type SubComponents = {
-  Wrapper: typeof Wrapper;
-  Header: typeof Header;
-  Footer: typeof Footer;
-  TapBar: typeof TapBar;
-  Logo: typeof Logo;
-  LoginDialog: typeof LoginDialog;
-};
+import { LayoutTapBarProps } from "./TapBar";
 
 export type Props = {
-  header?: boolean | LayoutHeaderProps;
-  footer?: boolean | LayoutFooterProps;
+  header?: false | LayoutHeaderProps;
+  footer?: false | LayoutFooterProps;
   tapbar?: boolean | LayoutTapBarProps;
-  wrapperProps?: LayoutWrapperFProps;
-  mainProps?: React.ComponentPropsWithoutRef<"main">;
+  container?: React.ComponentPropsWithRef<"div">;
+  main?: React.ComponentPropsWithoutRef<"main">;
+  shoppingCart?: boolean;
+  children: React.ReactNode;
 };
 
-// @ts-expect-error
-const Layout: React.FC<Props> & SubComponents = memo(
-  // @ts-expect-error
-  ({ header = true, footer = true, tapbar = true, wrapperProps, mainProps = {}, children }) => {
-    const [isDialogShown, setIsDialogShown] = useState(false);
-    const { isMobile } = useIsMobile();
+export const Layout: React.NamedExoticComponent<Props> = memo(
+  ({ header, footer, tapbar = true, container = {}, main = {}, shoppingCart = false, children }) => {
     const [isKeyboardShown, setIsKeyboardShown] = useState(false);
-
+    const [containerClassNames, containerRest] = useClassnames("container", container);
+    const isDesktop = useIsDesktop();
+    const { height } = useWindowDimensions();
     const { variables, setValue } = useConfig();
+
+    const BOTTOM_SHEET_DEFAULT_Y = isDesktop ? 150 : 300;
+
+    const { isCartShown, dispatch: searchDispatch } = useSearchContext();
 
     const fetchUsersIp = async () => {
       const res = await fetch(
@@ -46,49 +43,8 @@ const Layout: React.FC<Props> & SubComponents = memo(
       );
       const data: IpAddrType = await res.json();
       if (data.status === "success") {
-        const {
-          city,
-          country,
-          countryCode,
-          currency,
-          district,
-          lat,
-          lon,
-          mobile,
-          query,
-          region,
-          regionName,
-          status,
-          timezone,
-          zip,
-        } = data;
-
-        const newIpAddr: IpAddrType = {
-          city,
-          country,
-          countryCode,
-          currency,
-          district,
-          lat,
-          lon,
-          mobile,
-          query,
-          region,
-          regionName,
-          status,
-          timezone,
-          zip,
-        };
-
-        userIpAddr(newIpAddr);
-
-        setValue(prevState => ({
-          ...prevState,
-          variables: {
-            ...prevState.variables,
-            ipAddr: newIpAddr,
-          },
-        }));
+        userIpAddr(data);
+        setValue(prevState => ({ ...prevState, variables: { ...prevState.variables, ipAddr: data } }));
       }
     };
 
@@ -120,29 +76,41 @@ const Layout: React.FC<Props> & SubComponents = memo(
 
     return (
       <>
-        {header && <Header btnProps={{ onClick: () => setIsDialogShown(true) }} {...header} />}
-        <LoginDialog isShown={isDialogShown} setIsShown={setIsDialogShown}>
-          <AuthForm />
+        <LoginDialog>
+          <Auth />
         </LoginDialog>
-        <AnimatePresence exitBeforeEnter>
-          <Wrapper key="wrapper" {...wrapperProps}>
-            <main {...mainProps} style={{ ...mainProps?.style, height: "fit-content" }}>
-              {children}
+        <MapDialog />
+        {header !== false && <Header {...header} />}
+        <div className={containerClassNames} {...containerRest}>
+          <AnimatePresence exitBeforeEnter>
+            {/* <Wrapper key="wrapper" {...wrapper}> */}
+            <main {...main} style={{ ...main?.style, height: "fit-content", flexGrow: 1 }}>
+              <div className="wrapper">{children}</div>
             </main>
-            {footer && <Footer {...footer} />}
-          </Wrapper>
-        </AnimatePresence>
-        {!isKeyboardShown && isMobile && tapbar && <TapBar />}
+            {/* </Wrapper> */}
+          </AnimatePresence>
+          {footer !== false && <Footer {...footer} />}
+        </div>
+        {shoppingCart && (
+          <BottomSheet
+            isShown={isCartShown}
+            transformTemplate={(_, gen) => gen.replace("300px", BOTTOM_SHEET_DEFAULT_Y + "px")}
+            defaultY={BOTTOM_SHEET_DEFAULT_Y}
+            hugContentsHeight={false}
+            style={{ top: 0 }}
+            onDismiss={() => searchDispatch({ type: SEARCH_ACTIONS.TOGGLE_CART, payload: { bool: false } })}
+          >
+            <Dialog.Content className="search__cart" style={{ maxHeight: height - BOTTOM_SHEET_DEFAULT_Y - 32 }}>
+              <ShoppingCart />
+            </Dialog.Content>
+          </BottomSheet>
+        )}
+        {/* {!isKeyboardShown && isMobile && tapbar && <TapBar />} */}
       </>
     );
   }
 );
 
-Layout.Wrapper = Wrapper;
-Layout.Header = Header;
-Layout.Footer = Footer;
-Layout.TapBar = TapBar;
-Layout.Logo = Logo;
-Layout.LoginDialog = LoginDialog;
+Layout.displayName = "Layout";
 
 export default Layout;

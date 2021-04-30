@@ -1,0 +1,11 @@
+.container {
+  margin: 37.5vh 0;
+
+  &:first-child {
+    margin-top: 0;
+  }
+
+  &:last-child {
+    margin-bottom: 18.5em;
+  }
+}

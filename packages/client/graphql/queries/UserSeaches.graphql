@@ -1,0 +1,24 @@
+query UserSearches($limit: Int) {
+  userSearches(limit: $limit) {
+    id
+    searchDate
+    searchAdults
+    searchChildren
+    inputValue {
+      id
+      city {
+        id
+        name
+      }
+      region {
+        id
+        name
+      }
+      beachBar {
+        id
+        name
+        thumbnailUrl
+      }
+    }
+  }
+}

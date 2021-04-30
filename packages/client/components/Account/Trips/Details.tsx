@@ -5,10 +5,10 @@ type Props = {
   header?: string;
 };
 
-type FProps =Props & React.ComponentPropsWithoutRef<"div">;
+type FProps = Props & React.ComponentPropsWithoutRef<"div">;
 
 export const Details: React.FC<FProps> = ({ header, children, ...props }) => {
-  const [classNames, rest] = useClassnames(styles.container + " w-100", props);
+  const [classNames, rest] = useClassnames(styles.container + " w100", props);
 
   return (
     <div className={classNames} {...rest}>

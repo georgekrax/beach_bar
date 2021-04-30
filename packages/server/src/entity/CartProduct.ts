@@ -3,12 +3,13 @@ import { Dayjs } from "dayjs";
 import {
   BaseEntity,
   Check,
+  Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
 import { softRemove } from "utils/softRemove";
@@ -19,19 +20,22 @@ import { HourTime } from "./Time";
 @Entity({ name: "cart_product", schema: "public" })
 @Check(`"quantity" >= ${COMMON_CONFIG.DATA.cartProductQuantity.min} AND "quantity" <= ${COMMON_CONFIG.DATA.cartProductQuantity.max}`)
 export class CartProduct extends BaseEntity {
-  @PrimaryColumn({ type: "bigint", name: "cart_id" })
+  @PrimaryGeneratedColumn({ type: "bigint" })
+  id: bigint;
+
+  @Column({ type: "bigint", name: "cart_id" })
   cartId: bigint;
 
-  @PrimaryColumn({ type: "integer", name: "product_id" })
+  @Column({ type: "integer", name: "product_id" })
   productId: number;
 
-  @PrimaryColumn({ type: "smallint", name: "quantity", default: () => 1 })
+  @Column({ type: "smallint", name: "quantity", default: () => 1 })
   quantity: number;
 
-  @PrimaryColumn({ type: "date", name: "date", default: () => `CURRENT_DATE` })
+  @Column({ type: "date", name: "date", default: () => `CURRENT_DATE` })
   date: Dayjs;
 
-  @PrimaryColumn({ type: "integer", name: "time_id" })
+  @Column({ type: "integer", name: "time_id" })
   timeId: number;
 
   @ManyToOne(() => Cart, cart => cart.products, { nullable: false, cascade: ["soft-remove", "recover"] })

@@ -11,21 +11,9 @@ export const CustomerType = objectType({
     t.id("id");
     t.field("email", { type: EmailScalar });
     t.nullable.string("phoneNumber");
-    t.nullable.field("user", {
-      type: UserType,
-      description: "The user that is a customer too",
-      resolve: o => o.user,
-    });
-    t.nullable.list.field("cards", {
-      type: CardType,
-      description: "A list of all the customers cards",
-      resolve: o => o.cards,
-    });
-    t.nullable.field("country", {
-      type: CountryType,
-      description: "The country of the customer",
-      resolve: o => o.country,
-    });
+    t.nullable.field("user", { type: UserType,      description: "The user that is a customer too" });
+    t.nullable.list.field("cards", { type: CardType,description: "A list of all the customers cards" });
+    t.nullable.field("country", { type: CountryType, description: "The country of the customer" });
   },
 });
 
@@ -33,14 +21,8 @@ export const AddCustomerType = objectType({
   name: "AddCustomer",
   description: "Info to be returned when a customer is added (registered)",
   definition(t) {
-    t.field("customer", {
-      type: CustomerType,
-      description: "The customer that is added (registered)",
-      resolve: o => o.customer,
-    });
-    t.boolean("added", {
-      description: "A boolean that indicates if the customer has been successfully added (registered)",
-    });
+    t.field("customer", { type: CustomerType, description: "The customer that is added (registered)" });
+    t.boolean("added");
   },
 });
 
@@ -62,14 +44,8 @@ export const UpdateCustomerType = objectType({
   name: "UpdateCustomer",
   description: "Info to be returned when a customer details are updated",
   definition(t) {
-    t.field("customer", {
-      type: CustomerType,
-      description: "The customer that is updated",
-      resolve: o => o.customer,
-    });
-    t.boolean("updated", {
-      description: "A boolean that indicates if the customer details have been successfully updated",
-    });
+    t.field("customer", { type: CustomerType, description: "The customer that is updated" });
+    t.boolean("updated");
   },
 });
 

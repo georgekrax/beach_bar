@@ -2,6 +2,7 @@ import { Variants } from "framer-motion";
 
 export const LAYOUT_IDS = {
   searchBox: "search_box",
+  accountHeader: "account_header",
 };
 export const productVariants: Variants = {
   initial: { opacity: 0, x: -48 },

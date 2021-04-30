@@ -1,0 +1,13 @@
+.container {
+  a,
+  & > div > div {
+    margin-bottom: map-get($em-spacers, 8);
+    color: $grey-8;
+    white-space: nowrap;
+  }
+
+  & > div:first-child {
+    margin-bottom: map-get($em-spacers, 12);
+    color: $grey-9;
+  }
+}

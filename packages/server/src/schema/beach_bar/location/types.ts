@@ -16,28 +16,13 @@ export const BeachBarLocationType = objectType({
     t.nullable.list.float("whereIs", {
       description: "The 'point' value generated from latitude & longitude, provided by the PostGIS PostgreSQL extension",
       resolve: o => {
-        if (o.whereIs.coordinates) {
-          return o.whereIs.coordinates;
-        } else {
-          return null;
-        }
+        if (o.whereIs.coordinates) return o.whereIs.coordinates;
+        else return null;
       },
     });
-    t.field("country", {
-      type: CountryType,
-      description: "The country the #beach_bar is located at",
-      resolve: o => o.country,
-    });
-    t.field("city", {
-      type: CityType,
-      description: "The city the #beach_bar is located at",
-      resolve: o => o.city,
-    });
-    t.nullable.field("region", {
-      type: RegionType,
-      description: "The region the #beach_bar is located at",
-      resolve: o => o.region,
-    });
+    t.field("country", { type: CountryType, description: "The country the #beach_bar is located at" });
+    t.field("city", { type: CityType, description: "The city the #beach_bar is located at" });
+    t.nullable.field("region", { type: RegionType, description: "The region the #beach_bar is located at" });
   },
 });
 
@@ -45,11 +30,7 @@ export const AddBeachBarLocationType = objectType({
   name: "AddBeachBarLocation",
   description: "Info to be returned when location is added (assigned) to a #beach_bar",
   definition(t) {
-    t.field("location", {
-      type: BeachBarLocationType,
-      description: "The location of the #beach_bar that is added",
-      resolve: o => o.location,
-    });
+    t.field("location", { type: BeachBarLocationType, description: "The location of the #beach_bar that is added" });
     t.boolean("added", { description: "A boolean that indicates if the #beach_bar locations has been successfully being added" });
   },
 });
@@ -72,11 +53,7 @@ export const UpdateBeachBarLocationType = objectType({
   name: "UpdateBeachBarLocation",
   description: "Info to be returned when the details of #beach_bar location are updated",
   definition(t) {
-    t.field("location", {
-      type: BeachBarLocationType,
-      description: "The #beach_bar location that is updated",
-      resolve: o => o.location,
-    });
+    t.field("location", { type: BeachBarLocationType, description: "The #beach_bar location that is updated" });
     t.boolean("updated", {
       description: "A boolean that indicates if the #beach_bar location details have been successfully updated",
     });

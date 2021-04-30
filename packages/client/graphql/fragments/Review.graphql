@@ -1,0 +1,43 @@
+fragment Review on BeachBarReview {
+  id
+  ratingValue
+  review
+  positiveComment
+  negativeComment
+  updatedAt
+  timestamp
+  votes {
+    id
+    user {
+      id
+    }
+    type {
+      id
+      value
+    }
+  }
+  month {
+    id
+    value
+  }
+  visitType {
+    id
+    name
+  }
+  answer {
+    id
+    body
+    updatedAt
+  }
+  customer {
+    id
+    user {
+      id
+      fullName
+      account {
+        id
+        imgUrl
+      }
+    }
+  }
+}

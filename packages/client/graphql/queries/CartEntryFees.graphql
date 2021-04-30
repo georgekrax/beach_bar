@@ -1,0 +1,3 @@
+query CartEntryFees($cartId: ID!, $totalPeople: Int!) {
+  cartEntryFees(cartId: $cartId, totalPeople: $totalPeople)
+}

@@ -1,10 +1,8 @@
 .container {
   position: relative;
 
-  summary {
-    &::marker {
-      content: "";
-    }
+  summary ::marker {
+    content: "";
   }
 
   & > label {

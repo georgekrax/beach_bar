@@ -1,0 +1,6 @@
+mutation Checkout($cartId: ID!, $cardId: ID!, $totalPeople: Int = 1) {
+  checkout(cartId: $cartId, cardId: $cardId, totalPeople: $totalPeople) {
+    id
+    refCode
+  }
+}

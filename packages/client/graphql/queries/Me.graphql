@@ -4,6 +4,7 @@ query Me {
 		email
 		firstName
 		lastName
+		fullName
     account {
 			id
       honorificTitle
@@ -38,5 +39,14 @@ query Me {
 				id
 			}
 		}
+		favoriteBars {
+      beachBar {
+        id
+				name
+				slug
+				thumbnailUrl
+				formattedLocation
+      }
+    }
   }
 }

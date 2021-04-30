@@ -74,14 +74,11 @@ export class ReservedProduct extends BaseEntity {
   }
 
   async getPrice(): Promise<number | undefined> {
-    const entryFee = await this.payment.cart.getBeachBarEntryFee(this.product.beachBarId);
-    if (entryFee === undefined) {
-      return undefined;
-    }
-    const productTotal = await this.payment.cart.getProductTotalPrice(this.productId);
-    if (productTotal === undefined) {
-      return undefined;
-    }
+    const entryFee = this.product.beachBar.entryFee;
+    if (entryFee === undefined) return undefined;
+    
+    const productTotal = await this.payment.cart.getProductTotal(this.productId);
+    if (productTotal === undefined) return undefined;
     return productTotal + entryFee;
   }
 
@@ -97,12 +94,9 @@ export class ReservedProduct extends BaseEntity {
         where: { id: this.id },
         relations: ["product", "product.beachBar", "product.category", "product.components", "time", "payment"],
       });
-      if (!reservedProduct) {
-        throw new Error();
-      }
-      if (create) {
-        await redis.lpush(this.getRedisKey(), JSON.stringify(this));
-      } else {
+      if (!reservedProduct) throw new Error();
+      if (create) await redis.lpush(this.getRedisKey(), JSON.stringify(this));
+      else {
         const idx = await reservedProduct.getRedisIdx(redis);
         await redis.lset(reservedProduct.getRedisKey(), idx, JSON.stringify(reservedProduct));
       }

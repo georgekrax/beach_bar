@@ -1,5 +1,6 @@
-import { dayjsFormat } from "@beach_bar/common";
-import dayjs, { Dayjs } from "dayjs";
+import { errors } from "@beach_bar/common";
+import { ApolloError } from "apollo-server-express";
+import { Dayjs } from "dayjs";
 import {
   BaseEntity,
   Between,
@@ -7,8 +8,6 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  getManager,
-  getRepository,
   JoinColumn,
   ManyToMany,
   ManyToOne,
@@ -17,11 +16,11 @@ import {
   UpdateDateColumn,
 } from "typeorm";
 import { ProductAvailabilityHourReturnType } from "typings/beach_bar/product";
+import { checkProductAvailable } from "utils/beach_bar/availability";
 import { checkMinimumProductPrice } from "utils/beach_bar/checkMinimumProductPrice";
 import { checkScopes } from "utils/checkScopes";
 import { softRemove } from "utils/softRemove";
 import { BeachBar } from "./BeachBar";
-import { BundleProductComponent } from "./BundleProductComponent";
 import { CartProduct } from "./CartProduct";
 import { OfferCampaign } from "./OfferCampaign";
 import { Owner } from "./Owner";
@@ -71,9 +70,6 @@ export class Product extends BaseEntity {
   @JoinColumn({ name: "category_id" })
   category: ProductCategory;
 
-  @OneToMany(() => BundleProductComponent, bundleProductComponent => bundleProductComponent.product)
-  components: BundleProductComponent[];
-
   @OneToMany(() => ProductPriceHistory, productPriceHistory => productPriceHistory.product, { nullable: true })
   priceHistory?: ProductPriceHistory[];
 
@@ -98,47 +94,29 @@ export class Product extends BaseEntity {
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Dayjs;
 
-  async getReservationLimit(timeId: number, date: Dayjs = dayjs()): Promise<number> {
-    const formattedDate = dayjs(date).format(dayjsFormat.ISO_STRING);
-    const reservationLimit = await ProductReservationLimit.find({ product: this, date: formattedDate });
-    if (reservationLimit.length > 0) {
-      const limitNumber = reservationLimit.find(limit => timeId >= limit.startTimeId && timeId <= limit.endTimeId);
-      if (limitNumber) {
-        return limitNumber.limitNumber;
-      } else {
-        return 0;
-      }
-    } else {
-      return 0;
-    }
+  getReservationLimit(date: string, timeId?: string): number | undefined {
+    const barLimits = this.beachBar.getReservationLimits(date, timeId);
+    const limits = barLimits.filter(({ productId }) => productId.toString() === this.id.toString());
+    if (limits.length > 0 && timeId) {
+      const parsed = parseInt(timeId);
+      const limitNumbers = limits.filter(limit => parsed >= limit.startTimeId && parsed <= limit.endTimeId);
+      if (limitNumbers) return limitNumbers.reduce((sum, i) => sum + i.limitNumber, 0);
+      else return undefined;
+    } else return Math.floor(limits.reduce((sum, i) => sum + i.limitNumber, 0) / limits.length);
   }
 
-  async getReservedProducts(timeId: number, date: Dayjs = dayjs()): Promise<number> {
-    const reservedProductsNumber = await getManager()
-      .createQueryBuilder(ReservedProduct, "reservedProduct")
-      .select("COUNT(*)", "count")
-      .where("reservedProduct.date = :searchDate", { searchDate: dayjs(date).format(dayjsFormat.ISO_STRING) })
-      .andWhere("reservedProduct.timeId = :timeId", { timeId })
-      .getRawOne();
-
-    if (reservedProductsNumber) {
-      return parseInt(reservedProductsNumber.count);
-    } else {
-      return 0;
-    }
+  getReservedProducts(date: string, timeId?: string): ReservedProduct[] {
+    return this.beachBar
+      .getReservedProducts(date, timeId)
+      .filter(reservedProduct => reservedProduct.productId.toString() === this.id.toString());
   }
 
-  async checkIfAvailable(timeId: number, date?: Dayjs, elevator = 0): Promise<boolean> {
-    const limit = await this.getReservationLimit(timeId, date);
-    const reservedProductsNumber = await this.getReservedProducts(timeId, date);
-    if (limit !== 0 && reservedProductsNumber !== 0 && reservedProductsNumber + elevator >= limit) {
-      return false;
-    } else {
-      return true;
-    }
+  isAvailable(date: string, timeId?: string, totalPeople?: number, elevator: number = 0) {
+    const { quantity } = checkProductAvailable(this, date, timeId, totalPeople, elevator);
+    return { quantity, available: quantity > 0 };
   }
 
-  async getHoursAvailability(date: Dayjs): Promise<ProductAvailabilityHourReturnType[] | undefined> {
+  async getHoursAvailability(date: string): Promise<ProductAvailabilityHourReturnType[]> {
     const openingTime = this.beachBar.openingTime.value.split(":")[0] + ":00:00";
     const closingTime = this.beachBar.closingTime.value.startsWith("00:")
       ? "24:00:00"
@@ -148,37 +126,31 @@ export class Product extends BaseEntity {
     const results: ProductAvailabilityHourReturnType[] = [];
     for (let i = 0; i < hourTimes.length; i++) {
       const element = hourTimes[i];
-      const res = await this.checkIfAvailable(element.id, date);
-      results.push({
-        hourTime: element,
-        isAvailable: res,
-      });
+      const { available } = this.isAvailable(date, element.id.toString());
+      results.push({ hourTime: element, isAvailable: available });
     }
     return results;
   }
 
-  async getQuantityAvailability(date: Dayjs, timeId: number): Promise<number | null> {
-    const limit = await this.getReservationLimit(timeId, date);
-    const reservedProductsCount = await this.getReservedProducts(timeId, date);
-    if (limit !== 0 && reservedProductsCount !== 0 && limit === reservedProductsCount) {
-      return null;
-    } else if (limit - reservedProductsCount === 0 || limit - reservedProductsCount >= parseInt(process.env.MAX_PRODUCT_QUANTITY!)) {
-      return 0;
-    } else {
-      return limit - reservedProductsCount;
-    }
+  getQuantityAvailability(date: string, timeId: string): number {
+    const limit = this.getReservationLimit(date, timeId);
+    if (!limit) return 0;
+    const { length } = this.getReservedProducts(date, timeId);
+    if (limit !== 0 && length !== 0 && limit === length) throw new ApolloError(errors.SOMETHING_WENT_WRONG);
+    else if (limit - length === 0 || limit - length >= parseInt(process.env.MAX_PRODUCT_QUANTITY!)) return 0;
+    else return limit - length;
   }
 
-  async createProductComponents(update: boolean): Promise<void> {
-    if (update) {
-      const bundleProducts = await BundleProductComponent.find({ product: this });
-      await getRepository(BundleProductComponent).softRemove(bundleProducts);
-    }
+  // async createProductComponents(update: boolean): Promise<void> {
+  //   if (update) {
+  //     const bundleProducts = await BundleProductComponent.find({ product: this });
+  //     await getRepository(BundleProductComponent).softRemove(bundleProducts);
+  //   }
 
-    this.category.productComponents.forEach(async productComponent => {
-      await BundleProductComponent.create({ product: this, component: productComponent, deletedAt: undefined }).save();
-    });
-  }
+  //   this.category.productComponents.forEach(async productComponent => {
+  //     await BundleProductComponent.create({ product: this, component: productComponent, deletedAt: undefined }).save();
+  //   });
+  // }
 
   async update(options: {
     name?: string;
@@ -195,7 +167,7 @@ export class Product extends BaseEntity {
     try {
       if (price && checkScopes(payload, ["beach_bar@crud:beach_bar", "beach_bar@crud:product"])) {
         try {
-          await checkMinimumProductPrice(price, this.category, this.beachBar, this.beachBar.defaultCurrencyId);
+          await checkMinimumProductPrice(price, this.category, this.beachBar.defaultCurrencyId);
         } catch (err) {
           throw new Error(err.message);
         }
@@ -206,26 +178,16 @@ export class Product extends BaseEntity {
         const category = await ProductCategory.findOne({ where: { id: categoryId }, relations: ["productComponents"] });
         if (category) {
           this.category = category;
-          await this.createProductComponents(true);
+          // await this.createProductComponents(true);
         } else {
           throw new Error("Please provide a valid product category");
         }
       }
-      if (isActive !== null && isActive !== undefined) {
-        this.isActive = isActive;
-      }
-      if (name && name !== this.name) {
-        this.name = name;
-      }
-      if (description && description !== this.description) {
-        this.description = description;
-      }
-      if (maxPeople && maxPeople !== this.maxPeople && maxPeople > 0) {
-        this.maxPeople = maxPeople;
-      }
-      if (imgUrl && imgUrl !== this.imgUrl) {
-        this.imgUrl = imgUrl.toString();
-      }
+      if (isActive !== null && isActive !== undefined) this.isActive = isActive;
+      if (name && name !== this.name) this.name = name;
+      if (description && description !== this.description) this.description = description;
+      if (maxPeople && maxPeople !== this.maxPeople && maxPeople > 0) this.maxPeople = maxPeople;
+      if (imgUrl && imgUrl !== this.imgUrl) this.imgUrl = imgUrl.toString();
       await this.save();
       await this.beachBar.updateRedis();
     } catch (err) {
@@ -238,7 +200,8 @@ export class Product extends BaseEntity {
     await softRemove(
       Product,
       { id: this.id, name: this.name, beachBarId: this.beachBarId },
-      [BundleProductComponent, CartProduct, ReservedProduct, ProductReservationLimit],
+      // [BundleProductComponent, CartProduct, ReservedProduct, ProductReservationLimit],
+      [CartProduct, ReservedProduct, ProductReservationLimit],
       findOptions
     );
     this.offerCampaigns?.forEach(async campaign => campaign.softRemove());

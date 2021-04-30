@@ -49,14 +49,11 @@
 }
 
 .container {
-  @extend .w-100;
-  @extend .flex-row-flex-start-center;
   overflow: hidden;
   margin-top: -(map-get($em-spacers, 4));
 
   & > div {
-    @extend .w-100;
-    @extend .flex-column-center-center;
+    width: inherit;
     flex-shrink: 0;
     margin-top: map-get($em-spacers, 8);
   }
@@ -78,24 +75,6 @@
 
   &#{Container} {
     flex-wrap: wrap;
-  }
-}
-
-.orContainer {
-  max-width: 25em;
-
-  & > span {
-    &:first-of-type,
-    &:last-of-type {
-      height: 1px;
-      background-color: $grey-6;
-      border-radius: 8px;
-      flex: 1;
-    }
-
-    &:nth-of-type(2) {
-      margin: 0 map-get($em-spacers, 12) map-get($em-spacers, 4);
-    }
   }
 }
 

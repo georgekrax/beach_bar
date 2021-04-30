@@ -36,16 +36,8 @@ export const UserSignUpAndLoginMutation = extendType({
       type: UserType,
       description: "Sign up a user",
       args: {
-        userCredentials: arg({
-          type: UserCredentials,
-          description: "Credential for signing up a user",
-        }),
-        isPrimaryOwner: nullable(
-          booleanArg({
-            default: false,
-            description: "Set to true if you want to sign up an owner for a #beach_bar",
-          })
-        ),
+        userCredentials: arg({ type: UserCredentials, description: "Credential for signing up a user" }),
+        isPrimaryOwner: nullable(booleanArg({ default: false, description: "Wether to sign up an owner for a #beach_bar" })),
       },
       resolve: async (_, { userCredentials, isPrimaryOwner }, { redis }: MyContext): Promise<TUser> => {
         const { email, password } = userCredentials;
@@ -97,16 +89,8 @@ export const UserSignUpAndLoginMutation = extendType({
       type: UserLoginType,
       description: "Login a user",
       args: {
-        userCredentials: arg({
-          type: UserCredentials,
-          description: "Credential for signing up a user",
-        }),
-        loginDetails: nullable(
-          arg({
-            type: UserLoginDetails,
-            description: "User details in login",
-          })
-        ),
+        userCredentials: arg({ type: UserCredentials, description: "Credential for signing up a user" }),
+        loginDetails: nullable(arg({ type: UserLoginDetails, description: "User details" })),
       },
       resolve: async (_, { userCredentials, loginDetails }, { res, redis, uaParser, ipAddr }: MyContext): Promise<TUserLogin> => {
         const { email, password } = userCredentials;
@@ -187,10 +171,10 @@ export const UserSignUpAndLoginMutation = extendType({
             prompt.none !== true ||
             JSON.stringify(scope) !== JSON.stringify(hashtagScope)
           )
-            throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.SOMETHING_WENT_WRONG);
+            throw new ApolloError(errors.SOMETHING_WENT_WRONG);
 
           if (String(hashtagUser.id) !== String(user.hashtagId) || email !== hashtagUser.email)
-            throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.SOMETHING_WENT_WRONG);
+            throw new ApolloError(errors.SOMETHING_WENT_WRONG);
         } catch (err) {
           return err;
         }
@@ -230,9 +214,7 @@ export const UserSignUpAndLoginMutation = extendType({
 
           // Logined successfully
           // Get user info from ID token
-          const { tokenInfo } = await graphqlClient.request(tokenInfoQuery, {
-            token: hashtagIdToken.token,
-          });
+          const { tokenInfo } = await graphqlClient.request(tokenInfoQuery, { token: hashtagIdToken.token });
 
           if (tokenInfo.error) {
             const { message, code } = exchangeCode.error;
@@ -322,7 +304,7 @@ export const UserLogoutMutation = extendType({
         if (!payload) throw new AuthenticationError(errors.NOT_AUTHENTICATED_MESSAGE);
 
         const redisUser = await redis.hgetall(`${redisKeys.USER}:${payload.sub.toString()}` as KeyType);
-        if (!redisUser) throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.SOMETHING_WENT_WRONG);
+        if (!redisUser) throw new ApolloError(errors.SOMETHING_WENT_WRONG);
 
         try {
           if (redisUser.hashtag_access_token && redisUser.hashtag_access_token !== "" && redisUser.hashtag_access_token !== " ") {
@@ -344,7 +326,7 @@ export const UserLogoutMutation = extendType({
               const { message, code } = logoutUser.error;
               if ((message || code) && !success) throw new ApolloError(message, code);
             }
-            if (!success) throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.SOMETHING_WENT_WRONG);
+            if (!success) throw new ApolloError(errors.SOMETHING_WENT_WRONG);
           }
           await removeUserSessions(payload.sub, redis);
         } catch (err) {
@@ -354,9 +336,7 @@ export const UserLogoutMutation = extendType({
         res.clearCookie(process.env.REFRESH_TOKEN_COOKIE_NAME!.toString(), { httpOnly: true });
         res.clearCookie(process.env.ACCESS_TOKEN_COOKIE_NAME!.toString(), { httpOnly: true });
 
-        return {
-          success: true,
-        };
+        return { success: true };
       },
     });
   },
@@ -368,12 +348,7 @@ export const UserForgotPasswordMutation = extendType({
     t.field("sendForgotPasswordLink", {
       type: SuccessGraphQLType,
       description: "Sends a link to the user's email address to change its password",
-      args: {
-        email: arg({
-          type: EmailScalar,
-          description: "The email address of user",
-        }),
-      },
+      args: { email: arg({ type: EmailScalar, description: "The email address of user" }) },
       resolve: async (_, { email }, { res, redis }): Promise<SuccessObjectType> => {
         if (!email || email.trim().length === 0)
           throw new UserInputError("Please provide a valid email address", { code: errors.INVALID_ARGUMENTS });
@@ -387,9 +362,7 @@ export const UserForgotPasswordMutation = extendType({
         if (!user.hashtagId) throw new ApolloError("You have not authenticated with #hashtag", errors.HASHTAG_NOT_AUTHENTICATED_CODE);
 
         try {
-          const { sendForgotPasswordLink } = await graphqlClient.request(sendForgotPasswordLinkMutation, {
-            email,
-          });
+          const { sendForgotPasswordLink } = await graphqlClient.request(sendForgotPasswordLinkMutation, { email });
 
           if (sendForgotPasswordLink.error) {
             const { message, code } = sendForgotPasswordLink.error;
@@ -406,25 +379,16 @@ export const UserForgotPasswordMutation = extendType({
         res.clearCookie(process.env.REFRESH_TOKEN_COOKIE_NAME!.toString(), { httpOnly: true });
         res.clearCookie(process.env.ACCESS_TOKEN_COOKIE_NAME!.toString(), { httpOnly: true });
 
-        return {
-          success: true,
-        };
+        return { success: true };
       },
     });
     t.field("changeUserPassword", {
       type: SuccessGraphQLType,
       description: "Change a user's password",
       args: {
-        email: arg({
-          type: EmailScalar,
-          description: "Email of user to retrieve OAuth Client applications",
-        }),
-        token: stringArg({
-          description: "The token in the URL to identify and verify user. Each key lasts 20 minutes",
-        }),
-        newPassword: stringArg({
-          description: "User's new password",
-        }),
+        email: arg({ type: EmailScalar, description: "Email of user to retrieve OAuth Client applications" }),
+        token: stringArg({ description: "The token in the URL to identify and verify user. Each key lasts 20 minutes" }),
+        newPassword: stringArg({ description: "User's new password" }),
       },
       resolve: async (_, { email, token, newPassword }): Promise<SuccessObjectType> => {
         if (!email || email.trim().length === 0)
@@ -454,14 +418,12 @@ export const UserForgotPasswordMutation = extendType({
             if (message || code) throw new ApolloError(message, code);
           }
           const success: boolean = changeUserPassword.success;
-          if (!success) throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.SOMETHING_WENT_WRONG);
+          if (!success) throw new ApolloError(errors.SOMETHING_WENT_WRONG);
         } catch (err) {
           return err;
         }
 
-        return {
-          success: true,
-        };
+        return { success: true };
       },
     });
   },
@@ -561,11 +523,11 @@ export const UserCrudMutation = extendType({
             });
           }
         } catch (err) {
-          throw new ApolloError(`Something went wrong: ${err.message}`, errors.SOMETHING_WENT_WRONG);
+          throw new ApolloError(err.message);
         }
 
         const redisUser = await redis.hgetall(user.getRedisKey() as KeyType);
-        if (!redisUser) throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.SOMETHING_WENT_WRONG);
+        if (!redisUser) throw new ApolloError(errors.SOMETHING_WENT_WRONG);
 
         if (redisUser.hashtag_access_token && redisUser.hashtag_access_token.trim().length !== 0 && isNew) {
           try {

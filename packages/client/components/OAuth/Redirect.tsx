@@ -12,8 +12,8 @@ type Props = {
 
 export const Redirect: React.FC<Props> = ({ provider, errors, children }) => {
   return (
-    <Layout header={{ withAuth: false }} mainProps={{ className: "ih-100" }} tapbar={false}>
-      <div className={styles.container + " w-100 flex-column-center-center"}>
+    <Layout header={{ withAuth: false }} main={{ className: "ih100" }} tapbar={false}>
+      <div className={styles.container + " w100 flex-column-center-center"}>
         <Icons.Flame.Filled width={98} height={98} />
         <div>
           {errors?.length === 0 && (

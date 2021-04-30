@@ -133,8 +133,8 @@ const TabBar: React.FC<Props> = React.memo(({ active, children }) => {
 
   return (
     <>
-      <nav className={styles["tapbar__container"] + " w-100 flex-column-center-center"}>
-        <ul className={styles["tapbar__menu-list"] + " w-100"}>
+      <nav className={styles.container + " w100 flex-column-center-center"}>
+        <ul className={styles.list + " w100 flex-row-space-around-center"}>
           {pagesArr.map(({ pathname: pagePathname, children }) => {
             const id = CONFIG.TapBarPageIdx[pagePathname];
             return (
@@ -144,18 +144,18 @@ const TabBar: React.FC<Props> = React.memo(({ active, children }) => {
             );
           })}
         </ul>
-        <motion.div className={styles["tapbar__gooey__container"]} style={{ left }} animate={indicatorAnimation}>
-          <div className={styles["tapbar__gooey__container--effect"] + " flex-column-flex-end-center"}>
-            <motion.div className={styles["tapbar__gooey__ball"]} animate={ballAnimation} />
+        <motion.div className={styles.gooey__container} style={{ left }} animate={indicatorAnimation}>
+          <div className={styles.gooey__container___effect + " flex-column-flex-end-center"}>
+            <motion.div className={styles.gooeyBall} animate={ballAnimation} />
             <Icons.TapBarIndicator
               style={{ opacity }}
               transition={{ duration: 2 }}
-              className={styles["tapbar__indicator"]}
+              className={styles.indicator}
             />
           </div>
           <Icons.TapBarIndicator
             animate={svgAnimation}
-            className={styles["tapbar__indicator"] + " " + styles["overlap"]}
+            className={styles.indicator+ " " + styles.overlap}
           />
         </motion.div>
       </nav>

@@ -1,16 +1,5 @@
 query GetAllBeachBars {
   getAllBeachBars {
-    id
-    name
-    thumbnailUrl
-    description
-    avgRating
-    payments {
-      id
-    }
-    location {
-      longitude
-      latitude
-    }
+    ...SearchBeachBar
   }
 }

@@ -1,28 +1,23 @@
+import Account from "@/components/Account";
+import BeachBar from "@/components/BeachBar";
+import Layout from "@/components/Layout";
+import { NextMotionContainer } from "@/components/Next/MotionContainer";
+import { NextDoNotHave } from "@/components/Next/DoNotHave";
+import { FavouriteBeachBarsDocument, useFavouriteBeachBarsQuery } from "@/graphql/generated";
+import { initializeApollo, INITIAL_APOLLO_STATE } from "@/lib/apollo";
 import { motion, Variants } from "framer-motion";
 import { GetServerSideProps } from "next";
 import { Toaster } from "react-hot-toast";
-import Account from "../../components/Account";
-import BeachBar from "../../components/BeachBar";
-import Layout from "../../components/Layout";
-import Next from "../../components/Next";
-import { FavouriteBeachBarsDocument, useFavouriteBeachBarsQuery } from "../../graphql/generated";
-import { initializeApollo, INITIAL_APOLLO_STATE } from "../../lib/apollo";
 
 const containerVariants: Variants = {
   initial: {},
   animate: {
-    transition: {
-      staggerChildren: 0.2,
-    },
+    transition: { staggerChildren: 0.2 },
   },
 };
 
 const Favourites: React.FC = () => {
-  const {
-    data: { favouriteBeachBars },
-    loading,
-    error,
-  } = useFavouriteBeachBarsQuery();
+  const { data, loading, error } = useFavouriteBeachBarsQuery();
 
   return (
     <Layout>
@@ -31,25 +26,25 @@ const Favourites: React.FC = () => {
       <Account.Menu defaultSelected="/favourites" />
       {loading ? (
         <h2>Loading...</h2>
-      ) : error || !favouriteBeachBars ? (
+      ) : error || !data?.favouriteBeachBars ? (
         <h2>Error</h2>
       ) : (
-        <Next.Motion.Container>
-          {favouriteBeachBars.length > 0 ? (
+        <NextMotionContainer>
+          {data.favouriteBeachBars.length > 0 ? (
             <motion.div
-              className="account-favourites__container w-100 flex-row-flex-start-flex-start"
+              className="account-favourites__container w100 flex-row-flex-start-flex-start"
               animate="animate"
               initial="initial"
               variants={containerVariants}
             >
-              {favouriteBeachBars.map(({ beachBar: { id, ...rest } }) => (
+              {data.favouriteBeachBars.map(({ beachBar: { id, ...rest } }) => (
                 <BeachBar.Favourite key={id} id={id} {...rest} />
               ))}
             </motion.div>
           ) : (
-            <Next.DoNotHave msg="You have not added any #beach_bar into your favourites list" emoji="❤️" />
+            <NextDoNotHave msg="You have not added any #beach_bar into your favourites list" emoji="❤️" />
           )}
-        </Next.Motion.Container>
+        </NextMotionContainer>
       )}
     </Layout>
   );

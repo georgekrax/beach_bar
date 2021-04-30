@@ -26,29 +26,6 @@
   }
 }
 
-// .heartBox {
-//   padding: map-get($em-spacers, 8);
-//   border-radius: 14px;
-//   background-color: rgba($volcano-5, 0.25);
-//   align-self: flex-end;
-//   cursor: pointer;
-//   @include transition-2s("ease-out", "opacity");
-
-//   & > svg:last-child {
-//     position: absolute;
-//   }
-
-//   &:active {
-//     opacity: 0.8;
-//   }
-
-//   :global {
-//     @include path--filled-classNames() {
-//       fill: $red-5 !important;
-//     }
-//   }
-// }
-
 @include breakpoint("sm") {
   .container {
     max-width: 14em;

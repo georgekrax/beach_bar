@@ -1,0 +1,30 @@
+.btn {
+  $bg: $grey-1;
+  $bc: $grey-7;
+  padding: 0.375em;
+  appearance: none;
+  background-color: $bg;
+  border: 1px solid $bc;
+  box-shadow: none;
+  pointer-events: all;
+
+  &:hover {
+    background-color: $bg;
+    border-color: $bc;
+  }
+
+  @include active-classNames() {
+    background-color: $grey-10;
+    border-color: $grey-10;
+
+    path {
+      fill: $grey-1;
+      stroke: none;
+    }
+  }
+
+  path {
+    fill: $volcano-5;
+    stroke: none;
+  }
+}

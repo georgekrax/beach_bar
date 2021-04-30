@@ -39,3 +39,10 @@ export const textSchema = yup.string().max(255);
 export const cardHolderSchema = yup.object().shape({
   cardholderName: textSchema.required("Please provide a cardholder name"),
 });
+
+export const verifyPaymentIdSchema = yup.object().shape({
+  refCode: yup
+    .string()
+    .length(16, "The ID should have length of ${length} characters")
+    .required("Please provide valid ID"),
+});

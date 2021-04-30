@@ -1,4 +1,5 @@
 import { MyContext } from "@beach_bar/common";
+import { ApolloError, UserInputError } from "apollo-server-express";
 import { SearchFilter } from "entity/SearchFilter";
 import { UserSearch } from "entity/UserSearch";
 import { extendType, idArg, list, nullable, stringArg } from "nexus";
@@ -9,28 +10,20 @@ import { UserSearchType } from "./types";
 export const SearchUpdateMutation = extendType({
   type: "Mutation",
   definition(t) {
-    t.nullable.field("updateSearch", {
+    t.field("updateSearch", {
       type: UserSearchType,
       description: "Update a previous user's search",
       args: {
-        searchId: idArg({
-          description: "The ID value of a previous user search",
-        }),
+        searchId: idArg({ description: "The ID value of a previous user search" }),
         filterIds: nullable(
-          list(
-            stringArg({
-              description: "A list with the filter IDs to add in the search, found in the documentation",
-            })
-          )
+          list(stringArg({ description: "A list with the filter IDs to add in the search, found in the documentation" }))
         ),
       },
-      resolve: async (_, { searchId, filterIds = [] }, { payload, redis }: MyContext): Promise<UserSearch | null> => {
-        if (!searchId || searchId <= 0) {
-          return null;
-        }
+      resolve: async (_, { searchId, filterIds = [] }, { payload, redis }: MyContext): Promise<UserSearch> => {
+        if (!searchId || searchId.trim().length === 0) throw new UserInputError("Please provide a valid searchId");
 
         const userSearch = await UserSearch.findOne({ where: { id: searchId }, relations: ["filters", "sort"] });
-        if (!userSearch) return null;
+        if (!userSearch) throw new ApolloError("User search was not found");
 
         if (
           (userSearch.filters &&
@@ -50,10 +43,9 @@ export const SearchUpdateMutation = extendType({
             const idx = await userSearch.getRedisIdx(redis, payload ? payload.sub : undefined);
             await redis.lset(userSearch.getRedisKey(payload ? payload.sub : undefined), idx, JSON.stringify(userSearch));
           } catch (err) {
-            return null;
+            throw new ApolloError(err.message);
           }
         }
-
         return userSearch;
       },
     });

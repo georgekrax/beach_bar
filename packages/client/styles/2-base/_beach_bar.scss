@@ -1,7 +1,13 @@
 .beach_bar {
   &__header {
-    color: $grey-9;
+    // color: $grey-9;
     text-transform: none;
+
+    &__name {
+      margin-top: map-get($em-spacers, 4);
+      margin-right: auto;
+      align-self: flex-start;
+    }
   }
 
   &__name-and-location {
@@ -10,7 +16,24 @@
     }
 
     .beach_bar__header {
-      margin-bottom: map-get($em-spacers, 4);
+      margin-bottom: 0.15em;
+    }
+  }
+
+  &__reviews-container {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: min(100vw, 32em);
+    // background-color: $grey-1;
+
+    & > div > div {
+      padding: 0 map-get($em-spacers, 32);
+
+      &:first-child {
+        padding-top: map-get($em-spacers, 32);
+      }
     }
   }
 }

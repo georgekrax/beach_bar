@@ -31,10 +31,14 @@ export type TDelete = {
 };
 
 export type SuccessType =
-  | ErrorType
-  | {
-      success: boolean;
-    };
+| ErrorType
+| {
+  success: boolean;
+};
+
+export type TSuccess = {
+  success: boolean;
+};
 
 export type SuccessObjectType = {
   success: boolean;

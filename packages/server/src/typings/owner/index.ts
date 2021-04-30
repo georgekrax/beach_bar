@@ -1,10 +1,10 @@
 import { BeachBarOwner } from "entity/BeachBarOwner";
-import { AddType, ErrorType, UpdateType } from "typings/.index";
+import { AddType, UpdateType } from "typings/.index";
 
 type BeachBarOwnerType = {
   owner: BeachBarOwner;
 };
 
-export type AddBeachBarOwnerType = (AddType & BeachBarOwnerType) | ErrorType;
+export type TAddBeachBarOwner = AddType & BeachBarOwnerType;
 
-export type UpdateBeachBarOwnerType = (UpdateType & BeachBarOwnerType) | ErrorType;
+export type TUpdateBeachBarOwner = UpdateType & BeachBarOwnerType;

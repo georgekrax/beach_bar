@@ -4,7 +4,6 @@ import { GetAllBeachBarsQuery } from "@/graphql/generated";
 import { Button } from "@hashtag-design-system/components";
 import React, { memo, useMemo } from "react";
 import { Marker as MapboxMarker, ViewportProps } from "react-map-gl";
-import styles from "./Marker.module.scss";
 
 type FProps = Pick<GetAllBeachBarsQuery["getAllBeachBars"][number], "location"> &
   Pick<React.ComponentPropsWithoutRef<"button">, "onClick"> &
@@ -19,7 +18,7 @@ export const Marker = memo(
 
     return (
       <MapboxMarker latitude={latitude} longitude={longitude} offsetLeft={-12} offsetTop={-12}>
-        <Button className={styles.btn} ref={ref} onClick={onClick}>
+        <Button ref={ref} onClick={onClick}>
           <Icons.MapMarker.Dot.Filled width={size} height={size} />
         </Button>
       </MapboxMarker>

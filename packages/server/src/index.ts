@@ -27,7 +27,7 @@ export let stripe: Stripe;
 (async (): Promise<any> => {
   try {
     redis = new Redis({
-      password: "george2016",
+      password: "@George2016",
       db: 2,
       connectTimeout: 10000,
       reconnectOnError: (): boolean => true,
@@ -54,7 +54,7 @@ export let stripe: Stripe;
   app.use(
     cors({
       credentials: true,
-      // origin: process.env.NODE_ENV === "production" ? String(process.env.TOKEN_AUDIENCE!) : "http://192.168.1.4:3000",
+      // origin: process.env.NODE_ENV === "production" ? String(process.env.TOKEN_AUDIENCE!) : "http://192.168.1.8:3000",
       origin: "http://192.168.1.8:3000",
     })
   );
@@ -130,7 +130,7 @@ export let stripe: Stripe;
             //     });
             //     console.log(payload);
           }
-          // await fetch("http://192.168.1.4:4000/oauth/refresh_token", {
+          // await fetch("http://192.168.1.8:4000/oauth/refresh_token", {
           //   method: "POST",
           //   headers: {
           //     Cookie: process.env.REFRESH_TOKEN_COOKIE_NAME!.toString() + "=" + refreshToken.accessToken.token,
@@ -211,7 +211,7 @@ export let stripe: Stripe;
         throw new ApolloError(errors.NOT_AUTHENTICATED_MESSAGE, errors.JWT_EXPIRED);
       if (payload && payload.sub) payload.sub = parseInt(payload.sub);
       const uaParser = new UAParser(req.headers["user-agent"]);
-      
+
       type IpAddrType = string | undefined;
       const ipAddr: IpAddrType = (req.headers.ip_address as IpAddrType) || undefined;
       return { req, res, payload, redis, sgMail, sgClient, stripe, uaParser, googleOAuth2Client, ipAddr };

@@ -1,6 +1,6 @@
 import Icons from "@/components/Icons";
 import Layout from "@/components/Layout";
-import Next from "@/components/Next";
+import { IconBox } from "@/components/Next/IconBox";
 import { MapPage, MapReducerInitialStateType, MAP_ACTIONS, reducer } from "@/components/pages";
 import Search from "@/components/Search";
 import { SEARCH_ACTIONS } from "@/components/Search/reducer";
@@ -12,6 +12,7 @@ import { calcDist } from "@/utils/search";
 import { BottomSheet, isInViewport } from "@hashtag-design-system/components";
 import { motion, useAnimation, Variants } from "framer-motion";
 import { isEmpty } from "lodash";
+import debounce from "lodash/debounce";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useEffect, useMemo, useReducer, useRef, useState } from "react";
@@ -23,18 +24,7 @@ const initialState: MapReducerInitialStateType = {
   timer: null,
   viewport: { latitude: 0, longitude: 0, zoom: 10 },
   isBottomSheetShown: false,
-  selectedBeachBar: {
-    id: "",
-    name: "",
-    thumbnailUrl: "",
-    description: "",
-    avgRating: 0,
-    payments: [],
-    location: {
-      latitude: 0,
-      longitude: 0,
-    },
-  },
+  selectedBeachBar: { name: "", thumbnailUrl: "", description: "" },
 };
 
 const suggestionsBoxVariants: Variants = {
@@ -86,16 +76,16 @@ const Map: React.FC = () => {
 
   const markers = useMemo(
     () =>
-      data?.getAllBeachBars.map(({ id, location: { latitude, longitude } }) => (
+      (map?.sortedResults ?? data?.getAllBeachBars ?? []).map(({ id, location }) => (
         <MapPage.Marker
           key={id}
           zoom={viewport.zoom || initialState.viewport.zoom || 10}
-          location={{ latitude, longitude }}
+          location={location}
           onClick={() => handleMarkerClick(id)}
           ref={el => (markersRef.current[id] = el!)}
         />
       )),
-    [viewport]
+    [map, data]
   );
 
   const handleMarkerClick = (id: string) => {
@@ -147,6 +137,18 @@ const Map: React.FC = () => {
     }
   };
 
+  const handleSort = debounce(() => {
+    if (map && map.sort)
+      searchDispatch({
+        type: SEARCH_ACTIONS.HANDLE_SORT,
+        payload: {
+          sortId: map?.sort.id,
+          beachBars: shownBeachBars,
+          coords: viewport,
+        },
+      });
+  }, 1000);
+
   // useEffect(() => {
   //   if (navigator.geolocation) {
   //     navigator.geolocation.getCurrentPosition(pos => console.log(pos), undefined, { enableHighAccuracy: true });
@@ -187,35 +189,30 @@ const Map: React.FC = () => {
   useEffect(() => {
     if (markersRef && !isEmpty(markersRef.current) && data) {
       // https://stackoverflow.com/a/55616626/13142787
-      const arr = data.getAllBeachBars.filter(({ id }) => isInViewport(markersRef.current[id]));
+      const arr = (map.sortedResults || data.getAllBeachBars).filter(({ id }) => {
+        try {
+          const bool = isInViewport(markersRef.current[id]);
+          return bool;
+        } catch {
+          return true;
+        }
+      });
       setShownBeachBars(arr);
     }
-  }, [data, viewport, markersRef]);
+  }, [viewport, markersRef]);
 
-  useEffect(() => {
-    if (map?.sort) {
-      searchDispatch({
-        type: SEARCH_ACTIONS.HANDLE_SORT,
-        payload: {
-          sortId: map?.sort.id,
-          beachBars: shownBeachBars,
-          coords: viewport,
-        },
-      });
-    }
-  }, [map?.sort, viewport]);
+  useEffect(() => handleSort(), [map.sort, viewport]);
 
   if (loading) return <h1>Loading...</h1>;
 
   if (error || !data) return <h2>Error</h2>;
 
   return (
-    <Layout header={false} footer={false} wrapperProps={{ className: "map__wrapper" }}>
-      <motion.div className="h-100" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit="initial">
+    <Layout header={false} footer={false} container={{ className: "map__wrapper" }}>
+      <motion.div className="h100" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit="initial">
         <ReactMapGL
           {...viewport}
           attributionControl={true}
-          className="map"
           onTouchStart={e => dispatch({ type: MAP_ACTIONS.HANDLE_TOUCH_START, payload: { touchY: e.point[1] } })}
           width="100vw"
           height="100%"
@@ -231,9 +228,9 @@ const Map: React.FC = () => {
           <div className="map__searchbar flex-row-center-center">
             {redirectUri && (
               <Link href={redirectUri}>
-                <Next.IconBox>
+                <IconBox aria-label="Return to search results">
                   <Icons.Arrow.Left />
-                </Next.IconBox>
+                </IconBox>
               </Link>
             )}
             <Search.Box
@@ -248,7 +245,7 @@ const Map: React.FC = () => {
           <NavigationControl className="map__navigation-control" />
           {markers}
           <motion.div
-            className="map__suggestions w-100"
+            className="map__suggestions w100 flex-column-flex-end-center"
             initial="shown"
             animate={suggestionsControls}
             variants={suggestionsBoxVariants}
@@ -257,18 +254,17 @@ const Map: React.FC = () => {
           >
             <MapPage.Suggestions
               dispatch={dispatch}
-              beachBars={(map.sortedResults || shownBeachBars)
-                .slice(0, 7)
-                .map(({ thumbnailUrl, ...rest }, i) => ({
-                  idx: i,
-                  beachBar: { thumbnailUrl, ...rest },
-                  imgProps: { src: thumbnailUrl },
-                }))}
+              beachBars={(map.sortedResults || shownBeachBars).slice(0, 7).map(({ thumbnailUrl, ...rest }, i) => ({
+                idx: i,
+                beachBar: { thumbnailUrl, ...rest },
+                imgProps: { src: thumbnailUrl },
+              }))}
             />
-            <Search.Filters beachBars={shownBeachBars} />
+            <Search.Filters allBeachBars={shownBeachBars} />
           </motion.div>
           <BottomSheet
             isShown={isBottomSheetShown}
+            allowedPositions={{ middle: true, expanded: false, hidden: false, "input-focused": true }}
             onDismiss={() => dispatch({ type: MAP_ACTIONS.HANDLE_MARKER_CLICK })}
           >
             <MapPage.BeachBarDetails {...selectedBeachBar} />

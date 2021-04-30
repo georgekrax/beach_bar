@@ -1,63 +1,29 @@
 .container {
-  width: min(100%, 400px);
-  padding: map-get($em-spacers, 16);
+  max-width: 400px;
+  padding: map-get($em-spacers, 16) 0;
   position: relative;
   background-color: $grey-1;
-  border-radius: 14px;
-  box-shadow: 0px 2px 10px rgba($grey-7, 0.4);
+  // border-radius: 14px;
+  border-bottom: 2px solid $grey-4;
+  // box-shadow: 0px 2px 10px rgba($grey-6, 0.75);
   overflow: hidden;
 
   & > div:first-child {
-    border-bottom: 1px solid $grey-6;
+    // border-bottom: 1px solid $grey-6;
     padding: map-get($em-spacers, 8) 0;
   }
 }
 
-@mixin rating-box-background($rating) {
-  @if $rating == 3 {
-    background: linear-gradient(
-      to bottom left,
-      rgba(mix($volcano-5, $success-color, 95%), 0.85),
-      rgba(mix($volcano-5, $success-color, 95%), 0.4)
-    );
-  } @else {
-    background: linear-gradient(
-      to bottom left,
-      rgba(mix($success-color, $error-color, $rating * 20%), 0.85),
-      rgba(mix($success-color, $error-color, $rating * 20%), 0.4)
-    );
-  }
-}
-
-.ratingBox {
-  $rating-boxes-length: 5;
-  height: 2em;
-  width: 2em;
-  border-radius: 14px 14px 14px 0px;
-  // background-color: rgba(mix($success-color, $error-color, 80%), 0.85);
-  color: $grey-1;
-  @include rating-box-background(abs($rating-boxes-length / 2) + 1);
-
-  @mixin list {
-    @for $i from 1 through $rating-boxes-length {
-      &.rating_#{$i} {
-        @include rating-box-background($i);
-      }
-    }
-  }
-
-  @include list();
+.avatar > div {
+  margin-right: map-get($em-spacers, 12) !important;
 }
 
 .content {
-  margin: map-get($em-spacers, 20) 0;
+  margin: map-get($em-spacers, 8) 0 map-get($em-spacers, 20);
 
-  span {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 5; /* number of lines to show */
-    -webkit-box-orient: vertical;
+  & > div > span:not(:only-child) {
+    margin: map-get($em-spacers, 20) 0 map-get($em-spacers, 24);
+    @include text-overflow();
   }
 }
 
@@ -66,27 +32,21 @@
     padding: map-get($em-spacers, 8);
   }
 
-  & > div {
+  & > div:first-child {
     position: absolute;
     left: 0;
     bottom: 0;
     padding: map-get($em-spacers, 8) map-get($em-spacers, 16);
     background-color: $grey-2;
     border-radius: 0px 14px 0px 0px;
-    box-shadow: inset -2px 2px 8px rgba($grey-8, 0.2);
-
-    & > div {
-      color: $grey-8;
-    }
+    box-shadow: inset -2px 2px 4px rgba($grey-6, 0.5);
 
     & > div:first-child {
       margin-right: map-get($em-spacers, 16);
     }
 
-    & > div:last-child {
-      & > svg {
-        margin-top: 6px;
-      }
+    & > div:last-child > svg {
+      margin-top: 6px;
     }
 
     & > div.selected {
@@ -99,11 +59,18 @@
     }
 
     svg {
-      margin-right: map-get($em-spacers, 8);
+      + span {
+        margin-left: map-get($em-spacers, 8);
+      }
 
       path {
-        fill: $grey-7 !important;
+        fill: rgba($grey-7, 0.5) !important;
       }
     }
   }
+}
+
+.userSubheader {
+  margin: 0.15em 0;
+  color: $grey-7;
 }
