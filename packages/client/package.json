@@ -20,7 +20,7 @@
     "@hashtag-design-system/primitives": "1.2.12",
     "@hookform/resolvers": "2.4.0",
     "@stripe/react-stripe-js": "^1.4.0",
-    "@stripe/stripe-js": "^1.13.1",
+    "@stripe/stripe-js": "^1.14.0",
     "@the_hashtag/common": "1.0.39",
     "@turf/distance": "^6.3.0",
     "dayjs": "^1.10.4",
