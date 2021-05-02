@@ -13696,10 +13696,10 @@ react-hook-form@^6.14.0:
   resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-6.15.6.tgz#5d4985ffd3758dee97912e370595e49a6fcd24ab"
   integrity sha512-WIrOAoWw+ftMC13tJd5VL/vyNV6EkPKOUY/TwUHBinym/45k3gmC67an2rETvdDXxwXfCIaD+kPyMwjXBnCjBw==
 
-react-hook-form@^7.3.3:
-  version "7.3.3"
-  resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.3.3.tgz#0061714a7c3aec6c5a13f10d4e6bf49884f6ca20"
-  integrity sha512-MhKVEwxNgn/VgwOQQwUSZ9g/KhGS+HNzfD++V0mnnGeBjHOFajIPPA19cBzMSd7illd4YyyBXdTxd9+vi6Ne4A==
+react-hook-form@^7.3.6:
+  version "7.3.6"
+  resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.3.6.tgz#21da0f1aff834a9ae9f80a604ebbc28c5b229f79"
+  integrity sha512-3LRjxMDn+CUKZ2G9TA9BgNQXX7M9I8WcE5GkcMNg6eOHa9mFc+uF6rKY9QAKlNNjKhdL1atOmOTVBEj2gJVuEQ==
 
 react-hot-toast@^1.0.2:
   version "1.0.2"
