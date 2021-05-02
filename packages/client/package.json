@@ -24,7 +24,7 @@
     "@the_hashtag/common": "1.0.39",
     "@turf/distance": "^6.3.0",
     "dayjs": "^1.10.4",
-    "framer-motion": "^4.1.9",
+    "framer-motion": "^4.1.11",
     "graphql": "^15.5.0",
     "graphql-request": "^3.4.0",
     "lodash": "^4.17.20",
