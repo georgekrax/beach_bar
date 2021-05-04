@@ -44,7 +44,7 @@
     "apollo-link": "^1.2.14",
     "apollo-link-http": "^1.5.17",
     "apollo-server-express": "^2.23.0",
-    "aws-sdk": "^2.892.0",
+    "aws-sdk": "^2.897.0",
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
     "dayjs": "^1.9.6",
