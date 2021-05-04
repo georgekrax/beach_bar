@@ -1,4 +1,5 @@
 version: 2
+<<<<<<< HEAD
 updates:
   - package-ecosystem: "npm"
     directory: "/packages/client"
@@ -27,3 +28,78 @@ updates:
       - "georgekrax"
     assignees:
       - "georgekrax"
+=======
+registries:
+  npm-registry-github-com:
+    type: npm-registry
+    url: https://github.com
+    token: "${{secrets.NPM_REGISTRY_GITHUB_COM_TOKEN}}"
+  npm-registry-npm-pkg-github-com:
+    type: npm-registry
+    url: https://npm.pkg.github.com
+    token: "${{secrets.NPM_REGISTRY_NPM_PKG_GITHUB_COM_TOKEN}}"
+  npm-registry-registry-npmjs-org:
+    type: npm-registry
+    url: https://registry.npmjs.org
+    token: "${{secrets.NPM_REGISTRY_REGISTRY_NPMJS_ORG_TOKEN}}"
+
+updates:
+- package-ecosystem: npm
+  directory: "/"
+  schedule:
+    interval: weekly
+    day: sunday
+    time: "07:30"
+    timezone: Europe/Athens
+  open-pull-requests-limit: 15
+  ignore:
+  - dependency-name: "@types/ioredis"
+    versions:
+    - 4.17.10
+    - 4.19.4
+  - dependency-name: webpack
+    versions:
+    - 5.12.2
+    - 5.19.0
+    - 5.21.1
+  - dependency-name: "@types/node"
+    versions:
+    - 14.14.16
+    - 14.14.22
+  - dependency-name: relay-compiler
+    versions:
+    - 10.1.3
+  - dependency-name: eslint
+    versions:
+    - 7.17.0
+  - dependency-name: relay-runtime
+    versions:
+    - 10.1.2
+  - dependency-name: ua-parser-js
+    versions:
+    - 0.7.23
+  registries:
+  - npm-registry-github-com
+  - npm-registry-npm-pkg-github-com
+  - npm-registry-registry-npmjs-org
+- package-ecosystem: npm
+  directory: "/packages/common"
+  schedule:
+    interval: daily
+    time: "07:30"
+    timezone: Europe/Athens
+  open-pull-requests-limit: 15
+  versioning-strategy: increase-if-necessary
+  ignore:
+  - dependency-name: eslint-config-prettier
+    versions:
+    - 8.0.0
+  - dependency-name: google-auth-library
+    versions:
+    - 7.0.0
+    - 7.0.1
+  registries:
+  - npm-registry-github-com
+  - npm-registry-npm-pkg-github-com
+  - npm-registry-registry-npmjs-org
+>>>>>>> 556a93578146a186966a9cab0546cb2fdc25da15
