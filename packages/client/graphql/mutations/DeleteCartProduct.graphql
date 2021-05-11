@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 mutation DeleteCartProduct($id: ID!) {
   deleteCartProduct(id: $id) {
     ... on Delete {
@@ -11,4 +12,19 @@ mutation DeleteCartProduct($id: ID!) {
       }
     }
   }
+=======
+mutation DeleteCartProduct($id: ID!) {
+  deleteCartProduct(id: $id) {
+    ... on Delete {
+      deleted
+    }
+
+    ... on Error {
+      error {
+        code
+        message
+      }
+    }
+  }
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff
 }

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .header {
   align-items: flex-start;
   margin-bottom: map-get($em-spacers, 20);
@@ -73,3 +74,80 @@
     width: 13em !important;
   }
 }
+=======
+.header {
+  align-items: flex-start;
+  margin-bottom: map-get($em-spacers, 20);
+
+  + div {
+    padding-bottom: map-get($em-spacers, 24);
+    overflow-y: scroll;
+    max-height: calc(100vh - 7em);
+  }
+}
+
+.summary {
+  margin-top: map-get($em-spacers, 24);
+
+  & > div:first-child {
+    margin-right: map-get($em-spacers, 12);
+  }
+
+  h5 {
+    color: $grey-9;
+
+    + div {
+      color: $grey-7;
+    }
+  }
+}
+
+.filtersContainer {
+  margin: map-get($em-spacers, 24) 0;
+  padding-bottom: map-get($em-spacers, 24);
+  border-bottom: 1px solid $grey-6;
+
+  & > div:first-child > div {
+    margin-bottom: map-get($em-spacers, 12);
+  }
+
+  & > div:last-child {
+    flex-wrap: wrap;
+    gap: map-get($em-spacers, 16);
+
+    & > div:first-child {
+      flex: 0 1 auto;
+
+      summary {
+        width: 9em !important;
+      }
+    }
+  }
+}
+
+.list > div {
+  margin-bottom: map-get($em-spacers, 24);
+  max-width: none;
+}
+
+.refCode {
+  & > div:first-child {
+    margin-bottom: map-get($em-spacers, 20);
+  }
+
+  & > div:last-of-type {
+    margin-bottom: map-get($em-spacers, 32);
+  }
+}
+
+.postCta {
+  margin-left: auto;
+  margin-top: map-get($em-spacers, 16);
+}
+
+@include breakpoint("sm") {
+  .filtersContainer > div:last-child > div:first-child summary {
+    width: 13em !important;
+  }
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

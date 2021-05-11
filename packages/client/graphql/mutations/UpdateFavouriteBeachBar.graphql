@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 mutation UpdateFavouriteBeachBar($slug: ID!) {
   updateFavouriteBeachBar(slug: $slug) {
     # favouriteBar {
@@ -11,3 +12,18 @@ mutation UpdateFavouriteBeachBar($slug: ID!) {
     updated
   }
 }
+=======
+mutation UpdateFavouriteBeachBar($slug: ID!) {
+  updateFavouriteBeachBar(slug: $slug) {
+    # favouriteBar {
+    #   beachBar {
+    #     id
+    #     name
+    #     thumbnailUrl
+    #     formattedLocation
+    #   }
+    # }
+    updated
+  }
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

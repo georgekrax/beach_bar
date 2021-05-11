@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .container {
   :global {
     .mapboxgl-control-container {
@@ -63,3 +64,70 @@
     }
   }
 }
+=======
+.container {
+  :global {
+    .mapboxgl-control-container {
+      display: flex;
+      position: absolute;
+      top: 0;
+      right: 0;
+
+      & > div:nth-last-child(2),
+      & > div:last-child {
+        position: static;
+      }
+
+      & > div:nth-last-child(2) {
+        margin-right: map-get($em-spacers, 12);
+      }
+    }
+  }
+}
+
+.searchBar {
+  position: absolute;
+  margin: 0;
+  padding: $wrapper-padding;
+
+  // margin: $wrapper-padding;
+  // margin-top: map-get($em-spacers, 4);
+  // margin-right: map-get($em-spacers, 16);
+
+  .closeDialog {
+    margin-left: map-get($em-spacers, 32);
+  }
+
+  & > div:first-child {
+    margin: 0;
+  }
+}
+
+.navigationControl {
+  position: static !important;
+  margin-left: $wrapper-padding;
+  margin-top: 7.5em;
+  transform: translateX(map-get($em-spacers, 24));
+}
+
+.suggestions {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  min-height: 7.5em;
+  max-height: 10.5em;
+  background: linear-gradient(to top, $grey-1 50%, transparent 70%);
+
+  & > div {
+    padding: 0 $wrapper-padding;
+
+    &:first-child > div > section > div:last-child {
+      padding-right: 0;
+    }
+
+    &:last-child {
+      margin-bottom: map-get($em-spacers, 8);
+    }
+  }
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .icon {
   &__stroke--sm {
     stroke-width: 1px;
@@ -111,3 +112,118 @@
     }
   }
 }
+=======
+.icon {
+  &__stroke--sm {
+    stroke-width: 1px;
+  }
+
+  &__stroke--none path {
+    stroke: none;
+  }
+
+  &__filled-path {
+    &--white {
+      stroke: $grey-1 !important;
+    }
+  }
+
+  &__filled--white {
+    stroke: none !important;
+    fill: $grey-1 !important;
+  }
+
+  &-stroke {
+    &--success {
+      stroke: $success-color !important;
+    }
+
+    &--error {
+      stroke: $error-color !important;
+    }
+  }
+
+  &-save {
+    & > mask {
+      fill: $grey-1;
+
+      & > path {
+        stroke-width: 0px;
+      }
+    }
+
+    & > path {
+      fill: $grey-10;
+      stroke: none !important;
+    }
+  }
+
+  &-chechmark {
+    &__path--filled {
+      stroke: $grey-1 !important;
+    }
+
+    &__colored {
+      stroke: $green-7;
+    }
+
+    &__circle--colored {
+      stroke: none !important;
+      fill: rgba($green-7, 0.8) !important;
+    }
+  }
+
+  &-close {
+    &__path--filled {
+      stroke: $grey-1 !important;
+    }
+
+    &__circle--colored {
+      stroke: none !important;
+      fill: rgba($red-6, 0.8) !important;
+    }
+  }
+
+  &-star {
+    &--filled {
+      stroke: $yellow-5;
+      fill: $yellow-5;
+    }
+
+    &--grey {
+      stroke: none;
+      fill: $grey-4;
+    }
+  }
+
+  &__beach-umbrella__filled-stroke {
+    stroke: $grey-10 !important;
+  }
+
+  &__colored {
+    $color: $volcano-5;
+
+    &--chair,
+    &--sunbed,
+    &--snacks,
+    &--swimming-pool,
+    &--stroke {
+      path {
+        stroke: $color;
+      }
+    }
+
+    &--sunbed-with-mattress,
+    &--beach-umbrella,
+    &--fill {
+      path {
+        fill: $color;
+      }
+    }
+
+    &--parking-sign circle {
+      fill: $color;
+    }
+  }
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

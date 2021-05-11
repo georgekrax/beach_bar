@@ -39,7 +39,10 @@ module.exports = {
     });
 
     if (isServer) config.plugins.push(new webpack.IgnorePlugin(/\/.scss\//));
+<<<<<<< HEAD
     if (dev) config.plugins.push(c => (c.options.devtool = "eval-source-map"))
+=======
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff
     // config.plugins.push(
     //   new webpack.ProgressPlugin((percentage, message, ...args) => {
     //     // e.g. Output each progress message directly to the console:

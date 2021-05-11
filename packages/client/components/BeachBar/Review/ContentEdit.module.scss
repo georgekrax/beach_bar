@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .visit {
   summary {
     width: 10em !important;
@@ -24,3 +25,31 @@
     margin: map-get($em-spacers, 24) 0 map-get($em-spacers, 32);
   }
 }
+=======
+.visit {
+  summary {
+    width: 10em !important;
+  }
+
+  & > div {
+    align-items: center;
+  }
+}
+
+.rating {
+  cursor: pointer;
+
+  &:not(:last-child) {
+    margin-right: map-get($em-spacers, 8);
+  }
+
+  &:not(.colored) > path {
+    stroke: $grey-9 !important;
+    stroke-width: 1px !important;
+  }
+
+  &#{Container} {
+    margin: map-get($em-spacers, 24) 0 map-get($em-spacers, 32);
+  }
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

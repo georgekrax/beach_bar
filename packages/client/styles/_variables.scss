@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 $wrapper-padding: 2em;
 $header-height: map-get($em-spacers, 80);
 $hero-height: 75vh;
@@ -12,3 +13,19 @@ $home-carousel-item-height: min(#{$home-img-height}, 300px);
 $carousel-bar-height: min(60vw, 260px);
 
 $home-img-content-width: 86%;
+=======
+$wrapper-padding: 2em;
+$header-height: map-get($em-spacers, 80);
+$hero-height: 75vh;
+$layout-padding: $wrapper-padding/1.25;
+$layout-login-shape-size: 100px;
+$tapbar-height: 72px;
+$tapbar-border-radius: 20px;
+// $searchbar-bg: scale-color($grey-4, $lightness: 60%);
+$home-img-height: 60vw;
+$rating-boxes-length: 5;
+$home-carousel-item-height: min(#{$home-img-height}, 300px);
+$carousel-bar-height: min(60vw, 260px);
+
+$home-img-content-width: 86%;
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

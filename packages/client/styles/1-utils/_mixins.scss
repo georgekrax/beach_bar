@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 @mixin path--filled-classNames() {
   @include path-classNames() {
     &.filled {
@@ -32,4 +33,40 @@
   @include breakpoint("md", $width) {
     @content;
   }
+=======
+@mixin path--filled-classNames() {
+  @include path-classNames() {
+    &.filled {
+      @content;
+    }
+  }
+}
+
+@mixin masonry-item--small($elem: 1) {
+  .item:not([data-length="1"]) {
+    &:nth-child(#{$elem}) {
+      @extend .item--small;
+    }
+  }
+}
+
+@mixin text-overflow($numberOfLines: 5) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: $numberOfLines; /* number of lines to show */
+  -webkit-box-orient: vertical;
+}
+
+@mixin breakpoint--max($width: "min-width") {
+  @include breakpoint("lg", $width) {
+    @content;
+  }
+}
+
+@mixin responsive($width: "min-width") {
+  @include breakpoint("md", $width) {
+    @content;
+  }
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff
 }

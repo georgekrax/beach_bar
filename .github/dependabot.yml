@@ -1,0 +1,29 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/packages/client"
+    schedule:
+      interval: "weekly"
+    target-branch: "dev"
+    reviewers:
+      - "georgekrax"
+    assignees:
+      - "georgekrax"
+  - package-ecosystem: "npm"
+    directory: "/packages/server"
+    schedule:
+      interval: "weekly"
+    target-branch: "dev"
+    reviewers:
+      - "georgekrax"
+    assignees:
+      - "georgekrax"
+  - package-ecosystem: "npm"
+    directory: "/packages/common"
+    schedule:
+      interval: "weekly"
+    target-branch: "dev"
+    reviewers:
+      - "georgekrax"
+    assignees:
+      - "georgekrax"

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 mutation UpdateCartProduct($id: ID!, $quantity: Int) {
   updateCartProduct(id: $id, quantity: $quantity) {
     updated
@@ -7,3 +8,14 @@ mutation UpdateCartProduct($id: ID!, $quantity: Int) {
     }
   }
 }
+=======
+mutation UpdateCartProduct($id: ID!, $quantity: Int) {
+  updateCartProduct(id: $id, quantity: $quantity) {
+    updated
+    product {
+      id
+      quantity
+    }
+  }
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

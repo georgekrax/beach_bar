@@ -58,8 +58,12 @@ const IndexPage: InferGetServerSidePropsType<typeof getServerSideProps> = ({ ref
   return (
     <Layout header={{ className: "home__header" }}>
       <motion.div className="home__container" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit="initial">
+<<<<<<< HEAD
         <div>Με</div>
         {/* <div className="w100 flex-row-flex-start-flex-start">
+=======
+        <div className="w100 flex-row-flex-start-flex-start">
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff
           <div className="home__img">
             <div className="home__img__container">
               <Image
@@ -136,7 +140,11 @@ const IndexPage: InferGetServerSidePropsType<typeof getServerSideProps> = ({ ref
               </>
             )}
           </div>
+<<<<<<< HEAD
         )} */}
+=======
+        )}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff
       </motion.div>
     </Layout>
   );

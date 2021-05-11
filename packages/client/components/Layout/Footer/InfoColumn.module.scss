@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .container {
   a,
   & > div > div {
@@ -11,3 +12,18 @@
     color: $grey-9;
   }
 }
+=======
+.container {
+  a,
+  & > div > div {
+    margin-bottom: map-get($em-spacers, 8);
+    color: $grey-8;
+    white-space: nowrap;
+  }
+
+  & > div:first-child {
+    margin-bottom: map-get($em-spacers, 12);
+    color: $grey-9;
+  }
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

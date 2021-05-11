@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .btn {
   padding: map-get($em-spacers, 12);
   border-color: $grey-4;
@@ -29,3 +30,36 @@
     font-size: 85%;
   }
 }
+=======
+.btn {
+  padding: map-get($em-spacers, 12);
+  border-color: $grey-4;
+  box-shadow: none;
+
+  &[data-ischecked="true"] {
+    background-color: $volcano-5;
+    border-color: $volcano-5;
+    color: $grey-1;
+  }
+
+  &:not([data-ischecked="true"]):hover {
+    background-color: $grey-1;
+    border-color: $input-border-color;
+    color: $grey-10;
+  }
+}
+
+.checkbox {
+  margin: 0;
+
+  + svg path {
+    stroke: $grey-1;
+  }
+}
+
+@include breakpoint("md") {
+  .btn {
+    font-size: 85%;
+  }
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

@@ -1,6 +1,15 @@
+<<<<<<< HEAD
 mutation Checkout($cartId: ID!, $cardId: ID!, $totalPeople: Int = 1) {
   checkout(cartId: $cartId, cardId: $cardId, totalPeople: $totalPeople) {
     id
     refCode
   }
 }
+=======
+mutation Checkout($cartId: ID!, $cardId: ID!, $totalPeople: Int = 1) {
+  checkout(cartId: $cartId, cardId: $cardId, totalPeople: $totalPeople) {
+    id
+    refCode
+  }
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

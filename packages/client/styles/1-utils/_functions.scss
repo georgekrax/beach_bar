@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 @function rating-box-background($rating) {
   @if $rating == 3 {
     @return (
@@ -11,3 +12,47 @@
     );
   }
 }
+=======
+@use "sass:map";
+
+$base-spacer: 4;
+$base-spacers: (
+  0: $base-spacer * 0,
+  4: $base-spacer * 1,
+  8: $base-spacer * 2,
+  12: $base-spacer * 3,
+  16: $base-spacer * 4,
+  20: $base-spacer * 5,
+  24: $base-spacer * 6,
+  32: $base-spacer * 8,
+  40: $base-spacer * 10,
+  48: $base-spacer * 12,
+  64: $base-spacer * 16,
+  80: $base-spacer * 20,
+  96: $base-spacer * 24,
+);
+
+$px-spacers: ();
+$em-spacers: ();
+$rem-spacers: ();
+
+@each $key, $value in $base-spacers {
+  $px-spacers: map.set($px-spacers, $key, #{$value}px);
+  $em-spacers: map.set($em-spacers, $key, em($value));
+  $rem-spacers: map.set($rem-spacers, $key, rem($value));
+}
+
+@function rating-box-background($rating) {
+  @if $rating == 3 {
+    @return (
+      first: rgba(mix($volcano-5, $success-color, 95%), 0.85),
+      second: rgba(mix($volcano-5, $success-color, 95%), 0.4)
+    );
+  } @else {
+    @return (
+      first: rgba(mix($success-color, $error-color, $rating * 20%), 0.85),
+      second: rgba(mix($success-color, $error-color, $rating * 20%), 0.4)
+    );
+  }
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

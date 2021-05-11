@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .container {
   padding: map-get($em-spacers, 8);
   border-radius: 14px;
@@ -29,3 +30,36 @@
     color: $grey-9;
   }
 }
+=======
+.container {
+  padding: map-get($em-spacers, 8);
+  border-radius: 14px;
+  background-color: $grey-3;
+  min-width: 11em;
+  scroll-snap-align: start;
+  cursor: pointer;
+  @include transition-2s("ease-out", "background-color");
+
+  &:hover {
+    background-color: $grey-4;
+  }
+}
+
+.imgContainer {
+  margin-right: map-get($em-spacers, 16);
+  flex-shrink: 0;
+
+  & > div {
+    border-radius: 14px;
+  }
+
+  + div {
+    margin-right: map-get($em-spacers, 4);
+  }
+
+  + div > div:not(:only-child):last-child {
+    white-space: nowrap;
+    color: $grey-9;
+  }
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

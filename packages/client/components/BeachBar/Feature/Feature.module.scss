@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .container {
   padding: 0.6em map-get($em-spacers, 12);
   border: 1px solid $grey-5;
@@ -44,3 +45,51 @@
   transform: translateY(2px);
   margin: auto 0.6em;
 }
+=======
+.container {
+  padding: 0.6em map-get($em-spacers, 12);
+  border: 1px solid $grey-5;
+  border-radius: 14px;
+  // background-color: $grey-1;
+  color: $grey-9;
+  @include transition-2s("ease-out", "background-color");
+
+  & > svg {
+    flex-shrink: 0;
+  }
+
+  & > div:not(:only-child) {
+    margin-left: 0.65em;
+  }
+
+  &.checked {
+    background: rgba($grey-4, 0.75);
+  }
+}
+
+.quantityX {
+  transform: translateY(-5%);
+}
+
+.bull {
+  margin: 0 map-get($em-spacers, 4);
+  color: rgba($grey-9, 0.85);
+}
+
+.search {
+  padding: 0;
+  border: none;
+
+  &:last-of-type .divider {
+    display: none;
+  }
+}
+
+.divider {
+  width: 3.5px;
+  height: 3.5px;
+  background-color: $grey-8;
+  transform: translateY(2px);
+  margin: auto 0.6em;
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

@@ -1,4 +1,5 @@
 // It is intended to ONLY @import other files
+<<<<<<< HEAD
 
 @import "@hashtag-design-system/primitives/src/base/_colors.scss";
 @import "@hashtag-design-system/primitives/src/_variables.scss";
@@ -9,6 +10,17 @@
 @import "@hashtag-design-system/primitives/src/mixins/_index.scss";
 @import "@hashtag-design-system/primitives/src/mixins/_typography.scss";
 
+=======
+
+@import "@hashtag-design-system/primitives/src/base/_colors.scss";
+@import "@hashtag-design-system/primitives/src/_variables.scss";
+@import "@hashtag-design-system/primitives/src/utils/_functions.scss";
+@import "@hashtag-design-system/primitives/src/utils/_generate.scss";
+@import "@hashtag-design-system/primitives/src/mixins/_at-rules.scss";
+@import "@hashtag-design-system/primitives/src/mixins/_animations.scss";
+@import "@hashtag-design-system/primitives/src/mixins/_index.scss";
+@import "@hashtag-design-system/primitives/src/mixins/_typography.scss";
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff
 
 // 0 - Utils
 @import "1-utils/generate";

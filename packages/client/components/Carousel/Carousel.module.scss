@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .container {
   position: relative;
   min-height: min(60vw, 18em);
@@ -14,3 +15,21 @@
   overflow-x: auto;
   cursor: grab;
 }
+=======
+.container {
+  position: relative;
+  min-height: min(60vw, 18em);
+  overflow: visible;
+  margin: map-get($em-spacers, 24) 0;
+}
+
+.scrollableArea {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: map-get($em-spacers, 16);
+  width: 100vw;
+  overflow-x: auto;
+  cursor: grab;
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

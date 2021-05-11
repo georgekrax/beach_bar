@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 $padding: map-get($em-spacers, 12);
 
 .container {
@@ -53,3 +54,60 @@ $padding: map-get($em-spacers, 12);
     margin-bottom: map-get($em-spacers, 64);
   }
 }
+=======
+$padding: map-get($em-spacers, 12);
+
+.container {
+  position: relative;
+  height: fit-content;
+  padding: $padding;
+  margin: map-get($em-spacers, 24) 0 map-get($em-spacers, 64);
+  // border: 1px solid $grey-5;
+  border-radius: 14px;
+  background: linear-gradient(116deg, $grey-1 40%, $grey-4);
+  max-width: 25em;
+  cursor: pointer;
+
+  &:active {
+    background: $grey-3;
+  }
+}
+
+.imgContainer {
+  border-radius: 14px;
+  overflow: hidden;
+  margin-right: map-get($em-spacers, 16);
+  flex-shrink: 0;
+}
+
+.content > div {
+  &:first-child {
+    margin-bottom: map-get($em-spacers, 4);
+  }
+
+  &:last-child span {
+    color: $grey-10;
+  }
+}
+
+.attribution {
+  position: absolute;
+  top: 100%;
+  left: 7.5%;
+  padding: map-get($em-spacers, 8) $padding;
+  background: linear-gradient(to top, $grey-1, $grey-3 50%);
+  background: $grey-3;
+  border-radius: 0px 0px 10px 10px;
+
+  & > a {
+    text-decoration: none;
+  }
+}
+
+@include breakpoint("md") {
+  .container {
+    margin-top: 0;
+    margin-bottom: map-get($em-spacers, 64);
+  }
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

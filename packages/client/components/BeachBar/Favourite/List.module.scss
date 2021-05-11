@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 $gap: map-get($em-spacers, 20);
 
 .column {
@@ -22,3 +23,29 @@ $gap: map-get($em-spacers, 20);
     min-height: calc(#{$item-height / 1.25} - #{$gap / 2});
   }
 }
+=======
+$gap: map-get($em-spacers, 20);
+
+.column {
+  gap: $gap;
+
+  &:first-child {
+    margin-right: $gap;
+    @include masonry-item--small();
+  }
+
+  &:nth-child(2) {
+    @include masonry-item--small(2);
+  }
+}
+
+.item {
+  $item-height: 32vh;
+  display: inline-block;
+  min-height: $item-height;
+
+  &--small {
+    min-height: calc(#{$item-height / 1.25} - #{$gap / 2});
+  }
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

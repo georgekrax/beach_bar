@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .link {
   text-decoration: none;
   outline: none;
@@ -37,3 +38,44 @@
   color: $grey-7;
   margin: 0 map-get($em-spacers, 4);
 }
+=======
+.link {
+  text-decoration: none;
+  outline: none;
+  color: $blue-5;
+  cursor: pointer;
+  opacity: 1;
+  @include transition-2s("ease-out", "opacity");
+
+  &:hover {
+    opacity: 0.75;
+  }
+}
+
+.feedback {
+  @extend .d--block;
+  align-self: center;
+  text-align: center;
+}
+
+.error {
+  color: $red-6;
+}
+
+.ierror {
+  color: $red-6 !important;
+}
+
+.success {
+  color: $green-7;
+}
+
+.isuccess {
+  color: $green-7 !important;
+}
+
+.bull {
+  color: $grey-7;
+  margin: 0 map-get($em-spacers, 4);
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

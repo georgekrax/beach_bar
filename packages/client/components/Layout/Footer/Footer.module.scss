@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .container {
   height: fit-content;
   background-color: rgba($grey-2, 0.75);
@@ -101,3 +102,108 @@
     margin-top: 0;
   }
 }
+=======
+.container {
+  height: fit-content;
+  background-color: rgba($grey-2, 0.75);
+  margin-top: map-get($em-spacers, 80);
+  cursor: pointer;
+
+  // & > div:first-child {
+  // flex-wrap: wrap;
+  // }
+}
+
+.box {
+  align-self: stretch;
+  margin-right: map-get($em-spacers, 24);
+  max-width: 35%;
+
+  small {
+    width: inherit;
+    margin-top: map-get($em-spacers, 8);
+  }
+}
+
+.chevron {
+  margin-right: map-get($em-spacers, 16);
+
+  path {
+    stroke: $grey-9;
+  }
+}
+
+.details {
+  gap: map-get($em-spacers, 64);
+  flex-wrap: wrap;
+  margin-top: map-get($em-spacers, 32);
+
+  & > div:last-child {
+    flex: 1;
+  }
+}
+
+.bottom {
+  margin-top: map-get($em-spacers, 32);
+  padding: map-get($em-spacers, 20) map-get($em-spacers, 4) map-get($em-spacers, 24);
+  border-top: 1px solid $grey-8;
+
+  small {
+    color: $grey-9;
+  }
+
+  small span {
+    margin: 0 map-get($em-spacers, 4);
+  }
+
+  a {
+    color: $grey-9;
+  }
+}
+
+.getInTouch {
+  margin-bottom: map-get($em-spacers, 40) !important;
+}
+
+.getInTouch + div > a {
+  padding: map-get($em-spacers, 8);
+  margin-right: map-get($em-spacers, 16);
+  margin-bottom: 0;
+  border-radius: 14px;
+  background-color: $grey-4;
+  filter: grayscale(100%);
+  user-select: none;
+  @include transition-2s("ease-out", "background-color");
+
+  &:hover {
+    background-color: $grey-5;
+  }
+
+  &:active {
+    background-color: $grey-6;
+  }
+
+  &:nth-child(2) {
+    background-color: rgba($grey-4, 0.85);
+  }
+}
+
+@include breakpoint("md") {
+  .container {
+    cursor: default;
+
+    & > div:first-child {
+      flex-direction: row;
+    }
+  }
+
+  .chevron {
+    display: none;
+  }
+
+  .details {
+    flex-wrap: nowrap;
+    margin-top: 0;
+  }
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

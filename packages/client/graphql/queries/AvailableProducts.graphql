@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 query AvailableProducts($beachBarId: ID!, $availability: SearchInput!) {
   availableProducts(beachBarId: $beachBarId, availability: $availability) {
     product {
@@ -6,3 +7,13 @@ query AvailableProducts($beachBarId: ID!, $availability: SearchInput!) {
     quantity
   }
 }
+=======
+query AvailableProducts($beachBarId: ID!, $availability: SearchInput!) {
+  availableProducts(beachBarId: $beachBarId, availability: $availability) {
+    product {
+      ...BeachBarProduct
+    }
+    quantity
+  }
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

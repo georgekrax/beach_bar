@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 @use "main" as *;
 
 .no-scrollbar {
@@ -108,3 +109,115 @@
 .text-ws--nowrap {
   white-space: nowrap;
 }
+=======
+@use "main" as *;
+
+.no-scrollbar {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.w100 {
+  width: 100%;
+}
+
+.iw100 {
+  width: 100% !important;
+}
+
+.w--inherit {
+  width: inherit;
+}
+
+.h100 {
+  height: 100%;
+}
+
+.ih100 {
+  height: 100% !important;
+}
+
+.border-radius--lg {
+  border-radius: 999px;
+}
+
+.iborder-radius--lg {
+  border-radius: 999px !important;
+}
+
+.d--none {
+  display: none;
+}
+
+.id--none {
+  display: none !important;
+}
+
+.d--block {
+  display: block;
+}
+
+.id--block {
+  display: block !important;
+}
+
+.d--ib {
+  display: inline-block;
+}
+
+.id--ib {
+  display: inline-block !important;
+}
+
+.normal {
+  font-weight: map-get($font-weights, "normal");
+}
+
+.text-transform--capitalize {
+  text-transform: capitalize;
+}
+
+.icon {
+  &--bold {
+    & > path {
+      stroke-width: 2.5px !important;
+    }
+  }
+}
+
+.zi--sm {
+  z-index: 9;
+}
+
+.zi--md {
+  z-index: 99;
+}
+
+.zi--lg {
+  z-index: 999;
+}
+
+.zi--xl {
+  z-index: 99999;
+}
+
+.zi--none {
+  z-index: -1;
+}
+
+.text--grey {
+  color: $grey-8;
+}
+
+.text--secondary {
+  color: $secondary;
+}
+
+.text-ws--nowrap {
+  white-space: nowrap;
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

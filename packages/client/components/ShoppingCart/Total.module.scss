@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .container {
   width: fit-content;
   margin: map-get($em-spacers, 48) 0 map-get($em-spacers, 16);
@@ -11,3 +12,18 @@
     font-size: 1.25rem;
   }
 }
+=======
+.container {
+  width: fit-content;
+  margin: map-get($em-spacers, 48) 0 map-get($em-spacers, 16);
+
+  & > h6 {
+    font-size: 2rem;
+  }
+
+  & > span {
+    margin-right: map-get($em-spacers, 4);
+    font-size: 1.25rem;
+  }
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff
