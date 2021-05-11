@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 $color: $grey-9;
 $border-color: lighten($grey-9, 16);
 $border-width: 1.5px;
@@ -54,3 +55,61 @@ $border-width: 1.5px;
     margin: map-get($em-spacers, 16) 0 map-get($em-spacers, 64);
   }
 }
+=======
+$color: $grey-9;
+$border-color: lighten($grey-9, 16);
+$border-width: 1.5px;
+
+.container__padding {
+  padding: map-get($em-spacers, 32) map-get($em-spacers, 24);
+}
+
+.container {
+  background-color: $grey-1;
+  position: relative;
+  border-bottom: $border-width solid lighten($border-color, 10);
+
+  & > h6 {
+    color: $color;
+  }
+
+  & > div,
+  & > svg {
+    margin-right: map-get($em-spacers, 24);
+  }
+
+  & > div {
+    align-self: stretch;
+    width: $border-width;
+    background-color: $border-color;
+    transform: scaleY(1.4);
+  }
+
+  & > button {
+    position: absolute;
+    bottom: -50%;
+    right: 12%;
+    transform: translateY(-50%);
+    padding-top: map-get($em-spacers, 12);
+    padding-bottom: map-get($em-spacers, 12);
+    @include font-semibold();
+
+    & > svg > path {
+      fill: $grey-1;
+      stroke: $grey-1;
+    }
+  }
+
+  & > svg > path {
+    stroke: $color;
+  }
+}
+
+.content {
+  background-color: $grey-2;
+
+  & > div {
+    margin: map-get($em-spacers, 16) 0 map-get($em-spacers, 64);
+  }
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

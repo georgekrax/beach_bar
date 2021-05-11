@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .container {
   margin: 37.5vh 0;
 
@@ -9,3 +10,16 @@
     margin-bottom: 18.5em;
   }
 }
+=======
+.container {
+  margin: 37.5vh 0;
+
+  &:first-child {
+    margin-top: 0;
+  }
+
+  &:last-child {
+    margin-bottom: 18.5em;
+  }
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 query Payment($refCode: String!) {
   payment(refCode: $refCode) {
     id
@@ -58,3 +59,65 @@ query Payment($refCode: String!) {
     }
   }
 }
+=======
+query Payment($refCode: String!) {
+  payment(refCode: $refCode) {
+    id
+    refCode
+    isRefunded
+    timestamp
+    cart {
+      id
+      total
+      products {
+        ...BasicCartProduct
+      }
+    }
+    card {
+      id
+      last4
+      brand {
+        id
+        name
+      }
+      country {
+        id
+        currency {
+          id
+          symbol
+        }
+      }
+      customer {
+        id
+        email
+        phoneNumber
+        country {
+          id
+          callingCode
+        }
+      }
+    }
+    status {
+      id
+      name
+    }
+    voucherCode {
+      id
+      couponCode {
+        id
+        refCode
+        discountPercentage
+      }
+      offerCode {
+        id
+        refCode
+        totalAmount
+        timesUsed
+        campaign {
+          id
+        }
+      }
+    }
+  }
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

@@ -1,8 +1,15 @@
+<<<<<<< HEAD
+import { gql } from "@apollo/client";
+import { useState } from "react";
+import { FileWithPath } from "react-dropzone";
+import Layout from "@/components/Layout/Layout";
+=======
 // import { gql } from "@apollo/client";
 // import { useState } from "react";
 // import { Me } from "@/me/Layout";
 import { Layout } from "@/components/Layout/Layout";
 // import { FileWithPath } from "react-dropzone";
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff
 
 // const mutation = gql`
 //   mutation uploadMutation($filename: String!, $filetype: String!, $tableName: String!) {
@@ -55,6 +62,20 @@ export const Upload: React.FC = () => {
 
   return (
     <Layout>
+<<<<<<< HEAD
+      <div>@georgekrax me</div>
+      {/* <input {...getInputProps()} />
+      {isDragActive || (loading && uploaded < files.length) ? (
+        <p>Please wait to upload file(s)</p>
+      ) : (
+        <>
+          <p>Drag & drop some files here,or click to select files</p>
+          <span>Or click to select files</span>
+        </>
+      )}
+      {uploaded > files.length && <p>File(s) successfully have been uploaded</p>} */}
+    </Layout>
+=======
       {/* <Me> */}
       <div>This is @me!</div>
       {/* </Me> */}
@@ -69,6 +90,7 @@ export const Upload: React.FC = () => {
     //   </>
     // )}
     // {uploaded > files.length && <p>File(s) successfully have been uploaded</p>} */}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff
   );
 };
 

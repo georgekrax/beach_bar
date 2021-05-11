@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 $border: (
   "height": 1.5px,
   "color": $grey-6,
@@ -36,3 +37,43 @@ $border: (
 .header {
   margin: 0;
 }
+=======
+$border: (
+  "height": 1.5px,
+  "color": $grey-6,
+);
+
+:export {
+  borderHeight: map-get($border, "height");
+  borderColor: map-get($border, "color");
+}
+
+.container {
+  margin-bottom: map-get($em-spacers, 48);
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  :global {
+    span.select__hr {
+      margin: map-get($em-spacers, 8) 0 0;
+      height: map-get($border, "height");
+      background-color: map-get($border, "color");
+    }
+
+    .input-incr-dcr__container {
+      align-self: flex-end;
+
+      input {
+        width: 3em;
+        height: 100%;
+      }
+    }
+  }
+}
+
+.header {
+  margin: 0;
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

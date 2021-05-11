@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .container {
   flex-wrap: wrap;
   gap: map-get($em-spacers, 12);
@@ -14,3 +15,21 @@
     background-color: $grey-6;
   }
 }
+=======
+.container {
+  flex-wrap: wrap;
+  gap: map-get($em-spacers, 12);
+  position: relative;
+  padding-top: map-get($em-spacers, 8);
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 40px;
+    height: 1px;
+    background-color: $grey-6;
+  }
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

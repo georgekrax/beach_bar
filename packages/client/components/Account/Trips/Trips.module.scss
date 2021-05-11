@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .trip {
   width: min(85%, 280px);
 }
@@ -13,3 +14,20 @@
     margin: 0 map-get($em-spacers, 12);
   }
 }
+=======
+.trip {
+  width: min(85%, 280px);
+}
+
+.container {
+  flex-wrap: wrap;
+  gap: map-get($em-spacers, 48);
+}
+
+@include breakpoint("sm") {
+  .container {
+    justify-content: flex-start;
+    margin: 0 map-get($em-spacers, 12);
+  }
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

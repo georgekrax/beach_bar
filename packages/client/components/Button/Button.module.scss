@@ -1,0 +1,117 @@
+// Primary button
+.btn {
+  @include body-16();
+  flex: none;
+  align-self: flex-start;
+  position: relative;
+  white-space: nowrap;
+  padding: 0.75em 1em;
+  width: auto;
+  align-items: center;
+  border-radius: rem(12);
+  border: none;
+  outline: none;
+  overflow: hidden;
+  position: relative;
+  text-align: center;
+  appearance: none;
+  gap: 0.5em;
+  transition: 0.2s cubic-bezier(0.3, 0, 0.5, 1);
+  user-select: none;
+  letter-spacing: 0.025em;
+  cursor: pointer;
+
+  &:focus-visible {
+    @include accessibility-5dp;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+  }
+
+  // Pill button
+  &.pill {
+    border-radius: rem(24) !important;
+  }
+
+  &__loading-icon {
+    position: relative;
+    top: -3px;
+    left: -76px;
+    align-self: center;
+
+    &__path {
+      stroke: lighten($primary, 20);
+    }
+  }
+}
+
+.btn-primary {
+  background-color: $primary;
+  color: $grey-1;
+
+  &:hover {
+    background-color: darken($primary, 10);
+    border-color: darken($primary, 10);
+  }
+
+  &:disabled {
+    background-color: $grey-7;
+    border-color: $grey-7;
+    color: $grey-10;
+  }
+
+  @include disabled-classNames {
+  }
+}
+
+// Secondary button
+.btn-secondary {
+  background-color: $grey-1;
+  border: 2px solid $primary;
+  box-sizing: border-box;
+
+  &:hover {
+    background-color: $primary;
+    color: $grey-1;
+    border-color: $primary;
+  }
+
+  &:disabled {
+    background-color: inherit;
+    border-color: $grey-8;
+    color: $grey-8;
+
+    & > * {
+      stroke: $grey-8 !important;
+    }
+  }
+}
+
+// Danger button
+.btn-danger {
+  color: $grey-1;
+  background-color: $red-6;
+  border-color: $red-6;
+
+  &:hover {
+    background-color: $red-7;
+    border-color: $red-7;
+    color: $grey-1;
+  }
+
+  &:disabled {
+    background-color: inherit;
+    border-color: $red-6;
+    color: $red-6;
+
+    & > * {
+      stroke: $red-6 !important;
+    }
+  }
+
+  &:focus-visible {
+    background-color: $red-6;
+    border-color: $red-6;
+  }
+}

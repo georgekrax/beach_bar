@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 query BeachBarImgs($slug: String!) {
   beachBarImgs(slug: $slug) {
     id
@@ -6,3 +7,13 @@ query BeachBarImgs($slug: String!) {
     timestamp
   }
 }
+=======
+query BeachBarImgs($slug: String!) {
+  beachBarImgs(slug: $slug) {
+    id
+    imgUrl
+    description
+    timestamp
+  }
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

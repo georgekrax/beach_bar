@@ -54,8 +54,13 @@ export let stripe: Stripe;
   app.use(
     cors({
       credentials: true,
+<<<<<<< HEAD
+      // origin: process.env.NODE_ENV === "production" ? String(process.env.TOKEN_AUDIENCE!) : "http://localhost:3000",
+      origin: "http://localhost:3000",
+=======
       // origin: process.env.NODE_ENV === "production" ? String(process.env.TOKEN_AUDIENCE!) : "http://192.168.1.8:3000",
       origin: "http://192.168.1.8:3000",
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff
     })
   );
   app.use((req, res, next) => {
@@ -130,7 +135,11 @@ export let stripe: Stripe;
             //     });
             //     console.log(payload);
           }
+<<<<<<< HEAD
+          // await fetch("http://localhost:4000/oauth/refresh_token", {
+=======
           // await fetch("http://192.168.1.8:4000/oauth/refresh_token", {
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff
           //   method: "POST",
           //   headers: {
           //     Cookie: process.env.REFRESH_TOKEN_COOKIE_NAME!.toString() + "=" + refreshToken.accessToken.token,

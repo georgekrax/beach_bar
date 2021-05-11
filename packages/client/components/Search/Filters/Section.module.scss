@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .container {
   h6 {
     color: $grey-9;
@@ -36,3 +37,43 @@
     }
   }
 }
+=======
+.container {
+  h6 {
+    color: $grey-9;
+  }
+
+  & > div {
+    gap: map-get($em-spacers, 16);
+    margin-top: map-get($em-spacers, 16);
+    margin-bottom: map-get($em-spacers, 48);
+  }
+}
+
+@include breakpoint("md") {
+  .container {
+    &:nth-of-type(3),
+    &:nth-of-type(4) {
+      & > div {
+        flex-direction: column;
+      }
+    }
+  }
+
+  .container {
+    h6 {
+      font-size: 1rem;
+    }
+
+    & > div {
+      margin-top: map-get($em-spacers, 12);
+      margin-bottom: map-get($em-spacers, 32);
+      gap: map-get($em-spacers, 12);
+    }
+
+    &:last-child > div {
+      margin-bottom: 0;
+    }
+  }
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

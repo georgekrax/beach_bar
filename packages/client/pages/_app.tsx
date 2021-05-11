@@ -1,5 +1,9 @@
 import "@/styles/globals.scss";
 import "mapbox-gl/dist/mapbox-gl.css";
+<<<<<<< HEAD
+// import "antd/dist/antd.css";
+=======
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff
 import { Context as AuthContext } from "@/components/Auth/Context";
 import { Context as SearchContext } from "@/components/Search/Context";
 import { INITIAL_APOLLO_STATE, useApollo } from "@/lib/apollo";

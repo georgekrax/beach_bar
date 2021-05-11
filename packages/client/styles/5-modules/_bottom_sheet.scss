@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .bottom_sheet {
   &__title {
     @extend .w100;
@@ -11,3 +12,18 @@
     @include font-semibold();
   }
 }
+=======
+.bottom_sheet {
+  &__title {
+    @extend .w100;
+    @extend .d--block;
+    @extend .body-16;
+    content: "";
+    height: auto;
+    padding: map-get($em-spacers, 8) 0;
+    color: $grey-10;
+    text-align: center;
+    @include font-semibold();
+  }
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

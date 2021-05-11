@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 query Me {
   me {
     id
@@ -49,4 +50,57 @@ query Me {
       }
     }
   }
+=======
+query Me {
+  me {
+    id
+		email
+		firstName
+		lastName
+		fullName
+    account {
+			id
+      honorificTitle
+			birthday
+			age
+			address
+			zipCode
+			imgUrl
+			city
+			trackHistory
+			phoneNumber
+			telCountry {
+				id
+				name
+			}
+      country {
+        id
+				name
+				currency {
+					id
+					symbol
+				}
+      }
+		}
+		reviewVotes {
+			id
+			type {
+				id
+				value
+			}
+			review {
+				id
+			}
+		}
+		favoriteBars {
+      beachBar {
+        id
+				name
+				slug
+				thumbnailUrl
+				formattedLocation
+      }
+    }
+  }
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff
 }

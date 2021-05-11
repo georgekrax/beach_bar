@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 query BeachBar($slug: String!, $userVisit: Boolean) {
   beachBar(slug: $slug, userVisit: $userVisit) {
     ...DetailsBeachBar
@@ -23,3 +24,30 @@ query BeachBar($slug: String!, $userVisit: Boolean) {
     }
   }
 }
+=======
+query BeachBar($slug: String!, $userVisit: Boolean) {
+  beachBar(slug: $slug, userVisit: $userVisit) {
+    ...DetailsBeachBar
+    reviews {
+      ...Review
+      payment {
+        id
+        timestamp
+      }
+    }
+    imgUrls {
+      id
+      imgUrl
+      description
+      timestamp
+    }
+    defaultCurrency {
+      id
+      symbol
+    }
+    products {
+      ...BeachBarProduct
+    }
+  }
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

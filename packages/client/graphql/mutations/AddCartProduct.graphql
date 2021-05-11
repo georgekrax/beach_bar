@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 mutation AddCartProduct($cartId: ID!, $productId: ID!, $quantity: Int, $date: Date!, $timeId: ID) {
   addCartProduct(cartId: $cartId, productId: $productId, quantity: $quantity, date: $date, timeId: $timeId) {
     product {
@@ -11,3 +12,18 @@ mutation AddCartProduct($cartId: ID!, $productId: ID!, $quantity: Int, $date: Da
     added
   }
 }
+=======
+mutation AddCartProduct($cartId: ID!, $productId: ID!, $quantity: Int, $date: Date!, $timeId: ID) {
+  addCartProduct(cartId: $cartId, productId: $productId, quantity: $quantity, date: $date, timeId: $timeId) {
+    product {
+      id
+      quantity
+      product {
+        id
+        name
+      }
+    }
+    added
+  }
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

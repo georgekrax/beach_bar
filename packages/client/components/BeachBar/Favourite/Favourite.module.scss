@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .container {
   border-radius: 14px;
   border: 1px solid $grey-6;
@@ -42,3 +43,49 @@
     }
   }
 }
+=======
+.container {
+  border-radius: 14px;
+  border: 1px solid $grey-6;
+  padding: map-get($em-spacers, 12);
+
+  & > div:first-child {
+    position: relative;
+    width: 7em;
+    height: auto;
+    min-height: max(7em, 13.5vh);
+    margin-right: map-get($em-spacers, 16);
+    border-radius: 14px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  & > div:last-child > div {
+    & > span {
+      color: $grey-8;
+      margin: 0.15em 0 map-get($em-spacers, 8);
+    }
+
+    & > h6 {
+      color: $grey-9;
+    }
+  }
+}
+
+@include breakpoint("sm") {
+  .container {
+    max-width: 14em;
+    flex-direction: column;
+
+    & > div:first-child {
+      width: 100%;
+      min-height: 10em;
+      margin-bottom: map-get($em-spacers, 12);
+    }
+
+    & > div:last-child > div {
+      flex: 1;
+    }
+  }
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .layout--padding {
   padding: $wrapper-padding;
   padding-top: calc(#{$wrapper-padding}/ 1.5);
@@ -24,3 +25,31 @@
     flex: inherit;
   }
 }
+=======
+.layout--padding {
+  padding: $wrapper-padding;
+  padding-top: calc(#{$wrapper-padding}/ 1.5);
+}
+
+.container--padding {
+  padding: 0 $wrapper-padding;
+}
+
+.container--mw {
+  max-width: map-get($breakpoints, "xl");
+}
+
+.container {
+  @extend .w100;
+  @extend .container--mw;
+  @extend .container--padding;
+  display: inherit;
+  flex-direction: inherit;
+  margin: 0 auto;
+  flex: 1;
+
+  & > main {
+    flex: inherit;
+  }
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

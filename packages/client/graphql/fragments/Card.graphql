@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 fragment BasicCard on Card {
   id
   expMonth
@@ -10,3 +11,17 @@ fragment BasicCard on Card {
     name
   }
 }
+=======
+fragment BasicCard on Card {
+  id
+  expMonth
+  expYear
+  last4
+  cardholderName
+  isDefault
+  brand {
+    id
+    name
+  }
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

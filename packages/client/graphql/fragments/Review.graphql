@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 fragment Review on BeachBarReview {
   id
   ratingValue
@@ -41,3 +42,48 @@ fragment Review on BeachBarReview {
     }
   }
 }
+=======
+fragment Review on BeachBarReview {
+  id
+  ratingValue
+  review
+  positiveComment
+  negativeComment
+  updatedAt
+  timestamp
+  votes {
+    id
+    user {
+      id
+    }
+    type {
+      id
+      value
+    }
+  }
+  month {
+    id
+    value
+  }
+  visitType {
+    id
+    name
+  }
+  answer {
+    id
+    body
+    updatedAt
+  }
+  customer {
+    id
+    user {
+      id
+      fullName
+      account {
+        id
+        imgUrl
+      }
+    }
+  }
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

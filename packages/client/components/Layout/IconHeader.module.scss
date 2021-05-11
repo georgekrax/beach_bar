@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .container {
   & > div:first-child > div {
     margin-right: map-get($em-spacers, 16);
@@ -7,3 +8,14 @@
     margin-left: map-get($em-spacers, 16);
   }
 }
+=======
+.container {
+  & > div:first-child > div {
+    margin-right: map-get($em-spacers, 16);
+  }
+
+  & > div:last-child > div {
+    margin-left: map-get($em-spacers, 16);
+  }
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

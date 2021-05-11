@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .carousel {
   margin-top: 0;
   min-height: calc(#{$carousel-bar-height} / 2 + #{map-get($em-spacers, 8)});
@@ -14,4 +15,22 @@
   button:disabled {
     background-color: $grey-4;
   }
+=======
+.carousel {
+  margin-top: 0;
+  min-height: calc(#{$carousel-bar-height} / 2 + #{map-get($em-spacers, 8)});
+}
+
+.item {
+  height: calc(#{$carousel-bar-height} / 2);
+  opacity: 1 !important;
+}
+
+.controlBtns {
+  justify-content: flex-end;
+
+  button:disabled {
+    background-color: $grey-4;
+  }
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff
 }

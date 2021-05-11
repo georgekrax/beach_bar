@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 fragment BeachBarProduct on Product {
   id
   name
@@ -20,3 +21,27 @@ fragment BeachBarProduct on Product {
     }
   }
 }
+=======
+fragment BeachBarProduct on Product {
+  id
+  name
+  description
+  imgUrl
+  price
+  maxPeople
+  category {
+    id
+    components {
+      quantity
+      component {
+        id
+        name
+        icon {
+          id
+          publicId
+        }
+      }
+    }
+  }
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff
