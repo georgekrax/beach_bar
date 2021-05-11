@@ -5,6 +5,6 @@ export const PaymentStatusType = objectType({
   description: "Represents the status of a payment",
   definition(t) {
     t.id("id");
-    t.string("status");
+    t.string("name");
   },
 });

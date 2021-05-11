@@ -80,10 +80,10 @@ export class BeachBarReview extends BaseEntity {
 
   @ManyToOne(() => MonthTime, monthTime => monthTime.reviews, { nullable: true })
   @JoinColumn({ name: "month_time_id" })
-  monthTime?: MonthTime | null;
+  month?: MonthTime | null;
 
-  @OneToOne(() => ReviewAnswer, reviewAnswer => reviewAnswer.review)
-  answer: ReviewAnswer;
+  @OneToOne(() => ReviewAnswer, reviewAnswer => reviewAnswer.review, { nullable: true })
+  answer?: ReviewAnswer;
 
   @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
   updatedAt: Dayjs;
@@ -115,19 +115,18 @@ export class BeachBarReview extends BaseEntity {
         }
       }
       if (monthTimeId && monthTimeId !== this.monthTimeId?.toString()) {
-        if (monthTimeId.toLowerCase() === "none") this.monthTime = null;
+        if (monthTimeId.toLowerCase() === "none") this.month = null;
         else {
           const monthTime = await MonthTime.findOne(monthTimeId);
           if (!monthTime) throw new Error();
-          this.monthTime = monthTime;
+          this.month = monthTime;
         }
       }
       if (positiveComment && positiveComment !== this.positiveComment) this.positiveComment = positiveComment;
       if (negativeComment && negativeComment !== this.negativeComment) this.negativeComment = negativeComment;
       if (review && review !== this.review) this.review = review;
       await this.save();
-      // TODO: Change later
-      // await this.beachBar.updateRedis();
+      await this.beachBar.updateRedis();
       return this;
     } catch (err) {
       throw new Error(err.message);
@@ -161,8 +160,7 @@ export class BeachBarReview extends BaseEntity {
           await userVoteForThisReview.save();
         }
       }
-      // TODO: Change later
-      // await this.beachBar.updateRedis();
+      await this.beachBar.updateRedis();
     } catch (err) {
       throw new Error(err.message);
     }
@@ -171,7 +169,6 @@ export class BeachBarReview extends BaseEntity {
   async softRemove(): Promise<any> {
     const findOptions: any = { reviewId: this.id };
     await softRemove(BeachBarReview, { id: this.id }, [ReviewAnswer], findOptions);
-    // TODO: Change later
-    // await this.beachBar.updateRedis();
+    await this.beachBar.updateRedis();
   }
 }

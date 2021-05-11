@@ -1,0 +1,57 @@
+$padding: map-get($em-spacers, 16);
+
+.container {
+  position: relative;
+  padding: map-get($em-spacers, 20) $padding;
+  padding-bottom: 0;
+  background-color: $grey-1;
+  border-radius: 14px;
+  color: $grey-10;
+  margin-bottom: map-get($em-spacers, 24);
+  border: 1px solid $grey-6;
+  box-shadow: 0px 0px 6px rgba($grey-6, 0.65);
+}
+
+.content {
+  align-self: stretch;
+
+  & > div:nth-child(2) {
+    margin-top: map-get($em-spacers, 12);
+    color: $grey-8;
+    @include text-overflow(3);
+  }
+}
+
+.imgContainer {
+  margin-right: map-get($em-spacers, 16);
+
+  & > div {
+    border-radius: 14px;
+  }
+}
+
+.priceTag {
+  // top: map-get($em-spacers, 12);
+  // right: map-get($em-spacers, 12);
+  padding: map-get($em-spacers, 4) 0.65em 0.35em;
+  flex: 0 0 auto;
+  background-color: $grey-9;
+  color: $grey-1;
+}
+
+.components {
+  margin-top: map-get($em-spacers, 16);
+}
+
+.cartCta {
+  position: relative;
+  margin: map-get($em-spacers, 24) -#{$padding} 0;
+  padding: map-get($em-spacers, 12) $padding;
+  border-top: 2px solid $grey-5;
+
+  button {
+    margin-left: auto;
+    padding: map-get($em-spacers, 8) map-get($em-spacers, 16);
+    box-shadow: none;
+  }
+}

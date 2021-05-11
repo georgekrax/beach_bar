@@ -3,26 +3,18 @@ import { PricingFee } from "entity/PricingFee";
 import { PricingFeeCurrency } from "entity/PricingFeeCurrency";
 import { AddType, UpdateType } from "typings/.index";
 
-export interface GetFullPricingReturnType {
-  pricingFee: PricingFee;
-  currencyFee: PricingFeeCurrency;
-}
+export type GetFullPricingReturnType = { pricingFee: PricingFee; currencyFee: PricingFeeCurrency };
 
-export interface BeachBarAvailabilityReturnType {
-  hasAvailability?: boolean;
-  hasCapacity?: boolean;
-}
+export type BeachBarAvailabilityReturnType = { hasAvailability?: boolean; hasCapacity?: boolean };
 
-export interface GetBeachBarPaymentDetails {
+export type GetBeachBarPaymentDetails = {
   total: number;
   transferAmount: number;
   beachBarAppFee: number;
   stripeFee: number;
-}
-
-type BeachBarType = {
-  beachBar: BeachBar;
 };
+
+type BeachBarType = { beachBar: BeachBar };
 
 export type TAddBeachBar = AddType & BeachBarType;
 

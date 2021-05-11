@@ -38,8 +38,8 @@ export class MonthTime extends BaseEntity {
   @Column({ type: "integer", name: "days" })
   days: number;
 
-  @OneToMany(() => BeachBarReview, beachBarReview => beachBarReview.monthTime, { nullable: true })
-  reviews?: BeachBarReview[];
+  @OneToMany(() => BeachBarReview, beachBarReview => beachBarReview.month)
+  reviews: BeachBarReview[];
 }
 
 @Entity({ name: "quarter_time", schema: "public" })
@@ -51,9 +51,9 @@ export class QuarterTime extends BaseEntity {
   @Column({ type: "time without time zone", scale: 0, name: "value" })
   value: string;
 
-  @OneToMany(() => BeachBar, beachBar => beachBar.openingTime, { nullable: true })
-  beachBarsOpeningTime?: BeachBar[];
+  @OneToMany(() => BeachBar, beachBar => beachBar.openingTime)
+  beachBarsOpeningTime: BeachBar[];
 
-  @OneToMany(() => BeachBar, beachBar => beachBar.closingTime, { nullable: true })
-  beachBarsClosingTime?: BeachBar[];
+  @OneToMany(() => BeachBar, beachBar => beachBar.closingTime)
+  beachBarsClosingTime: BeachBar[];
 }

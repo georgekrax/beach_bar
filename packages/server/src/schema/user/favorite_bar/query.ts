@@ -9,29 +9,23 @@ export const UserFavoriteBarQuery = extendType({
     t.list.field("favouriteBeachBars", {
       type: UserFavoriteBarType,
       description: "Get a user's favourite #beach_bars list",
-      args: {
-        limit: nullable(intArg({ description: "How many data to fetch?" })),
-      },
+      args: { limit: nullable(intArg({ description: "How many data to fetch?" })) },
       resolve: async (_, { limit }, { payload }: MyContext): Promise<UserFavoriteBar[]> => {
         if (!payload || !payload.sub) return [];
 
-        try {
-          const favouriteBeachBars = await UserFavoriteBar.find({
-            where: { userId: payload.sub },
-            relations: [
-              "user",
-              "beachBar",
-              "beachBar.location",
-              "beachBar.location.country",
-              "beachBar.location.city",
-              "beachBar.location.region",
-            ],
-            take: limit ?? undefined,
-          });
-          return favouriteBeachBars;
-        } catch {
-          return [];
-        }
+        const favouriteBeachBars = await UserFavoriteBar.find({
+          where: { userId: payload!.sub },
+          relations: [
+            "user",
+            "beachBar",
+            "beachBar.location",
+            "beachBar.location.country",
+            "beachBar.location.city",
+            "beachBar.location.region",
+          ],
+          take: limit ?? undefined,
+        });
+        return favouriteBeachBars;
       },
     });
   },

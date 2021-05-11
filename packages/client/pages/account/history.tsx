@@ -1,3 +1,12 @@
+import Account from "@/components/Account";
+import Layout from "@/components/Layout";
+import { NextDoNotHave } from "@/components/Next/DoNotHave";
+import { NextLink } from "@/components/Next/Link";
+import { NextMotionContainer } from "@/components/Next/MotionContainer";
+import { UserHistoryDocument, UserHistoryQuery, useUserHistoryQuery } from "@/graphql/generated";
+import { initializeApollo, INITIAL_APOLLO_STATE } from "@/lib/apollo";
+import { getAuth } from "@/lib/auth";
+import { useAuth } from "@/utils/hooks";
 import { DAY_NAMES_ARR, MONTHS } from "@the_hashtag/common";
 import dayjs, { Dayjs } from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
@@ -6,22 +15,13 @@ import { groupBy } from "lodash";
 import { GetServerSideProps } from "next";
 import { useMemo } from "react";
 import { Toaster } from "react-hot-toast";
-import Account from "../../components/Account";
-import Layout from "../../components/Layout";
-import Next from "../../components/Next";
-import { UserHistoryDocument, UserHistoryQuery, useUserHistoryQuery } from "../../graphql/generated";
-import { initializeApollo, INITIAL_APOLLO_STATE } from "../../lib/apollo";
-import { getAuth } from "../../lib/auth";
-import { useAuth } from "../../utils/hooks";
 
 dayjs.extend(weekOfYear);
 dayjs.extend(isoWeek);
 
 const History: React.FC = () => {
-  const {
-    data: { me },
-  } = useAuth();
-  const doNotAllow = useMemo(() => !me.account.trackHistory, [me]);
+  const { data: authData } = useAuth();
+  const doNotAllow = useMemo(() => !authData?.me?.account.trackHistory, [authData]);
   const { data, loading, error } = useUserHistoryQuery({ skip: doNotAllow });
 
   const parseWeekDate = (day: Dayjs) => {
@@ -56,11 +56,11 @@ const History: React.FC = () => {
       ) : error || (!data?.userHistory && !doNotAllow) ? (
         <h2>Error</h2>
       ) : (
-        <Next.Motion.Container>
+        <NextMotionContainer>
           {!doNotAllow ? (
             <div className="flex-column-flex-start-flex-start">
               {sortedData.map((val, i) => (
-                <div className="w-100 account-history__section" key={i}>
+                <div className="w100 account-history__section" key={i}>
                   <h5 className="header-6 semibold">{val[0]}</h5>
                   <div>
                     {val[1].map(({ userHistory: { id }, ...rest }) => (
@@ -71,13 +71,13 @@ const History: React.FC = () => {
               ))}
             </div>
           ) : (
-            <Next.DoNotHave emoji="⚙️">
+            <NextDoNotHave emoji="⚙️">
               Please go to your{" "}
-              <Next.Link href={{ pathname: "/account", hash: "preferences" }}>account preferences</Next.Link> and enable
+              <NextLink href={{ pathname: "/account", hash: "preferences" }}>account preferences</NextLink> and enable
               the "Track search history" feature, to keep a record of your search history.
-            </Next.DoNotHave>
+            </NextDoNotHave>
           )}
-        </Next.Motion.Container>
+        </NextMotionContainer>
       )}
     </Layout>
   );

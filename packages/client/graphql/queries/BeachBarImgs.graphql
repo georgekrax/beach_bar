@@ -1,0 +1,8 @@
+query BeachBarImgs($slug: String!) {
+  beachBarImgs(slug: $slug) {
+    id
+    imgUrl
+    description
+    timestamp
+  }
+}

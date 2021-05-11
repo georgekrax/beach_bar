@@ -1,10 +1,10 @@
 import { ReviewAnswer } from "entity/ReviewAnswer";
-import { AddType, ErrorType, UpdateType } from "typings/.index";
+import { AddType, UpdateType } from "typings/.index";
 
 type ReviewAnswerType = {
   answer: ReviewAnswer;
 };
 
-export type AddReviewAnswerType = (AddType & ReviewAnswerType) | ErrorType;
+export type TAddReviewAnswer = AddType & ReviewAnswerType;
 
-export type UpdateReviewAnswerType = (UpdateType & ReviewAnswerType) | ErrorType;
+export type TUpdateReviewAnswer = UpdateType & ReviewAnswerType;

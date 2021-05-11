@@ -41,40 +41,11 @@
     }
   }
 
-  &__searchbar {
-    margin: $searchbar-margin-top $wrapper-padding 0;
-
-    & > div:first-child {
-      background-color: $searchbar-bg;
-      margin-top: map-get($em-spacers, 4);
-      margin-right: map-get($em-spacers, 16);
-    }
-
-    & > div:last-child {
-      margin: 0;
-    }
-  }
-
   &__wrapper {
     padding: 0;
 
     main {
-      @extend .ih-100;
+      @extend .ih100;
     }
-  }
-
-  &__navigation-control {
-    @extend .zi--md;
-    // + <Input /> component's height
-    top: calc(#{$searchbar-margin-top} + 3em);
-    left: calc(#{$wrapper-padding} * 1.25);
-    margin-top: map-get($em-spacers, 24);
-  }
-
-  &__suggestions {
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    background: linear-gradient(to top, $grey-1 50%, rgba($grey-1, 0) 70%);
   }
 }

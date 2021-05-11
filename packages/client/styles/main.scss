@@ -1,20 +1,24 @@
-// This is the single file output by SCSS.
-// ! It is intended to ONLY @import other files
+// It is intended to ONLY @import other files
 
-@import "@hashtag-design-system/primitives/src/index.scss";
+@import "@hashtag-design-system/primitives/src/base/_colors.scss";
+@import "@hashtag-design-system/primitives/src/_variables.scss";
+@import "@hashtag-design-system/primitives/src/utils/_functions.scss";
+@import "@hashtag-design-system/primitives/src/utils/_generate.scss";
+@import "@hashtag-design-system/primitives/src/mixins/_at-rules.scss";
+@import "@hashtag-design-system/primitives/src/mixins/_animations.scss";
+@import "@hashtag-design-system/primitives/src/mixins/_index.scss";
+@import "@hashtag-design-system/primitives/src/mixins/_typography.scss";
+
 
 // 0 - Utils
+@import "1-utils/generate";
+@import "./variables";
 @import "1-utils/functions";
 @import "1-utils/mixins";
 
+
 // 1 - Current directory
-@import "./variables";
 
 // 2 - Base
-@import "2-base/base";
-@import "2-base/beach_bar";
-
-// 3 - Layout
-@import "3-layout/base";
-@import "3-layout/header";
-@import "3-layout/login";
+// @import "2-base/base";
+// @import "2-base/beach_bar";

@@ -13,29 +13,14 @@ export type S3PayloadFieldPolicy = {
 	signedRequest?: FieldPolicy<any> | FieldReadFunction<any>,
 	url?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type BeachBarEntryFeeKeySpecifier = ('id' | 'fee' | 'date' | 'beachBar' | BeachBarEntryFeeKeySpecifier)[];
-export type BeachBarEntryFeeFieldPolicy = {
-	id?: FieldPolicy<any> | FieldReadFunction<any>,
-	fee?: FieldPolicy<any> | FieldReadFunction<any>,
-	date?: FieldPolicy<any> | FieldReadFunction<any>,
-	beachBar?: FieldPolicy<any> | FieldReadFunction<any>
-};
-export type AddBeachBarEntryFeeKeySpecifier = ('fees' | 'added' | AddBeachBarEntryFeeKeySpecifier)[];
-export type AddBeachBarEntryFeeFieldPolicy = {
-	fees?: FieldPolicy<any> | FieldReadFunction<any>,
-	added?: FieldPolicy<any> | FieldReadFunction<any>
-};
-export type UpdateBeachBarEntryFeeKeySpecifier = ('fees' | 'updated' | UpdateBeachBarEntryFeeKeySpecifier)[];
-export type UpdateBeachBarEntryFeeFieldPolicy = {
-	fees?: FieldPolicy<any> | FieldReadFunction<any>,
-	updated?: FieldPolicy<any> | FieldReadFunction<any>
-};
-export type BeachBarImgUrlKeySpecifier = ('id' | 'imgUrl' | 'description' | 'beachBar' | BeachBarImgUrlKeySpecifier)[];
+export type BeachBarImgUrlKeySpecifier = ('id' | 'imgUrl' | 'description' | 'beachBar' | 'updatedAt' | 'timestamp' | BeachBarImgUrlKeySpecifier)[];
 export type BeachBarImgUrlFieldPolicy = {
 	id?: FieldPolicy<any> | FieldReadFunction<any>,
 	imgUrl?: FieldPolicy<any> | FieldReadFunction<any>,
 	description?: FieldPolicy<any> | FieldReadFunction<any>,
-	beachBar?: FieldPolicy<any> | FieldReadFunction<any>
+	beachBar?: FieldPolicy<any> | FieldReadFunction<any>,
+	updatedAt?: FieldPolicy<any> | FieldReadFunction<any>,
+	timestamp?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type AddBeachBarImgUrlKeySpecifier = ('imgUrl' | 'added' | AddBeachBarImgUrlKeySpecifier)[];
 export type AddBeachBarImgUrlFieldPolicy = {
@@ -127,10 +112,11 @@ export type AddCouponCodeFieldPolicy = {
 	couponCode?: FieldPolicy<any> | FieldReadFunction<any>,
 	added?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type UpdateCouponCodeKeySpecifier = ('couponCode' | 'updated' | UpdateCouponCodeKeySpecifier)[];
+export type UpdateCouponCodeKeySpecifier = ('couponCode' | 'updated' | 'deleted' | UpdateCouponCodeKeySpecifier)[];
 export type UpdateCouponCodeFieldPolicy = {
 	couponCode?: FieldPolicy<any> | FieldReadFunction<any>,
-	updated?: FieldPolicy<any> | FieldReadFunction<any>
+	updated?: FieldPolicy<any> | FieldReadFunction<any>,
+	deleted?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type AddOfferCampaignKeySpecifier = ('offerCampaign' | 'added' | AddOfferCampaignKeySpecifier)[];
 export type AddOfferCampaignFieldPolicy = {
@@ -207,6 +193,11 @@ export type ProductFieldPolicy = {
 	category?: FieldPolicy<any> | FieldReadFunction<any>,
 	updatedAt?: FieldPolicy<any> | FieldReadFunction<any>,
 	deletedAt?: FieldPolicy<any> | FieldReadFunction<any>
+};
+export type ProductAvailabilityKeySpecifier = ('product' | 'quantity' | ProductAvailabilityKeySpecifier)[];
+export type ProductAvailabilityFieldPolicy = {
+	product?: FieldPolicy<any> | FieldReadFunction<any>,
+	quantity?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type AddProductKeySpecifier = ('product' | 'added' | AddProductKeySpecifier)[];
 export type AddProductFieldPolicy = {
@@ -297,7 +288,7 @@ export type UpdateReviewAnswerFieldPolicy = {
 	answer?: FieldPolicy<any> | FieldReadFunction<any>,
 	updated?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type BeachBarReviewKeySpecifier = ('id' | 'ratingValue' | 'positiveComment' | 'negativeComment' | 'review' | 'beachBar' | 'votes' | 'answer' | 'customer' | 'visitType' | 'month' | 'updatedAt' | 'timestamp' | BeachBarReviewKeySpecifier)[];
+export type BeachBarReviewKeySpecifier = ('id' | 'ratingValue' | 'positiveComment' | 'negativeComment' | 'review' | 'beachBar' | 'votes' | 'answer' | 'customer' | 'visitType' | 'month' | 'payment' | 'updatedAt' | 'timestamp' | BeachBarReviewKeySpecifier)[];
 export type BeachBarReviewFieldPolicy = {
 	id?: FieldPolicy<any> | FieldReadFunction<any>,
 	ratingValue?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -310,6 +301,7 @@ export type BeachBarReviewFieldPolicy = {
 	customer?: FieldPolicy<any> | FieldReadFunction<any>,
 	visitType?: FieldPolicy<any> | FieldReadFunction<any>,
 	month?: FieldPolicy<any> | FieldReadFunction<any>,
+	payment?: FieldPolicy<any> | FieldReadFunction<any>,
 	updatedAt?: FieldPolicy<any> | FieldReadFunction<any>,
 	timestamp?: FieldPolicy<any> | FieldReadFunction<any>
 };
@@ -323,10 +315,11 @@ export type UpdateBeachBarReviewFieldPolicy = {
 	review?: FieldPolicy<any> | FieldReadFunction<any>,
 	updated?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type BeachBarServiceKeySpecifier = ('id' | 'name' | BeachBarServiceKeySpecifier)[];
+export type BeachBarServiceKeySpecifier = ('id' | 'name' | 'icon' | BeachBarServiceKeySpecifier)[];
 export type BeachBarServiceFieldPolicy = {
 	id?: FieldPolicy<any> | FieldReadFunction<any>,
-	name?: FieldPolicy<any> | FieldReadFunction<any>
+	name?: FieldPolicy<any> | FieldReadFunction<any>,
+	icon?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type BeachBarFeatureKeySpecifier = ('service' | 'beachBar' | 'quantity' | 'description' | 'updatedAt' | 'timestamp' | BeachBarFeatureKeySpecifier)[];
 export type BeachBarFeatureFieldPolicy = {
@@ -347,12 +340,13 @@ export type UpdateBeachBarFeatureFieldPolicy = {
 	feature?: FieldPolicy<any> | FieldReadFunction<any>,
 	updated?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type BeachBarKeySpecifier = ('id' | 'name' | 'slug' | 'description' | 'avgRating' | 'thumbnailUrl' | 'contactPhoneNumber' | 'hidePhoneNumber' | 'isActive' | 'isAvailable' | 'location' | 'formattedLocation' | 'payments' | 'category' | 'imgUrls' | 'reviews' | 'features' | 'styles' | 'restaurants' | 'defaultCurrency' | 'owners' | 'openingTime' | 'closingTime' | 'updatedAt' | 'timestamp' | BeachBarKeySpecifier)[];
+export type BeachBarKeySpecifier = ('id' | 'name' | 'slug' | 'description' | 'entryFee' | 'avgRating' | 'thumbnailUrl' | 'contactPhoneNumber' | 'hidePhoneNumber' | 'isActive' | 'isAvailable' | 'location' | 'formattedLocation' | 'payments' | 'category' | 'imgUrls' | 'products' | 'reviews' | 'features' | 'styles' | 'restaurants' | 'defaultCurrency' | 'owners' | 'openingTime' | 'closingTime' | 'updatedAt' | 'timestamp' | BeachBarKeySpecifier)[];
 export type BeachBarFieldPolicy = {
 	id?: FieldPolicy<any> | FieldReadFunction<any>,
 	name?: FieldPolicy<any> | FieldReadFunction<any>,
 	slug?: FieldPolicy<any> | FieldReadFunction<any>,
 	description?: FieldPolicy<any> | FieldReadFunction<any>,
+	entryFee?: FieldPolicy<any> | FieldReadFunction<any>,
 	avgRating?: FieldPolicy<any> | FieldReadFunction<any>,
 	thumbnailUrl?: FieldPolicy<any> | FieldReadFunction<any>,
 	contactPhoneNumber?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -364,6 +358,7 @@ export type BeachBarFieldPolicy = {
 	payments?: FieldPolicy<any> | FieldReadFunction<any>,
 	category?: FieldPolicy<any> | FieldReadFunction<any>,
 	imgUrls?: FieldPolicy<any> | FieldReadFunction<any>,
+	products?: FieldPolicy<any> | FieldReadFunction<any>,
 	reviews?: FieldPolicy<any> | FieldReadFunction<any>,
 	features?: FieldPolicy<any> | FieldReadFunction<any>,
 	styles?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -390,8 +385,9 @@ export type BeachBarAvailabilityFieldPolicy = {
 	hasAvailability?: FieldPolicy<any> | FieldReadFunction<any>,
 	hasCapacity?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type CartProductKeySpecifier = ('quantity' | 'date' | 'timestamp' | 'cart' | 'product' | 'time' | CartProductKeySpecifier)[];
+export type CartProductKeySpecifier = ('id' | 'quantity' | 'date' | 'timestamp' | 'cart' | 'product' | 'time' | CartProductKeySpecifier)[];
 export type CartProductFieldPolicy = {
+	id?: FieldPolicy<any> | FieldReadFunction<any>,
 	quantity?: FieldPolicy<any> | FieldReadFunction<any>,
 	date?: FieldPolicy<any> | FieldReadFunction<any>,
 	timestamp?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -489,31 +485,30 @@ export type CountryFieldPolicy = {
 	cities?: FieldPolicy<any> | FieldReadFunction<any>,
 	currency?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type PaymentStatusKeySpecifier = ('id' | 'status' | PaymentStatusKeySpecifier)[];
+export type PaymentStatusKeySpecifier = ('id' | 'name' | PaymentStatusKeySpecifier)[];
 export type PaymentStatusFieldPolicy = {
 	id?: FieldPolicy<any> | FieldReadFunction<any>,
-	status?: FieldPolicy<any> | FieldReadFunction<any>
+	name?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type ProductComponentKeySpecifier = ('id' | 'title' | 'description' | 'iconUrl' | ProductComponentKeySpecifier)[];
+export type ProductComponentKeySpecifier = ('id' | 'name' | 'icon' | ProductComponentKeySpecifier)[];
 export type ProductComponentFieldPolicy = {
 	id?: FieldPolicy<any> | FieldReadFunction<any>,
-	title?: FieldPolicy<any> | FieldReadFunction<any>,
-	description?: FieldPolicy<any> | FieldReadFunction<any>,
-	iconUrl?: FieldPolicy<any> | FieldReadFunction<any>
+	name?: FieldPolicy<any> | FieldReadFunction<any>,
+	icon?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type BundleProductComponentKeySpecifier = ('product' | 'component' | 'quantity' | BundleProductComponentKeySpecifier)[];
-export type BundleProductComponentFieldPolicy = {
-	product?: FieldPolicy<any> | FieldReadFunction<any>,
+export type ProductCategoryComponentKeySpecifier = ('quantity' | 'component' | 'category' | ProductCategoryComponentKeySpecifier)[];
+export type ProductCategoryComponentFieldPolicy = {
+	quantity?: FieldPolicy<any> | FieldReadFunction<any>,
 	component?: FieldPolicy<any> | FieldReadFunction<any>,
-	quantity?: FieldPolicy<any> | FieldReadFunction<any>
+	category?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type ProductCategoryKeySpecifier = ('id' | 'name' | 'underscoredName' | 'description' | 'productComponents' | ProductCategoryKeySpecifier)[];
+export type ProductCategoryKeySpecifier = ('id' | 'name' | 'underscoredName' | 'description' | 'components' | ProductCategoryKeySpecifier)[];
 export type ProductCategoryFieldPolicy = {
 	id?: FieldPolicy<any> | FieldReadFunction<any>,
 	name?: FieldPolicy<any> | FieldReadFunction<any>,
 	underscoredName?: FieldPolicy<any> | FieldReadFunction<any>,
 	description?: FieldPolicy<any> | FieldReadFunction<any>,
-	productComponents?: FieldPolicy<any> | FieldReadFunction<any>
+	components?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type ReviewVisitTypeKeySpecifier = ('id' | 'name' | ReviewVisitTypeKeySpecifier)[];
 export type ReviewVisitTypeFieldPolicy = {
@@ -544,6 +539,12 @@ export type BeachBarCategoryFieldPolicy = {
 	name?: FieldPolicy<any> | FieldReadFunction<any>,
 	description?: FieldPolicy<any> | FieldReadFunction<any>
 };
+export type IconKeySpecifier = ('id' | 'name' | 'publicId' | IconKeySpecifier)[];
+export type IconFieldPolicy = {
+	id?: FieldPolicy<any> | FieldReadFunction<any>,
+	name?: FieldPolicy<any> | FieldReadFunction<any>,
+	publicId?: FieldPolicy<any> | FieldReadFunction<any>
+};
 export type VoteCategoryKeySpecifier = ('id' | 'title' | 'description' | 'refCode' | VoteCategoryKeySpecifier)[];
 export type VoteCategoryFieldPolicy = {
 	id?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -559,19 +560,17 @@ export type VoteTagFieldPolicy = {
 	totalVotes?: FieldPolicy<any> | FieldReadFunction<any>,
 	category?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type MutationKeySpecifier = ('uploadSingleFile' | 'hello' | 'signS3' | 'addBeachBarEntryFee' | 'updateBeachBarEntryFee' | 'deleteBeachBarEntryFee' | 'addBeachBarImgUrl' | 'updateBeachBaImgUrl' | 'deleteBeachBarImgUrl' | 'addBeachBarLocation' | 'updateBeachBarLocation' | 'addBeachBar' | 'updateBeachBar' | 'deleteBeachBar' | 'addProduct' | 'updateProduct' | 'deleteProduct' | 'restoreBeachBarProduct' | 'addCouponCode' | 'updateCouponCode' | 'deleteCouponCode' | 'addOfferCampaign' | 'updateOfferCampaign' | 'deleteOfferCampaign' | 'addOfferCampaignCode' | 'deleteOfferCode' | 'addProductReservationLimit' | 'updateProductReservationLimit' | 'deleteProductReservationLimit' | 'addRestaurantFoodItem' | 'updateRestaurantFoodItem' | 'deleteRestaurantFoodItem' | 'addBeachBarRestaurant' | 'updateBeachBarRestaurant' | 'deleteBeachBarRestaurant' | 'updateReviewVote' | 'addReviewAnswer' | 'updateReviewAnswer' | 'deleteReviewAnswer' | 'addReview' | 'updateReview' | 'deleteReview' | 'addBeachBarFeature' | 'updateBeachBarFeature' | 'deleteBeachBarFeature' | 'deleteCart' | 'addCartProduct' | 'updateCartProduct' | 'deleteCartProduct' | 'addCustomerPaymentMethod' | 'updateCustomerPaymentMethod' | 'deleteCustomerPaymentMethod' | 'updateCustomer' | 'deleteCustomer' | 'authorizeWithGoogle' | 'authorizeWithFacebook' | 'authorizeWithInstagram' | 'addBeachBarOwner' | 'updateBeachBarOwner' | 'deleteBeachBarOwner' | 'checkout' | 'refundPayment' | 'updateSearch' | 'updateFavouriteBeachBar' | 'deleteUserFavoriteBar' | 'signUp' | 'login' | 'logout' | 'sendForgotPasswordLink' | 'changeUserPassword' | 'updateUser' | MutationKeySpecifier)[];
+export type MutationKeySpecifier = ('uploadSingleFile' | 'hello' | 'signS3' | 'addBeachBarImgUrl' | 'updateBeachBaImgUrl' | 'deleteBeachBarImgUrl' | 'addBeachBarLocation' | 'updateBeachBarLocation' | 'cacheBeachBars' | 'addBeachBar' | 'updateBeachBar' | 'deleteBeachBar' | 'addProduct' | 'updateProduct' | 'deleteProduct' | 'restoreBeachBarProduct' | 'addCouponCode' | 'updateCouponCode' | 'deleteCouponCode' | 'addOfferCampaign' | 'updateOfferCampaign' | 'deleteOfferCampaign' | 'addOfferCampaignCode' | 'deleteOfferCode' | 'addProductReservationLimit' | 'updateProductReservationLimit' | 'deleteProductReservationLimit' | 'addRestaurantFoodItem' | 'updateRestaurantFoodItem' | 'deleteRestaurantFoodItem' | 'addBeachBarRestaurant' | 'updateBeachBarRestaurant' | 'deleteBeachBarRestaurant' | 'updateReviewVote' | 'addReviewAnswer' | 'updateReviewAnswer' | 'deleteReviewAnswer' | 'verifyUserPaymentForReview' | 'addReview' | 'updateReview' | 'deleteReview' | 'addBeachBarFeature' | 'updateBeachBarFeature' | 'deleteBeachBarFeature' | 'deleteCart' | 'addCartProduct' | 'updateCartProduct' | 'deleteCartProduct' | 'addCustomerPaymentMethod' | 'updateCustomerPaymentMethod' | 'deleteCustomerPaymentMethod' | 'updateCustomer' | 'deleteCustomer' | 'authorizeWithGoogle' | 'authorizeWithFacebook' | 'authorizeWithInstagram' | 'addBeachBarOwner' | 'updateBeachBarOwner' | 'deleteBeachBarOwner' | 'checkout' | 'refundPayment' | 'updateSearch' | 'updateFavouriteBeachBar' | 'deleteUserFavoriteBar' | 'signUp' | 'login' | 'logout' | 'sendForgotPasswordLink' | 'changeUserPassword' | 'updateUser' | MutationKeySpecifier)[];
 export type MutationFieldPolicy = {
 	uploadSingleFile?: FieldPolicy<any> | FieldReadFunction<any>,
 	hello?: FieldPolicy<any> | FieldReadFunction<any>,
 	signS3?: FieldPolicy<any> | FieldReadFunction<any>,
-	addBeachBarEntryFee?: FieldPolicy<any> | FieldReadFunction<any>,
-	updateBeachBarEntryFee?: FieldPolicy<any> | FieldReadFunction<any>,
-	deleteBeachBarEntryFee?: FieldPolicy<any> | FieldReadFunction<any>,
 	addBeachBarImgUrl?: FieldPolicy<any> | FieldReadFunction<any>,
 	updateBeachBaImgUrl?: FieldPolicy<any> | FieldReadFunction<any>,
 	deleteBeachBarImgUrl?: FieldPolicy<any> | FieldReadFunction<any>,
 	addBeachBarLocation?: FieldPolicy<any> | FieldReadFunction<any>,
 	updateBeachBarLocation?: FieldPolicy<any> | FieldReadFunction<any>,
+	cacheBeachBars?: FieldPolicy<any> | FieldReadFunction<any>,
 	addBeachBar?: FieldPolicy<any> | FieldReadFunction<any>,
 	updateBeachBar?: FieldPolicy<any> | FieldReadFunction<any>,
 	deleteBeachBar?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -600,6 +599,7 @@ export type MutationFieldPolicy = {
 	addReviewAnswer?: FieldPolicy<any> | FieldReadFunction<any>,
 	updateReviewAnswer?: FieldPolicy<any> | FieldReadFunction<any>,
 	deleteReviewAnswer?: FieldPolicy<any> | FieldReadFunction<any>,
+	verifyUserPaymentForReview?: FieldPolicy<any> | FieldReadFunction<any>,
 	addReview?: FieldPolicy<any> | FieldReadFunction<any>,
 	updateReview?: FieldPolicy<any> | FieldReadFunction<any>,
 	deleteReview?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -682,6 +682,13 @@ export type UpdateReservedProductFieldPolicy = {
 	reservedProduct?: FieldPolicy<any> | FieldReadFunction<any>,
 	updated?: FieldPolicy<any> | FieldReadFunction<any>
 };
+export type PaymentOfferCodeKeySpecifier = ('id' | 'payment' | 'couponCode' | 'offerCode' | PaymentOfferCodeKeySpecifier)[];
+export type PaymentOfferCodeFieldPolicy = {
+	id?: FieldPolicy<any> | FieldReadFunction<any>,
+	payment?: FieldPolicy<any> | FieldReadFunction<any>,
+	couponCode?: FieldPolicy<any> | FieldReadFunction<any>,
+	offerCode?: FieldPolicy<any> | FieldReadFunction<any>
+};
 export type PaymentKeySpecifier = ('id' | 'refCode' | 'stripeId' | 'isRefunded' | 'cart' | 'card' | 'status' | 'voucherCode' | 'reservedProducts' | 'timestamp' | PaymentKeySpecifier)[];
 export type PaymentFieldPolicy = {
 	id?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -718,48 +725,49 @@ export type PaymentVisitsDatesFieldPolicy = {
 	month?: FieldPolicy<any> | FieldReadFunction<any>,
 	year?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type QueryKeySpecifier = ('hello' | 'getAllBeachBarEntryFees' | 'getBeachBarImgUrl' | 'getVoucherCode' | 'getBeachBarOfferCampaigns' | 'revealCouponCode' | 'revealOfferCampaignCode' | 'getBeachBarProducts' | 'getProductAvailabilityHours' | 'getProductAvailabilityQuantity' | 'hasProductReservationLimit' | 'getBeachBar' | 'checkBeachBarAvailability' | 'getAllBeachBars' | 'getPersonalizedBeachBars' | 'verifyUserPaymentReview' | 'getPaymentProductsMonth' | 'userReviews' | 'review' | 'getCartEntryFees' | 'verifyZeroCartTotal' | 'getCart' | 'getCustomerPaymentMethods' | 'getOrCreateCustomer' | 'getStripeConnectOAuthUrl' | 'getGoogleOAuthUrl' | 'getFacebookOAuthUrl' | 'getInstagramOAuthUrl' | 'getPayments' | 'payment' | 'paymentRefundAmount' | 'getPaymentsDates' | 'searchInputValues' | 'getLatestUserSearches' | 'search' | 'userHistory' | 'favouriteBeachBars' | 'me' | QueryKeySpecifier)[];
+export type QueryKeySpecifier = ('hello' | 'getVoucherCode' | 'getBeachBarOfferCampaigns' | 'revealCouponCode' | 'revealOfferCampaignCode' | 'beachBarProducts' | 'getProductAvailabilityHours' | 'getProductAvailabilityQuantity' | 'hasProductReservationLimit' | 'beachBar' | 'beachBarImgs' | 'checkBeachBarAvailability' | 'availableProducts' | 'getAllBeachBars' | 'getPersonalizedBeachBars' | 'nearBeachBars' | 'getPaymentProductsMonth' | 'userReviews' | 'review' | 'cartEntryFees' | 'verifyZeroCartTotal' | 'cart' | 'customerPaymentMethods' | 'customer' | 'getStripeConnectOAuthUrl' | 'getGoogleOAuthUrl' | 'getFacebookOAuthUrl' | 'getInstagramOAuthUrl' | 'payments' | 'payment' | 'paymentRefundAmount' | 'paymentDates' | 'searchInputValues' | 'userSearches' | 'search' | 'userHistory' | 'favouriteBeachBars' | 'accessToken' | 'me' | QueryKeySpecifier)[];
 export type QueryFieldPolicy = {
 	hello?: FieldPolicy<any> | FieldReadFunction<any>,
-	getAllBeachBarEntryFees?: FieldPolicy<any> | FieldReadFunction<any>,
-	getBeachBarImgUrl?: FieldPolicy<any> | FieldReadFunction<any>,
 	getVoucherCode?: FieldPolicy<any> | FieldReadFunction<any>,
 	getBeachBarOfferCampaigns?: FieldPolicy<any> | FieldReadFunction<any>,
 	revealCouponCode?: FieldPolicy<any> | FieldReadFunction<any>,
 	revealOfferCampaignCode?: FieldPolicy<any> | FieldReadFunction<any>,
-	getBeachBarProducts?: FieldPolicy<any> | FieldReadFunction<any>,
+	beachBarProducts?: FieldPolicy<any> | FieldReadFunction<any>,
 	getProductAvailabilityHours?: FieldPolicy<any> | FieldReadFunction<any>,
 	getProductAvailabilityQuantity?: FieldPolicy<any> | FieldReadFunction<any>,
 	hasProductReservationLimit?: FieldPolicy<any> | FieldReadFunction<any>,
-	getBeachBar?: FieldPolicy<any> | FieldReadFunction<any>,
+	beachBar?: FieldPolicy<any> | FieldReadFunction<any>,
+	beachBarImgs?: FieldPolicy<any> | FieldReadFunction<any>,
 	checkBeachBarAvailability?: FieldPolicy<any> | FieldReadFunction<any>,
+	availableProducts?: FieldPolicy<any> | FieldReadFunction<any>,
 	getAllBeachBars?: FieldPolicy<any> | FieldReadFunction<any>,
 	getPersonalizedBeachBars?: FieldPolicy<any> | FieldReadFunction<any>,
-	verifyUserPaymentReview?: FieldPolicy<any> | FieldReadFunction<any>,
+	nearBeachBars?: FieldPolicy<any> | FieldReadFunction<any>,
 	getPaymentProductsMonth?: FieldPolicy<any> | FieldReadFunction<any>,
 	userReviews?: FieldPolicy<any> | FieldReadFunction<any>,
 	review?: FieldPolicy<any> | FieldReadFunction<any>,
-	getCartEntryFees?: FieldPolicy<any> | FieldReadFunction<any>,
+	cartEntryFees?: FieldPolicy<any> | FieldReadFunction<any>,
 	verifyZeroCartTotal?: FieldPolicy<any> | FieldReadFunction<any>,
-	getCart?: FieldPolicy<any> | FieldReadFunction<any>,
-	getCustomerPaymentMethods?: FieldPolicy<any> | FieldReadFunction<any>,
-	getOrCreateCustomer?: FieldPolicy<any> | FieldReadFunction<any>,
+	cart?: FieldPolicy<any> | FieldReadFunction<any>,
+	customerPaymentMethods?: FieldPolicy<any> | FieldReadFunction<any>,
+	customer?: FieldPolicy<any> | FieldReadFunction<any>,
 	getStripeConnectOAuthUrl?: FieldPolicy<any> | FieldReadFunction<any>,
 	getGoogleOAuthUrl?: FieldPolicy<any> | FieldReadFunction<any>,
 	getFacebookOAuthUrl?: FieldPolicy<any> | FieldReadFunction<any>,
 	getInstagramOAuthUrl?: FieldPolicy<any> | FieldReadFunction<any>,
-	getPayments?: FieldPolicy<any> | FieldReadFunction<any>,
+	payments?: FieldPolicy<any> | FieldReadFunction<any>,
 	payment?: FieldPolicy<any> | FieldReadFunction<any>,
 	paymentRefundAmount?: FieldPolicy<any> | FieldReadFunction<any>,
-	getPaymentsDates?: FieldPolicy<any> | FieldReadFunction<any>,
+	paymentDates?: FieldPolicy<any> | FieldReadFunction<any>,
 	searchInputValues?: FieldPolicy<any> | FieldReadFunction<any>,
-	getLatestUserSearches?: FieldPolicy<any> | FieldReadFunction<any>,
+	userSearches?: FieldPolicy<any> | FieldReadFunction<any>,
 	search?: FieldPolicy<any> | FieldReadFunction<any>,
 	userHistory?: FieldPolicy<any> | FieldReadFunction<any>,
 	favouriteBeachBars?: FieldPolicy<any> | FieldReadFunction<any>,
+	accessToken?: FieldPolicy<any> | FieldReadFunction<any>,
 	me?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type UserSearchKeySpecifier = ('id' | 'searchDate' | 'searchAdults' | 'searchChildren' | 'user' | 'inputValue' | 'sort' | 'filters' | 'updatedAt' | 'timestamp' | UserSearchKeySpecifier)[];
+export type UserSearchKeySpecifier = ('id' | 'searchDate' | 'searchAdults' | 'searchChildren' | 'user' | 'inputValue' | 'filters' | 'sort' | 'updatedAt' | 'timestamp' | UserSearchKeySpecifier)[];
 export type UserSearchFieldPolicy = {
 	id?: FieldPolicy<any> | FieldReadFunction<any>,
 	searchDate?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -767,8 +775,8 @@ export type UserSearchFieldPolicy = {
 	searchChildren?: FieldPolicy<any> | FieldReadFunction<any>,
 	user?: FieldPolicy<any> | FieldReadFunction<any>,
 	inputValue?: FieldPolicy<any> | FieldReadFunction<any>,
-	sort?: FieldPolicy<any> | FieldReadFunction<any>,
 	filters?: FieldPolicy<any> | FieldReadFunction<any>,
+	sort?: FieldPolicy<any> | FieldReadFunction<any>,
 	updatedAt?: FieldPolicy<any> | FieldReadFunction<any>,
 	timestamp?: FieldPolicy<any> | FieldReadFunction<any>
 };
@@ -803,11 +811,6 @@ export type SearchFilterFieldPolicy = {
 	publicId?: FieldPolicy<any> | FieldReadFunction<any>,
 	name?: FieldPolicy<any> | FieldReadFunction<any>,
 	description?: FieldPolicy<any> | FieldReadFunction<any>
-};
-export type FormattedSearchInputValueKeySpecifier = ('inputValue' | 'beachBarThumbnailUrl' | FormattedSearchInputValueKeySpecifier)[];
-export type FormattedSearchInputValueFieldPolicy = {
-	inputValue?: FieldPolicy<any> | FieldReadFunction<any>,
-	beachBarThumbnailUrl?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type NodeKeySpecifier = ('id' | NodeKeySpecifier)[];
 export type NodeFieldPolicy = {
@@ -880,12 +883,13 @@ export type UpdateUserFavoriteBarFieldPolicy = {
 	favouriteBar?: FieldPolicy<any> | FieldReadFunction<any>,
 	updated?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type UserKeySpecifier = ('id' | 'email' | 'firstName' | 'lastName' | 'account' | 'reviews' | 'favoriteBars' | 'reviewVotes' | UserKeySpecifier)[];
+export type UserKeySpecifier = ('id' | 'email' | 'firstName' | 'lastName' | 'fullName' | 'account' | 'reviews' | 'favoriteBars' | 'reviewVotes' | UserKeySpecifier)[];
 export type UserFieldPolicy = {
 	id?: FieldPolicy<any> | FieldReadFunction<any>,
 	email?: FieldPolicy<any> | FieldReadFunction<any>,
 	firstName?: FieldPolicy<any> | FieldReadFunction<any>,
 	lastName?: FieldPolicy<any> | FieldReadFunction<any>,
+	fullName?: FieldPolicy<any> | FieldReadFunction<any>,
 	account?: FieldPolicy<any> | FieldReadFunction<any>,
 	reviews?: FieldPolicy<any> | FieldReadFunction<any>,
 	favoriteBars?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -913,13 +917,6 @@ export type BeachBarStyleFieldPolicy = {
 	id?: FieldPolicy<any> | FieldReadFunction<any>,
 	name?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type PaymentOfferCodeKeySpecifier = ('id' | 'payment' | 'couponCode' | 'offerCode' | PaymentOfferCodeKeySpecifier)[];
-export type PaymentOfferCodeFieldPolicy = {
-	id?: FieldPolicy<any> | FieldReadFunction<any>,
-	payment?: FieldPolicy<any> | FieldReadFunction<any>,
-	couponCode?: FieldPolicy<any> | FieldReadFunction<any>,
-	offerCode?: FieldPolicy<any> | FieldReadFunction<any>
-};
 export type TypedTypePolicies = TypePolicies & {
 	Error?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | ErrorKeySpecifier | (() => undefined | ErrorKeySpecifier),
@@ -932,18 +929,6 @@ export type TypedTypePolicies = TypePolicies & {
 	S3Payload?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | S3PayloadKeySpecifier | (() => undefined | S3PayloadKeySpecifier),
 		fields?: S3PayloadFieldPolicy,
-	},
-	BeachBarEntryFee?: Omit<TypePolicy, "fields" | "keyFields"> & {
-		keyFields?: false | BeachBarEntryFeeKeySpecifier | (() => undefined | BeachBarEntryFeeKeySpecifier),
-		fields?: BeachBarEntryFeeFieldPolicy,
-	},
-	AddBeachBarEntryFee?: Omit<TypePolicy, "fields" | "keyFields"> & {
-		keyFields?: false | AddBeachBarEntryFeeKeySpecifier | (() => undefined | AddBeachBarEntryFeeKeySpecifier),
-		fields?: AddBeachBarEntryFeeFieldPolicy,
-	},
-	UpdateBeachBarEntryFee?: Omit<TypePolicy, "fields" | "keyFields"> & {
-		keyFields?: false | UpdateBeachBarEntryFeeKeySpecifier | (() => undefined | UpdateBeachBarEntryFeeKeySpecifier),
-		fields?: UpdateBeachBarEntryFeeFieldPolicy,
 	},
 	BeachBarImgUrl?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | BeachBarImgUrlKeySpecifier | (() => undefined | BeachBarImgUrlKeySpecifier),
@@ -1036,6 +1021,10 @@ export type TypedTypePolicies = TypePolicies & {
 	Product?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | ProductKeySpecifier | (() => undefined | ProductKeySpecifier),
 		fields?: ProductFieldPolicy,
+	},
+	ProductAvailability?: Omit<TypePolicy, "fields" | "keyFields"> & {
+		keyFields?: false | ProductAvailabilityKeySpecifier | (() => undefined | ProductAvailabilityKeySpecifier),
+		fields?: ProductAvailabilityFieldPolicy,
 	},
 	AddProduct?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | AddProductKeySpecifier | (() => undefined | AddProductKeySpecifier),
@@ -1205,9 +1194,9 @@ export type TypedTypePolicies = TypePolicies & {
 		keyFields?: false | ProductComponentKeySpecifier | (() => undefined | ProductComponentKeySpecifier),
 		fields?: ProductComponentFieldPolicy,
 	},
-	BundleProductComponent?: Omit<TypePolicy, "fields" | "keyFields"> & {
-		keyFields?: false | BundleProductComponentKeySpecifier | (() => undefined | BundleProductComponentKeySpecifier),
-		fields?: BundleProductComponentFieldPolicy,
+	ProductCategoryComponent?: Omit<TypePolicy, "fields" | "keyFields"> & {
+		keyFields?: false | ProductCategoryComponentKeySpecifier | (() => undefined | ProductCategoryComponentKeySpecifier),
+		fields?: ProductCategoryComponentFieldPolicy,
 	},
 	ProductCategory?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | ProductCategoryKeySpecifier | (() => undefined | ProductCategoryKeySpecifier),
@@ -1232,6 +1221,10 @@ export type TypedTypePolicies = TypePolicies & {
 	BeachBarCategory?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | BeachBarCategoryKeySpecifier | (() => undefined | BeachBarCategoryKeySpecifier),
 		fields?: BeachBarCategoryFieldPolicy,
+	},
+	Icon?: Omit<TypePolicy, "fields" | "keyFields"> & {
+		keyFields?: false | IconKeySpecifier | (() => undefined | IconKeySpecifier),
+		fields?: IconFieldPolicy,
 	},
 	VoteCategory?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | VoteCategoryKeySpecifier | (() => undefined | VoteCategoryKeySpecifier),
@@ -1276,6 +1269,10 @@ export type TypedTypePolicies = TypePolicies & {
 	UpdateReservedProduct?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | UpdateReservedProductKeySpecifier | (() => undefined | UpdateReservedProductKeySpecifier),
 		fields?: UpdateReservedProductFieldPolicy,
+	},
+	PaymentOfferCode?: Omit<TypePolicy, "fields" | "keyFields"> & {
+		keyFields?: false | PaymentOfferCodeKeySpecifier | (() => undefined | PaymentOfferCodeKeySpecifier),
+		fields?: PaymentOfferCodeFieldPolicy,
 	},
 	Payment?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | PaymentKeySpecifier | (() => undefined | PaymentKeySpecifier),
@@ -1324,10 +1321,6 @@ export type TypedTypePolicies = TypePolicies & {
 	SearchFilter?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | SearchFilterKeySpecifier | (() => undefined | SearchFilterKeySpecifier),
 		fields?: SearchFilterFieldPolicy,
-	},
-	FormattedSearchInputValue?: Omit<TypePolicy, "fields" | "keyFields"> & {
-		keyFields?: false | FormattedSearchInputValueKeySpecifier | (() => undefined | FormattedSearchInputValueKeySpecifier),
-		fields?: FormattedSearchInputValueFieldPolicy,
 	},
 	Node?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | NodeKeySpecifier | (() => undefined | NodeKeySpecifier),
@@ -1396,9 +1389,5 @@ export type TypedTypePolicies = TypePolicies & {
 	BeachBarStyle?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | BeachBarStyleKeySpecifier | (() => undefined | BeachBarStyleKeySpecifier),
 		fields?: BeachBarStyleFieldPolicy,
-	},
-	PaymentOfferCode?: Omit<TypePolicy, "fields" | "keyFields"> & {
-		keyFields?: false | PaymentOfferCodeKeySpecifier | (() => undefined | PaymentOfferCodeKeySpecifier),
-		fields?: PaymentOfferCodeFieldPolicy,
 	}
 };

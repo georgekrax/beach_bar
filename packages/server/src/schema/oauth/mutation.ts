@@ -24,17 +24,9 @@ export const AuthorizeWithOAuthProviders = extendType({
       args: {
         code: stringArg({ description: "The response code from Google's OAuth callback" }),
         state: stringArg({ description: "The response state, to check if everything went correct" }),
-        loginDetails: nullable(
-          arg({
-            type: UserLoginDetails,
-            description: "User details in login",
-          })
-        ),
+        loginDetails: nullable(arg({ type: UserLoginDetails, description: "User details in login" })),
         isPrimaryOwner: nullable(
-          booleanArg({
-            default: false,
-            description: "Set to true if you want to sign up an owner for a #beach_bar",
-          })
+          booleanArg({ default: false, description: "Set to true if you want to sign up an owner for a #beach_bar" })
         ),
       },
       resolve: async (
@@ -75,16 +67,7 @@ export const AuthorizeWithOAuthProviders = extendType({
         let signedUp = false;
         if (!user) {
           signedUp = true;
-          const response = await signUpUser({
-            email,
-            redis,
-            isPrimaryOwner,
-            googleId,
-            firstName,
-            lastName,
-            countryId,
-            city,
-          });
+          const response = await signUpUser({ email, redis, isPrimaryOwner, googleId, firstName, lastName, countryId, city });
           if (response.error && !response.user) throw new ApolloError(response.error.message, response.error.code);
           user = await User.findOne({ where: { email }, relations: ["account"] });
         }
@@ -133,12 +116,7 @@ export const AuthorizeWithOAuthProviders = extendType({
         res.clearCookie("gcode_verifier", { httpOnly: true });
         googleOAuth2Client.revokeCredentials();
 
-        return {
-          user,
-          accessToken: accessToken.token,
-          signedUp,
-          logined: true,
-        };
+        return { user, accessToken: accessToken.token, signedUp, logined: true };
       },
     });
     t.field("authorizeWithFacebook", {
@@ -147,17 +125,9 @@ export const AuthorizeWithOAuthProviders = extendType({
       args: {
         code: stringArg({ description: "The response code from Google's OAuth callback" }),
         state: stringArg({ description: "The response state, to check if everything went correct" }),
-        loginDetails: nullable(
-          arg({
-            type: UserLoginDetails,
-            description: "User details in login",
-          })
-        ),
+        loginDetails: nullable(arg({ type: UserLoginDetails, description: "User details in login" })),
         isPrimaryOwner: nullable(
-          booleanArg({
-            default: false,
-            description: "Set to true if you want to sign up an owner for a #beach_bar",
-          })
+          booleanArg({ default: false, description: "Set to true if you want to sign up an owner for a #beach_bar" })
         ),
       },
       resolve: async (
@@ -333,12 +303,7 @@ export const AuthorizeWithOAuthProviders = extendType({
 
         res.clearCookie("fbstate", { httpOnly: true });
 
-        return {
-          user,
-          accessToken: accessToken.token,
-          signedUp,
-          logined: true,
-        };
+        return { user, accessToken: accessToken.token, signedUp, logined: true };
       },
     });
     t.field("authorizeWithInstagram", {
@@ -348,17 +313,9 @@ export const AuthorizeWithOAuthProviders = extendType({
         email: arg({ type: EmailScalar, description: "Email address of user to authorize with Instagram" }),
         code: stringArg({ description: "The response code from Google's OAuth callback" }),
         state: stringArg({ description: "The response state, to check if everything went correct" }),
-        loginDetails: nullable(
-          arg({
-            type: UserLoginDetails,
-            description: "User details in login",
-          })
-        ),
+        loginDetails: nullable(arg({ type: UserLoginDetails, description: "User details in login" })),
         isPrimaryOwner: nullable(
-          booleanArg({
-            default: false,
-            description: "Set to true if you want to sign up an owner for a #beach_bar",
-          })
+          booleanArg({ default: false, description: "Set to true if you want to sign up an owner for a #beach_bar" })
         ),
       },
       resolve: async (
@@ -386,9 +343,7 @@ export const AuthorizeWithOAuthProviders = extendType({
           instagramUserId: string | undefined = undefined;
         await fetch(`${process.env.INSTAGRAM_API_HOSTNAME!.toString()}/oauth/access_token`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
           // @ts-expect-error
           body: requestBody,
         })
@@ -416,9 +371,7 @@ export const AuthorizeWithOAuthProviders = extendType({
         success = false;
         await fetch(
           `${process.env.INSTAGRAM_GRAPH_API_HOSTNAME!.toString()}/${instagramUserId}?fields=id,username&access_token=${instagramAccessToken}`,
-          {
-            method: "GET",
-          }
+          { method: "GET" }
         )
           .then(res => {
             requestStatus = res.status;
@@ -442,22 +395,11 @@ export const AuthorizeWithOAuthProviders = extendType({
         const { osId, browserId, countryId, city } = findLoginDetails({ details: loginDetails, uaParser });
 
         // Search for user in DB
-        let user: User | undefined = await User.findOne({
-          where: { email },
-          relations: ["account"],
-        });
+        let user: User | undefined = await User.findOne({ where: { email }, relations: ["account"] });
         let signedUp = false;
         if (!user) {
           signedUp = true;
-          const response = await signUpUser({
-            email,
-            redis,
-            isPrimaryOwner,
-            instagramId,
-            instagramUsername,
-            countryId,
-            city,
-          });
+          const response = await signUpUser({ email, redis, isPrimaryOwner, instagramId, instagramUsername, countryId, city });
           if (response.error && !response.user) throw new ApolloError(response.error.message, response.error.code);
           user = await User.findOne({ where: { email, instagramUsername }, relations: ["account"] });
         }
@@ -491,9 +433,7 @@ export const AuthorizeWithOAuthProviders = extendType({
 
           user.instagramId = instagramId;
           user.account.isActive = true;
-          if (instagramUsername) {
-            user.instagramUsername = instagramUsername;
-          }
+          if (instagramUsername) user.instagramUsername = instagramUsername;
           await user.save();
           await user.account.save();
           if (instagramId !== String(user.instagramId))
@@ -514,12 +454,7 @@ export const AuthorizeWithOAuthProviders = extendType({
 
         res.clearCookie("instastate", { httpOnly: true });
 
-        return {
-          user,
-          accessToken: accessToken.token,
-          signedUp,
-          logined: true,
-        };
+        return { user, accessToken: accessToken.token, signedUp, logined: true };
       },
     });
   },

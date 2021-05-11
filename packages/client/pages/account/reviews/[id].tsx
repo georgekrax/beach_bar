@@ -1,5 +1,20 @@
+import Account from "@/components/Account";
+import BeachBar from "@/components/BeachBar";
+import Header from "@/components/Header";
+import Icons from "@/components/Icons";
+import Layout from "@/components/Layout";
+import { DATA } from "@/config/data";
+import {
+  ReviewDocument,
+  useDeleteReviewMutation,
+  useReviewQuery,
+  UserReviewsDocument,
+  useUpdateReviewMutation,
+} from "@/graphql/generated";
+import { initializeApollo, INITIAL_APOLLO_STATE } from "@/lib/apollo";
+import { notify } from "@/utils/notify";
 import { Dialog, Input, Select } from "@hashtag-design-system/components";
-import { SelectedItems } from "@hashtag-design-system/components/dist/esm/components/Select/Select";
+import { SelectedItems } from "@hashtag-design-system/components";
 import { MONTHS } from "@the_hashtag/common";
 import dayjs from "dayjs";
 import { motion } from "framer-motion";
@@ -8,20 +23,6 @@ import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { Toaster } from "react-hot-toast";
-import Account from "../../../components/Account";
-import BeachBar from "../../../components/BeachBar";
-import Header from "../../../components/Header";
-import Icons from "../../../components/Icons";
-import Layout from "../../../components/Layout";
-import {
-  ReviewDocument,
-  useDeleteReviewMutation,
-  useReviewQuery,
-  UserReviewsDocument,
-  useUpdateReviewMutation,
-} from "../../../graphql/generated";
-import { initializeApollo, INITIAL_APOLLO_STATE } from "../../../lib/apollo";
-import { notify } from "../../../utils/notify";
 
 type FormData = {
   visitTypeId?: string;
@@ -35,23 +36,19 @@ type FormData = {
 const Review: React.FC = () => {
   const router = useRouter();
   const variables = { reviewId: router.query.id as string };
-  const {
-    data: { review },
-    loading,
-    error,
-  } = useReviewQuery({ variables });
+  const { data, loading, error } = useReviewQuery({ variables });
 
   const [deleteReview] = useDeleteReviewMutation();
   const [updateReview] = useUpdateReviewMutation();
 
   const [isDialogShown, setIsDialogShown] = useState(false);
   const [formData, setFormData] = useState<FormData>({
-    monthTimeId: review.month?.id,
-    visitTypeId: review.visitType?.id,
-    positiveFeedback: review.positiveComment,
-    negativeFeedback: review.negativeComment,
-    rating: review.ratingValue,
-    reviewBody: review.review,
+    monthTimeId: data?.review.month?.id,
+    visitTypeId: data?.review.visitType?.id,
+    positiveFeedback: data?.review.positiveComment,
+    negativeFeedback: data?.review.negativeComment,
+    rating: data?.review.ratingValue || 0,
+    reviewBody: data?.review.review,
   });
 
   const genKey = (val: string, idx: number) => idx + "_" + val.toLowerCase().replace(" ", "_");
@@ -71,6 +68,8 @@ const Review: React.FC = () => {
     }));
 
   const handleSubmit = async () => {
+    const review = data?.review;
+    if (!review) return;
     const { rating, visitTypeId, monthTimeId, positiveFeedback, negativeFeedback, reviewBody } = formData;
     const { errors } = await updateReview({
       variables: {
@@ -91,13 +90,12 @@ const Review: React.FC = () => {
             ...review,
             id: variables.reviewId,
             ratingValue: rating,
-            visitType:
-              visitTypeId === "none" || !review.visitType
-                ? null
-                : { __typename: "ReviewVisitType", id: visitTypeId, name: review.visitType.name },
+            visitType: (visitTypeId === "none" || !review.visitType
+              ? undefined
+              : { __typename: "ReviewVisitType", id: visitTypeId, name: review.visitType.name }) as any,
             month:
-              monthTimeId === "none" || !review.month
-                ? null
+              monthTimeId === "none" || !review.month || !monthTimeId
+                ? undefined
                 : { __typename: "MonthTime", id: monthTimeId, value: MONTHS[parseInt(monthTimeId) - 1] },
             positiveComment: positiveFeedback,
             negativeComment: negativeFeedback,
@@ -111,7 +109,7 @@ const Review: React.FC = () => {
   };
 
   return (
-    <Layout header={false} tapbar={false} footer={false} wrapperProps={{ style: { padding: 0 } }}>
+    <Layout header={false} tapbar={false} footer={false} container={{ style: { padding: 0 } }}>
       <Toaster position="top-center" />
       <Header.Crud
         title="Review"
@@ -122,7 +120,7 @@ const Review: React.FC = () => {
       >
         {loading ? (
           <h2>Loading...</h2>
-        ) : error || !review ? (
+        ) : error || !data || !data.review ? (
           <h2>Error</h2>
         ) : (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit="initial">
@@ -130,39 +128,37 @@ const Review: React.FC = () => {
               <Account.Trips.Details>
                 <Account.Trips.Info info="#beach_bar">
                   <Account.Trips.DoubleInfo
-                    primary={review.beachBar.name}
-                    secondary={review.beachBar.formattedLocation}
+                    primary={data.review.beachBar.name}
+                    secondary={data.review.beachBar.formattedLocation}
                   />
                 </Account.Trips.Info>
                 <Account.Trips.Info info="Payment ID" children="njbHf235RW3ubpTK" />
-                <Account.Trips.Info info="Posted at" children={dayjs(review.timestamp).format("MM/DD/YYYY")} />
+                <Account.Trips.Info info="Posted at" children={dayjs(data.review.timestamp).format("MM/DD/YYYY")} />
               </Account.Trips.Details>
               <Account.Trips.Details className="account-reviews__visit" header="Visit information">
                 <Account.Trips.Info info="Visit type">
                   <Select onSelect={items => handleSelect(items, "visitTypeId")}>
-                    <Select.Button>{review.visitType?.name || "Type"}</Select.Button>
+                    <Select.Button>{data.review.visitType?.name || "Type"}</Select.Button>
                     <Select.Modal>
                       <Select.Options>
-                        {["None", "Daily bath", "Weekend gateway", "Family", "Couple", "Group of 8+ people"].map(
-                          (val, i) => {
-                            const key = genKey(val, i);
-                            return (
-                              <Select.Item
-                                key={key}
-                                id={key}
-                                content={val}
-                                state={i.toString() === formData.visitTypeId ? "focus" : undefined}
-                              />
-                            );
-                          }
-                        )}
+                        {["None", ...Object.values(DATA.REVIEW_VISIT_TYPES).map(({ name }) => name)].map((val, i) => {
+                          const key = genKey(val, i);
+                          return (
+                            <Select.Item
+                              key={key}
+                              id={key}
+                              content={val}
+                              state={i.toString() === formData.visitTypeId ? "focus" : undefined}
+                            />
+                          );
+                        })}
                       </Select.Options>
                     </Select.Modal>
                   </Select>
                 </Account.Trips.Info>
                 <Account.Trips.Info info="Visit month">
                   <Select onSelect={items => handleSelect(items, "monthTimeId")}>
-                    <Select.Button>{review.month?.value || "Month"}</Select.Button>
+                    <Select.Button>{data.review.month?.value || "Month"}</Select.Button>
                     <Select.Modal>
                       <Select.Options>
                         {["None", ...MONTHS].map((month, i) => {
@@ -208,7 +204,7 @@ const Review: React.FC = () => {
                     rows={4}
                     name="positiveFeedback"
                     label="What did you like?"
-                    defaultValue={review.positiveComment}
+                    defaultValue={data.review.positiveComment}
                     placeholder="e.g. the location, the sea"
                     floatingplaceholder={false}
                     onChange={e => handleChange(e)}
@@ -220,7 +216,7 @@ const Review: React.FC = () => {
                     name="negativeFeedback"
                     label="What could be better?"
                     placeholder=""
-                    defaultValue={review.negativeComment}
+                    defaultValue={data.review.negativeComment}
                     onChange={e => handleChange(e)}
                   />
                 </BeachBar.Review.Feedback>
@@ -230,14 +226,14 @@ const Review: React.FC = () => {
                   rows={6}
                   name="reviewBody"
                   label="How was your overall experience?"
-                  defaultValue={review.review}
+                  defaultValue={data.review.review}
                   floatingplaceholder={false}
                   onChange={e => handleChange(e)}
                 />
               </Account.Trips.Details>
               <Account.Trips.Details className="account-reviews__answer" header="#beach_bar's Answer">
-                {review.answer ? (
-                  <div>{review.answer.body}</div>
+                {data.review.answer ? (
+                  <div>{data.review.answer.body}</div>
                 ) : (
                   <div className="flex-column-center-center">
                     <Icons.Search.NotFound width={40} height={40} />
@@ -296,9 +292,5 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
 
   await apolloClient.query({ query: ReviewDocument, variables: { reviewId: ctx.query.id } });
 
-  return {
-    props: {
-      [INITIAL_APOLLO_STATE]: apolloClient.cache.extract(),
-    },
-  };
+  return { props: { [INITIAL_APOLLO_STATE]: apolloClient.cache.extract() } };
 };

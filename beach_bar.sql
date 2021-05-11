@@ -517,6 +517,7 @@ CREATE TABLE public.beach_bar (
     id integer NOT NULL,
     name character varying(255) NOT NULL,
     description text,
+    entry_fee decimal(5,2),
     avg_rating numeric(2,1),
     is_active boolean DEFAULT false NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
@@ -1014,6 +1015,7 @@ CREATE TABLE public.card (
     last_4 character varying(4) NOT NULL,
     cardholder_name character varying(255) NOT NULL,
     is_default boolean DEFAULT false NOT NULL,
+    saved_for_future boolean DEFAULT true,
     customer_id bigint NOT NULL,
     stripe_id character varying(255) NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
@@ -1126,6 +1128,7 @@ ALTER SEQUENCE public.cart_id_seq OWNED BY public.cart.id;
 --
 
 CREATE TABLE public.cart_product (
+    id BIGSERIAL PRIMARY KEY,
     cart_id integer NOT NULL,
     product_id integer NOT NULL,
     quantity smallint DEFAULT 1 NOT NULL,
@@ -1729,9 +1732,10 @@ CREATE TABLE public.payment (
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     "timestamp" timestamp with time zone DEFAULT now() NOT NULL,
     is_refunded boolean DEFAULT false NOT NULL,
-    app_fee numeric(12,2),
-    transfer_amount numeric(12,2),
+    app_fee numeric(12,2) NOT NULL,
+    transfer_amount numeric(12,2) NOT NULL,
     transfer_group_code character varying(19) NOT NULL,
+    stripe_proccessing_fee decimal(12,2) NOT NULL,
     CONSTRAINT payment_ref_code_check CHECK ((length((ref_code)::text) = 16)),
     CONSTRAINT payment_transfer_group_code_check CHECK ((length((transfer_group_code)::text) = 19))
 );
@@ -1766,7 +1770,7 @@ ALTER SEQUENCE public.payment_id_seq OWNED BY public.payment.id;
 
 CREATE TABLE public.payment_status (
     id integer NOT NULL,
-    status character varying(25) NOT NULL
+    name character varying(25) NOT NULL
 );
 
 
@@ -1962,9 +1966,22 @@ ALTER SEQUENCE public.product_category_id_seq OWNED BY public.product_category.i
 
 CREATE TABLE public.product_component (
     id integer NOT NULL,
-    title character varying(50) NOT NULL,
-    description text,
-    icon_url text NOT NULL
+    name character varying(50) NOT NULL,
+    quantity SMALLINT NOT NULL DEFAULT 1
+);
+
+CREATE TABLE public.product_category_component (
+    category_id INTEGER PRIMARY KEY NOT NULL,
+    component_id INTEGER NOT NULL,
+    quantity SMALLINT NOT NULL DEFAULT 1,
+    FOREIGN KEY (product_id) REFERENCES public.product_category (id),
+    FOREIGN KEY (component_id) REFERENCES public.product_component (id)
+);
+
+CREATE TABLE public.icon (
+    id SERIAL PRIMARY KEY NOT NULL,
+    public_id VARCHAR(3) UNIQUE NOT NULL,
+    name CHAR(50) UNIQUE NOT NULL
 );
 
 
@@ -7470,13 +7487,6 @@ CREATE UNIQUE INDEX bundle_product_component_product_id_component_id_key ON publ
 --
 
 CREATE UNIQUE INDEX card_is_default_customer_id_key ON public.card USING btree (is_default, customer_id) WHERE ((deleted_at IS NULL) AND (is_default = true));
-
-
---
--- Name: cart_product_cart_id_product_id_date_time_id_key; Type: INDEX; Schema: public; Owner: postgres
---
-
-CREATE UNIQUE INDEX cart_product_cart_id_product_id_date_time_id_key ON public.cart_product USING btree (cart_id, product_id, date, time_id) WHERE (deleted_at IS NULL);
 
 
 --

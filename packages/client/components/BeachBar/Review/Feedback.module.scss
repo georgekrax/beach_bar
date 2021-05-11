@@ -1,14 +1,14 @@
 .container {
   &:not(:only-child):first-child {
-    margin-bottom: map-get($em-spacers, 16);
+    margin: map-get($em-spacers, 16) 0;
   }
 
   & > svg {
     flex-shrink: 0;
     margin-right: map-get($em-spacers, 16);
   }
+}
 
-  &:nth-child(2) > svg > * {
-    stroke: $grey-7 !important;
-  }
+.negative > * {
+  stroke: $grey-7 !important;
 }

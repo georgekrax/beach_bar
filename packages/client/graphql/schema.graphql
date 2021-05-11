@@ -59,46 +59,6 @@ type S3Payload {
   url: URL!
 }
 
-"""Represents an entry fee for a #beach_bar"""
-type BeachBarEntryFee {
-  id: ID!
-  fee: Float!
-
-  """The date this entry fee is applicable for"""
-  date: Date!
-
-  """The #beach_bar this fee is added (assigned) to"""
-  beachBar: BeachBar!
-}
-
-"""Info to be returned when an entry fee is added to a #beach_bar"""
-type AddBeachBarEntryFee {
-  """The fees that are being added & its details"""
-  fees: [BeachBarEntryFee!]!
-
-  """
-  A boolean that indicates if the fees have been successfully being added to a #beach_bar
-  """
-  added: Boolean!
-}
-
-union AddBeachBarEntryFeeResult = AddBeachBarEntryFee | Error
-
-"""
-Info to be returned when the details of #beach_bar entry fee, are updated
-"""
-type UpdateBeachBarEntryFee {
-  """The fees being updated"""
-  fees: [BeachBarEntryFee!]!
-
-  """
-  A boolean that indicates if the fee details have been successfully updated
-  """
-  updated: Boolean!
-}
-
-union UpdateBeachBarEntryFeeResult = UpdateBeachBarEntryFee | Error
-
 """Represents a #beach_bar's image (URL value)"""
 type BeachBarImgUrl {
   id: ID!
@@ -109,6 +69,8 @@ type BeachBarImgUrl {
   """
   description: String
   beachBar: BeachBar!
+  updatedAt: DateTime!
+  timestamp: DateTime!
 }
 
 """Info to be returned when an image (URL) is added to a #beach_bar"""
@@ -122,8 +84,6 @@ type AddBeachBarImgUrl {
   added: Boolean!
 }
 
-union AddBeachBarImgUrlResult = AddBeachBarImgUrl | Error
-
 """
 Info to be returned when the details of #beach_bar's image, are updated
 """
@@ -134,8 +94,6 @@ type UpdateBeachBarImgUrl {
   """Indicates if the image details have been successfully updated"""
   updated: Boolean!
 }
-
-union UpdateBeachBarImgUrlResult = UpdateBeachBarImgUrl | Error
 
 """Represents a #beach_bar's location details"""
 type BeachBarLocation {
@@ -287,8 +245,6 @@ type AddCouponCode {
   added: Boolean!
 }
 
-union AddCouponCodeResult = AddCouponCode | Error
-
 """Info to be returned when a coupon code details are updated"""
 type UpdateCouponCode {
   """The coupon code that is updated"""
@@ -296,9 +252,10 @@ type UpdateCouponCode {
 
   """Indicates if the coupon code has been successfully updated"""
   updated: Boolean!
-}
 
-union UpdateCouponCodeResult = UpdateCouponCode | Delete | Error
+  """Indicates if the coupon code has been deleted"""
+  deleted: Boolean!
+}
 
 """
 Info to be returned when an offer campaign is added to a or some #beach_bar's product(s)
@@ -311,8 +268,6 @@ type AddOfferCampaign {
   added: Boolean!
 }
 
-union AddOfferCampaignResult = AddOfferCampaign | Error
-
 """Info to be returned when an offer campaign details are updated"""
 type UpdateOfferCampaign {
   """The offer campaign that is updated"""
@@ -321,8 +276,6 @@ type UpdateOfferCampaign {
   """Indicates if the offer campaign details have been successfully updated"""
   updated: Boolean!
 }
-
-union UpdateOfferCampaignResult = UpdateOfferCampaign | Error
 
 """
 Info to be returned when a new offer code, of an offer campaign, is added (issued)
@@ -334,8 +287,6 @@ type AddOfferCampaignCode {
   """Indicates if the offer code has been successfully added (issued)"""
   added: Boolean!
 }
-
-union AddOfferCampaignCodeResult = AddOfferCampaignCode | Error
 
 """Represents a coupon code, with its referral code revealed"""
 type CouponCodeReveal implements CouponCodeInterface {
@@ -358,8 +309,6 @@ type CouponCodeReveal implements CouponCodeInterface {
   beachBar: BeachBar
 }
 
-union CouponCodeRevealResult = CouponCodeReveal | Error
-
 """Represents an offer campaign code, with its referral code revealed"""
 type OfferCampaignCodeReveal implements OfferCampaignCodeInterface {
   id: ID!
@@ -380,8 +329,6 @@ type OfferCampaignCodeReveal implements OfferCampaignCodeInterface {
   timestamp: DateTime!
   deletedAt: DateTime
 }
-
-union OfferCampaignCodeRevealResult = OfferCampaignCodeReveal | Error
 
 """
 Represents a the limit number, on how many times a product can be provided by a #beach_bar on a specific date
@@ -416,8 +363,6 @@ type AddProductReservationLimit {
   added: Boolean!
 }
 
-union AddProductReservationLimitResult = AddProductReservationLimit | Error
-
 """
 Info to be returned when a reservation limit of a #beach_bar's product is updated
 """
@@ -431,13 +376,11 @@ type UpdateProductReservationLimit {
   updated: Boolean!
 }
 
-union UpdateProductReservationLimitResult = UpdateProductReservationLimit | Error
-
 """
 Info to be returned, when checking if a #beach_bar product is available
 """
 type AvailableProduct {
-  """The hour (time), to check if available"""
+  """The hour, to check if available"""
   hourTime: HourTime!
 
   """A boolean that indicates if the product is available in the hour time"""
@@ -455,13 +398,23 @@ type Product {
   maxPeople: Int!
   imgUrl: URL
 
-  """The #beach_bar that provides the product"""
+  """The #beach_bar that sells the product"""
   beachBar: BeachBar!
 
   """The category of the product"""
   category: ProductCategory!
   updatedAt: DateTime!
   deletedAt: DateTime
+}
+
+"""
+Represents a product of a #beach_bar, and info about it's rest availability quantity
+"""
+type ProductAvailability {
+  product: Product!
+
+  """How many other's products of this type are available for purchase"""
+  quantity: Int!
 }
 
 """Info to be returned when a product is added to a #beach_bar"""
@@ -475,8 +428,6 @@ type AddProduct {
   added: Boolean!
 }
 
-union AddProductResult = AddProduct | Error
-
 """Info to be returned when a product of a #beach_bar is updated"""
 type UpdateProduct {
   """The product that is updated"""
@@ -485,8 +436,6 @@ type UpdateProduct {
   """A boolean that indicates if the product has been successfully updated"""
   updated: Boolean!
 }
-
-union UpdateProductResult = UpdateProduct | Error
 
 """
 The info to be returned when checking for a #beach_bar product's availability hour times
@@ -499,10 +448,7 @@ type ProductAvailabilityHour {
 
 """Represents a category of a #beach_bar's restaurant menu"""
 type RestaurantMenuCategory {
-  """The ID value of the menu category"""
   id: ID!
-
-  """The name of the menu category"""
   name: String!
 }
 
@@ -510,19 +456,12 @@ type RestaurantMenuCategory {
 Represents a #beach_bar's restaurant food item (product) in its menu catalog
 """
 type RestaurantFoodItem {
-  """The ID value of the food item"""
-  id: BigInt!
-
-  """The name of the food item"""
+  id: ID!
   name: String!
-
-  """
-  The price of the food item, in decimal format with precision of five (5) & scale of two (2)
-  """
   price: Float!
 
   """The URL value of the food item's picture"""
-  imgUrl: String
+  imgUrl: URL
 
   """The menu category this food item is associated to"""
   menuCategory: RestaurantMenuCategory!
@@ -541,8 +480,6 @@ type AddRestaurantFoodItem {
   added: Boolean!
 }
 
-union AddRestaurantFoodItemResult = AddRestaurantFoodItem | Error
-
 """
 Info to be returned when the food item of #beach_bar restaurant, is updated
 """
@@ -555,8 +492,6 @@ type UpdateRestaurantFoodItem {
   """
   updated: Boolean!
 }
-
-union UpdateRestaurantFoodItemResult = UpdateRestaurantFoodItem | Error
 
 """Represents a #beach_bar's restaurant"""
 type BeachBarRestaurant {
@@ -578,7 +513,7 @@ type BeachBarRestaurant {
   beachBar: BeachBar!
 
   """A list of food items (products) in the menu of the restaurant"""
-  foodItems: [RestaurantFoodItem!]
+  foodItems: [RestaurantFoodItem!]!
 }
 
 """Info to be returned when a restaurant is added to a #beach_bar"""
@@ -592,8 +527,6 @@ type AddBeachBarRestaurant {
   added: Boolean!
 }
 
-union AddBeachBarRestaurantResult = AddBeachBarRestaurant | Error
-
 """
 Info to be returned when the details of #beach_bar restaurant, are updated
 """
@@ -606,8 +539,6 @@ type UpdateBeachBarRestaurant {
   """
   updated: Boolean!
 }
-
-union UpdateBeachBarRestaurantResult = UpdateBeachBarRestaurant | Error
 
 """Represents a vote for a user's review"""
 type ReviewVoteType {
@@ -670,8 +601,6 @@ type AddReviewAnswer {
   added: Boolean!
 }
 
-union AddReviewAnswerResult = AddReviewAnswer | Error
-
 """Info to be returned when the answer of a customer's review is updated"""
 type UpdateReviewAnswer {
   """The review answer that is updated"""
@@ -682,8 +611,6 @@ type UpdateReviewAnswer {
   """
   updated: Boolean!
 }
-
-union UpdateReviewAnswerResult = UpdateReviewAnswer | Error
 
 """Represents a #beach_bar's review, by a customer"""
 type BeachBarReview {
@@ -701,11 +628,9 @@ type BeachBarReview {
 
   """A summary (description) of the user's overall review"""
   review: String
-
-  """The #beach_bar of the review"""
   beachBar: BeachBar!
 
-  """The votes os users for this review"""
+  """The votes of users for this review"""
   votes: [ReviewVote!]!
 
   """The answer of the #beach_bar to this review"""
@@ -720,10 +645,11 @@ type BeachBarReview {
   """The visited month of the customer visited the #beach_bar"""
   month: MonthTime
 
-  """The last time user's account was updated, in the format of a timestamp"""
+  """
+  The relevant payment the user made, to be able to review a #beach_bar's products
+  """
+  payment: Payment!
   updatedAt: DateTime!
-
-  """The timestamp recorded, when the user's account was created"""
   timestamp: DateTime!
 }
 
@@ -751,11 +677,11 @@ type UpdateBeachBarReview {
 
 """Represents a service (feature), which a #beach_bar can provide"""
 type BeachBarService {
-  """The ID value of the feature"""
   id: ID!
-
-  """The name of the feature"""
   name: String!
+
+  """Details about which icon to be used in the front-end"""
+  icon: Icon!
 }
 
 """Represents a #beach_bar's feature (service) & its details"""
@@ -788,8 +714,6 @@ type AddBeachBarFeature {
   added: Boolean!
 }
 
-union AddBeachBarFeatureResult = AddBeachBarFeature | Error
-
 """
 Info to be returned when the info of a feature of a #beach_bar, are updated
 """
@@ -800,8 +724,6 @@ type UpdateBeachBarFeature {
   """A boolean that indicates if the feature has been successfully updated"""
   updated: Boolean!
 }
-
-union UpdateBeachBarFeatureResult = UpdateBeachBarFeature | Error
 
 """Represents a #beach_bar"""
 type BeachBar {
@@ -817,9 +739,12 @@ type BeachBar {
   """A description text about the #beach_bar"""
   description: String
 
+  """The entry fee this #beach_bar has applied for guests"""
+  entryFee: Float
+
   """The average rating of all the user reviews for this #beach_bar"""
   avgRating: Float!
-  thumbnailUrl: URL
+  thumbnailUrl: URL!
 
   """A phone number to contact the #beach_bar directly"""
   contactPhoneNumber: String!
@@ -840,7 +765,7 @@ type BeachBar {
   """The location of the #beach_bar"""
   location: BeachBarLocation!
 
-  """Get the location of the #beach_bar in a formatted string"""
+  """Get the location of the #beach_bar formatted"""
   formattedLocation: String!
 
   """A list with all the payments of a #beach_bar"""
@@ -850,13 +775,16 @@ type BeachBar {
   category: BeachBarCategory!
 
   """A list with all the #beach_bar's images (URL values)"""
-  imgUrls: [BeachBarImgUrl!]
+  imgUrls: [BeachBarImgUrl!]!
+
+  """A list with all the #beach_bar's products"""
+  products: [Product!]!
 
   """A list of all the reviews of the #beach_bar"""
-  reviews: [BeachBarReview!]
+  reviews: [BeachBarReview!]!
 
   """A list of all the #beach_bar's features"""
-  features: [BeachBarFeature]!
+  features: [BeachBarFeature!]!
 
   """A list of all the styles the #beach_bar is associated with"""
   styles: [BeachBarStyle!]
@@ -928,6 +856,7 @@ type BeachBarAvailability {
 
 """Represents a shopping cart with its products"""
 type CartProduct {
+  id: ID!
   quantity: Int!
 
   """The date of purchase of the product"""
@@ -948,10 +877,6 @@ type CartProduct {
 type AddCartProduct {
   """The product that is added to the cart"""
   product: CartProduct!
-
-  """
-  A boolean that indicates if the product has been successfully added to the cart
-  """
   added: Boolean!
 }
 
@@ -959,8 +884,6 @@ type AddCartProduct {
 type UpdateCartProduct {
   """The product that is updated"""
   product: CartProduct!
-
-  """A boolean that indicates if the product has been successfully updated"""
   updated: Boolean!
 }
 
@@ -1037,10 +960,6 @@ type Customer {
 type AddCustomer {
   """The customer that is added (registered)"""
   customer: Customer!
-
-  """
-  A boolean that indicates if the customer has been successfully added (registered)
-  """
   added: Boolean!
 }
 
@@ -1048,10 +967,6 @@ type AddCustomer {
 type UpdateCustomer {
   """The customer that is updated"""
   customer: Customer!
-
-  """
-  A boolean that indicates if the customer details have been successfully updated
-  """
   updated: Boolean!
 }
 
@@ -1120,25 +1035,25 @@ type Country {
 """Represents the status of a payment"""
 type PaymentStatus {
   id: ID!
-  status: String!
+  name: String!
 }
 
-"""Represents a component of a #beach_bar product. For example a sunbed."""
+"""Represents a component of a product. For example a sunbed."""
 type ProductComponent {
   id: ID!
-  title: String!
-  description: String!
-  iconUrl: URL!
+  name: String!
+
+  """Details about which icon to be used in the front-end"""
+  icon: Icon!
 }
 
-"""Represents a #beach_bar product & its components"""
-type BundleProductComponent {
-  """The product of the #beach_bar"""
-  product: Product!
-
-  """The component of the product"""
-  component: ProductComponent!
+"""
+Represents a component of a product category, including the quantity that each category has.
+"""
+type ProductCategoryComponent {
   quantity: Int!
+  component: ProductComponent!
+  category: ProductCategory!
 }
 
 """Represents a #beach_bar's product category"""
@@ -1148,8 +1063,8 @@ type ProductCategory {
   underscoredName: String!
   description: String
 
-  """The component of a product"""
-  productComponents: [ProductComponent!]!
+  """The components of a category's product"""
+  components: [ProductCategoryComponent!]!
 }
 
 """Represents a review's visit type, by the user"""
@@ -1188,6 +1103,15 @@ type BeachBarCategory {
   id: ID!
   name: String!
   description: String
+}
+
+"""Represents a SVG icon to be used in the front-end"""
+type Icon {
+  id: ID!
+  name: String!
+
+  """A unique public ID for the icon, to be matched in the front-end"""
+  publicId: String!
 }
 
 """Represents a voting category"""
@@ -1232,39 +1156,9 @@ type Mutation {
     s3Bucket: String!
   ): S3Payload!
 
-  """Add an entry fee(s) to a #beach_bar"""
-  addBeachBarEntryFee(
-    """The ID value of the #beach_bar to add the entry fee(s)"""
-    beachBarId: Int!
-
-    """The price value of the entry fee. Its value cannot be less than 0"""
-    fee: Float!
-
-    """A list with all the dates to add (assign) the entry fee"""
-    dates: [Date!]!
-  ): AddBeachBarEntryFeeResult!
-
-  """Update an or many entry fee(s) of a #beach_bar"""
-  updateBeachBarEntryFee(
-    """A list with all the entry fess to update"""
-    entryFeeIds: [ID!]!
-
-    """The price value to update the entry fees"""
-    fee: Float
-  ): UpdateBeachBarEntryFeeResult!
-
-  """Delete (remove) an or some entry fees from a #beach_bar"""
-  deleteBeachBarEntryFee(
-    """
-    A list with all the ID values of entry fee(s) to delete (remove) from a #beach_bar
-    """
-    entryFeeIds: [ID!]!
-  ): DeleteResult!
-
   """Add an image (URL) to a #beach_bar"""
   addBeachBarImgUrl(
-    """The ID value of the #beach_bar"""
-    beachBarId: Int!
+    beachBarId: ID!
 
     """The URL value of the image"""
     imgUrl: URL!
@@ -1273,31 +1167,16 @@ type Mutation {
     A short description about what the image represents. The characters of the description should not exceed the number 175
     """
     description: String
-  ): AddBeachBarImgUrlResult!
+  ): AddBeachBarImgUrl!
 
   """Update the details of a #beach_bar's image"""
-  updateBeachBaImgUrl(
-    """The ID value of the #beach_bar's image"""
-    imgUrlId: ID!
-
-    """The URL value of the image"""
-    imgUrl: URL
-
-    """
-    A short description about what the image represents. The characters of the description should not exceed the number 175
-    """
-    description: String
-  ): UpdateBeachBarImgUrlResult!
+  updateBeachBaImgUrl(imgUrlId: ID!, imgUrl: URL, description: String): UpdateBeachBarImgUrl!
 
   """Delete an image (URL) from a #beach_bar"""
-  deleteBeachBarImgUrl(
-    """The ID value of the #beach_bar's image"""
-    imgUrlId: ID!
-  ): DeleteResult!
+  deleteBeachBarImgUrl(imgUrlId: ID!): Delete!
 
   """Add (assign) a location to a #beach_bar"""
   addBeachBarLocation(
-    """The ID value of the #beach_bar"""
     beachBarId: ID!
 
     """The address of the #beach_bar"""
@@ -1323,31 +1202,8 @@ type Mutation {
   ): AddBeachBarLocation!
 
   """Update the location details of a #beach_bar"""
-  updateBeachBarLocation(
-    """The ID value of the #beach_bar location"""
-    locationId: ID!
-
-    """The address of the #beach_bar"""
-    address: String
-
-    """The zip (postal) code of the #beach_bar"""
-    zipCode: String
-
-    """The latitude of the location of the #beach_bar"""
-    latitude: String
-
-    """The longitude of the location of the #beach_bar"""
-    longitude: String
-
-    """The ID value of the country the #beach_bar is located at"""
-    countryId: ID
-
-    """The city the #beach_bar is located at"""
-    city: String
-
-    """The #beach_bar's region"""
-    region: String
-  ): UpdateBeachBarLocation!
+  updateBeachBarLocation(locationId: ID!, address: String, zipCode: String, latitude: String, longitude: String, countryId: ID, city: String, region: String): UpdateBeachBarLocation!
+  cacheBeachBars: Boolean!
 
   """Add (register) a new #beach_bar to the platform"""
   addBeachBar(
@@ -1399,7 +1255,6 @@ type Mutation {
 
   """Update a #beach_bar details"""
   updateBeachBar(
-    """The ID value of the #beach_bar"""
     beachBarId: ID!
 
     """
@@ -1451,15 +1306,11 @@ type Mutation {
   ): UpdateBeachBar!
 
   """Delete (remove) a #beach_bar from the platform"""
-  deleteBeachBar(
-    """The ID value of the #beach_bar"""
-    beachBarId: Int!
-  ): DeleteResult!
+  deleteBeachBar(beachBarId: ID!): Delete!
 
   """Add a product to a #beach_bar"""
   addProduct(
-    """The ID value of the #beach_bar to add the product to"""
-    beachBarId: Int!
+    beachBarId: ID!
 
     """The name of the product"""
     name: String!
@@ -1468,7 +1319,7 @@ type Mutation {
     description: String
 
     """The ID value of the category of the product"""
-    categoryId: Int!
+    categoryId: ID!
 
     """The price of the product"""
     price: Float!
@@ -1483,12 +1334,11 @@ type Mutation {
 
     """An image for the #beach_bar's product"""
     imgUrl: URL!
-  ): AddProductResult!
+  ): AddProduct!
 
   """Update a #beach_bar's product info"""
   updateProduct(
-    """The ID value of the product"""
-    productId: Int!
+    productId: ID!
 
     """The name of the product"""
     name: String!
@@ -1497,7 +1347,7 @@ type Mutation {
     description: String
 
     """The ID value of the category of the product"""
-    categoryId: Int
+    categoryId: ID
 
     """The price of the product"""
     price: Float
@@ -1512,19 +1362,13 @@ type Mutation {
 
     """An image for the #beach_bar's product"""
     imgUrl: URL
-  ): UpdateProductResult!
+  ): UpdateProduct!
 
   """Delete (remove) a product from a #beach_bar"""
-  deleteProduct(
-    """The ID value of the product"""
-    productId: Int!
-  ): DeleteResult!
+  deleteProduct(productId: ID!): Delete!
 
   """Restore a (soft) deleted #beach_bar product"""
-  restoreBeachBarProduct(
-    """The ID value of the product"""
-    productId: Int!
-  ): UpdateProductResult!
+  restoreBeachBarProduct(productId: ID!): UpdateProduct!
 
   """Add a coupon code"""
   addCouponCode(
@@ -1533,8 +1377,6 @@ type Mutation {
 
     """The percentage of the coupon code discount"""
     discountPercentage: Float!
-
-    """The ID value of the #beach_bar, to apply the coupon code for"""
     beachBarId: ID
 
     """
@@ -1549,11 +1391,10 @@ type Mutation {
 
     """Represents how many times this coupon code can be used"""
     timesLimit: Int!
-  ): AddCouponCodeResult!
+  ): AddCouponCode!
 
   """Update a coupon code"""
   updateCouponCode(
-    """The ID value of the coupon code"""
     couponCodeId: ID!
 
     """The name or a short description of the coupon code"""
@@ -1574,16 +1415,12 @@ type Mutation {
 
     """Represents how many times this coupon code can be used"""
     timesLimit: Int
-  ): UpdateCouponCodeResult!
-  deleteCouponCode(
-    """The ID value of the coupon code"""
-    couponCodeId: ID!
-  ): DeleteResult!
+  ): UpdateCouponCode!
+  deleteCouponCode(couponCodeId: ID!): Delete!
 
   """Add an offer campaign to a #beach_bar"""
   addOfferCampaign(
-    """The ID value of the product"""
-    productIds: [Int!]!
+    productIds: [ID!]!
 
     """The name or a short description of the coupon code"""
     title: String!
@@ -1600,15 +1437,14 @@ type Mutation {
     Set to true if coupon code is active. Its default value is set to false
     """
     isActive: Boolean! = false
-  ): AddOfferCampaignResult!
+  ): AddOfferCampaign!
 
   """Update the details of an offer campaign of a #beach_bar"""
   updateOfferCampaign(
-    """The ID value of the offer campaign"""
     offerCampaignId: ID!
 
     """The ID value of the product"""
-    productIds: [Int]!
+    productIds: [ID]!
 
     """The name or a short description of the coupon code"""
     title: String
@@ -1625,30 +1461,21 @@ type Mutation {
     Set to true if coupon code is active. Its default value is set to false
     """
     isActive: Boolean
-  ): UpdateOfferCampaignResult!
+  ): UpdateOfferCampaign!
 
   """Delete an offer campaign of a #beach_bar"""
-  deleteOfferCampaign(
-    """The ID value of the offer campaign"""
-    offerCampaignId: ID!
-  ): DeleteResult!
+  deleteOfferCampaign(offerCampaignId: ID!): Delete!
 
   """Add (issue) a new offer code"""
-  addOfferCampaignCode(
-    """The ID value of the offer campaign"""
-    offerCampaignId: ID!
-  ): AddOfferCampaignCodeResult!
+  addOfferCampaignCode(offerCampaignId: ID!): AddOfferCampaignCode!
 
   """Delete (invalidate) an offer code of an offer campaign"""
-  deleteOfferCode(
-    """The ID value of the offer campaign"""
-    offerCodeId: ID!
-  ): DeleteResult!
+  deleteOfferCode(offerCodeId: ID!): Delete!
 
   """Add a reservation limit to a #beach_bar product"""
   addProductReservationLimit(
     """The ID value of the product to add this reservation limit"""
-    productId: Int!
+    productId: ID!
 
     """
     The number to add as a limit a #beach_bar can provide the product, for specific date(s)
@@ -1659,43 +1486,23 @@ type Mutation {
     dates: [Date!]!
 
     """The ID value of the hour time from when this limit is applicable"""
-    startTimeId: Int!
+    startTimeId: ID!
 
     """
     The ID value of the hour time from when this limit is terminated (is not applicable anymore)
     """
-    endTimeId: Int!
-  ): AddProductReservationLimitResult!
+    endTimeId: ID!
+  ): AddProductReservationLimit!
 
   """Update a #beach_bar's product reservation limit"""
-  updateProductReservationLimit(
-    """A list with all the reservation limits to update"""
-    reservationLimitIds: [BigInt!]!
-
-    """
-    The number to add as a limit a #beach_bar can provide the product, for specific date(s)
-    """
-    limit: Int
-
-    """The ID value of the hour time from when this limit is applicable"""
-    startTimeId: Int
-
-    """
-    The ID value of the hour time from when this limit is terminated (is not applicable anymore)
-    """
-    endTimeId: Int
-  ): UpdateProductReservationLimitResult!
+  updateProductReservationLimit(reservationLimitIds: [ID!]!, limit: Int, startTimeId: ID, endTimeId: ID): UpdateProductReservationLimit!
 
   """Delete a or some reservation limit(s) from a #beach_bar's product"""
-  deleteProductReservationLimit(
-    """A list with all the reservation limits to delete"""
-    reservationLimitIds: [BigInt!]!
-  ): DeleteResult!
+  deleteProductReservationLimit(reservationLimitIds: [ID!]!): Delete!
 
   """Add a food item to a #beach_bar restaurant"""
   addRestaurantFoodItem(
-    """The ID value of the #beach_bar restaurant"""
-    restaurantId: Int!
+    restaurantId: ID!
 
     """The name of the food item"""
     name: String!
@@ -1709,39 +1516,18 @@ type Mutation {
     menuCategoryId: Int!
 
     """An image representing the food item product"""
-    imgUrl: String
-  ): AddRestaurantFoodItemResult!
+    imgUrl: URL
+  ): AddRestaurantFoodItem!
 
   """Update a #beach_bar's restaurant food item details"""
-  updateRestaurantFoodItem(
-    """The ID value of the food item"""
-    foodItemId: BigInt!
-
-    """The name of the food item"""
-    name: String
-
-    """The price of the food item in the menu catalogue"""
-    price: Float
-
-    """
-    The ID value of the category of the gastronomic menu, the food item is assigned to
-    """
-    menuCategoryId: Int
-
-    """An image representing the food item product"""
-    imgUrl: String
-  ): UpdateRestaurantFoodItemResult!
+  updateRestaurantFoodItem(foodItemId: ID!, name: String, price: Float, menuCategoryId: ID, imgUrl: String): UpdateRestaurantFoodItem!
 
   """Delete (remove) a food item from a #beach_bar's restaurant"""
-  deleteRestaurantFoodItem(
-    """The ID value of the food item"""
-    foodItemId: BigInt!
-  ): DeleteResult!
+  deleteRestaurantFoodItem(foodItemId: ID!): Delete!
 
   """Add a restaurant of a #beach_bar"""
   addBeachBarRestaurant(
-    """The ID value of the #beach_bar the restaurant will be added to"""
-    beachBarId: Int!
+    beachBarId: ID!
 
     """The name of the restaurant"""
     name: String!
@@ -1753,28 +1539,13 @@ type Mutation {
     A boolean that indicates if the restaurant is active or not. Its default value is false
     """
     isActive: Boolean = false
-  ): AddBeachBarRestaurantResult!
+  ): AddBeachBarRestaurant!
 
   """Update the restaurant details of a #beach_bar"""
-  updateBeachBarRestaurant(
-    """The ID value of the restaurant"""
-    restaurantId: Int!
-
-    """The name of the restaurant"""
-    name: String
-
-    """A short description, info text, about the restaurant itself"""
-    description: String
-
-    """A boolean that indicates if the restaurant is active or not"""
-    isActive: Boolean
-  ): UpdateBeachBarRestaurantResult!
+  updateBeachBarRestaurant(restaurantId: ID!, name: String, description: String, isActive: Boolean): UpdateBeachBarRestaurant!
 
   """Delete (remove) a restaurant from a #beach_bar"""
-  deleteBeachBarRestaurant(
-    """The ID value of the #beach_bar restaurant"""
-    restaurantId: Int!
-  ): DeleteResult!
+  deleteBeachBarRestaurant(restaurantId: ID!): Delete!
 
   """Upvote or downvote a customer's review on a #beach_bar"""
   updateReviewVote(
@@ -1791,42 +1562,45 @@ type Mutation {
   """Add a reply to a #beach_bar's review, by its owner"""
   addReviewAnswer(
     """The ID value of the customer's review"""
-    reviewId: BigInt!
+    reviewId: ID!
 
     """The body of the reply"""
     body: String!
-  ): AddReviewAnswerResult!
+  ): AddReviewAnswer!
 
   """Update the body of a #beach_bar's review reply"""
   updateReviewAnswer(
     """The ID value of the review's answer"""
-    answerId: BigInt!
+    answerId: ID!
 
     """The body of the reply"""
     body: String
-  ): UpdateReviewAnswerResult!
+  ): UpdateReviewAnswer!
 
   """Delete (remove) a reply from a #beach_bar's review"""
   deleteReviewAnswer(
     """The ID value of the review's answer"""
-    answerId: BigInt!
-  ): DeleteResult!
+    answerId: ID!
+  ): Delete!
+
+  """Verify a user's payment to submit review"""
+  verifyUserPaymentForReview(
+    beachBarId: ID!
+
+    """The referral code of the customer payment, to find"""
+    refCode: String
+  ): Boolean!
 
   """Add a customer's review on a #beach_bar"""
   addReview(
-    """The ID value of the #beach_bar, to submit the review"""
-    beachBarId: Int!
+    beachBarId: ID!
 
     """The referral code of the payment, to find"""
     paymentRefCode: String
 
     """The rating value between 1 to 10, the customers rates the #beach_bar"""
     ratingValue: Int!
-
-    """The ID value of the customer's visit type"""
     visitTypeId: ID
-
-    """The ID value of the month time"""
     monthTimeId: ID
 
     """A positive comment about the #beach_bar"""
@@ -1841,16 +1615,11 @@ type Mutation {
 
   """Update a customer's review on a #beach_bar"""
   updateReview(
-    """The ID value of the customer's review"""
     reviewId: ID!
 
     """The rating value between 1 to 10, the customers rates the #beach_bar"""
     ratingValue: Int
-
-    """The ID value of the customer's visit type"""
     visitTypeId: ID
-
-    """The ID value of the month time"""
     monthTimeId: ID
 
     """A positive comment about the #beach_bar"""
@@ -1864,18 +1633,12 @@ type Mutation {
   ): UpdateBeachBarReview!
 
   """Delete a customer's review on a #beach_bar"""
-  deleteReview(
-    """The ID value of the customer's review"""
-    reviewId: ID!
-  ): Delete!
+  deleteReview(reviewId: ID!): Delete!
 
   """Add (assign) a feature to a #beach_bar"""
   addBeachBarFeature(
-    """The ID value of the #beach_bar to add (assign) the feature"""
-    beachBarId: Int!
-
-    """The ID value of the feature to add (assign) to the #beach_bar"""
-    featureId: Int!
+    beachBarId: ID!
+    featureId: ID!
 
     """
     An integer that indicates the quantity of the service, a #beach_bar provides
@@ -1884,41 +1647,18 @@ type Mutation {
 
     """A short description about the service"""
     description: String
-  ): AddBeachBarFeatureResult!
+  ): AddBeachBarFeature!
 
   """Update a feature of a #beach_bar"""
-  updateBeachBarFeature(
-    """The ID value of the #beach_bar to update its feature info"""
-    beachBarId: Int!
-
-    """The ID value of the feature of the #beach_bar, to update its info"""
-    featureId: Int!
-
-    """
-    An integer that indicates the quantity of the service, a #beach_bar provides
-    """
-    quantity: Int
-
-    """A short description about the service"""
-    description: String
-  ): UpdateBeachBarFeatureResult!
+  updateBeachBarFeature(beachBarId: ID!, featureId: ID!, quantity: Int, description: String): UpdateBeachBarFeature!
 
   """Delete (remove) a feature (service) from a #beach_bar"""
-  deleteBeachBarFeature(
-    """The ID value of the #beach_bar to delete (remove) its feature"""
-    beachBarId: Int!
-
-    """The ID value of the feature of the #beach_bar, to delete (remove)"""
-    featureId: Int!
-  ): DeleteResult!
+  deleteBeachBarFeature(beachBarId: ID!, featureId: ID!): Delete!
 
   """
   Delete a cart after a transaction. This mutation is also called if the user is not authenticated & closes the browser tab
   """
-  deleteCart(
-    """The ID values of the shopping cart"""
-    cartId: ID!
-  ): DeleteResult!
+  deleteCart(cartId: ID!): Delete!
 
   """Add a product to a shopping cart"""
   addCartProduct(
@@ -1926,44 +1666,27 @@ type Mutation {
     cartId: ID!
 
     """The ID value of the product to add"""
-    productId: Int!
+    productId: ID!
 
     """
     The number that indicates how many times to add the product to the cart. Its default value is 1
     """
     quantity: Int = 1
 
-    """The ID value of the hour time of product use"""
-    timeId: Int!
-
     """
     The date to purchase the product. Its default value its the current date
     """
-    date: Date
+    date: Date!
+
+    """The ID value of the hour time of product use"""
+    timeId: ID
   ): AddCartProduct!
 
   """Update the quantity of a product in a shopping cart"""
-  updateCartProduct(
-    """The ID value of the shopping cart"""
-    cartId: ID!
-
-    """The ID value of the product to update its quantity"""
-    productId: Int!
-
-    """
-    The number that indicates how many times to add the product to the cart
-    """
-    quantity: Int
-  ): UpdateCartProduct!
+  updateCartProduct(id: ID!, quantity: Int): UpdateCartProduct!
 
   """Delete (remove) a product from a shopping cart"""
-  deleteCartProduct(
-    """The ID value of the shopping cart"""
-    cartId: ID!
-
-    """The ID value of the product to delete (remove)"""
-    productId: Int!
-  ): DeleteResult!
+  deleteCartProduct(id: ID!): DeleteResult!
 
   """Add a payment method (credit / debit card) to a customer"""
   addCustomerPaymentMethod(
@@ -1982,6 +1705,11 @@ type Mutation {
     A boolean that indicates if the card registered is the default one for the customer, to use in its transactions. Its default value is false
     """
     isDefault: Boolean = false
+
+    """
+    A boolean that indicates if the card should be saved for future payments. Defaults to true
+    """
+    savedForFuture: Boolean = true
   ): AddCard!
 
   """Update the details of customer's card"""
@@ -2005,10 +1733,7 @@ type Mutation {
   ): UpdateCard!
 
   """Delete (remove) a payment method (credit / debit card) from a customer"""
-  deleteCustomerPaymentMethod(
-    """The ID value of the card to delete"""
-    cardId: ID!
-  ): Delete!
+  deleteCustomerPaymentMethod(cardId: ID!): Delete!
 
   """Update a customer's details"""
   updateCustomer(
@@ -2023,10 +1748,7 @@ type Mutation {
   ): UpdateCustomer!
 
   """Delete (remove) a customer"""
-  deleteCustomer(
-    """The ID value of the registered customer to delete"""
-    customerId: ID
-  ): Delete!
+  deleteCustomer(customerId: ID): Delete!
 
   """Authorize a user with Google"""
   authorizeWithGoogle(
@@ -2081,52 +1803,26 @@ type Mutation {
   """
   addBeachBarOwner(
     """The ID value of the #beach_bar the owner will be added (assigned) to"""
-    beachBarId: Int!
+    beachBarId: ID!
 
     """
     The user to add (assign) to the #beach_bar, to become one of its owners
     """
-    userId: Int
+    userId: ID
 
     """
     Set to true if the user will become the or one of the primary owners of the #beach_bar. It is set to false by default
     """
     isPrimary: Boolean = false
-  ): AddBeachBarOwnerResult!
+  ): AddBeachBarOwner!
 
   """Update a #beach_bar's owner info"""
-  updateBeachBarOwner(
-    """The ID value of the #beach_bar the owner is added (assigned) to"""
-    beachBarId: Int!
-
-    """
-    The user to update its info. It should not be null or 0, if a primary owner wants to update another owner
-    """
-    userId: Int
-
-    """
-    A boolean that indicates if the owner info (contact details) are meant to be presented online to the public
-    """
-    publicInfo: Boolean
-
-    """
-    Set to true if the user will become the or one of the primary owners of the #beach_bar. It is set to false by default
-    """
-    isPrimary: Boolean = false
-  ): UpdateBeachBarOwnerResult!
+  updateBeachBarOwner(beachBarId: ID!, userId: ID, publicInfo: Boolean, isPrimary: Boolean = false): UpdateBeachBarOwner!
 
   """Delete (remove) an owner from a #beach_bar"""
-  deleteBeachBarOwner(
-    """The ID value of the #beach_bar the owner is added (assigned) to"""
-    beachBarId: Int!
+  deleteBeachBarOwner(beachBarId: ID!, userId: ID): DeleteResult!
 
-    """
-    The owner with its userId to delete (remove) from the #beach_bar. Its value should not be null or 0, if a primary owner wants to update another primary owner
-    """
-    userId: Int
-  ): DeleteResult!
-
-  """Create (make) a payment for a customer's shopping cart"""
+  """Make a payment using a customer's shopping cart"""
   checkout(
     """The ID value of the shopping cart with the products to purchase"""
     cartId: ID!
@@ -2134,11 +1830,14 @@ type Mutation {
     """The ID value of the credit or debit card of the customer"""
     cardId: ID!
 
+    """How many people will visit the #beach_bar(s)?. Defaults to true"""
+    totalPeople: Int = 1
+
     """
-    A coupon or offer campaign code to make a discount to the shopping cart's or payment's price
+    A coupon or offer campaign code to make a discount to the payment's price
     """
     voucherCode: String
-  ): AddPaymentResult!
+  ): Payment!
 
   """Refund a payment"""
   refundPayment(
@@ -2155,14 +1854,14 @@ type Mutation {
     A list with the filter IDs to add in the search, found in the documentation
     """
     filterIds: [String!]
-  ): UserSearch
+  ): UserSearch!
 
   """Update a user's #beach_bar favourites list"""
   updateFavouriteBeachBar(
     """
-    The ID value of the #beach_bar, to add / remove from the user's favourites list
+    The slug of the #beach_bar, to add / remove from the user's favourites list
     """
-    beachBarId: ID!
+    slug: ID!
   ): UpdateUserFavoriteBar!
 
   """Remove a #beach_bar from a user's favorites list"""
@@ -2176,7 +1875,7 @@ type Mutation {
     """Credential for signing up a user"""
     userCredentials: UserCredentials!
 
-    """Set to true if you want to sign up an owner for a #beach_bar"""
+    """Wether to sign up an owner for a #beach_bar"""
     isPrimaryOwner: Boolean = false
   ): User!
 
@@ -2185,7 +1884,7 @@ type Mutation {
     """Credential for signing up a user"""
     userCredentials: UserCredentials!
 
-    """User details in login"""
+    """User details"""
     loginDetails: UserLoginDetails
   ): UserLogin!
 
@@ -2306,8 +2005,6 @@ type AddBeachBarOwner {
   added: Boolean
 }
 
-union AddBeachBarOwnerResult = AddBeachBarOwner | Error
-
 """Info to be returned when the info of a #beach_bar owner, are updated"""
 type UpdateBeachBarOwner {
   """The owner being added & its info"""
@@ -2318,8 +2015,6 @@ type UpdateBeachBarOwner {
   """
   updated: Boolean!
 }
-
-union UpdateBeachBarOwnerResult = UpdateBeachBarOwner | Error
 
 """Represents a reserved product"""
 type ReservedProduct {
@@ -2366,6 +2061,20 @@ type UpdateReservedProduct {
 }
 
 union UpdateReservedProductResult = UpdateReservedProduct | Error
+
+"""Represents the offer codes added to a payment"""
+type PaymentOfferCode {
+  id: ID!
+
+  """The payment that holds these offer codes"""
+  payment: Payment!
+
+  """A coupon code added to the payment"""
+  couponCode: CouponCode
+
+  """A campaign offer code added to the payment"""
+  offerCode: OfferCampaignCode
+}
 
 """Represents a payment"""
 type Payment {
@@ -2438,51 +2147,24 @@ type PaymentVisitsDates {
 type Query {
   hello: String!
 
-  """Get a list with all entry fees of a #beach_bar"""
-  getAllBeachBarEntryFees(
-    """The ID value of the #beach_bar"""
-    beachBarId: Int!
-
-    """
-    Set to true if to retrieve the entry fees from today and in the future. Its default value is set to true
-    """
-    moreThanOrEqualToToday: Boolean = true
-  ): [BeachBarEntryFee!]!
-
-  """Get a list with all the images (URL values) of a #beach_bar"""
-  getBeachBarImgUrl(
-    """The ID value of the #beach_bar"""
-    beachBarId: Int!
-  ): [BeachBarImgUrl!]
-
   """Get the product offer or coupon, based on its referral code"""
   getVoucherCode(
     """The referral code of the product offer or coupon"""
     refCode: String!
-  ): VoucherCodeQueryResult
+  ): VoucherCodeQueryResult!
 
   """Get a list with all the offer campaigns of a #beach_bar"""
-  getBeachBarOfferCampaigns(
-    """The ID value of the #beach_bar"""
-    beachBarId: Int!
-  ): [OfferCampaign!]
+  getBeachBarOfferCampaigns(beachBarId: Int!): [OfferCampaign!]!
 
   """Get a coupon's code details & its referral code"""
-  revealCouponCode(
-    """The ID value of the coupon code"""
-    couponCodeId: ID!
-  ): CouponCodeRevealResult!
+  revealCouponCode(couponCodeId: ID!): CouponCodeReveal!
 
   """Get an offer's campaign code details + its referral code"""
-  revealOfferCampaignCode(
-    """The ID value of the offer campaign code"""
-    offerCampaignCodeId: ID!
-  ): OfferCampaignCodeRevealResult!
+  revealOfferCampaignCode(offerCampaignCodeId: ID!): OfferCampaignCodeReveal!
 
   """Get all products of a #beach_bar"""
-  getBeachBarProducts(
-    """The ID values of the #beach_bar, to get its products"""
-    beachBarId: Int!
+  beachBarProducts(
+    beachBarId: ID!
 
     """A boolean that indicates to retrieve only active products"""
     isActive: Boolean = true
@@ -2491,42 +2173,38 @@ type Query {
     A boolean that indicates to retrieve deleted products too. Its default value is set to false
     """
     isDeleted: Boolean = false
-  ): [Product!]
+  ): [Product!]!
 
-  """Retrieve (get) a list with all the available hour times of a product"""
+  """Fetch a list with all the available hour times of a product"""
   getProductAvailabilityHours(
-    """The ID value of the #beach_bar product"""
-    productId: Int!
+    productId: ID!
 
     """The date to search availability for"""
     date: Date!
-  ): [ProductAvailabilityHour!]
+  ): [ProductAvailabilityHour!]!
   getProductAvailabilityQuantity(
-    """The ID value of the #beach_bar product"""
-    productId: Int!
+    productId: ID!
 
     """The date to search availability for"""
     date: Date!
 
     """The ID value of the hour time to search availability for"""
     timeId: Int!
-  ): Int
+  ): Int!
 
   """Get a list with all the hours this product has reservation limits"""
   hasProductReservationLimit(
-    """The ID value of the product, to search if available"""
-    productId: Int!
+    productId: ID!
 
     """
     The date to purchase the product. Its default value its the current date
     """
-    date: Date
+    date: Date!
   ): [AvailableProduct!]!
 
-  """Get the detail info of a #beach_bar"""
-  getBeachBar(
-    """The ID value of the #beach_bar"""
-    beachBarId: Int!
+  """Get the details of a #beach_bar"""
+  beachBar(
+    slug: String!
 
     """
     Indicates if to retrieve information for user search. Its default value is set to true
@@ -2534,12 +2212,14 @@ type Query {
     userVisit: Boolean = true
   ): BeachBar
 
+  """Get the images of a #beach_bar"""
+  beachBarImgs(slug: String!): [BeachBarImgUrl!]
+
   """Check a #beach_bar's availability"""
-  checkBeachBarAvailability(
-    """The ID value of the #beach_bar, to check for availability"""
-    beachBarId: Int!
-    availability: SearchInput
-  ): BeachBarAvailability
+  checkBeachBarAvailability(beachBarId: ID!, availability: SearchInput!): BeachBarAvailability!
+
+  """Get a list with a #beach_bar's available products"""
+  availableProducts(beachBarId: ID!, availability: SearchInput!): [ProductAvailability!]!
 
   """A list with all the available #beach_bars"""
   getAllBeachBars: [BeachBar!]!
@@ -2549,19 +2229,18 @@ type Query {
   """
   getPersonalizedBeachBars: [BeachBar!]!
 
-  """Verify a user's payment to submit review"""
-  verifyUserPaymentReview(
-    """The ID value of the #beach_bar to submit the review"""
-    beachBarId: Int!
+  """A list with 6 #beach_bars, near to the user's location"""
+  nearBeachBars(
+    """The latitude of the user's location"""
+    latitude: String!
 
-    """The referral code of the customer payment, to find"""
-    refCode: String
-  ): Boolean!
+    """The longitude of the user's location"""
+    longitude: String!
+  ): [BeachBar!]!
 
   """Get a list with all the months in a review, by the product purchase"""
   getPaymentProductsMonth(
-    """The ID value of the #beach_bar to submit the review"""
-    beachBarId: Int!
+    beachBarId: ID!
 
     """The referral code of the customer payment, to find"""
     refCode: String
@@ -2571,44 +2250,39 @@ type Query {
   userReviews: [BeachBarReview!]!
 
   """Get the details of a a review of an authenticated user"""
-  review(
-    """The ID value of the review to fetch"""
-    reviewId: ID!
-  ): BeachBarReview!
-  getCartEntryFees(
-    """The ID values of the shopping cart"""
-    cartId: ID
-  ): Float
-  verifyZeroCartTotal(
+  review(reviewId: ID!): BeachBarReview!
+  cartEntryFees(
     """The ID values of the shopping cart"""
     cartId: ID!
-  ): Boolean
+
+    """How many people will visit the #beach_bar"""
+    totalPeople: Int!
+  ): Float!
+  verifyZeroCartTotal(cartId: ID!): Boolean!
 
   """Get the latest cart of an authenticated user or create one"""
-  getCart(
+  cart(
     """The ID values of the shopping cart, if it is created previously"""
     cartId: ID
-  ): Cart
+  ): Cart!
 
   """
   Get a list with all the payments methods (credit / debit cards) of the current authenticated user
   """
-  getCustomerPaymentMethods: [Card!]
+  customerPaymentMethods: [Card!]!
 
   """
   Get or create a customer, depending on current authenticated or not user
   """
-  getOrCreateCustomer(
-    """
-    The email address of an authenticated or not user, to register as a client
-    """
+  customer(
+    """The email address of an authenticated or not user"""
     email: Email
 
     """The phone number of the customer"""
     phoneNumber: String
 
-    """The ISO code of the country of customer's telephone"""
-    countryAlpha2Code: String
+    """The ID value of the country of customer's telephone"""
+    countryId: ID
   ): AddCustomer!
 
   """
@@ -2632,13 +2306,13 @@ type Query {
   """
   Get a list of payments for a specific / latest month of an authenticated user
   """
-  getPayments(
+  payments(
     """The ID of the month of the payments to fetch"""
     monthId: ID
 
     """The year of the payments to fetch"""
     year: Int
-  ): [PaymentVisits!]
+  ): [PaymentVisits!]!
 
   """Get the details of a specific payment / trip"""
   payment(
@@ -2646,7 +2320,7 @@ type Query {
     refCode: String!
   ): Payment!
 
-  """Get the amount of refuned of a specific payment / trip"""
+  """Get the amount of refund of a specific payment / trip"""
   paymentRefundAmount(
     """The referral code of the payment to fetch"""
     refCode: String!
@@ -2655,13 +2329,16 @@ type Query {
   """
   Get a list with the months and years of the cart products in all the payments of an authenticated user
   """
-  getPaymentsDates: [PaymentVisitsDates!]!
+  paymentDates: [PaymentVisitsDates!]!
 
   """Returns a list of formatted search input values"""
-  searchInputValues: [FormattedSearchInputValue!]!
+  searchInputValues: [SearchInputValue!]!
 
   """Get a list with a user's latest searches"""
-  getLatestUserSearches: [UserSearch!]!
+  userSearches(
+    """How many data to fetch?"""
+    limit: Int
+  ): [UserSearch!]!
 
   """Search for available #beach_bars"""
   search(
@@ -2684,7 +2361,7 @@ type Query {
     A ID of the sort filter the user has selected, found in the documentation
     """
     sortId: ID
-  ): Search
+  ): Search!
 
   """Returns a list of user's recorded / saved history"""
   userHistory: [UserHistoryExtended!]!
@@ -2694,6 +2371,7 @@ type Query {
     """How many data to fetch?"""
     limit: Int
   ): [UserFavoriteBar!]!
+  accessToken: String!
 
   """Returns current authenticated user"""
   me: User
@@ -2712,11 +2390,11 @@ type UserSearch {
   """The input value that the user searched for"""
   inputValue: SearchInputValue!
 
+  """A sort filter used by the user, in its search"""
+  filters: [SearchFilter!]!
+
   """The input value that the user searched for"""
   sort: SearchSort
-
-  """A sort filter used by the user, in its search"""
-  filters: [SearchSort!]
   updatedAt: DateTime!
   timestamp: DateTime!
 }
@@ -2801,17 +2479,6 @@ type SearchFilter {
   A short description about the filter, what is its value, and when to use
   """
   description: String
-}
-
-"""Represents a formatted search input value"""
-type FormattedSearchInputValue {
-  """The search input value"""
-  inputValue: SearchInputValue!
-
-  """
-  The URL value of the #beach_bar thumbnail image to show, at search "dropdown results"
-  """
-  beachBarThumbnailUrl: URL
 }
 
 """The base of a GraphQL Node"""
@@ -2971,17 +2638,20 @@ type User {
   """User's last (family) name"""
   lastName: String
 
+  """User's first and last name combines"""
+  fullName: String
+
   """User's account info"""
   account: UserAccount!
 
   """A user's review on a #beach_bar"""
-  reviews: [BeachBarReview!]
+  reviews: [BeachBarReview!]!
 
   """A list with all the user's favorite #beach_bars"""
-  favoriteBars: [UserFavoriteBar!]
+  favoriteBars: [UserFavoriteBar!]!
 
   """A list of all the votes of the user"""
-  reviewVotes: [ReviewVote!]
+  reviewVotes: [ReviewVote!]!
 }
 
 union UserTypeResult = User | Error
@@ -3036,18 +2706,4 @@ type Region {
 type BeachBarStyle {
   id: ID!
   name: String!
-}
-
-"""Represents the offer codes added to a payment"""
-type PaymentOfferCode {
-  id: ID!
-
-  """The payment that holds these offer codes"""
-  payment: Payment!
-
-  """A coupon code added to the payment"""
-  couponCode: CouponCode
-
-  """A campaign offer code added to the payment"""
-  offerCode: OfferCampaignCode
 }

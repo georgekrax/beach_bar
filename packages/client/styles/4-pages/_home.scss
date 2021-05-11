@@ -1,29 +1,20 @@
 .index {
   $border-radius: 14px;
 
-  &__container {
-    overflow: visible;
-  }
-
-  &__section {
-    &__container {
-      @extend .w-100;
-      overflow: auto;
-    }
-
-    &__list {
-      @extend .w-100;
-      flex-wrap: wrap;
-      gap: map-get($em-spacers, 16);
-    }
-  }
+  // &__list {
+  //   @extend .w100;
+  //   flex-wrap: wrap;
+  //   gap: map-get($em-spacers, 16);
+  // }
+  // }
 
   &__carousel {
     &__container {
       gap: 1em;
-      position: relative;
+      position: absolute;
+      top: 0;
       left: 0;
-      width: 100vw;
+      padding-right: $wrapper-padding;
       height: fit-content;
       // Does not work as needed, so we use a "spacer" div
       // padding: 0 1.5em 0 1.5em;
@@ -36,18 +27,18 @@
 
       &__container {
         width: min(60vw, 240px);
-        height: min(#{$home-img-height}, 300px);
+        height: $home-carousel-item-height;
         position: relative;
         flex-shrink: 0;
         overflow: hidden;
 
         &::after {
-          @extend .w-100;
-          @extend .h-100;
+          @extend .w100;
+          @extend .h100;
           content: "";
           background: linear-gradient(
-            180deg,
-            rgba($grey-1, 0) 45%,
+            to bottom,
+            transparent 45%,
             rgba($grey-10, 0.25) 57.5%,
             rgba($grey-10, 0.75) 100%
           );
@@ -57,35 +48,6 @@
           border-radius: $border-radius;
           z-index: 1;
           pointer-events: none;
-        }
-      }
-    }
-
-    &__content {
-      &__container {
-        position: absolute;
-        // padding: 0.5em;
-        // background: rgba($grey-1, 0.5);
-        // box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-        // backdrop-filter: blur(15px);
-        // border-radius: $border-radius;
-        // border: 1px solid rgba($grey-1, 0.5);
-        width: $home-img-content-width;
-        left: 50%;
-        bottom: 5%;
-        transform: translateX(-50%);
-        overflow: hidden;
-        z-index: 2;
-
-        div {
-          @include path-classNames() {
-            stroke: none;
-            fill: $grey-1 !important;
-          }
-        }
-
-        & > * {
-          color: $grey-1;
         }
       }
     }
@@ -111,5 +73,161 @@
         }
       }
     }
+  }
+}
+
+.home {
+  &__container {
+    // min-height: 75vh;
+
+    & > div:first-child {
+      min-height: calc(#{$hero-height} - #{$header-height});
+    }
+  }
+
+  &__header {
+    h4 {
+      color: $grey-1;
+    }
+
+    // &::before {
+    //   content: "";
+    //   position: absolute;
+    //   top: 0;
+    //   left: 0;
+    //   width: 100%;
+    //   height: 180%;
+    //   background: linear-gradient(to bottom, rgba($grey-10, 0.6), transparent);
+    //   z-index: -1;
+    // }
+  }
+
+  &__hero {
+    position: absolute;
+    top: 0;
+    left: 0;
+    min-height: $hero-height;
+  }
+
+  &__search-box {
+    position: absolute;
+    top: 7.5%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+  }
+
+  &__go-next {
+    margin: map-get($em-spacers, 48) 0;
+    // max-width: 25%;
+  }
+}
+
+.home {
+  &__img {
+    width: 30vw;
+    height: calc(100vh - #{$header-height});
+    flex-shrink: 0;
+  }
+
+  &__img__container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: inherit;
+    height: 100vh;
+    overflow: hidden;
+    border-radius: 0 56px 56px 0;
+
+    &::before {
+      @extend .w100;
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 15%;
+      background: linear-gradient(to bottom, rgba($grey-10, 0.4), transparent);
+      z-index: 1;
+    }
+  }
+
+  &__main {
+    margin-top: map-get($em-spacers, 24);
+    margin-left: $wrapper-padding;
+    min-width: map-get($em-spacers, 16);
+    // max-height: calc(100vh - #{$header-height});
+    overflow: visible;
+    flex: 1;
+
+    & > div:first-child {
+      margin: 0;
+      margin-bottom: map-get($em-spacers, 24);
+    }
+
+    & > div:last-child {
+      margin: 0;
+    }
+
+    & > div:nth-child(2) > h4,
+    & > div:nth-last-child(2) > h4 {
+      color: $grey-9;
+    }
+  }
+
+  &__near-you {
+    margin: map-get($em-spacers, 32) 0;
+
+    & > div {
+      position: relative;
+      margin-top: map-get($em-spacers, 12);
+      min-height: 10.5em;
+    }
+
+    &__grid-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: grid;
+      gap: map-get($em-spacers, 16) map-get($em-spacers, 48);
+      grid-auto-flow: row;
+      grid-template-columns: repeat(3, max-content);
+      scroll-snap-type: x mandatory;
+      width: 100vw;
+      overflow-x: auto;
+    }
+
+    &__last {
+      // Does not need to have a specific width,
+      // due to the column-gap property specified on its parent element
+      min-width: 1px;
+      min-height: map-get($em-spacers, 16);
+    }
+  }
+
+  &__user-custom {
+    gap: map-get($em-spacers, 48);
+    margin: map-get($em-spacers, 40) 0 map-get($em-spacers, 64);
+
+    & > section {
+      flex: 1 1 auto;
+    }
+  }
+}
+
+@include breakpoint("md") {
+  .home {
+    &__user-custom {
+      flex-direction: row;
+
+      & > section {
+        max-width: 52.5%;
+      }
+    }
+  }
+}
+
+@include breakpoint("xl", "max-width") {
+  .home__near-you > div > div {
+    max-width: calc(100% + (#{$wrapper-padding} * 0.75)) !important;
   }
 }

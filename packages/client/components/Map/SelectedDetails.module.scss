@@ -1,0 +1,50 @@
+.btn {
+  font-size: rem(18);
+  border-radius: 8px;
+  background-color: rgba($secondary, 0.75);
+  padding-top: map-get($em-spacers, 16);
+  padding-bottom: map-get($em-spacers, 16);
+  margin-top: map-get($em-spacers, 96);
+  @include font-semibold();
+}
+
+.imgContainer {
+  position: relative;
+  width: auto;
+  max-width: 37.5%;
+  min-height: 15vh;
+  max-height: 9.5em;
+  height: auto;
+  flex: 1;
+
+  img {
+    border-radius: 14px;
+  }
+}
+
+.content {
+  margin-left: map-get($em-spacers, 16);
+  flex: 1;
+
+  p {
+    @include text-overflow();
+  }
+}
+
+.container {
+  padding: map-get($em-spacers, 12);
+  background-color: rgba($volcano-5, 0.15);
+  border: 2px solid rgba($volcano-5, 0.4);
+  border-radius: 16px;
+  margin-right: map-get($em-spacers, 24);
+  box-shadow: 2px 2px 6px $grey-4;
+
+  path {
+    stroke: $volcano-5;
+    stroke-width: 2px;
+  }
+}
+
+// .featuresContainer {
+//   margin-top: map-get($em-spacers, 24);
+// }

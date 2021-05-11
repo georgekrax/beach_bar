@@ -14,7 +14,11 @@ export const Feedback: React.FC<FProps> = ({ isShown, positive = false, children
 
   return isShown ? (
     <div className={classNames} {...rest}>
-      {positive ? <Icons.Face.Happy.Colored width={40} height={40} /> : <Icons.Face.Sad width={40} height={40} />}
+      {positive ? (
+        <Icons.Face.Happy.Colored width={40} height={40} />
+      ) : (
+        <Icons.Face.Sad className={styles.negative} width={40} height={40} />
+      )}
       {children}
     </div>
   ) : null;

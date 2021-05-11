@@ -16,19 +16,16 @@ export const CustomerCrudMutation = extendType({
       type: UpdateCustomerType,
       description: "Update a customer's details",
       args: {
-        customerId: idArg({
-          description: "The ID value of the customer",
-        }),
+        customerId: idArg({ description: "The ID value of the customer" }),
         phoneNumber: nullable(stringArg({ description: "The phone number of the customer" })),
         countryIsoCode: nullable(stringArg({ description: "The ISO code of the country of customer's telephone" })),
       },
       resolve: async (_, { customerId, phoneNumber, countryIsoCode }): Promise<TUpdateCustomer> => {
-        if (!customerId || customerId <= 0)
-          throw new UserInputError("Please provide a valid customer ID", { code: errors.INVALID_ARGUMENTS });
-        if (phoneNumber && phoneNumber.trim().length === 0)
-          throw new UserInputError("Please provide a valid phone number", { code: errors.INVALID_ARGUMENTS });
-        if (countryIsoCode && countryIsoCode.trim().length === 0)
-          throw new UserInputError("Please provide a valid country", { code: errors.INVALID_ARGUMENTS });
+        if (!customerId || customerId.trim().length === 0) throw new UserInputError("Please provide a valid customerId");
+        // if (phoneNumber && phoneNumber.trim().length === 0)
+        //   throw new UserInputError("Please provide a valid phone number");
+        // if (countryIsoCode && countryIsoCode.trim().length === 0)
+        //   throw new UserInputError("Please provide a valid country");
 
         const customer = await Customer.findOne({ where: { id: customerId }, relations: ["country", "user", "cards"] });
         if (!customer) throw new ApolloError("Specified customer does not exist", errors.NOT_FOUND);
@@ -37,28 +34,19 @@ export const CustomerCrudMutation = extendType({
           const response = await customer.update(phoneNumber, countryIsoCode);
           if (!response) throw new ApolloError(errors.SOMETHING_WENT_WRONG);
 
-          return {
-            customer: response,
-            updated: true,
-          };
+          return { customer: response, updated: true };
         } catch (err) {
-          throw new ApolloError(errors.SOMETHING_WENT_WRONG + ": " + err.message);
+          throw new ApolloError(err.message);
         }
       },
     });
     t.field("deleteCustomer", {
       type: DeleteGraphQlType,
       description: "Delete (remove) a customer",
-      args: {
-        customerId: nullable(
-          idArg({
-            description: "The ID value of the registered customer to delete",
-          })
-        ),
-      },
+      args: { customerId: nullable(idArg()) },
       resolve: async (_, { customerId }, { payload, stripe }: MyContext): Promise<TDelete> => {
-        if (customerId && customerId <= 0)
-          throw new UserInputError("Please provide a valid customer", { code: errors.INVALID_ARGUMENTS });
+        if (customerId && customerId.trim().lengtj === 0)
+          throw new UserInputError("Please provide a valid customerId");
         if (!customerId && !payload) throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.INVALID_ARGUMENTS);
 
         let user: User | undefined = undefined;
@@ -74,12 +62,10 @@ export const CustomerCrudMutation = extendType({
           // deletes customer in DB & Stripe
           await customer.customSoftRemove(stripe);
         } catch (err) {
-          throw new ApolloError(errors.SOMETHING_WENT_WRONG + ": " + err.message);
+          throw new ApolloError(err.message);
         }
 
-        return {
-          deleted: true,
-        };
+        return { deleted: true };
       },
     });
   },

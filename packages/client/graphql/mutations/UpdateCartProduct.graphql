@@ -1,7 +1,8 @@
-mutation UpdateCartProduct($cartId: ID!, $productId: Int!, $quantity: Int) {
-  updateCartProduct(cartId: $cartId, productId: $productId, quantity: $quantity) {
+mutation UpdateCartProduct($id: ID!, $quantity: Int) {
+  updateCartProduct(id: $id, quantity: $quantity) {
     updated
     product {
+      id
       quantity
     }
   }

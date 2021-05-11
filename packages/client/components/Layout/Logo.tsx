@@ -7,3 +7,4 @@ export const Logo: React.FC<Props> = () => {
 };
 
 Logo.displayName = "LayoutLogo";
+

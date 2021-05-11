@@ -1,3 +1,5 @@
+@use "main" as *;
+
 .no-scrollbar {
   &::-webkit-scrollbar {
     display: none;
@@ -7,19 +9,23 @@
   scrollbar-width: none;
 }
 
-.w-100 {
+.w100 {
   width: 100%;
 }
 
-.iw-100 {
+.iw100 {
   width: 100% !important;
 }
 
-.h-100 {
+.w--inherit {
+  width: inherit;
+}
+
+.h100 {
   height: 100%;
 }
 
-.ih-100 {
+.ih100 {
   height: 100% !important;
 }
 
@@ -71,18 +77,34 @@
   }
 }
 
+.zi--sm {
+  z-index: 9;
+}
+
 .zi--md {
   z-index: 99;
 }
 
-.bottom-sheet__title {
-  @extend .w-100;
-  @extend .d--block;
-  @extend .body-16;
-  content: "";
-  font-weight: map-get($font-weights, "semibold");
-  height: auto;
-  padding: map-get($em-spacers, 8) 0;
-  color: $grey-10;
-  text-align: center;
+.zi--lg {
+  z-index: 999;
+}
+
+.zi--xl {
+  z-index: 99999;
+}
+
+.zi--none {
+  z-index: -1;
+}
+
+.text--grey {
+  color: $grey-8;
+}
+
+.text--secondary {
+  color: $secondary;
+}
+
+.text-ws--nowrap {
+  white-space: nowrap;
 }

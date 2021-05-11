@@ -1,0 +1,12 @@
+query NearBeachBars($latitude: String!, $longitude: String!) {
+  nearBeachBars(latitude: $latitude, longitude: $longitude) {
+    id
+    name
+    slug
+    thumbnailUrl
+    location {
+      latitude
+      longitude
+    }
+  }
+}

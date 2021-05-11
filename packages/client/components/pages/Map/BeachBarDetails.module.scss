@@ -1,5 +1,4 @@
 .btn {
-  @extend .semibold;
   font-size: rem(18);
   border-radius: 8px;
   background-color: rgba($secondary, 0.75);
@@ -27,12 +26,7 @@
   flex: 1;
 
   p {
-    -webkit-line-clamp: 5;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    margin-top: map-get($em-spacers, 8);
+    @include text-overflow();
   }
 }
 
@@ -44,11 +38,9 @@
   margin-right: map-get($em-spacers, 24);
   box-shadow: 2px 2px 6px $grey-4;
 
-  :global {
-    @include path-classNames() {
-      stroke: $volcano-5;
-      stroke-width: 2px;
-    }
+  path {
+    stroke: $volcano-5;
+    stroke-width: 2px;
   }
 }
 

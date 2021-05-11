@@ -1,5 +1,5 @@
-mutation UpdateFavouriteBeachBar($beachBarId: ID!) {
-  updateFavouriteBeachBar(beachBarId: $beachBarId) {
+mutation UpdateFavouriteBeachBar($slug: ID!) {
+  updateFavouriteBeachBar(slug: $slug) {
     # favouriteBar {
     #   beachBar {
     #     id

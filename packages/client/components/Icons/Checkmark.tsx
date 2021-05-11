@@ -4,18 +4,20 @@ import { Base, CircleBase, IconBaseFProps, IconCircleBaseFProps, IconPathBaseFPr
 type SubComponents = {
   Path: typeof Path;
   Circle: typeof Circle;
+  Colored: typeof Colored;
 };
 
-export const Path: React.FC<IconPathBaseFProps> = ({ ...props }) => {
-  return <PathBase d="M3.5 12.3l6.1 6.3L22.3 5" strokeLinecap="round" strokeLinejoin="round" {...props} />;
-};
-export const Checkmark: React.FC<IconBaseFProps> & SubComponents = ({ ...props }) => {
-  return (
-    <Base {...props}>
-      <Path />
-    </Base>
-  );
-};
+export const Path: React.FC<IconPathBaseFProps> = ({ ...props }) => (
+  <PathBase d="M3.5 12.3l6.1 6.3L22.3 5" strokeLinecap="round" strokeLinejoin="round" {...props} />
+);
+
+export const Checkmark: React.FC<IconBaseFProps> & SubComponents = ({ ...props }) => (
+  <Base {...props}>
+    <Path />
+  </Base>
+);
+
+const Colored: React.FC<IconBaseFProps> = ({ ...props }) => <Checkmark className="icon-checkmark__colored" {...props} />;
 
 type CircleSubComponents = {
   Path: typeof CirclePath;
@@ -72,9 +74,11 @@ export const CircleColored: React.FC<IconBaseFProps> = ({ ...props }) => {
 Checkmark.displayName = "IconCheckmark";
 Path.displayName = "IconCheckmarkPath";
 Circle.displayName = "IconCheckmarkCircle";
+Colored.displayName = "IconCheckmarkColored";
 
 Checkmark.Path = Path;
 Checkmark.Circle = Circle;
+Checkmark.Colored = Colored;
 Circle.Path = CirclePath;
 Circle.Circle = CircleCircle;
 Circle.Filled = CircleFilled;

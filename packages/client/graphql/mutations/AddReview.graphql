@@ -1,0 +1,26 @@
+mutation AddReview(
+  $beachBarId: ID!
+  $paymentRefCode: String
+  $ratingValue: Int!
+  $visitTypeId: ID
+  $monthTimeId: ID
+  $positiveComment: String
+  $negativeComment: String
+  $review: String
+) {
+  addReview(
+    beachBarId: $beachBarId
+    paymentRefCode: $paymentRefCode
+    ratingValue: $ratingValue
+    visitTypeId: $visitTypeId
+    monthTimeId: $monthTimeId
+    positiveComment: $positiveComment
+    negativeComment: $negativeComment
+    review: $review
+  ) {
+    review {
+      id
+    }
+    added
+  }
+}

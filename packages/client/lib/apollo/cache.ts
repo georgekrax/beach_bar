@@ -4,6 +4,20 @@ import { TypedTypePolicies } from "./apollo-helpers";
 
 export const cache = new InMemoryCache({
   typePolicies: {
+    BeachBarLocation: {
+      merge(existing, incoming) {
+        return { ...existing, ...incoming };
+      },
+    },
+    BeachBarReview: {
+      fields: {
+        votes: {
+          merge(_, incoming) {
+            return incoming;
+          },
+        },
+      },
+    },
     Query: {
       fields: {
         favouriteBeachBars: {

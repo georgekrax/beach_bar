@@ -1,6 +1,6 @@
-import { BaseEntity, Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Product } from "./Product";
-import { ProductComponent } from "./ProductComponent";
+import { ProductCategoryComponent } from "./ProductCategoryComponent";
 
 @Entity({ name: "product_category", schema: "public" })
 export class ProductCategory extends BaseEntity {
@@ -22,20 +22,9 @@ export class ProductCategory extends BaseEntity {
   @Column({ type: "text", name: "description", nullable: true })
   description?: string;
 
-  @ManyToMany(() => ProductComponent, productComponent => productComponent.productCategories, { nullable: false })
-  @JoinTable({
-    name: "product_category_component",
-    joinColumn: {
-      name: "category_id",
-      referencedColumnName: "id",
-    },
-    inverseJoinColumn: {
-      name: "component_id",
-      referencedColumnName: "id",
-    },
-  })
-  productComponents: ProductComponent[];
+  @OneToMany(() => ProductCategoryComponent, productCategory => productCategory.category)
+  components: ProductCategoryComponent[];
 
   @OneToMany(() => Product, product => product.category)
-  products?: Product[];
+  products: Product[];
 }

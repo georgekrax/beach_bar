@@ -1,27 +1,40 @@
+import Icons from "@/components/Icons";
+import { BeachBar as GraphQLBeachBar } from "@/graphql/generated";
 import { useClassnames } from "@hashtag-design-system/components";
 import { memo, useMemo } from "react";
-import Icons from "../Icons";
 import BeachBar from "./index";
 
-type Props = {
+export type Props = {
   name: string;
   city?: string;
   region?: string;
+  showLocation?: boolean;
+  showLocationIcon?: boolean;
 };
 
-type FProps = Props & React.ComponentPropsWithoutRef<"div">;
-
-export const NameAndLocation: React.FC<FProps> = memo(({ name, city, region, ...props }) => {
+export const NameAndLocation: React.FC<
+  Props & React.ComponentPropsWithoutRef<"div"> & Pick<GraphQLBeachBar, "formattedLocation">
+> = memo(({ name, city, region, formattedLocation, showLocation = true, showLocationIcon = true, ...props }) => {
   const [classNames, rest] = useClassnames("flex-column-center-flex-start beach_bar__name-and-location", props);
-  const location = useMemo(() => `${city}${region ? `, ${region}` : ""}`, [city, region]);
+  const location = useMemo(
+    () =>
+      formattedLocation
+        ? formattedLocation.split(", ").slice(0, -1).join(", ")
+        : `${city}${region ? `, ${region}` : ""}`,
+    [formattedLocation, city, region]
+  );
 
   return (
     <div className={classNames} {...rest}>
-      <BeachBar.Header as="h6">{name}</BeachBar.Header>
-      {(city || region) && (
+      <BeachBar.Header as="h4" className="header-6">
+        {name}
+      </BeachBar.Header>
+      {location && showLocation && (
         <div className="flex-row-center-center">
-          <Icons.MapMarker.Dot.Filled width={16} height={16} />
-          <span style={{ marginBottom: "0.15em" }}>{location}</span>
+          {showLocationIcon && <Icons.MapMarker.Dot.Filled width={16} height={16} style={{ marginRight: "0.25em" }} />}
+          <span className="body-14" style={{ marginBottom: "0.15em" }}>
+            {location}
+          </span>
         </div>
       )}
     </div>

@@ -47,14 +47,15 @@
       }
 
       input {
-        @extend .w-100;
+        @extend .w100;
       }
     }
   }
+
   &__date-picker {
     &__content {
       &::before {
-        @extend .bottom-sheet__title;
+        @extend .bottom_sheet__title;
         content: "Select the date of your trip";
       }
 
@@ -79,7 +80,7 @@
   &__select-container {
     &__content {
       &::before {
-        @extend .bottom-sheet__title;
+        @extend .bottom_sheet__title;
         content: "Select the hour of your trip";
       }
     }
@@ -173,23 +174,6 @@
       }
     }
 
-    &__rating {
-      cursor: pointer;
-
-      &:not(:last-child) {
-        margin-right: map-get($em-spacers, 8);
-      }
-
-      &:not(.colored) > path {
-        stroke: $grey-9 !important;
-        stroke-width: 1px !important;
-      }
-
-      &__container {
-        margin: map-get($em-spacers, 24) 0 map-get($em-spacers, 32);
-      }
-    }
-
     &__feedback {
       &:last-child {
         margin-top: map-get($em-spacers, 16);
@@ -197,16 +181,6 @@
 
       & > div {
         max-width: 100%;
-      }
-    }
-
-    &__visit {
-      summary {
-        width: 160px !important;
-      }
-
-      & > div {
-        align-items: center;
       }
     }
   }

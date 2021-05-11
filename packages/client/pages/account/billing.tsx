@@ -1,14 +1,15 @@
 import Account, { AccountPaymentMethodEditProps } from "@/components/Account";
 import Layout from "@/components/Layout";
-import Next from "@/components/Next";
+import { NextMotionContainer } from "@/components/Next/MotionContainer"
+import { NextDoNotHave } from "@/components/Next/DoNotHave"
 import {
   Card,
-  GetCustomerPaymentMethodsDocument,
-  GetCustomerPaymentMethodsQuery,
-  GetOrCreateCustomerDocument,
+  CustomerDocument,
+  CustomerPaymentMethodsDocument,
+  CustomerPaymentMethodsQuery,
+  useCustomerPaymentMethodsQuery,
+  useCustomerQuery,
   useDeleteCustomerPaymentMethodMutation,
-  useGetCustomerPaymentMethodsQuery,
-  useGetOrCreateCustomerQuery,
   useUpdateCustomerPaymentMethodMutation,
 } from "@/graphql/generated";
 import { initializeApollo, INITIAL_APOLLO_STATE } from "@/lib/apollo";
@@ -36,15 +37,15 @@ const Billing: React.FC = () => {
   const [cardToEdit, setCardToEdit] = useState<AccountPaymentMethodEditProps["card"] | null>(null);
   const [cardToDelete, setCardToDelete] = useState<Pick<PaymentMethodFormData, "id"> | null>(null);
 
-  const { data: customerData } = useGetOrCreateCustomerQuery();
-  const { data, loading, error } = useGetCustomerPaymentMethodsQuery();
+  const { data: customerData } = useCustomerQuery();
+  const { data, loading, error } = useCustomerPaymentMethodsQuery();
   const [updatePaymentMethod] = useUpdateCustomerPaymentMethodMutation();
   const [deletePaymentMethod] = useDeleteCustomerPaymentMethodMutation();
 
   const sorted = useMemo(
     () =>
-      data && data.getCustomerPaymentMethods
-        ? data.getCustomerPaymentMethods
+      data && data.customerPaymentMethods
+        ? data.customerPaymentMethods
             ?.map(({ __typename, ...card }) => card)
             .sort((a, b) => parseInt(b.id) - parseInt(a.id))
         : [],
@@ -69,21 +70,21 @@ const Billing: React.FC = () => {
         },
       },
       update: (cache, { data }) => {
-        const cachedData = cache.readQuery<GetCustomerPaymentMethodsQuery>({
-          query: GetCustomerPaymentMethodsDocument,
+        const cachedData = cache.readQuery<CustomerPaymentMethodsQuery>({
+          query: CustomerPaymentMethodsDocument,
         });
         const newCard = data?.updateCustomerPaymentMethod.card;
         if (!newCard) return;
-        const updated = cachedData?.getCustomerPaymentMethods?.map(prevCard => {
+        const updated = cachedData?.customerPaymentMethods?.map(prevCard => {
           if (prevCard.id === newCard.id) return newCard;
           else {
             if (newCard.isDefault) return { ...prevCard, isDefault: false };
             else return prevCard;
           }
         });
-        cache.writeQuery({
-          query: GetCustomerPaymentMethodsDocument,
-          data: { getCustomerPaymentMethods: updated },
+        cache.writeQuery<CustomerPaymentMethodsQuery>({
+          query: CustomerPaymentMethodsDocument,
+          data: { customerPaymentMethods: updated || [] },
         });
       },
     });
@@ -103,17 +104,17 @@ const Billing: React.FC = () => {
       <Account.Menu defaultSelected="/billing" />
       {loading ? (
         <h2>Loading...</h2>
-      ) : error || !data || !data.getCustomerPaymentMethods || !customerData ? (
+      ) : error || !data || !data.customerPaymentMethods || !customerData ? (
         <h2>Error</h2>
       ) : (
-        <Next.Motion.Container>
+        <NextMotionContainer>
           <Account.PaymentMethod.Add
-            cardsLength={data.getCustomerPaymentMethods.length}
-            customerId={customerData.getOrCreateCustomer.customer.id}
+            cardsLength={data.customerPaymentMethods.length}
+            customerId={customerData.customer.customer.id}
           />
           {sorted.length > 0 ? (
             <motion.div
-              className="w-100 flex-column-center-flex-end"
+              className="w100 flex-column-center-flex-end"
               initial="initial"
               animate="animate"
               variants={variants}
@@ -130,7 +131,7 @@ const Billing: React.FC = () => {
               ))}
             </motion.div>
           ) : (
-            <Next.DoNotHave msg="You have not added a payment method yet." emoji="💳" />
+            <NextDoNotHave msg="You have not added a payment method yet." emoji="💳" />
           )}
           <Account.PaymentMethod.Edit
             card={cardToEdit || undefined}
@@ -165,7 +166,7 @@ const Billing: React.FC = () => {
               <Dialog.Btn confirm>Yes</Dialog.Btn>
             </Dialog.Btn.Group>
           </Dialog>
-        </Next.Motion.Container>
+        </NextMotionContainer>
       )}
     </Layout>
   );
@@ -178,12 +179,8 @@ export default Billing;
 export const getServerSideProps: GetServerSideProps = async ctx => {
   const apolloClient = initializeApollo(ctx);
 
-  await apolloClient.query({ query: GetOrCreateCustomerDocument });
-  await apolloClient.query({ query: GetCustomerPaymentMethodsDocument });
+  await apolloClient.query({ query: CustomerDocument });
+  await apolloClient.query({ query: CustomerPaymentMethodsDocument });
 
-  return {
-    props: {
-      [INITIAL_APOLLO_STATE]: apolloClient.cache.extract(),
-    },
-  };
+  return { props: { [INITIAL_APOLLO_STATE]: apolloClient.cache.extract() } };
 };

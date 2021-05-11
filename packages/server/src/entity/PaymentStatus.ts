@@ -6,8 +6,8 @@ export class PaymentStatus extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column("varchar", { length: 25, name: "status", unique: true })
-  status: string;
+  @Column("varchar", { length: 25, name: "name", unique: true })
+  name: string;
 
   @OneToMany(() => Payment, payment => payment.status, { nullable: true })
   payments?: Payment[];

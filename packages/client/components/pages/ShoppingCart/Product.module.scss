@@ -33,8 +33,15 @@
   flex: 1 0;
 
   & > div:not(.quantity) > div > span:first-child {
-    @extend .semibold;
+    // @extend .semibold;
     margin-bottom: map-get($em-spacers, 4);
+  }
+
+  & > div:first-child > div:last-child > div:nth-child(2) {
+    width: 1px;
+    align-self: stretch;
+    background-color: $grey-8;
+    margin: 0.15em 0.35em 0;
   }
 
   & > div:last-child {
@@ -46,10 +53,10 @@
   margin-top: map-get($em-spacers, 16);
 
   & > div:first-child {
-    font-size: 1.25rem;
+    font-size: 1.15rem;
 
     & > span {
-      color: $grey-8;
+      color: $grey-9;
     }
   }
 }

@@ -8,6 +8,7 @@ import { MonthTime } from "entity/Time";
 import { extendType, idArg, intArg, nullable, stringArg } from "nexus";
 import { TDelete } from "typings/.index";
 import { TAddBeachBarReview, TUpdateBeachBarReview } from "typings/beach_bar/review";
+import { isAuth } from "utils/auth/payload";
 import { verifyUserPaymentReview } from "utils/beach_bar/verifyUserPaymentReview";
 import { DeleteGraphQlType } from "../../types";
 import { AddBeachBarReviewType, UpdateBeachBarReviewType } from "./types";
@@ -15,45 +16,39 @@ import { AddBeachBarReviewType, UpdateBeachBarReviewType } from "./types";
 export const BeachBarReviewCrudMutation = extendType({
   type: "Mutation",
   definition(t) {
+    t.boolean("verifyUserPaymentForReview", {
+      description: "Verify a user's payment to submit review",
+      args: {
+        beachBarId: idArg(),
+        refCode: nullable(stringArg({ description: "The referral code of the customer payment, to find" })),
+      },
+      resolve: async (_, { beachBarId, refCode }, { payload }: MyContext): Promise<boolean> => {
+        if (!beachBarId || beachBarId.trim().length === 0) throw new UserInputError("Please provide a valid beachBarId");
+        const { boolean, customer, payment } = await verifyUserPaymentReview(beachBarId, refCode, payload);
+        if (!customer || !payment) return false;
+        // if (!customer.checkReviewsQuantity(beachBarId, payment)) return false;
+        return boolean;
+      },
+    });
     t.field("addReview", {
       type: AddBeachBarReviewType,
       description: "Add a customer's review on a #beach_bar",
       args: {
-        beachBarId: intArg({ description: "The ID value of the #beach_bar, to submit the review" }),
+        beachBarId: idArg(),
         paymentRefCode: nullable(stringArg({ description: "The referral code of the payment, to find" })),
         ratingValue: intArg({ description: "The rating value between 1 to 10, the customers rates the #beach_bar" }),
-        visitTypeId: nullable(
-          idArg({
-            description: "The ID value of the customer's visit type",
-          })
-        ),
-        monthTimeId: nullable(
-          idArg({
-            description: "The ID value of the month time",
-          })
-        ),
-        positiveComment: nullable(
-          stringArg({
-            description: "A positive comment about the #beach_bar",
-          })
-        ),
-        negativeComment: nullable(
-          stringArg({
-            description: "A negative comment about the #beach_bar",
-          })
-        ),
-        review: nullable(
-          stringArg({
-            description: "A summary (description) of the user's overall review",
-          })
-        ),
+        visitTypeId: nullable(idArg()),
+        monthTimeId: nullable(idArg()),
+        positiveComment: nullable(stringArg({ description: "A positive comment about the #beach_bar" })),
+        negativeComment: nullable(stringArg({ description: "A negative comment about the #beach_bar" })),
+        review: nullable(stringArg({ description: "A summary (description) of the user's overall review" })),
       },
       resolve: async (
         _,
         { beachBarId, paymentRefCode, monthTimeId, ratingValue, visitTypeId, positiveComment, negativeComment, review },
         { payload }: MyContext
       ): Promise<TAddBeachBarReview> => {
-        if (!payload || !payload.sub) throw new ApolloError(errors.NOT_AUTHENTICATED_MESSAGE, errors.NOT_AUTHENTICATED_CODE);
+        isAuth(payload);
         if (!beachBarId || beachBarId.trim().length === 0)
           throw new UserInputError("Please provide a valid #beach_bar", { code: errors.INVALID_ARGUMENTS });
         if (!ratingValue || ratingValue < 1 || ratingValue > beachBarReviewRatingMaxValue)
@@ -68,14 +63,14 @@ export const BeachBarReviewCrudMutation = extendType({
         const { boolean: res, customer, payment } = await verifyUserPaymentReview(beachBarId, paymentRefCode, payload);
         if (!res || !payment || !customer)
           throw new ApolloError(
-            "You have not purchased any products from this #beach_bar, to submit a review for it",
+            "You have not purchased any products from this #beach_bar, to submit a review for it.",
             errors.UNAUTHORIZED_CODE
           );
-        if (!customer.checkReviewsQuantity(beachBarId, payment))
-          throw new ApolloError(
-            "You are not allowed to submit more reviews than your purchased products / services",
-            errors.UNAUTHORIZED_CODE
-          );
+        // if (!customer.checkReviewsQuantity(beachBarId, payment))
+        //   throw new ApolloError(
+        //     "You are not allowed to submit more reviews than your purchased products / services",
+        //     errors.UNAUTHORIZED_CODE
+        //   );
 
         const beachBar = await BeachBar.findOne({ id: beachBarId, isActive: true });
         if (!beachBar) throw new ApolloError(errors.BEACH_BAR_DOES_NOT_EXIST, errors.NOT_FOUND);
@@ -83,12 +78,12 @@ export const BeachBarReviewCrudMutation = extendType({
         const visitType = await ReviewVisitType.findOne(visitTypeId);
         if (!visitType && visitTypeId) throw new ApolloError("Invalid visit type", errors.NOT_FOUND);
 
-        const monthTime = await MonthTime.findOne(monthTimeId);
-        if (!monthTime && monthTimeId) throw new ApolloError("Invalid visit month", errors.NOT_FOUND);
-        else if (monthTime && monthTimeId) {
+        const month = await MonthTime.findOne(monthTimeId);
+        if (!month && monthTimeId) throw new ApolloError("Invalid visit month", errors.NOT_FOUND);
+        else if (month && monthTimeId) {
           const paymentProductsMonth = payment.getProductsMonth(beachBarId);
           if (!paymentProductsMonth) throw new ApolloError(errors.SOMETHING_WENT_WRONG);
-          const isIncluded = paymentProductsMonth.includes(monthTime.id);
+          const isIncluded = paymentProductsMonth.includes(month.id);
           if (!isIncluded) throw new ApolloError(errors.SOMETHING_WENT_WRONG);
         }
 
@@ -98,7 +93,7 @@ export const BeachBarReviewCrudMutation = extendType({
           payment,
           ratingValue,
           visitType,
-          monthTime,
+          month,
           positiveComment,
           negativeComment,
           review,
@@ -121,40 +116,20 @@ export const BeachBarReviewCrudMutation = extendType({
       type: UpdateBeachBarReviewType,
       description: "Update a customer's review on a #beach_bar",
       args: {
-        reviewId: idArg({ description: "The ID value of the customer's review" }),
-        ratingValue: nullable(
-          intArg({
-            description: "The rating value between 1 to 10, the customers rates the #beach_bar",
-          })
-        ),
-        visitTypeId: nullable(idArg({ description: "The ID value of the customer's visit type" })),
-        monthTimeId: nullable(
-          idArg({
-            description: "The ID value of the month time",
-          })
-        ),
-        positiveComment: nullable(
-          stringArg({
-            description: "A positive comment about the #beach_bar",
-          })
-        ),
-        negativeComment: nullable(
-          stringArg({
-            description: "A negative comment about the #beach_bar",
-          })
-        ),
-        review: nullable(
-          stringArg({
-            description: "A summary (description) of the user's overall review",
-          })
-        ),
+        reviewId: idArg(),
+        ratingValue: nullable(intArg({ description: "The rating value between 1 to 10, the customers rates the #beach_bar" })),
+        visitTypeId: nullable(idArg()),
+        monthTimeId: nullable(idArg()),
+        positiveComment: nullable(stringArg({ description: "A positive comment about the #beach_bar" })),
+        negativeComment: nullable(stringArg({ description: "A negative comment about the #beach_bar" })),
+        review: nullable(stringArg({ description: "A summary (description) of the user's overall review" })),
       },
       resolve: async (
         _,
         { reviewId, ratingValue, visitTypeId, monthTimeId, positiveComment, negativeComment, review },
         { payload }: MyContext
       ): Promise<TUpdateBeachBarReview> => {
-        if (!payload || !payload.sub) throw new ApolloError(errors.NOT_AUTHENTICATED_MESSAGE, errors.NOT_AUTHENTICATED_CODE);
+        isAuth(payload);
         if (!reviewId || reviewId.trim().length === 0)
           throw new UserInputError("Please provide a valid review ID", { code: errors.INVALID_ARGUMENTS });
         if (ratingValue && (ratingValue < 1 || ratingValue > beachBarReviewRatingMaxValue))
@@ -171,7 +146,7 @@ export const BeachBarReviewCrudMutation = extendType({
           relations: ["beachBar", "customer", "votes", "votes.type"],
         });
         if (!usersReview) throw new ApolloError("Specified review does not exist", errors.NOT_FOUND);
-        if (usersReview.customer.userId?.toString() !== payload.sub.toString())
+        if (usersReview.customer.userId?.toString() !== payload!.sub.toString())
           throw new ApolloError("You are not allow to edit another's user review", errors.UNAUTHORIZED_CODE);
 
         try {
@@ -197,10 +172,9 @@ export const BeachBarReviewCrudMutation = extendType({
     t.field("deleteReview", {
       type: DeleteGraphQlType,
       description: "Delete a customer's review on a #beach_bar",
-      args: {
-        reviewId: idArg({ description: "The ID value of the customer's review" }),
-      },
-      resolve: async (_, { reviewId }): Promise<TDelete> => {
+      args: { reviewId: idArg() },
+      resolve: async (_, { reviewId }, { payload }: MyContext): Promise<TDelete> => {
+        isAuth(payload);
         if (!reviewId || reviewId.trim().length === 0)
           throw new UserInputError("Please provide a valid review ID", { code: errors.INVALID_ARGUMENTS });
 

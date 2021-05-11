@@ -1,9 +1,9 @@
 .idea/
 .vscode/
 node_modules/
-packages/server/node_modules
-packages/server/build
-packages/server/dist
+packages/server/node_modules/
+packages/server/build/
+packages/server/dist/
 packages/server/ormconfig.json
 packages/server/yarn-error.log
 tmp/

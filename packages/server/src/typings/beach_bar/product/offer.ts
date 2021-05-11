@@ -1,30 +1,30 @@
 import { CouponCode } from "entity/CouponCode";
 import { OfferCampaign } from "entity/OfferCampaign";
 import { OfferCampaignCode } from "entity/OfferCampaignCode";
-import { AddType, ErrorType, UpdateType } from "typings/.index";
+import { AddType, DeleteType, UpdateType } from "typings/.index";
 
 type CouponCodeType = {
   couponCode: CouponCode;
 };
 
-export type AddCouponCodeType = (AddType & CouponCodeType) | ErrorType;
+export type TAddCouponCode = AddType & CouponCodeType;
 
-export type UpdateCouponCodeType = (UpdateType & CouponCodeType) | ErrorType;
+export type TUpdateCouponCode = UpdateType & DeleteType & CouponCodeType;
 
 type OfferCampaignType = {
   offerCampaign: OfferCampaign;
 };
 
-export type AddOfferCampaignType = (AddType & OfferCampaignType) | ErrorType;
+export type TAddOfferCampaign = AddType & OfferCampaignType;
 
-export type UpdateOfferCampaignType = (UpdateType & OfferCampaignType) | ErrorType;
+export type TUpdateOfferCampaign = UpdateType & OfferCampaignType;
 
 type OfferCampaignCodeType = {
   offerCode: OfferCampaignCode;
 };
 
-export type AddOfferCampaignCodeType = (AddType & OfferCampaignCodeType) | ErrorType;
+export type TAddOfferCampaignCode = AddType & OfferCampaignCodeType;
 
-export type UpdateOfferCampaignCodeType = (UpdateType & OfferCampaignCodeType) | ErrorType;
+export type TUpdateOfferCampaignCode = UpdateType & OfferCampaignCodeType;
 
-export type ProductOfferType = (CouponCode | OfferCampaignCode) | ErrorType | null;
+export type ProductOfferType = (CouponCode | OfferCampaignCode) | null;

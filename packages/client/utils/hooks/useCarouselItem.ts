@@ -1,4 +1,4 @@
-import { CarouselItemProps } from "@/components/Carousel";
+import { CarouselItemProps } from "@/components/HeyCarousel";
 import { useCycle, useReducedMotion } from "framer-motion";
 import { useEffect } from "react";
 

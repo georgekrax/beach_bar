@@ -1,0 +1,13 @@
+.btn {
+  padding: 0;
+  border: none;
+  box-shadow: none;
+
+  &:hover {
+    background-color: unset;
+  }
+
+  svg {
+    display: none;
+  }
+}

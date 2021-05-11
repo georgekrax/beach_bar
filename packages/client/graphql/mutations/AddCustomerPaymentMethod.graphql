@@ -3,12 +3,14 @@ mutation AddCustomerPaymentMethod(
   $customerId: ID!
   $cardholderName: String!
   $isDefault: Boolean = false
+  $savedForFuture: Boolean = true
 ) {
   addCustomerPaymentMethod(
     source: $token
     customerId: $customerId
     cardholderName: $cardholderName
     isDefault: $isDefault
+    savedForFuture: $savedForFuture
   ) {
     card {
       id

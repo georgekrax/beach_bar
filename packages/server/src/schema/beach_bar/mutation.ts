@@ -1,20 +1,31 @@
 import { errors, MyContext, toSlug } from "@beach_bar/common";
-import { ApolloError } from "apollo-server-express";
+import { ApolloError, UserInputError } from "apollo-server-express";
+import { DATA } from "constants/data";
 import redisKeys from "constants/redisKeys";
+import relations from "constants/relations";
 import { BeachBar } from "entity/BeachBar";
 import { BeachBarCategory } from "entity/BeachBarCategory";
 import { Currency } from "entity/Currency";
+import { PricingFee } from "entity/PricingFee";
 import { User } from "entity/User";
-import { booleanArg, extendType, idArg, intArg, nullable, stringArg } from "nexus";
-import { DeleteType } from "typings/.index";
+import { booleanArg, extendType, idArg, nullable, stringArg } from "nexus";
+import { TDelete } from "typings/.index";
 import { TAddBeachBar, TUpdateBeachBar } from "typings/beach_bar";
-import { checkScopes } from "utils/checkScopes";
-import { DeleteResult } from "../types";
-import { AddBeachBarType,UpdateBeachBarType } from "./types";
+import { isAuth, throwScopesUnauthorized } from "utils/auth/payload";
+import { DeleteGraphQlType } from "../types";
+import { AddBeachBarType, UpdateBeachBarType } from "./types";
 
 export const BeachBarCrudMutation = extendType({
   type: "Mutation",
   definition(t) {
+    t.boolean("cacheBeachBars", {
+      resolve: async (_, __, { redis }): Promise<boolean> => {
+        const beachBars = await BeachBar.find({ relations: relations.BEACH_BAR_EXTENSIVE });
+        beachBars.map(beachBar => redis.lpush(redisKeys.BEACH_BAR_CACHE_KEY, JSON.stringify(beachBar)));
+        console.log(beachBars.map(({ reviews }) => reviews));
+        return true;
+      },
+    });
     t.field("addBeachBar", {
       type: AddBeachBarType,
       description: "Add (register) a new #beach_bar to the platform",
@@ -57,9 +68,8 @@ export const BeachBarCrudMutation = extendType({
         },
         { payload, req, res, stripe, redis }: MyContext
       ): Promise<TAddBeachBar> => {
-        if (!payload || !payload.sub) throw new ApolloError(errors.NOT_AUTHENTICATED_MESSAGE, errors.NOT_AUTHENTICATED_CODE);
-        if (!checkScopes(payload, ["beach_bar@crud:beach_bar"]))
-          throw new ApolloError(errors.NOT_REGISTERED_PRIMARY_OWNER, errors.UNAUTHORIZED_CODE);
+        isAuth(payload);
+        throwScopesUnauthorized(payload, errors.NOT_REGISTERED_PRIMARY_OWNER, ["beach_bar@crud:beach_bar"]);
 
         if (!code || code.trim().length === 0 || !state || state.trim().length === 0)
           throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.INTERNAL_SERVER_ERROR);
@@ -80,7 +90,7 @@ export const BeachBarCrudMutation = extendType({
         )
           throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.INTERNAL_SERVER_ERROR);
 
-        const user = await User.findOne({ where: { id: payload.sub }, relations: ["owner"] });
+        const user = await User.findOne({ where: { id: payload!.sub }, relations: ["owner"] });
         if (!user) throw new ApolloError(errors.USER_NOT_FOUND_MESSAGE, errors.NOT_FOUND);
         if (!user.owner) throw new ApolloError(errors.NOT_REGISTERED_PRIMARY_OWNER, errors.UNAUTHORIZED_CODE);
 
@@ -118,7 +128,7 @@ export const BeachBarCrudMutation = extendType({
             closingTimeId,
           });
 
-          const pricingFee = await newBeachBar.getPricingFee();
+          const pricingFee = await PricingFee.findOne(DATA.BEACH_BAR.PRICING_FEES.find(({ isDefault }) => isDefault === true)?.id);
           if (!pricingFee) throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.INTERNAL_SERVER_ERROR);
           newBeachBar.fee = pricingFee;
           await newBeachBar.save();
@@ -144,7 +154,7 @@ export const BeachBarCrudMutation = extendType({
       type: UpdateBeachBarType,
       description: "Update a #beach_bar details",
       args: {
-        beachBarId: idArg({ description: "The ID value of the #beach_bar" }),
+        beachBarId: idArg(),
         name: nullable(stringArg({ description: "The name to register the #beach_bar. It should be unique among other ones" })),
         description: nullable(stringArg({ description: "A description of the #beach_bar" })),
         thumbnailUrl: nullable(
@@ -195,17 +205,16 @@ export const BeachBarCrudMutation = extendType({
         },
         { payload }: MyContext
       ): Promise<TUpdateBeachBar> => {
-        if (!payload || !payload.sub) throw new ApolloError(errors.NOT_AUTHENTICATED_MESSAGE, errors.NOT_AUTHENTICATED_CODE);
-        if (!checkScopes(payload, ["beach_bar@crud:beach_bar", "beach_bar@update:beach_bar"]))
-          throw new ApolloError('You are not allowed to update "this" #beach_bar\'s details', errors.UNAUTHORIZED_CODE);
+        isAuth(payload);
+        throwScopesUnauthorized(payload, 'You are not allowed to update "this" #beach_bar\'s details', [
+          "beach_bar@crud:beach_bar",
+          "beach_bar@update:beach_bar",
+        ]);
 
         if (!beachBarId || beachBarId.trim().length === 0)
           throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.INVALID_ARGUMENTS);
 
-        const beachBar = await BeachBar.findOne({
-          where: { id: beachBarId },
-          relations: ["location"],
-        });
+        const beachBar = await BeachBar.findOne({ where: { id: beachBarId }, relations: ["location"] });
         if (!beachBar) throw new ApolloError(errors.BEACH_BAR_DOES_NOT_EXIST, errors.NOT_FOUND);
 
         try {
@@ -222,10 +231,7 @@ export const BeachBarCrudMutation = extendType({
             openingTimeId,
             closingTimeId
           );
-          return {
-            beachBar: updatedBeachBar,
-            updated: true,
-          };
+          return { beachBar: updatedBeachBar, updated: true };
         } catch (err) {
           if (err.message === 'duplicate key value violates unique constraint "beach_bar_name_key"')
             throw new ApolloError("A #beach_bar with this name already exists.", errors.CONFLICT);
@@ -234,53 +240,33 @@ export const BeachBarCrudMutation = extendType({
       },
     });
     t.field("deleteBeachBar", {
-      type: DeleteResult,
+      type: DeleteGraphQlType,
       description: "Delete (remove) a #beach_bar from the platform",
-      args: {
-        beachBarId: intArg({ description: "The ID value of the #beach_bar" }),
-      },
-      resolve: async (_, { beachBarId }, { payload, redis, stripe }: MyContext): Promise<DeleteType> => {
-        if (!payload) {
-          return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
-        }
-        if (!checkScopes(payload, ["beach_bar@crud:beach_bar"])) {
-          return {
-            error: { code: errors.UNAUTHORIZED_CODE, message: errors.NOT_REGISTERED_PRIMARY_OWNER },
-          };
-        }
+      args: { beachBarId: idArg() },
+      resolve: async (_, { beachBarId }, { payload, redis, stripe }: MyContext): Promise<TDelete> => {
+        isAuth(payload);
+        throwScopesUnauthorized(payload, errors.NOT_REGISTERED_PRIMARY_OWNER, ["beach_bar@crud:beach_bar"]);
 
-        if (!beachBarId || beachBarId <= 0) {
-          return { error: { code: errors.INVALID_ARGUMENTS, message: errors.SOMETHING_WENT_WRONG } };
-        }
+        if (!beachBarId || beachBarId.trim().length === 0) throw new UserInputError("Please provide a valid beachBarId");
 
         const beachBar = await BeachBar.findOne(beachBarId);
-        if (!beachBar) {
-          return { error: { code: errors.CONFLICT, message: errors.BEACH_BAR_DOES_NOT_EXIST } };
-        }
+        if (!beachBar) throw new ApolloError(errors.BEACH_BAR_DOES_NOT_EXIST, errors.NOT_FOUND);
 
         try {
           // delete Connect account in Stripe, but first check its balance to be zero (0)
-          const accountBalance = await stripe.balance.retrieve({
-            stripeAccount: beachBar.stripeConnectId,
-          });
-          if (!accountBalance || accountBalance.available.some(data => data.amount !== 0)) {
-            return { error: { message: "Your account balance should be zero (0) in value, to delete your account" } };
-          }
+          const accountBalance = await stripe.balance.retrieve({ stripeAccount: beachBar.stripeConnectId });
+          if (!accountBalance || accountBalance.available.some(data => data.amount !== 0))
+            throw new ApolloError("Your account balance should be zero (0) in value, to delete your account");
 
-          if (process.env.NODE_ENV === "production") {
-            await stripe.accounts.del(beachBar.stripeConnectId);
-          } else {
-            await stripe.accounts.reject(beachBar.stripeConnectId, { reason: "other" });
-          }
+          if (process.env.NODE_ENV === "production") await stripe.accounts.del(beachBar.stripeConnectId);
+          else await stripe.accounts.reject(beachBar.stripeConnectId, { reason: "other" });
 
           await beachBar.customSoftRemove(redis);
         } catch (err) {
-          return { error: { message: `${errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
+          throw new ApolloError(errors.SOMETHING_WENT_WRONG + ": " + err.message);
         }
 
-        return {
-          deleted: true,
-        };
+        return { deleted: true };
       },
     });
   },

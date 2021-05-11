@@ -16,13 +16,25 @@ query Search(
   ) {
     results {
       beachBar {
-        id
-        name
-        thumbnailUrl
+        ...SearchBeachBar
       }
       availability {
         hasAvailability
         hasCapacity
+      }
+    }
+    search {
+      id
+      filters {
+        id
+        publicId
+      }
+      sort {
+        id
+        name
+      }
+      inputValue {
+        ...SearchInputValue
       }
     }
   }

@@ -8,24 +8,13 @@ export const CartProduct = objectType({
   name: "CartProduct",
   description: "Represents a shopping cart with its products",
   definition(t) {
+    t.id("id");
     t.int("quantity");
     t.field("date", { type: DateScalar, description: "The date of purchase of the product" });
     t.field("timestamp", { type: DateTimeScalar });
-    t.field("cart", {
-      type: CartType,
-      description: "The shopping cart the product is added to",
-      resolve: o => o.cart,
-    });
-    t.field("product", {
-      type: ProductType,
-      description: "The product that is added to the shopping cart",
-      resolve: o => o.product,
-    });
-    t.field("time", {
-      type: HourTimeType,
-      description: "The hour of use of the product",
-      resolve: o => o.time,
-    });
+    t.field("cart", { type: CartType, description: "The shopping cart the product is added to" });
+    t.field("product", { type: ProductType, description: "The product that is added to the shopping cart" });
+    t.field("time", { type: HourTimeType, description: "The hour of use of the product" });
   },
 });
 
@@ -33,14 +22,8 @@ export const AddCartProduct = objectType({
   name: "AddCartProduct",
   description: "Info to be returned when a product is added to a shopping cart",
   definition(t) {
-    t.field("product", {
-      type: CartProduct,
-      description: "The product that is added to the cart",
-      resolve: o => o.product,
-    });
-    t.boolean("added", {
-      description: "A boolean that indicates if the product has been successfully added to the cart",
-    });
+    t.field("product", { type: CartProduct, description: "The product that is added to the cart" });
+    t.boolean("added");
   },
 });
 
@@ -65,11 +48,8 @@ export const UpdateCartProduct = objectType({
     t.field("product", {
       type: CartProduct,
       description: "The product that is updated",
-      resolve: o => o.product,
     });
-    t.boolean("updated", {
-      description: "A boolean that indicates if the product has been successfully updated",
-    });
+    t.boolean("updated");
   },
 });
 

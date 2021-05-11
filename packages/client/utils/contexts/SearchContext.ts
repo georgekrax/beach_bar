@@ -1,21 +1,23 @@
 import { ACTIONTYPE } from "@/components/Search";
-import { GetAllBeachBarsQuery, Search, SearchFilter, SearchInputValuesQuery, SearchSort } from "@/graphql/generated";
+import { GetAllBeachBarsQuery, SearchInputValuesQuery, SearchQuery, SearchSort } from "@/graphql/generated";
 import { userIpAddr } from "@/lib/apollo/cache";
 import { createCtx } from "@hashtag-design-system/components";
 import { Dayjs } from "dayjs";
 
 export type SearchContextType = {
   id: string;
-  inputValue?: SearchInputValuesQuery["searchInputValues"][number]["inputValue"];
-  sort?: SearchSort;
-  filters: SearchFilter[];
+  inputValue?: SearchInputValuesQuery["searchInputValues"][number];
+  sort?: Omit<SearchSort, "__typename">;
+  filterPublicIds: string[];
   date?: Dayjs;
   hourTime?: number;
+  isCartShown: boolean;
   people?: {
     adults: number;
     children: number;
   };
   map: {
+    isDialogShown: boolean;
     isActive: boolean;
     sort?: SearchSort;
     sortedResults?: GetAllBeachBarsQuery["getAllBeachBars"];
@@ -23,8 +25,7 @@ export type SearchContextType = {
   coordinates: {
     latitude: number;
     longitude: number;
-  },
-  dispatch: React.Dispatch<ACTIONTYPE>;
+  };
   form: {
     searchValue: string;
     suggestions: SearchInputValuesQuery["searchInputValues"];
@@ -32,15 +33,21 @@ export type SearchContextType = {
     isTimePickerShown: boolean;
     isPeopleShown: boolean;
   };
-  results: Search["results"];
+  results: {
+    arr: SearchQuery["search"]["results"];
+    filtered: SearchQuery["search"]["results"];
+  };
+  dispatch: React.Dispatch<ACTIONTYPE>;
 };
 
 export const INITIAL_SEARCH_VALUES: SearchContextType = {
   id: "",
   date: undefined,
-  filters: [],
+  filterPublicIds: [],
   people: undefined,
+  isCartShown: false,
   map: {
+    isDialogShown: false,
     isActive: false,
     sortedResults: undefined,
   },
@@ -48,7 +55,6 @@ export const INITIAL_SEARCH_VALUES: SearchContextType = {
     latitude: userIpAddr().lat,
     longitude: userIpAddr().lon,
   },
-  dispatch: () => {},
   form: {
     searchValue: "",
     suggestions: [],
@@ -56,16 +62,12 @@ export const INITIAL_SEARCH_VALUES: SearchContextType = {
     isTimePickerShown: false,
     isPeopleShown: false,
   },
-  inputValue: {
-    id: "",
-    publicId: "",
-    formattedValue: "",
-    beachBar: undefined,
-    country: undefined,
-    city: undefined,
-    region: undefined,
+  inputValue: undefined,
+  results: {
+    arr: [],
+    filtered: [],
   },
-  results: [],
+  dispatch: () => {},
 };
 
 export const [SearchContextProvider, useSearchContext] = createCtx<SearchContextType>();

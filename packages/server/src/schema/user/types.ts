@@ -14,26 +14,33 @@ export const UserType = objectType({
     t.field("email", { type: EmailScalar, description: "User's email address" });
     t.nullable.string("firstName", { description: "User's first (given) name" });
     t.nullable.string("lastName", { description: "User's last (family) name" });
+    t.nullable.string("fullName", {
+      description: "User's first and last name combines",
+      resolve: (o): null | string => {
+        const { firstName, lastName } = o;
+        if (!firstName && !lastName) return null;
+        let fullName: string[] = [];
+        if (firstName) fullName.push(firstName);
+        if (lastName) fullName.push(lastName);
+        return fullName.join(" ");
+      },
+    });
     t.field("account", {
       type: UserAccountType,
       description: "User's account info",
-      resolve: o => o.account,
     });
-    t.nullable.list.field("reviews", {
+    t.list.field("reviews", {
       type: BeachBarReviewType,
       description: "A user's review on a #beach_bar",
-      resolve: o => o.reviews,
     });
-    t.nullable.list.field("favoriteBars", {
+    t.list.field("favoriteBars", {
       type: UserFavoriteBarType,
       description: "A list with all the user's favorite #beach_bars",
-      resolve: o => o.favoriteBars,
     });
-    t.nullable.list.field("reviewVotes", {
+    t.list.field("reviewVotes", {
       type: ReviewVoteType,
       description: "A list of all the votes of the user",
-      resolve: o => o.reviewVotes,
-    })
+    });
   },
 });
 
@@ -43,11 +50,8 @@ export const UserResult = unionType({
     t.members("User", "Error");
   },
   resolveType: item => {
-    if (item.error) {
-      return "Error";
-    } else {
-      return "User";
-    }
+    if (item.error) return "Error";
+    else return "User";
   },
 });
 
@@ -69,11 +73,7 @@ export const UserLoginType = objectType({
   name: "UserLogin",
   description: "User info to be returned on login",
   definition(t) {
-    t.field("user", {
-      type: UserType,
-      description: "The user (object) that logins",
-      resolve: o => o.user,
-    });
+    t.field("user", { type: UserType, description: "The user (object) that logins" });
     t.string("accessToken", { description: "The access token to authenticate & authorize the user" });
   },
 });

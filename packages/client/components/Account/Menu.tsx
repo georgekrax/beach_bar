@@ -36,7 +36,7 @@ export const Menu: React.FC<Props> = ({ defaultSelected }) => {
     // <AnimateSharedLayout>
     <div className={styles.outerContainer}>
       <div
-        className={styles.container + " w-100 no-scrollbar flex-row-flex-start-center"}
+        className={styles.container + " w100 no-scrollbar flex-row-flex-start-center"}
         onScroll={() =>
           controls.set({
             x: (refs.current[selected]?.getBoundingClientRect().left || 0) - 24,

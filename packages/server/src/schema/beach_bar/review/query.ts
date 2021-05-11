@@ -3,7 +3,7 @@ import { ApolloError, UserInputError } from "apollo-server-express";
 import { BeachBarReview } from "entity/BeachBarReview";
 import { Customer } from "entity/Customer";
 import { MonthTime } from "entity/Time";
-import { extendType, idArg, intArg, nullable, stringArg } from "nexus";
+import { extendType, idArg, nullable, stringArg } from "nexus";
 import { In } from "typeorm";
 import { verifyUserPaymentReview } from "utils/beach_bar/verifyUserPaymentReview";
 import { MonthTimeType } from "../../details/time/types";
@@ -12,31 +12,11 @@ import { BeachBarReviewType } from "./types";
 export const BeachBarReviewQuery = extendType({
   type: "Query",
   definition(t) {
-    t.boolean("verifyUserPaymentReview", {
-      description: "Verify a user's payment to submit review",
-      args: {
-        beachBarId: intArg({ description: "The ID value of the #beach_bar to submit the review" }),
-        refCode: nullable(stringArg({ description: "The referral code of the customer payment, to find" })),
-      },
-      resolve: async (_, { beachBarId, refCode }, { payload }: MyContext): Promise<boolean> => {
-        if (!beachBarId || beachBarId <= 0) {
-          return false;
-        }
-        const { boolean, customer, payment } = await verifyUserPaymentReview(beachBarId, refCode, payload);
-        if (!customer || !payment) {
-          return false;
-        }
-        if (!customer.checkReviewsQuantity(beachBarId, payment)) {
-          return false;
-        }
-        return boolean;
-      },
-    });
     t.nullable.list.field("getPaymentProductsMonth", {
       type: MonthTimeType,
       description: "Get a list with all the months in a review, by the product purchase",
       args: {
-        beachBarId: intArg({ description: "The ID value of the #beach_bar to submit the review" }),
+        beachBarId: idArg(),
         refCode: nullable(stringArg({ description: "The referral code of the customer payment, to find" })),
       },
       resolve: async (_, { beachBarId, refCode }, { payload }: MyContext): Promise<MonthTime[] | null> => {
@@ -62,7 +42,7 @@ export const BeachBarReviewQuery = extendType({
             "reviews",
             "reviews.beachBar",
             "reviews.visitType",
-            "reviews.monthTime",
+            "reviews.month",
             "reviews.payment",
             "reviews.answer",
             "reviews.customer",
@@ -80,11 +60,8 @@ export const BeachBarReviewQuery = extendType({
     t.field("review", {
       type: BeachBarReviewType,
       description: "Get the details of a a review of an authenticated user",
-      args: {
-        reviewId: idArg({ description: "The ID value of the review to fetch" }),
-      },
-      resolve: async (_, { reviewId }, { payload }: MyContext): Promise<BeachBarReview | null> => {
-        if (!payload || !payload.sub) return null;
+      args: { reviewId: idArg() },
+      resolve: async (_, { reviewId }): Promise<BeachBarReview> => {
         if (!reviewId || reviewId.trim().length === 0)
           throw new UserInputError("Please provide a valid review ID", {
             code: errors.INVALID_ARGUMENTS,
@@ -94,7 +71,7 @@ export const BeachBarReviewQuery = extendType({
           where: { id: reviewId },
           relations: [
             "visitType",
-            "monthTime",
+            "month",
             "payment",
             "answer",
             "customer",

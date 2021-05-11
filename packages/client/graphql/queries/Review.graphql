@@ -1,38 +1,10 @@
 query Review($reviewId: ID!) {
   review(reviewId: $reviewId) {
-    id
-    ratingValue
-    positiveComment
-    negativeComment
-    review
-    updatedAt
-    timestamp
-    votes {
-      id
-      user {
-        id
-      }
-      type {
-        id
-        value
-      }
-    }
-    answer {
-      id
-      body
-    }
+    ...Review
     beachBar {
       id
       name
       formattedLocation
-    }
-    visitType {
-      id
-      name
-    }
-    month {
-      id
-      value
     }
   }
 }

@@ -1,53 +1,5 @@
 query SearchInputValues {
-	searchInputValues {
-		inputValue {
-			id
-			publicId
-			formattedValue
-      country {
-        id
-        name
-        alpha2Code
-      }
-			city {
-				id
-				name
-        country {
-          id
-          alpha2Code
-        }
-			}
-      region {
-        id
-        name
-        country {
-          id
-          alpha2Code
-        }
-      }
-      beachBar {
-        id
-        name
-        thumbnailUrl
-        formattedLocation
-        location {
-          longitude
-          latitude
-          country {
-            id
-            name
-            alpha2Code
-          }
-          city {
-            id
-            name
-          }
-          region {
-            id
-            name
-          }
-        }
-      }
-		}
-	}
+  searchInputValues {
+    ...SearchInputValue
+  }
 }

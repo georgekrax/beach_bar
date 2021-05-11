@@ -9,6 +9,7 @@ export const CardBrand: React.FC<FProps> = ({ brand, width = 96, height = 72, ..
     <div className={styles.container}>
       <Image
         src={`https://hashtag--data.s3-eu-west-1.amazonaws.com/credit-card-brands/${String(brand).toLowerCase()}.png`}
+        alt={brand + " logo"}
         width={brand === "AMEX" ? parseInt(width.toString()) * 0.75 : width}
         height={height}
         {...props}

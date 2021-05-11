@@ -8,26 +8,7 @@ query Payment($refCode: String!) {
       id
       total
       products {
-        quantity
-        date
-        time {
-          id
-          value
-        }
-        product {
-          id
-          name
-          price
-          imgUrl
-          beachBar {
-            id
-            name
-            formattedLocation
-            defaultCurrency {
-              symbol
-            }
-          }
-        }
+        ...BasicCartProduct
       }
     }
     card {
@@ -56,7 +37,7 @@ query Payment($refCode: String!) {
     }
     status {
       id
-      status
+      name
     }
     voucherCode {
       id

@@ -17,8 +17,8 @@ export const UserFavoriteBarCrudMutation = extendType({
     t.field("updateFavouriteBeachBar", {
       type: UpdateUserFavoriteBarType,
       description: "Update a user's #beach_bar favourites list",
-      args: { beachBarId: idArg({ description: "The ID value of the #beach_bar, to add / remove from the user's favourites list" }) },
-      resolve: async (_, { beachBarId }, { payload, redis }: MyContext): Promise<TUpdateUserFavoriteBarType> => {
+      args: { slug: idArg({ description: "The slug of the #beach_bar, to add / remove from the user's favourites list" }) },
+      resolve: async (_, { slug }, { payload, redis }: MyContext): Promise<TUpdateUserFavoriteBarType> => {
         if (!payload || !payload.sub) throw new ApolloError(errors.NOT_AUTHENTICATED_MESSAGE, errors.NOT_AUTHENTICATED_CODE);
         if (!checkScopes(payload, ["beach_bar@crud:user"]))
           throw new ApolloError(errors.NOT_AUTHENTICATED_MESSAGE, errors.UNAUTHORIZED_CODE);
@@ -31,34 +31,26 @@ export const UserFavoriteBarCrudMutation = extendType({
         if (!user) throw new ApolloError(errors.USER_NOT_FOUND_MESSAGE, errors.NOT_FOUND);
 
         const beachBars: BeachBar[] = (await redis.lrange(redisKeys.BEACH_BAR_CACHE_KEY, 0, -1)).map((x: string) => JSON.parse(x));
-        const beachBar = beachBars.find(bar => String(bar.id) === String(beachBarId));
+        const beachBar = beachBars.find(bar => bar.slug.toString() === slug);
         if (!beachBar) throw new ApolloError(errors.BEACH_BAR_DOES_NOT_EXIST, errors.NOT_FOUND);
 
         try {
-          let favouriteBar = user.favoriteBars?.find(bar => bar.beachBarId.toString() === beachBarId.toString());
+          let favouriteBar = user.favoriteBars?.find(bar => bar.beachBar.slug.toString() === slug.toString());
           if (!favouriteBar) {
-            favouriteBar = UserFavoriteBar.create({
-              beachBar,
-              user,
-            });
+            favouriteBar = UserFavoriteBar.create({ beachBar, user });
             await favouriteBar.save();
           } else await favouriteBar.softRemove();
           if (!favouriteBar) throw new ApolloError(errors.SOMETHING_WENT_WRONG);
-          return {
-            favouriteBar,
-            updated: true,
-          };
+          return { favouriteBar, updated: true };
         } catch (err) {
-          throw new ApolloError(errors.SOMETHING_WENT_WRONG + ": " + err.message);
+          throw new ApolloError(err.message);
         }
       },
     });
     t.field("deleteUserFavoriteBar", {
       type: DeleteResult,
       description: "Remove a #beach_bar from a user's favorites list",
-      args: {
-        beachBarId: intArg({ description: "The ID value of the #beach_bar, to add to the user's favorites list" }),
-      },
+      args: { beachBarId: intArg({ description: "The ID value of the #beach_bar, to add to the user's favorites list" }) },
       deprecation:
         "You should use the `updateUserFavoriteBar` mutation operation, which handles automatically the creation and removement of a user's #beach_bar",
       resolve: async (_, { beachBarId }, { payload }: MyContext): Promise<DeleteType> => {

@@ -1,4 +1,4 @@
-import { SearchContextProvider, INITIAL_SEARCH_VALUES } from "@/utils/contexts";
+import { SearchContextProvider, INITIAL_SEARCH_VALUES } from "@/utils/contexts/SearchContext";
 import { useReducer, memo } from "react";
 import { reducer } from "./reducer";
 

@@ -1,78 +1,71 @@
-import BeachBar from "@/components/BeachBar";
-import { BeachBar as BeachBarGraphQL } from "@/graphql/generated";
-import { useCarouselItem } from "@/utils/hooks";
-import { useClassnames, useHasMounted } from "@hashtag-design-system/components";
-import { HTMLMotionProps, motion, Variants } from "framer-motion";
-import Image, { ImageProps } from "next/image";
-import React, { memo } from "react";
+import { useCarouselContext } from "@/utils/contexts";
+import { motion } from "framer-motion";
+import { useEffect, useMemo, useRef } from "react";
 import styles from "./Item.module.scss";
 
-export const IMAGE_HEIGHT = 312;
+// const isElementInViewport = <T extends HTMLElement = HTMLElement>(el: T, strict: boolean = false) => {
+//   const { bottom, right, left, top, width } = el.getBoundingClientRect();
+//   const parentRect = el.parentElement?.parentElement?.getBoundingClientRect();
 
-const itemVariants: Variants = {
-  initial: {
-    opacity: 0,
-  },
-  animate: {
-    opacity: 0.9,
-  },
-};
+//   return (
+//     bottom > 0 &&
+//     right > 0 &&
+//     left < (window.innerWidth || document.documentElement.clientWidth) - (strict ? width : 0) &&
+//     top < (window.innerHeight || document.documentElement.clientHeight) &&
+//     (strict ? right - width > (parentRect?.left || 0) : true)
+//   );
+// };
 
-export type Options = {
+type Props = {
   idx: number;
-  imgProps: Partial<ImageProps> & Pick<ImageProps, "src">;
-  beachBar: Pick<BeachBarGraphQL, "id" | "name"> & { city?: string; region?: string };
-  showFavourite?: boolean;
 };
 
-export type Props = {
-  active?: boolean;
-} & Options;
+export const Item: React.FC<Props> = ({ idx, children }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollXProgress, items, visibleItems, setItems } = useCarouselContext();
 
-export type FProps = Props & Omit<HTMLMotionProps<"div">, "id">;
+  const activeIdxs = useMemo(() => visibleItems.map(({ idx }) => idx), [visibleItems]);
 
-export const Item = memo(React.forwardRef<HTMLDivElement, FProps>(
-  ({ idx, active = false, imgProps, beachBar: { id, city, name, region }, showFavourite = true, ...props }, ref) => {
-    const [classNames, rest] = useClassnames("index__carousel__img__container", props);
-    const [imgClassnames, imgRest] = useClassnames("index__carousel__img", imgProps);
-    const [hasMounted] = useHasMounted();
-    const [scale] = useCarouselItem({ active });
+  const handleElemScroll = () => {
+    const current = ref.current;
+    if (!ref || !current) return;
+    const { bottom, right, left, top, width } = current.getBoundingClientRect();
+    const parentRect = current.parentElement?.parentElement?.getBoundingClientRect();
 
-    return (
-      <motion.div
-        className={classNames}
-        key={"index_carousel_img_" + idx}
-        variants={itemVariants}
-        transition={{ duration: hasMounted ? 0.2 : 0.6, ease: "easeOut" }}
-        animate={{ scale: scale }}
-        ref={ref}
-        data-id={idx}
-        {...rest}
-      >
-        <Image
-          className={imgClassnames}
-          // width={232}
-          // height={IMAGE_HEIGHT}
-          alt={`${name} #beach_bar thumbnail image`}
-          objectFit="cover"
-          objectPosition="center"
-          layout="fill"
-          {...imgRest}
-        />
-        {showFavourite && (
-          <div className={styles.favourite}>
-            <BeachBar.Favourite.HeartBox beachBarId={id} />
-          </div>
-        )}
-        <BeachBar.NameAndLocation
-          className="index__carousel__content__container"
-          name={name}
-          city={city}
-          region={region}
-        />
-      </motion.div>
-    );
-  }
-));
+    const bool =
+      bottom > 0 &&
+      right > 0 &&
+      left < (window.innerWidth || document.documentElement.clientWidth) - width &&
+      top < (window.innerHeight || document.documentElement.clientHeight) &&
+      right - width > (parentRect?.left || 0);
+      
+    setItems(prev => prev.map(item => (item.idx === idx ? { ...item, isVisible: bool } : item)));
+  };
+
+  useEffect(() => {
+    if (items.filter(item => item.idx === idx).length === 0) setItems(prev => [...prev, { idx, isVisible: false }]);
+  }, [idx]);
+
+  useEffect(() => {
+    handleElemScroll();
+
+    return () => setItems(items.filter(item => item.idx !== idx));
+  }, []);
+
+  useEffect(() => {
+    scrollXProgress.onChange(() => handleElemScroll());
+  }, [scrollXProgress]);
+
+  return (
+    <motion.div
+      animate={{ scale: activeIdxs.includes(idx) ? 1.1 : 1, transition: { duration: 0.2 } }}
+      className={styles.overflowPadding}
+    >
+      <div ref={ref} className={styles.container}>
+        {children}
+      </div>
+    </motion.div>
+  );
+};
 
 Item.displayName = "CarouselItem";

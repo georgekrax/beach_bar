@@ -12,9 +12,13 @@ export const Header: React.FC<FProps> = ({ as = "h6", children, ...props }) => {
   const [classNames, rest] = useClassnames("beach_bar__header semibold", props);
 
   return as === "h4" ? (
-    <motion.h4 className={classNames} {...rest}>{children}</motion.h4>
+    <motion.h4 className={classNames} {...rest}>
+      {children}
+    </motion.h4>
   ) : (
-    <motion.h6 className={classNames} {...rest}>{children}</motion.h6>
+    <motion.h6 className={classNames} {...rest}>
+      {children}
+    </motion.h6>
   );
 };
 

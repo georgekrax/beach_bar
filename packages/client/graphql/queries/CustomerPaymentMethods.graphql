@@ -1,0 +1,5 @@
+query CustomerPaymentMethods {
+  customerPaymentMethods {
+    ...BasicCard
+  }
+}

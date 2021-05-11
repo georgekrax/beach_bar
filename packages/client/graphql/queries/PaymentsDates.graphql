@@ -1,0 +1,9 @@
+query PaymentDates {
+	paymentDates {
+		month {
+			id
+			value
+		}
+		year
+	}
+}

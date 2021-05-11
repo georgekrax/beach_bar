@@ -18,11 +18,17 @@ $border-height: 2px;
   position: relative;
   margin-top: map-get($em-spacers, 24);
 
+  & > div {
+    max-width: none;
+  }
+
+  &#{Container} {
+    margin-top: map-get($em-spacers, 8);
+    z-index: 99;
+  }
+
   input {
     $border-color: $grey-5;
-    @extend .w-100;
-    @extend .header-5;
-    @extend .semibold;
     margin: 0;
     padding: map-get($rem-spacers, 20) 0 map-get($rem-spacers, 8) 0;
     background: none;
@@ -31,6 +37,8 @@ $border-height: 2px;
     border: none;
     border-radius: 0;
     border-bottom: $border-height solid $border-color;
+    @include h5();
+    @include font-semibold();
 
     &::placeholder {
       color: $grey-7;
@@ -46,11 +54,6 @@ $border-height: 2px;
       font-size: 1.6rem;
       color: $grey-7;
     }
-  }
-
-  &#{Container} {
-    margin-top: map-get($em-spacers, 8);
-    z-index: 99;
   }
 }
 
@@ -82,10 +85,9 @@ $border-height: 2px;
   }
 }
 
-button.cta {
-  @extend .w-100;
-  @extend .header-6;
+.cta {
   padding: map-get($rem-spacers, 12) map-get($rem-spacers, 16);
   background-color: $volcano-5;
   margin-top: map-get($rem-spacers, 96);
+  @include h6();
 }

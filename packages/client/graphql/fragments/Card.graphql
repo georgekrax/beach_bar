@@ -1,0 +1,12 @@
+fragment BasicCard on Card {
+  id
+  expMonth
+  expYear
+  last4
+  cardholderName
+  isDefault
+  brand {
+    id
+    name
+  }
+}

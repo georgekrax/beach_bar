@@ -1,5 +1,5 @@
-mutation DeleteCartProduct($cartId: ID!, $productId: Int!) {
-  deleteCartProduct(cartId: $cartId, productId: $productId) {
+mutation DeleteCartProduct($id: ID!) {
+  deleteCartProduct(id: $id) {
     ... on Delete {
       deleted
     }

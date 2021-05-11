@@ -4,6 +4,7 @@ export type Maybe<T> = T | undefined;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+const defaultOptions =  {}
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -27,7 +28,7 @@ export type Scalars = {
   /** The `Upload` scalar type represents a file upload. */
   Upload: any;
   /** A field whose value conforms to the standard URL format as specified in RFC3986: https://www.ietf.org/rfc/rfc3986.txt. */
-  URL: any;
+  URL: string;
 };
 
 
@@ -63,39 +64,6 @@ export type S3Payload = {
   readonly url: Scalars['URL'];
 };
 
-/** Represents an entry fee for a #beach_bar */
-export type BeachBarEntryFee = {
-  readonly __typename?: 'BeachBarEntryFee';
-  readonly id: Scalars['ID'];
-  readonly fee: Scalars['Float'];
-  /** The date this entry fee is applicable for */
-  readonly date: Scalars['Date'];
-  /** The #beach_bar this fee is added (assigned) to */
-  readonly beachBar: BeachBar;
-};
-
-/** Info to be returned when an entry fee is added to a #beach_bar */
-export type AddBeachBarEntryFee = {
-  readonly __typename?: 'AddBeachBarEntryFee';
-  /** The fees that are being added & its details */
-  readonly fees: ReadonlyArray<BeachBarEntryFee>;
-  /** A boolean that indicates if the fees have been successfully being added to a #beach_bar */
-  readonly added: Scalars['Boolean'];
-};
-
-export type AddBeachBarEntryFeeResult = AddBeachBarEntryFee | Error;
-
-/** Info to be returned when the details of #beach_bar entry fee, are updated */
-export type UpdateBeachBarEntryFee = {
-  readonly __typename?: 'UpdateBeachBarEntryFee';
-  /** The fees being updated */
-  readonly fees: ReadonlyArray<BeachBarEntryFee>;
-  /** A boolean that indicates if the fee details have been successfully updated */
-  readonly updated: Scalars['Boolean'];
-};
-
-export type UpdateBeachBarEntryFeeResult = UpdateBeachBarEntryFee | Error;
-
 /** Represents a #beach_bar's image (URL value) */
 export type BeachBarImgUrl = {
   readonly __typename?: 'BeachBarImgUrl';
@@ -104,6 +72,8 @@ export type BeachBarImgUrl = {
   /** A short description about what the image represents. The characters of the description should not exceed the number 175 */
   readonly description: Maybe<Scalars['String']>;
   readonly beachBar: BeachBar;
+  readonly updatedAt: Scalars['DateTime'];
+  readonly timestamp: Scalars['DateTime'];
 };
 
 /** Info to be returned when an image (URL) is added to a #beach_bar */
@@ -115,8 +85,6 @@ export type AddBeachBarImgUrl = {
   readonly added: Scalars['Boolean'];
 };
 
-export type AddBeachBarImgUrlResult = AddBeachBarImgUrl | Error;
-
 /** Info to be returned when the details of #beach_bar's image, are updated */
 export type UpdateBeachBarImgUrl = {
   readonly __typename?: 'UpdateBeachBarImgUrl';
@@ -125,8 +93,6 @@ export type UpdateBeachBarImgUrl = {
   /** Indicates if the image details have been successfully updated */
   readonly updated: Scalars['Boolean'];
 };
-
-export type UpdateBeachBarImgUrlResult = UpdateBeachBarImgUrl | Error;
 
 /** Represents a #beach_bar's location details */
 export type BeachBarLocation = {
@@ -253,8 +219,6 @@ export type AddCouponCode = {
   readonly added: Scalars['Boolean'];
 };
 
-export type AddCouponCodeResult = AddCouponCode | Error;
-
 /** Info to be returned when a coupon code details are updated */
 export type UpdateCouponCode = {
   readonly __typename?: 'UpdateCouponCode';
@@ -262,9 +226,9 @@ export type UpdateCouponCode = {
   readonly couponCode: CouponCode;
   /** Indicates if the coupon code has been successfully updated */
   readonly updated: Scalars['Boolean'];
+  /** Indicates if the coupon code has been deleted */
+  readonly deleted: Scalars['Boolean'];
 };
-
-export type UpdateCouponCodeResult = UpdateCouponCode | Delete | Error;
 
 /** Info to be returned when an offer campaign is added to a or some #beach_bar's product(s) */
 export type AddOfferCampaign = {
@@ -275,8 +239,6 @@ export type AddOfferCampaign = {
   readonly added: Scalars['Boolean'];
 };
 
-export type AddOfferCampaignResult = AddOfferCampaign | Error;
-
 /** Info to be returned when an offer campaign details are updated */
 export type UpdateOfferCampaign = {
   readonly __typename?: 'UpdateOfferCampaign';
@@ -286,8 +248,6 @@ export type UpdateOfferCampaign = {
   readonly updated: Scalars['Boolean'];
 };
 
-export type UpdateOfferCampaignResult = UpdateOfferCampaign | Error;
-
 /** Info to be returned when a new offer code, of an offer campaign, is added (issued) */
 export type AddOfferCampaignCode = {
   readonly __typename?: 'AddOfferCampaignCode';
@@ -296,8 +256,6 @@ export type AddOfferCampaignCode = {
   /** Indicates if the offer code has been successfully added (issued) */
   readonly added: Scalars['Boolean'];
 };
-
-export type AddOfferCampaignCodeResult = AddOfferCampaignCode | Error;
 
 /** Represents a coupon code, with its referral code revealed */
 export type CouponCodeReveal = CouponCodeInterface & {
@@ -317,8 +275,6 @@ export type CouponCodeReveal = CouponCodeInterface & {
   readonly beachBar: Maybe<BeachBar>;
 };
 
-export type CouponCodeRevealResult = CouponCodeReveal | Error;
-
 /** Represents an offer campaign code, with its referral code revealed */
 export type OfferCampaignCodeReveal = OfferCampaignCodeInterface & {
   readonly __typename?: 'OfferCampaignCodeReveal';
@@ -334,8 +290,6 @@ export type OfferCampaignCodeReveal = OfferCampaignCodeInterface & {
   readonly timestamp: Scalars['DateTime'];
   readonly deletedAt: Maybe<Scalars['DateTime']>;
 };
-
-export type OfferCampaignCodeRevealResult = OfferCampaignCodeReveal | Error;
 
 /** Represents a the limit number, on how many times a product can be provided by a #beach_bar on a specific date */
 export type ProductReservationLimit = {
@@ -361,8 +315,6 @@ export type AddProductReservationLimit = {
   readonly added: Scalars['Boolean'];
 };
 
-export type AddProductReservationLimitResult = AddProductReservationLimit | Error;
-
 /** Info to be returned when a reservation limit of a #beach_bar's product is updated */
 export type UpdateProductReservationLimit = {
   readonly __typename?: 'UpdateProductReservationLimit';
@@ -372,12 +324,10 @@ export type UpdateProductReservationLimit = {
   readonly updated: Scalars['Boolean'];
 };
 
-export type UpdateProductReservationLimitResult = UpdateProductReservationLimit | Error;
-
 /** Info to be returned, when checking if a #beach_bar product is available */
 export type AvailableProduct = {
   readonly __typename?: 'AvailableProduct';
-  /** The hour (time), to check if available */
+  /** The hour, to check if available */
   readonly hourTime: HourTime;
   /** A boolean that indicates if the product is available in the hour time */
   readonly isAvailable: Scalars['Boolean'];
@@ -394,12 +344,20 @@ export type Product = {
   readonly isIndividual: Scalars['Boolean'];
   readonly maxPeople: Scalars['Int'];
   readonly imgUrl: Maybe<Scalars['URL']>;
-  /** The #beach_bar that provides the product */
+  /** The #beach_bar that sells the product */
   readonly beachBar: BeachBar;
   /** The category of the product */
   readonly category: ProductCategory;
   readonly updatedAt: Scalars['DateTime'];
   readonly deletedAt: Maybe<Scalars['DateTime']>;
+};
+
+/** Represents a product of a #beach_bar, and info about it's rest availability quantity */
+export type ProductAvailability = {
+  readonly __typename?: 'ProductAvailability';
+  readonly product: Product;
+  /** How many other's products of this type are available for purchase */
+  readonly quantity: Scalars['Int'];
 };
 
 /** Info to be returned when a product is added to a #beach_bar */
@@ -411,8 +369,6 @@ export type AddProduct = {
   readonly added: Scalars['Boolean'];
 };
 
-export type AddProductResult = AddProduct | Error;
-
 /** Info to be returned when a product of a #beach_bar is updated */
 export type UpdateProduct = {
   readonly __typename?: 'UpdateProduct';
@@ -421,8 +377,6 @@ export type UpdateProduct = {
   /** A boolean that indicates if the product has been successfully updated */
   readonly updated: Scalars['Boolean'];
 };
-
-export type UpdateProductResult = UpdateProduct | Error;
 
 /** The info to be returned when checking for a #beach_bar product's availability hour times */
 export type ProductAvailabilityHour = {
@@ -435,23 +389,18 @@ export type ProductAvailabilityHour = {
 /** Represents a category of a #beach_bar's restaurant menu */
 export type RestaurantMenuCategory = {
   readonly __typename?: 'RestaurantMenuCategory';
-  /** The ID value of the menu category */
   readonly id: Scalars['ID'];
-  /** The name of the menu category */
   readonly name: Scalars['String'];
 };
 
 /** Represents a #beach_bar's restaurant food item (product) in its menu catalog */
 export type RestaurantFoodItem = {
   readonly __typename?: 'RestaurantFoodItem';
-  /** The ID value of the food item */
-  readonly id: Scalars['BigInt'];
-  /** The name of the food item */
+  readonly id: Scalars['ID'];
   readonly name: Scalars['String'];
-  /** The price of the food item, in decimal format with precision of five (5) & scale of two (2) */
   readonly price: Scalars['Float'];
   /** The URL value of the food item's picture */
-  readonly imgUrl: Maybe<Scalars['String']>;
+  readonly imgUrl: Maybe<Scalars['URL']>;
   /** The menu category this food item is associated to */
   readonly menuCategory: RestaurantMenuCategory;
 };
@@ -465,8 +414,6 @@ export type AddRestaurantFoodItem = {
   readonly added: Scalars['Boolean'];
 };
 
-export type AddRestaurantFoodItemResult = AddRestaurantFoodItem | Error;
-
 /** Info to be returned when the food item of #beach_bar restaurant, is updated */
 export type UpdateRestaurantFoodItem = {
   readonly __typename?: 'UpdateRestaurantFoodItem';
@@ -475,8 +422,6 @@ export type UpdateRestaurantFoodItem = {
   /** A boolean that indicates if the food item has been successfully updated */
   readonly updated: Scalars['Boolean'];
 };
-
-export type UpdateRestaurantFoodItemResult = UpdateRestaurantFoodItem | Error;
 
 /** Represents a #beach_bar's restaurant */
 export type BeachBarRestaurant = {
@@ -492,7 +437,7 @@ export type BeachBarRestaurant = {
   /** The #beach_bar this restaurant is owned by */
   readonly beachBar: BeachBar;
   /** A list of food items (products) in the menu of the restaurant */
-  readonly foodItems: Maybe<ReadonlyArray<RestaurantFoodItem>>;
+  readonly foodItems: ReadonlyArray<RestaurantFoodItem>;
 };
 
 /** Info to be returned when a restaurant is added to a #beach_bar */
@@ -504,8 +449,6 @@ export type AddBeachBarRestaurant = {
   readonly added: Scalars['Boolean'];
 };
 
-export type AddBeachBarRestaurantResult = AddBeachBarRestaurant | Error;
-
 /** Info to be returned when the details of #beach_bar restaurant, are updated */
 export type UpdateBeachBarRestaurant = {
   readonly __typename?: 'UpdateBeachBarRestaurant';
@@ -514,8 +457,6 @@ export type UpdateBeachBarRestaurant = {
   /** A boolean that indicates if the restaurant details have been successfully updated */
   readonly updated: Scalars['Boolean'];
 };
-
-export type UpdateBeachBarRestaurantResult = UpdateBeachBarRestaurant | Error;
 
 /** Represents a vote for a user's review */
 export type ReviewVoteType = {
@@ -567,8 +508,6 @@ export type AddReviewAnswer = {
   readonly added: Scalars['Boolean'];
 };
 
-export type AddReviewAnswerResult = AddReviewAnswer | Error;
-
 /** Info to be returned when the answer of a customer's review is updated */
 export type UpdateReviewAnswer = {
   readonly __typename?: 'UpdateReviewAnswer';
@@ -577,8 +516,6 @@ export type UpdateReviewAnswer = {
   /** A boolean that indicates if the review answer has been successfully updated */
   readonly updated: Scalars['Boolean'];
 };
-
-export type UpdateReviewAnswerResult = UpdateReviewAnswer | Error;
 
 /** Represents a #beach_bar's review, by a customer */
 export type BeachBarReview = {
@@ -593,9 +530,8 @@ export type BeachBarReview = {
   readonly negativeComment: Maybe<Scalars['String']>;
   /** A summary (description) of the user's overall review */
   readonly review: Maybe<Scalars['String']>;
-  /** The #beach_bar of the review */
   readonly beachBar: BeachBar;
-  /** The votes os users for this review */
+  /** The votes of users for this review */
   readonly votes: ReadonlyArray<ReviewVote>;
   /** The answer of the #beach_bar to this review */
   readonly answer: Maybe<ReviewAnswer>;
@@ -605,9 +541,9 @@ export type BeachBarReview = {
   readonly visitType: Maybe<ReviewVisitType>;
   /** The visited month of the customer visited the #beach_bar */
   readonly month: Maybe<MonthTime>;
-  /** The last time user's account was updated, in the format of a timestamp */
+  /** The relevant payment the user made, to be able to review a #beach_bar's products */
+  readonly payment: Payment;
   readonly updatedAt: Scalars['DateTime'];
-  /** The timestamp recorded, when the user's account was created */
   readonly timestamp: Scalars['DateTime'];
 };
 
@@ -632,10 +568,10 @@ export type UpdateBeachBarReview = {
 /** Represents a service (feature), which a #beach_bar can provide */
 export type BeachBarService = {
   readonly __typename?: 'BeachBarService';
-  /** The ID value of the feature */
   readonly id: Scalars['ID'];
-  /** The name of the feature */
   readonly name: Scalars['String'];
+  /** Details about which icon to be used in the front-end */
+  readonly icon: Icon;
 };
 
 /** Represents a #beach_bar's feature (service) & its details */
@@ -662,8 +598,6 @@ export type AddBeachBarFeature = {
   readonly added: Scalars['Boolean'];
 };
 
-export type AddBeachBarFeatureResult = AddBeachBarFeature | Error;
-
 /** Info to be returned when the info of a feature of a #beach_bar, are updated */
 export type UpdateBeachBarFeature = {
   readonly __typename?: 'UpdateBeachBarFeature';
@@ -672,8 +606,6 @@ export type UpdateBeachBarFeature = {
   /** A boolean that indicates if the feature has been successfully updated */
   readonly updated: Scalars['Boolean'];
 };
-
-export type UpdateBeachBarFeatureResult = UpdateBeachBarFeature | Error;
 
 /** Represents a #beach_bar */
 export type BeachBar = {
@@ -686,9 +618,11 @@ export type BeachBar = {
   readonly slug: Scalars['String'];
   /** A description text about the #beach_bar */
   readonly description: Maybe<Scalars['String']>;
+  /** The entry fee this #beach_bar has applied for guests */
+  readonly entryFee: Maybe<Scalars['Float']>;
   /** The average rating of all the user reviews for this #beach_bar */
   readonly avgRating: Scalars['Float'];
-  readonly thumbnailUrl: Maybe<Scalars['URL']>;
+  readonly thumbnailUrl: Scalars['URL'];
   /** A phone number to contact the #beach_bar directly */
   readonly contactPhoneNumber: Scalars['String'];
   /** A boolean that indicates if to NOT display the #beach_bar contact phone number */
@@ -699,18 +633,20 @@ export type BeachBar = {
   readonly isAvailable: Scalars['Boolean'];
   /** The location of the #beach_bar */
   readonly location: BeachBarLocation;
-  /** Get the location of the #beach_bar in a formatted string */
+  /** Get the location of the #beach_bar formatted */
   readonly formattedLocation: Scalars['String'];
   /** A list with all the payments of a #beach_bar */
   readonly payments: ReadonlyArray<Payment>;
   /** The category (type) of the #beach_bar */
   readonly category: BeachBarCategory;
   /** A list with all the #beach_bar's images (URL values) */
-  readonly imgUrls: Maybe<ReadonlyArray<BeachBarImgUrl>>;
+  readonly imgUrls: ReadonlyArray<BeachBarImgUrl>;
+  /** A list with all the #beach_bar's products */
+  readonly products: ReadonlyArray<Product>;
   /** A list of all the reviews of the #beach_bar */
-  readonly reviews: Maybe<ReadonlyArray<BeachBarReview>>;
+  readonly reviews: ReadonlyArray<BeachBarReview>;
   /** A list of all the #beach_bar's features */
-  readonly features: ReadonlyArray<Maybe<BeachBarFeature>>;
+  readonly features: ReadonlyArray<BeachBarFeature>;
   /** A list of all the styles the #beach_bar is associated with */
   readonly styles: Maybe<ReadonlyArray<BeachBarStyle>>;
   /** A list of all the restaurants of a #beach_bar */
@@ -761,6 +697,7 @@ export type BeachBarAvailability = {
 /** Represents a shopping cart with its products */
 export type CartProduct = {
   readonly __typename?: 'CartProduct';
+  readonly id: Scalars['ID'];
   readonly quantity: Scalars['Int'];
   /** The date of purchase of the product */
   readonly date: Scalars['Date'];
@@ -778,7 +715,6 @@ export type AddCartProduct = {
   readonly __typename?: 'AddCartProduct';
   /** The product that is added to the cart */
   readonly product: CartProduct;
-  /** A boolean that indicates if the product has been successfully added to the cart */
   readonly added: Scalars['Boolean'];
 };
 
@@ -787,7 +723,6 @@ export type UpdateCartProduct = {
   readonly __typename?: 'UpdateCartProduct';
   /** The product that is updated */
   readonly product: CartProduct;
-  /** A boolean that indicates if the product has been successfully updated */
   readonly updated: Scalars['Boolean'];
 };
 
@@ -858,7 +793,6 @@ export type AddCustomer = {
   readonly __typename?: 'AddCustomer';
   /** The customer that is added (registered) */
   readonly customer: Customer;
-  /** A boolean that indicates if the customer has been successfully added (registered) */
   readonly added: Scalars['Boolean'];
 };
 
@@ -867,7 +801,6 @@ export type UpdateCustomer = {
   readonly __typename?: 'UpdateCustomer';
   /** The customer that is updated */
   readonly customer: Customer;
-  /** A boolean that indicates if the customer details have been successfully updated */
   readonly updated: Scalars['Boolean'];
 };
 
@@ -928,26 +861,24 @@ export type Country = {
 export type PaymentStatus = {
   readonly __typename?: 'PaymentStatus';
   readonly id: Scalars['ID'];
-  readonly status: Scalars['String'];
+  readonly name: Scalars['String'];
 };
 
-/** Represents a component of a #beach_bar product. For example a sunbed. */
+/** Represents a component of a product. For example a sunbed. */
 export type ProductComponent = {
   readonly __typename?: 'ProductComponent';
   readonly id: Scalars['ID'];
-  readonly title: Scalars['String'];
-  readonly description: Scalars['String'];
-  readonly iconUrl: Scalars['URL'];
+  readonly name: Scalars['String'];
+  /** Details about which icon to be used in the front-end */
+  readonly icon: Icon;
 };
 
-/** Represents a #beach_bar product & its components */
-export type BundleProductComponent = {
-  readonly __typename?: 'BundleProductComponent';
-  /** The product of the #beach_bar */
-  readonly product: Product;
-  /** The component of the product */
-  readonly component: ProductComponent;
+/** Represents a component of a product category, including the quantity that each category has. */
+export type ProductCategoryComponent = {
+  readonly __typename?: 'ProductCategoryComponent';
   readonly quantity: Scalars['Int'];
+  readonly component: ProductComponent;
+  readonly category: ProductCategory;
 };
 
 /** Represents a #beach_bar's product category */
@@ -957,8 +888,8 @@ export type ProductCategory = {
   readonly name: Scalars['String'];
   readonly underscoredName: Scalars['String'];
   readonly description: Maybe<Scalars['String']>;
-  /** The component of a product */
-  readonly productComponents: ReadonlyArray<ProductComponent>;
+  /** The components of a category's product */
+  readonly components: ReadonlyArray<ProductCategoryComponent>;
 };
 
 /** Represents a review's visit type, by the user */
@@ -1002,6 +933,15 @@ export type BeachBarCategory = {
   readonly description: Maybe<Scalars['String']>;
 };
 
+/** Represents a SVG icon to be used in the front-end */
+export type Icon = {
+  readonly __typename?: 'Icon';
+  readonly id: Scalars['ID'];
+  readonly name: Scalars['String'];
+  /** A unique public ID for the icon, to be matched in the front-end */
+  readonly publicId: Scalars['String'];
+};
+
 /** Represents a voting category */
 export type VoteCategory = {
   readonly __typename?: 'VoteCategory';
@@ -1031,77 +971,74 @@ export type Mutation = {
   readonly hello: Scalars['String'];
   /** Sign the S3 URL for an object */
   readonly signS3: S3Payload;
-  /** Add an entry fee(s) to a #beach_bar */
-  readonly addBeachBarEntryFee: AddBeachBarEntryFeeResult;
-  /** Update an or many entry fee(s) of a #beach_bar */
-  readonly updateBeachBarEntryFee: UpdateBeachBarEntryFeeResult;
-  /** Delete (remove) an or some entry fees from a #beach_bar */
-  readonly deleteBeachBarEntryFee: DeleteResult;
   /** Add an image (URL) to a #beach_bar */
-  readonly addBeachBarImgUrl: AddBeachBarImgUrlResult;
+  readonly addBeachBarImgUrl: AddBeachBarImgUrl;
   /** Update the details of a #beach_bar's image */
-  readonly updateBeachBaImgUrl: UpdateBeachBarImgUrlResult;
+  readonly updateBeachBaImgUrl: UpdateBeachBarImgUrl;
   /** Delete an image (URL) from a #beach_bar */
-  readonly deleteBeachBarImgUrl: DeleteResult;
+  readonly deleteBeachBarImgUrl: Delete;
   /** Add (assign) a location to a #beach_bar */
   readonly addBeachBarLocation: AddBeachBarLocation;
   /** Update the location details of a #beach_bar */
   readonly updateBeachBarLocation: UpdateBeachBarLocation;
+  readonly cacheBeachBars: Scalars['Boolean'];
   /** Add (register) a new #beach_bar to the platform */
   readonly addBeachBar: AddBeachBar;
   /** Update a #beach_bar details */
   readonly updateBeachBar: UpdateBeachBar;
   /** Delete (remove) a #beach_bar from the platform */
-  readonly deleteBeachBar: DeleteResult;
+  readonly deleteBeachBar: Delete;
   /** Add a product to a #beach_bar */
-  readonly addProduct: AddProductResult;
+  readonly addProduct: AddProduct;
   /** Update a #beach_bar's product info */
-  readonly updateProduct: UpdateProductResult;
+  readonly updateProduct: UpdateProduct;
   /** Delete (remove) a product from a #beach_bar */
-  readonly deleteProduct: DeleteResult;
+  readonly deleteProduct: Delete;
   /** Restore a (soft) deleted #beach_bar product */
-  readonly restoreBeachBarProduct: UpdateProductResult;
+  readonly restoreBeachBarProduct: UpdateProduct;
   /** Add a coupon code */
-  readonly addCouponCode: AddCouponCodeResult;
+  readonly addCouponCode: AddCouponCode;
   /** Update a coupon code */
-  readonly updateCouponCode: UpdateCouponCodeResult;
-  readonly deleteCouponCode: DeleteResult;
+  readonly updateCouponCode: UpdateCouponCode;
+  readonly deleteCouponCode: Delete;
   /** Add an offer campaign to a #beach_bar */
-  readonly addOfferCampaign: AddOfferCampaignResult;
+  readonly addOfferCampaign: AddOfferCampaign;
   /** Update the details of an offer campaign of a #beach_bar */
-  readonly updateOfferCampaign: UpdateOfferCampaignResult;
+  readonly updateOfferCampaign: UpdateOfferCampaign;
   /** Delete an offer campaign of a #beach_bar */
-  readonly deleteOfferCampaign: DeleteResult;
+  readonly deleteOfferCampaign: Delete;
   /** Add (issue) a new offer code */
-  readonly addOfferCampaignCode: AddOfferCampaignCodeResult;
+  readonly addOfferCampaignCode: AddOfferCampaignCode;
   /** Delete (invalidate) an offer code of an offer campaign */
-  readonly deleteOfferCode: DeleteResult;
+  readonly deleteOfferCode: Delete;
   /** Add a reservation limit to a #beach_bar product */
-  readonly addProductReservationLimit: AddProductReservationLimitResult;
+  readonly addProductReservationLimit: AddProductReservationLimit;
   /** Update a #beach_bar's product reservation limit */
-  readonly updateProductReservationLimit: UpdateProductReservationLimitResult;
+  readonly updateProductReservationLimit: UpdateProductReservationLimit;
   /** Delete a or some reservation limit(s) from a #beach_bar's product */
-  readonly deleteProductReservationLimit: DeleteResult;
+  readonly deleteProductReservationLimit: Delete;
   /** Add a food item to a #beach_bar restaurant */
-  readonly addRestaurantFoodItem: AddRestaurantFoodItemResult;
+  readonly addRestaurantFoodItem: AddRestaurantFoodItem;
   /** Update a #beach_bar's restaurant food item details */
-  readonly updateRestaurantFoodItem: UpdateRestaurantFoodItemResult;
+  readonly updateRestaurantFoodItem: UpdateRestaurantFoodItem;
   /** Delete (remove) a food item from a #beach_bar's restaurant */
-  readonly deleteRestaurantFoodItem: DeleteResult;
+  readonly deleteRestaurantFoodItem: Delete;
   /** Add a restaurant of a #beach_bar */
-  readonly addBeachBarRestaurant: AddBeachBarRestaurantResult;
+  readonly addBeachBarRestaurant: AddBeachBarRestaurant;
   /** Update the restaurant details of a #beach_bar */
-  readonly updateBeachBarRestaurant: UpdateBeachBarRestaurantResult;
+  readonly updateBeachBarRestaurant: UpdateBeachBarRestaurant;
   /** Delete (remove) a restaurant from a #beach_bar */
-  readonly deleteBeachBarRestaurant: DeleteResult;
+  readonly deleteBeachBarRestaurant: Delete;
   /** Upvote or downvote a customer's review on a #beach_bar */
   readonly updateReviewVote: UpdateBeachBarReview;
   /** Add a reply to a #beach_bar's review, by its owner */
-  readonly addReviewAnswer: AddReviewAnswerResult;
+  readonly addReviewAnswer: AddReviewAnswer;
   /** Update the body of a #beach_bar's review reply */
-  readonly updateReviewAnswer: UpdateReviewAnswerResult;
+  readonly updateReviewAnswer: UpdateReviewAnswer;
   /** Delete (remove) a reply from a #beach_bar's review */
-  readonly deleteReviewAnswer: DeleteResult;
+  readonly deleteReviewAnswer: Delete;
+  /** Verify a user's payment to submit review */
+  readonly verifyUserPaymentForReview: Scalars['Boolean'];
   /** Add a customer's review on a #beach_bar */
   readonly addReview: AddBeachBarReview;
   /** Update a customer's review on a #beach_bar */
@@ -1109,13 +1046,13 @@ export type Mutation = {
   /** Delete a customer's review on a #beach_bar */
   readonly deleteReview: Delete;
   /** Add (assign) a feature to a #beach_bar */
-  readonly addBeachBarFeature: AddBeachBarFeatureResult;
+  readonly addBeachBarFeature: AddBeachBarFeature;
   /** Update a feature of a #beach_bar */
-  readonly updateBeachBarFeature: UpdateBeachBarFeatureResult;
+  readonly updateBeachBarFeature: UpdateBeachBarFeature;
   /** Delete (remove) a feature (service) from a #beach_bar */
-  readonly deleteBeachBarFeature: DeleteResult;
+  readonly deleteBeachBarFeature: Delete;
   /** Delete a cart after a transaction. This mutation is also called if the user is not authenticated & closes the browser tab */
-  readonly deleteCart: DeleteResult;
+  readonly deleteCart: Delete;
   /** Add a product to a shopping cart */
   readonly addCartProduct: AddCartProduct;
   /** Update the quantity of a product in a shopping cart */
@@ -1139,17 +1076,17 @@ export type Mutation = {
   /** Authorize a user with Instagram */
   readonly authorizeWithInstagram: OAuthAuthorization;
   /** Add (assign) another owner to a #beach_bar too. Only available for the primary owner of a #beach_bar */
-  readonly addBeachBarOwner: AddBeachBarOwnerResult;
+  readonly addBeachBarOwner: AddBeachBarOwner;
   /** Update a #beach_bar's owner info */
-  readonly updateBeachBarOwner: UpdateBeachBarOwnerResult;
+  readonly updateBeachBarOwner: UpdateBeachBarOwner;
   /** Delete (remove) an owner from a #beach_bar */
   readonly deleteBeachBarOwner: DeleteResult;
-  /** Create (make) a payment for a customer's shopping cart */
-  readonly checkout: AddPaymentResult;
+  /** Make a payment using a customer's shopping cart */
+  readonly checkout: Payment;
   /** Refund a payment */
   readonly refundPayment: Delete;
   /** Update a previous user's search */
-  readonly updateSearch: Maybe<UserSearch>;
+  readonly updateSearch: UserSearch;
   /** Update a user's #beach_bar favourites list */
   readonly updateFavouriteBeachBar: UpdateUserFavoriteBar;
   /**
@@ -1193,29 +1130,8 @@ export type MutationSignS3Args = {
 
 
 /** Mutation */
-export type MutationAddBeachBarEntryFeeArgs = {
-  beachBarId: Scalars['Int'];
-  fee: Scalars['Float'];
-  dates: ReadonlyArray<Scalars['Date']>;
-};
-
-
-/** Mutation */
-export type MutationUpdateBeachBarEntryFeeArgs = {
-  entryFeeIds: ReadonlyArray<Scalars['ID']>;
-  fee: Maybe<Scalars['Float']>;
-};
-
-
-/** Mutation */
-export type MutationDeleteBeachBarEntryFeeArgs = {
-  entryFeeIds: ReadonlyArray<Scalars['ID']>;
-};
-
-
-/** Mutation */
 export type MutationAddBeachBarImgUrlArgs = {
-  beachBarId: Scalars['Int'];
+  beachBarId: Scalars['ID'];
   imgUrl: Scalars['URL'];
   description: Maybe<Scalars['String']>;
 };
@@ -1296,16 +1212,16 @@ export type MutationUpdateBeachBarArgs = {
 
 /** Mutation */
 export type MutationDeleteBeachBarArgs = {
-  beachBarId: Scalars['Int'];
+  beachBarId: Scalars['ID'];
 };
 
 
 /** Mutation */
 export type MutationAddProductArgs = {
-  beachBarId: Scalars['Int'];
+  beachBarId: Scalars['ID'];
   name: Scalars['String'];
   description: Maybe<Scalars['String']>;
-  categoryId: Scalars['Int'];
+  categoryId: Scalars['ID'];
   price: Scalars['Float'];
   isActive?: Maybe<Scalars['Boolean']>;
   maxPeople: Scalars['Int'];
@@ -1315,10 +1231,10 @@ export type MutationAddProductArgs = {
 
 /** Mutation */
 export type MutationUpdateProductArgs = {
-  productId: Scalars['Int'];
+  productId: Scalars['ID'];
   name: Scalars['String'];
   description: Maybe<Scalars['String']>;
-  categoryId: Maybe<Scalars['Int']>;
+  categoryId: Maybe<Scalars['ID']>;
   price: Maybe<Scalars['Float']>;
   isActive: Maybe<Scalars['Boolean']>;
   maxPeople: Scalars['Int'];
@@ -1328,13 +1244,13 @@ export type MutationUpdateProductArgs = {
 
 /** Mutation */
 export type MutationDeleteProductArgs = {
-  productId: Scalars['Int'];
+  productId: Scalars['ID'];
 };
 
 
 /** Mutation */
 export type MutationRestoreBeachBarProductArgs = {
-  productId: Scalars['Int'];
+  productId: Scalars['ID'];
 };
 
 
@@ -1368,7 +1284,7 @@ export type MutationDeleteCouponCodeArgs = {
 
 /** Mutation */
 export type MutationAddOfferCampaignArgs = {
-  productIds: ReadonlyArray<Scalars['Int']>;
+  productIds: ReadonlyArray<Scalars['ID']>;
   title: Scalars['String'];
   discountPercentage: Scalars['Float'];
   validUntil: Scalars['DateTime'];
@@ -1379,7 +1295,7 @@ export type MutationAddOfferCampaignArgs = {
 /** Mutation */
 export type MutationUpdateOfferCampaignArgs = {
   offerCampaignId: Scalars['ID'];
-  productIds: ReadonlyArray<Maybe<Scalars['Int']>>;
+  productIds: ReadonlyArray<Maybe<Scalars['ID']>>;
   title: Maybe<Scalars['String']>;
   discountPercentage: Maybe<Scalars['Float']>;
   validUntil: Maybe<Scalars['DateTime']>;
@@ -1407,58 +1323,58 @@ export type MutationDeleteOfferCodeArgs = {
 
 /** Mutation */
 export type MutationAddProductReservationLimitArgs = {
-  productId: Scalars['Int'];
+  productId: Scalars['ID'];
   limit: Scalars['Int'];
   dates: ReadonlyArray<Scalars['Date']>;
-  startTimeId: Scalars['Int'];
-  endTimeId: Scalars['Int'];
+  startTimeId: Scalars['ID'];
+  endTimeId: Scalars['ID'];
 };
 
 
 /** Mutation */
 export type MutationUpdateProductReservationLimitArgs = {
-  reservationLimitIds: ReadonlyArray<Scalars['BigInt']>;
+  reservationLimitIds: ReadonlyArray<Scalars['ID']>;
   limit: Maybe<Scalars['Int']>;
-  startTimeId: Maybe<Scalars['Int']>;
-  endTimeId: Maybe<Scalars['Int']>;
+  startTimeId: Maybe<Scalars['ID']>;
+  endTimeId: Maybe<Scalars['ID']>;
 };
 
 
 /** Mutation */
 export type MutationDeleteProductReservationLimitArgs = {
-  reservationLimitIds: ReadonlyArray<Scalars['BigInt']>;
+  reservationLimitIds: ReadonlyArray<Scalars['ID']>;
 };
 
 
 /** Mutation */
 export type MutationAddRestaurantFoodItemArgs = {
-  restaurantId: Scalars['Int'];
+  restaurantId: Scalars['ID'];
   name: Scalars['String'];
   price: Scalars['Float'];
   menuCategoryId: Scalars['Int'];
-  imgUrl: Maybe<Scalars['String']>;
+  imgUrl: Maybe<Scalars['URL']>;
 };
 
 
 /** Mutation */
 export type MutationUpdateRestaurantFoodItemArgs = {
-  foodItemId: Scalars['BigInt'];
+  foodItemId: Scalars['ID'];
   name: Maybe<Scalars['String']>;
   price: Maybe<Scalars['Float']>;
-  menuCategoryId: Maybe<Scalars['Int']>;
+  menuCategoryId: Maybe<Scalars['ID']>;
   imgUrl: Maybe<Scalars['String']>;
 };
 
 
 /** Mutation */
 export type MutationDeleteRestaurantFoodItemArgs = {
-  foodItemId: Scalars['BigInt'];
+  foodItemId: Scalars['ID'];
 };
 
 
 /** Mutation */
 export type MutationAddBeachBarRestaurantArgs = {
-  beachBarId: Scalars['Int'];
+  beachBarId: Scalars['ID'];
   name: Scalars['String'];
   description: Maybe<Scalars['String']>;
   isActive?: Maybe<Scalars['Boolean']>;
@@ -1467,7 +1383,7 @@ export type MutationAddBeachBarRestaurantArgs = {
 
 /** Mutation */
 export type MutationUpdateBeachBarRestaurantArgs = {
-  restaurantId: Scalars['Int'];
+  restaurantId: Scalars['ID'];
   name: Maybe<Scalars['String']>;
   description: Maybe<Scalars['String']>;
   isActive: Maybe<Scalars['Boolean']>;
@@ -1476,7 +1392,7 @@ export type MutationUpdateBeachBarRestaurantArgs = {
 
 /** Mutation */
 export type MutationDeleteBeachBarRestaurantArgs = {
-  restaurantId: Scalars['Int'];
+  restaurantId: Scalars['ID'];
 };
 
 
@@ -1490,27 +1406,34 @@ export type MutationUpdateReviewVoteArgs = {
 
 /** Mutation */
 export type MutationAddReviewAnswerArgs = {
-  reviewId: Scalars['BigInt'];
+  reviewId: Scalars['ID'];
   body: Scalars['String'];
 };
 
 
 /** Mutation */
 export type MutationUpdateReviewAnswerArgs = {
-  answerId: Scalars['BigInt'];
+  answerId: Scalars['ID'];
   body: Maybe<Scalars['String']>;
 };
 
 
 /** Mutation */
 export type MutationDeleteReviewAnswerArgs = {
-  answerId: Scalars['BigInt'];
+  answerId: Scalars['ID'];
+};
+
+
+/** Mutation */
+export type MutationVerifyUserPaymentForReviewArgs = {
+  beachBarId: Scalars['ID'];
+  refCode: Maybe<Scalars['String']>;
 };
 
 
 /** Mutation */
 export type MutationAddReviewArgs = {
-  beachBarId: Scalars['Int'];
+  beachBarId: Scalars['ID'];
   paymentRefCode: Maybe<Scalars['String']>;
   ratingValue: Scalars['Int'];
   visitTypeId: Maybe<Scalars['ID']>;
@@ -1541,8 +1464,8 @@ export type MutationDeleteReviewArgs = {
 
 /** Mutation */
 export type MutationAddBeachBarFeatureArgs = {
-  beachBarId: Scalars['Int'];
-  featureId: Scalars['Int'];
+  beachBarId: Scalars['ID'];
+  featureId: Scalars['ID'];
   quantity?: Scalars['Int'];
   description: Maybe<Scalars['String']>;
 };
@@ -1550,8 +1473,8 @@ export type MutationAddBeachBarFeatureArgs = {
 
 /** Mutation */
 export type MutationUpdateBeachBarFeatureArgs = {
-  beachBarId: Scalars['Int'];
-  featureId: Scalars['Int'];
+  beachBarId: Scalars['ID'];
+  featureId: Scalars['ID'];
   quantity: Maybe<Scalars['Int']>;
   description: Maybe<Scalars['String']>;
 };
@@ -1559,8 +1482,8 @@ export type MutationUpdateBeachBarFeatureArgs = {
 
 /** Mutation */
 export type MutationDeleteBeachBarFeatureArgs = {
-  beachBarId: Scalars['Int'];
-  featureId: Scalars['Int'];
+  beachBarId: Scalars['ID'];
+  featureId: Scalars['ID'];
 };
 
 
@@ -1573,25 +1496,23 @@ export type MutationDeleteCartArgs = {
 /** Mutation */
 export type MutationAddCartProductArgs = {
   cartId: Scalars['ID'];
-  productId: Scalars['Int'];
+  productId: Scalars['ID'];
   quantity?: Maybe<Scalars['Int']>;
-  timeId: Scalars['Int'];
-  date: Maybe<Scalars['Date']>;
+  date: Scalars['Date'];
+  timeId: Maybe<Scalars['ID']>;
 };
 
 
 /** Mutation */
 export type MutationUpdateCartProductArgs = {
-  cartId: Scalars['ID'];
-  productId: Scalars['Int'];
+  id: Scalars['ID'];
   quantity: Maybe<Scalars['Int']>;
 };
 
 
 /** Mutation */
 export type MutationDeleteCartProductArgs = {
-  cartId: Scalars['ID'];
-  productId: Scalars['Int'];
+  id: Scalars['ID'];
 };
 
 
@@ -1601,6 +1522,7 @@ export type MutationAddCustomerPaymentMethodArgs = {
   customerId: Maybe<Scalars['ID']>;
   cardholderName: Scalars['String'];
   isDefault?: Maybe<Scalars['Boolean']>;
+  savedForFuture?: Maybe<Scalars['Boolean']>;
 };
 
 
@@ -1664,16 +1586,16 @@ export type MutationAuthorizeWithInstagramArgs = {
 
 /** Mutation */
 export type MutationAddBeachBarOwnerArgs = {
-  beachBarId: Scalars['Int'];
-  userId: Maybe<Scalars['Int']>;
+  beachBarId: Scalars['ID'];
+  userId: Maybe<Scalars['ID']>;
   isPrimary?: Maybe<Scalars['Boolean']>;
 };
 
 
 /** Mutation */
 export type MutationUpdateBeachBarOwnerArgs = {
-  beachBarId: Scalars['Int'];
-  userId: Maybe<Scalars['Int']>;
+  beachBarId: Scalars['ID'];
+  userId: Maybe<Scalars['ID']>;
   publicInfo: Maybe<Scalars['Boolean']>;
   isPrimary?: Maybe<Scalars['Boolean']>;
 };
@@ -1681,8 +1603,8 @@ export type MutationUpdateBeachBarOwnerArgs = {
 
 /** Mutation */
 export type MutationDeleteBeachBarOwnerArgs = {
-  beachBarId: Scalars['Int'];
-  userId: Maybe<Scalars['Int']>;
+  beachBarId: Scalars['ID'];
+  userId: Maybe<Scalars['ID']>;
 };
 
 
@@ -1690,6 +1612,7 @@ export type MutationDeleteBeachBarOwnerArgs = {
 export type MutationCheckoutArgs = {
   cartId: Scalars['ID'];
   cardId: Scalars['ID'];
+  totalPeople?: Maybe<Scalars['Int']>;
   voucherCode: Maybe<Scalars['String']>;
 };
 
@@ -1709,7 +1632,7 @@ export type MutationUpdateSearchArgs = {
 
 /** Mutation */
 export type MutationUpdateFavouriteBeachBarArgs = {
-  beachBarId: Scalars['ID'];
+  slug: Scalars['ID'];
 };
 
 
@@ -1809,8 +1732,6 @@ export type AddBeachBarOwner = {
   readonly added: Maybe<Scalars['Boolean']>;
 };
 
-export type AddBeachBarOwnerResult = AddBeachBarOwner | Error;
-
 /** Info to be returned when the info of a #beach_bar owner, are updated */
 export type UpdateBeachBarOwner = {
   readonly __typename?: 'UpdateBeachBarOwner';
@@ -1819,8 +1740,6 @@ export type UpdateBeachBarOwner = {
   /** A boolean that indicates if the owner info have been successfully updated */
   readonly updated: Scalars['Boolean'];
 };
-
-export type UpdateBeachBarOwnerResult = UpdateBeachBarOwner | Error;
 
 /** Represents a reserved product */
 export type ReservedProduct = {
@@ -1858,6 +1777,18 @@ export type UpdateReservedProduct = {
 };
 
 export type UpdateReservedProductResult = UpdateReservedProduct | Error;
+
+/** Represents the offer codes added to a payment */
+export type PaymentOfferCode = {
+  readonly __typename?: 'PaymentOfferCode';
+  readonly id: Scalars['ID'];
+  /** The payment that holds these offer codes */
+  readonly payment: Payment;
+  /** A coupon code added to the payment */
+  readonly couponCode: Maybe<CouponCode>;
+  /** A campaign offer code added to the payment */
+  readonly offerCode: Maybe<OfferCampaignCode>;
+};
 
 /** Represents a payment */
 export type Payment = {
@@ -1921,49 +1852,49 @@ export type PaymentVisitsDates = {
 export type Query = {
   readonly __typename?: 'Query';
   readonly hello: Scalars['String'];
-  /** Get a list with all entry fees of a #beach_bar */
-  readonly getAllBeachBarEntryFees: ReadonlyArray<BeachBarEntryFee>;
-  /** Get a list with all the images (URL values) of a #beach_bar */
-  readonly getBeachBarImgUrl: Maybe<ReadonlyArray<BeachBarImgUrl>>;
   /** Get the product offer or coupon, based on its referral code */
-  readonly getVoucherCode: Maybe<VoucherCodeQueryResult>;
+  readonly getVoucherCode: VoucherCodeQueryResult;
   /** Get a list with all the offer campaigns of a #beach_bar */
-  readonly getBeachBarOfferCampaigns: Maybe<ReadonlyArray<OfferCampaign>>;
+  readonly getBeachBarOfferCampaigns: ReadonlyArray<OfferCampaign>;
   /** Get a coupon's code details & its referral code */
-  readonly revealCouponCode: CouponCodeRevealResult;
+  readonly revealCouponCode: CouponCodeReveal;
   /** Get an offer's campaign code details + its referral code */
-  readonly revealOfferCampaignCode: OfferCampaignCodeRevealResult;
+  readonly revealOfferCampaignCode: OfferCampaignCodeReveal;
   /** Get all products of a #beach_bar */
-  readonly getBeachBarProducts: Maybe<ReadonlyArray<Product>>;
-  /** Retrieve (get) a list with all the available hour times of a product */
-  readonly getProductAvailabilityHours: Maybe<ReadonlyArray<ProductAvailabilityHour>>;
-  readonly getProductAvailabilityQuantity: Maybe<Scalars['Int']>;
+  readonly beachBarProducts: ReadonlyArray<Product>;
+  /** Fetch a list with all the available hour times of a product */
+  readonly getProductAvailabilityHours: ReadonlyArray<ProductAvailabilityHour>;
+  readonly getProductAvailabilityQuantity: Scalars['Int'];
   /** Get a list with all the hours this product has reservation limits */
   readonly hasProductReservationLimit: ReadonlyArray<AvailableProduct>;
-  /** Get the detail info of a #beach_bar */
-  readonly getBeachBar: Maybe<BeachBar>;
+  /** Get the details of a #beach_bar */
+  readonly beachBar: Maybe<BeachBar>;
+  /** Get the images of a #beach_bar */
+  readonly beachBarImgs: Maybe<ReadonlyArray<BeachBarImgUrl>>;
   /** Check a #beach_bar's availability */
-  readonly checkBeachBarAvailability: Maybe<BeachBarAvailability>;
+  readonly checkBeachBarAvailability: BeachBarAvailability;
+  /** Get a list with a #beach_bar's available products */
+  readonly availableProducts: ReadonlyArray<ProductAvailability>;
   /** A list with all the available #beach_bars */
   readonly getAllBeachBars: ReadonlyArray<BeachBar>;
   /** A list with all the #beach_bars, related to a user or are top selections */
   readonly getPersonalizedBeachBars: ReadonlyArray<BeachBar>;
-  /** Verify a user's payment to submit review */
-  readonly verifyUserPaymentReview: Scalars['Boolean'];
+  /** A list with 6 #beach_bars, near to the user's location */
+  readonly nearBeachBars: ReadonlyArray<BeachBar>;
   /** Get a list with all the months in a review, by the product purchase */
   readonly getPaymentProductsMonth: Maybe<ReadonlyArray<MonthTime>>;
   /** Get a list of all the reviews of an authenticated user */
   readonly userReviews: ReadonlyArray<BeachBarReview>;
   /** Get the details of a a review of an authenticated user */
   readonly review: BeachBarReview;
-  readonly getCartEntryFees: Maybe<Scalars['Float']>;
-  readonly verifyZeroCartTotal: Maybe<Scalars['Boolean']>;
+  readonly cartEntryFees: Scalars['Float'];
+  readonly verifyZeroCartTotal: Scalars['Boolean'];
   /** Get the latest cart of an authenticated user or create one */
-  readonly getCart: Maybe<Cart>;
+  readonly cart: Cart;
   /** Get a list with all the payments methods (credit / debit cards) of the current authenticated user */
-  readonly getCustomerPaymentMethods: Maybe<ReadonlyArray<Card>>;
+  readonly customerPaymentMethods: ReadonlyArray<Card>;
   /** Get or create a customer, depending on current authenticated or not user */
-  readonly getOrCreateCustomer: AddCustomer;
+  readonly customer: AddCustomer;
   /** Returns the URL where the #beach_bar (owner) will be redirected to authorize and register with Stripe, for its connect account */
   readonly getStripeConnectOAuthUrl: Maybe<Scalars['URL']>;
   /** Returns the URL where the user will be redirected to login with Google */
@@ -1973,38 +1904,26 @@ export type Query = {
   /** Returns the URL where the user will be redirected to login with Instagram */
   readonly getInstagramOAuthUrl: Scalars['URL'];
   /** Get a list of payments for a specific / latest month of an authenticated user */
-  readonly getPayments: Maybe<ReadonlyArray<PaymentVisits>>;
+  readonly payments: ReadonlyArray<PaymentVisits>;
   /** Get the details of a specific payment / trip */
   readonly payment: Payment;
-  /** Get the amount of refuned of a specific payment / trip */
+  /** Get the amount of refund of a specific payment / trip */
   readonly paymentRefundAmount: Scalars['Float'];
   /** Get a list with the months and years of the cart products in all the payments of an authenticated user */
-  readonly getPaymentsDates: ReadonlyArray<PaymentVisitsDates>;
+  readonly paymentDates: ReadonlyArray<PaymentVisitsDates>;
   /** Returns a list of formatted search input values */
-  readonly searchInputValues: ReadonlyArray<FormattedSearchInputValue>;
+  readonly searchInputValues: ReadonlyArray<SearchInputValue>;
   /** Get a list with a user's latest searches */
-  readonly getLatestUserSearches: ReadonlyArray<UserSearch>;
+  readonly userSearches: ReadonlyArray<UserSearch>;
   /** Search for available #beach_bars */
-  readonly search: Maybe<Search>;
+  readonly search: Search;
   /** Returns a list of user's recorded / saved history */
   readonly userHistory: ReadonlyArray<UserHistoryExtended>;
   /** Get a user's favourite #beach_bars list */
   readonly favouriteBeachBars: ReadonlyArray<UserFavoriteBar>;
+  readonly accessToken: Scalars['String'];
   /** Returns current authenticated user */
   readonly me: Maybe<User>;
-};
-
-
-/** Query */
-export type QueryGetAllBeachBarEntryFeesArgs = {
-  beachBarId: Scalars['Int'];
-  moreThanOrEqualToToday?: Maybe<Scalars['Boolean']>;
-};
-
-
-/** Query */
-export type QueryGetBeachBarImgUrlArgs = {
-  beachBarId: Scalars['Int'];
 };
 
 
@@ -2033,8 +1952,8 @@ export type QueryRevealOfferCampaignCodeArgs = {
 
 
 /** Query */
-export type QueryGetBeachBarProductsArgs = {
-  beachBarId: Scalars['Int'];
+export type QueryBeachBarProductsArgs = {
+  beachBarId: Scalars['ID'];
   isActive?: Maybe<Scalars['Boolean']>;
   isDeleted?: Maybe<Scalars['Boolean']>;
 };
@@ -2042,14 +1961,14 @@ export type QueryGetBeachBarProductsArgs = {
 
 /** Query */
 export type QueryGetProductAvailabilityHoursArgs = {
-  productId: Scalars['Int'];
+  productId: Scalars['ID'];
   date: Scalars['Date'];
 };
 
 
 /** Query */
 export type QueryGetProductAvailabilityQuantityArgs = {
-  productId: Scalars['Int'];
+  productId: Scalars['ID'];
   date: Scalars['Date'];
   timeId: Scalars['Int'];
 };
@@ -2057,35 +1976,48 @@ export type QueryGetProductAvailabilityQuantityArgs = {
 
 /** Query */
 export type QueryHasProductReservationLimitArgs = {
-  productId: Scalars['Int'];
-  date: Maybe<Scalars['Date']>;
+  productId: Scalars['ID'];
+  date: Scalars['Date'];
 };
 
 
 /** Query */
-export type QueryGetBeachBarArgs = {
-  beachBarId: Scalars['Int'];
+export type QueryBeachBarArgs = {
+  slug: Scalars['String'];
   userVisit?: Maybe<Scalars['Boolean']>;
 };
 
 
 /** Query */
-export type QueryCheckBeachBarAvailabilityArgs = {
-  beachBarId: Scalars['Int'];
-  availability: Maybe<SearchInput>;
+export type QueryBeachBarImgsArgs = {
+  slug: Scalars['String'];
 };
 
 
 /** Query */
-export type QueryVerifyUserPaymentReviewArgs = {
-  beachBarId: Scalars['Int'];
-  refCode: Maybe<Scalars['String']>;
+export type QueryCheckBeachBarAvailabilityArgs = {
+  beachBarId: Scalars['ID'];
+  availability: SearchInput;
+};
+
+
+/** Query */
+export type QueryAvailableProductsArgs = {
+  beachBarId: Scalars['ID'];
+  availability: SearchInput;
+};
+
+
+/** Query */
+export type QueryNearBeachBarsArgs = {
+  latitude: Scalars['String'];
+  longitude: Scalars['String'];
 };
 
 
 /** Query */
 export type QueryGetPaymentProductsMonthArgs = {
-  beachBarId: Scalars['Int'];
+  beachBarId: Scalars['ID'];
   refCode: Maybe<Scalars['String']>;
 };
 
@@ -2097,8 +2029,9 @@ export type QueryReviewArgs = {
 
 
 /** Query */
-export type QueryGetCartEntryFeesArgs = {
-  cartId: Maybe<Scalars['ID']>;
+export type QueryCartEntryFeesArgs = {
+  cartId: Scalars['ID'];
+  totalPeople: Scalars['Int'];
 };
 
 
@@ -2109,21 +2042,21 @@ export type QueryVerifyZeroCartTotalArgs = {
 
 
 /** Query */
-export type QueryGetCartArgs = {
+export type QueryCartArgs = {
   cartId: Maybe<Scalars['ID']>;
 };
 
 
 /** Query */
-export type QueryGetOrCreateCustomerArgs = {
+export type QueryCustomerArgs = {
   email: Maybe<Scalars['Email']>;
   phoneNumber: Maybe<Scalars['String']>;
-  countryAlpha2Code: Maybe<Scalars['String']>;
+  countryId: Maybe<Scalars['ID']>;
 };
 
 
 /** Query */
-export type QueryGetPaymentsArgs = {
+export type QueryPaymentsArgs = {
   monthId: Maybe<Scalars['ID']>;
   year: Maybe<Scalars['Int']>;
 };
@@ -2138,6 +2071,12 @@ export type QueryPaymentArgs = {
 /** Query */
 export type QueryPaymentRefundAmountArgs = {
   refCode: Scalars['String'];
+};
+
+
+/** Query */
+export type QueryUserSearchesArgs = {
+  limit: Maybe<Scalars['Int']>;
 };
 
 
@@ -2168,10 +2107,10 @@ export type UserSearch = {
   readonly user: Maybe<User>;
   /** The input value that the user searched for */
   readonly inputValue: SearchInputValue;
+  /** A sort filter used by the user, in its search */
+  readonly filters: ReadonlyArray<SearchFilter>;
   /** The input value that the user searched for */
   readonly sort: Maybe<SearchSort>;
-  /** A sort filter used by the user, in its search */
-  readonly filters: Maybe<ReadonlyArray<SearchSort>>;
   readonly updatedAt: Scalars['DateTime'];
   readonly timestamp: Scalars['DateTime'];
 };
@@ -2239,15 +2178,6 @@ export type SearchFilter = {
   readonly name: Scalars['String'];
   /** A short description about the filter, what is its value, and when to use */
   readonly description: Maybe<Scalars['String']>;
-};
-
-/** Represents a formatted search input value */
-export type FormattedSearchInputValue = {
-  readonly __typename?: 'FormattedSearchInputValue';
-  /** The search input value */
-  readonly inputValue: SearchInputValue;
-  /** The URL value of the #beach_bar thumbnail image to show, at search "dropdown results" */
-  readonly beachBarThumbnailUrl: Maybe<Scalars['URL']>;
 };
 
 /** The base of a GraphQL Node */
@@ -2386,14 +2316,16 @@ export type User = {
   readonly firstName: Maybe<Scalars['String']>;
   /** User's last (family) name */
   readonly lastName: Maybe<Scalars['String']>;
+  /** User's first and last name combines */
+  readonly fullName: Maybe<Scalars['String']>;
   /** User's account info */
   readonly account: UserAccount;
   /** A user's review on a #beach_bar */
-  readonly reviews: Maybe<ReadonlyArray<BeachBarReview>>;
+  readonly reviews: ReadonlyArray<BeachBarReview>;
   /** A list with all the user's favorite #beach_bars */
-  readonly favoriteBars: Maybe<ReadonlyArray<UserFavoriteBar>>;
+  readonly favoriteBars: ReadonlyArray<UserFavoriteBar>;
   /** A list of all the votes of the user */
-  readonly reviewVotes: Maybe<ReadonlyArray<ReviewVote>>;
+  readonly reviewVotes: ReadonlyArray<ReviewVote>;
 };
 
 export type UserTypeResult = User | Error;
@@ -2449,17 +2381,82 @@ export type BeachBarStyle = {
   readonly name: Scalars['String'];
 };
 
-/** Represents the offer codes added to a payment */
-export type PaymentOfferCode = {
-  readonly __typename?: 'PaymentOfferCode';
-  readonly id: Scalars['ID'];
-  /** The payment that holds these offer codes */
-  readonly payment: Payment;
-  /** A coupon code added to the payment */
-  readonly couponCode: Maybe<CouponCode>;
-  /** A campaign offer code added to the payment */
-  readonly offerCode: Maybe<OfferCampaignCode>;
-};
+export type DetailsBeachBarFragment = (
+  { readonly __typename?: 'BeachBar' }
+  & Pick<BeachBar, 'id' | 'name' | 'slug' | 'thumbnailUrl' | 'description' | 'avgRating' | 'isAvailable' | 'formattedLocation' | 'contactPhoneNumber' | 'hidePhoneNumber'>
+  & { readonly location: (
+    { readonly __typename?: 'BeachBarLocation' }
+    & Pick<BeachBarLocation, 'id' | 'address' | 'zipCode' | 'longitude' | 'latitude'>
+    & { readonly country: (
+      { readonly __typename?: 'Country' }
+      & Pick<Country, 'id' | 'name' | 'callingCode'>
+    ), readonly city: (
+      { readonly __typename?: 'City' }
+      & Pick<City, 'id' | 'name'>
+    ), readonly region: Maybe<(
+      { readonly __typename?: 'Region' }
+      & Pick<Region, 'id' | 'name'>
+    )> }
+  ), readonly features: ReadonlyArray<(
+    { readonly __typename?: 'BeachBarFeature' }
+    & Pick<BeachBarFeature, 'quantity'>
+    & { readonly service: (
+      { readonly __typename?: 'BeachBarService' }
+      & Pick<BeachBarService, 'id' | 'name'>
+      & { readonly icon: (
+        { readonly __typename?: 'Icon' }
+        & Pick<Icon, 'id' | 'publicId'>
+      ) }
+    ) }
+  )>, readonly styles: Maybe<ReadonlyArray<(
+    { readonly __typename?: 'BeachBarStyle' }
+    & Pick<BeachBarStyle, 'id' | 'name'>
+  )>>, readonly restaurants: Maybe<ReadonlyArray<(
+    { readonly __typename?: 'BeachBarRestaurant' }
+    & Pick<BeachBarRestaurant, 'id'>
+  )>> }
+);
+
+export type SearchBeachBarFragment = (
+  { readonly __typename?: 'BeachBar' }
+  & { readonly reviews: ReadonlyArray<(
+    { readonly __typename?: 'BeachBarReview' }
+    & Pick<BeachBarReview, 'id'>
+  )>, readonly payments: ReadonlyArray<(
+    { readonly __typename?: 'Payment' }
+    & Pick<Payment, 'id'>
+  )> }
+  & DetailsBeachBarFragment
+);
+
+export type BasicCardFragment = (
+  { readonly __typename?: 'Card' }
+  & Pick<Card, 'id' | 'expMonth' | 'expYear' | 'last4' | 'cardholderName' | 'isDefault'>
+  & { readonly brand: Maybe<(
+    { readonly __typename?: 'CardBrand' }
+    & Pick<CardBrand, 'id' | 'name'>
+  )> }
+);
+
+export type BasicCartProductFragment = (
+  { readonly __typename?: 'CartProduct' }
+  & Pick<CartProduct, 'id' | 'quantity' | 'date' | 'timestamp'>
+  & { readonly time: (
+    { readonly __typename?: 'HourTime' }
+    & Pick<HourTime, 'id' | 'value'>
+  ), readonly product: (
+    { readonly __typename?: 'Product' }
+    & Pick<Product, 'id' | 'name' | 'price' | 'imgUrl'>
+    & { readonly beachBar: (
+      { readonly __typename?: 'BeachBar' }
+      & Pick<BeachBar, 'id' | 'name' | 'thumbnailUrl' | 'formattedLocation'>
+      & { readonly defaultCurrency: (
+        { readonly __typename?: 'Currency' }
+        & Pick<Currency, 'symbol'>
+      ) }
+    ) }
+  ) }
+);
 
 export type CountryFragment = (
   { readonly __typename?: 'Country' }
@@ -2473,11 +2470,134 @@ export type CountryFragment = (
   ) }
 );
 
+export type BeachBarProductFragment = (
+  { readonly __typename?: 'Product' }
+  & Pick<Product, 'id' | 'name' | 'description' | 'imgUrl' | 'price' | 'maxPeople'>
+  & { readonly category: (
+    { readonly __typename?: 'ProductCategory' }
+    & Pick<ProductCategory, 'id'>
+    & { readonly components: ReadonlyArray<(
+      { readonly __typename?: 'ProductCategoryComponent' }
+      & Pick<ProductCategoryComponent, 'quantity'>
+      & { readonly component: (
+        { readonly __typename?: 'ProductComponent' }
+        & Pick<ProductComponent, 'id' | 'name'>
+        & { readonly icon: (
+          { readonly __typename?: 'Icon' }
+          & Pick<Icon, 'id' | 'publicId'>
+        ) }
+      ) }
+    )> }
+  ) }
+);
+
+export type ReviewFragment = (
+  { readonly __typename?: 'BeachBarReview' }
+  & Pick<BeachBarReview, 'id' | 'ratingValue' | 'review' | 'positiveComment' | 'negativeComment' | 'updatedAt' | 'timestamp'>
+  & { readonly votes: ReadonlyArray<(
+    { readonly __typename?: 'ReviewVote' }
+    & Pick<ReviewVote, 'id'>
+    & { readonly user: (
+      { readonly __typename?: 'User' }
+      & Pick<User, 'id'>
+    ), readonly type: (
+      { readonly __typename?: 'ReviewVoteType' }
+      & Pick<ReviewVoteType, 'id' | 'value'>
+    ) }
+  )>, readonly month: Maybe<(
+    { readonly __typename?: 'MonthTime' }
+    & Pick<MonthTime, 'id' | 'value'>
+  )>, readonly visitType: Maybe<(
+    { readonly __typename?: 'ReviewVisitType' }
+    & Pick<ReviewVisitType, 'id' | 'name'>
+  )>, readonly answer: Maybe<(
+    { readonly __typename?: 'ReviewAnswer' }
+    & Pick<ReviewAnswer, 'id' | 'body' | 'updatedAt'>
+  )>, readonly customer: (
+    { readonly __typename?: 'Customer' }
+    & Pick<Customer, 'id'>
+    & { readonly user: Maybe<(
+      { readonly __typename?: 'User' }
+      & Pick<User, 'id' | 'fullName'>
+      & { readonly account: (
+        { readonly __typename?: 'UserAccount' }
+        & Pick<UserAccount, 'id' | 'imgUrl'>
+      ) }
+    )> }
+  ) }
+);
+
+export type SearchInputValueFragment = (
+  { readonly __typename?: 'SearchInputValue' }
+  & Pick<SearchInputValue, 'id' | 'publicId' | 'formattedValue'>
+  & { readonly country: Maybe<(
+    { readonly __typename?: 'Country' }
+    & Pick<Country, 'id' | 'name' | 'alpha2Code'>
+  )>, readonly city: Maybe<(
+    { readonly __typename?: 'City' }
+    & Pick<City, 'id' | 'name'>
+    & { readonly country: Maybe<(
+      { readonly __typename?: 'Country' }
+      & Pick<Country, 'id' | 'alpha2Code'>
+    )> }
+  )>, readonly region: Maybe<(
+    { readonly __typename?: 'Region' }
+    & Pick<Region, 'id' | 'name'>
+    & { readonly country: (
+      { readonly __typename?: 'Country' }
+      & Pick<Country, 'id' | 'alpha2Code'>
+    ) }
+  )>, readonly beachBar: Maybe<(
+    { readonly __typename?: 'BeachBar' }
+    & Pick<BeachBar, 'id' | 'name' | 'thumbnailUrl' | 'formattedLocation'>
+    & { readonly location: (
+      { readonly __typename?: 'BeachBarLocation' }
+      & Pick<BeachBarLocation, 'longitude' | 'latitude'>
+      & { readonly country: (
+        { readonly __typename?: 'Country' }
+        & Pick<Country, 'id' | 'name' | 'alpha2Code'>
+      ), readonly city: (
+        { readonly __typename?: 'City' }
+        & Pick<City, 'id' | 'name'>
+      ), readonly region: Maybe<(
+        { readonly __typename?: 'Region' }
+        & Pick<Region, 'id' | 'name'>
+      )> }
+    ) }
+  )> }
+);
+
+export type AddCartProductMutationVariables = Exact<{
+  cartId: Scalars['ID'];
+  productId: Scalars['ID'];
+  quantity: Maybe<Scalars['Int']>;
+  date: Scalars['Date'];
+  timeId: Maybe<Scalars['ID']>;
+}>;
+
+
+export type AddCartProductMutation = (
+  { readonly __typename?: 'Mutation' }
+  & { readonly addCartProduct: (
+    { readonly __typename?: 'AddCartProduct' }
+    & Pick<AddCartProduct, 'added'>
+    & { readonly product: (
+      { readonly __typename?: 'CartProduct' }
+      & Pick<CartProduct, 'id' | 'quantity'>
+      & { readonly product: (
+        { readonly __typename?: 'Product' }
+        & Pick<Product, 'id' | 'name'>
+      ) }
+    ) }
+  ) }
+);
+
 export type AddCustomerPaymentMethodMutationVariables = Exact<{
   token: Scalars['String'];
   customerId: Scalars['ID'];
   cardholderName: Scalars['String'];
   isDefault?: Maybe<Scalars['Boolean']>;
+  savedForFuture?: Maybe<Scalars['Boolean']>;
 }>;
 
 
@@ -2497,6 +2617,30 @@ export type AddCustomerPaymentMethodMutation = (
   ) }
 );
 
+export type AddReviewMutationVariables = Exact<{
+  beachBarId: Scalars['ID'];
+  paymentRefCode: Maybe<Scalars['String']>;
+  ratingValue: Scalars['Int'];
+  visitTypeId: Maybe<Scalars['ID']>;
+  monthTimeId: Maybe<Scalars['ID']>;
+  positiveComment: Maybe<Scalars['String']>;
+  negativeComment: Maybe<Scalars['String']>;
+  review: Maybe<Scalars['String']>;
+}>;
+
+
+export type AddReviewMutation = (
+  { readonly __typename?: 'Mutation' }
+  & { readonly addReview: (
+    { readonly __typename?: 'AddBeachBarReview' }
+    & Pick<AddBeachBarReview, 'added'>
+    & { readonly review: (
+      { readonly __typename?: 'BeachBarReview' }
+      & Pick<BeachBarReview, 'id'>
+    ) }
+  ) }
+);
+
 export type ChangeUserPasswordMutationVariables = Exact<{
   email: Scalars['Email'];
   token: Scalars['String'];
@@ -2512,9 +2656,23 @@ export type ChangeUserPasswordMutation = (
   ) }
 );
 
-export type DeleteCartProductMutationVariables = Exact<{
+export type CheckoutMutationVariables = Exact<{
   cartId: Scalars['ID'];
-  productId: Scalars['Int'];
+  cardId: Scalars['ID'];
+  totalPeople?: Maybe<Scalars['Int']>;
+}>;
+
+
+export type CheckoutMutation = (
+  { readonly __typename?: 'Mutation' }
+  & { readonly checkout: (
+    { readonly __typename?: 'Payment' }
+    & Pick<Payment, 'id' | 'refCode'>
+  ) }
+);
+
+export type DeleteCartProductMutationVariables = Exact<{
+  id: Scalars['ID'];
 }>;
 
 
@@ -2653,8 +2811,7 @@ export type SignUpMutation = (
 );
 
 export type UpdateCartProductMutationVariables = Exact<{
-  cartId: Scalars['ID'];
-  productId: Scalars['Int'];
+  id: Scalars['ID'];
   quantity: Maybe<Scalars['Int']>;
 }>;
 
@@ -2666,7 +2823,7 @@ export type UpdateCartProductMutation = (
     & Pick<UpdateCartProduct, 'updated'>
     & { readonly product: (
       { readonly __typename?: 'CartProduct' }
-      & Pick<CartProduct, 'quantity'>
+      & Pick<CartProduct, 'id' | 'quantity'>
     ) }
   ) }
 );
@@ -2697,7 +2854,7 @@ export type UpdateCustomerPaymentMethodMutation = (
 );
 
 export type UpdateFavouriteBeachBarMutationVariables = Exact<{
-  beachBarId: Scalars['ID'];
+  slug: Scalars['ID'];
 }>;
 
 
@@ -2825,6 +2982,17 @@ export type UpdateUserMutation = (
   ) }
 );
 
+export type VerifyUserPaymentForReviewMutationVariables = Exact<{
+  beachBarId: Scalars['ID'];
+  refCode: Maybe<Scalars['String']>;
+}>;
+
+
+export type VerifyUserPaymentForReviewMutation = (
+  { readonly __typename?: 'Mutation' }
+  & Pick<Mutation, 'verifyUserPaymentForReview'>
+);
+
 export type AuthorizeWithFacebookMutationVariables = Exact<{
   code: Scalars['String'];
   state: Scalars['String'];
@@ -2883,7 +3051,135 @@ export type AuthorizeWithInstagramMutation = (
   ) }
 );
 
-export type FavouriteBeachBarsQueryVariables = Exact<{ [key: string]: never; }>;
+export type AvailableProductsQueryVariables = Exact<{
+  beachBarId: Scalars['ID'];
+  availability: SearchInput;
+}>;
+
+
+export type AvailableProductsQuery = (
+  { readonly __typename?: 'Query' }
+  & { readonly availableProducts: ReadonlyArray<(
+    { readonly __typename?: 'ProductAvailability' }
+    & Pick<ProductAvailability, 'quantity'>
+    & { readonly product: (
+      { readonly __typename?: 'Product' }
+      & BeachBarProductFragment
+    ) }
+  )> }
+);
+
+export type BeachBarQueryVariables = Exact<{
+  slug: Scalars['String'];
+  userVisit: Maybe<Scalars['Boolean']>;
+}>;
+
+
+export type BeachBarQuery = (
+  { readonly __typename?: 'Query' }
+  & { readonly beachBar: Maybe<(
+    { readonly __typename?: 'BeachBar' }
+    & { readonly reviews: ReadonlyArray<(
+      { readonly __typename?: 'BeachBarReview' }
+      & { readonly payment: (
+        { readonly __typename?: 'Payment' }
+        & Pick<Payment, 'id' | 'timestamp'>
+      ) }
+      & ReviewFragment
+    )>, readonly imgUrls: ReadonlyArray<(
+      { readonly __typename?: 'BeachBarImgUrl' }
+      & Pick<BeachBarImgUrl, 'id' | 'imgUrl' | 'description' | 'timestamp'>
+    )>, readonly defaultCurrency: (
+      { readonly __typename?: 'Currency' }
+      & Pick<Currency, 'id' | 'symbol'>
+    ), readonly products: ReadonlyArray<(
+      { readonly __typename?: 'Product' }
+      & BeachBarProductFragment
+    )> }
+    & DetailsBeachBarFragment
+  )> }
+);
+
+export type BeachBarImgsQueryVariables = Exact<{
+  slug: Scalars['String'];
+}>;
+
+
+export type BeachBarImgsQuery = (
+  { readonly __typename?: 'Query' }
+  & { readonly beachBarImgs: Maybe<ReadonlyArray<(
+    { readonly __typename?: 'BeachBarImgUrl' }
+    & Pick<BeachBarImgUrl, 'id' | 'imgUrl' | 'description' | 'timestamp'>
+  )>> }
+);
+
+export type CartQueryVariables = Exact<{
+  cartId: Maybe<Scalars['ID']>;
+}>;
+
+
+export type CartQuery = (
+  { readonly __typename?: 'Query' }
+  & { readonly cart: (
+    { readonly __typename?: 'Cart' }
+    & Pick<Cart, 'id' | 'total'>
+    & { readonly products: Maybe<ReadonlyArray<(
+      { readonly __typename?: 'CartProduct' }
+      & BasicCartProductFragment
+    )>> }
+  ) }
+);
+
+export type CartEntryFeesQueryVariables = Exact<{
+  cartId: Scalars['ID'];
+  totalPeople: Scalars['Int'];
+}>;
+
+
+export type CartEntryFeesQuery = (
+  { readonly __typename?: 'Query' }
+  & Pick<Query, 'cartEntryFees'>
+);
+
+export type CustomerQueryVariables = Exact<{
+  email: Maybe<Scalars['Email']>;
+  phoneNumber: Maybe<Scalars['String']>;
+  countryId: Maybe<Scalars['ID']>;
+}>;
+
+
+export type CustomerQuery = (
+  { readonly __typename?: 'Query' }
+  & { readonly customer: (
+    { readonly __typename?: 'AddCustomer' }
+    & { readonly customer: (
+      { readonly __typename?: 'Customer' }
+      & Pick<Customer, 'id' | 'email'>
+      & { readonly user: Maybe<(
+        { readonly __typename?: 'User' }
+        & Pick<User, 'id' | 'email'>
+      )>, readonly cards: Maybe<ReadonlyArray<(
+        { readonly __typename?: 'Card' }
+        & BasicCardFragment
+      )>> }
+    ) }
+  ) }
+);
+
+export type CustomerPaymentMethodsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type CustomerPaymentMethodsQuery = (
+  { readonly __typename?: 'Query' }
+  & { readonly customerPaymentMethods: ReadonlyArray<(
+    { readonly __typename?: 'Card' }
+    & BasicCardFragment
+  )> }
+);
+
+export type FavouriteBeachBarsQueryVariables = Exact<{
+  limit: Maybe<Scalars['Int']>;
+}>;
 
 
 export type FavouriteBeachBarsQuery = (
@@ -2892,7 +3188,7 @@ export type FavouriteBeachBarsQuery = (
     { readonly __typename?: 'UserFavoriteBar' }
     & { readonly beachBar: (
       { readonly __typename?: 'BeachBar' }
-      & Pick<BeachBar, 'id' | 'name' | 'thumbnailUrl' | 'formattedLocation'>
+      & Pick<BeachBar, 'id' | 'name' | 'slug' | 'thumbnailUrl' | 'formattedLocation'>
     ) }
   )> }
 );
@@ -2918,152 +3214,6 @@ export type GetUserFavouriteBeachBarsQuery = (
   )> }
 );
 
-export type GetCartQueryVariables = Exact<{
-  cartId: Maybe<Scalars['ID']>;
-}>;
-
-
-export type GetCartQuery = (
-  { readonly __typename?: 'Query' }
-  & { readonly getCart: Maybe<(
-    { readonly __typename?: 'Cart' }
-    & Pick<Cart, 'id' | 'total'>
-    & { readonly products: Maybe<ReadonlyArray<(
-      { readonly __typename?: 'CartProduct' }
-      & Pick<CartProduct, 'quantity' | 'date' | 'timestamp'>
-      & { readonly time: (
-        { readonly __typename?: 'HourTime' }
-        & Pick<HourTime, 'id' | 'value'>
-      ), readonly product: (
-        { readonly __typename?: 'Product' }
-        & Pick<Product, 'id' | 'name' | 'price' | 'imgUrl'>
-        & { readonly beachBar: (
-          { readonly __typename?: 'BeachBar' }
-          & Pick<BeachBar, 'id' | 'name' | 'thumbnailUrl'>
-          & { readonly defaultCurrency: (
-            { readonly __typename?: 'Currency' }
-            & Pick<Currency, 'symbol'>
-          ) }
-        ) }
-      ) }
-    )>> }
-  )> }
-);
-
-export type GetCustomerPaymentMethodsQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetCustomerPaymentMethodsQuery = (
-  { readonly __typename?: 'Query' }
-  & { readonly getCustomerPaymentMethods: Maybe<ReadonlyArray<(
-    { readonly __typename?: 'Card' }
-    & Pick<Card, 'id' | 'expMonth' | 'expYear' | 'last4' | 'cardholderName' | 'isDefault'>
-    & { readonly brand: Maybe<(
-      { readonly __typename?: 'CardBrand' }
-      & Pick<CardBrand, 'id' | 'name'>
-    )> }
-  )>> }
-);
-
-export type GetLatestUserSearchesQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetLatestUserSearchesQuery = (
-  { readonly __typename?: 'Query' }
-  & { readonly getLatestUserSearches: ReadonlyArray<(
-    { readonly __typename?: 'UserSearch' }
-    & Pick<UserSearch, 'id' | 'searchDate' | 'searchAdults' | 'searchChildren'>
-    & { readonly inputValue: (
-      { readonly __typename?: 'SearchInputValue' }
-      & { readonly city: Maybe<(
-        { readonly __typename?: 'City' }
-        & Pick<City, 'name'>
-      )>, readonly region: Maybe<(
-        { readonly __typename?: 'Region' }
-        & Pick<Region, 'name'>
-      )>, readonly beachBar: Maybe<(
-        { readonly __typename?: 'BeachBar' }
-        & Pick<BeachBar, 'name' | 'thumbnailUrl'>
-      )> }
-    ) }
-  )> }
-);
-
-export type GetOrCreateCustomerQueryVariables = Exact<{
-  email: Maybe<Scalars['Email']>;
-  phoneNumber: Maybe<Scalars['String']>;
-  countryAlpha2Code: Maybe<Scalars['String']>;
-}>;
-
-
-export type GetOrCreateCustomerQuery = (
-  { readonly __typename?: 'Query' }
-  & { readonly getOrCreateCustomer: (
-    { readonly __typename?: 'AddCustomer' }
-    & Pick<AddCustomer, 'added'>
-    & { readonly customer: (
-      { readonly __typename?: 'Customer' }
-      & Pick<Customer, 'id'>
-      & { readonly user: Maybe<(
-        { readonly __typename?: 'User' }
-        & Pick<User, 'id'>
-      )> }
-    ) }
-  ) }
-);
-
-export type GetPaymentsQueryVariables = Exact<{
-  monthId: Maybe<Scalars['ID']>;
-  year: Maybe<Scalars['Int']>;
-}>;
-
-
-export type GetPaymentsQuery = (
-  { readonly __typename?: 'Query' }
-  & { readonly getPayments: Maybe<ReadonlyArray<(
-    { readonly __typename?: 'PaymentVisits' }
-    & { readonly beachBar: (
-      { readonly __typename?: 'BeachBar' }
-      & Pick<BeachBar, 'id' | 'name' | 'thumbnailUrl'>
-      & { readonly location: (
-        { readonly __typename?: 'BeachBarLocation' }
-        & { readonly city: (
-          { readonly __typename?: 'City' }
-          & Pick<City, 'name'>
-        ), readonly region: Maybe<(
-          { readonly __typename?: 'Region' }
-          & Pick<Region, 'name'>
-        )> }
-      ) }
-    ), readonly visits: ReadonlyArray<(
-      { readonly __typename?: 'Visit' }
-      & Pick<Visit, 'isUpcoming' | 'isRefunded' | 'date'>
-      & { readonly time: (
-        { readonly __typename?: 'HourTime' }
-        & Pick<HourTime, 'id' | 'value'>
-      ), readonly payment: (
-        { readonly __typename?: 'Payment' }
-        & Pick<Payment, 'id' | 'refCode'>
-      ) }
-    )> }
-  )>> }
-);
-
-export type GetPaymentsDatesQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetPaymentsDatesQuery = (
-  { readonly __typename?: 'Query' }
-  & { readonly getPaymentsDates: ReadonlyArray<(
-    { readonly __typename?: 'PaymentVisitsDates' }
-    & Pick<PaymentVisitsDates, 'year'>
-    & { readonly month: (
-      { readonly __typename?: 'MonthTime' }
-      & Pick<MonthTime, 'id' | 'value'>
-    ) }
-  )> }
-);
-
 export type GetPersonalizedBeachBarsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -3071,9 +3221,10 @@ export type GetPersonalizedBeachBarsQuery = (
   { readonly __typename?: 'Query' }
   & { readonly getPersonalizedBeachBars: ReadonlyArray<(
     { readonly __typename?: 'BeachBar' }
-    & Pick<BeachBar, 'name' | 'thumbnailUrl'>
+    & Pick<BeachBar, 'id' | 'name' | 'slug' | 'thumbnailUrl' | 'formattedLocation'>
     & { readonly location: (
       { readonly __typename?: 'BeachBarLocation' }
+      & Pick<BeachBarLocation, 'latitude' | 'longitude'>
       & { readonly city: (
         { readonly __typename?: 'City' }
         & Pick<City, 'name'>
@@ -3092,7 +3243,7 @@ export type MeQuery = (
   { readonly __typename?: 'Query' }
   & { readonly me: Maybe<(
     { readonly __typename?: 'User' }
-    & Pick<User, 'id' | 'email' | 'firstName' | 'lastName'>
+    & Pick<User, 'id' | 'email' | 'firstName' | 'lastName' | 'fullName'>
     & { readonly account: (
       { readonly __typename?: 'UserAccount' }
       & Pick<UserAccount, 'id' | 'honorificTitle' | 'birthday' | 'age' | 'address' | 'zipCode' | 'imgUrl' | 'city' | 'trackHistory' | 'phoneNumber'>
@@ -3107,7 +3258,7 @@ export type MeQuery = (
           & Pick<Currency, 'id' | 'symbol'>
         ) }
       )> }
-    ), readonly reviewVotes: Maybe<ReadonlyArray<(
+    ), readonly reviewVotes: ReadonlyArray<(
       { readonly __typename?: 'ReviewVote' }
       & Pick<ReviewVote, 'id'>
       & { readonly type: (
@@ -3117,7 +3268,31 @@ export type MeQuery = (
         { readonly __typename?: 'BeachBarReview' }
         & Pick<BeachBarReview, 'id'>
       ) }
-    )>> }
+    )>, readonly favoriteBars: ReadonlyArray<(
+      { readonly __typename?: 'UserFavoriteBar' }
+      & { readonly beachBar: (
+        { readonly __typename?: 'BeachBar' }
+        & Pick<BeachBar, 'id' | 'name' | 'slug' | 'thumbnailUrl' | 'formattedLocation'>
+      ) }
+    )> }
+  )> }
+);
+
+export type NearBeachBarsQueryVariables = Exact<{
+  latitude: Scalars['String'];
+  longitude: Scalars['String'];
+}>;
+
+
+export type NearBeachBarsQuery = (
+  { readonly __typename?: 'Query' }
+  & { readonly nearBeachBars: ReadonlyArray<(
+    { readonly __typename?: 'BeachBar' }
+    & Pick<BeachBar, 'id' | 'name' | 'slug' | 'thumbnailUrl'>
+    & { readonly location: (
+      { readonly __typename?: 'BeachBarLocation' }
+      & Pick<BeachBarLocation, 'latitude' | 'longitude'>
+    ) }
   )> }
 );
 
@@ -3136,22 +3311,7 @@ export type PaymentQuery = (
       & Pick<Cart, 'id' | 'total'>
       & { readonly products: Maybe<ReadonlyArray<(
         { readonly __typename?: 'CartProduct' }
-        & Pick<CartProduct, 'quantity' | 'date'>
-        & { readonly time: (
-          { readonly __typename?: 'HourTime' }
-          & Pick<HourTime, 'id' | 'value'>
-        ), readonly product: (
-          { readonly __typename?: 'Product' }
-          & Pick<Product, 'id' | 'name' | 'price' | 'imgUrl'>
-          & { readonly beachBar: (
-            { readonly __typename?: 'BeachBar' }
-            & Pick<BeachBar, 'id' | 'name' | 'formattedLocation'>
-            & { readonly defaultCurrency: (
-              { readonly __typename?: 'Currency' }
-              & Pick<Currency, 'symbol'>
-            ) }
-          ) }
-        ) }
+        & BasicCartProductFragment
       )>> }
     ), readonly card: (
       { readonly __typename?: 'Card' }
@@ -3176,7 +3336,7 @@ export type PaymentQuery = (
       ) }
     ), readonly status: (
       { readonly __typename?: 'PaymentStatus' }
-      & Pick<PaymentStatus, 'id' | 'status'>
+      & Pick<PaymentStatus, 'id' | 'name'>
     ), readonly voucherCode: Maybe<(
       { readonly __typename?: 'PaymentOfferCode' }
       & Pick<PaymentOfferCode, 'id'>
@@ -3205,6 +3365,58 @@ export type PaymentRefundAmountQuery = (
   & Pick<Query, 'paymentRefundAmount'>
 );
 
+export type PaymentsQueryVariables = Exact<{
+  monthId: Maybe<Scalars['ID']>;
+  year: Maybe<Scalars['Int']>;
+}>;
+
+
+export type PaymentsQuery = (
+  { readonly __typename?: 'Query' }
+  & { readonly payments: ReadonlyArray<(
+    { readonly __typename?: 'PaymentVisits' }
+    & { readonly beachBar: (
+      { readonly __typename?: 'BeachBar' }
+      & Pick<BeachBar, 'id' | 'name' | 'thumbnailUrl'>
+      & { readonly location: (
+        { readonly __typename?: 'BeachBarLocation' }
+        & { readonly city: (
+          { readonly __typename?: 'City' }
+          & Pick<City, 'name'>
+        ), readonly region: Maybe<(
+          { readonly __typename?: 'Region' }
+          & Pick<Region, 'name'>
+        )> }
+      ) }
+    ), readonly visits: ReadonlyArray<(
+      { readonly __typename?: 'Visit' }
+      & Pick<Visit, 'isUpcoming' | 'isRefunded' | 'date'>
+      & { readonly time: (
+        { readonly __typename?: 'HourTime' }
+        & Pick<HourTime, 'id' | 'value'>
+      ), readonly payment: (
+        { readonly __typename?: 'Payment' }
+        & Pick<Payment, 'id' | 'refCode'>
+      ) }
+    )> }
+  )> }
+);
+
+export type PaymentDatesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type PaymentDatesQuery = (
+  { readonly __typename?: 'Query' }
+  & { readonly paymentDates: ReadonlyArray<(
+    { readonly __typename?: 'PaymentVisitsDates' }
+    & Pick<PaymentVisitsDates, 'year'>
+    & { readonly month: (
+      { readonly __typename?: 'MonthTime' }
+      & Pick<MonthTime, 'id' | 'value'>
+    ) }
+  )> }
+);
+
 export type ReviewQueryVariables = Exact<{
   reviewId: Scalars['ID'];
 }>;
@@ -3214,30 +3426,11 @@ export type ReviewQuery = (
   { readonly __typename?: 'Query' }
   & { readonly review: (
     { readonly __typename?: 'BeachBarReview' }
-    & Pick<BeachBarReview, 'id' | 'ratingValue' | 'positiveComment' | 'negativeComment' | 'review' | 'updatedAt' | 'timestamp'>
-    & { readonly votes: ReadonlyArray<(
-      { readonly __typename?: 'ReviewVote' }
-      & Pick<ReviewVote, 'id'>
-      & { readonly user: (
-        { readonly __typename?: 'User' }
-        & Pick<User, 'id'>
-      ), readonly type: (
-        { readonly __typename?: 'ReviewVoteType' }
-        & Pick<ReviewVoteType, 'id' | 'value'>
-      ) }
-    )>, readonly answer: Maybe<(
-      { readonly __typename?: 'ReviewAnswer' }
-      & Pick<ReviewAnswer, 'id' | 'body'>
-    )>, readonly beachBar: (
+    & { readonly beachBar: (
       { readonly __typename?: 'BeachBar' }
       & Pick<BeachBar, 'id' | 'name' | 'formattedLocation'>
-    ), readonly visitType: Maybe<(
-      { readonly __typename?: 'ReviewVisitType' }
-      & Pick<ReviewVisitType, 'id' | 'name'>
-    )>, readonly month: Maybe<(
-      { readonly __typename?: 'MonthTime' }
-      & Pick<MonthTime, 'id' | 'value'>
-    )> }
+    ) }
+    & ReviewFragment
   ) }
 );
 
@@ -3253,19 +3446,32 @@ export type SearchQueryVariables = Exact<{
 
 export type SearchQuery = (
   { readonly __typename?: 'Query' }
-  & { readonly search: Maybe<(
+  & { readonly search: (
     { readonly __typename?: 'Search' }
     & { readonly results: ReadonlyArray<(
       { readonly __typename?: 'SearchResultType' }
       & { readonly beachBar: (
         { readonly __typename?: 'BeachBar' }
-        & Pick<BeachBar, 'id' | 'name' | 'thumbnailUrl'>
+        & SearchBeachBarFragment
       ), readonly availability: (
         { readonly __typename?: 'BeachBarAvailability' }
         & Pick<BeachBarAvailability, 'hasAvailability' | 'hasCapacity'>
       ) }
-    )> }
-  )> }
+    )>, readonly search: (
+      { readonly __typename?: 'UserSearch' }
+      & Pick<UserSearch, 'id'>
+      & { readonly filters: ReadonlyArray<(
+        { readonly __typename?: 'SearchFilter' }
+        & Pick<SearchFilter, 'id' | 'publicId'>
+      )>, readonly sort: Maybe<(
+        { readonly __typename?: 'SearchSort' }
+        & Pick<SearchSort, 'id' | 'name'>
+      )>, readonly inputValue: (
+        { readonly __typename?: 'SearchInputValue' }
+        & SearchInputValueFragment
+      ) }
+    ) }
+  ) }
 );
 
 export type SearchInputValuesQueryVariables = Exact<{ [key: string]: never; }>;
@@ -3274,46 +3480,8 @@ export type SearchInputValuesQueryVariables = Exact<{ [key: string]: never; }>;
 export type SearchInputValuesQuery = (
   { readonly __typename?: 'Query' }
   & { readonly searchInputValues: ReadonlyArray<(
-    { readonly __typename?: 'FormattedSearchInputValue' }
-    & { readonly inputValue: (
-      { readonly __typename?: 'SearchInputValue' }
-      & Pick<SearchInputValue, 'id' | 'publicId' | 'formattedValue'>
-      & { readonly country: Maybe<(
-        { readonly __typename?: 'Country' }
-        & Pick<Country, 'id' | 'name' | 'alpha2Code'>
-      )>, readonly city: Maybe<(
-        { readonly __typename?: 'City' }
-        & Pick<City, 'id' | 'name'>
-        & { readonly country: Maybe<(
-          { readonly __typename?: 'Country' }
-          & Pick<Country, 'id' | 'alpha2Code'>
-        )> }
-      )>, readonly region: Maybe<(
-        { readonly __typename?: 'Region' }
-        & Pick<Region, 'id' | 'name'>
-        & { readonly country: (
-          { readonly __typename?: 'Country' }
-          & Pick<Country, 'id' | 'alpha2Code'>
-        ) }
-      )>, readonly beachBar: Maybe<(
-        { readonly __typename?: 'BeachBar' }
-        & Pick<BeachBar, 'id' | 'name' | 'thumbnailUrl' | 'formattedLocation'>
-        & { readonly location: (
-          { readonly __typename?: 'BeachBarLocation' }
-          & Pick<BeachBarLocation, 'longitude' | 'latitude'>
-          & { readonly country: (
-            { readonly __typename?: 'Country' }
-            & Pick<Country, 'id' | 'name' | 'alpha2Code'>
-          ), readonly city: (
-            { readonly __typename?: 'City' }
-            & Pick<City, 'id' | 'name'>
-          ), readonly region: Maybe<(
-            { readonly __typename?: 'Region' }
-            & Pick<Region, 'id' | 'name'>
-          )> }
-        ) }
-      )> }
-    ) }
+    { readonly __typename?: 'SearchInputValue' }
+    & SearchInputValueFragment
   )> }
 );
 
@@ -3376,6 +3544,33 @@ export type UserReviewsQuery = (
       { readonly __typename?: 'MonthTime' }
       & Pick<MonthTime, 'id' | 'value'>
     )> }
+  )> }
+);
+
+export type UserSearchesQueryVariables = Exact<{
+  limit: Maybe<Scalars['Int']>;
+}>;
+
+
+export type UserSearchesQuery = (
+  { readonly __typename?: 'Query' }
+  & { readonly userSearches: ReadonlyArray<(
+    { readonly __typename?: 'UserSearch' }
+    & Pick<UserSearch, 'id' | 'searchDate' | 'searchAdults' | 'searchChildren'>
+    & { readonly inputValue: (
+      { readonly __typename?: 'SearchInputValue' }
+      & Pick<SearchInputValue, 'id'>
+      & { readonly city: Maybe<(
+        { readonly __typename?: 'City' }
+        & Pick<City, 'id' | 'name'>
+      )>, readonly region: Maybe<(
+        { readonly __typename?: 'Region' }
+        & Pick<Region, 'id' | 'name'>
+      )>, readonly beachBar: Maybe<(
+        { readonly __typename?: 'BeachBar' }
+        & Pick<BeachBar, 'id' | 'name' | 'thumbnailUrl'>
+      )> }
+    ) }
   )> }
 );
 
@@ -3444,17 +3639,114 @@ export type GetAllBeachBarsQuery = (
   { readonly __typename?: 'Query' }
   & { readonly getAllBeachBars: ReadonlyArray<(
     { readonly __typename?: 'BeachBar' }
-    & Pick<BeachBar, 'id' | 'name' | 'thumbnailUrl' | 'description' | 'avgRating'>
-    & { readonly payments: ReadonlyArray<(
-      { readonly __typename?: 'Payment' }
-      & Pick<Payment, 'id'>
-    )>, readonly location: (
-      { readonly __typename?: 'BeachBarLocation' }
-      & Pick<BeachBarLocation, 'longitude' | 'latitude'>
-    ) }
+    & SearchBeachBarFragment
   )> }
 );
 
+export const DetailsBeachBarFragmentDoc = gql`
+    fragment DetailsBeachBar on BeachBar {
+  id
+  name
+  slug
+  thumbnailUrl
+  description
+  avgRating
+  isAvailable
+  formattedLocation
+  contactPhoneNumber
+  hidePhoneNumber
+  location {
+    id
+    address
+    zipCode
+    longitude
+    latitude
+    country {
+      id
+      name
+      callingCode
+    }
+    city {
+      id
+      name
+    }
+    region {
+      id
+      name
+    }
+  }
+  features {
+    quantity
+    service {
+      id
+      name
+      icon {
+        id
+        publicId
+      }
+    }
+  }
+  styles {
+    id
+    name
+  }
+  restaurants {
+    id
+  }
+}
+    `;
+export const SearchBeachBarFragmentDoc = gql`
+    fragment SearchBeachBar on BeachBar {
+  ...DetailsBeachBar
+  reviews {
+    id
+  }
+  payments {
+    id
+  }
+}
+    ${DetailsBeachBarFragmentDoc}`;
+export const BasicCardFragmentDoc = gql`
+    fragment BasicCard on Card {
+  id
+  expMonth
+  expYear
+  last4
+  cardholderName
+  isDefault
+  brand {
+    id
+    name
+  }
+}
+    `;
+export const BasicCartProductFragmentDoc = gql`
+    fragment BasicCartProduct on CartProduct {
+  id
+  quantity
+  date
+  timestamp
+  time {
+    id
+    value
+  }
+  product {
+    id
+    name
+    price
+    imgUrl
+    beachBar {
+      id
+      name
+      thumbnailUrl
+      formattedLocation
+      defaultCurrency {
+        symbol
+      }
+    }
+  }
+}
+    `;
 export const CountryFragmentDoc = gql`
     fragment Country on Country {
   id
@@ -3476,13 +3768,185 @@ export const CountryFragmentDoc = gql`
   }
 }
     `;
+export const BeachBarProductFragmentDoc = gql`
+    fragment BeachBarProduct on Product {
+  id
+  name
+  description
+  imgUrl
+  price
+  maxPeople
+  category {
+    id
+    components {
+      quantity
+      component {
+        id
+        name
+        icon {
+          id
+          publicId
+        }
+      }
+    }
+  }
+}
+    `;
+export const ReviewFragmentDoc = gql`
+    fragment Review on BeachBarReview {
+  id
+  ratingValue
+  review
+  positiveComment
+  negativeComment
+  updatedAt
+  timestamp
+  votes {
+    id
+    user {
+      id
+    }
+    type {
+      id
+      value
+    }
+  }
+  month {
+    id
+    value
+  }
+  visitType {
+    id
+    name
+  }
+  answer {
+    id
+    body
+    updatedAt
+  }
+  customer {
+    id
+    user {
+      id
+      fullName
+      account {
+        id
+        imgUrl
+      }
+    }
+  }
+}
+    `;
+export const SearchInputValueFragmentDoc = gql`
+    fragment SearchInputValue on SearchInputValue {
+  id
+  publicId
+  formattedValue
+  country {
+    id
+    name
+    alpha2Code
+  }
+  city {
+    id
+    name
+    country {
+      id
+      alpha2Code
+    }
+  }
+  region {
+    id
+    name
+    country {
+      id
+      alpha2Code
+    }
+  }
+  beachBar {
+    id
+    name
+    thumbnailUrl
+    formattedLocation
+    location {
+      longitude
+      latitude
+      country {
+        id
+        name
+        alpha2Code
+      }
+      city {
+        id
+        name
+      }
+      region {
+        id
+        name
+      }
+    }
+  }
+}
+    `;
+export const AddCartProductDocument = gql`
+    mutation AddCartProduct($cartId: ID!, $productId: ID!, $quantity: Int, $date: Date!, $timeId: ID) {
+  addCartProduct(
+    cartId: $cartId
+    productId: $productId
+    quantity: $quantity
+    date: $date
+    timeId: $timeId
+  ) {
+    product {
+      id
+      quantity
+      product {
+        id
+        name
+      }
+    }
+    added
+  }
+}
+    `;
+export type AddCartProductMutationFn = Apollo.MutationFunction<AddCartProductMutation, AddCartProductMutationVariables>;
+
+/**
+ * __useAddCartProductMutation__
+ *
+ * To run a mutation, you first call `useAddCartProductMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddCartProductMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addCartProductMutation, { data, loading, error }] = useAddCartProductMutation({
+ *   variables: {
+ *      cartId: // value for 'cartId'
+ *      productId: // value for 'productId'
+ *      quantity: // value for 'quantity'
+ *      date: // value for 'date'
+ *      timeId: // value for 'timeId'
+ *   },
+ * });
+ */
+export function useAddCartProductMutation(baseOptions?: Apollo.MutationHookOptions<AddCartProductMutation, AddCartProductMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AddCartProductMutation, AddCartProductMutationVariables>(AddCartProductDocument, options);
+      }
+export type AddCartProductMutationHookResult = ReturnType<typeof useAddCartProductMutation>;
+export type AddCartProductMutationResult = Apollo.MutationResult<AddCartProductMutation>;
+export type AddCartProductMutationOptions = Apollo.BaseMutationOptions<AddCartProductMutation, AddCartProductMutationVariables>;
 export const AddCustomerPaymentMethodDocument = gql`
-    mutation AddCustomerPaymentMethod($token: String!, $customerId: ID!, $cardholderName: String!, $isDefault: Boolean = false) {
+    mutation AddCustomerPaymentMethod($token: String!, $customerId: ID!, $cardholderName: String!, $isDefault: Boolean = false, $savedForFuture: Boolean = true) {
   addCustomerPaymentMethod(
     source: $token
     customerId: $customerId
     cardholderName: $cardholderName
     isDefault: $isDefault
+    savedForFuture: $savedForFuture
   ) {
     card {
       id
@@ -3519,15 +3983,69 @@ export type AddCustomerPaymentMethodMutationFn = Apollo.MutationFunction<AddCust
  *      customerId: // value for 'customerId'
  *      cardholderName: // value for 'cardholderName'
  *      isDefault: // value for 'isDefault'
+ *      savedForFuture: // value for 'savedForFuture'
  *   },
  * });
  */
 export function useAddCustomerPaymentMethodMutation(baseOptions?: Apollo.MutationHookOptions<AddCustomerPaymentMethodMutation, AddCustomerPaymentMethodMutationVariables>) {
-        return Apollo.useMutation<AddCustomerPaymentMethodMutation, AddCustomerPaymentMethodMutationVariables>(AddCustomerPaymentMethodDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AddCustomerPaymentMethodMutation, AddCustomerPaymentMethodMutationVariables>(AddCustomerPaymentMethodDocument, options);
       }
 export type AddCustomerPaymentMethodMutationHookResult = ReturnType<typeof useAddCustomerPaymentMethodMutation>;
 export type AddCustomerPaymentMethodMutationResult = Apollo.MutationResult<AddCustomerPaymentMethodMutation>;
 export type AddCustomerPaymentMethodMutationOptions = Apollo.BaseMutationOptions<AddCustomerPaymentMethodMutation, AddCustomerPaymentMethodMutationVariables>;
+export const AddReviewDocument = gql`
+    mutation AddReview($beachBarId: ID!, $paymentRefCode: String, $ratingValue: Int!, $visitTypeId: ID, $monthTimeId: ID, $positiveComment: String, $negativeComment: String, $review: String) {
+  addReview(
+    beachBarId: $beachBarId
+    paymentRefCode: $paymentRefCode
+    ratingValue: $ratingValue
+    visitTypeId: $visitTypeId
+    monthTimeId: $monthTimeId
+    positiveComment: $positiveComment
+    negativeComment: $negativeComment
+    review: $review
+  ) {
+    review {
+      id
+    }
+    added
+  }
+}
+    `;
+export type AddReviewMutationFn = Apollo.MutationFunction<AddReviewMutation, AddReviewMutationVariables>;
+
+/**
+ * __useAddReviewMutation__
+ *
+ * To run a mutation, you first call `useAddReviewMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddReviewMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addReviewMutation, { data, loading, error }] = useAddReviewMutation({
+ *   variables: {
+ *      beachBarId: // value for 'beachBarId'
+ *      paymentRefCode: // value for 'paymentRefCode'
+ *      ratingValue: // value for 'ratingValue'
+ *      visitTypeId: // value for 'visitTypeId'
+ *      monthTimeId: // value for 'monthTimeId'
+ *      positiveComment: // value for 'positiveComment'
+ *      negativeComment: // value for 'negativeComment'
+ *      review: // value for 'review'
+ *   },
+ * });
+ */
+export function useAddReviewMutation(baseOptions?: Apollo.MutationHookOptions<AddReviewMutation, AddReviewMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AddReviewMutation, AddReviewMutationVariables>(AddReviewDocument, options);
+      }
+export type AddReviewMutationHookResult = ReturnType<typeof useAddReviewMutation>;
+export type AddReviewMutationResult = Apollo.MutationResult<AddReviewMutation>;
+export type AddReviewMutationOptions = Apollo.BaseMutationOptions<AddReviewMutation, AddReviewMutationVariables>;
 export const ChangeUserPasswordDocument = gql`
     mutation ChangeUserPassword($email: Email!, $token: String!, $newPassword: String!) {
   changeUserPassword(email: $email, token: $token, newPassword: $newPassword) {
@@ -3557,14 +4075,51 @@ export type ChangeUserPasswordMutationFn = Apollo.MutationFunction<ChangeUserPas
  * });
  */
 export function useChangeUserPasswordMutation(baseOptions?: Apollo.MutationHookOptions<ChangeUserPasswordMutation, ChangeUserPasswordMutationVariables>) {
-        return Apollo.useMutation<ChangeUserPasswordMutation, ChangeUserPasswordMutationVariables>(ChangeUserPasswordDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ChangeUserPasswordMutation, ChangeUserPasswordMutationVariables>(ChangeUserPasswordDocument, options);
       }
 export type ChangeUserPasswordMutationHookResult = ReturnType<typeof useChangeUserPasswordMutation>;
 export type ChangeUserPasswordMutationResult = Apollo.MutationResult<ChangeUserPasswordMutation>;
 export type ChangeUserPasswordMutationOptions = Apollo.BaseMutationOptions<ChangeUserPasswordMutation, ChangeUserPasswordMutationVariables>;
+export const CheckoutDocument = gql`
+    mutation Checkout($cartId: ID!, $cardId: ID!, $totalPeople: Int = 1) {
+  checkout(cartId: $cartId, cardId: $cardId, totalPeople: $totalPeople) {
+    id
+    refCode
+  }
+}
+    `;
+export type CheckoutMutationFn = Apollo.MutationFunction<CheckoutMutation, CheckoutMutationVariables>;
+
+/**
+ * __useCheckoutMutation__
+ *
+ * To run a mutation, you first call `useCheckoutMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCheckoutMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [checkoutMutation, { data, loading, error }] = useCheckoutMutation({
+ *   variables: {
+ *      cartId: // value for 'cartId'
+ *      cardId: // value for 'cardId'
+ *      totalPeople: // value for 'totalPeople'
+ *   },
+ * });
+ */
+export function useCheckoutMutation(baseOptions?: Apollo.MutationHookOptions<CheckoutMutation, CheckoutMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CheckoutMutation, CheckoutMutationVariables>(CheckoutDocument, options);
+      }
+export type CheckoutMutationHookResult = ReturnType<typeof useCheckoutMutation>;
+export type CheckoutMutationResult = Apollo.MutationResult<CheckoutMutation>;
+export type CheckoutMutationOptions = Apollo.BaseMutationOptions<CheckoutMutation, CheckoutMutationVariables>;
 export const DeleteCartProductDocument = gql`
-    mutation DeleteCartProduct($cartId: ID!, $productId: Int!) {
-  deleteCartProduct(cartId: $cartId, productId: $productId) {
+    mutation DeleteCartProduct($id: ID!) {
+  deleteCartProduct(id: $id) {
     ... on Delete {
       deleted
     }
@@ -3592,13 +4147,13 @@ export type DeleteCartProductMutationFn = Apollo.MutationFunction<DeleteCartProd
  * @example
  * const [deleteCartProductMutation, { data, loading, error }] = useDeleteCartProductMutation({
  *   variables: {
- *      cartId: // value for 'cartId'
- *      productId: // value for 'productId'
+ *      id: // value for 'id'
  *   },
  * });
  */
 export function useDeleteCartProductMutation(baseOptions?: Apollo.MutationHookOptions<DeleteCartProductMutation, DeleteCartProductMutationVariables>) {
-        return Apollo.useMutation<DeleteCartProductMutation, DeleteCartProductMutationVariables>(DeleteCartProductDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteCartProductMutation, DeleteCartProductMutationVariables>(DeleteCartProductDocument, options);
       }
 export type DeleteCartProductMutationHookResult = ReturnType<typeof useDeleteCartProductMutation>;
 export type DeleteCartProductMutationResult = Apollo.MutationResult<DeleteCartProductMutation>;
@@ -3630,7 +4185,8 @@ export type DeleteCustomerPaymentMethodMutationFn = Apollo.MutationFunction<Dele
  * });
  */
 export function useDeleteCustomerPaymentMethodMutation(baseOptions?: Apollo.MutationHookOptions<DeleteCustomerPaymentMethodMutation, DeleteCustomerPaymentMethodMutationVariables>) {
-        return Apollo.useMutation<DeleteCustomerPaymentMethodMutation, DeleteCustomerPaymentMethodMutationVariables>(DeleteCustomerPaymentMethodDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteCustomerPaymentMethodMutation, DeleteCustomerPaymentMethodMutationVariables>(DeleteCustomerPaymentMethodDocument, options);
       }
 export type DeleteCustomerPaymentMethodMutationHookResult = ReturnType<typeof useDeleteCustomerPaymentMethodMutation>;
 export type DeleteCustomerPaymentMethodMutationResult = Apollo.MutationResult<DeleteCustomerPaymentMethodMutation>;
@@ -3662,7 +4218,8 @@ export type DeleteReviewMutationFn = Apollo.MutationFunction<DeleteReviewMutatio
  * });
  */
 export function useDeleteReviewMutation(baseOptions?: Apollo.MutationHookOptions<DeleteReviewMutation, DeleteReviewMutationVariables>) {
-        return Apollo.useMutation<DeleteReviewMutation, DeleteReviewMutationVariables>(DeleteReviewDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteReviewMutation, DeleteReviewMutationVariables>(DeleteReviewDocument, options);
       }
 export type DeleteReviewMutationHookResult = ReturnType<typeof useDeleteReviewMutation>;
 export type DeleteReviewMutationResult = Apollo.MutationResult<DeleteReviewMutation>;
@@ -3692,7 +4249,8 @@ export type HelloMutationFn = Apollo.MutationFunction<HelloMutation, HelloMutati
  * });
  */
 export function useHelloMutation(baseOptions?: Apollo.MutationHookOptions<HelloMutation, HelloMutationVariables>) {
-        return Apollo.useMutation<HelloMutation, HelloMutationVariables>(HelloDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<HelloMutation, HelloMutationVariables>(HelloDocument, options);
       }
 export type HelloMutationHookResult = ReturnType<typeof useHelloMutation>;
 export type HelloMutationResult = Apollo.MutationResult<HelloMutation>;
@@ -3729,7 +4287,8 @@ export type LoginMutationFn = Apollo.MutationFunction<LoginMutation, LoginMutati
  * });
  */
 export function useLoginMutation(baseOptions?: Apollo.MutationHookOptions<LoginMutation, LoginMutationVariables>) {
-        return Apollo.useMutation<LoginMutation, LoginMutationVariables>(LoginDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<LoginMutation, LoginMutationVariables>(LoginDocument, options);
       }
 export type LoginMutationHookResult = ReturnType<typeof useLoginMutation>;
 export type LoginMutationResult = Apollo.MutationResult<LoginMutation>;
@@ -3760,7 +4319,8 @@ export type LogoutMutationFn = Apollo.MutationFunction<LogoutMutation, LogoutMut
  * });
  */
 export function useLogoutMutation(baseOptions?: Apollo.MutationHookOptions<LogoutMutation, LogoutMutationVariables>) {
-        return Apollo.useMutation<LogoutMutation, LogoutMutationVariables>(LogoutDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<LogoutMutation, LogoutMutationVariables>(LogoutDocument, options);
       }
 export type LogoutMutationHookResult = ReturnType<typeof useLogoutMutation>;
 export type LogoutMutationResult = Apollo.MutationResult<LogoutMutation>;
@@ -3792,7 +4352,8 @@ export type RefundPaymentMutationFn = Apollo.MutationFunction<RefundPaymentMutat
  * });
  */
 export function useRefundPaymentMutation(baseOptions?: Apollo.MutationHookOptions<RefundPaymentMutation, RefundPaymentMutationVariables>) {
-        return Apollo.useMutation<RefundPaymentMutation, RefundPaymentMutationVariables>(RefundPaymentDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RefundPaymentMutation, RefundPaymentMutationVariables>(RefundPaymentDocument, options);
       }
 export type RefundPaymentMutationHookResult = ReturnType<typeof useRefundPaymentMutation>;
 export type RefundPaymentMutationResult = Apollo.MutationResult<RefundPaymentMutation>;
@@ -3824,7 +4385,8 @@ export type SendForgotPasswordLinkMutationFn = Apollo.MutationFunction<SendForgo
  * });
  */
 export function useSendForgotPasswordLinkMutation(baseOptions?: Apollo.MutationHookOptions<SendForgotPasswordLinkMutation, SendForgotPasswordLinkMutationVariables>) {
-        return Apollo.useMutation<SendForgotPasswordLinkMutation, SendForgotPasswordLinkMutationVariables>(SendForgotPasswordLinkDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SendForgotPasswordLinkMutation, SendForgotPasswordLinkMutationVariables>(SendForgotPasswordLinkDocument, options);
       }
 export type SendForgotPasswordLinkMutationHookResult = ReturnType<typeof useSendForgotPasswordLinkMutation>;
 export type SendForgotPasswordLinkMutationResult = Apollo.MutationResult<SendForgotPasswordLinkMutation>;
@@ -3859,7 +4421,8 @@ export type SignS3MutationFn = Apollo.MutationFunction<SignS3Mutation, SignS3Mut
  * });
  */
 export function useSignS3Mutation(baseOptions?: Apollo.MutationHookOptions<SignS3Mutation, SignS3MutationVariables>) {
-        return Apollo.useMutation<SignS3Mutation, SignS3MutationVariables>(SignS3Document, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SignS3Mutation, SignS3MutationVariables>(SignS3Document, options);
       }
 export type SignS3MutationHookResult = ReturnType<typeof useSignS3Mutation>;
 export type SignS3MutationResult = Apollo.MutationResult<SignS3Mutation>;
@@ -3892,16 +4455,18 @@ export type SignUpMutationFn = Apollo.MutationFunction<SignUpMutation, SignUpMut
  * });
  */
 export function useSignUpMutation(baseOptions?: Apollo.MutationHookOptions<SignUpMutation, SignUpMutationVariables>) {
-        return Apollo.useMutation<SignUpMutation, SignUpMutationVariables>(SignUpDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SignUpMutation, SignUpMutationVariables>(SignUpDocument, options);
       }
 export type SignUpMutationHookResult = ReturnType<typeof useSignUpMutation>;
 export type SignUpMutationResult = Apollo.MutationResult<SignUpMutation>;
 export type SignUpMutationOptions = Apollo.BaseMutationOptions<SignUpMutation, SignUpMutationVariables>;
 export const UpdateCartProductDocument = gql`
-    mutation UpdateCartProduct($cartId: ID!, $productId: Int!, $quantity: Int) {
-  updateCartProduct(cartId: $cartId, productId: $productId, quantity: $quantity) {
+    mutation UpdateCartProduct($id: ID!, $quantity: Int) {
+  updateCartProduct(id: $id, quantity: $quantity) {
     updated
     product {
+      id
       quantity
     }
   }
@@ -3922,14 +4487,14 @@ export type UpdateCartProductMutationFn = Apollo.MutationFunction<UpdateCartProd
  * @example
  * const [updateCartProductMutation, { data, loading, error }] = useUpdateCartProductMutation({
  *   variables: {
- *      cartId: // value for 'cartId'
- *      productId: // value for 'productId'
+ *      id: // value for 'id'
  *      quantity: // value for 'quantity'
  *   },
  * });
  */
 export function useUpdateCartProductMutation(baseOptions?: Apollo.MutationHookOptions<UpdateCartProductMutation, UpdateCartProductMutationVariables>) {
-        return Apollo.useMutation<UpdateCartProductMutation, UpdateCartProductMutationVariables>(UpdateCartProductDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateCartProductMutation, UpdateCartProductMutationVariables>(UpdateCartProductDocument, options);
       }
 export type UpdateCartProductMutationHookResult = ReturnType<typeof useUpdateCartProductMutation>;
 export type UpdateCartProductMutationResult = Apollo.MutationResult<UpdateCartProductMutation>;
@@ -3983,14 +4548,15 @@ export type UpdateCustomerPaymentMethodMutationFn = Apollo.MutationFunction<Upda
  * });
  */
 export function useUpdateCustomerPaymentMethodMutation(baseOptions?: Apollo.MutationHookOptions<UpdateCustomerPaymentMethodMutation, UpdateCustomerPaymentMethodMutationVariables>) {
-        return Apollo.useMutation<UpdateCustomerPaymentMethodMutation, UpdateCustomerPaymentMethodMutationVariables>(UpdateCustomerPaymentMethodDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateCustomerPaymentMethodMutation, UpdateCustomerPaymentMethodMutationVariables>(UpdateCustomerPaymentMethodDocument, options);
       }
 export type UpdateCustomerPaymentMethodMutationHookResult = ReturnType<typeof useUpdateCustomerPaymentMethodMutation>;
 export type UpdateCustomerPaymentMethodMutationResult = Apollo.MutationResult<UpdateCustomerPaymentMethodMutation>;
 export type UpdateCustomerPaymentMethodMutationOptions = Apollo.BaseMutationOptions<UpdateCustomerPaymentMethodMutation, UpdateCustomerPaymentMethodMutationVariables>;
 export const UpdateFavouriteBeachBarDocument = gql`
-    mutation UpdateFavouriteBeachBar($beachBarId: ID!) {
-  updateFavouriteBeachBar(beachBarId: $beachBarId) {
+    mutation UpdateFavouriteBeachBar($slug: ID!) {
+  updateFavouriteBeachBar(slug: $slug) {
     updated
   }
 }
@@ -4010,12 +4576,13 @@ export type UpdateFavouriteBeachBarMutationFn = Apollo.MutationFunction<UpdateFa
  * @example
  * const [updateFavouriteBeachBarMutation, { data, loading, error }] = useUpdateFavouriteBeachBarMutation({
  *   variables: {
- *      beachBarId: // value for 'beachBarId'
+ *      slug: // value for 'slug'
  *   },
  * });
  */
 export function useUpdateFavouriteBeachBarMutation(baseOptions?: Apollo.MutationHookOptions<UpdateFavouriteBeachBarMutation, UpdateFavouriteBeachBarMutationVariables>) {
-        return Apollo.useMutation<UpdateFavouriteBeachBarMutation, UpdateFavouriteBeachBarMutationVariables>(UpdateFavouriteBeachBarDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateFavouriteBeachBarMutation, UpdateFavouriteBeachBarMutationVariables>(UpdateFavouriteBeachBarDocument, options);
       }
 export type UpdateFavouriteBeachBarMutationHookResult = ReturnType<typeof useUpdateFavouriteBeachBarMutation>;
 export type UpdateFavouriteBeachBarMutationResult = Apollo.MutationResult<UpdateFavouriteBeachBarMutation>;
@@ -4097,7 +4664,8 @@ export type UpdateReviewMutationFn = Apollo.MutationFunction<UpdateReviewMutatio
  * });
  */
 export function useUpdateReviewMutation(baseOptions?: Apollo.MutationHookOptions<UpdateReviewMutation, UpdateReviewMutationVariables>) {
-        return Apollo.useMutation<UpdateReviewMutation, UpdateReviewMutationVariables>(UpdateReviewDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateReviewMutation, UpdateReviewMutationVariables>(UpdateReviewDocument, options);
       }
 export type UpdateReviewMutationHookResult = ReturnType<typeof useUpdateReviewMutation>;
 export type UpdateReviewMutationResult = Apollo.MutationResult<UpdateReviewMutation>;
@@ -4145,7 +4713,8 @@ export type UpdateReviewVoteMutationFn = Apollo.MutationFunction<UpdateReviewVot
  * });
  */
 export function useUpdateReviewVoteMutation(baseOptions?: Apollo.MutationHookOptions<UpdateReviewVoteMutation, UpdateReviewVoteMutationVariables>) {
-        return Apollo.useMutation<UpdateReviewVoteMutation, UpdateReviewVoteMutationVariables>(UpdateReviewVoteDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateReviewVoteMutation, UpdateReviewVoteMutationVariables>(UpdateReviewVoteDocument, options);
       }
 export type UpdateReviewVoteMutationHookResult = ReturnType<typeof useUpdateReviewVoteMutation>;
 export type UpdateReviewVoteMutationResult = Apollo.MutationResult<UpdateReviewVoteMutation>;
@@ -4227,11 +4796,44 @@ export type UpdateUserMutationFn = Apollo.MutationFunction<UpdateUserMutation, U
  * });
  */
 export function useUpdateUserMutation(baseOptions?: Apollo.MutationHookOptions<UpdateUserMutation, UpdateUserMutationVariables>) {
-        return Apollo.useMutation<UpdateUserMutation, UpdateUserMutationVariables>(UpdateUserDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateUserMutation, UpdateUserMutationVariables>(UpdateUserDocument, options);
       }
 export type UpdateUserMutationHookResult = ReturnType<typeof useUpdateUserMutation>;
 export type UpdateUserMutationResult = Apollo.MutationResult<UpdateUserMutation>;
 export type UpdateUserMutationOptions = Apollo.BaseMutationOptions<UpdateUserMutation, UpdateUserMutationVariables>;
+export const VerifyUserPaymentForReviewDocument = gql`
+    mutation VerifyUserPaymentForReview($beachBarId: ID!, $refCode: String) {
+  verifyUserPaymentForReview(beachBarId: $beachBarId, refCode: $refCode)
+}
+    `;
+export type VerifyUserPaymentForReviewMutationFn = Apollo.MutationFunction<VerifyUserPaymentForReviewMutation, VerifyUserPaymentForReviewMutationVariables>;
+
+/**
+ * __useVerifyUserPaymentForReviewMutation__
+ *
+ * To run a mutation, you first call `useVerifyUserPaymentForReviewMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useVerifyUserPaymentForReviewMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [verifyUserPaymentForReviewMutation, { data, loading, error }] = useVerifyUserPaymentForReviewMutation({
+ *   variables: {
+ *      beachBarId: // value for 'beachBarId'
+ *      refCode: // value for 'refCode'
+ *   },
+ * });
+ */
+export function useVerifyUserPaymentForReviewMutation(baseOptions?: Apollo.MutationHookOptions<VerifyUserPaymentForReviewMutation, VerifyUserPaymentForReviewMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<VerifyUserPaymentForReviewMutation, VerifyUserPaymentForReviewMutationVariables>(VerifyUserPaymentForReviewDocument, options);
+      }
+export type VerifyUserPaymentForReviewMutationHookResult = ReturnType<typeof useVerifyUserPaymentForReviewMutation>;
+export type VerifyUserPaymentForReviewMutationResult = Apollo.MutationResult<VerifyUserPaymentForReviewMutation>;
+export type VerifyUserPaymentForReviewMutationOptions = Apollo.BaseMutationOptions<VerifyUserPaymentForReviewMutation, VerifyUserPaymentForReviewMutationVariables>;
 export const AuthorizeWithFacebookDocument = gql`
     mutation AuthorizeWithFacebook($code: String!, $state: String!, $isPrimaryOwner: Boolean = false, $loginDetails: UserLoginDetails) {
   authorizeWithFacebook(
@@ -4270,7 +4872,8 @@ export type AuthorizeWithFacebookMutationFn = Apollo.MutationFunction<AuthorizeW
  * });
  */
 export function useAuthorizeWithFacebookMutation(baseOptions?: Apollo.MutationHookOptions<AuthorizeWithFacebookMutation, AuthorizeWithFacebookMutationVariables>) {
-        return Apollo.useMutation<AuthorizeWithFacebookMutation, AuthorizeWithFacebookMutationVariables>(AuthorizeWithFacebookDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AuthorizeWithFacebookMutation, AuthorizeWithFacebookMutationVariables>(AuthorizeWithFacebookDocument, options);
       }
 export type AuthorizeWithFacebookMutationHookResult = ReturnType<typeof useAuthorizeWithFacebookMutation>;
 export type AuthorizeWithFacebookMutationResult = Apollo.MutationResult<AuthorizeWithFacebookMutation>;
@@ -4313,7 +4916,8 @@ export type AuthorizeWithGoogleMutationFn = Apollo.MutationFunction<AuthorizeWit
  * });
  */
 export function useAuthorizeWithGoogleMutation(baseOptions?: Apollo.MutationHookOptions<AuthorizeWithGoogleMutation, AuthorizeWithGoogleMutationVariables>) {
-        return Apollo.useMutation<AuthorizeWithGoogleMutation, AuthorizeWithGoogleMutationVariables>(AuthorizeWithGoogleDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AuthorizeWithGoogleMutation, AuthorizeWithGoogleMutationVariables>(AuthorizeWithGoogleDocument, options);
       }
 export type AuthorizeWithGoogleMutationHookResult = ReturnType<typeof useAuthorizeWithGoogleMutation>;
 export type AuthorizeWithGoogleMutationResult = Apollo.MutationResult<AuthorizeWithGoogleMutation>;
@@ -4358,17 +4962,308 @@ export type AuthorizeWithInstagramMutationFn = Apollo.MutationFunction<Authorize
  * });
  */
 export function useAuthorizeWithInstagramMutation(baseOptions?: Apollo.MutationHookOptions<AuthorizeWithInstagramMutation, AuthorizeWithInstagramMutationVariables>) {
-        return Apollo.useMutation<AuthorizeWithInstagramMutation, AuthorizeWithInstagramMutationVariables>(AuthorizeWithInstagramDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AuthorizeWithInstagramMutation, AuthorizeWithInstagramMutationVariables>(AuthorizeWithInstagramDocument, options);
       }
 export type AuthorizeWithInstagramMutationHookResult = ReturnType<typeof useAuthorizeWithInstagramMutation>;
 export type AuthorizeWithInstagramMutationResult = Apollo.MutationResult<AuthorizeWithInstagramMutation>;
 export type AuthorizeWithInstagramMutationOptions = Apollo.BaseMutationOptions<AuthorizeWithInstagramMutation, AuthorizeWithInstagramMutationVariables>;
+export const AvailableProductsDocument = gql`
+    query AvailableProducts($beachBarId: ID!, $availability: SearchInput!) {
+  availableProducts(beachBarId: $beachBarId, availability: $availability) {
+    product {
+      ...BeachBarProduct
+    }
+    quantity
+  }
+}
+    ${BeachBarProductFragmentDoc}`;
+
+/**
+ * __useAvailableProductsQuery__
+ *
+ * To run a query within a React component, call `useAvailableProductsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAvailableProductsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAvailableProductsQuery({
+ *   variables: {
+ *      beachBarId: // value for 'beachBarId'
+ *      availability: // value for 'availability'
+ *   },
+ * });
+ */
+export function useAvailableProductsQuery(baseOptions: Apollo.QueryHookOptions<AvailableProductsQuery, AvailableProductsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AvailableProductsQuery, AvailableProductsQueryVariables>(AvailableProductsDocument, options);
+      }
+export function useAvailableProductsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AvailableProductsQuery, AvailableProductsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AvailableProductsQuery, AvailableProductsQueryVariables>(AvailableProductsDocument, options);
+        }
+export type AvailableProductsQueryHookResult = ReturnType<typeof useAvailableProductsQuery>;
+export type AvailableProductsLazyQueryHookResult = ReturnType<typeof useAvailableProductsLazyQuery>;
+export type AvailableProductsQueryResult = Apollo.QueryResult<AvailableProductsQuery, AvailableProductsQueryVariables>;
+export const BeachBarDocument = gql`
+    query BeachBar($slug: String!, $userVisit: Boolean) {
+  beachBar(slug: $slug, userVisit: $userVisit) {
+    ...DetailsBeachBar
+    reviews {
+      ...Review
+      payment {
+        id
+        timestamp
+      }
+    }
+    imgUrls {
+      id
+      imgUrl
+      description
+      timestamp
+    }
+    defaultCurrency {
+      id
+      symbol
+    }
+    products {
+      ...BeachBarProduct
+    }
+  }
+}
+    ${DetailsBeachBarFragmentDoc}
+${ReviewFragmentDoc}
+${BeachBarProductFragmentDoc}`;
+
+/**
+ * __useBeachBarQuery__
+ *
+ * To run a query within a React component, call `useBeachBarQuery` and pass it any options that fit your needs.
+ * When your component renders, `useBeachBarQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useBeachBarQuery({
+ *   variables: {
+ *      slug: // value for 'slug'
+ *      userVisit: // value for 'userVisit'
+ *   },
+ * });
+ */
+export function useBeachBarQuery(baseOptions: Apollo.QueryHookOptions<BeachBarQuery, BeachBarQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<BeachBarQuery, BeachBarQueryVariables>(BeachBarDocument, options);
+      }
+export function useBeachBarLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<BeachBarQuery, BeachBarQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<BeachBarQuery, BeachBarQueryVariables>(BeachBarDocument, options);
+        }
+export type BeachBarQueryHookResult = ReturnType<typeof useBeachBarQuery>;
+export type BeachBarLazyQueryHookResult = ReturnType<typeof useBeachBarLazyQuery>;
+export type BeachBarQueryResult = Apollo.QueryResult<BeachBarQuery, BeachBarQueryVariables>;
+export const BeachBarImgsDocument = gql`
+    query BeachBarImgs($slug: String!) {
+  beachBarImgs(slug: $slug) {
+    id
+    imgUrl
+    description
+    timestamp
+  }
+}
+    `;
+
+/**
+ * __useBeachBarImgsQuery__
+ *
+ * To run a query within a React component, call `useBeachBarImgsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useBeachBarImgsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useBeachBarImgsQuery({
+ *   variables: {
+ *      slug: // value for 'slug'
+ *   },
+ * });
+ */
+export function useBeachBarImgsQuery(baseOptions: Apollo.QueryHookOptions<BeachBarImgsQuery, BeachBarImgsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<BeachBarImgsQuery, BeachBarImgsQueryVariables>(BeachBarImgsDocument, options);
+      }
+export function useBeachBarImgsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<BeachBarImgsQuery, BeachBarImgsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<BeachBarImgsQuery, BeachBarImgsQueryVariables>(BeachBarImgsDocument, options);
+        }
+export type BeachBarImgsQueryHookResult = ReturnType<typeof useBeachBarImgsQuery>;
+export type BeachBarImgsLazyQueryHookResult = ReturnType<typeof useBeachBarImgsLazyQuery>;
+export type BeachBarImgsQueryResult = Apollo.QueryResult<BeachBarImgsQuery, BeachBarImgsQueryVariables>;
+export const CartDocument = gql`
+    query Cart($cartId: ID) {
+  cart(cartId: $cartId) {
+    id
+    total
+    products {
+      ...BasicCartProduct
+    }
+  }
+}
+    ${BasicCartProductFragmentDoc}`;
+
+/**
+ * __useCartQuery__
+ *
+ * To run a query within a React component, call `useCartQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCartQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCartQuery({
+ *   variables: {
+ *      cartId: // value for 'cartId'
+ *   },
+ * });
+ */
+export function useCartQuery(baseOptions?: Apollo.QueryHookOptions<CartQuery, CartQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CartQuery, CartQueryVariables>(CartDocument, options);
+      }
+export function useCartLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CartQuery, CartQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CartQuery, CartQueryVariables>(CartDocument, options);
+        }
+export type CartQueryHookResult = ReturnType<typeof useCartQuery>;
+export type CartLazyQueryHookResult = ReturnType<typeof useCartLazyQuery>;
+export type CartQueryResult = Apollo.QueryResult<CartQuery, CartQueryVariables>;
+export const CartEntryFeesDocument = gql`
+    query CartEntryFees($cartId: ID!, $totalPeople: Int!) {
+  cartEntryFees(cartId: $cartId, totalPeople: $totalPeople)
+}
+    `;
+
+/**
+ * __useCartEntryFeesQuery__
+ *
+ * To run a query within a React component, call `useCartEntryFeesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCartEntryFeesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCartEntryFeesQuery({
+ *   variables: {
+ *      cartId: // value for 'cartId'
+ *      totalPeople: // value for 'totalPeople'
+ *   },
+ * });
+ */
+export function useCartEntryFeesQuery(baseOptions: Apollo.QueryHookOptions<CartEntryFeesQuery, CartEntryFeesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CartEntryFeesQuery, CartEntryFeesQueryVariables>(CartEntryFeesDocument, options);
+      }
+export function useCartEntryFeesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CartEntryFeesQuery, CartEntryFeesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CartEntryFeesQuery, CartEntryFeesQueryVariables>(CartEntryFeesDocument, options);
+        }
+export type CartEntryFeesQueryHookResult = ReturnType<typeof useCartEntryFeesQuery>;
+export type CartEntryFeesLazyQueryHookResult = ReturnType<typeof useCartEntryFeesLazyQuery>;
+export type CartEntryFeesQueryResult = Apollo.QueryResult<CartEntryFeesQuery, CartEntryFeesQueryVariables>;
+export const CustomerDocument = gql`
+    query Customer($email: Email, $phoneNumber: String, $countryId: ID) {
+  customer(email: $email, phoneNumber: $phoneNumber, countryId: $countryId) {
+    customer {
+      id
+      email
+      user {
+        id
+        email
+      }
+      cards {
+        ...BasicCard
+      }
+    }
+  }
+}
+    ${BasicCardFragmentDoc}`;
+
+/**
+ * __useCustomerQuery__
+ *
+ * To run a query within a React component, call `useCustomerQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCustomerQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCustomerQuery({
+ *   variables: {
+ *      email: // value for 'email'
+ *      phoneNumber: // value for 'phoneNumber'
+ *      countryId: // value for 'countryId'
+ *   },
+ * });
+ */
+export function useCustomerQuery(baseOptions?: Apollo.QueryHookOptions<CustomerQuery, CustomerQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CustomerQuery, CustomerQueryVariables>(CustomerDocument, options);
+      }
+export function useCustomerLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CustomerQuery, CustomerQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CustomerQuery, CustomerQueryVariables>(CustomerDocument, options);
+        }
+export type CustomerQueryHookResult = ReturnType<typeof useCustomerQuery>;
+export type CustomerLazyQueryHookResult = ReturnType<typeof useCustomerLazyQuery>;
+export type CustomerQueryResult = Apollo.QueryResult<CustomerQuery, CustomerQueryVariables>;
+export const CustomerPaymentMethodsDocument = gql`
+    query CustomerPaymentMethods {
+  customerPaymentMethods {
+    ...BasicCard
+  }
+}
+    ${BasicCardFragmentDoc}`;
+
+/**
+ * __useCustomerPaymentMethodsQuery__
+ *
+ * To run a query within a React component, call `useCustomerPaymentMethodsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCustomerPaymentMethodsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCustomerPaymentMethodsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useCustomerPaymentMethodsQuery(baseOptions?: Apollo.QueryHookOptions<CustomerPaymentMethodsQuery, CustomerPaymentMethodsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CustomerPaymentMethodsQuery, CustomerPaymentMethodsQueryVariables>(CustomerPaymentMethodsDocument, options);
+      }
+export function useCustomerPaymentMethodsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CustomerPaymentMethodsQuery, CustomerPaymentMethodsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CustomerPaymentMethodsQuery, CustomerPaymentMethodsQueryVariables>(CustomerPaymentMethodsDocument, options);
+        }
+export type CustomerPaymentMethodsQueryHookResult = ReturnType<typeof useCustomerPaymentMethodsQuery>;
+export type CustomerPaymentMethodsLazyQueryHookResult = ReturnType<typeof useCustomerPaymentMethodsLazyQuery>;
+export type CustomerPaymentMethodsQueryResult = Apollo.QueryResult<CustomerPaymentMethodsQuery, CustomerPaymentMethodsQueryVariables>;
 export const FavouriteBeachBarsDocument = gql`
-    query FavouriteBeachBars {
-  favouriteBeachBars {
+    query FavouriteBeachBars($limit: Int) {
+  favouriteBeachBars(limit: $limit) {
     beachBar {
       id
       name
+      slug
       thumbnailUrl
       formattedLocation
     }
@@ -4388,14 +5283,17 @@ export const FavouriteBeachBarsDocument = gql`
  * @example
  * const { data, loading, error } = useFavouriteBeachBarsQuery({
  *   variables: {
+ *      limit: // value for 'limit'
  *   },
  * });
  */
 export function useFavouriteBeachBarsQuery(baseOptions?: Apollo.QueryHookOptions<FavouriteBeachBarsQuery, FavouriteBeachBarsQueryVariables>) {
-        return Apollo.useQuery<FavouriteBeachBarsQuery, FavouriteBeachBarsQueryVariables>(FavouriteBeachBarsDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FavouriteBeachBarsQuery, FavouriteBeachBarsQueryVariables>(FavouriteBeachBarsDocument, options);
       }
 export function useFavouriteBeachBarsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FavouriteBeachBarsQuery, FavouriteBeachBarsQueryVariables>) {
-          return Apollo.useLazyQuery<FavouriteBeachBarsQuery, FavouriteBeachBarsQueryVariables>(FavouriteBeachBarsDocument, baseOptions);
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FavouriteBeachBarsQuery, FavouriteBeachBarsQueryVariables>(FavouriteBeachBarsDocument, options);
         }
 export type FavouriteBeachBarsQueryHookResult = ReturnType<typeof useFavouriteBeachBarsQuery>;
 export type FavouriteBeachBarsLazyQueryHookResult = ReturnType<typeof useFavouriteBeachBarsLazyQuery>;
@@ -4433,305 +5331,27 @@ export const GetUserFavouriteBeachBarsDocument = gql`
  * });
  */
 export function useGetUserFavouriteBeachBarsQuery(baseOptions?: Apollo.QueryHookOptions<GetUserFavouriteBeachBarsQuery, GetUserFavouriteBeachBarsQueryVariables>) {
-        return Apollo.useQuery<GetUserFavouriteBeachBarsQuery, GetUserFavouriteBeachBarsQueryVariables>(GetUserFavouriteBeachBarsDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetUserFavouriteBeachBarsQuery, GetUserFavouriteBeachBarsQueryVariables>(GetUserFavouriteBeachBarsDocument, options);
       }
 export function useGetUserFavouriteBeachBarsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetUserFavouriteBeachBarsQuery, GetUserFavouriteBeachBarsQueryVariables>) {
-          return Apollo.useLazyQuery<GetUserFavouriteBeachBarsQuery, GetUserFavouriteBeachBarsQueryVariables>(GetUserFavouriteBeachBarsDocument, baseOptions);
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetUserFavouriteBeachBarsQuery, GetUserFavouriteBeachBarsQueryVariables>(GetUserFavouriteBeachBarsDocument, options);
         }
 export type GetUserFavouriteBeachBarsQueryHookResult = ReturnType<typeof useGetUserFavouriteBeachBarsQuery>;
 export type GetUserFavouriteBeachBarsLazyQueryHookResult = ReturnType<typeof useGetUserFavouriteBeachBarsLazyQuery>;
 export type GetUserFavouriteBeachBarsQueryResult = Apollo.QueryResult<GetUserFavouriteBeachBarsQuery, GetUserFavouriteBeachBarsQueryVariables>;
-export const GetCartDocument = gql`
-    query GetCart($cartId: ID) {
-  getCart(cartId: $cartId) {
-    id
-    total
-    products {
-      quantity
-      date
-      time {
-        id
-        value
-      }
-      timestamp
-      product {
-        id
-        name
-        price
-        imgUrl
-        beachBar {
-          id
-          name
-          thumbnailUrl
-          defaultCurrency {
-            symbol
-          }
-        }
-      }
-    }
-  }
-}
-    `;
-
-/**
- * __useGetCartQuery__
- *
- * To run a query within a React component, call `useGetCartQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetCartQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetCartQuery({
- *   variables: {
- *      cartId: // value for 'cartId'
- *   },
- * });
- */
-export function useGetCartQuery(baseOptions?: Apollo.QueryHookOptions<GetCartQuery, GetCartQueryVariables>) {
-        return Apollo.useQuery<GetCartQuery, GetCartQueryVariables>(GetCartDocument, baseOptions);
-      }
-export function useGetCartLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetCartQuery, GetCartQueryVariables>) {
-          return Apollo.useLazyQuery<GetCartQuery, GetCartQueryVariables>(GetCartDocument, baseOptions);
-        }
-export type GetCartQueryHookResult = ReturnType<typeof useGetCartQuery>;
-export type GetCartLazyQueryHookResult = ReturnType<typeof useGetCartLazyQuery>;
-export type GetCartQueryResult = Apollo.QueryResult<GetCartQuery, GetCartQueryVariables>;
-export const GetCustomerPaymentMethodsDocument = gql`
-    query GetCustomerPaymentMethods {
-  getCustomerPaymentMethods {
-    id
-    expMonth
-    expYear
-    last4
-    cardholderName
-    isDefault
-    brand {
-      id
-      name
-    }
-  }
-}
-    `;
-
-/**
- * __useGetCustomerPaymentMethodsQuery__
- *
- * To run a query within a React component, call `useGetCustomerPaymentMethodsQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetCustomerPaymentMethodsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetCustomerPaymentMethodsQuery({
- *   variables: {
- *   },
- * });
- */
-export function useGetCustomerPaymentMethodsQuery(baseOptions?: Apollo.QueryHookOptions<GetCustomerPaymentMethodsQuery, GetCustomerPaymentMethodsQueryVariables>) {
-        return Apollo.useQuery<GetCustomerPaymentMethodsQuery, GetCustomerPaymentMethodsQueryVariables>(GetCustomerPaymentMethodsDocument, baseOptions);
-      }
-export function useGetCustomerPaymentMethodsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetCustomerPaymentMethodsQuery, GetCustomerPaymentMethodsQueryVariables>) {
-          return Apollo.useLazyQuery<GetCustomerPaymentMethodsQuery, GetCustomerPaymentMethodsQueryVariables>(GetCustomerPaymentMethodsDocument, baseOptions);
-        }
-export type GetCustomerPaymentMethodsQueryHookResult = ReturnType<typeof useGetCustomerPaymentMethodsQuery>;
-export type GetCustomerPaymentMethodsLazyQueryHookResult = ReturnType<typeof useGetCustomerPaymentMethodsLazyQuery>;
-export type GetCustomerPaymentMethodsQueryResult = Apollo.QueryResult<GetCustomerPaymentMethodsQuery, GetCustomerPaymentMethodsQueryVariables>;
-export const GetLatestUserSearchesDocument = gql`
-    query GetLatestUserSearches {
-  getLatestUserSearches {
-    id
-    searchDate
-    searchAdults
-    searchChildren
-    inputValue {
-      city {
-        name
-      }
-      region {
-        name
-      }
-      beachBar {
-        name
-        thumbnailUrl
-      }
-    }
-  }
-}
-    `;
-
-/**
- * __useGetLatestUserSearchesQuery__
- *
- * To run a query within a React component, call `useGetLatestUserSearchesQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetLatestUserSearchesQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetLatestUserSearchesQuery({
- *   variables: {
- *   },
- * });
- */
-export function useGetLatestUserSearchesQuery(baseOptions?: Apollo.QueryHookOptions<GetLatestUserSearchesQuery, GetLatestUserSearchesQueryVariables>) {
-        return Apollo.useQuery<GetLatestUserSearchesQuery, GetLatestUserSearchesQueryVariables>(GetLatestUserSearchesDocument, baseOptions);
-      }
-export function useGetLatestUserSearchesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetLatestUserSearchesQuery, GetLatestUserSearchesQueryVariables>) {
-          return Apollo.useLazyQuery<GetLatestUserSearchesQuery, GetLatestUserSearchesQueryVariables>(GetLatestUserSearchesDocument, baseOptions);
-        }
-export type GetLatestUserSearchesQueryHookResult = ReturnType<typeof useGetLatestUserSearchesQuery>;
-export type GetLatestUserSearchesLazyQueryHookResult = ReturnType<typeof useGetLatestUserSearchesLazyQuery>;
-export type GetLatestUserSearchesQueryResult = Apollo.QueryResult<GetLatestUserSearchesQuery, GetLatestUserSearchesQueryVariables>;
-export const GetOrCreateCustomerDocument = gql`
-    query GetOrCreateCustomer($email: Email, $phoneNumber: String, $countryAlpha2Code: String) {
-  getOrCreateCustomer(
-    email: $email
-    phoneNumber: $phoneNumber
-    countryAlpha2Code: $countryAlpha2Code
-  ) {
-    customer {
-      id
-      user {
-        id
-      }
-    }
-    added
-  }
-}
-    `;
-
-/**
- * __useGetOrCreateCustomerQuery__
- *
- * To run a query within a React component, call `useGetOrCreateCustomerQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetOrCreateCustomerQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetOrCreateCustomerQuery({
- *   variables: {
- *      email: // value for 'email'
- *      phoneNumber: // value for 'phoneNumber'
- *      countryAlpha2Code: // value for 'countryAlpha2Code'
- *   },
- * });
- */
-export function useGetOrCreateCustomerQuery(baseOptions?: Apollo.QueryHookOptions<GetOrCreateCustomerQuery, GetOrCreateCustomerQueryVariables>) {
-        return Apollo.useQuery<GetOrCreateCustomerQuery, GetOrCreateCustomerQueryVariables>(GetOrCreateCustomerDocument, baseOptions);
-      }
-export function useGetOrCreateCustomerLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetOrCreateCustomerQuery, GetOrCreateCustomerQueryVariables>) {
-          return Apollo.useLazyQuery<GetOrCreateCustomerQuery, GetOrCreateCustomerQueryVariables>(GetOrCreateCustomerDocument, baseOptions);
-        }
-export type GetOrCreateCustomerQueryHookResult = ReturnType<typeof useGetOrCreateCustomerQuery>;
-export type GetOrCreateCustomerLazyQueryHookResult = ReturnType<typeof useGetOrCreateCustomerLazyQuery>;
-export type GetOrCreateCustomerQueryResult = Apollo.QueryResult<GetOrCreateCustomerQuery, GetOrCreateCustomerQueryVariables>;
-export const GetPaymentsDocument = gql`
-    query GetPayments($monthId: ID, $year: Int) {
-  getPayments(monthId: $monthId, year: $year) {
-    beachBar {
-      id
-      name
-      thumbnailUrl
-      location {
-        city {
-          name
-        }
-        region {
-          name
-        }
-      }
-    }
-    visits {
-      isUpcoming
-      isRefunded
-      date
-      time {
-        id
-        value
-      }
-      payment {
-        id
-        refCode
-      }
-    }
-  }
-}
-    `;
-
-/**
- * __useGetPaymentsQuery__
- *
- * To run a query within a React component, call `useGetPaymentsQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetPaymentsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetPaymentsQuery({
- *   variables: {
- *      monthId: // value for 'monthId'
- *      year: // value for 'year'
- *   },
- * });
- */
-export function useGetPaymentsQuery(baseOptions?: Apollo.QueryHookOptions<GetPaymentsQuery, GetPaymentsQueryVariables>) {
-        return Apollo.useQuery<GetPaymentsQuery, GetPaymentsQueryVariables>(GetPaymentsDocument, baseOptions);
-      }
-export function useGetPaymentsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetPaymentsQuery, GetPaymentsQueryVariables>) {
-          return Apollo.useLazyQuery<GetPaymentsQuery, GetPaymentsQueryVariables>(GetPaymentsDocument, baseOptions);
-        }
-export type GetPaymentsQueryHookResult = ReturnType<typeof useGetPaymentsQuery>;
-export type GetPaymentsLazyQueryHookResult = ReturnType<typeof useGetPaymentsLazyQuery>;
-export type GetPaymentsQueryResult = Apollo.QueryResult<GetPaymentsQuery, GetPaymentsQueryVariables>;
-export const GetPaymentsDatesDocument = gql`
-    query GetPaymentsDates {
-  getPaymentsDates {
-    month {
-      id
-      value
-    }
-    year
-  }
-}
-    `;
-
-/**
- * __useGetPaymentsDatesQuery__
- *
- * To run a query within a React component, call `useGetPaymentsDatesQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetPaymentsDatesQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetPaymentsDatesQuery({
- *   variables: {
- *   },
- * });
- */
-export function useGetPaymentsDatesQuery(baseOptions?: Apollo.QueryHookOptions<GetPaymentsDatesQuery, GetPaymentsDatesQueryVariables>) {
-        return Apollo.useQuery<GetPaymentsDatesQuery, GetPaymentsDatesQueryVariables>(GetPaymentsDatesDocument, baseOptions);
-      }
-export function useGetPaymentsDatesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetPaymentsDatesQuery, GetPaymentsDatesQueryVariables>) {
-          return Apollo.useLazyQuery<GetPaymentsDatesQuery, GetPaymentsDatesQueryVariables>(GetPaymentsDatesDocument, baseOptions);
-        }
-export type GetPaymentsDatesQueryHookResult = ReturnType<typeof useGetPaymentsDatesQuery>;
-export type GetPaymentsDatesLazyQueryHookResult = ReturnType<typeof useGetPaymentsDatesLazyQuery>;
-export type GetPaymentsDatesQueryResult = Apollo.QueryResult<GetPaymentsDatesQuery, GetPaymentsDatesQueryVariables>;
 export const GetPersonalizedBeachBarsDocument = gql`
     query GetPersonalizedBeachBars {
   getPersonalizedBeachBars {
+    id
     name
+    slug
     thumbnailUrl
+    formattedLocation
     location {
+      latitude
+      longitude
       city {
         name
       }
@@ -4759,10 +5379,12 @@ export const GetPersonalizedBeachBarsDocument = gql`
  * });
  */
 export function useGetPersonalizedBeachBarsQuery(baseOptions?: Apollo.QueryHookOptions<GetPersonalizedBeachBarsQuery, GetPersonalizedBeachBarsQueryVariables>) {
-        return Apollo.useQuery<GetPersonalizedBeachBarsQuery, GetPersonalizedBeachBarsQueryVariables>(GetPersonalizedBeachBarsDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetPersonalizedBeachBarsQuery, GetPersonalizedBeachBarsQueryVariables>(GetPersonalizedBeachBarsDocument, options);
       }
 export function useGetPersonalizedBeachBarsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetPersonalizedBeachBarsQuery, GetPersonalizedBeachBarsQueryVariables>) {
-          return Apollo.useLazyQuery<GetPersonalizedBeachBarsQuery, GetPersonalizedBeachBarsQueryVariables>(GetPersonalizedBeachBarsDocument, baseOptions);
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetPersonalizedBeachBarsQuery, GetPersonalizedBeachBarsQueryVariables>(GetPersonalizedBeachBarsDocument, options);
         }
 export type GetPersonalizedBeachBarsQueryHookResult = ReturnType<typeof useGetPersonalizedBeachBarsQuery>;
 export type GetPersonalizedBeachBarsLazyQueryHookResult = ReturnType<typeof useGetPersonalizedBeachBarsLazyQuery>;
@@ -4774,6 +5396,7 @@ export const MeDocument = gql`
     email
     firstName
     lastName
+    fullName
     account {
       id
       honorificTitle
@@ -4808,6 +5431,15 @@ export const MeDocument = gql`
         id
       }
     }
+    favoriteBars {
+      beachBar {
+        id
+        name
+        slug
+        thumbnailUrl
+        formattedLocation
+      }
+    }
   }
 }
     `;
@@ -4828,14 +5460,59 @@ export const MeDocument = gql`
  * });
  */
 export function useMeQuery(baseOptions?: Apollo.QueryHookOptions<MeQuery, MeQueryVariables>) {
-        return Apollo.useQuery<MeQuery, MeQueryVariables>(MeDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<MeQuery, MeQueryVariables>(MeDocument, options);
       }
 export function useMeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MeQuery, MeQueryVariables>) {
-          return Apollo.useLazyQuery<MeQuery, MeQueryVariables>(MeDocument, baseOptions);
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<MeQuery, MeQueryVariables>(MeDocument, options);
         }
 export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
 export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
 export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
+export const NearBeachBarsDocument = gql`
+    query NearBeachBars($latitude: String!, $longitude: String!) {
+  nearBeachBars(latitude: $latitude, longitude: $longitude) {
+    id
+    name
+    slug
+    thumbnailUrl
+    location {
+      latitude
+      longitude
+    }
+  }
+}
+    `;
+
+/**
+ * __useNearBeachBarsQuery__
+ *
+ * To run a query within a React component, call `useNearBeachBarsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useNearBeachBarsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useNearBeachBarsQuery({
+ *   variables: {
+ *      latitude: // value for 'latitude'
+ *      longitude: // value for 'longitude'
+ *   },
+ * });
+ */
+export function useNearBeachBarsQuery(baseOptions: Apollo.QueryHookOptions<NearBeachBarsQuery, NearBeachBarsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<NearBeachBarsQuery, NearBeachBarsQueryVariables>(NearBeachBarsDocument, options);
+      }
+export function useNearBeachBarsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<NearBeachBarsQuery, NearBeachBarsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<NearBeachBarsQuery, NearBeachBarsQueryVariables>(NearBeachBarsDocument, options);
+        }
+export type NearBeachBarsQueryHookResult = ReturnType<typeof useNearBeachBarsQuery>;
+export type NearBeachBarsLazyQueryHookResult = ReturnType<typeof useNearBeachBarsLazyQuery>;
+export type NearBeachBarsQueryResult = Apollo.QueryResult<NearBeachBarsQuery, NearBeachBarsQueryVariables>;
 export const PaymentDocument = gql`
     query Payment($refCode: String!) {
   payment(refCode: $refCode) {
@@ -4847,26 +5524,7 @@ export const PaymentDocument = gql`
       id
       total
       products {
-        quantity
-        date
-        time {
-          id
-          value
-        }
-        product {
-          id
-          name
-          price
-          imgUrl
-          beachBar {
-            id
-            name
-            formattedLocation
-            defaultCurrency {
-              symbol
-            }
-          }
-        }
+        ...BasicCartProduct
       }
     }
     card {
@@ -4895,7 +5553,7 @@ export const PaymentDocument = gql`
     }
     status {
       id
-      status
+      name
     }
     voucherCode {
       id
@@ -4916,7 +5574,7 @@ export const PaymentDocument = gql`
     }
   }
 }
-    `;
+    ${BasicCartProductFragmentDoc}`;
 
 /**
  * __usePaymentQuery__
@@ -4935,10 +5593,12 @@ export const PaymentDocument = gql`
  * });
  */
 export function usePaymentQuery(baseOptions: Apollo.QueryHookOptions<PaymentQuery, PaymentQueryVariables>) {
-        return Apollo.useQuery<PaymentQuery, PaymentQueryVariables>(PaymentDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PaymentQuery, PaymentQueryVariables>(PaymentDocument, options);
       }
 export function usePaymentLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PaymentQuery, PaymentQueryVariables>) {
-          return Apollo.useLazyQuery<PaymentQuery, PaymentQueryVariables>(PaymentDocument, baseOptions);
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PaymentQuery, PaymentQueryVariables>(PaymentDocument, options);
         }
 export type PaymentQueryHookResult = ReturnType<typeof usePaymentQuery>;
 export type PaymentLazyQueryHookResult = ReturnType<typeof usePaymentLazyQuery>;
@@ -4966,54 +5626,127 @@ export const PaymentRefundAmountDocument = gql`
  * });
  */
 export function usePaymentRefundAmountQuery(baseOptions: Apollo.QueryHookOptions<PaymentRefundAmountQuery, PaymentRefundAmountQueryVariables>) {
-        return Apollo.useQuery<PaymentRefundAmountQuery, PaymentRefundAmountQueryVariables>(PaymentRefundAmountDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PaymentRefundAmountQuery, PaymentRefundAmountQueryVariables>(PaymentRefundAmountDocument, options);
       }
 export function usePaymentRefundAmountLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PaymentRefundAmountQuery, PaymentRefundAmountQueryVariables>) {
-          return Apollo.useLazyQuery<PaymentRefundAmountQuery, PaymentRefundAmountQueryVariables>(PaymentRefundAmountDocument, baseOptions);
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PaymentRefundAmountQuery, PaymentRefundAmountQueryVariables>(PaymentRefundAmountDocument, options);
         }
 export type PaymentRefundAmountQueryHookResult = ReturnType<typeof usePaymentRefundAmountQuery>;
 export type PaymentRefundAmountLazyQueryHookResult = ReturnType<typeof usePaymentRefundAmountLazyQuery>;
 export type PaymentRefundAmountQueryResult = Apollo.QueryResult<PaymentRefundAmountQuery, PaymentRefundAmountQueryVariables>;
-export const ReviewDocument = gql`
-    query Review($reviewId: ID!) {
-  review(reviewId: $reviewId) {
-    id
-    ratingValue
-    positiveComment
-    negativeComment
-    review
-    updatedAt
-    timestamp
-    votes {
+export const PaymentsDocument = gql`
+    query Payments($monthId: ID, $year: Int) {
+  payments(monthId: $monthId, year: $year) {
+    beachBar {
       id
-      user {
-        id
+      name
+      thumbnailUrl
+      location {
+        city {
+          name
+        }
+        region {
+          name
+        }
       }
-      type {
+    }
+    visits {
+      isUpcoming
+      isRefunded
+      date
+      time {
         id
         value
       }
+      payment {
+        id
+        refCode
+      }
     }
-    answer {
+  }
+}
+    `;
+
+/**
+ * __usePaymentsQuery__
+ *
+ * To run a query within a React component, call `usePaymentsQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePaymentsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePaymentsQuery({
+ *   variables: {
+ *      monthId: // value for 'monthId'
+ *      year: // value for 'year'
+ *   },
+ * });
+ */
+export function usePaymentsQuery(baseOptions?: Apollo.QueryHookOptions<PaymentsQuery, PaymentsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PaymentsQuery, PaymentsQueryVariables>(PaymentsDocument, options);
+      }
+export function usePaymentsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PaymentsQuery, PaymentsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PaymentsQuery, PaymentsQueryVariables>(PaymentsDocument, options);
+        }
+export type PaymentsQueryHookResult = ReturnType<typeof usePaymentsQuery>;
+export type PaymentsLazyQueryHookResult = ReturnType<typeof usePaymentsLazyQuery>;
+export type PaymentsQueryResult = Apollo.QueryResult<PaymentsQuery, PaymentsQueryVariables>;
+export const PaymentDatesDocument = gql`
+    query PaymentDates {
+  paymentDates {
+    month {
       id
-      body
+      value
     }
+    year
+  }
+}
+    `;
+
+/**
+ * __usePaymentDatesQuery__
+ *
+ * To run a query within a React component, call `usePaymentDatesQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePaymentDatesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePaymentDatesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function usePaymentDatesQuery(baseOptions?: Apollo.QueryHookOptions<PaymentDatesQuery, PaymentDatesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PaymentDatesQuery, PaymentDatesQueryVariables>(PaymentDatesDocument, options);
+      }
+export function usePaymentDatesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PaymentDatesQuery, PaymentDatesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PaymentDatesQuery, PaymentDatesQueryVariables>(PaymentDatesDocument, options);
+        }
+export type PaymentDatesQueryHookResult = ReturnType<typeof usePaymentDatesQuery>;
+export type PaymentDatesLazyQueryHookResult = ReturnType<typeof usePaymentDatesLazyQuery>;
+export type PaymentDatesQueryResult = Apollo.QueryResult<PaymentDatesQuery, PaymentDatesQueryVariables>;
+export const ReviewDocument = gql`
+    query Review($reviewId: ID!) {
+  review(reviewId: $reviewId) {
+    ...Review
     beachBar {
       id
       name
       formattedLocation
     }
-    visitType {
-      id
-      name
-    }
-    month {
-      id
-      value
-    }
   }
 }
-    `;
+    ${ReviewFragmentDoc}`;
 
 /**
  * __useReviewQuery__
@@ -5032,10 +5765,12 @@ export const ReviewDocument = gql`
  * });
  */
 export function useReviewQuery(baseOptions: Apollo.QueryHookOptions<ReviewQuery, ReviewQueryVariables>) {
-        return Apollo.useQuery<ReviewQuery, ReviewQueryVariables>(ReviewDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ReviewQuery, ReviewQueryVariables>(ReviewDocument, options);
       }
 export function useReviewLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ReviewQuery, ReviewQueryVariables>) {
-          return Apollo.useLazyQuery<ReviewQuery, ReviewQueryVariables>(ReviewDocument, baseOptions);
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ReviewQuery, ReviewQueryVariables>(ReviewDocument, options);
         }
 export type ReviewQueryHookResult = ReturnType<typeof useReviewQuery>;
 export type ReviewLazyQueryHookResult = ReturnType<typeof useReviewLazyQuery>;
@@ -5052,18 +5787,31 @@ export const SearchDocument = gql`
   ) {
     results {
       beachBar {
-        id
-        name
-        thumbnailUrl
+        ...SearchBeachBar
       }
       availability {
         hasAvailability
         hasCapacity
       }
     }
+    search {
+      id
+      filters {
+        id
+        publicId
+      }
+      sort {
+        id
+        name
+      }
+      inputValue {
+        ...SearchInputValue
+      }
+    }
   }
 }
-    `;
+    ${SearchBeachBarFragmentDoc}
+${SearchInputValueFragmentDoc}`;
 
 /**
  * __useSearchQuery__
@@ -5087,10 +5835,12 @@ export const SearchDocument = gql`
  * });
  */
 export function useSearchQuery(baseOptions?: Apollo.QueryHookOptions<SearchQuery, SearchQueryVariables>) {
-        return Apollo.useQuery<SearchQuery, SearchQueryVariables>(SearchDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SearchQuery, SearchQueryVariables>(SearchDocument, options);
       }
 export function useSearchLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SearchQuery, SearchQueryVariables>) {
-          return Apollo.useLazyQuery<SearchQuery, SearchQueryVariables>(SearchDocument, baseOptions);
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SearchQuery, SearchQueryVariables>(SearchDocument, options);
         }
 export type SearchQueryHookResult = ReturnType<typeof useSearchQuery>;
 export type SearchLazyQueryHookResult = ReturnType<typeof useSearchLazyQuery>;
@@ -5098,58 +5848,10 @@ export type SearchQueryResult = Apollo.QueryResult<SearchQuery, SearchQueryVaria
 export const SearchInputValuesDocument = gql`
     query SearchInputValues {
   searchInputValues {
-    inputValue {
-      id
-      publicId
-      formattedValue
-      country {
-        id
-        name
-        alpha2Code
-      }
-      city {
-        id
-        name
-        country {
-          id
-          alpha2Code
-        }
-      }
-      region {
-        id
-        name
-        country {
-          id
-          alpha2Code
-        }
-      }
-      beachBar {
-        id
-        name
-        thumbnailUrl
-        formattedLocation
-        location {
-          longitude
-          latitude
-          country {
-            id
-            name
-            alpha2Code
-          }
-          city {
-            id
-            name
-          }
-          region {
-            id
-            name
-          }
-        }
-      }
-    }
+    ...SearchInputValue
   }
 }
-    `;
+    ${SearchInputValueFragmentDoc}`;
 
 /**
  * __useSearchInputValuesQuery__
@@ -5167,10 +5869,12 @@ export const SearchInputValuesDocument = gql`
  * });
  */
 export function useSearchInputValuesQuery(baseOptions?: Apollo.QueryHookOptions<SearchInputValuesQuery, SearchInputValuesQueryVariables>) {
-        return Apollo.useQuery<SearchInputValuesQuery, SearchInputValuesQueryVariables>(SearchInputValuesDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SearchInputValuesQuery, SearchInputValuesQueryVariables>(SearchInputValuesDocument, options);
       }
 export function useSearchInputValuesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SearchInputValuesQuery, SearchInputValuesQueryVariables>) {
-          return Apollo.useLazyQuery<SearchInputValuesQuery, SearchInputValuesQueryVariables>(SearchInputValuesDocument, baseOptions);
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SearchInputValuesQuery, SearchInputValuesQueryVariables>(SearchInputValuesDocument, options);
         }
 export type SearchInputValuesQueryHookResult = ReturnType<typeof useSearchInputValuesQuery>;
 export type SearchInputValuesLazyQueryHookResult = ReturnType<typeof useSearchInputValuesLazyQuery>;
@@ -5221,10 +5925,12 @@ export const UserHistoryDocument = gql`
  * });
  */
 export function useUserHistoryQuery(baseOptions?: Apollo.QueryHookOptions<UserHistoryQuery, UserHistoryQueryVariables>) {
-        return Apollo.useQuery<UserHistoryQuery, UserHistoryQueryVariables>(UserHistoryDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<UserHistoryQuery, UserHistoryQueryVariables>(UserHistoryDocument, options);
       }
 export function useUserHistoryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UserHistoryQuery, UserHistoryQueryVariables>) {
-          return Apollo.useLazyQuery<UserHistoryQuery, UserHistoryQueryVariables>(UserHistoryDocument, baseOptions);
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<UserHistoryQuery, UserHistoryQueryVariables>(UserHistoryDocument, options);
         }
 export type UserHistoryQueryHookResult = ReturnType<typeof useUserHistoryQuery>;
 export type UserHistoryLazyQueryHookResult = ReturnType<typeof useUserHistoryLazyQuery>;
@@ -5285,14 +5991,70 @@ export const UserReviewsDocument = gql`
  * });
  */
 export function useUserReviewsQuery(baseOptions?: Apollo.QueryHookOptions<UserReviewsQuery, UserReviewsQueryVariables>) {
-        return Apollo.useQuery<UserReviewsQuery, UserReviewsQueryVariables>(UserReviewsDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<UserReviewsQuery, UserReviewsQueryVariables>(UserReviewsDocument, options);
       }
 export function useUserReviewsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UserReviewsQuery, UserReviewsQueryVariables>) {
-          return Apollo.useLazyQuery<UserReviewsQuery, UserReviewsQueryVariables>(UserReviewsDocument, baseOptions);
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<UserReviewsQuery, UserReviewsQueryVariables>(UserReviewsDocument, options);
         }
 export type UserReviewsQueryHookResult = ReturnType<typeof useUserReviewsQuery>;
 export type UserReviewsLazyQueryHookResult = ReturnType<typeof useUserReviewsLazyQuery>;
 export type UserReviewsQueryResult = Apollo.QueryResult<UserReviewsQuery, UserReviewsQueryVariables>;
+export const UserSearchesDocument = gql`
+    query UserSearches($limit: Int) {
+  userSearches(limit: $limit) {
+    id
+    searchDate
+    searchAdults
+    searchChildren
+    inputValue {
+      id
+      city {
+        id
+        name
+      }
+      region {
+        id
+        name
+      }
+      beachBar {
+        id
+        name
+        thumbnailUrl
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useUserSearchesQuery__
+ *
+ * To run a query within a React component, call `useUserSearchesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useUserSearchesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useUserSearchesQuery({
+ *   variables: {
+ *      limit: // value for 'limit'
+ *   },
+ * });
+ */
+export function useUserSearchesQuery(baseOptions?: Apollo.QueryHookOptions<UserSearchesQuery, UserSearchesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<UserSearchesQuery, UserSearchesQueryVariables>(UserSearchesDocument, options);
+      }
+export function useUserSearchesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UserSearchesQuery, UserSearchesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<UserSearchesQuery, UserSearchesQueryVariables>(UserSearchesDocument, options);
+        }
+export type UserSearchesQueryHookResult = ReturnType<typeof useUserSearchesQuery>;
+export type UserSearchesLazyQueryHookResult = ReturnType<typeof useUserSearchesLazyQuery>;
+export type UserSearchesQueryResult = Apollo.QueryResult<UserSearchesQuery, UserSearchesQueryVariables>;
 export const GetFacebookOAuthUrlDocument = gql`
     query GetFacebookOAuthUrl {
   getFacebookOAuthUrl
@@ -5315,10 +6077,12 @@ export const GetFacebookOAuthUrlDocument = gql`
  * });
  */
 export function useGetFacebookOAuthUrlQuery(baseOptions?: Apollo.QueryHookOptions<GetFacebookOAuthUrlQuery, GetFacebookOAuthUrlQueryVariables>) {
-        return Apollo.useQuery<GetFacebookOAuthUrlQuery, GetFacebookOAuthUrlQueryVariables>(GetFacebookOAuthUrlDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetFacebookOAuthUrlQuery, GetFacebookOAuthUrlQueryVariables>(GetFacebookOAuthUrlDocument, options);
       }
 export function useGetFacebookOAuthUrlLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetFacebookOAuthUrlQuery, GetFacebookOAuthUrlQueryVariables>) {
-          return Apollo.useLazyQuery<GetFacebookOAuthUrlQuery, GetFacebookOAuthUrlQueryVariables>(GetFacebookOAuthUrlDocument, baseOptions);
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetFacebookOAuthUrlQuery, GetFacebookOAuthUrlQueryVariables>(GetFacebookOAuthUrlDocument, options);
         }
 export type GetFacebookOAuthUrlQueryHookResult = ReturnType<typeof useGetFacebookOAuthUrlQuery>;
 export type GetFacebookOAuthUrlLazyQueryHookResult = ReturnType<typeof useGetFacebookOAuthUrlLazyQuery>;
@@ -5345,10 +6109,12 @@ export const GetGoogleOAuthUrlDocument = gql`
  * });
  */
 export function useGetGoogleOAuthUrlQuery(baseOptions?: Apollo.QueryHookOptions<GetGoogleOAuthUrlQuery, GetGoogleOAuthUrlQueryVariables>) {
-        return Apollo.useQuery<GetGoogleOAuthUrlQuery, GetGoogleOAuthUrlQueryVariables>(GetGoogleOAuthUrlDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetGoogleOAuthUrlQuery, GetGoogleOAuthUrlQueryVariables>(GetGoogleOAuthUrlDocument, options);
       }
 export function useGetGoogleOAuthUrlLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetGoogleOAuthUrlQuery, GetGoogleOAuthUrlQueryVariables>) {
-          return Apollo.useLazyQuery<GetGoogleOAuthUrlQuery, GetGoogleOAuthUrlQueryVariables>(GetGoogleOAuthUrlDocument, baseOptions);
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetGoogleOAuthUrlQuery, GetGoogleOAuthUrlQueryVariables>(GetGoogleOAuthUrlDocument, options);
         }
 export type GetGoogleOAuthUrlQueryHookResult = ReturnType<typeof useGetGoogleOAuthUrlQuery>;
 export type GetGoogleOAuthUrlLazyQueryHookResult = ReturnType<typeof useGetGoogleOAuthUrlLazyQuery>;
@@ -5375,10 +6141,12 @@ export const GetInstagramOAuthUrlDocument = gql`
  * });
  */
 export function useGetInstagramOAuthUrlQuery(baseOptions?: Apollo.QueryHookOptions<GetInstagramOAuthUrlQuery, GetInstagramOAuthUrlQueryVariables>) {
-        return Apollo.useQuery<GetInstagramOAuthUrlQuery, GetInstagramOAuthUrlQueryVariables>(GetInstagramOAuthUrlDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetInstagramOAuthUrlQuery, GetInstagramOAuthUrlQueryVariables>(GetInstagramOAuthUrlDocument, options);
       }
 export function useGetInstagramOAuthUrlLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetInstagramOAuthUrlQuery, GetInstagramOAuthUrlQueryVariables>) {
-          return Apollo.useLazyQuery<GetInstagramOAuthUrlQuery, GetInstagramOAuthUrlQueryVariables>(GetInstagramOAuthUrlDocument, baseOptions);
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetInstagramOAuthUrlQuery, GetInstagramOAuthUrlQueryVariables>(GetInstagramOAuthUrlDocument, options);
         }
 export type GetInstagramOAuthUrlQueryHookResult = ReturnType<typeof useGetInstagramOAuthUrlQuery>;
 export type GetInstagramOAuthUrlLazyQueryHookResult = ReturnType<typeof useGetInstagramOAuthUrlLazyQuery>;
@@ -5428,10 +6196,12 @@ export const IndexPageDocument = gql`
  * });
  */
 export function useIndexPageQuery(baseOptions?: Apollo.QueryHookOptions<IndexPageQuery, IndexPageQueryVariables>) {
-        return Apollo.useQuery<IndexPageQuery, IndexPageQueryVariables>(IndexPageDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<IndexPageQuery, IndexPageQueryVariables>(IndexPageDocument, options);
       }
 export function useIndexPageLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<IndexPageQuery, IndexPageQueryVariables>) {
-          return Apollo.useLazyQuery<IndexPageQuery, IndexPageQueryVariables>(IndexPageDocument, baseOptions);
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<IndexPageQuery, IndexPageQueryVariables>(IndexPageDocument, options);
         }
 export type IndexPageQueryHookResult = ReturnType<typeof useIndexPageQuery>;
 export type IndexPageLazyQueryHookResult = ReturnType<typeof useIndexPageLazyQuery>;
@@ -5439,21 +6209,10 @@ export type IndexPageQueryResult = Apollo.QueryResult<IndexPageQuery, IndexPageQ
 export const GetAllBeachBarsDocument = gql`
     query GetAllBeachBars {
   getAllBeachBars {
-    id
-    name
-    thumbnailUrl
-    description
-    avgRating
-    payments {
-      id
-    }
-    location {
-      longitude
-      latitude
-    }
+    ...SearchBeachBar
   }
 }
-    `;
+    ${SearchBeachBarFragmentDoc}`;
 
 /**
  * __useGetAllBeachBarsQuery__
@@ -5471,10 +6230,12 @@ export const GetAllBeachBarsDocument = gql`
  * });
  */
 export function useGetAllBeachBarsQuery(baseOptions?: Apollo.QueryHookOptions<GetAllBeachBarsQuery, GetAllBeachBarsQueryVariables>) {
-        return Apollo.useQuery<GetAllBeachBarsQuery, GetAllBeachBarsQueryVariables>(GetAllBeachBarsDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetAllBeachBarsQuery, GetAllBeachBarsQueryVariables>(GetAllBeachBarsDocument, options);
       }
 export function useGetAllBeachBarsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAllBeachBarsQuery, GetAllBeachBarsQueryVariables>) {
-          return Apollo.useLazyQuery<GetAllBeachBarsQuery, GetAllBeachBarsQueryVariables>(GetAllBeachBarsDocument, baseOptions);
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetAllBeachBarsQuery, GetAllBeachBarsQueryVariables>(GetAllBeachBarsDocument, options);
         }
 export type GetAllBeachBarsQueryHookResult = ReturnType<typeof useGetAllBeachBarsQuery>;
 export type GetAllBeachBarsLazyQueryHookResult = ReturnType<typeof useGetAllBeachBarsLazyQuery>;

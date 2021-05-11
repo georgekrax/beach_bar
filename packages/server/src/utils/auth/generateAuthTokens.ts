@@ -1,10 +1,10 @@
 import { errors } from "@beach_bar/common";
 import { User } from "entity/User";
-import { decode, sign } from "jsonwebtoken";
+import { decode, sign, SignOptions } from "jsonwebtoken";
 import { nanoid } from "nanoid";
 import { GeneratedTokenType } from "../returnTypes";
 
-export const generateAccessToken = (user: User, scope: string[]): GeneratedTokenType => {
+export const generateAccessToken = (user: User, scope: string[], opts?: SignOptions): GeneratedTokenType => {
   const token = sign(
     {
       scope,
@@ -16,18 +16,20 @@ export const generateAccessToken = (user: User, scope: string[]): GeneratedToken
       subject: user.id.toString(),
       expiresIn: process.env.ACCESS_TOKEN_EXPIRATION!.toString(),
       jwtid: nanoid(),
+      ...opts,
     }
   );
 
   const tokenPayload: any = decode(token);
   if (tokenPayload === null) throw new Error(errors.SOMETHING_WENT_WRONG);
+  const { exp, iat, jti, aud, iss } = tokenPayload;
   return {
     token,
-    exp: tokenPayload.exp * 1000,
-    iat: tokenPayload.iat * 1000,
-    jti: tokenPayload.jti,
-    aud: tokenPayload.aud,
-    iss: tokenPayload.iss,
+    exp: exp * 1000,
+    iat: iat * 1000,
+    jti,
+    aud,
+    iss,
   };
 };
 
@@ -51,15 +53,14 @@ export const generateRefreshToken = (
   );
 
   const tokenPayload: any = decode(token);
-  if (tokenPayload === null) {
-    throw new Error(errors.SOMETHING_WENT_WRONG);
-  }
+  if (tokenPayload === null) throw new Error(errors.SOMETHING_WENT_WRONG);
+  const { exp, iat, jti, aud, iss } = tokenPayload;
   return {
     token,
-    exp: tokenPayload.exp * 1000,
-    iat: tokenPayload.iat * 1000,
-    jti: tokenPayload.jti,
-    aud: tokenPayload.aud,
-    iss: tokenPayload.iss,
+    exp: exp * 1000,
+    iat: iat * 1000,
+    jti,
+    aud,
+    iss,
   };
 };

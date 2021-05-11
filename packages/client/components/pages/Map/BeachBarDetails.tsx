@@ -1,18 +1,27 @@
 import BeachBar from "@/components/BeachBar";
-import { GetAllBeachBarsQuery } from "../../AuthForm/node_modules/@/graphql/generated";
+import { genBarThumbnailAlt } from "@/utils/format";
 import { Button, Dialog } from "@hashtag-design-system/components";
 import Image from "next/image";
 import styles from "./BeachBarDetails.module.scss";
+import { MapReducerInitialStateType } from "./__helpers__";
 
-type FProps = Pick<GetAllBeachBarsQuery["getAllBeachBars"][number], "name" | "thumbnailUrl" | "description">;
-
-export const BeachBarDetails: React.FC<FProps> = ({ name, description, thumbnailUrl }) => {
+export const BeachBarDetails: React.FC<MapReducerInitialStateType["selectedBeachBar"]> = ({
+  name,
+  description,
+  thumbnailUrl,
+}) => {
   return (
     <Dialog.Content>
-      <div className="w-100 flex-column-space-between-flex-start">
-        <div className="w-100 flex-row-flex-start-stretch">
+      <div className="w100 flex-column-space-between-flex-start">
+        <div className="w100 flex-row-flex-start-stretch">
           <div className={styles.imgContainer}>
-            <Image src={thumbnailUrl} layout="fill" objectFit="cover" objectPosition="center" />
+            <Image
+              src={thumbnailUrl}
+              alt={genBarThumbnailAlt(name)}
+              layout="fill"
+              objectFit="cover"
+              objectPosition="center"
+            />
           </div>
           <div className={styles.content + " flex-column-inherit-flex-start"}>
             <BeachBar.Header as="h4">{name}</BeachBar.Header>
@@ -26,7 +35,7 @@ export const BeachBarDetails: React.FC<FProps> = ({ name, description, thumbnail
             </div>
           ))}
         </div> */}
-        <Button className={styles.btn + " iw-100"}>Go to #beach_bar</Button>
+        <Button className={styles.btn + " iw100"}>Go to #beach_bar</Button>
       </div>
     </Dialog.Content>
   );

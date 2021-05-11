@@ -3,9 +3,11 @@
   outline: none;
   color: $blue-5;
   cursor: pointer;
+  opacity: 1;
+  @include transition-2s("ease-out", "opacity");
 
-  &:active {
-    color: $blue-7;
+  &:hover {
+    opacity: 0.75;
   }
 }
 
@@ -29,4 +31,9 @@
 
 .isuccess {
   color: $green-7 !important;
+}
+
+.bull {
+  color: $grey-7;
+  margin: 0 map-get($em-spacers, 4);
 }

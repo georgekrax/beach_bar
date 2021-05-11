@@ -1,23 +1,24 @@
 .container {
   margin-bottom: map-get($em-spacers, 16);
+  padding: map-get($em-spacers, 8) 0.1em;
+  border-bottom: 1px solid $grey-5;
 
   h6 {
     color: $grey-9;
   }
+}
 
-  & > div {
-    a {
-      @extend .body-14;
-      margin-right: 0.375em;
-    }
+.container > div {
+  a {
+    margin-right: 0.375em;
+  }
 
-    svg {
-      // align-self: flex-end;
-      margin-top: 3%;
+  svg {
+    // align-self: flex-end;
+    margin-top: 3%;
 
-      path {
-        stroke: $secondary;
-      }
+    path {
+      stroke: $secondary;
     }
   }
 }

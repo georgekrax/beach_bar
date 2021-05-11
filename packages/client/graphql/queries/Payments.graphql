@@ -1,0 +1,30 @@
+query Payments($monthId: ID, $year: Int) {
+	payments(monthId: $monthId, year: $year) {
+		beachBar {
+			id
+			name
+			thumbnailUrl
+			location {
+				city {
+					name
+				}
+				region {
+					name
+				}
+			}
+		}
+		visits {
+			isUpcoming
+			isRefunded
+			date
+			time {
+				id
+				value
+			}
+			payment {
+				id
+				refCode
+			}
+		}
+	}
+}

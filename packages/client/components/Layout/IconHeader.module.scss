@@ -1,0 +1,9 @@
+.container {
+  & > div:first-child > div {
+    margin-right: map-get($em-spacers, 16);
+  }
+
+  & > div:last-child > div {
+    margin-left: map-get($em-spacers, 16);
+  }
+}

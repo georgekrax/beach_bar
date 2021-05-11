@@ -1,56 +1,43 @@
 import { errors, MyContext } from "@beach_bar/common";
+import { ApolloError, UserInputError } from "apollo-server-express";
 import { BeachBar } from "entity/BeachBar";
 import { CouponCode } from "entity/CouponCode";
 import { OfferCampaign } from "entity/OfferCampaign";
 import { OfferCampaignCode } from "entity/OfferCampaignCode";
 import { extendType, idArg, intArg, stringArg } from "nexus";
-import { ErrorType } from "typings/.index";
 import { ProductOfferType } from "typings/beach_bar/product/offer";
-import { checkScopes } from "utils/checkScopes";
-import { checkVoucherCode } from "utils/checkVoucherCode";
-import { CouponCodeRevealResult, OfferCampaignCodeRevealResult, OfferCampaignType, VoucherCodeQueryResult } from "./types";
+import { isAuth, throwScopesUnauthorized } from "utils/auth/payload";
+import { checkVoucherCode } from "utils/payment";
+import { CouponCodeRevealType, OfferCampaignCodeRevealType, OfferCampaignType, VoucherCodeQueryResult } from "./types";
 
 export const VoucherCoderQuery = extendType({
   type: "Query",
   definition(t) {
-    t.nullable.field("getVoucherCode", {
+    t.field("getVoucherCode", {
       type: VoucherCodeQueryResult,
       description: "Get the product offer or coupon, based on its referral code",
-      args: {
-        refCode: stringArg({ description: "The referral code of the product offer or coupon" }),
-      },
+      args: { refCode: stringArg({ description: "The referral code of the product offer or coupon" }) },
       resolve: async (_, { refCode }): Promise<ProductOfferType> => {
-        if (!refCode || refCode.trim().length === 0) {
-          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: "Invalid coupon code" } };
-        }
+        if (!refCode || refCode.trim().length === 0) throw new UserInputError("Please provide a valid refCode");
 
         const res = await checkVoucherCode(refCode);
-        if (res.couponCode) {
-          return res.couponCode;
-        } else if (res.offerCode) {
-          return res.offerCode;
-        }
-        return res.error as any;
+        if (res.couponCode) return res.couponCode;
+        else if (res.offerCode)return res.offerCode;
+        else throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.INTERNAL_SERVER_ERROR);
       },
     });
-    t.nullable.list.field("getBeachBarOfferCampaigns", {
+    t.list.field("getBeachBarOfferCampaigns", {
       type: OfferCampaignType,
       description: "Get a list with all the offer campaigns of a #beach_bar",
-      args: {
-        beachBarId: intArg({ description: "The ID value of the #beach_bar" }),
-      },
-      resolve: async (_, { beachBarId }): Promise<OfferCampaign[] | null> => {
-        if (!beachBarId || beachBarId <= 0) {
-          return null;
-        }
+      args: { beachBarId: intArg() },
+      resolve: async (_, { beachBarId }): Promise<OfferCampaign[]> => {
+        if (!beachBarId || beachBarId.trim().length === 0) throw new UserInputError("Please provide a valid beachBarId");
 
         const beachBar = await BeachBar.findOne({
           where: { id: beachBarId },
           relations: ["products", "products.offerCampaigns", "products.offerCampaigns.products"],
         });
-        if (!beachBar) {
-          return null;
-        }
+        if (!beachBar) throw new ApolloError(errors.BEACH_BAR_DOES_NOT_EXIST, errors.NOT_FOUND);
 
         const result: OfferCampaign[] = [];
         beachBar.products.map(product => product.offerCampaigns?.forEach(campaign => result.push(campaign)));
@@ -59,55 +46,33 @@ export const VoucherCoderQuery = extendType({
       },
     });
     t.field("revealCouponCode", {
-      type: CouponCodeRevealResult,
+      type: CouponCodeRevealType,
       description: "Get a coupon's code details & its referral code",
-      args: {
-        couponCodeId: idArg({ description: "The ID value of the coupon code" }),
-      },
-      resolve: async (_, { couponCodeId }, { payload }: MyContext): Promise<CouponCode | ErrorType> => {
-        if (!payload) {
-          return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
-        }
-        if (!checkScopes(payload, ["beach_bar@crud:coupon_code"])) {
-          return {
-            error: {
-              code: errors.UNAUTHORIZED_CODE,
-              message: "You are not allowed to retrieve the referral code of a coupon",
-            },
-          };
-        }
+      args: { couponCodeId: idArg() },
+      resolve: async (_, { couponCodeId }, { payload }: MyContext): Promise<CouponCode> => {
+        isAuth(payload);
+        throwScopesUnauthorized(payload, "You are not allowed to retrieve the referral code of a coupon", [
+          "beach_bar@crud:coupon_code",
+        ]);
 
         const couponCode = await CouponCode.findOne(couponCodeId);
-        if (!couponCode) {
-          return { error: { code: errors.CONFLICT, message: "Specified coupon code does not exist" } };
-        }
+        if (!couponCode) throw new ApolloError("Specified coupon code does not exist", errors.NOT_FOUND);
 
         return couponCode;
       },
     });
     t.field("revealOfferCampaignCode", {
-      type: OfferCampaignCodeRevealResult,
+      type: OfferCampaignCodeRevealType,
       description: "Get an offer's campaign code details + its referral code",
-      args: {
-        offerCampaignCodeId: idArg({ description: "The ID value of the offer campaign code" }),
-      },
-      resolve: async (_, { offerCampaignCodeId }, { payload }: MyContext): Promise<OfferCampaignCode | ErrorType> => {
-        if (!payload) {
-          return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
-        }
-        if (!checkScopes(payload, ["beach_bar@crud:offer_campaign"])) {
-          return {
-            error: {
-              code: errors.UNAUTHORIZED_CODE,
-              message: "You are not allowed to retrieve the referral code of an offer campaign code",
-            },
-          };
-        }
+      args: { offerCampaignCodeId: idArg() },
+      resolve: async (_, { offerCampaignCodeId }, { payload }: MyContext): Promise<OfferCampaignCode> => {
+        isAuth(payload);
+        throwScopesUnauthorized(payload, "You are not allowed to retrieve the referral code of an offer campaign code", [
+          "beach_bar@crud:offer_campaign",
+        ]);
 
         const offerCampaignCode = await OfferCampaignCode.findOne(offerCampaignCodeId);
-        if (!offerCampaignCode) {
-          return { error: { code: errors.CONFLICT, message: "Specified offer campaign code does not exist" } };
-        }
+        if (!offerCampaignCode) throw new ApolloError("Specified offer campaign code does not exist", errors.NOT_FOUND);
 
         return offerCampaignCode;
       },

@@ -1,20 +1,50 @@
 .container {
-  @extend .layout--padding;
   position: sticky;
   top: 0;
   left: 0;
-  min-height: 5em;
-  z-index: 99;
+  height: $header-height;
   background-color: $grey-1;
-  // background-color: rgba($volcano-5, 0.7);
+  z-index: 100;
+  // backdrop-filter: saturate(180%) blur(20px);
 
   & > * {
     color: $grey-9;
   }
+
+  & > div {
+    margin: auto;
+  }
 }
 
-.btn {
-  @extend .semibold;
-  color: $grey-9;
-  padding: 0.6em 0.75em;
+.userFirstName {
+  margin-right: map-get($em-spacers, 20);
+}
+
+// .nav {
+// }
+
+.searchBar {
+  font-size: 75%;
+  width: max(25rem, 40%);
+  margin: auto;
+
+  summary + div label,
+  p div:first-child {
+    display: none;
+  }
+
+  & > div {
+    flex-basis: 25%;
+    margin: 0;
+  }
+
+  & > button {
+    padding: map-get($em-spacers, 8) map-get($em-spacers, 12);
+  }
+}
+
+@include breakpoint("md", "max-width") {
+  .userFirstName {
+    display: none;
+  }
 }

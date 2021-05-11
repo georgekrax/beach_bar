@@ -1,4 +1,4 @@
-import { errors } from "@beach_bar/common";
+import { errors, MyContext } from "@beach_bar/common";
 import { validateEmailSchema } from "@the_hashtag/common";
 import { Dayjs } from "dayjs";
 import { Stripe } from "stripe";
@@ -69,14 +69,12 @@ export class Customer extends BaseEntity {
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Dayjs;
 
-  checkReviewsQuantity(beachBarId: number, payment: Payment): boolean {
+  checkReviewsQuantity(beachBarId: string, payment: Payment): boolean {
     if (this.reviews) {
-      const customerBeachBarReviews = this.reviews.filter(review => review.beachBarId === beachBarId && !review.deletedAt);
+      const customerBeachBarReviews = this.reviews.filter(review => review.beachBarId.toString() === beachBarId && !review.deletedAt);
       if (customerBeachBarReviews && customerBeachBarReviews.length >= 1) {
         const paymentBeachBarProducts = payment.getBeachBarProducts(beachBarId);
-        if (paymentBeachBarProducts && paymentBeachBarProducts.length <= customerBeachBarReviews.length) {
-          return false;
-        }
+        if (paymentBeachBarProducts && paymentBeachBarProducts.length <= customerBeachBarReviews.length) return false;
         return true;
       }
       return true;
@@ -86,14 +84,10 @@ export class Customer extends BaseEntity {
 
   async update(phoneNumber?: string, countryAlpha2Code?: string): Promise<Customer | any> {
     try {
-      if (phoneNumber && phoneNumber !== this.phoneNumber && phoneNumber.trim().length !== 0) {
-        this.phoneNumber = phoneNumber;
-      }
+      if (phoneNumber && phoneNumber !== this.phoneNumber && phoneNumber.trim().length !== 0) this.phoneNumber = phoneNumber;
       if (countryAlpha2Code && countryAlpha2Code.trim().length !== 0) {
         const country = await Country.findOne({ alpha2Code: countryAlpha2Code });
-        if (country) {
-          this.country = country;
-        }
+        if (country) this.country = country;
       }
       await this.save();
       return this;
@@ -102,7 +96,7 @@ export class Customer extends BaseEntity {
     }
   }
 
-  async customSoftRemove(stripe: Stripe, webhook = false): Promise<void | Error> {
+  async customSoftRemove(stripe: Stripe, webhook = false): Promise<void | never> {
     if (!webhook) {
       // delete customer in Stripe too
       try {
@@ -111,7 +105,6 @@ export class Customer extends BaseEntity {
         throw new Error(err.message);
       }
     }
-
     const findOptions: any = { customerId: this.id };
     await softRemove(Customer, { id: this.id }, [Card], findOptions);
   }
@@ -121,29 +114,27 @@ export class Customer extends BaseEntity {
 export class CustomerRepository extends Repository<Customer> {
   async getOrCreateCustomer(
     stripe: Stripe,
-    email: string,
+    email?: string,
     phoneNumber?: string,
-    countryAlpha2Code?: string,
-    payload?: any
+    countryId?: string,
+    payload?: MyContext["payload"]
   ): Promise<TAddCustomer> {
     let user: User | undefined = undefined;
+    const relations = [
+      "account",
+      "account.country",
+      "customer",
+      "customer.user",
+      "customer.cards",
+      "customer.cards.brand",
+      "customer.country",
+    ];
     if (payload && payload.sub) {
-      user = await User.findOne({
-        where: [{ id: payload.sub }, { email }],
-        relations: ["account", "account.country", "customer", "customer.user", "customer.cards", "customer.country"],
-      });
+      user = await User.findOne({ where: [{ id: payload.sub }, { email }], relations });
       if (!user) throw new Error(errors.USER_NOT_FOUND_MESSAGE);
-    } else
-      user = await User.findOne({
-        where: { email },
-        relations: ["account", "account.country", "customer", "customer.user", "customer.cards", "customer.country"],
-      });
+    } else user = await User.findOne({ where: { email }, relations });
 
-    if (user && user.customer)
-      return {
-        customer: user.customer,
-        added: false,
-      };
+    if (user && user.customer) return { customer: user.customer, added: false };
 
     if (email && !user) {
       try {
@@ -153,16 +144,13 @@ export class CustomerRepository extends Repository<Customer> {
       }
     }
 
-    const newCustomer = Customer.create({
-      user,
-      email: user ? user.email : email,
-    });
+    const newCustomer = Customer.create({ user, email: user ? user.email : email });
 
     try {
       if (user && user.account && user.account && user.account.phoneNumber) newCustomer.phoneNumber = user.account.phoneNumber;
       else newCustomer.phoneNumber = phoneNumber;
-      if (countryAlpha2Code) {
-        const country = await Country.findOne({ alpha2Code: countryAlpha2Code });
+      if (countryId) {
+        const country = await Country.findOne(countryId);
         if (country) newCustomer.country = country;
       }
 
@@ -177,28 +165,23 @@ export class CustomerRepository extends Repository<Customer> {
         address: userAccount
           ? {
               line1: userAccount.address || "",
-              country: userAccount.country?.alpha2Code || undefined,
+              country: newCustomer.country?.alpha2Code || undefined,
               city: userAccount.city || undefined,
               postal_code: userAccount.zipCode || undefined,
             }
           : undefined,
         phone: newCustomer.phoneNumber,
-        metadata: {
-          is_signed_up: user ? "true" : "false",
-        },
+        metadata: { is_signed_up: user ? "true" : "false" },
       });
       if (!stripeCustomer && (stripeCustomer.email !== email || stripeCustomer.email !== user?.email))
         throw new Error(errors.SOMETHING_WENT_WRONG);
       newCustomer.stripeCustomerId = stripeCustomer.id;
       await newCustomer.save();
     } catch (err) {
-      throw new Error(errors.SOMETHING_WENT_WRONG + ": " + err.message);
+      throw new Error(err.message);
     }
 
-    return {
-      customer: newCustomer,
-      added: true,
-    };
+    return { customer: newCustomer, added: true };
   }
 
   async createStripeWebhookCustomer(stripeCustomer: any): Promise<void | Error> {
@@ -216,10 +199,7 @@ export class CustomerRepository extends Repository<Customer> {
       }
     }
 
-    const newCustomer = Customer.create({
-      user,
-      email: user ? user.email : email,
-    });
+    const newCustomer = Customer.create({ user, email: user ? user.email : email });
 
     try {
       newCustomer.stripeCustomerId = id;

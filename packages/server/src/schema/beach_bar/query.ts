@@ -1,24 +1,29 @@
-import { MyContext, COMMON_CONFIG } from "@beach_bar/common";
+import { COMMON_CONFIG, errors, MyContext } from "@beach_bar/common";
+import { ApolloError, UserInputError } from "apollo-server-errors";
 import redisKeys from "constants/redisKeys";
 import { BeachBar } from "entity/BeachBar";
+import { BeachBarImgUrl } from "entity/BeachBarImgUrl";
 import { Payment } from "entity/Payment";
 import { UserFavoriteBar } from "entity/UserFavoriteBar";
 import { UserHistory } from "entity/UserHistory";
-import uniqBy from "lodash/uniqby";
-import { arg, booleanArg, extendType, intArg, nullable } from "nexus";
+import {uniqBy} from "lodash";
+import { arg, booleanArg, extendType, idArg, nullable, stringArg } from "nexus";
 import { getConnection, In, Not } from "typeorm";
 import { BeachBarAvailabilityReturnType } from "typings/beach_bar";
+import { TProductAvailability } from "typings/beach_bar/product";
 import { SearchInputType } from "../search/types";
+import { BeachBarImgUrlType } from "./img_url/types";
+import { ProductAvailabilityType } from "./product/types";
 import { BeachBarAvailabilityType, BeachBarType } from "./types";
 
 export const BeachBarQuery = extendType({
   type: "Query",
   definition(t) {
-    t.nullable.field("getBeachBar", {
+    t.nullable.field("beachBar", {
       type: BeachBarType,
-      description: "Get the detail info of a #beach_bar",
+      description: "Get the details of a #beach_bar",
       args: {
-        beachBarId: intArg({ description: "The ID value of the #beach_bar" }),
+        slug: stringArg(),
         userVisit: nullable(
           booleanArg({
             description: "Indicates if to retrieve information for user search. Its default value is set to true",
@@ -26,42 +31,42 @@ export const BeachBarQuery = extendType({
           })
         ),
       },
-      resolve: async (_, { beachBarId, userVisit }, { redis, ipAddr, payload }: MyContext): Promise<BeachBar | null> => {
-        if (!beachBarId || beachBarId <= 0) {
-          return null;
-        }
+      resolve: async (_, { slug, userVisit }, { redis, ipAddr, payload }: MyContext): Promise<BeachBar | null> => {
+        if (!slug || slug.trim().length === 0) return null;
 
         const beachBars: BeachBar[] = (await redis.lrange(redisKeys.BEACH_BAR_CACHE_KEY, 0, -1)).map((x: string) => JSON.parse(x));
-        const beachBar = beachBars.find(beachBar => beachBar.id === beachBarId);
-        if (!beachBar) {
-          return null;
-        }
-        if (userVisit) {
+        const beachBar = beachBars.find(beachBar => beachBar.slug === slug);
+        if (!beachBar) return null;
+        if (userVisit)
           await UserHistory.create({
             activityId: COMMON_CONFIG.HISTORY_ACTIVITY.BEACH_BAR_QUERY_ID,
             objectId: BigInt(beachBar.id),
             userId: payload ? payload.sub : undefined,
             ipAddr,
           }).save();
-        }
 
         return beachBar;
       },
     });
-    t.nullable.field("checkBeachBarAvailability", {
+    t.nullable.list.field("beachBarImgs", {
+      type: BeachBarImgUrlType,
+      description: "Get the images of a #beach_bar",
+      args: { slug: stringArg() },
+      resolve: async (_, { slug }, { redis }: MyContext): Promise<BeachBarImgUrl[] | null> => {
+        if (!slug || slug.trim().length === 0) return null;
+
+        const beachBars: BeachBar[] = (await redis.lrange(redisKeys.BEACH_BAR_CACHE_KEY, 0, -1)).map((x: string) => JSON.parse(x));
+        const beachBar = beachBars.find(beachBar => beachBar.slug === slug);
+        return beachBar?.imgUrls || null;
+      },
+    });
+    t.field("checkBeachBarAvailability", {
       type: BeachBarAvailabilityType,
       description: "Check a #beach_bar's availability",
-      args: {
-        beachBarId: intArg({ description: "The ID value of the #beach_bar, to check for availability" }),
-        availability: nullable(arg({ type: SearchInputType })),
-      },
-      resolve: async (_, { beachBarId, availability }, { redis }: MyContext): Promise<BeachBarAvailabilityReturnType | null> => {
-        if (!beachBarId || beachBarId <= 0) {
-          return null;
-        }
-        if (!availability) {
-          return null;
-        }
+      args: { beachBarId: idArg(), availability: arg({ type: SearchInputType }) },
+      resolve: async (_, { beachBarId, availability }): Promise<BeachBarAvailabilityReturnType> => {
+        if (!beachBarId || beachBarId.trim().length === 0) throw new UserInputError("Please provide a valid beachBarId");
+        if (!availability) throw new UserInputError("Please provide a valid availability");
         const { date, timeId } = availability;
         let { adults, children } = availability;
         adults = adults || 0;
@@ -70,17 +75,40 @@ export const BeachBarQuery = extendType({
 
         const beachBar = await BeachBar.findOne({
           where: { id: beachBarId },
-          relations: ["products", "products.reservationLimits", "products.reservationLimits.product"],
+          relations: ["products", "products.reservedProducts", "products.reservationLimits", "products.reservationLimits.product"],
         });
-        if (!beachBar) {
-          return null;
-        }
-        const { hasAvailability, hasCapacity } = await beachBar.checkAvailability(redis, date, timeId, totalPeople);
+        if (!beachBar) throw new ApolloError(errors.BEACH_BAR_DOES_NOT_EXIST, errors.NOT_FOUND);
+        return beachBar.checkAvailability({ date, timeId, totalPeople });
+      },
+    });
+    t.list.field("availableProducts", {
+      type: ProductAvailabilityType,
+      description: "Get a list with a #beach_bar's available products",
+      args: { beachBarId: idArg(), availability: arg({ type: SearchInputType }) },
+      resolve: async (_, { beachBarId, availability }): Promise<TProductAvailability[]> => {
+        const { date, timeId } = availability;
+        let { adults, children } = availability;
+        adults = adults || 0;
+        children = children || 0;
+        const totalPeople = adults + children !== 0 ? adults + children : undefined;
 
-        return {
-          hasAvailability,
-          hasCapacity,
-        };
+        const beachBar = await BeachBar.findOne({
+          where: { id: beachBarId },
+          relations: [
+            "products",
+            "products.category",
+            "products.category.components",
+            "products.category.components.component",
+            "products.category.components.component.icon",
+            "products.beachBar",
+            "products.beachBar.products",
+            "products.beachBar.products.reservedProducts",
+            "products.beachBar.products.reservationLimits",
+            "products.beachBar.products.reservationLimits.product",
+          ],
+        });
+        if (!beachBar) throw new ApolloError(errors.BEACH_BAR_DOES_NOT_EXIST, errors.NOT_FOUND);
+        return beachBar.getAvailableProducts({ date, timeId, totalPeople });
       },
     });
     t.list.field("getAllBeachBars", {
@@ -99,10 +127,13 @@ export const BeachBarQuery = extendType({
             "products",
             "features",
             "features.service",
+            "features.service.icon",
             "location",
             "location.country",
             "location.city",
             "location.region",
+            "styles",
+            "styles.style",
           ],
         });
         beachBars.forEach(beachBar => (beachBar.features = beachBar.features.filter(feature => !feature.deletedAt)));
@@ -178,6 +209,28 @@ export const BeachBarQuery = extendType({
         }
 
         return finalArr;
+      },
+    });
+    t.list.field("nearBeachBars", {
+      type: BeachBarType,
+      description: "A list with 6 #beach_bars, near to the user's location",
+      args: {
+        latitude: stringArg({ description: "The latitude of the user's location" }),
+        longitude: stringArg({ description: "The longitude of the user's location" }),
+      },
+      resolve: async (_, { latitude, longitude }): Promise<BeachBar[]> => {
+        const beachBars = await getConnection()
+          .getRepository(BeachBar)
+          .createQueryBuilder("beachBar")
+          .leftJoinAndSelect("beachBar.location", "beachBarLocation")
+          .leftJoinAndSelect("beachBarLocation.country", "beachBarLocationCountry")
+          .leftJoinAndSelect("beachBarLocation.city", "beachBarLocationCity")
+          .leftJoinAndSelect("beachBarLocation.region", "beachBarLocationRegion")
+          // .where("", {})
+          .orderBy(`beachBarLocation.where_is <-> ST_MakePoint(${latitude}, ${longitude})::geography`, "ASC")
+          .limit(6)
+          .getMany();
+        return beachBars;
       },
     });
   },

@@ -1,15 +1,18 @@
 import { Product } from "entity/Product";
-import { AddType, ErrorType, UpdateType } from "typings/.index";
+import { AddType, UpdateType } from "typings/.index";
 import { HourTimeReturnType } from "typings/details/time";
 
 export type ProductType = {
   product: Product;
 };
 
-export type AddProductType = (AddType & ProductType) | ErrorType;
+export type TAddProduct = AddType & ProductType;
 
-export type UpdateProductType = (UpdateType & ProductType) | ErrorType;
+export type TUpdateProduct = UpdateType & ProductType;
 
 export type ProductAvailabilityHourReturnType = HourTimeReturnType & {
   isAvailable: boolean;
 };
+
+export type TProductAvailability = ProductType & { quantity: number }
+

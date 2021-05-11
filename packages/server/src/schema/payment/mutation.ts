@@ -1,97 +1,94 @@
 import { errors, MyContext } from "@beach_bar/common";
 import { generateId } from "@the_hashtag/common";
 import { ApolloError, UserInputError } from "apollo-server-express";
+import { DATA } from "constants/data";
 import prefixes from "constants/prefixes";
-import { payment as paymentStatus } from "constants/status";
 import { generateIdSpecialCharacters } from "constants/_index";
 import { Card } from "entity/Card";
 import { Cart } from "entity/Cart";
 import { CouponCode } from "entity/CouponCode";
 import { OfferCampaignCode } from "entity/OfferCampaignCode";
 import { Payment } from "entity/Payment";
-import { PaymentStatus } from "entity/PaymentStatus";
 import { PaymentVoucherCode } from "entity/PaymentVoucherCode";
-import { StripeMinimumCurrency } from "entity/StripeMinimumCurrency";
-import { extendType, idArg, nullable, stringArg } from "nexus";
-import { getManager } from "typeorm";
+import { extendType, idArg, intArg, nullable, stringArg } from "nexus";
+import { getManager, IsNull, Not } from "typeorm";
 import { TDelete } from "typings/.index";
-import { AddPaymentType } from "typings/payment";
-import { checkVoucherCode } from "utils/checkVoucherCode";
+import { checkVoucherCode, formatMetadata, formatVoucherCodeMetadata, toFixed2 } from "utils/payment";
 import { DeleteGraphQlType } from "../types";
-import { AddPaymentResult } from "./types";
+import { PaymentType } from "./types";
 
 export const PaymentCrudMutation = extendType({
   type: "Mutation",
   definition(t) {
     t.field("checkout", {
-      type: AddPaymentResult,
-      description: "Create (make) a payment for a customer's shopping cart",
+      type: PaymentType,
+      description: "Make a payment using a customer's shopping cart",
       args: {
         cartId: idArg({ description: "The ID value of the shopping cart with the products to purchase" }),
         cardId: idArg({ description: "The ID value of the credit or debit card of the customer" }),
-        voucherCode: nullable(
-          stringArg({
-            description: "A coupon or offer campaign code to make a discount to the shopping cart's or payment's price",
-          })
-        ),
+        totalPeople: nullable(intArg({ description: "How many people will visit the #beach_bar(s)?. Defaults to true", default: 1 })),
+        voucherCode: nullable(stringArg({ description: "A coupon or offer campaign code to make a discount to the payment's price" })),
       },
-      resolve: async (_, { cartId, cardId, voucherCode }, { stripe }: MyContext): Promise<AddPaymentType> => {
-        if (!cartId || cartId.trim().length === 0)
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid shopping cart" } };
-        if (!cardId || cardId.trim().length === 0)
-          return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid credit or debit card" } };
+      resolve: async (_, { cartId, cardId, totalPeople, voucherCode }, { stripe }: MyContext): Promise<Payment> => {
+        if (!cartId || cartId.trim().length === 0) throw new UserInputError("Please provide a valid cartId");
+        if (!cardId || cardId.trim().length === 0) throw new UserInputError("Please provide a valid cardId");
 
         const cart = await Cart.findOne({
           where: { id: cartId },
           relations: [
             "products",
+            "products.time",
             "products.product",
             "products.product.beachBar",
             "products.product.beachBar.products",
             "products.product.beachBar.defaultCurrency",
+            "products.product.beachBar.fee",
           ],
         });
-        if (!cart || !cart.products || cart.products.length === 0)
-          return { error: { code: errors.CONFLICT, message: "Specified shopping cart does not exist" } };
-        const uniqueBeachBars = cart.getUniqueBeachBars();
-        if (!uniqueBeachBars || uniqueBeachBars.length === 0)
-          return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
+        if (!cart || !cart.products || cart.products.length === 0) throw new ApolloError("Shopping cart was not found");
+        // console.log("AVAILABLE: ", cart.checkAllProductsAvailable());
+        const { bool: allCartProductsAvailable, notAvailable } = cart.checkAllProductsAvailable();
+        if (!allCartProductsAvailable && notAvailable.length > 0) throw new ApolloError("Some products that you have in your shopping cart are not currently available.", errors.CONFLICT, {
+            notAvailableProducts: notAvailable,
+          });
+        const uniqueBeachBars = cart.getUniqBeachBars();
+        if (uniqueBeachBars.length === 0) throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.INTERNAL_SERVER_ERROR);
 
-        const cartTotal = await cart.getTotalPrice();
-        if (cartTotal === undefined || cartTotal.totalWithoutEntryFees !== parseFloat(cart.total.toString()))
-          return { error: { message: errors.SOMETHING_WENT_WRONG } };
+        const cartTotal = cart.getTotalPrice();
+        if (cartTotal.totalWithoutEntryFees !== +cart.total) throw new ApolloError(errors.SOMETHING_WENT_WRONG);
+        // console.log("CART TOTAL: ", cartTotal);
 
-        const card = await Card.findOne({ where: { id: cardId }, relations: ["customer", "country", "country.currency"] });
-        if (!card || !card.customer || !card.country) {
-          return {
-            error: { code: errors.CONFLICT, message: "Specified credit or debit card does not exist, or is not your default one" },
-          };
-        }
+        const card = await Card.findOne({
+          where: [
+            { id: cardId, deletedAt: IsNull() },
+            { id: cardId, savedForFuture: false, deletedAt: Not(IsNull()) },
+          ],
+          relations: ["customer", "country", "country.currency"],
+          withDeleted: true,
+        });
+        if (!card || !card.customer || !card.country) throw new ApolloError("Payment method was not found", errors.NOT_FOUND);
 
         const customer = card.customer;
-        if (!customer) return { error: { message: errors.SOMETHING_WENT_WRONG } };
-
-        const status = await PaymentStatus.findOne({ status: paymentStatus.CREATED });
-        if (!status) return { error: { message: errors.SOMETHING_WENT_WRONG } };
+        const status = DATA.PAYMENT.STATUSES.CREATED;
 
         const refCode = generateId({ length: 16, specialCharacters: generateIdSpecialCharacters.PAYMENT });
-        const transferGroupCode = `${prefixes.PAYMENT_TARGET_GROUP}${generateId({ length: 16 })}`;
+        const transferGroupCode = prefixes.PAYMENT_TARGET_GROUP + generateId({ length: 16 });
+        // console.log("DETAILS: ");
+        // console.log("refCode: ", refCode);
+        // console.log("transferGroupCode: ", transferGroupCode);
 
-        const newPayment = Payment.create({
-          cart,
-          card,
-          status,
-          refCode,
-          transferGroupCode,
-        });
+        const newPayment = Payment.create({ cart, card, status, refCode, transferGroupCode });
         const { totalWithEntryFees, totalWithoutEntryFees } = cartTotal;
-        let total = totalWithEntryFees;
 
+        let total = totalWithEntryFees;
         let paymentVoucherCode: PaymentVoucherCode | undefined = undefined;
+
+        const stripeProccessingFees = cart.getStripeFee(card.country.isEu);
+        newPayment.stripeProccessingFee = stripeProccessingFees;
+        // console.log("STRIPE PROCCESSING FEES: ", stripeProccessingFees);
 
         if (voucherCode) {
           const res = await checkVoucherCode(voucherCode);
-          if (res.error) return res.error;
           const newPaymentOfferCode = PaymentVoucherCode.create({ payment: newPayment });
           if (res.couponCode) newPaymentOfferCode.couponCode = res.couponCode;
           else if (res.offerCode) newPaymentOfferCode.offerCode = res.offerCode;
@@ -108,82 +105,63 @@ export const PaymentCrudMutation = extendType({
         newPayment.voucherCode = paymentVoucherCode;
 
         try {
-          // * check if cart total is 0
+          // check if cart total is 0
           for (let i = 0; i < uniqueBeachBars.length; i++) {
             const beachBar = uniqueBeachBars[i];
             const isZeroCartTotal = cart.verifyZeroCartTotal(beachBar);
-            const minimumCurrency = await StripeMinimumCurrency.findOne({ currencyId: beachBar.defaultCurrencyId });
-            if (!minimumCurrency) return { error: { code: errors.INTERNAL_SERVER_ERROR, message: errors.SOMETHING_WENT_WRONG } };
-            const boolean = total <= parseFloat(minimumCurrency.chargeAmount.toString());
-            if (!beachBar.zeroCartTotal && boolean) {
-              return {
-                error: {
-                  code: errors.ZERO_CART_TOTAL_ERROR_CODE,
-                  message: `You cannot have ${cartTotal} as the total of your shopping cart for this #beach_bar`,
-                },
-              };
-            } else if (isZeroCartTotal && boolean) {
+            const minimumCurrency = DATA.STRIPE.MINIMUM_CURRENCY.find(({ currencyId }) => currencyId === beachBar.defaultCurrencyId);
+            if (!minimumCurrency) throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.INTERNAL_SERVER_ERROR);
+            const boolean = total <= minimumCurrency.chargeAmount;
+            if (!beachBar.zeroCartTotal && boolean)
+              throw new ApolloError(
+                `You cannot have ${cartTotal} as the total of your shopping cart for this #beach_bar`,
+                errors.ZERO_CART_TOTAL_ERROR_CODE
+              );
+            else if (isZeroCartTotal && boolean) {
+              const barTotal = cart.getBeachBarTotal(beachBar.id, totalPeople);
+              const { beachBarAppFee } = beachBar.getPaymentDetails(barTotal.totalWithoutEntryFees, 0);
               const charge = await stripe.charges.create({
-                amount: minimumCurrency.chargeAmount * 100,
+                amount: (beachBarAppFee + stripeProccessingFees) * 100,
                 currency: beachBar.defaultCurrency.isoCode.toLowerCase(),
                 source: beachBar.stripeConnectId,
               });
               newPayment.stripeId = charge.id;
-              console.log(charge);
-              return {
-                payment: newPayment,
-                added: true,
-              };
+              newPayment.appFee = beachBarAppFee;
+              newPayment.transferAmount = 0;
+              await newPayment.save();
+              return newPayment;
             }
           }
+
           const cartProducts = cart.products;
           const stripePayment = await stripe.paymentIntents.create({
             amount: total * 100,
             currency: card.country.currency.isoCode.toLowerCase(),
             customer: customer.stripeCustomerId,
             payment_method: card.stripeId,
-            off_session: true,
+            // off_session: true,
             confirm: true,
             receipt_email: customer.email,
+            transfer_group: transferGroupCode,
             description: `${cartProducts.length}x product${cartProducts.length > 1 ? "s" : ""} purchased by ${customer.email} (${
               customer.stripeCustomerId
             })`,
             metadata: {
               ref_code: refCode,
+              calculated_stripe_proccessing_fee: stripeProccessingFees,
               products_quantity: cartProducts.length,
-              product_ids: cartProducts
-                .map(product => JSON.stringify({ id: product.product.id, name: product.product.name }))
-                .toString()
-                .replace(/[[\]]/g, "")
-                .replace(/},{/g, "} - {")
-                .replace(/[:]/g, ": ")
-                .replace(/[,]/g, ", "),
-              voucher_code: newPayment.voucherCode
-                ? JSON.stringify({
-                    id: newPayment.voucherCode.couponCode
-                      ? newPayment.voucherCode.couponCode.id
-                      : newPayment.voucherCode.offerCode?.id,
-                    discount_percentage: newPayment.voucherCode.couponCode
-                      ? newPayment.voucherCode.couponCode.discountPercentage
-                      : newPayment.voucherCode.offerCode?.campaign.discountPercentage,
-                    type: newPayment.voucherCode.couponCode ? "coupon_code" : "offer_campaign_code",
-                  })
-                    .toString()
-                    .replace(/[[\]]/g, "")
-                    .replace(/},{/g, "} - {")
-                    .replace(/[:]/g, ": ")
-                    .replace(/[,]/g, ", ")
-                : null,
+              product_ids: formatMetadata(cartProducts.map(({ product: { id, name } }) => JSON.stringify({ id, name })).toString()),
+              voucher_code: formatVoucherCodeMetadata(newPayment.voucherCode),
               entry_fees_total: totalWithEntryFees - totalWithoutEntryFees + total,
             },
-            transfer_group: transferGroupCode,
           });
 
-          if (!stripePayment) return { error: { message: errors.SOMETHING_WENT_WRONG } };
+          if (!stripePayment) throw new ApolloError(errors.SOMETHING_WENT_WRONG);
 
           let beachBarPricingFee = 0;
           let transferAmount = 0;
           let discountPerBeachBar = 0;
+
           if (newPayment.voucherCode && newPayment.voucherCode.couponCode) {
             const voucherCouponCode = newPayment.voucherCode.couponCode;
             if (!voucherCouponCode.beachBarId) {
@@ -195,10 +173,9 @@ export const PaymentCrudMutation = extendType({
           for (let i = 0; i < uniqueBeachBars.length; i++) {
             const beachBar = uniqueBeachBars[i];
 
-            const cartBeachBarTotal = await cart.getBeachBarTotalPrice(beachBar.id, discountPerBeachBar);
-            if (cartBeachBarTotal === undefined) return { error: { message: errors.SOMETHING_WENT_WRONG } };
-            // console.log(cartBeachBarTotal);
-            const { totalWithEntryFees } = cartBeachBarTotal;
+            const cartBarTotal = cart.getBeachBarTotal(beachBar.id, totalPeople, discountPerBeachBar);
+            console.log("#BEACH_BAR TOTAL: ", cartBarTotal);
+            const { totalWithEntryFees } = cartBarTotal;
             let discountAmount = 0;
             const paymentVoucherCode = newPayment.voucherCode;
             if (paymentVoucherCode && paymentVoucherCode.offerCode)
@@ -214,59 +191,41 @@ export const PaymentCrudMutation = extendType({
               const couponCodeDiscount = (totalWithEntryFees * paymentVoucherCode.couponCode.discountPercentage) / 100;
               discountAmount += couponCodeDiscount;
             }
-            const beachBarTotal = parseFloat((totalWithEntryFees - discountAmount).toFixed(2));
+            const barTotal = toFixed2(totalWithEntryFees - discountAmount);
             // console.log(`Discount amount: ${discountAmount}`);
-            // console.log(`#beach_bar total: ${beachBarTotal}`);
-            if (beachBarTotal > 0) {
-              const beachBarStripeFee = await cart.getStripeFee(card.country.isEu, beachBarTotal);
-              if (beachBarStripeFee === undefined) return { error: { message: errors.SOMETHING_WENT_WRONG } };
-              const pricingFee = await beachBar.getBeachBarPaymentDetails(beachBarTotal, beachBarStripeFee);
-              if (pricingFee === undefined) return { error: { message: errors.SOMETHING_WENT_WRONG } };
+            // console.log("#BEACH_BAR ID: ", beachBar.id)
+            if (barTotal > 0) {
+              const { beachBarAppFee, transferAmount: barTransferAmount } = beachBar.getPaymentDetails(
+                barTotal,
+                stripeProccessingFees
+              );
 
-              const { beachBarAppFee, transferAmount: beachBarTransferAmount } = pricingFee;
-              // console.log(`App fee: ${pricingFee.beachBarAppFee}`);
-              // console.log(`Transfer amount: ${pricingFee.transferAmount}`);
-              // console.log(`Total: ${pricingFee.total}`);
+              // console.log(`APP FEE: ${beachBarAppFee}`);
+              // console.log(`TRANSFER AMOUNT: ${barTransferAmount}`);
+              // console.log(`TOTAL: ${pricingFee.total}`);
               beachBarPricingFee += beachBarAppFee;
-              transferAmount += beachBarTransferAmount;
-              // console.log(`Stripe fee: ${beachBarStripeFee}`);
-              // console.log(stripePayment.currency.toLowerCase());
-              if (beachBarTransferAmount * 100 > 1) {
+              transferAmount += barTransferAmount;
+
+              if (barTransferAmount * 100 > 1) {
                 const stripeTransfer = await stripe.transfers.create({
-                  amount: Math.round(beachBarTransferAmount * 100),
+                  amount: Math.round(barTransferAmount * 100),
                   currency: beachBar.defaultCurrency.isoCode.toLowerCase(),
                   transfer_group: transferGroupCode,
                   destination: beachBar.stripeConnectId,
                   metadata: {
                     ref_code: refCode,
-                    stripe_fee: beachBarStripeFee,
+                    stripe_fee: stripeProccessingFees,
                     platform_fee: beachBarAppFee,
-                    products: cartProducts
-                      .filter(product => product.product.beachBarId === beachBar.id)
-                      .map(product => JSON.stringify({ name: product.product.name }))
-                      .toString()
-                      .replace("[", "")
-                      .replace("]", "")
-                      .replace("},{", "} - {"),
-                    offer_codes: newPayment.voucherCode
-                      ? JSON.stringify({
-                          id: newPayment.voucherCode.couponCode
-                            ? newPayment.voucherCode.couponCode.id
-                            : newPayment.voucherCode.offerCode?.id,
-                          discount_percentage: newPayment.voucherCode.couponCode
-                            ? newPayment.voucherCode.couponCode.discountPercentage
-                            : newPayment.voucherCode.offerCode?.campaign.discountPercentage,
-                          type: newPayment.voucherCode.couponCode ? "coupon_code" : "offer_campaign_code",
-                        })
-                          .toString()
-                          .replace(/[[\]]/g, "")
-                          .replace(/},{/g, "} - {")
-                          .replace(/[:]/g, ": ")
-                          .replace(/[,]/g, ", ")
-                      : null,
+                    products: formatMetadata(
+                      cartProducts
+                        .filter(({ product: { beachBarId } }) => beachBarId === beachBar.id)
+                        .map(({ product: { name } }) => JSON.stringify({ name }))
+                        .toString()
+                    ),
+                    offer_codes: formatVoucherCodeMetadata(newPayment.voucherCode),
                   },
                 });
-                if (!stripeTransfer) return { error: { message: errors.SOMETHING_WENT_WRONG } };
+                if (!stripeTransfer) throw new ApolloError(errors.SOMETHING_WENT_WRONG);
               }
             }
           }
@@ -285,14 +244,11 @@ export const PaymentCrudMutation = extendType({
               await getManager().increment(OfferCampaignCode, { id: paymentVoucherCode.offerCode.id }, "timesUsed", 1);
           }
 
-          // * Reserved products are created after a successful payment, via Stripe webhook events
+          // Reserved products are created after a successful payment, via Stripe webhook events
 
-          return {
-            payment: newPayment,
-            added: true,
-          };
+          return newPayment;
         } catch (err) {
-          return { error: { message: `${errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
+          throw new ApolloError(err.message);
         }
       },
     });
@@ -301,15 +257,14 @@ export const PaymentCrudMutation = extendType({
       description: "Refund a payment",
       args: { paymentId: idArg({ description: "The ID of the payment to refund" }) },
       resolve: async (_, { paymentId }, { stripe }: MyContext): Promise<TDelete> => {
-        if (!paymentId || paymentId.trim().length === 0)
-          throw new UserInputError("Please provide a valid payment", { code: errors.INVALID_ARGUMENTS });
+        if (!paymentId || paymentId.trim().length === 0) throw new UserInputError("Please provide a valid paymentId");
 
         const payment = await Payment.findOne({
           where: { id: paymentId },
           relations: ["cart", "cart.products", "cart.products.product", "cart.products.product.beachBar"],
         });
-        if (!payment) throw new ApolloError("Specified payment does not exist", errors.CONFLICT);
-        if (payment.isRefunded) throw new ApolloError("Specified payment has already been refunded", errors.CONFLICT);
+        if (!payment) throw new ApolloError("Payment was not found", errors.CONFLICT);
+        if (payment.isRefunded) throw new ApolloError("Payment has already been refunded", errors.CONFLICT);
 
         try {
           const refund = await payment.getRefundPercentage();
@@ -333,11 +288,9 @@ export const PaymentCrudMutation = extendType({
           }
           await payment.softRemove();
         } catch (err) {
-          throw new ApolloError(errors.SOMETHING_WENT_WRONG + ": " + err.message);
+          throw new ApolloError(err.message);
         }
-        return {
-          deleted: true,
-        };
+        return { deleted: true };
       },
     });
   },

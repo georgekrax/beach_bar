@@ -9,15 +9,7 @@ export const CartType = objectType({
   definition(t) {
     t.implements(Node);
     t.float("total");
-    t.nullable.field("user", {
-      type: UserType,
-      description: "The use that has created this shopping cart",
-      resolve: o => o.user,
-    });
-    t.nullable.list.field("products", {
-      type: CartProduct,
-      description: "A list with all the cart products",
-      resolve: o => o.products,
-    });
+    t.nullable.field("user", { type: UserType, description: "The use that has created this shopping cart" });
+    t.nullable.list.field("products", { type: CartProduct, description: "A list with all the cart products" });
   },
 });

@@ -2,20 +2,20 @@ import { BeachBar } from "entity/BeachBar";
 import { Payment } from "entity/Payment";
 import { RefundPercentage } from "entity/RefundPercentage";
 import { HourTime, MonthTime } from "entity/Time";
-import { AddType, ErrorType, UpdateType } from "typings/.index";
+import { AddType, UpdateType } from "typings/.index";
 
 export interface GetRefundPercentage {
   refundPercentage: RefundPercentage;
   daysDiff: number;
 }
 
-type PaymentType = {
+export type TPayment = {
   payment: Payment;
 };
 
-export type AddPaymentType = (AddType & PaymentType) | ErrorType;
+export type AddPaymentType = AddType & TPayment;
 
-export type UpdatePaymentType = (UpdateType & PaymentType) | ErrorType;
+export type UpdatePaymentType = UpdateType & TPayment;
 
 export type TVisit = {
   time: Pick<HourTime, "id" | "value">;

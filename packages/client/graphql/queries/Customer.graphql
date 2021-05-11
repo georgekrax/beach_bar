@@ -1,0 +1,15 @@
+query Customer($email: Email, $phoneNumber: String, $countryId: ID) {
+  customer(email: $email, phoneNumber: $phoneNumber, countryId: $countryId) {
+    customer {
+      id
+      email
+      user {
+        id
+        email
+      }
+      cards {
+        ...BasicCard
+      }
+    }
+  }
+}

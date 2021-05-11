@@ -9,14 +9,9 @@ import Next from "../../../components/Next";
 import { UserReviewsDocument, useUserReviewsQuery } from "../../../graphql/generated";
 import { initializeApollo, INITIAL_APOLLO_STATE } from "../../../lib/apollo";
 import { getAuth } from "../../../lib/auth";
-import { useAuth } from "../../../utils/hooks";
 
 const Reviews: React.FC = () => {
-  const {
-    data: { me },
-  } = useAuth();
   const { data, loading, error } = useUserReviewsQuery();
-  const userVotes = useMemo(() => me.reviewVotes, [me]);
 
   return (
     <Layout>
@@ -37,12 +32,7 @@ const Reviews: React.FC = () => {
           {data.userReviews.length > 0 ? (
             <>
               {data.userReviews.map(({ id, ...props }) => (
-                <BeachBar.Review
-                  key={id}
-                  id={id}
-                  userVote={userVotes?.find(({ review }) => review.id.toString() === id.toString())}
-                  {...props}
-                />
+                <BeachBar.Review key={id} id={id} {...props} />
               ))}
             </>
           ) : (

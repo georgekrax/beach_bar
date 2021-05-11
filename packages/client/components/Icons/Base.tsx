@@ -46,7 +46,7 @@ export type IconCircleBaseFProps = React.ComponentPropsWithoutRef<"circle"> & { 
 export const CircleBase: React.FC<IconCircleBaseFProps> = ({ filled = false, children, ...props }) => {
   const [classNames, rest] = useClassnames(filled ? "filled" : "", props);
 
-  return <circle className={classNames} {...rest} />;
+  return <circle className={classNames} strokeWidth={1.5} {...rest} />;
 };
 
 CircleBase.displayName = "CircleBaseIcon";

@@ -1,0 +1,39 @@
+.header {
+  padding: map-get($em-spacers, 16);
+  margin-bottom: map-get($em-spacers, 12);
+  border-radius: 14px;
+  box-shadow: 0px 2px 10px rgba($grey-6, 0.55);
+  transform: scale(1.025);
+
+  &.white {
+    background-color: $grey-1;
+  }
+
+  &.blue {
+    background-color: rgba($blue-2, 0.7);
+    color: $grey-1;
+
+    path {
+      stroke: $grey-1;
+    }
+  }
+}
+
+.bull {
+  margin: 0 map-get($em-spacers, 8);
+
+  + div {
+    div {
+      margin-right: map-get($em-spacers, 8);
+    }
+
+    svg {
+      margin-top: 0.15em;
+    }
+
+    path {
+      stroke: $grey-7;
+      fill: $grey-1;
+    }
+  }
+}

@@ -1,0 +1,71 @@
+$icon-color: $volcano-6;
+
+.btn {
+  &:nth-last-of-type(2) {
+    .icon path {
+      &:first-child,
+      &:nth-child(2) {
+        fill: $icon-color !important;
+      }
+    }
+  }
+
+  &[data-ischecked="true"] {
+    & > div:first-child {
+      background-color: rgba($grey-2, 0.25);
+
+      circle,
+      path {
+        fill: $grey-1;
+      }
+    }
+
+    &:nth-of-type(2) {
+      circle {
+        stroke: $grey-1 !important;
+      }
+
+      path:last-child {
+        fill: $volcano-5 !important;
+      }
+    }
+  }
+}
+
+.icon {
+  background-color: rgba($volcano-5, 0.25);
+  padding: map-get($em-spacers, 8);
+  border-radius: 14px;
+  margin-right: map-get($em-spacers, 8);
+
+  &.v2 {
+    margin: 0;
+    background-color: $grey-1;
+    border: 1px solid $grey-5;
+  }
+
+  circle,
+  path {
+    fill: $icon-color;
+  }
+
+  circle {
+    stroke: $icon-color !important;
+  }
+
+  path {
+    stroke: none !important;
+  }
+}
+
+@include breakpoint("md") {
+  .icon {
+    margin-right: map-get($em-spacers, 4);
+    display: none;
+
+    svg {
+      width: 16px !important;
+      height: 16px !important;
+    }
+  }
+}

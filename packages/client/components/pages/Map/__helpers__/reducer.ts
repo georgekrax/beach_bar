@@ -1,6 +1,6 @@
-import { GetAllBeachBarsQuery } from "../../../../graphql/generated";
 import { AnimationControls } from "framer-motion";
 import { ViewportProps } from "react-map-gl";
+import { GetAllBeachBarsQuery } from "../../../../graphql/generated";
 
 // ------------ Reducer types ------------ //
 export const MAP_ACTIONS = {
@@ -18,7 +18,7 @@ export type MapReducerInitialStateType = {
   suggestionsBox: { height: number; top: number };
   viewport: ViewportProps;
   isBottomSheetShown: boolean;
-  selectedBeachBar: GetAllBeachBarsQuery["getAllBeachBars"][number];
+  selectedBeachBar: Pick<GetAllBeachBarsQuery["getAllBeachBars"][number], "name" | "thumbnailUrl" | "description">;
 };
 
 export type ACTIONTYPE =
@@ -34,7 +34,7 @@ export type ACTIONTYPE =
 
 // ------------ The reducer ------------ //
 export const reducer = (state: MapReducerInitialStateType, action: ACTIONTYPE): MapReducerInitialStateType => {
-  const { viewport, isSuggestionsBoxTouch, isBottomSheetShown, timer, suggestionsBox } = state;
+  const { viewport, isSuggestionsBoxTouch, timer, suggestionsBox } = state;
 
   switch (action.type) {
     case MAP_ACTIONS.SET_SUGGESTIONS_BOX:
@@ -46,7 +46,7 @@ export const reducer = (state: MapReducerInitialStateType, action: ACTIONTYPE): 
     case MAP_ACTIONS.SET_SELECTED_BEACH_BAR:
       return { ...state, selectedBeachBar: { ...action.payload } };
     case MAP_ACTIONS.HANDLE_MARKER_CLICK:
-      return { ...state, isBottomSheetShown: action.payload !== undefined ? action.payload.open : !isBottomSheetShown };
+      return { ...state, isBottomSheetShown: action.payload !== undefined ? action.payload.open : false };
     case MAP_ACTIONS.HANDLE_TOUCH_START: {
       const { touchY } = action.payload;
       const touchInSuggestionsBox = suggestionsBox.top < touchY;

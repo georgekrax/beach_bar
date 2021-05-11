@@ -1,5 +1,6 @@
 import Icons from "@/components/Icons";
 import { UserHistoryQuery } from "@/graphql/generated";
+import { formatPeopleShort } from "@/utils/search";
 import dayjs from "dayjs";
 import Link from "next/link";
 import { useMemo } from "react";
@@ -16,10 +17,7 @@ export const HistoryAction: React.FC<FProps> = ({ beachBar, search }) => {
   }, [beachBar, search]);
   const secondaryInfo = useMemo(() => {
     if (beachBar) return beachBar.formattedLocation;
-    else if (search) {
-      const people = (search.searchAdults || 0) + (search.searchChildren || 0);
-      return `${people} ${people <= 1 ? "Person" : "People"}`;
-    }
+    else if (search) return formatPeopleShort({ adults: search.searchAdults, children: search.searchChildren || 0 });
   }, [beachBar, search]);
   const date = useMemo(() => {
     if (!search) return "";
@@ -30,10 +28,8 @@ export const HistoryAction: React.FC<FProps> = ({ beachBar, search }) => {
   const handleClick = () => {};
 
   return beachBar || search ? (
-    <Link
-      href={{ pathname: beachBar ? `/beachbar/${beachBar.id}` : search && `/search`, query: search && { id: "1" } }}
-    >
-      <div className={styles.container + " w-100 flex-row-center-center"} onClick={() => handleClick()}>
+    <Link href={{ pathname: beachBar ? `/beach/${beachBar.id}` : search && `/search`, query: search && { id: "1" } }}>
+      <div className={styles.container + " w100 flex-row-center-center"} onClick={() => handleClick()}>
         <div>
           {beachBar ? <Icons.Logo.Hashtag width={18} height={18} /> : search && <Icons.Search width={18} height={18} />}
         </div>

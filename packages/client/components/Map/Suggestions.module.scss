@@ -1,0 +1,17 @@
+.carousel {
+  margin-top: 0;
+  min-height: calc(#{$carousel-bar-height} / 2 + #{map-get($em-spacers, 8)});
+}
+
+.item {
+  height: calc(#{$carousel-bar-height} / 2);
+  opacity: 1 !important;
+}
+
+.controlBtns {
+  justify-content: flex-end;
+
+  button:disabled {
+    background-color: $grey-4;
+  }
+}

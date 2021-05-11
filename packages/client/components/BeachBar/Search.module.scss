@@ -1,0 +1,117 @@
+.container {
+  // padding: map-get($em-spacers, 16);
+  margin-bottom: map-get($em-spacers, 48);
+  background-color: $grey-1;
+  border: 1px solid $grey-6;
+  border-radius: 14px;
+  min-height: 22.5em;
+  cursor: pointer;
+  @include transition-2s("ease-in-out", "background-color");
+
+  &:hover {
+    background-color: $grey-2;
+  }
+
+  &:active .content {
+    opacity: 0.75;
+  }
+
+  &:last-child {
+    margin-bottom: 7em;
+  }
+}
+
+.imgContainer {
+  flex-shrink: 0;
+  transform: scale(1.01);
+  border-radius: inherit;
+  overflow: hidden;
+  min-height: 192px;
+  @include aspect-ratio(60%);
+}
+
+.content {
+  padding: map-get($em-spacers, 16);
+  padding-top: map-get($em-spacers, 20);
+  flex: 1;
+  // margin-left: 0.4em;
+}
+
+.header {
+  width: inherit;
+
+  h5 {
+    color: $grey-9;
+
+    + div {
+      margin-left: map-get($em-spacers, 8);
+      color: $grey-7;
+    }
+  }
+
+  & > div:last-child svg {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+.feature {
+  color: $grey-8;
+
+  &::after {
+    content: "";
+    display: block;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    margin: 0 map-get($em-spacers, 8);
+    background-color: $grey-8;
+  }
+}
+
+.reviewsScore {
+  margin-top: map-get($em-spacers, 8);
+
+  svg {
+    margin-top: 0.1em;
+    margin-right: map-get($em-spacers, 4);
+    background: transparent;
+    opacity: 0.85;
+  }
+
+  span {
+    color: $grey-7;
+  }
+}
+
+@include breakpoint("md") {
+  .container {
+    flex-direction: row;
+    min-height: 12em;
+    height: 1px;
+  }
+
+  .imgContainer {
+    max-width: 12.5em;
+    min-height: auto;
+    flex-shrink: 1;
+    transform: scale(1.1);
+  }
+
+  .content {
+    padding-top: map-get($em-spacers, 16);
+    padding-left: 1.75em;
+
+    .header > div:last-child {
+      align-self: flex-start;
+    }
+
+    & > div:last-child > div {
+      color: $grey-9;
+    }
+  }
+
+  .reviewsScore {
+    margin-top: map-get($em-spacers, 12);
+  }
+}

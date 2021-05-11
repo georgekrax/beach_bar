@@ -28,13 +28,13 @@ $border-width: 1.5px;
   }
 
   & > button {
-    @extend .semibold;
     position: absolute;
     bottom: -50%;
     right: 12%;
     transform: translateY(-50%);
     padding-top: map-get($em-spacers, 12);
     padding-bottom: map-get($em-spacers, 12);
+    @include font-semibold();
 
     & > svg > path {
       fill: $grey-1;

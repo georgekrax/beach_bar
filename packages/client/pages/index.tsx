@@ -1,198 +1,159 @@
-import { CarouselItemOptions, Item } from "@/components/Carousel";
-import FavouriteBeachBars from "@/components/FavouriteBeachBars";
+import { BeachBarFavouriteCanvasProps } from "@/components/BeachBar/Favourite/Canvas";
+import Carousel from "@/components/Carousel";
 import Layout from "@/components/Layout";
-import { IndexPage } from "@/components/pages";
-import RecentSearches, { RecentSearchesProps } from "@/components/RecentSearches";
-import Search from "@/components/Search";
+import Search, { SEARCH_ACTIONS } from "@/components/Search";
 import {
-  GetLatestUserSearchesDocument,
-  useGetLatestUserSearchesQuery,
+  GetPersonalizedBeachBarsDocument,
   useGetPersonalizedBeachBarsQuery,
-  useGetUserFavouriteBeachBarsQuery,
-  useLoginMutation,
-  useLogoutMutation,
+  useNearBeachBarsQuery,
+  UserSearchesDocument,
+  useUserSearchesQuery,
 } from "@/graphql/generated";
 import { initializeApollo, INITIAL_APOLLO_STATE } from "@/lib/apollo";
-import dayjs from "dayjs";
+import { userIpAddr } from "@/lib/apollo/cache";
+import { useSearchContext } from "@/utils/contexts";
+import { useAuth, useIsDesktop } from "@/utils/hooks";
+import { useReactiveVar } from "@apollo/client";
+import { useWindowDimensions } from "@hashtag-design-system/components";
 import { motion } from "framer-motion";
-import { GetStaticProps } from "next";
-import React from "react";
+import { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import dynamic from "next/dynamic";
+import Image from "next/image";
+import { useRouter } from "next/router";
+import { useEffect, useRef } from "react";
 
-const Index: React.FC = () => {
-  // const [adultsValue, setAdultsValue] = useState(1);
-  // const [childrenValue, setChildrenValue] = useState(0);
+// const SearchBoxDynamic = dynamic<any>(() => import("@/components/Search/Box").then(mod => mod.Box));
+const BeachBarFavouriteCanvasDynamic = dynamic<BeachBarFavouriteCanvasProps>(() =>
+  import("@/components/BeachBar/Favourite/Canvas").then(mod => mod.Canvas)
+);
+const SearchRecentDynamic = dynamic<React.ComponentProps<typeof Search["Recent"]>>(() =>
+  import("@/components/Search/Recent").then(mod => mod.Recent)
+);
+
+const IndexPage: InferGetServerSidePropsType<typeof getServerSideProps> = ({ referer }) => {
+  const router = useRouter();
+  const mainRef = useRef<HTMLDivElement>(null);
+  const isDesktop = useIsDesktop();
+  const { lat, lon } = useReactiveVar(userIpAddr);
+
+  const { width } = useWindowDimensions();
+  const { inputValue, results, dispatch } = useSearchContext();
+
+  const { data: authData } = useAuth();
   const { data, error, loading } = useGetPersonalizedBeachBarsQuery();
-  const [login] = useLoginMutation({
-    variables: { userCredentials: { email: "georgekraxt@gmail.com", password: "george2016" }, loginDetails: undefined },
+  const { data: recentData, loading: recentLoading, error: recentError } = useUserSearchesQuery({
+    variables: { limit: 8 },
   });
-  const [logout] = useLogoutMutation();
-  const { data: favouriteData, loading: favouriteLoading, error: favouriteError } = useGetUserFavouriteBeachBarsQuery();
-  const {
-    data: recentSearchesData,
-    loading: recentSearchesLoading,
-    error: recentSearchesError,
-  } = useGetLatestUserSearchesQuery();
+  const { data: nearData, error: nearError } = useNearBeachBarsQuery({
+    skip: !lat || !lon,
+    variables: { latitude: lat.toString(), longitude: lon.toString() },
+  });
 
-  if (loading || favouriteLoading || recentSearchesLoading) return <h1>Loading...</h1>;
-
-  if (error || !data || favouriteError || !favouriteData || recentSearchesError || !recentSearchesData)
-    return <h2>Error</h2>;
-
-  const generateSlides = (
-    query: Exclude<keyof typeof data | keyof typeof favouriteData, "__typename">
-  ): CarouselItemOptions[] => {
-    let parsedData = data[query];
-    if (favouriteData && query === "favouriteBeachBars") {
-      parsedData = favouriteData[query].map(data => data.beachBar);
-    }
-    const slides: CarouselItemOptions[] = parsedData.map(({ id, name, thumbnailUrl, location: { city, region } }) => ({
-      id,
-      imgProps: {
-        src: thumbnailUrl,
-      },
-      beachBar: {
-        name,
-        city: city && city.name,
-        region: region && region.name,
-        isFavourite: favouriteData.favouriteBeachBars.map(({ beachBar: { id } }) => id).includes(id),
-      },
-    }));
-
-    return slides;
-  };
-
-  const recentSearchesBeachBars: RecentSearchesProps["beachBars"] = recentSearchesData.getLatestUserSearches.map(
-    ({ id, inputValue, searchAdults, searchChildren, searchDate }) => {
-      return {
-        id,
-        date: searchDate && dayjs(searchDate),
-        people: searchAdults + (searchChildren || 0),
-        searchValue: inputValue?.beachBar
-          ? { beachBar: { name: inputValue.beachBar.name, thumbnailUrl: inputValue.beachBar.thumbnailUrl } }
-          : inputValue?.city?.name + (inputValue?.region ? ", " + inputValue.region.name : ""),
-      };
-    }
-  );
+  useEffect(() => {
+    if (referer && !referer.includes("search") && inputValue && results.arr.length > 0)
+      router.push({ pathname: "/search" });
+    router.prefetch(isDesktop ? "/search" : "/search?box=true");
+  }, []);
 
   return (
-    <Layout>
-      <motion.div className="index__container" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit="initial">
-        <IndexPage.Header
-          header={
-            <>
-              Where would you <span style={{ display: "block" }} /> like to go <span className="normal">next?</span>
-            </>
-          }
-        >
-          {({ position, itemsRef, handleClick }) =>
-            generateSlides("getPersonalizedBeachBars").map(({ idx, ...props }, i) => (
-              <Item
-                key={i}
-                ref={el => (itemsRef.current[i] = el)}
-                idx={i}
-                active={i === position}
-                onClick={() => handleClick(i)}
-                {...props}
+    <Layout header={{ className: "home__header" }}>
+      <motion.div className="home__container" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit="initial">
+        <div>Με</div>
+        {/* <div className="w100 flex-row-flex-start-flex-start">
+          <div className="home__img">
+            <div className="home__img__container">
+              <Image
+                src="https://images.unsplash.com/photo-1533930885163-9a19e215b300?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=998&q=100"
+                alt="Homepage beach image"
+                priority
+                objectFit="cover"
+                objectPosition="center bottom"
+                layout="fill"
+                quality={100}
+                loading="eager"
               />
-            ))
-          }
-        </IndexPage.Header>
-        <Search.Box />
-        {/* <Link href="/search?box">
-          <motion.div
-            className="index__form__container w-100 flex-column-flex-start-stretch"
-            initial={false}
-            transformTemplate={(_, generated) => {
-              if (generated.includes("scale(1,")) return generated.split(" scale(1, ")[0];
-              else return generated;
-            }}
-            layout
-            layoutId="search_bar"
-          >
-            <Input
-              suffix={<Icons.Search width={24} height={24} />}
-              floatingplaceholder={false}
-              placeholder="Search for places"
-              style={{ pointerEvents: "none" }}
-            />
-          </motion.div>
-        </Link> */}
-        {/* <BottomSheet isShown={isShown} onDismiss={() => setIsShown(false)}>
-        <BottomSheet.ScrollBar />
-        <Dialog.Content className="index__form__bottom-sheet flex-column-center-stretch">
-          <div className="people__container">
-            <p>Adults (age 12+)</p>
-            <div className="people__quantity flex-row-space-between-center">
-              <span className="semibold">{adultsValue}</span>
-              <Input.IncrDcr defaultValue={1} min={1} max={12} onValue={value => setAdultsValue(value)} />
             </div>
           </div>
-          <div className="hr-vector" />
-          <div className="people__container">
-            <p>Children (age 0 - 11)</p>
-            <div className="people__quantity flex-row-space-between-center">
-              <span className="semibold">{childrenValue}</span>
-              <Input.IncrDcr defaultValue={0} min={0} max={8} onValue={value => setChildrenValue(value)} />
-            </div>
+          <div ref={mainRef} className="home__main">
+            <Search.Box />
+            {loading ? (
+              <h2>Loading...</h2>
+            ) : error ? (
+              <h2>Error</h2>
+            ) : (
+              <>
+                <div className="home__near-you">
+                  <button
+                    onClick={() => {
+                      dispatch({ type: SEARCH_ACTIONS.TOGGLE_MAP_DIALOG, payload: { bool: true } });
+                    }}
+                  >
+                    Show Map
+                  </button>
+                  <h4>Near You</h4>
+                  {nearError ? (
+                    <h2>Error</h2>
+                  ) : (
+                    <div style={{ minHeight: (nearData?.nearBeachBars.length || 0) > 3 ? "10.5em" : "4.75em" }}>
+                      <div
+                        className="home__near-you__grid-container no-scrollbar"
+                        style={{ maxWidth: width - (mainRef.current?.offsetLeft || 0) + "px" }}
+                      >
+                        {nearData?.nearBeachBars.map(({ id, location, ...rest }) => (
+                          <Search.NearYou key={"near_you_" + id} {...location} {...rest} />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <Carousel.Context>
+                  <div className="flex-row-space-between-center">
+                    <h4>Discover</h4>
+                    <Carousel.ControlBtns />
+                  </div>
+                  <Carousel>
+                    {data?.getPersonalizedBeachBars.map(({ id, location, ...rest }, i) => (
+                      <Carousel.Item key={"carousel_item_" + id} idx={i}>
+                        <Carousel.BeachBar {...location} {...rest} />
+                      </Carousel.Item>
+                    ))}
+                  </Carousel>
+                </Carousel.Context>
+              </>
+            )}
           </div>
-        </Dialog.Content>
-      </BottomSheet>
-      <Input
-            suffix={!isFocused && <Icons.Search width={24} height={24} />}
-            onFocus={async () => {
-              // setIsFocused(true);
-              // // await inputAnimation.start({ top: 0, height: "100vh", x: -5, width: "100vw" });
-              // const bottom = headerRef.current.getBoundingClientRect().bottom;
-              // const top = formRef.current.getBoundingClientRect().top;
-              // const hey = top - bottom;
-              // headerRef.current.scrollIntoView();
-              // await inputAnimation.start(
-              //   { y: -hey, height: "100vh", x: "-0.75em", width: "100vw" },
-              //   { duration: 0.5 }
-              // );
-              router.push({ pathname: "/search", query: { box: "" } });
-            }}
-            onBlur={async () => {
-              // setIsFocused(false);
-              // await inputAnimation.start({ top: 0, height: "fit-content", x: 0, width: "100%" });
-              // await inputAnimation.start({ y: 0, height: "fit-content", x: 0, width: "100%" }, { duration: 0.25 });
-              // setIsFocused(false);
-            }}
-            floatingplaceholder={false}
-            placeholder="Search for places..."
-          />
-          */}
-        <FavouriteBeachBars beachBars={generateSlides("favouriteBeachBars")} />
-        <RecentSearches beachBars={recentSearchesBeachBars} />
-        <div className="flex-row-flex-start-center">
-          <button
-            onClick={async () => {
-              const { data } = await login();
-              console.log(data);
-            }}
-            style={{ marginRight: "2em" }}
-          >
-            Click me!
-          </button>
-          <button
-            onClick={async () => {
-              const { data } = await logout();
-              console.log(data);
-            }}
-          >
-            Logout
-          </button>
         </div>
+        {authData && authData.me && (
+          <div className="home__user-custom flex-column-flex-start-flex-start">
+            {recentLoading ? (
+              <h2>Loading...</h2>
+            ) : recentError ? (
+              <h2>Error</h2>
+            ) : (
+              <>
+                <BeachBarFavouriteCanvasDynamic arr={authData.me.favoriteBars || []} />
+                <SearchRecentDynamic searches={recentData?.userSearches || []} />
+              </>
+            )}
+          </div>
+        )} */}
       </motion.div>
     </Layout>
   );
 };
 
-export default Index;
+export default IndexPage;
 
-export const getStaticProps: GetStaticProps = async () => {
-  const apolloClient = initializeApollo();
+export const getServerSideProps: GetServerSideProps = async ctx => {
+  const apolloClient = initializeApollo(ctx);
 
-  await apolloClient.query({ query: GetLatestUserSearchesDocument });
-  return { props: { [INITIAL_APOLLO_STATE]: apolloClient.cache.extract() } };
+  await apolloClient.query({ query: UserSearchesDocument });
+  await apolloClient.query({ query: GetPersonalizedBeachBarsDocument });
+
+  return {
+    props: {
+      referer: ctx.req.headers.referer || null,
+      [INITIAL_APOLLO_STATE]: apolloClient.cache.extract(),
+    },
+  };
 };
