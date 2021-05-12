@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { useAuth } from "@/utils/hooks";
 import { useClassnames } from "@hashtag-design-system/components";
 import Image, { ImageProps } from "next/image";
@@ -29,33 +28,3 @@ export const Avatar: React.FC<Partial<ImageProps>> = ({ src, ...props }) => {
 Avatar.displayName = "AccountAvatar";
 
 export const AccountAvatar = Avatar;
-=======
-import { useAuth } from "@/utils/hooks";
-import { useClassnames } from "@hashtag-design-system/components";
-import Image, { ImageProps } from "next/image";
-import styles from "./Avatar.module.scss";
-
-export const Avatar: React.FC<Partial<ImageProps>> = ({ src, ...props }) => {
-  const [classNames, rest] = useClassnames(styles.avatar, props);
-  const { data } = useAuth();
-
-  return (
-    <>
-      <Image
-        className={classNames}
-        src={data?.me?.account.imgUrl || src || "/user_default.jpg"}
-        alt="Authenticated user's account image"
-        width={48}
-        height={48}
-        objectFit="cover"
-        objectPosition="center"
-        priority
-        quality={100}
-        {...rest}
-      />
-    </>
-  );
-};
-
-Avatar.displayName = "AccountAvatar";
->>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

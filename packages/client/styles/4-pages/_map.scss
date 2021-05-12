@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 .map {
   $searchbar-margin-top: map-get($em-spacers, 64);
 
@@ -50,56 +49,3 @@
     }
   }
 }
-=======
-.map {
-  $searchbar-margin-top: map-get($em-spacers, 64);
-
-  & > .mapboxgl-control-container {
-    @extend .flex-row-flex-end-flex-end;
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    // width: calc(100% - #{$wrapper-padding * 2});
-    width: 100%;
-
-    .mapboxgl-ctrl-bottom-left,
-    .mapboxgl-ctrl-bottom-right {
-      position: static;
-    }
-
-    .mapboxgl-ctrl-bottom {
-      &-left {
-        order: 2;
-        margin-left: -(map-get($em-spacers, 8));
-      }
-
-      &-right {
-        order: 1;
-      }
-    }
-
-    @include breakpoint("sm") {
-      align-items: flex-start;
-
-      .mapboxgl-ctrl-bottom {
-        &-left {
-          margin-left: 0;
-        }
-
-        &-right {
-          margin-right: map-get($em-spacers, 8);
-        }
-      }
-    }
-  }
-
-  &__wrapper {
-    padding: 0;
-
-    main {
-      @extend .ih100;
-    }
-  }
-}
->>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

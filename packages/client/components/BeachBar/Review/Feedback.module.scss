@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 .container {
   &:not(:only-child):first-child {
     margin: map-get($em-spacers, 16) 0;
@@ -13,19 +12,3 @@
 .negative > * {
   stroke: $grey-7 !important;
 }
-=======
-.container {
-  &:not(:only-child):first-child {
-    margin: map-get($em-spacers, 16) 0;
-  }
-
-  & > svg {
-    flex-shrink: 0;
-    margin-right: map-get($em-spacers, 16);
-  }
-}
-
-.negative > * {
-  stroke: $grey-7 !important;
-}
->>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

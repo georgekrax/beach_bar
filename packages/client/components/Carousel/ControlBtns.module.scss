@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 .btns {
   margin-bottom: map-get($em-spacers, 8);
 }
@@ -37,43 +36,3 @@
     transform: translateX(5%);
   }
 }
-=======
-.btns {
-  margin-bottom: map-get($em-spacers, 8);
-}
-
-.btns button {
-  $border-color: $grey-8;
-  border-radius: 50%;
-  gap: 0;
-  border-width: 1px;
-  border-color: transparent;
-  padding: map-get($em-spacers, 8);
-  box-shadow: none;
-
-  &:disabled {
-    border-color: transparent;
-  }
-
-  &:hover {
-    background-color: $grey-1;
-    border-color: $border-color;
-  }
-
-  &:active {
-    background-color: $grey-3;
-  }
-
-  &:first-child {
-    margin-right: map-get($em-spacers, 12);
-
-    svg {
-      transform: translateX(-5%);
-    }
-  }
-
-  &:last-child svg {
-    transform: translateX(5%);
-  }
-}
->>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

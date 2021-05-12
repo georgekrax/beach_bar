@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 @mixin list {
   @for $i from 1 through $rating-boxes-length {
     $value: rating-box-background($i);
@@ -16,22 +15,3 @@
 }
 
 @include list();
-=======
-@mixin list {
-  @for $i from 1 through $rating-boxes-length {
-    $value: rating-box-background($i);
-    $stroke: map-get($value, "first");
-
-    .rating--#{$i} {
-      background: linear-gradient(to bottom left, map-get($value, "first"), map-get($value, "second"));
-
-      path {
-        stroke: $stroke;
-        fill: $stroke;
-      }
-    }
-  }
-}
-
-@include list();
->>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

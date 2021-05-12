@@ -6,7 +6,7 @@ type Props = {};
 const Hey: React.FC<Props> = () => {
   return (
     <Layout>
-      <div>Hey from @me!</div>
+      <div>Hey from @georgekrax!</div>
       {/* <Button>Click @hey</Button> */}
       {/* <Button>Click @georgekrax</Button> */}
     </Layout>

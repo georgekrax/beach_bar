@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 .row {
   margin: map-get($em-spacers, 24) 0;
 
@@ -50,56 +49,3 @@
 .quantity {
   font-size: map-get($em-spacers, 24);
 }
-=======
-.row {
-  margin: map-get($em-spacers, 24) 0;
-
-  &:first-child {
-    margin-top: map-get($em-spacers, 12);
-  }
-
-  &:last-child {
-    margin-bottom: map-get($em-spacers, 32);
-  }
-
-  :global {
-    .input__container {
-      display: none;
-    }
-
-    .input-incr-dcr__btn {
-      border: 1px solid $blue-4;
-    }
-
-    .input-incr-dcr__btn:disabled {
-      background-color: $grey-3 !important;
-      border: 1px solid $grey-7;
-    }
-  }
-}
-
-.row button {
-  width: map-get($em-spacers, 32);
-  height: map-get($em-spacers, 32);
-}
-
-.row > div:first-child {
-  & > span {
-    color: $secondary;
-    text-align: center;
-    width: map-get($em-spacers, 24);
-  }
-
-  & > div {
-    margin-left: map-get($em-spacers, 8);
-
-    & > span {
-      color: $grey-7;
-    }
-  }
-}
-
-.quantity {
-  font-size: map-get($em-spacers, 24);
-}
->>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff
