@@ -52,9 +52,9 @@ const InstagramCallback: React.FC = () => {
   // if (
   //   typeof window !== "undefined" &&
   //   process.env.NODE_ENV !== "production" &&
-  //   window.location.href.includes("127.0.0.1")
+  //   window.location.href.includes("192.168.1.7")
   // )
-  //   router.replace(window.location.href.replace("127.0.0.1:3000", "192.168.1.8:3000"));
+  //   router.replace(window.location.href.replace("192.168.1.7:3000", "192.168.1.8:3000"));
 
   return (
     <OAuth.Redirect provider="Instagram" errors={graphqlErrors}>

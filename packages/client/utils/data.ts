@@ -6,5 +6,5 @@ export const getBeachBarStaticPaths = async () => {
 
   const { data } = await apolloClient.query<GetAllBeachBarsQuery>({ query: GetAllBeachBarsDocument });
 
-  return { paths: data.getAllBeachBars.map(({ slug }) => ({ params: { slug } })), fallback: true };
+  return { paths: data.getAllBeachBars.map(({ slug }) => ({ params: { slug: [slug] } })), fallback: true };
 };

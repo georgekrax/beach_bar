@@ -28,7 +28,7 @@ const SearchFilters = dynamic(() => {
   return prom;
 });
 const NextMotionContainer = dynamic(() => {
-  const prom = import("@/components/Next/Motion/Container").then(mod => mod.Container);
+  const prom = import("@/components/Next/MotionContainer").then(mod => mod.NextMotionContainer);
   return prom;
 });
 const NextIconBox = dynamic(() => {

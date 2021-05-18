@@ -29,13 +29,17 @@ export const Layout: React.NamedExoticComponent<Props> = memo(
   ({ header, footer, tapbar = true, container = {}, main = {}, shoppingCart = false, children }) => {
     const [isKeyboardShown, setIsKeyboardShown] = useState(false);
     const [containerClassNames, containerRest] = useClassnames("container", container);
-    const isDesktop = useIsDesktop();
-    const { height } = useWindowDimensions();
+    // const isDesktop = useIsDesktop();
+    // const { height } = useWindowDimensions();
     const { variables, setValue } = useConfig();
+
+    return (
+      <div>{children}</div>
+    )
 
     const BOTTOM_SHEET_DEFAULT_Y = isDesktop ? 150 : 300;
 
-    const { isCartShown, dispatch: searchDispatch } = useSearchContext();
+    // const { isCartShown, dispatch: searchDispatch } = useSearchContext();
 
     const fetchUsersIp = async () => {
       const res = await fetch(
@@ -61,25 +65,25 @@ export const Layout: React.NamedExoticComponent<Props> = memo(
     };
 
     // Fetch user's IP Address
-    useEffect(() => {
-      if (!variables.ipAddr) fetchUsersIp();
-      // console.clear();
+    // useEffect(() => {
+    //   if (!variables.ipAddr) fetchUsersIp();
+    //   // console.clear();
 
-      document.addEventListener("focus", e => handleFocus(e, true), true);
-      document.addEventListener("blur", e => handleFocus(e, false), true);
+    //   document.addEventListener("focus", e => handleFocus(e, true), true);
+    //   document.addEventListener("blur", e => handleFocus(e, false), true);
 
-      return () => {
-        document.removeEventListener("focus", e => handleFocus(e, true));
-        document.removeEventListener("blur", e => handleFocus(e, false));
-      };
-    }, []);
+    //   return () => {
+    //     document.removeEventListener("focus", e => handleFocus(e, true));
+    //     document.removeEventListener("blur", e => handleFocus(e, false));
+    //   };
+    // }, []);
 
     return (
       <>
-        <LoginDialog>
+        {/* <LoginDialog>
           <Auth />
-        </LoginDialog>
-        <MapDialog />
+        </LoginDialog> */}
+        {/* <MapDialog /> */}
         {header !== false && <Header {...header} />}
         <div className={containerClassNames} {...containerRest}>
           <AnimatePresence exitBeforeEnter>
@@ -91,7 +95,7 @@ export const Layout: React.NamedExoticComponent<Props> = memo(
           </AnimatePresence>
           {footer !== false && <Footer {...footer} />}
         </div>
-        {shoppingCart && (
+        {/* {shoppingCart && (
           <BottomSheet
             isShown={isCartShown}
             transformTemplate={(_, gen) => gen.replace("300px", BOTTOM_SHEET_DEFAULT_Y + "px")}
@@ -104,7 +108,7 @@ export const Layout: React.NamedExoticComponent<Props> = memo(
               <ShoppingCart />
             </Dialog.Content>
           </BottomSheet>
-        )}
+        )} */}
         {/* {!isKeyboardShown && isMobile && tapbar && <TapBar />} */}
       </>
     );

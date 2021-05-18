@@ -55,7 +55,7 @@ export let stripe: Stripe;
     cors({
       credentials: true,
       // origin: process.env.NODE_ENV === "production" ? String(process.env.TOKEN_AUDIENCE!) : "http://192.168.1.8:3000",
-      origin: "http://192.168.1.8:3000",
+      origin: "http://192.168.1.7:3000",
     })
   );
   app.use((req, res, next) => {

@@ -92,7 +92,7 @@ export const Footer: React.FC<Props> = props => {
           <InfoColumn header="Get in touch">
             <div className={styles.getInTouch + " body-14"}>
               <div>Questions or feedback?</div>
-              <div>We 'd love to hear from you</div>
+              <div>We' d love to hear from you</div>
             </div>
             <div className="flex-row-flex-start-center">
               <a href="https://www.instagram.com/georgekrax" rel="noreferrer" target="_blank">

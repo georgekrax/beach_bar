@@ -1,3 +1,4 @@
+import "@hashtag-design-system/components/build/index.css";
 import "@/styles/globals.scss";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Context as AuthContext } from "@/components/Auth/Context";

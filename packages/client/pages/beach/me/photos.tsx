@@ -30,7 +30,7 @@ const BeachPhotosPage: React.FC = () => {
   const { query } = useRouter();
 
   const slug = useMemo(() => (query.slug as string) || "", [query]);
-  const { data, loading, error } = useBeachBarImgsQuery({ variables: { slug } });
+  const { data, loading, error } = useBeachBarImgsQuery({ variables: { slug: "kikabu" } });
 
   const arr: NonNullable<BeachBarImgsQuery["beachBarImgs"]>[] = useMemo(
     () => chunk(data?.beachBarImgs?.concat(data?.beachBarImgs || []) || [], 6),
@@ -76,7 +76,7 @@ const BeachPhotosPage: React.FC = () => {
             {arr?.map((imgs, i) => (
               <div key={i} className="beach_bar__photos w100 flex-row-center-center">
                 {imgs.map(({ id, imgUrl, description }) => (
-                  <div key={id} style={{ height: 100 }}>
+                  <div key={id} className="h100">
                     <Img src={imgUrl} alt={description} layout="fill" />
                   </div>
                 ))}
@@ -93,17 +93,18 @@ BeachPhotosPage.displayName = "BeachPhotosPage";
 
 export default BeachPhotosPage;
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const res = await getBeachBarStaticPaths();
-  return res;
-};
+// export const getStaticPaths: GetStaticPaths = async () => {
+//   const res = await getBeachBarStaticPaths();
+//   return res;
+// };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const apolloClient = initializeApollo();
 
   const slug = params?.slug;
-  if (slug) await apolloClient.query<BeachBarImgsQuery>({ query: BeachBarImgsDocument, variables: { slug } });
-  else return { notFound: true, redirect: { destination: "/beach/" + slug, permanent: true } };
+  await apolloClient.query<BeachBarImgsQuery>({ query: BeachBarImgsDocument, variables: { slug: "kikabu" } });
+  // if (slug) await apolloClient.query<BeachBarImgsQuery>({ query: BeachBarImgsDocument, variables: { slug: "kikabu" } });
+  // else return { redirect: { destination: "/beach/" + slug, permanent: true } };
 
   return { props: { [INITIAL_APOLLO_STATE]: apolloClient.cache.extract() }, revalidate: 5 };
 };

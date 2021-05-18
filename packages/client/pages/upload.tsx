@@ -56,7 +56,7 @@ export const Upload: React.FC = () => {
   return (
     <Layout>
       {/* <Me> */}
-      <div>This is @me!</div>
+      <div>This is @skg me!</div>
       {/* </Me> */}
     </Layout>
     // {/* <input {...getInputProps()} />
