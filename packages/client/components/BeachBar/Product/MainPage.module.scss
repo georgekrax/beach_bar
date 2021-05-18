@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 .container {
   & > h4 {
     margin-top: map-get($em-spacers, 40);
@@ -59,65 +58,3 @@
 .product {
   margin-bottom: map-get($em-spacers, 40);
 }
-=======
-.container {
-  & > h4 {
-    margin-top: map-get($em-spacers, 40);
-    margin-bottom: map-get($em-spacers, 12);
-    color: $grey-9;
-  }
-
-  & > div:first-of-type {
-    margin-bottom: map-get($em-spacers, 32);
-  }
-}
-
-.filters {
-  $gap: map-get($em-spacers, 16);
-  margin: map-get($em-spacers, 48) 0 map-get($em-spacers, 24);
-
-  .people,
-  .components {
-    margin: map-get($em-spacers, 16) 0;
-  }
-
-  .components {
-    gap: $gap;
-    overflow-x: scroll;
-
-    & > div > div {
-      white-space: nowrap;
-    }
-  }
-
-  .people {
-    flex-wrap: wrap;
-
-    div,
-    button {
-      margin-right: $gap;
-    }
-
-    button {
-      padding: map-get($em-spacers, 8) map-get($em-spacers, 12);
-      border-radius: 10px;
-      box-shadow: none;
-      border-color: $grey-5;
-      border-width: 1px;
-
-      &:hover {
-        background: none;
-        color: $grey-10;
-      }
-
-      &.checked {
-        background: rgba($grey-4, 0.75);
-      }
-    }
-  }
-}
-
-.product {
-  margin-bottom: map-get($em-spacers, 40);
-}
->>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

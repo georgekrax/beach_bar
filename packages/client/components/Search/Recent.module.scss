@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 .container {
   flex-wrap: wrap;
   gap: map-get($em-spacers, 16);
@@ -35,41 +34,3 @@
 .content div:first-child {
   margin-bottom: map-get($em-spacers, 4);
 }
-=======
-.container {
-  flex-wrap: wrap;
-  gap: map-get($em-spacers, 16);
-}
-
-.item {
-  border-radius: 14px;
-  border: 1px solid $grey-5;
-  flex: 1 0 auto;
-  max-width: 16em;
-  padding: map-get($em-spacers, 8);
-  cursor: pointer;
-
-  .divider {
-    margin: 0 map-get($em-spacers, 8);
-    width: 0.2rem;
-    height: 0.2rem;
-    background-color: $grey-7;
-    align-self: center;
-    border-radius: 50%;
-  }
-}
-
-.img {
-  position: relative;
-  margin-right: map-get($em-spacers, 12);
-  @include aspect-ratio(56.25%);
-
-  img {
-    border-radius: 10px;
-  }
-}
-
-.content div:first-child {
-  margin-bottom: map-get($em-spacers, 4);
-}
->>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

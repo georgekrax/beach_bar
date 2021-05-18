@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 .container {
   margin-bottom: map-get($em-spacers, 16);
   padding: map-get($em-spacers, 8) 0.1em;
@@ -23,29 +22,3 @@
     }
   }
 }
-=======
-.container {
-  margin-bottom: map-get($em-spacers, 16);
-  padding: map-get($em-spacers, 8) 0.1em;
-  border-bottom: 1px solid $grey-5;
-
-  h6 {
-    color: $grey-9;
-  }
-}
-
-.container > div {
-  a {
-    margin-right: 0.375em;
-  }
-
-  svg {
-    // align-self: flex-end;
-    margin-top: 3%;
-
-    path {
-      stroke: $secondary;
-    }
-  }
-}
->>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

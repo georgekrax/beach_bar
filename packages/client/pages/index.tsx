@@ -30,7 +30,8 @@ const SearchRecentDynamic = dynamic<React.ComponentProps<typeof Search["Recent"]
   import("@/components/Search/Recent").then(mod => mod.Recent)
 );
 
-const IndexPage: InferGetServerSidePropsType<typeof getServerSideProps> = ({ referer }) => {
+// const IndexPage: InferGetServerSidePropsType<typeof getServerSideProps> = ({ referer }) => {
+const IndexPage = () => {
   const router = useRouter();
   const mainRef = useRef<HTMLDivElement>(null);
   const isDesktop = useIsDesktop();
@@ -39,31 +40,28 @@ const IndexPage: InferGetServerSidePropsType<typeof getServerSideProps> = ({ ref
   const { width } = useWindowDimensions();
   const { inputValue, results, dispatch } = useSearchContext();
 
-  const { data: authData } = useAuth();
-  const { data, error, loading } = useGetPersonalizedBeachBarsQuery();
+  const { data: authData } = useAuth({skip: true});
+  const { data, error, loading } = useGetPersonalizedBeachBarsQuery({skip: true});
   const { data: recentData, loading: recentLoading, error: recentError } = useUserSearchesQuery({
     variables: { limit: 8 },
+    skip: true,
   });
   const { data: nearData, error: nearError } = useNearBeachBarsQuery({
-    skip: !lat || !lon,
+    // skip: !lat || !lon,
+    skip: true,
     variables: { latitude: lat.toString(), longitude: lon.toString() },
   });
 
   useEffect(() => {
-    if (referer && !referer.includes("search") && inputValue && results.arr.length > 0)
-      router.push({ pathname: "/search" });
+    // if (referer && !referer.includes("search") && inputValue && results.arr.length > 0)
+    //   router.push({ pathname: "/search" });
     router.prefetch(isDesktop ? "/search" : "/search?box=true");
   }, []);
 
   return (
     <Layout header={{ className: "home__header" }}>
       <motion.div className="home__container" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit="initial">
-<<<<<<< HEAD
-        <div>Με</div>
-        {/* <div className="w100 flex-row-flex-start-flex-start">
-=======
         <div className="w100 flex-row-flex-start-flex-start">
->>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff
           <div className="home__img">
             <div className="home__img__container">
               <Image
@@ -140,11 +138,7 @@ const IndexPage: InferGetServerSidePropsType<typeof getServerSideProps> = ({ ref
               </>
             )}
           </div>
-<<<<<<< HEAD
-        )} */}
-=======
         )}
->>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff
       </motion.div>
     </Layout>
   );
@@ -152,16 +146,16 @@ const IndexPage: InferGetServerSidePropsType<typeof getServerSideProps> = ({ ref
 
 export default IndexPage;
 
-export const getServerSideProps: GetServerSideProps = async ctx => {
-  const apolloClient = initializeApollo(ctx);
+// export const getServerSideProps: GetServerSideProps = async ctx => {
+//   const apolloClient = initializeApollo(ctx);
 
-  await apolloClient.query({ query: UserSearchesDocument });
-  await apolloClient.query({ query: GetPersonalizedBeachBarsDocument });
+//   await apolloClient.query({ query: UserSearchesDocument });
+//   await apolloClient.query({ query: GetPersonalizedBeachBarsDocument });
 
-  return {
-    props: {
-      referer: ctx.req.headers.referer || null,
-      [INITIAL_APOLLO_STATE]: apolloClient.cache.extract(),
-    },
-  };
-};
+//   return {
+//     props: {
+//       referer: ctx.req.headers.referer || null,
+//       [INITIAL_APOLLO_STATE]: apolloClient.cache.extract(),
+//     },
+//   };
+// };

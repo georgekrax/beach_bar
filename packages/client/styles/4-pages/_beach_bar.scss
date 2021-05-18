@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 .beach_bar {
   &__heading {
     position: sticky;
@@ -63,69 +62,3 @@
     }
   }
 }
-=======
-.beach_bar {
-  &__heading {
-    position: sticky;
-    top: 0;
-    left: 0;
-    padding: map-get($em-spacers, 20) 0 map-get($em-spacers, 16);
-    background-color: $grey-1;
-
-    & > div:first-child {
-      align-items: flex-start;
-
-      & > div:last-child {
-        @extend .d--none;
-      }
-    }
-  }
-
-  &__photos {
-    display: grid;
-    flex-wrap: wrap;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(2, auto);
-    gap: map-get($em-spacers, 16);
-    margin-bottom: map-get($em-spacers, 32);
-
-    &:first-of-type > div:first-child {
-      grid-column: 1 / 3;
-      grid-row: 1 / 3;
-    }
-
-    &:nth-of-type(2) {
-      & > div:nth-child(2) {
-        grid-column: 2 / 4;
-      }
-    }
-
-    & > div {
-      position: relative;
-    }
-
-    &-container {
-      margin: map-get($em-spacers, 32) auto;
-      max-width: map-get($breakpoints, "md");
-
-      &--padding {
-        padding-top: $wrapper-padding;
-      }
-    }
-  }
-}
-
-@include responsive() {
-  .beach_bar {
-    &__heading > div:first-child > div:last-child {
-      display: block;
-      margin: 0;
-      margin-left: map-get($em-spacers, 4);
-
-      h3 {
-        max-width: none;
-      }
-    }
-  }
-}
->>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

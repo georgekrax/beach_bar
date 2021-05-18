@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 .container {
   position: relative;
 
@@ -12,18 +11,3 @@
     transform: none;
   }
 }
-=======
-.container {
-  position: relative;
-
-  summary ::marker {
-    content: "";
-  }
-
-  & > label {
-    position: static;
-    margin-bottom: map-get($em-spacers, 8);
-    transform: none;
-  }
-}
->>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

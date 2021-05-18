@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 .shopping-cart {
   &__container {
     margin-bottom: map-get($em-spacers, 24);
@@ -68,74 +67,3 @@
     margin-left: 0;
   }
 }
-=======
-.shopping-cart {
-  &__container {
-    margin-bottom: map-get($em-spacers, 24);
-
-    div:first-of-type > h4 {
-      @extend .text-transform--capitalize;
-    }
-  }
-
-  &__bars {
-    margin: map-get($em-spacers, 24) 0;
-
-    h6 {
-      @extend .semibold;
-    }
-  }
-
-  &__empty {
-    span {
-      margin-bottom: map-get($em-spacers, 8);
-    }
-
-    a {
-      margin-bottom: map-get($em-spacers, 64);
-    }
-  }
-
-  &__checkout-container {
-    position: sticky;
-    bottom: -24px;
-    left: 50%;
-    z-index: 9;
-    background-color: $grey-1;
-    padding: map-get($em-spacers, 12) 0;
-    margin: map-get($em-spacers, 24) 0 map-get($em-spacers, 48);
-
-    div {
-      margin-right: map-get($em-spacers, 48);
-
-      span:first-child {
-        margin-bottom: map-get($em-spacers, 8);
-      }
-
-      @include breakpoint("sm") {
-        display: flex !important;
-      }
-    }
-
-    button {
-      padding: map-get($em-spacers, 12) 0;
-      flex-grow: 1;
-      align-self: center;
-      max-width: 22.5em;
-      margin: auto;
-
-      svg {
-        margin-right: map-get($em-spacers, 8);
-
-        path {
-          stroke: $grey-1;
-        }
-      }
-    }
-  }
-
-  &__total {
-    margin-left: 0;
-  }
-}
->>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

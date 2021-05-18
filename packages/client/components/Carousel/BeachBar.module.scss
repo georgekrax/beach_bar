@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 @use "2-base/base";
 
 .container {
@@ -48,54 +47,3 @@
     fill: $grey-1;
   }
 }
-=======
-@use "2-base/base";
-
-.container {
-  position: relative;
-  width: min(60vw, 200px);
-  height: $carousel-bar-height;
-  border-radius: 14px;
-  overflow: hidden;
-  cursor: pointer;
-
-  &::after {
-    @extend .w100;
-    @extend .h100;
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    background: linear-gradient(to top, rgba($grey-10, 0.75), rgba($grey-10, 0.175), transparent);
-    z-index: 1;
-    pointer-events: none;
-  }
-}
-
-.favourite {
-  position: absolute;
-  top: 0;
-  right: 0;
-  border: none;
-  padding: 7%;
-}
-
-.content {
-  position: absolute;
-  width: 86%;
-  left: 50%;
-  bottom: 5%;
-  transform: translateX(-50%);
-  overflow: hidden;
-  z-index: 2;
-
-  & > * {
-    color: $grey-1;
-  }
-
-  div path {
-    stroke: none;
-    fill: $grey-1;
-  }
-}
->>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff
