@@ -1,4 +1,3 @@
-// import { Button } from "antd";
 import Layout from "@/components/Layout/Layout";
 
 type Props = {};
@@ -6,7 +5,7 @@ type Props = {};
 const Hey: React.FC<Props> = () => {
   return (
     <Layout>
-      <div>Hey from @georgekrax!</div>
+      <div>Hey from @me!</div>
       {/* <Button>Click @hey</Button> */}
       {/* <Button>Click @georgekrax</Button> */}
     </Layout>
