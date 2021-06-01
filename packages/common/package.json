@@ -1,3 +1,37 @@
+<<<<<<< HEAD
+{
+  "name": "@beach_bar/common",
+  "version": "1.0.14",
+  "license": "UNLICENSED",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "author": "George Krachtopoulos <@georgekrax>",
+  "scripts": {
+    "build": "rm -rf ./build && tsc",
+    "build:watch": "rm -rf ./build && tsc -w",
+    "prepublish": "yarn build"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.41",
+    "@typescript-eslint/eslint-plugin": "^4.22.0",
+    "@typescript-eslint/parser": "^4.22.0",
+    "eslint": "^7.24.0",
+    "eslint-config-prettier": "^8.2.0",
+    "eslint-import-resolver-typescript": "^2.2.0",
+    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "typescript": "^4.2.4"
+  },
+  "dependencies": {
+    "@sendgrid/mail": "^7.4.0",
+    "express": "^4.17.1",
+    "google-auth-library": "^7.0.4",
+    "ioredis": "^4.27.1",
+    "stripe": "^8.145.0",
+    "ua-parser-js": "^0.7.28"
+  }
+}
+=======
 {
   "name": "@beach_bar/common",
   "version": "1.0.13",
@@ -23,3 +57,4 @@
     "ua-parser-js": "^0.7.28"
   }
 }
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

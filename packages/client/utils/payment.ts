@@ -1,5 +1,5 @@
 import { CartQuery } from "@/graphql/generated";
-import uniqBy from "lodash/uniqBy";
+import {uniqBy} from "lodash";
 
 type Products = NonNullable<CartQuery["cart"]>["products"];
 

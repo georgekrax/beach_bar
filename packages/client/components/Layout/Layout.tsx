@@ -4,7 +4,7 @@ import { SEARCH_ACTIONS } from "@/components/Search/reducer";
 import ShoppingCart from "@/components/ShoppingCart/ShoppingCart";
 import { userIpAddr } from "@/lib/apollo/cache";
 import { IpAddrType } from "@/typings/graphql";
-import { useSearchContext } from "@/utils/contexts/SearchContext";
+import { useSearchContext } from "@/utils/contexts";
 import { useConfig } from "@/utils/hooks/useConfig";
 import { useIsDesktop } from "@/utils/hooks/useIsDesktop";
 import { BottomSheet, Dialog, useClassnames, useWindowDimensions } from "@hashtag-design-system/components";
@@ -12,7 +12,7 @@ import { AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
 import { memo, useEffect, useState } from "react";
 import { Footer, LayoutFooterProps } from "./Footer";
-import { Header, LayoutHeaderProps } from "./Header";
+import { Header,  LayoutHeaderProps } from "./Header";
 import { LoginDialog } from "./LoginDialog";
 import { LayoutTapBarProps } from "./TapBar";
 
@@ -42,48 +42,48 @@ export const Layout: React.NamedExoticComponent<Props> & SubComponents = memo(
     const [containerClassNames, containerRest] = useClassnames("container", container);
     const isDesktop = useIsDesktop();
     const { height } = useWindowDimensions();
-    const { variables, setValue } = useConfig();
+    // const { variables, setValue } = useConfig();
 
     const BOTTOM_SHEET_DEFAULT_Y = isDesktop ? 0 : 300;
 
     const { isCartShown, dispatch: searchDispatch } = useSearchContext();
 
-    const fetchUsersIp = async () => {
-      const res = await fetch(
-        "http://ip-api.com/json/?fields=status,message,country,countryCode,region,regionName,city,district,zip,lat,lon,timezone,currency,isp,org,as,mobile,query"
-      );
-      const data: IpAddrType = await res.json();
-      if (data.status === "success") {
-        userIpAddr(data);
-        setValue(prevState => ({ ...prevState, variables: { ...prevState.variables, ipAddr: data } }));
-      }
-    };
+    // const fetchUsersIp = async () => {
+    //   const res = await fetch(
+    //     "http://ip-api.com/json/?fields=status,message,country,countryCode,region,regionName,city,district,zip,lat,lon,timezone,currency,isp,org,as,mobile,query"
+    //   );
+    //   const data: IpAddrType = await res.json();
+    //   if (data.status === "success") {
+    //     userIpAddr(data);
+    //     setValue(prevState => ({ ...prevState, variables: { ...prevState.variables, ipAddr: data } }));
+    //   }
+    // };
 
-    const handleFocus = (e: FocusEvent, bool: boolean) => {
-      const activeEl = e.target;
-      if (
-        activeEl &&
-        // @ts-expect-error
-        ["input", "textarea"].includes(activeEl.tagName.toLowerCase()) &&
-        // @ts-expect-error
-        !["radio", "checkbox"].includes(activeEl.type)
-      )
-        setIsKeyboardShown(bool);
-    };
+    // const handleFocus = (e: FocusEvent, bool: boolean) => {
+    //   const activeEl = e.target;
+    //   if (
+    //     activeEl &&
+    //     // @ts-expect-error
+    //     ["input", "textarea"].includes(activeEl.tagName.toLowerCase()) &&
+    //     // @ts-expect-error
+    //     !["radio", "checkbox"].includes(activeEl.type)
+    //   )
+    //     setIsKeyboardShown(bool);
+    // };
 
-    // Fetch user's IP Address
-    useEffect(() => {
-      if (!variables.ipAddr) fetchUsersIp();
-      // console.clear();
+    // // Fetch user's IP Address
+    // useEffect(() => {
+    //   if (!variables.ipAddr) fetchUsersIp();
+    //   // console.clear();
 
-      document.addEventListener("focus", e => handleFocus(e, true), true);
-      document.addEventListener("blur", e => handleFocus(e, false), true);
+    //   document.addEventListener("focus", e => handleFocus(e, true), true);
+    //   document.addEventListener("blur", e => handleFocus(e, false), true);
 
-      return () => {
-        document.removeEventListener("focus", e => handleFocus(e, true));
-        document.removeEventListener("blur", e => handleFocus(e, false));
-      };
-    }, []);
+    //   return () => {
+    //     document.removeEventListener("focus", e => handleFocus(e, true));
+    //     document.removeEventListener("blur", e => handleFocus(e, false));
+    //   };
+    // }, []);
 
     return (
       <>

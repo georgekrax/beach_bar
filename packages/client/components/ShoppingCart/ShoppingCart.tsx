@@ -25,7 +25,7 @@ const ShoppingCart: React.NamedExoticComponent<Props> & SubComponents = memo(() 
   });
   const ref = useRef<HTMLDivElement>(null);
 
-  const { data: authData } = useAuth();
+  const { data: authData } = useAuth({skip: true});
   const { data, loading, error } = useCartQuery({
     fetchPolicy: "cache-and-network",
     nextFetchPolicy: "cache-first",
@@ -98,7 +98,7 @@ const ShoppingCart: React.NamedExoticComponent<Props> & SubComponents = memo(() 
               </div>
             </>
           )}
-          <Dialog
+          {/* <Dialog
             isShown={productToDelete.isDialogShown}
             onDismiss={async (e, { cancel }) => {
               const tagName = e.currentTarget.tagName;
@@ -129,7 +129,7 @@ const ShoppingCart: React.NamedExoticComponent<Props> & SubComponents = memo(() 
               <Dialog.Btn>Yes</Dialog.Btn>
               <Dialog.Btn confirm>No</Dialog.Btn>
             </Dialog.Btn.Group>
-          </Dialog>
+          </Dialog> */}
         </NextMotionContainer>
       )}
     </div>

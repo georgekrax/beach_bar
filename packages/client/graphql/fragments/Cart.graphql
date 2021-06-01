@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 fragment BasicCartProduct on CartProduct {
   id
   quantity
@@ -23,3 +24,30 @@ fragment BasicCartProduct on CartProduct {
     }
   }
 }
+=======
+fragment BasicCartProduct on CartProduct {
+  id
+  quantity
+  date
+  timestamp
+  time {
+    id
+    value
+  }
+  product {
+    id
+    name
+    price
+    imgUrl
+    beachBar {
+      id
+      name
+      thumbnailUrl
+      formattedLocation
+      defaultCurrency {
+        symbol
+      }
+    }
+  }
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

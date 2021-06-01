@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 query Search(
   $inputId: ID
   $inputValue: String
@@ -39,3 +40,46 @@ query Search(
     }
   }
 }
+=======
+query Search(
+  $inputId: ID
+  $inputValue: String
+  $availability: SearchInput
+  $searchId: ID
+  $filterIds: [String!]
+  $sortId: ID
+) {
+  search(
+    inputId: $inputId
+    inputValue: $inputValue
+    availability: $availability
+    searchId: $searchId
+    filterIds: $filterIds
+    sortId: $sortId
+  ) {
+    results {
+      beachBar {
+        ...SearchBeachBar
+      }
+      availability {
+        hasAvailability
+        hasCapacity
+      }
+    }
+    search {
+      id
+      filters {
+        id
+        publicId
+      }
+      sort {
+        id
+        name
+      }
+      inputValue {
+        ...SearchInputValue
+      }
+    }
+  }
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

@@ -15,6 +15,7 @@ type SubComponents = {
   ShowInMap: typeof ShowInMap;
   Recent: typeof Recent;
   NearYou: typeof NearYou;
+  // MapDialog: typeof MapDialog;
 };
 
 type Props = {};
@@ -30,6 +31,7 @@ Search.Filters = Filters;
 Search.ShowInMap = ShowInMap;
 Search.Recent = Recent;
 Search.NearYou = NearYou;
+// Search.MapDialog = MapDialog;
 
 Search.displayName = "Search";
 

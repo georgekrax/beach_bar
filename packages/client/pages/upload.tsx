@@ -1,7 +1,7 @@
+import Layout from "@/components/Layout/Layout";
 // import { gql } from "@apollo/client";
 // import { useState } from "react";
-// import { Me } from "@/me/Layout";
-import { Layout } from "@/components/Layout/Layout";
+import { Me } from "@/components/me/Layout";
 // import { FileWithPath } from "react-dropzone";
 
 // const mutation = gql`
@@ -52,13 +52,23 @@ export const Upload: React.FC = () => {
   // }
   // };
   // const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, multiple: true });
-
+  
   return (
     <Layout>
       {/* <Me> */}
       <div>This is @skg me!</div>
       {/* </Me> */}
     </Layout>
+      // {/* <input {...getInputProps()} />
+      // {isDragActive || (loading && uploaded < files.length) ? (
+      //   <p>Please wait to upload file(s)</p>
+      // ) : (
+      //   <>
+      //     <p>Drag & drop some files here,or click to select files</p>
+      //     <span>Or click to select files</span>
+      //   </>
+      // )}
+      // {uploaded > files.length && <p>File(s) successfully have been uploaded</p>} */}
     // {/* <input {...getInputProps()} />
     // {isDragActive || (loading && uploaded < files.length) ? (
     //   <p>Please wait to upload file(s)</p>

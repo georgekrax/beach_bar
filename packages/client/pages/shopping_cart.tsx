@@ -14,13 +14,13 @@ const ShoppingCart: React.FC = () => {
 
 export default ShoppingCart;
 
-export const getServerSideProps: GetServerSideProps = async ctx => {
-  const apolloClient = initializeApollo(ctx);
+// export const getServerSideProps: GetServerSideProps = async ctx => {
+//   const apolloClient = initializeApollo(ctx);
 
-  await getAuth({ apolloClient });
+//   await getAuth({ apolloClient });
 
-  return { props: { [INITIAL_APOLLO_STATE]: apolloClient.cache.extract() } };
-};
+//   return { props: { [INITIAL_APOLLO_STATE]: apolloClient.cache.extract() } };
+// };
 
 // {loading ? (
 //   <h2>Loading...</h2>

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 mutation AddCustomerPaymentMethod(
   $token: String!
   $customerId: ID!
@@ -27,3 +28,34 @@ mutation AddCustomerPaymentMethod(
     added
   }
 }
+=======
+mutation AddCustomerPaymentMethod(
+  $token: String!
+  $customerId: ID!
+  $cardholderName: String!
+  $isDefault: Boolean = false
+  $savedForFuture: Boolean = true
+) {
+  addCustomerPaymentMethod(
+    source: $token
+    customerId: $customerId
+    cardholderName: $cardholderName
+    isDefault: $isDefault
+    savedForFuture: $savedForFuture
+  ) {
+    card {
+      id
+      expMonth
+      expYear
+      last4
+      cardholderName
+      isDefault
+      brand {
+        id
+        name
+      }
+    }
+    added
+  }
+}
+>>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

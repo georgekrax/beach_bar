@@ -1,6 +1,6 @@
 import { AUTH_ACTIONS } from "@/components/Auth/reducer";
 import Icons from "@/components/Icons";
-import { OrContainer } from "@/components/Next/OrContainer";
+import { NextOrContainer } from "@/components/Next/OrContainer";
 import { DATA } from "@/config/data";
 import {
   GetFacebookOAuthUrlDocument,
@@ -67,7 +67,7 @@ export const LoginDialog: React.FC<Props & Partial<Pick<DialogFProps, "isShown">
         <div className={styles.container + " w100 flex-row-flex-start-center"}>{children}</div>
         {oauth && (
           <>
-            <OrContainer />
+            <NextOrContainer />
             <div className={styles.oauthContainer + " flex-row-center-center"}>
               <Button className={styles.oauth} variant="secondary" onClick={() => handleClick("Google")}>
                 <Icons.Logo.Google /> Sign in with Google

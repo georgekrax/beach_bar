@@ -17,7 +17,6 @@
     "baseUrl": ".",
     "paths": {
       "@/components/*": ["components/*"],
-      "@/me/*": ["me/*"],
       "@/pages/*": ["pages/*"],
       "@/graphql/*": ["graphql/*"],
       "@/styles/*": ["styles/*"],

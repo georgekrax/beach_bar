@@ -16,3 +16,5 @@ export const OrContainer: React.FC<Props> = ({ text = "Or continue with", direct
 };
 
 OrContainer.displayName = "NextOrContainer";
+
+export const NextOrContainer= OrContainer;

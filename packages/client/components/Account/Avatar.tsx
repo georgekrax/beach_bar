@@ -26,3 +26,5 @@ export const Avatar: React.FC<Partial<ImageProps>> = ({ src, ...props }) => {
 };
 
 Avatar.displayName = "AccountAvatar";
+
+export const AccountAvatar = Avatar;

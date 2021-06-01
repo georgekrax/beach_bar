@@ -1,4 +1,5 @@
 import Auth from "@/components/Auth";
+import { Container } from "@/components/Auth/Container";
 import { AUTH_ACTIONS } from "@/components/Auth/reducer";
 import { LoginDialog } from "@/components/Layout/LoginDialog";
 import OAuth from "@/components/OAuth";
@@ -59,7 +60,7 @@ const InstagramCallback: React.FC = () => {
   return (
     <OAuth.Redirect provider="Instagram" errors={graphqlErrors}>
       <LoginDialog oauth={false} dialogBtn={false}>
-        <Auth.Container
+        <Container
           initial={false}
           controls={false}
           variants={false}

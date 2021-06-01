@@ -32,7 +32,8 @@ export type Props = {
 export const Form: React.NamedExoticComponent<Props & React.ComponentPropsWithoutRef<"div">> & SubComponents = memo(
   ({ handleReturn, handleSubmit, ...props }) => {
     const { form, inputValue, map, dispatch } = useSearchContext();
-    const { searchInputValues, handleChange: onChange, handleSelect: onSelect } = useSearchForm();
+    // const { searchInputValues, handleChange: onChange, handleSelect: onSelect } = useSearchForm();
+    const { handleChange: onChange, handleSelect: onSelect } = useSearchForm();
     const { searchValue, showRest } = form;
     const [classNames, rest] = useClassnames(styles.container + " w100 flex-column-flex-start-stretch", props);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -80,10 +81,10 @@ export const Form: React.NamedExoticComponent<Props & React.ComponentPropsWithou
 
     const handleClear = () => {
       animateSuggestionsAnimation();
-      dispatch({
-        type: SEARCH_ACTIONS.HANDLE_CLEAR,
-        payload: { data: searchInputValues.data?.searchInputValues || [] },
-      });
+      // dispatch({
+      //   type: SEARCH_ACTIONS.HANDLE_CLEAR,
+      //   payload: { data: searchInputValues.data?.searchInputValues || [] },
+      // });
     };
 
     const handleFocus = async () => {
@@ -111,7 +112,7 @@ export const Form: React.NamedExoticComponent<Props & React.ComponentPropsWithou
 
     return (
       <div className={classNames} {...rest}>
-        <ReturnAndClear onReturn={handleReturn} onClear={handleClear} />
+        <ReturnAndClear handleReturn={handleReturn} onClear={handleClear} />
         <div className={styles.searchBarContainer}>
           <motion.div
             className={styles.searchBar + " " + (showRest ? styles.formItem + " " : "") + styles.wrapperMargin}
@@ -142,7 +143,8 @@ export const Form: React.NamedExoticComponent<Props & React.ComponentPropsWithou
           <CurrentLocation animate={locationControls} />
         </div>
         <div className={styles.suggestions}>
-          {searchInputValues.error ? (
+          {/* {searchInputValues.error ? ( */}
+          {false ? (
             <h2>Error</h2>
           ) : (
             <motion.div
@@ -155,16 +157,15 @@ export const Form: React.NamedExoticComponent<Props & React.ComponentPropsWithou
           )}
           <ul>
             <AnimatePresence presenceAffectsLayout>
-              {searchInputValues.sliced.map(({ id, ...rest }, i) => (
-                <Suggestion
+              {/* {searchInputValues.sliced.map(({ id, ...rest }, i) => ( */}
+                {/* <Suggestion
                   key={id}
                   idx={i}
                   id={id}
                   itemControls={itemControls}
                   onClick={content => handleSelect(content)}
                   {...rest}
-                />
-              ))}
+                /> */}
             </AnimatePresence>
           </ul>
         </div>

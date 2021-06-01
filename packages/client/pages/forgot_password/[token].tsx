@@ -1,4 +1,5 @@
 import Auth from "@/components/Auth";
+import { Container } from "@/components/Auth/Container";
 import { LoginDialog } from "@/components/Layout/LoginDialog";
 import { useChangeUserPasswordMutation } from "@/graphql/generated";
 import { SignUpFormData } from "@/typings/user";
@@ -19,7 +20,7 @@ const Token: React.FC = () => {
 
   return (
     <LoginDialog isShown oauth={false} dialogBtn={false}>
-      <Auth.Container
+      <Container
         initial={false}
         controls={false}
         variants={false}

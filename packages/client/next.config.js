@@ -38,7 +38,8 @@ module.exports = {
       loader: "graphql-tag/loader",
     });
 
-    if (isServer) config.plugins.push(new webpack.IgnorePlugin(/\/.scss\//));
+    // if (isServer) config.plugins.push(new webpack.IgnorePlugin(/\/.scss\//));
+    // if (dev) config.plugins.push(c => (c.options.devtool = "eval-source-map"))
     // config.plugins.push(
     //   new webpack.ProgressPlugin((percentage, message, ...args) => {
     //     // e.g. Output each progress message directly to the console:

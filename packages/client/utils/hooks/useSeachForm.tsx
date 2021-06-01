@@ -28,13 +28,14 @@ export const useSearchForm = () => {
   const { form, inputValue, date, hourTime, people, dispatch } = useSearchContext();
   const { suggestions } = form;
 
-  const apolloClient = useApolloClient();
-  const { data, loading, error } = useSearchInputValuesQuery({
-    onCompleted: ({ searchInputValues }) => {
-      if (isDesktop)
-        dispatch({ type: SEARCH_ACTIONS.SET_STATE, payload: { form: { ...form, suggestions: searchInputValues } } });
-    },
-  });
+  // const apolloClient = useApolloClient();
+  // const { data, loading, error } = useSearchInputValuesQuery({
+  //   skip: true,
+  //   onCompleted: ({ searchInputValues }) => {
+  //     if (isDesktop)
+  //       dispatch({ type: SEARCH_ACTIONS.SET_STATE, payload: { form: { ...form, suggestions: searchInputValues } } });
+  //   },
+  // });
 
   const slicedSuggestions = useMemo(() => suggestions.slice(0, 7), [suggestions]);
   const queryId = useMemo(() => router.query.id as string, [router]);
@@ -96,8 +97,9 @@ export const useSearchForm = () => {
     return value;
   };
 
-  const handleChange = (newVal: string) =>
-    dispatch({ type: SEARCH_ACTIONS.HANDLE_CHANGE, payload: { newVal, data: data?.searchInputValues || [] } });
+  const handleChange = (newVal: string) => {
+    // dispatch({ type: SEARCH_ACTIONS.HANDLE_CHANGE, payload: { newVal, data: data?.searchInputValues || [] } });
+  }
 
   const handleSelect = (newInputVal: Omit<HANDLE_SELECT_PAYLOAD, "content">) => {
     const { primary } = formatInputValue(newInputVal);
@@ -111,44 +113,44 @@ export const useSearchForm = () => {
       date: date || checkSearchDate(dayjs()),
       timeId: hourTime?.toString() || undefined,
     };
-    const { data: res, errors: searchErrors } = await apolloClient.query<SearchQuery>({
-      query: SearchDocument,
-      variables: {
-        inputId: inputValue?.publicId,
-        inputValue: undefined,
-        availability,
-        filterIds: undefined,
-        searchId: queryId,
-        sortId: undefined,
-      },
-    });
-    if (searchErrors) searchErrors.forEach(({ message }) => notify("error", message));
-    else {
-      const { results, search: newSearch } = res.search;
-      await fetchSearchValueCoords(res.search.search.inputValue);
-      dispatch({
-        type: SEARCH_ACTIONS.SET_STATE,
-        payload: {
-          id: newSearch.id,
-          results: { arr: results, filtered: results },
-          people: newPeople,
-          date: availability.date,
-          hourTime: availability.timeId ? parseInt(availability.timeId) : undefined,
-          inputValue: newSearch.inputValue,
-          filterPublicIds: newSearch.filters.map(({ publicId }) => publicId),
-          sort: newSearch.sort,
-          form: { ...form, searchValue: formatSearchValue(newSearch.inputValue) },
-        },
-      });
-      if (redirect) {
-        const { box, ...rest } = router.query;
-        router.push({ query: rest, pathname: "/search" });
-      }
-    }
+    // const { data: res, errors: searchErrors } = await apolloClient.query<SearchQuery>({
+    //   query: SearchDocument,
+    //   variables: {
+    //     inputId: inputValue?.publicId,
+    //     inputValue: undefined,
+    //     availability,
+    //     filterIds: undefined,
+    //     searchId: queryId,
+    //     sortId: undefined,
+    //   },
+    // });
+    // if (searchErrors) searchErrors.forEach(({ message }) => notify("error", message));
+    // else {
+    //   const { results, search: newSearch } = res.search;
+    //   await fetchSearchValueCoords(res.search.search.inputValue);
+    //   dispatch({
+    //     type: SEARCH_ACTIONS.SET_STATE,
+    //     payload: {
+    //       id: newSearch.id,
+    //       results: { arr: results, filtered: results },
+    //       people: newPeople,
+    //       date: availability.date,
+    //       hourTime: availability.timeId ? parseInt(availability.timeId) : undefined,
+    //       inputValue: newSearch.inputValue,
+    //       filterPublicIds: newSearch.filters.map(({ publicId }) => publicId),
+    //       sort: newSearch.sort,
+    //       form: { ...form, searchValue: formatSearchValue(newSearch.inputValue) },
+    //     },
+    //   });
+    //   if (redirect) {
+    //     const { box, ...rest } = router.query;
+    //     router.push({ query: rest, pathname: "/search" });
+    //   }
+    // }
   };
 
   return {
-    searchInputValues: { data, loading, error, sliced: slicedSuggestions },
+    searchInputValues: { data: {}, loading: false, error: false, sliced: slicedSuggestions },
     queryId,
     isBox,
     redirect,

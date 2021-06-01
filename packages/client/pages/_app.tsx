@@ -1,6 +1,7 @@
 import "@hashtag-design-system/components/build/index.css";
 import "@/styles/globals.scss";
 import "mapbox-gl/dist/mapbox-gl.css";
+// import "antd/dist/antd.css";
 import { Context as AuthContext } from "@/components/Auth/Context";
 import { Context as SearchContext } from "@/components/Search/Context";
 import { INITIAL_APOLLO_STATE, useApollo } from "@/lib/apollo";

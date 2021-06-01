@@ -2,7 +2,7 @@ import { CreditCardProps } from "@hashtag-design-system/components";
 import Image, { ImageProps } from "next/image";
 import styles from "./CardBrand.module.scss";
 
-type FProps = Pick<CreditCardProps, "brand"> & Partial<Omit<ImageProps, "layout">>;
+type FProps = Pick<CreditCardProps, "brand"> & Partial<Omit<ImageProps, "layout" | "placeholder">>;
 
 export const CardBrand: React.FC<FProps> = ({ brand, width = 96, height = 72, ...props }) => {
   return brand ? (

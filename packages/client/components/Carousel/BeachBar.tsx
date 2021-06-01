@@ -48,7 +48,7 @@ export const BeachBar: React.FC<
           />
           {showFavourite && (
             <div className={styles.favourite + " zi--md"}>
-              <FavouriteHeartBox beachBarSlug={slug} />
+              <BeachBarComp.Favourite.HeartBox beachBarSlug={slug} />
             </div>
           )}
           <BeachBarComp.NameAndLocation
