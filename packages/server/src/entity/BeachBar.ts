@@ -5,6 +5,7 @@ import relations from "constants/relations";
 import { beachBarReviewRatingMaxValue } from "constants/_index";
 import dayjs, { Dayjs } from "dayjs";
 import { Redis } from "ioredis";
+import chunk from "lodash/chunk";
 import {
   AfterInsert,
   AfterUpdate,
@@ -24,12 +25,11 @@ import {
   Repository,
   UpdateDateColumn,
 } from "typeorm";
-import { BeachBarAvailabilityReturnType, GetBeachBarPaymentDetails } from "typings/beach_bar";
-import { TProductAvailability } from "typings/beach_bar/product";
-import { checkAvailability } from "utils/beach_bar/availability";
+import { GetBeachBarPaymentDetails } from "typings/beach_bar";
+import { BeachBarRecommendedProductsType } from "typings/beach_bar/product";
 import { getReservationLimits } from "utils/beach_bar/getReservationLimits";
 import { getReservedProducts } from "utils/beach_bar/getReservedProducts";
-import { toFixed2 } from "utils/payment";
+import { numberTypeToNum, toFixed2 } from "utils/format";
 import { softRemove } from "utils/softRemove";
 import { redis } from "../index";
 import { BeachBarCategory } from "./BeachBarCategory";
@@ -48,10 +48,11 @@ import { ProductReservationLimit } from "./ProductReservationLimit";
 import { ReservedProduct } from "./ReservedProduct";
 import { SearchInputValue } from "./SearchInputValue";
 import { StripeMinimumCurrency } from "./StripeMinimumCurrency";
-import { QuarterTime } from "./Time";
+import { HourTime } from "./Time";
 import { UserFavoriteBar } from "./UserFavoriteBar";
 
-type AvailabilityArgs = { date: string; timeId?: string; totalPeople?: number };
+export type AvailableProductsType = { product: Product; remainingAvailable: number }[];
+export type BeachBarCapacityType = { date: string; timeId: string; totalPeople: number };
 
 @Entity({ name: "beach_bar", schema: "public" })
 @Check(`"avgRating" >= 0 AND "avgRating" <= ${beachBarReviewRatingMaxValue}`)
@@ -125,13 +126,13 @@ export class BeachBar extends BaseEntity {
   @JoinColumn({ name: "default_currency_id" })
   defaultCurrency: Currency;
 
-  @ManyToOne(() => QuarterTime, quarterTime => quarterTime.beachBarsOpeningTime, { nullable: false })
+  @ManyToOne(() => HourTime, hourTIme => hourTIme.beachBarsOpeningTime, { nullable: false })
   @JoinColumn({ name: "opening_time_id" })
-  openingTime: QuarterTime;
+  openingTime: HourTime;
 
-  @ManyToOne(() => QuarterTime, quarterTime => quarterTime.beachBarsClosingTime, { nullable: false })
+  @ManyToOne(() => HourTime, hourTime => hourTime.beachBarsClosingTime, { nullable: false })
   @JoinColumn({ name: "closing_time_id" })
-  closingTime: QuarterTime;
+  closingTime: HourTime;
 
   @OneToMany(() => SearchInputValue, searchInputValue => searchInputValue.city, { nullable: true })
   searchInputValues: SearchInputValue[];
@@ -236,6 +237,10 @@ export class BeachBar extends BaseEntity {
     return redisKeys.BEACH_BAR_CACHE_KEY;
   }
 
+  getRedisAvailabilityKey({ date, timeId }: Omit<BeachBarCapacityType, "totalPeople">): string {
+    return `available_products:${date}:${timeId.padEnd(4, "0")}`;
+  }
+
   getReservationLimits(date?: string, timeId?: string): ProductReservationLimit[] {
     return getReservationLimits(this, date, timeId);
   }
@@ -243,6 +248,90 @@ export class BeachBar extends BaseEntity {
   getReservedProducts(date?: string, timeId?: string): ReservedProduct[] {
     return getReservedProducts(this, date, timeId);
   }
+
+  async hasCapacity(args: BeachBarCapacityType, recommendedArr?: BeachBarRecommendedProductsType) {
+    const recommendedProducts = recommendedArr ? recommendedArr : await this.calcRecommendedProducts(args);
+    return recommendedProducts.length > 0;
+  }
+
+  async getAvailableProducts({ date, timeId }: Omit<BeachBarCapacityType, "totalPeople">): Promise<AvailableProductsType> {
+    const [_, products] = await redis.hscan(
+      this.getRedisAvailabilityKey({ date, timeId }),
+      0,
+      "MATCH",
+      `beach_bar:${this.id}:product:*`
+    );
+    const groupedProducts: string[][] = chunk(products, 2);
+    const parsedRes = groupedProducts
+      .map(([key, val]) => {
+        const product = this.products.find(({ id }) => id.toString() === key.split(":")[3]);
+        if (!product) return [];
+        return { product, remainingAvailable: parseInt(val) };
+      })
+      .flat();
+    return parsedRes.filter(({ remainingAvailable }) => remainingAvailable > 0);
+  }
+
+  async calcRecommendedProducts({ date, timeId, totalPeople }: BeachBarCapacityType): Promise<BeachBarRecommendedProductsType> {
+    console.log("date", date)
+    console.log(timeId)
+    console.log(totalPeople);
+    const availableProducts = await this.getAvailableProducts({ date, timeId });
+    const filtered = availableProducts.filter(({ product: { maxPeople } }) => maxPeople >= totalPeople);
+    if (availableProducts.length === 0) return [];
+    if (filtered.length > 0) {
+      console.log("hey")
+      const { product } = filtered.sort(
+        ({ product: { price: aPrice } }, { product: { price: bPrice } }) => numberTypeToNum(aPrice) - numberTypeToNum(bPrice)
+      )[0];
+      return [{ product, quantity: 1 }];
+    }
+
+    let res: BeachBarRecommendedProductsType = [];
+    let remainingPeople = totalPeople;
+    // const mostWithRemainings = Math.max(...availableProducts.map(({ remainingAvailable }) => remainingAvailable));
+    if (totalPeople === 0) throw new Error("totalPeople cannot be zero (0)");
+    while (remainingPeople > 0) {
+      const availableWithQuantity = availableProducts
+        .sort((a, b) => a.product.maxPeople - b.product.maxPeople)
+        .map(({ product, remainingAvailable }) => {
+          const maxPeople = product.maxPeople;
+          const quantity = maxPeople >= remainingPeople ? 1 : Math.floor(remainingPeople / maxPeople);
+          // console.log(product.id, totalPeople, quantity, remainingAvailable);
+          return {
+            product,
+            quantity: remainingAvailable < quantity ? remainingAvailable : quantity, // check for availability after new quantity,
+          };
+        })
+        .filter(({ quantity }) => quantity >= 1);
+      // const wholeQuantityArr = availableWithQuantity.filter(({ quantity }) => quantity % 1 === 0);
+      const whoMinQuantity = availableWithQuantity.sort(
+        ({ product: { price: aPrice }, quantity: aQuantity }, { product: { price: bPrice }, quantity: bQuantity }) => {
+          if (aQuantity < bQuantity && numberTypeToNum(aPrice) > numberTypeToNum(bPrice) && res.length > 0) return 1;
+          return aQuantity - bQuantity;
+        }
+      )[0];
+      if (res.find(({ product: { id } }) => whoMinQuantity.product.id === id)) {
+        res = res.map(item => {
+          if (item.product.id === whoMinQuantity.product.id) return { ...item, quantity: item.quantity + whoMinQuantity.quantity };
+          else return item;
+        });
+      } else res.push(whoMinQuantity);
+      remainingPeople =
+        totalPeople - res.reduce((prev, { product: { maxPeople }, quantity }) => prev + Math.floor(quantity) * maxPeople, 0);
+    }
+    return res;
+  }
+
+  // getAvailableProducts({ date, timeId, totalPeople = 0 }: AvailabilityArgs): TProductAvailability[] {
+  //   return this.products
+  //     .map(product => {
+  //       const { quantity } = product.isAvailable(date, timeId, totalPeople);
+  //       if (quantity === 0) return [];
+  //       return { product, quantity: quantity };
+  //     })
+  //     .flat();
+  // }
 
   async getRedisIdx(redis: Redis): Promise<number> {
     const beachBars = await redis.lrange(this.getRedisKey(), 0, -1);
@@ -281,11 +370,11 @@ export class BeachBar extends BaseEntity {
         if (category) this.category = category;
       }
       if (openingTimeId && openingTimeId !== this.openingTimeId) {
-        const quarterTime = await QuarterTime.findOne(openingTimeId);
+        const quarterTime = await HourTime.findOne(openingTimeId);
         if (quarterTime) this.openingTime = quarterTime;
       }
       if (closingTimeId && closingTimeId !== this.closingTimeId) {
-        const quarterTime = await QuarterTime.findOne(closingTimeId);
+        const quarterTime = await HourTime.findOne(closingTimeId);
         if (quarterTime) this.closingTime = quarterTime;
       }
       await this.save();
@@ -374,12 +463,7 @@ export class BeachBar extends BaseEntity {
     const beachBarAppFee = toFixed2((total * parseFloat(this.fee.percentageValue.toString())) / 100);
     // const beachBarAppFee = toFixed2(percentageFee + parseFloat(currencyFee.numericValue.toString()));
     const transferAmount = toFixed2(total - beachBarAppFee - stripeFee);
-    return {
-      total,
-      transferAmount,
-      beachBarAppFee,
-      stripeFee,
-    };
+    return { total, transferAmount, beachBarAppFee, stripeFee };
   }
 
   async getMinimumCurrency(): Promise<StripeMinimumCurrency | undefined> {
@@ -387,19 +471,9 @@ export class BeachBar extends BaseEntity {
     return minimumCurrency;
   }
 
-  checkAvailability({ date, timeId, totalPeople }: AvailabilityArgs): BeachBarAvailabilityReturnType {
-    return checkAvailability(this, date, timeId, totalPeople);
-  }
-
-  getAvailableProducts({ date, timeId, totalPeople = 0 }: AvailabilityArgs): TProductAvailability[] {
-    return this.products
-      .map(product => {
-        const { quantity } = product.isAvailable(date, timeId, totalPeople);
-        if (quantity === 0) return [];
-        return { product, quantity: quantity };
-      })
-      .flat();
-  }
+  // checkAvailability({ date, timeId, totalPeople }: AvailabilityArgs): BeachBarAvailabilityReturnType {
+  //   return checkAvailability(this, date, timeId, totalPeople);
+  // }
 
   async customSoftRemove(redis: Redis): Promise<any> {
     // delete from search dropdown results

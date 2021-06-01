@@ -151,15 +151,16 @@ export const UpdateBeachBarType = objectType({
 //   },
 // });
 
-export const BeachBarAvailabilityType = objectType({
-  name: "BeachBarAvailability",
-  description: "Boolean values to show if the #beach_bar is available",
-  definition(t) {
-    t.nullable.boolean("hasAvailability", {
-      description: "A boolean that indicates if the #beach_bar has availability for the dates selected",
-    });
-    t.nullable.boolean("hasCapacity", {
-      description: "A boolean that indicates if the #beach_bar has availability for the people selected",
-    });
-  },
-});
+// export const BeachBarAvailabilityType = objectType({
+//   name: "BeachBarAvailability",
+//   description: "Boolean values to show if the #beach_bar is available",
+//   definition(t) {
+//     t.boolean("isOpen", {
+//       description:
+//         "A boolean that indicates if the #beach_bar is open and active, even if it does not have capacity for the selected date, time and people",
+//     });
+//     t.boolean("hasCapacity", {
+//       description: "A boolean that indicates if the #beach_bar has availability for the people selected",
+//     });
+//   },
+// });

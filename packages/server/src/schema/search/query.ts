@@ -14,7 +14,6 @@ import { uniqBy } from "lodash";
 import { arg, extendType, idArg, intArg, list, nullable, stringArg } from "nexus";
 import { In } from "typeorm";
 import { RedisSearchReturnType, SearchResultReturnType, TSearch } from "typings/search";
-import { checkAvailability } from "utils/beach_bar/availability";
 import { fetchBeachBarPayments } from "utils/beach_bar/payment";
 import { formatInputValue } from "utils/search";
 import { SearchInputType, SearchInputValueType, SearchType, UserSearchType } from "./types";
@@ -75,7 +74,7 @@ export const SearchQuery = extendType({
       type: UserSearchType,
       description: "Get a list with a user's latest searches",
       args: { limit: nullable(intArg({ description: "How many data to fetch?" })) },
-      resolve: async (_, {limit}, { payload, redis }: MyContext): Promise<UserSearch[]> => {
+      resolve: async (_, { limit }, { payload, redis }: MyContext): Promise<UserSearch[]> => {
         if (!payload || !payload.sub) return [];
 
         let searches: RedisSearchReturnType[] = (
@@ -116,7 +115,7 @@ export const SearchQuery = extendType({
           const searches: RedisSearchReturnType[] = (await redis.lrange(redisKeys.USER_SEARCH, 0, -1)).map((x: string) =>
             JSON.parse(x)
           );
-          const userSearch = searches.find(search => BigInt(search.search.id) === BigInt(searchId));
+          const userSearch = searches.find(search => search.search.id.toString() === searchId.toString());
           if (!userSearch) throw new ApolloError(`User search with ID ${searchId} was not found`, errors.NOT_FOUND);
           await UserHistory.create({
             activityId: COMMON_CONFIG.HISTORY_ACTIVITY.SEARCH_ID,
@@ -139,125 +138,129 @@ export const SearchQuery = extendType({
             ipAddr,
           }).save();
           return userSearch;
+        }
+
+        if (!inputId && !inputValue) throw new UserInputError("You should specify either an inputId or an inputValue");
+
+        if (inputId && inputId.trim().length !== 5) throw new UserInputError("Invalid inputId");
+        if (inputValue && inputValue.trim().length === 0) throw new UserInputError("Invalid inputValue");
+
+        if (availability) {
+          if (availability.date && dayjs(availability.date).add(1, "day") < dayjs())
+            throw new ApolloError("Please provide a date later or equal to today", errors.LATER_DATE_ERROR_CODE);
+          if (availability.adults !== undefined && availability.adults > 12)
+            throw new ApolloError("You cannot search for more than 12 adults", errors.MAX_ADULTS_ERROR_CODE);
+          if (availability.children !== undefined && availability.children > 8)
+            throw new ApolloError("You cannot search for more than 8 children", errors.MAX_CHILDREN_ERROR_CODE);
+        }
+
+        let searchInput: SearchInputValue | undefined;
+        const searchInputRelations = ["beachBar", "country", "city", "region"];
+        if (inputId)
+          searchInput = await SearchInputValue.findOne({ where: { publicId: inputId.trim() }, relations: searchInputRelations });
+        else if (inputValue) {
+          const allSearchInputs = await SearchInputValue.find({ relations: searchInputRelations });
+          searchInput = allSearchInputs.find(input => formatInputValue(input).toLowerCase().includes(inputValue.toLowerCase()));
+        }
+
+        if (!searchInput) throw new ApolloError("Invalid search input", errors.NOT_FOUND);
+
+        // const redisResults: BeachBar[] = (await getCustomRepository(BeachBarRepository).findInRedis()).filter(bar => bar.isActive);
+        const redisResults = await BeachBar.find({
+          where: { isActive: true, isAvailable: true },
+          relations: [
+            "features",
+            "features.service",
+            "features.service.icon",
+            "products",
+            "products.reservedProducts",
+            "products.reservationLimits",
+            "products.reservedProducts.product",
+            "products.reservationLimits.product",
+            "styles",
+            "styles.style",
+            "location",
+            "location.country",
+            "location.city",
+            "location.region",
+            "reviews",
+          ],
+        });
+        redisResults.forEach(
+          beachBar => (beachBar.features = beachBar.features.filter((feature: BeachBarFeature) => !feature.deletedAt))
+        );
+        redisResults.forEach(beachBar => (beachBar.products = beachBar.products.filter((product: Product) => !product.deletedAt)));
+        let beachBars: BeachBar[] = [];
+        if (searchInput.beachBarId) {
+          beachBars = redisResults.filter(beachBar => beachBar.id.toString() === searchInput!.beachBarId?.toString());
+          beachBars = beachBars.slice(0, beachBars.length);
         } else {
-          if (!inputId && !inputValue) throw new UserInputError("You should specify either an inputId or an inputValue");
+          if (searchInput.countryId)
+            beachBars = redisResults.filter(beachBar => beachBar.location.countryId === searchInput!.countryId);
+          if (searchInput.cityId) beachBars = redisResults.filter(beachBar => beachBar.location.cityId === searchInput!.cityId);
+          if (searchInput.regionId) beachBars = redisResults.filter(beachBar => beachBar.location.regionId === searchInput!.regionId);
+        }
 
-          if (inputId && inputId.trim().length !== 5) throw new UserInputError("Invalid inputId");
-          if (inputValue && inputValue.trim().length === 0) throw new UserInputError("Invalid inputValue");
+        let results: SearchResultReturnType[] = beachBars.map(beachBar => ({
+          beachBar,
+          isOpen: false,
+          hasCapacity: false,
+          recommendedProducts: [],
+        }));
+        if (availability && availability.date) {
+          const timeId = availability.timeId ? parseInt(availability.timeId) : undefined;
+          const adults = availability.adults || 0;
+          const children = availability.children || 0;
+          const totalPeople = adults + children !== 0 ? adults + children : undefined;
 
-          if (availability) {
-            if (availability.date && dayjs(availability.date).add(1, "day") < dayjs())
-              throw new ApolloError("Please provide a date later or equal to today", errors.LATER_DATE_ERROR_CODE);
-            if (availability.adults !== undefined && availability.adults > 12)
-              throw new ApolloError("You cannot search for more than 12 adults", errors.MAX_ADULTS_ERROR_CODE);
-            if (availability.children !== undefined && availability.children > 8)
-              throw new ApolloError("You cannot search for more than 8 children", errors.MAX_CHILDREN_ERROR_CODE);
-          }
-
-          let searchInput: SearchInputValue | undefined;
-          if (inputId)
-            searchInput = await SearchInputValue.findOne({
-              where: { publicId: inputId.trim() },
-              relations: ["beachBar", "country", "city", "region"],
-            });
-          else if (inputValue) {
-            const allSearchInputs = await SearchInputValue.find({ relations: ["country", "city", "region", "beachBar"] });
-            searchInput = allSearchInputs.find(input => formatInputValue(input).toLowerCase().includes(inputValue.toLowerCase()));
-          }
-
-          if (!searchInput) throw new ApolloError("Invalid search input", errors.NOT_FOUND);
-
-          // const redisResults: BeachBar[] = (await getCustomRepository(BeachBarRepository).findInRedis()).filter(bar => bar.isActive);
-          const redisResults = await BeachBar.find({
-            where: { isActive: true },
-            relations: [
-              "features",
-              "features.service",
-              "features.service.icon",
-              "products",
-              "products.reservedProducts",
-              "products.reservationLimits",
-              "products.reservedProducts.product",
-              "products.reservationLimits.product",
-              "styles",
-              "styles.style",
-              "location",
-              "location.country",
-              "location.city",
-              "location.region",
-              "reviews",
-            ],
-          });
-          redisResults.forEach(
-            beachBar => (beachBar.features = beachBar.features.filter((feature: BeachBarFeature) => !feature.deletedAt))
+          results = await Promise.all(
+            results.map(async ({ beachBar }) => {
+              const recommendedProducts = await beachBar.calcRecommendedProducts({ ...availability, totalPeople });
+              return {
+                beachBar,
+                isOpen: beachBar.isActive && (!timeId ? true : timeId <= beachBar.closingTimeId && timeId >= beachBar.openingTimeId),
+                hasCapacity: await beachBar.hasCapacity({ ...availability, totalPeople }, recommendedProducts),
+                recommendedProducts,
+              };
+            })
           );
-          redisResults.forEach(beachBar => (beachBar.products = beachBar.products.filter((product: Product) => !product.deletedAt)));
-          let beachBars: BeachBar[] = [];
-          if (searchInput.beachBarId) {
-            beachBars = redisResults.filter(beachBar => beachBar.id === searchInput!.beachBarId);
-            beachBars = beachBars.slice(0, beachBars.length);
-          } else {
-            if (searchInput.countryId)
-              beachBars = redisResults.filter(beachBar => beachBar.location.countryId === searchInput!.countryId);
-            if (searchInput.cityId) beachBars = redisResults.filter(beachBar => beachBar.location.cityId === searchInput!.cityId);
-            if (searchInput.regionId)
-              beachBars = redisResults.filter(beachBar => beachBar.location.regionId === searchInput!.regionId);
-          }
+        }
 
-          let results: SearchResultReturnType[] = beachBars.map(bar => ({
-            beachBar: bar,
-            availability: { hasAvailability: undefined, hasCapacity: undefined },
-          }));
-          if (availability && availability.date) {
-            const { date } = availability;
-            const timeId = availability.timeId ? availability.timeId : undefined;
-            const adults = availability.adults || 0;
-            const children = availability.children || 0;
-            results = [];
-            const totalPeople = adults + children !== 0 ? adults + children : undefined;
+        let filters: SearchFilter[] = [];
+        if (filterIds && filterIds.length > 0) filters = await SearchFilter.find({ where: { publicId: In(filterIds) } });
 
-            for (let i = 0; i < beachBars.length; i++) {
-              const { hasAvailability, hasCapacity } = checkAvailability(beachBars[i], date, timeId, totalPeople);
-              results.push({ beachBar: beachBars[i], availability: { hasAvailability, hasCapacity } });
-            }
-          }
+        const userSearch = UserSearch.create({
+          searchDate: availability && availability.date ? dayjs(availability.date).format(dayjsFormat.ISO_STRING) : undefined,
+          searchAdults: availability && availability.adults,
+          searchChildren: availability && availability.children,
+          userId: payload ? payload.sub : undefined,
+          inputValue: searchInput,
+          inputValueId: searchInput.id,
+          filters,
+          sortId,
+        });
 
-          let filters: SearchFilter[] = [];
-          if (filterIds && filterIds.length > 0) filters = await SearchFilter.find({ where: { publicId: In(filterIds) } });
+        try {
+          await userSearch.save();
 
-          const userSearch = UserSearch.create({
-            searchDate: availability && availability.date ? dayjs(availability.date).format(dayjsFormat.ISO_STRING) : undefined,
-            searchAdults: availability && availability.adults,
-            searchChildren: availability && availability.children,
+          const res = { results, search: userSearch };
+
+          // cache in Redis
+          // * store in general user searches, even if the user is not authenticated
+          if (payload && payload.sub)
+            await redis.lpush(redisKeys.USER + ":" + payload.sub + ":" + redisKeys.USER_SEARCH, JSON.stringify(res));
+          await redis.lpush(redisKeys.USER_SEARCH, JSON.stringify(res));
+
+          await UserHistory.create({
+            activityId: COMMON_CONFIG.HISTORY_ACTIVITY.SEARCH_ID,
+            objectId: userSearch.id,
             userId: payload ? payload.sub : undefined,
-            inputValue: searchInput,
-            inputValueId: searchInput.id,
-            filters,
-            sortId,
-          });
+            ipAddr,
+          }).save();
 
-          try {
-            await userSearch.save();
-
-            const res = { results, search: userSearch };
-
-            // cache in Redis
-            // * store in general user searches, even if the user is not authenticated
-            if (payload && payload.sub)
-              await redis.lpush(redisKeys.USER + ":" + payload.sub + ":" + redisKeys.USER_SEARCH, JSON.stringify(res));
-            await redis.lpush(redisKeys.USER_SEARCH, JSON.stringify(res));
-
-            await UserHistory.create({
-              activityId: COMMON_CONFIG.HISTORY_ACTIVITY.SEARCH_ID,
-              objectId: userSearch.id,
-              userId: payload ? payload.sub : undefined,
-              ipAddr,
-            }).save();
-
-            return res;
-          } catch (err) {
-            throw new ApolloError(err.message, errors.INTERNAL_SERVER_ERROR);
-          }
+          return res;
+        } catch (err) {
+          throw new ApolloError(err.message, errors.INTERNAL_SERVER_ERROR);
         }
       },
     });

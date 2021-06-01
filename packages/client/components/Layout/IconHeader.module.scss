@@ -1,5 +1,5 @@
 .container {
-  & > div:first-child > div {
+  & > div:first-child > * {
     margin-right: map-get($em-spacers, 16);
   }
 

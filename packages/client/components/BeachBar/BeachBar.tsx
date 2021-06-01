@@ -1,25 +1,47 @@
+import Icons from "@/components/Icons";
+import Next from "@/components/Next";
+import { DATA } from "@/config/data";
 import { BeachBarQuery } from "@/graphql/generated";
-import { useSearchContext } from "@/utils/contexts";
+import { useConfig, useIsDesktop } from "@/utils/hooks";
+import { formatNumber } from "@/utils/search";
 import { COMMON_CONFIG } from "@beach_bar/common";
-import { Button } from "@hashtag-design-system/components";
+import { Button, useWindowDimensions } from "@hashtag-design-system/components";
 import uniq from "lodash/uniq";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import styles from "./BeachBar.module.scss";
 import { Favourite } from "./Favourite";
 import { Feature } from "./Feature";
-import { Header } from "./Header";
 import { BeachBarHeading } from "./Heading";
 import { Img } from "./Img";
-import { NameAndLocation } from "./NameAndLocation";
 import { Product } from "./Product/Product";
 import { Review } from "./Review";
-import { Search } from "./Search";
-import { SearchInfo } from "./SearchInfo";
 import { Section } from "./Section";
 
 const SHRINKED_DESCRIPTION_LENGTH = 720;
+
+const Header = dynamic(() => {
+  const prom = import("./Header").then(mod => mod.Header);
+  return prom;
+});
+const NameAndLocation = dynamic(() => {
+  const prom = import("./NameAndLocation").then(mod => mod.NameAndLocation);
+  return prom;
+});
+const Search = dynamic(() => {
+  const prom = import("./Search").then(mod => mod.Search);
+  return prom;
+});
+const SearchInfo = dynamic(() => {
+  const prom = import("./SearchInfo").then(mod => mod.SearchInfo);
+  return prom;
+});
+const Photos = dynamic(() => {
+  const prom = import("./Photos").then(mod => mod.Photos);
+  return prom;
+});
 
 type SubComponents = {
   Header: typeof Header;
@@ -32,10 +54,12 @@ type SubComponents = {
   Feature: typeof Feature;
   Section: typeof Section;
   SearchInfo: typeof SearchInfo;
+  Photos: typeof Photos;
 };
 
 export type Props = {
   reviewScore?: typeof COMMON_CONFIG.DATA.searchFilters.REVIEW_SCORES.EXCELLENT;
+  isPhotos?: boolean;
 };
 
 const BeachBar: React.FC<Props & NonNullable<BeachBarQuery["beachBar"]>> & SubComponents = ({
@@ -53,10 +77,16 @@ const BeachBar: React.FC<Props & NonNullable<BeachBarQuery["beachBar"]>> & SubCo
   contactPhoneNumber,
   hidePhoneNumber,
   reviewScore,
+  isPhotos = false,
+  children,
 }) => {
   const [showExpandedDescription, setShowExpandedDescription] = useState(false);
-
-  const { dispatch } = useSearchContext();
+  const isDesktop = useIsDesktop();
+  const { width } = useWindowDimensions();
+  const {
+    variables: { breakpoints },
+  } = useConfig();
+  const MAX_IMGS = width >= breakpoints.sm ? DATA.MAX_BEACH_IMGS : 3;
 
   const descriptionInfo = useMemo(() => {
     let res = { sliced: description?.slice(0, SHRINKED_DESCRIPTION_LENGTH), showMore: true, showLess: false };
@@ -70,17 +100,13 @@ const BeachBar: React.FC<Props & NonNullable<BeachBarQuery["beachBar"]>> & SubCo
       features.map(({ __typename, ...rest }) => rest).sort((a, b) => parseInt(a.service.id) - parseInt(b.service.id)),
     [features]
   );
-  const imgsArr = useMemo(
-    () => imgUrls.slice(0, 3),
-    [imgUrls]
-    // .concat(imgUrls.slice(0, 3).sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())),
-  );
+  const imgsArr = useMemo(() => imgUrls.slice(0, MAX_IMGS), [imgUrls, MAX_IMGS]);
   const reviewsInfo = useMemo(() => {
     const imgUrls = uniq(
       reviews
         .map(({ customer: { user } }) => user?.account.imgUrl || [])
         .flat()
-        .slice(0, 3)
+        .slice(0, MAX_IMGS)
     );
     let length = reviews.length;
     if (length >= 10) {
@@ -97,18 +123,36 @@ const BeachBar: React.FC<Props & NonNullable<BeachBarQuery["beachBar"]>> & SubCo
       <div className={styles.images + " flex-row-flex-start-stretch"}>
         <Img src={thumbnailUrl} layout="fill" quality={100} />
         {imgUrls.length > 0 && (
-          <div className={styles.restImgs + " w100 flex-row-flex-start-stretch"}>
-            {imgsArr.map(({ id, imgUrl, description }, i) => (
-              <Img key={id} src={imgUrl} alt={description && description + " - " + name} layout="fill">
-                {i === imgsArr.length - 1 && imgUrls.length > 3 && (
-                  <Link href={{ pathname: "/beach/[slug]/photos", query: { slug } }}>
-                    <div className={styles.moreImgs + " h100 bold header-5 w100 flex-row-center-center"}>
-                      +{imgUrls.length - 3}
-                    </div>
-                  </Link>
-                )}
-              </Img>
-            ))}
+          <div className={styles.restImgs + " w100 flex-column-flex-start-stretch"}>
+            {imgsArr.map(({ id, imgUrl, description }, i) => {
+              const last = i === imgsArr.length - 1;
+
+              return (
+                <Img
+                  key={id}
+                  src={imgUrl}
+                  alt={description ? description + " - " + name : name.trimEnd() + "'s image"}
+                  layout="fill"
+                  last={last}
+                  description={description}
+                >
+                  {last && imgUrls.length > MAX_IMGS && (
+                    <Link
+                      href={{ pathname: "/beach/[...slug]", query: { slug: [slug, "photos"] } }}
+                      replace
+                      shallow
+                      passHref
+                    >
+                      <a>
+                        <div className={styles.moreImgs + " bold header-5 w100 h100 flex-row-center-center"}>
+                          +{imgUrls.length - MAX_IMGS}
+                        </div>
+                      </a>
+                    </Link>
+                  )}
+                </Img>
+              );
+            })}
           </div>
         )}
       </div>
@@ -129,7 +173,7 @@ const BeachBar: React.FC<Props & NonNullable<BeachBarQuery["beachBar"]>> & SubCo
                     alt="Review's image"
                     className={
                       styles.reviewUserImg +
-                      (i === 0 ? " zi--md" : i === reviewsInfo.imgUrls.length - 1 ? " zi--none " : "") +
+                      (i === 0 ? " zi--sm" : i === reviewsInfo.imgUrls.length - 1 ? " zi--none " : "") +
                       " flex-row-center-center border-radius--lg"
                     }
                     width={32}
@@ -140,18 +184,18 @@ const BeachBar: React.FC<Props & NonNullable<BeachBarQuery["beachBar"]>> & SubCo
               </div>
             </div>
             <div className="flex-row-flex-start-center">
-              {/* <Next.Link href={{ pathname: "/beach/[slug]/reviews", query: { slug } }}>
+              <Next.Link href={{ pathname: "/beach/[...slug]", query: { slug: [slug, "reviews"] } }} replace shallow>
                 <a className="body-14">
                   View {reviews.length > reviewsInfo.length ? "+" : ""}
                   {formatNumber(reviewsInfo.length)} review{reviewsInfo.length > 1 ? "s" : ""}
                 </a>
               </Next.Link>
-              <Icons.Chevron.Right width={14} height={14} /> */}
+              <Icons.Chevron.Right width={14} height={14} />
             </div>
           </div>
           // </Link>
         )}
-        <div className={styles.description}>
+        <div className={styles.description + " text--grey"}>
           {descriptionInfo.sliced}
           {descriptionInfo.showMore ? (
             <>
@@ -169,41 +213,46 @@ const BeachBar: React.FC<Props & NonNullable<BeachBarQuery["beachBar"]>> & SubCo
           )}
         </div>
       </div>
-      <div className={styles.productsPreview}>
-        <SearchInfo />
+      <div className={styles.productsPreview + " flex-row-flex-start-flex-start"}>
+        {!isPhotos && <SearchInfo />}
         <div className={styles.list}>
-          {products.concat(products).map(({ id, ...props }) => (
+          {products.map(({ id, ...props }) => (
             <Product
               key={id}
               defaultCurrencySymbol={defaultCurrency.symbol}
               id={id}
-              showComponents={false}
+              showComponents={isDesktop}
+              addToCart={isDesktop}
+              extraDetails={isDesktop}
               {...props}
             />
           ))}
         </div>
-        <div className={styles.ctaContainer + " w100  h100 flex-row-center-flex-end"}>
-          <Link href={{ pathname: "/beach/[slug]/products", query: { slug } }}>
-            <Button>View products</Button>
-          </Link>
-        </div>
+      </div>
+      <div className={styles.ctaContainer + " w100 h100 flex-row-center-flex-end"}>
+        <Link href={{ pathname: "/beach/[...slug]", query: { slug: [slug, "products"] } }} shallow passHref>
+          <a className="w--inherit">
+            <Button className="w--inherit">View products</Button>
+          </a>
+        </Link>
       </div>
       <Section header="Facilities">
-        {/* <BeachBar.Feature.Container style={{ flexDirection: "column", alignItems: "flex-start" }}>
-            {sortedFeatures.map(({ quantity, service: { id, name, icon } }) => (
-              <Feature key={id} feature={name} quantity={quantity} iconId={icon.publicId} />
-            ))}
-          </BeachBar.Feature.Container> */}
+        <BeachBar.Feature.Container style={{ flexDirection: "column", alignItems: "flex-start" }}>
+          {sortedFeatures.map(({ quantity, service: { id, name, icon } }) => (
+            <Feature key={id} feature={name} quantity={quantity} iconId={icon.publicId} />
+          ))}
+        </BeachBar.Feature.Container>
       </Section>
       <Section header="Contact">
         <div>
-          {/* <Section.Contact info="Street address" val={location.address} />
-            {location.zipCode && <Section.Contact info="Zip code" val={location.zipCode} />}
-            {!hidePhoneNumber && (
-              <Section.Contact info="Phone number" val={`+${location.country.callingCode} ${contactPhoneNumber}`} />
-            )} */}
+          <Section.Contact info="Street address" val={location.address} />
+          {location.zipCode && <Section.Contact info="Zip code" val={location.zipCode} />}
+          {!hidePhoneNumber && (
+            <Section.Contact info="Phone number" val={`(+${location.country.callingCode}) ${contactPhoneNumber}`} />
+          )}
         </div>
       </Section>
+      {children}
     </div>
   );
 };
@@ -218,6 +267,7 @@ BeachBar.Product = Product;
 BeachBar.Feature = Feature;
 BeachBar.Section = Section;
 BeachBar.SearchInfo = SearchInfo;
+BeachBar.Photos = Photos;
 
 BeachBar.displayName = "BeachBar";
 

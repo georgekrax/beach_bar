@@ -1,10 +1,6 @@
 import { Form, FormGroupFProps } from "@hashtag-design-system/components";
 import { AnimationControls, HTMLMotionProps, motion, Variants } from "framer-motion";
 
-type SubComponents = {
-  FormGroup: typeof FormGroup;
-};
-
 export type Props = {
   controls: AnimationControls | false;
   variants: Variants | false;
@@ -14,7 +10,7 @@ export type Props = {
   children: React.ReactNode;
 } & Pick<HTMLMotionProps<"div">, "initial" | "custom">;
 
-export const Container: React.FC<Props> & SubComponents = ({
+export const Container: React.FC<Props> = ({
   initial,
   variants,
   controls,
@@ -34,10 +30,10 @@ export const Container: React.FC<Props> & SubComponents = ({
       transition={{ duration: 0.8 }}
     >
       <div className="w100 flex-column-center-center" style={{ maxWidth: "17.5em" }}>
-        {description && <span className="auth-form__description">{description}</span>}
+        {description && <span className="auth-form__description text--center">{description}</span>}
         {children}
         {other && (
-          <div className="auth-form__other">
+          <div className="auth-form__other text--center">
             <span>{other.text}</span>{" "}
             <span className="link" onClick={async () => handleClick && handleClick()}>
               {other.link}
@@ -62,6 +58,4 @@ export const FormGroup: React.FC<FormGroupFProps> = ({ children, ...props }) => 
   </Form.Group>
 );
 
-Container.FormGroup = FormGroup;
-
-FormGroup.displayName = "AuthContainerFormGroup";
+FormGroup.displayName = "AuthFormGroup";

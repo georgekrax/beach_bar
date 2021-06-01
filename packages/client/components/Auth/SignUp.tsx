@@ -6,7 +6,9 @@ import { Input } from "@hashtag-design-system/components";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useState } from "react";
 import { useController, useForm } from "react-hook-form";
-import Auth, { AuthCTAProps } from "./index";
+import { AuthCTAProps } from "./index";
+import { FormGroup } from "./Container";
+import { CTA } from "./CTA";
 
 type Props = {
   forgotPassword?: boolean;
@@ -48,7 +50,7 @@ export const SignUp: React.FC<FProps> = ({ forgotPassword = false, btn = "Sign u
   };
 
   return (
-    <Auth.Container.FormGroup onSubmit={handleSubmit(onSubmit)}>
+    <FormGroup onSubmit={handleSubmit(onSubmit)}>
       <Input
         {...email}
         placeholder="Email"
@@ -70,8 +72,8 @@ export const SignUp: React.FC<FProps> = ({ forgotPassword = false, btn = "Sign u
         onChange={() => trigger("confirmPassword")}
         onBlur={() => trigger("confirmPassword")}
       />
-      <Auth.CTA btn={btn} errors={graphqlErrors} />
-    </Auth.Container.FormGroup>
+      <CTA btn={btn} errors={graphqlErrors} />
+    </FormGroup>
   );
 };
 

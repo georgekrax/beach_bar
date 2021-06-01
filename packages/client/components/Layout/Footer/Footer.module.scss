@@ -1,12 +1,18 @@
 .container {
   height: fit-content;
-  background-color: rgba($grey-2, 0.75);
-  margin-top: map-get($em-spacers, 80);
+  background-color: $grey-2;
+  margin-top: map-get($em-spacers, 64);
   cursor: pointer;
+  overflow: hidden;
+  @include transition-2s("ease-in", "background-color");
 
   // & > div:first-child {
   // flex-wrap: wrap;
   // }
+}
+
+.logo {
+  padding: calc(#{$wrapper-padding} * 0.75) 0;
 }
 
 .box {
@@ -70,6 +76,11 @@
   user-select: none;
   @include transition-2s("ease-out", "background-color");
 
+  &:last-child {
+    margin-right: 0;
+    background-color: rgba($grey-4, 0.85);
+  }
+
   &:hover {
     background-color: $grey-5;
   }
@@ -77,13 +88,9 @@
   &:active {
     background-color: $grey-6;
   }
-
-  &:nth-child(2) {
-    background-color: rgba($grey-4, 0.85);
-  }
 }
 
-@include breakpoint("md") {
+@include responsive() {
   .container {
     cursor: default;
 
@@ -99,5 +106,11 @@
   .details {
     flex-wrap: nowrap;
     margin-top: 0;
+  }
+}
+
+@include responsive("max-width") {
+  .container:active {
+    background-color: $grey-3;
   }
 }

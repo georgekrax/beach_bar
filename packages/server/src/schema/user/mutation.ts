@@ -273,10 +273,17 @@ export const UserSignUpAndLoginMutation = extendType({
         sendCookieToken(res, accessToken.token, "access");
 
         try {
-          await redis.hset(user.getRedisKey() as KeyType, "access_token", accessToken.token);
-          await redis.hset(user.getRedisKey() as KeyType, "refresh_token", refreshToken.token);
-          await redis.hset(user.getRedisKey() as KeyType, "hashtag_access_token", hashtagAccessToken.token);
-          await redis.hset(user.getRedisKey() as KeyType, "hashtag_refresh_token", hashtagRefreshToken.token);
+          await redis.hset(
+            user.getRedisKey() as KeyType,
+            "access_token",
+            accessToken.token,
+            "refresh_token",
+            refreshToken.token,
+            "hashtag_access_token",
+            hashtagAccessToken.token,
+            "hashtag_refresh_token",
+            hashtagRefreshToken.token
+          );
 
           user.account.isActive = true;
           await user.save();
@@ -285,10 +292,7 @@ export const UserSignUpAndLoginMutation = extendType({
           throw new ApolloError(err, errors.SOMETHING_WENT_WRONG);
         }
 
-        return {
-          user,
-          accessToken: accessToken.token,
-        };
+        return { user, accessToken: accessToken.token };
       },
     });
   },
@@ -474,13 +478,8 @@ export const UserCrudMutation = extendType({
           throw new AuthenticationError("You are not allowed, do not have permission, to update this user's information");
         if (email && email.trim().length === 0) throw new UserInputError("Please provide a valid email address");
 
-        const user = await User.findOne({
-          where: { id: payload.sub },
-          relations: ["account", "account.country"],
-        });
-        if (!user) {
-          throw new ApolloError(errors.USER_NOT_FOUND_MESSAGE);
-        }
+        const user = await User.findOne({ where: { id: payload.sub }, relations: ["account", "account.country"] });
+        if (!user) throw new ApolloError(errors.USER_NOT_FOUND_MESSAGE);
 
         let isNew = false;
 
@@ -560,10 +559,7 @@ export const UserCrudMutation = extendType({
           }
         }
 
-        return {
-          user,
-          updated: true,
-        };
+        return { user, updated: true };
       },
     });
     // t.field("deleteUser", {

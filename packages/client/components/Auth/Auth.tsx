@@ -1,12 +1,37 @@
 import { useAnimation, Variants } from "framer-motion";
 import { useMemo } from "react";
-import { Container } from "./Container";
-import { CTA } from "./CTA";
-import { AuthContainerProps, ForgotPassword } from "./index";
-import { Login } from "./Login";
-import { SignUp } from "./SignUp";
-import { Context } from "./Context";
-import { LoginBtn } from "./LoginBtn";
+import { AuthContainerProps } from "./index";
+import dynamic from "next/dynamic";
+import { ForgotPassword } from "./ForgotPassword";
+
+const Login = dynamic(() => {
+  const prom = import("./Login").then(mod => mod.Login);
+  return prom;
+});
+const SignUp = dynamic(() => {
+  const prom = import("./SignUp").then(mod => mod.SignUp);
+  return prom;
+});
+const CTA = dynamic(() => {
+  const prom = import("./CTA").then(mod => mod.CTA);
+  return prom;
+});
+const Container = dynamic(() => {
+  const prom = import("./Container").then(mod => mod.Container);
+  return prom;
+});
+const FormGroup = dynamic(() => {
+  const prom = import("./Container").then(mod => mod.FormGroup);
+  return prom;
+});
+const Context = dynamic(() => {
+  const prom = import("./Context").then(mod => mod.Context);
+  return prom;
+});
+const LoginBtn = dynamic(() => {
+  const prom = import("./LoginBtn").then(mod => mod.LoginBtn);
+  return prom;
+});
 
 const loginVariants: Variants = {
   hidden: { x: "-300%" },
@@ -25,6 +50,7 @@ type SubComponents = {
   Container: typeof Container;
   Context: typeof Context;
   LoginBtn: typeof LoginBtn;
+  FormGroup: typeof FormGroup;
 };
 
 const Auth: React.FC & SubComponents = () => {
@@ -90,6 +116,7 @@ Auth.CTA = CTA;
 Auth.Container = Container;
 Auth.Context = Context;
 Auth.LoginBtn = LoginBtn;
+Auth.FormGroup = FormGroup;
 
 Auth.displayName = "Auth";
 

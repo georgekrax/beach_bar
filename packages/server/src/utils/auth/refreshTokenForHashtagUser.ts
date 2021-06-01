@@ -21,14 +21,10 @@ export const refreshTokenForHashtagUser = async (user: User, redis: Redis): Prom
 
   await fetch(`${process.env.HASHTAG_API_HOSTNAME}/oauth/refresh_token`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(requestBody),
   })
-    .then(res => {
-      return res.json();
-    })
+    .then(res => res.json())
     .then(async data => {
       if (data.success && data.accessToken.token && !data.refreshToken) {
         success = true;
@@ -38,14 +34,10 @@ export const refreshTokenForHashtagUser = async (user: User, redis: Redis): Prom
         const newRequestBody = { ...requestBody, refresh_token: data.refreshToken };
         fetch(`${process.env.HASHTAG_API_HOSTNAME}/oauth/refresh_token`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(newRequestBody),
         })
-          .then(res => {
-            return res.json();
-          })
+          .then(res => res.json())
           .then(async data => {
             if (data && data.accessToken && !data.refreshToken) {
               success = true;
@@ -55,17 +47,13 @@ export const refreshTokenForHashtagUser = async (user: User, redis: Redis): Prom
           .catch(err => {
             throw new Error(`${errors.SOMETHING_WENT_WRONG}: ${err.message}`);
           });
-      } else {
-        success = false;
-      }
+      } else success = false;
     })
     .catch(err => {
       success = false;
       if (
         err.message ===
-        `request to ${
-          process.env.HASHTAG_API_HOSTNAME
-        }/oauth/refresh_token failed, reason: connect ECONNREFUSED ${process.env
+        `request to ${process.env.HASHTAG_API_HOSTNAME}/oauth/refresh_token failed, reason: connect ECONNREFUSED ${process.env
           .HASHTAG_API_HOSTNAME!.replace("https://", "")
           .replace("http://", "")}`
       )

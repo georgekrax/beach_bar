@@ -1499,7 +1499,7 @@ export type MutationAddCartProductArgs = {
   productId: Scalars['ID'];
   quantity?: Maybe<Scalars['Int']>;
   date: Scalars['Date'];
-  timeId: Maybe<Scalars['ID']>;
+  timeId: Scalars['ID'];
 };
 
 
@@ -1873,8 +1873,6 @@ export type Query = {
   readonly beachBarImgs: Maybe<ReadonlyArray<BeachBarImgUrl>>;
   /** Check a #beach_bar's availability */
   readonly checkBeachBarAvailability: BeachBarAvailability;
-  /** Get a list with a #beach_bar's available products */
-  readonly availableProducts: ReadonlyArray<ProductAvailability>;
   /** A list with all the available #beach_bars */
   readonly getAllBeachBars: ReadonlyArray<BeachBar>;
   /** A list with all the #beach_bars, related to a user or are top selections */
@@ -1903,6 +1901,8 @@ export type Query = {
   readonly getFacebookOAuthUrl: Scalars['URL'];
   /** Returns the URL where the user will be redirected to login with Instagram */
   readonly getInstagramOAuthUrl: Scalars['URL'];
+  readonly hey: Scalars['Boolean'];
+  readonly isProductAvailable: Scalars['Boolean'];
   /** Get a list of payments for a specific / latest month of an authenticated user */
   readonly payments: ReadonlyArray<PaymentVisits>;
   /** Get the details of a specific payment / trip */
@@ -1996,13 +1996,6 @@ export type QueryBeachBarImgsArgs = {
 
 /** Query */
 export type QueryCheckBeachBarAvailabilityArgs = {
-  beachBarId: Scalars['ID'];
-  availability: SearchInput;
-};
-
-
-/** Query */
-export type QueryAvailableProductsArgs = {
   beachBarId: Scalars['ID'];
   availability: SearchInput;
 };
@@ -2572,7 +2565,7 @@ export type AddCartProductMutationVariables = Exact<{
   productId: Scalars['ID'];
   quantity: Maybe<Scalars['Int']>;
   date: Scalars['Date'];
-  timeId: Maybe<Scalars['ID']>;
+  timeId: Scalars['ID'];
 }>;
 
 
@@ -3049,24 +3042,6 @@ export type AuthorizeWithInstagramMutation = (
       & Pick<User, 'id' | 'email'>
     ) }
   ) }
-);
-
-export type AvailableProductsQueryVariables = Exact<{
-  beachBarId: Scalars['ID'];
-  availability: SearchInput;
-}>;
-
-
-export type AvailableProductsQuery = (
-  { readonly __typename?: 'Query' }
-  & { readonly availableProducts: ReadonlyArray<(
-    { readonly __typename?: 'ProductAvailability' }
-    & Pick<ProductAvailability, 'quantity'>
-    & { readonly product: (
-      { readonly __typename?: 'Product' }
-      & BeachBarProductFragment
-    ) }
-  )> }
 );
 
 export type BeachBarQueryVariables = Exact<{
@@ -3889,7 +3864,7 @@ export const SearchInputValueFragmentDoc = gql`
 }
     `;
 export const AddCartProductDocument = gql`
-    mutation AddCartProduct($cartId: ID!, $productId: ID!, $quantity: Int, $date: Date!, $timeId: ID) {
+    mutation AddCartProduct($cartId: ID!, $productId: ID!, $quantity: Int, $date: Date!, $timeId: ID!) {
   addCartProduct(
     cartId: $cartId
     productId: $productId
@@ -4968,45 +4943,6 @@ export function useAuthorizeWithInstagramMutation(baseOptions?: Apollo.MutationH
 export type AuthorizeWithInstagramMutationHookResult = ReturnType<typeof useAuthorizeWithInstagramMutation>;
 export type AuthorizeWithInstagramMutationResult = Apollo.MutationResult<AuthorizeWithInstagramMutation>;
 export type AuthorizeWithInstagramMutationOptions = Apollo.BaseMutationOptions<AuthorizeWithInstagramMutation, AuthorizeWithInstagramMutationVariables>;
-export const AvailableProductsDocument = gql`
-    query AvailableProducts($beachBarId: ID!, $availability: SearchInput!) {
-  availableProducts(beachBarId: $beachBarId, availability: $availability) {
-    product {
-      ...BeachBarProduct
-    }
-    quantity
-  }
-}
-    ${BeachBarProductFragmentDoc}`;
-
-/**
- * __useAvailableProductsQuery__
- *
- * To run a query within a React component, call `useAvailableProductsQuery` and pass it any options that fit your needs.
- * When your component renders, `useAvailableProductsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useAvailableProductsQuery({
- *   variables: {
- *      beachBarId: // value for 'beachBarId'
- *      availability: // value for 'availability'
- *   },
- * });
- */
-export function useAvailableProductsQuery(baseOptions: Apollo.QueryHookOptions<AvailableProductsQuery, AvailableProductsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AvailableProductsQuery, AvailableProductsQueryVariables>(AvailableProductsDocument, options);
-      }
-export function useAvailableProductsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AvailableProductsQuery, AvailableProductsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AvailableProductsQuery, AvailableProductsQueryVariables>(AvailableProductsDocument, options);
-        }
-export type AvailableProductsQueryHookResult = ReturnType<typeof useAvailableProductsQuery>;
-export type AvailableProductsLazyQueryHookResult = ReturnType<typeof useAvailableProductsLazyQuery>;
-export type AvailableProductsQueryResult = Apollo.QueryResult<AvailableProductsQuery, AvailableProductsQueryVariables>;
 export const BeachBarDocument = gql`
     query BeachBar($slug: String!, $userVisit: Boolean) {
   beachBar(slug: $slug, userVisit: $userVisit) {

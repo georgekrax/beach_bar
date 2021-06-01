@@ -35,13 +35,16 @@ const IndexPage: InferGetServerSidePropsType<typeof getServerSideProps> = ({ ref
   const mainRef = useRef<HTMLDivElement>(null);
   const isDesktop = useIsDesktop();
   const { lat, lon } = useReactiveVar(userIpAddr);
-
   const { width } = useWindowDimensions();
   const { inputValue, results, dispatch } = useSearchContext();
 
   const { data: authData } = useAuth();
   const { data, error, loading } = useGetPersonalizedBeachBarsQuery();
-  const { data: recentData, loading: recentLoading, error: recentError } = useUserSearchesQuery({
+  const {
+    data: recentData,
+    loading: recentLoading,
+    error: recentError,
+  } = useUserSearchesQuery({
     variables: { limit: 8 },
   });
   const { data: nearData, error: nearError } = useNearBeachBarsQuery({
@@ -82,11 +85,7 @@ const IndexPage: InferGetServerSidePropsType<typeof getServerSideProps> = ({ ref
             ) : (
               <>
                 <div className="home__near-you">
-                  <button
-                    onClick={() => {
-                      dispatch({ type: SEARCH_ACTIONS.TOGGLE_MAP_DIALOG, payload: { bool: true } });
-                    }}
-                  >
+                  <button onClick={() => dispatch({ type: SEARCH_ACTIONS.TOGGLE_MAP_DIALOG, payload: { bool: true } })}>
                     Show Map
                   </button>
                   <h4>Near You</h4>

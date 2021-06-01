@@ -29,7 +29,7 @@ export const Search: React.FC<SearchQuery["search"]["results"][number]> = ({
   }, []);
 
   return (
-    <Link href={{ pathname: `/beach/${slug}` }}>
+    <Link href={{ pathname: "/beach/[...slug]", query: { slug: [slug] } }}>
       <div className={styles.container + " w100 flex-column-flex-start-stretch"}>
         <div className={styles.imgContainer + " w100"}>
           <Image

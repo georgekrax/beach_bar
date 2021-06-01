@@ -1,7 +1,8 @@
 import { DateScalar, DateTimeScalar } from "@the_hashtag/common/dist/graphql";
 import { inputObjectType, objectType } from "nexus";
+import { ProductRecommendedType } from "schema/beach_bar/product/types";
 import { formatInputValue } from "utils/search";
-import { BeachBarAvailabilityType, BeachBarType } from "../beach_bar/types";
+import { BeachBarType } from "../beach_bar/types";
 import { CityType } from "../details/cityTypes";
 import { CountryType } from "../details/countryTypes";
 import { RegionType } from "../details/regionTypes";
@@ -37,8 +38,19 @@ export const SearchResultType = objectType({
   name: "SearchResultType",
   description: "Represents the info (results) to be returned on user search",
   definition(t) {
-    t.field("beachBar", { type: BeachBarType, description: "The #beach_bar found in the search" });
-    t.field("availability", { type: BeachBarAvailabilityType });
+    t.field("beachBar", { type: BeachBarType, description: "The #beach_bar (object) found in the search" });
+    t.boolean("isOpen", {
+      description:
+        "A boolean that indicates if the #beach_bar is open and active, even if it does not have capacity for the selected date, time and people",
+    });
+    t.boolean("hasCapacity", {
+      description: "A boolean that indicates if the #beach_bar has availability for the people selected",
+    });
+    t.list.field("recommendedProducts", {
+      type: ProductRecommendedType,
+      description:
+        "A list with all the recommended products for a user's search, depending on #beach_bar's availability and products prices",
+    });
   },
 });
 

@@ -1,9 +1,9 @@
 // import Auth from "@/components/Auth/Auth";
-// import { Footer } from "@/components/Layout/Footer/Footer";
+import { Footer } from "@/components/Layout/Footer/Footer";
 // import { LoginDialog } from "@/components/Layout/LoginDialog";
 // import { MapDialog } from "@/components/Search/MapDialog";
 import { AnimatePresence } from "framer-motion";
-// import { Header } from "./Header";
+import { Header } from "./Header";
 
 export const Me: React.FC = ({ children }) => {
   return (
@@ -12,16 +12,14 @@ export const Me: React.FC = ({ children }) => {
         <Auth />
       </LoginDialog>
       <MapDialog /> */}
-      {/* <Header /> */}
+      <Header />
       <div>
         <AnimatePresence exitBeforeEnter>
-          {/* <Wrapper key="wrapper" {...wrapper}> */}
           <main>
             <div className="wrapper">{children}</div>
           </main>
-          {/* </Wrapper> */}
         </AnimatePresence>
-        {/* <Footer /> */}
+        <Footer />
       </div>
     </>
   );

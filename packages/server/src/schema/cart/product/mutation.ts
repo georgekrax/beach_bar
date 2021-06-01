@@ -30,7 +30,7 @@ export const CartProductCrudMutation = extendType({
           })
         ),
         date: arg({ type: DateScalar, description: "The date to purchase the product. Its default value its the current date" }),
-        timeId: nullable(idArg({ description: "The ID value of the hour time of product use" })),
+        timeId: idArg({ description: "The ID value of the hour time of product use" }),
       },
       resolve: async (_, { cartId, productId, quantity, date, timeId }, { payload }: MyContext): Promise<AddCartProductType> => {
         if (quantity && quantity < QUANTITY_MIN) throw new ApolloError("Please provide a valid quantity", errors.INVALID_ARGUMENTS);
@@ -38,7 +38,6 @@ export const CartProductCrudMutation = extendType({
           throw new ApolloError(`You cannot set the quantity to be over value ${QUANTITY_MAX}`, errors.INVALID_ARGUMENTS);
         const cart = await getCustomRepository(CartRepository).getOrCreateCart(payload, cartId);
         if (!cart) throw new ApolloError("Please create a new shopping cart", errors.NOT_FOUND);
-
         const product = await Product.findOne({
           where: { id: productId },
           relations: ["beachBar", "beachBar.products", "beachBar.products.reservationLimits", "beachBar.products.reservedProducts"],
@@ -50,8 +49,8 @@ export const CartProductCrudMutation = extendType({
         const time = await HourTime.findOne(timeId);
         if (!time) throw new ApolloError("Invalid time", errors.NOT_FOUND);
 
-        const isAvailable = product.isAvailable(date, timeId, undefined, quantity);
-        if (!isAvailable.available)
+        const isAvailable = product.isAvailable({ date, timeId, elevator: quantity});
+        if (!isAvailable)
           throw new ApolloError("This product or service is not available for the date you selected", errors.CONFLICT);
 
         const newCartProduct = CartProduct.create({ cart, product, date, time, quantity });
@@ -84,13 +83,12 @@ export const CartProductCrudMutation = extendType({
 
         try {
           if (quantity > 0 && cartProduct.quantity !== quantity) {
-            const isAvailable = cartProduct.product.isAvailable(
-              cartProduct.date.toString(),
-              cartProduct.timeId.toString(),
-              undefined,
-              quantity
-            );
-            if (isAvailable.available) {
+            const isAvailable =await  cartProduct.product.isAvailable({
+              date: cartProduct.date.toString(),
+              timeId: cartProduct.timeId.toString(),
+              elevator: quantity
+            });
+            if (isAvailable) {
               if (quantity) {
                 cartProduct.quantity = quantity;
                 await getConnection()

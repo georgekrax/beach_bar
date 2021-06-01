@@ -28,7 +28,7 @@ export const HistoryAction: React.FC<FProps> = ({ beachBar, search }) => {
   const handleClick = () => {};
 
   return beachBar || search ? (
-    <Link href={{ pathname: beachBar ? `/beach/${beachBar.id}` : search && `/search`, query: search && { id: "1" } }}>
+    <Link href={{ pathname: beachBar ? "/beach/" + beachBar.id : search && "/search", query: search && { id: "1" } }}>
       <div className={styles.container + " w100 flex-row-center-center"} onClick={() => handleClick()}>
         <div>
           {beachBar ? <Icons.Logo.Hashtag width={18} height={18} /> : search && <Icons.Search width={18} height={18} />}

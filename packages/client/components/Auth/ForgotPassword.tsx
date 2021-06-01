@@ -5,10 +5,11 @@ import { emailSchema } from "@/utils/yup";
 import { Input } from "@hashtag-design-system/components";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { AnimationControls } from "framer-motion";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useController, useForm } from "react-hook-form";
 import { otherVariants } from "./Auth";
-import Auth from "./index";
+import { Container, FormGroup } from "./Container";
+import { CTA } from "./CTA";
 
 type FormData = {
   email: string;
@@ -37,7 +38,7 @@ export const ForgotPassword: React.FC<Props> = ({ animationControls }) => {
   };
 
   return (
-    <Auth.Container
+    <Container
       initial="hidden"
       variants={otherVariants}
       controls={animationControls}
@@ -46,22 +47,22 @@ export const ForgotPassword: React.FC<Props> = ({ animationControls }) => {
       other={{ text: "Didn't receive the email?", link: "Send again" }}
       handleClick={handleSubmit(onSubmit)}
     >
-      <Auth.Container.FormGroup onSubmit={handleSubmit(onSubmit)}>
+      <FormGroup onSubmit={handleSubmit(onSubmit)}>
         <Input
           {...email}
           placeholder="Email"
           forwardref={email.ref}
           secondhelptext={{ error: true, value: errors.email?.message }}
         />
-        <Auth.CTA btn="Reset password" errors={graphqlErrors}>
+        <CTA btn="Reset password" errors={graphqlErrors}>
           {success && (
             <Feedback.Success>
               Please check your email inbox. Follow the instructions to get a new one!
             </Feedback.Success>
           )}
-        </Auth.CTA>
-      </Auth.Container.FormGroup>
-    </Auth.Container>
+        </CTA>
+      </FormGroup>
+    </Container>
   );
 };
 

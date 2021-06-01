@@ -137,11 +137,16 @@ router.post("/webhooks/payment", async (req, res) => {
         try {
           const payment = await Payment.findOne({
             where: { stripeId: successfulPaymentIntent.id },
-            relations: ["cart", "cart.products", "cart.products.product", "cart.products.time"],
+            relations: [
+              "cart",
+              "cart.products",
+              "cart.products.time",
+              "cart.products.product",
+              "cart.products.product.reservationLimits",
+              "cart.products.product.reservedProducts",
+            ],
           });
-          if (!payment) {
-            return res.status(400).send({ error: errors.SOMETHING_WENT_WRONG }).end();
-          }
+          if (!payment) return res.status(400).send({ error: errors.SOMETHING_WENT_WRONG }).end();
           await payment.createReservedProducts();
           await payment.cart.customSoftRemove(false);
         } catch (err) {

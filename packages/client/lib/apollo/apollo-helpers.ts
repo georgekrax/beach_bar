@@ -725,7 +725,7 @@ export type PaymentVisitsDatesFieldPolicy = {
 	month?: FieldPolicy<any> | FieldReadFunction<any>,
 	year?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type QueryKeySpecifier = ('hello' | 'getVoucherCode' | 'getBeachBarOfferCampaigns' | 'revealCouponCode' | 'revealOfferCampaignCode' | 'beachBarProducts' | 'getProductAvailabilityHours' | 'getProductAvailabilityQuantity' | 'hasProductReservationLimit' | 'beachBar' | 'beachBarImgs' | 'checkBeachBarAvailability' | 'availableProducts' | 'getAllBeachBars' | 'getPersonalizedBeachBars' | 'nearBeachBars' | 'getPaymentProductsMonth' | 'userReviews' | 'review' | 'cartEntryFees' | 'verifyZeroCartTotal' | 'cart' | 'customerPaymentMethods' | 'customer' | 'getStripeConnectOAuthUrl' | 'getGoogleOAuthUrl' | 'getFacebookOAuthUrl' | 'getInstagramOAuthUrl' | 'payments' | 'payment' | 'paymentRefundAmount' | 'paymentDates' | 'searchInputValues' | 'userSearches' | 'search' | 'userHistory' | 'favouriteBeachBars' | 'accessToken' | 'me' | QueryKeySpecifier)[];
+export type QueryKeySpecifier = ('hello' | 'getVoucherCode' | 'getBeachBarOfferCampaigns' | 'revealCouponCode' | 'revealOfferCampaignCode' | 'beachBarProducts' | 'getProductAvailabilityHours' | 'getProductAvailabilityQuantity' | 'hasProductReservationLimit' | 'beachBar' | 'beachBarImgs' | 'checkBeachBarAvailability' | 'getAllBeachBars' | 'getPersonalizedBeachBars' | 'nearBeachBars' | 'getPaymentProductsMonth' | 'userReviews' | 'review' | 'cartEntryFees' | 'verifyZeroCartTotal' | 'cart' | 'customerPaymentMethods' | 'customer' | 'getStripeConnectOAuthUrl' | 'getGoogleOAuthUrl' | 'getFacebookOAuthUrl' | 'getInstagramOAuthUrl' | 'hey' | 'isProductAvailable' | 'payments' | 'payment' | 'paymentRefundAmount' | 'paymentDates' | 'searchInputValues' | 'userSearches' | 'search' | 'userHistory' | 'favouriteBeachBars' | 'accessToken' | 'me' | QueryKeySpecifier)[];
 export type QueryFieldPolicy = {
 	hello?: FieldPolicy<any> | FieldReadFunction<any>,
 	getVoucherCode?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -739,7 +739,6 @@ export type QueryFieldPolicy = {
 	beachBar?: FieldPolicy<any> | FieldReadFunction<any>,
 	beachBarImgs?: FieldPolicy<any> | FieldReadFunction<any>,
 	checkBeachBarAvailability?: FieldPolicy<any> | FieldReadFunction<any>,
-	availableProducts?: FieldPolicy<any> | FieldReadFunction<any>,
 	getAllBeachBars?: FieldPolicy<any> | FieldReadFunction<any>,
 	getPersonalizedBeachBars?: FieldPolicy<any> | FieldReadFunction<any>,
 	nearBeachBars?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -755,6 +754,8 @@ export type QueryFieldPolicy = {
 	getGoogleOAuthUrl?: FieldPolicy<any> | FieldReadFunction<any>,
 	getFacebookOAuthUrl?: FieldPolicy<any> | FieldReadFunction<any>,
 	getInstagramOAuthUrl?: FieldPolicy<any> | FieldReadFunction<any>,
+	hey?: FieldPolicy<any> | FieldReadFunction<any>,
+	isProductAvailable?: FieldPolicy<any> | FieldReadFunction<any>,
 	payments?: FieldPolicy<any> | FieldReadFunction<any>,
 	payment?: FieldPolicy<any> | FieldReadFunction<any>,
 	paymentRefundAmount?: FieldPolicy<any> | FieldReadFunction<any>,

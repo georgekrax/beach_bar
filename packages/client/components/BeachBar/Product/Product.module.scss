@@ -1,32 +1,44 @@
 $padding: map-get($em-spacers, 16);
+$cartBottomBorder: 2px solid $grey-4;
 
 .container {
   position: relative;
-  padding: map-get($em-spacers, 20) $padding;
-  padding-bottom: 0;
+  padding: $padding;
   background-color: $grey-1;
   border-radius: 14px;
   color: $grey-10;
-  margin-bottom: map-get($em-spacers, 24);
-  border: 1px solid $grey-6;
-  box-shadow: 0px 0px 6px rgba($grey-6, 0.65);
+  margin-bottom: map-get($em-spacers, 32);
+  border: 1px solid $grey-4;
+  box-shadow: 0px 1px 6px rgba($grey-6, 0.6);
 }
 
 .content {
-  align-self: stretch;
+  max-width: none;
 
-  & > div:nth-child(2) {
-    margin-top: map-get($em-spacers, 12);
-    color: $grey-8;
+  h5 {
+    margin-bottom: map-get($em-spacers, 8);
+  }
+
+  p {
+    max-width: none;
     @include text-overflow(3);
   }
 }
 
 .imgContainer {
-  margin-right: map-get($em-spacers, 16);
+  position: relative;
+  float: left;
+  margin-right: $padding;
+  margin-bottom: $padding;
+  user-select: none;
+  // @include aspect-ratio(90%);
 
   & > div {
     border-radius: 14px;
+  }
+
+  ~ div:not(:nth-child(2)) {
+    clear: both;
   }
 }
 
@@ -37,21 +49,54 @@ $padding: map-get($em-spacers, 16);
   flex: 0 0 auto;
   background-color: $grey-9;
   color: $grey-1;
+  user-select: none;
 }
 
 .components {
-  margin-top: map-get($em-spacers, 16);
+  margin-top: map-get($em-spacers, 24);
+  margin-bottom: map-get($em-spacers, 16);
 }
 
-.cartCta {
+.cartBottom {
   position: relative;
-  margin: map-get($em-spacers, 24) -#{$padding} 0;
   padding: map-get($em-spacers, 12) $padding;
-  border-top: 2px solid $grey-5;
+  border-top: $cartBottomBorder;
+  width: calc(100% + (#{$padding} * 2));
+  align-self: center;
 
   button {
     margin-left: auto;
     padding: map-get($em-spacers, 8) map-get($em-spacers, 16);
     box-shadow: none;
+  }
+}
+
+@include responsive() {
+  .container {
+    flex-direction: row;
+    padding-bottom: $padding !important;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .content p {
+    display: inline;
+  }
+
+  .components {
+    margin-bottom: 0;
+  }
+
+  .cartBottom {
+    width: auto;
+    flex-direction: column;
+    align-self: stretch;
+    margin-left: map-get($em-spacers, 64);
+    padding: 0;
+    padding-left: map-get($em-spacers, 32);
+    border-top: none;
+    border-left: $cartBottomBorder;
   }
 }

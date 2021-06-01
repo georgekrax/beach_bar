@@ -5,8 +5,7 @@ import { getAuthContext } from "../auth";
 import { userIpAddr } from "./cache";
 
 export const httpLink = new HttpLink({
-  // uri: process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT + "/graphql",
-  uri:"http://192.168.1.7:4000/graphql",
+  uri: process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT + "/graphql",
   credentials: "include",
   useGETForQueries: true,
   fetchOptions: {

@@ -21,7 +21,7 @@ import { router as oauthRouter } from "./routes/authRoutes";
 import { router as stripeRouter } from "./routes/stripeWebhooks";
 import { schema } from "./schema";
 
-export let redis;
+export let redis: Redis.Redis;
 export let stripe: Stripe;
 
 (async (): Promise<any> => {
@@ -55,7 +55,7 @@ export let stripe: Stripe;
     cors({
       credentials: true,
       // origin: process.env.NODE_ENV === "production" ? String(process.env.TOKEN_AUDIENCE!) : "http://192.168.1.8:3000",
-      origin: "http://192.168.1.7:3000",
+      origin: "http://192.168.1.8:3000",
     })
   );
   app.use((req, res, next) => {
@@ -95,7 +95,7 @@ export let stripe: Stripe;
         try {
           payload = verify(accessToken, process.env.ACCESS_TOKEN_SECRET!, { issuer: process.env.TOKEN_ISSUER!.toString() });
           if (payload && payload.sub && payload.sub.trim().length !== 0) {
-            const redisUser = await redis.hgetall(`${redisKeys.USER}:${payload.sub.toString()}`);
+            const redisUser = await redis.hgetall(redisKeys.USER + ":" + payload.sub.toString());
             if (!redisUser) payload = null;
           } else if (payload.sub.trim().length >= 0) payload = null;
         } catch (err) {
@@ -218,10 +218,7 @@ export let stripe: Stripe;
     },
   });
 
-  apolloServer.applyMiddleware({
-    app,
-    cors: false,
-  });
+  apolloServer.applyMiddleware({ app, cors: false });
 
   app.listen({ port: parseInt(process.env.PORT!) || 4000 }, () =>
     console.log(`🚀 Server ready at http://localhost:4000${apolloServer.graphqlPath}`)

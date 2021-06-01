@@ -32,6 +32,15 @@ export const ProductAvailabilityType = objectType({
   },
 });
 
+export const ProductRecommendedType = objectType({
+  name: "ProductRecommended",
+  description: "Represents a recommended product of a #beach_bar, depending on a user's search",
+  definition(t) {
+    t.field("product", { type: ProductType });
+    t.int("quantity", { description: "How many other's products of this type to purchase" });
+  },
+});
+
 export const AddProductType = objectType({
   name: "AddProduct",
   description: "Info to be returned when a product is added to a #beach_bar",

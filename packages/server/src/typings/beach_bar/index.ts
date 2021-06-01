@@ -5,7 +5,7 @@ import { AddType, UpdateType } from "typings/.index";
 
 export type GetFullPricingReturnType = { pricingFee: PricingFee; currencyFee: PricingFeeCurrency };
 
-export type BeachBarAvailabilityReturnType = { hasAvailability?: boolean; hasCapacity?: boolean };
+export type BeachBarAvailabilityReturnType = { isOpen?: boolean; hasCapacity?: boolean };
 
 export type GetBeachBarPaymentDetails = {
   total: number;

@@ -8,7 +8,8 @@ import { Input } from "@hashtag-design-system/components";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useState } from "react";
 import { useController, useForm } from "react-hook-form";
-import Auth from "./index";
+import { FormGroup } from "./Container";
+import { CTA } from "./CTA";
 import { AUTH_ACTIONS } from "./reducer";
 
 type Props = {
@@ -40,7 +41,7 @@ export const Login: React.FC<Props> = ({ handleForgotPasswordClick }) => {
   };
 
   return (
-    <Auth.Container.FormGroup onSubmit={handleSubmit(onSubmit)}>
+    <FormGroup onSubmit={handleSubmit(onSubmit)}>
       <Input
         {...email}
         placeholder="Email"
@@ -57,8 +58,8 @@ export const Login: React.FC<Props> = ({ handleForgotPasswordClick }) => {
       <span className="auth-form__forgot-password body-14 link" onClick={handleForgotPasswordClick}>
         Forgot password?
       </span>
-      <Auth.CTA btn="Login" errors={graphqlErrors} />
-    </Auth.Container.FormGroup>
+      <CTA btn="Login" errors={graphqlErrors} />
+    </FormGroup>
   );
 };
 

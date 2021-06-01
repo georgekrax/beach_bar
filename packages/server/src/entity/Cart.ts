@@ -16,7 +16,7 @@ import {
   PrimaryGeneratedColumn,
   Repository,
 } from "typeorm";
-import { toFixed2 } from "utils/payment";
+import { toFixed2 } from "utils/format";
 import { softRemove } from "utils/softRemove";
 import { BeachBar } from "./BeachBar";
 // import { BeachBarEntryFee } from "./BeachBarEntryFee";
@@ -76,8 +76,9 @@ export class Cart extends BaseEntity {
   }
 
   checkAllProductsAvailable(): { bool: boolean; notAvailable: CartProduct[] } {
-    const notAvailable = (this.products || []).filter(({ product, date, timeId, quantity }) =>
-      !product.isAvailable(date.toString(), timeId?.toString(), undefined, quantity)
+    const notAvailable = (this.products || []).filter(
+      ({ product, date, timeId, quantity }) =>
+        !product.isAvailable({ date: date.toString(), timeId: timeId.toString(), elevator: quantity })
     );
     return { bool: notAvailable.length == 0, notAvailable: notAvailable };
   }

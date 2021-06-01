@@ -50,7 +50,7 @@ export const NearYou: React.FC<
   }, [userIpAddr(), latitude, longitude]);
 
   return (
-    <Link href={{ pathname: "/beach/[slug]", query: { slug } }}>
+    <Link href={{ pathname: "/beach/[...slug]", query: { slug: [slug] } }}>
       <div className={styles.container + " flex-row-flex-start-center"}>
         <div className={styles.imgContainer + " flex-row-center-center"}>
           {thumbnailUrl && (

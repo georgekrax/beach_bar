@@ -1,54 +1,60 @@
 import Icons from "@/components/Icons";
 import { NextLink } from "@/components/Next/Link";
+import { useIsDesktop } from "@/utils/hooks";
 import { useAuth } from "@/utils/hooks/useAuth";
 import { useClassnames } from "@hashtag-design-system/components";
 import dayjs from "dayjs";
-import { useAnimation, Variants } from "framer-motion";
+import { HTMLMotionProps, motion, Variants } from "framer-motion";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Logo } from "../Logo";
 import styles from "./Footer.module.scss";
 import { InfoColumn } from "./InfoColumn";
 
 const boxVariants: Variants = {
-  open: { height: "auto", display: "block" },
-  closed: { height: 0, display: "none" },
+  open: { height: "auto" },
+  closed: { height: 76 },
 };
 
 const iconVariants: Variants = { open: { rotate: 180 }, closed: { rotate: 360 } };
 
-export type Props = React.ComponentPropsWithoutRef<"div">;
-
-export const Footer: React.FC<Props> = props => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [classNames, rest] = useClassnames(styles.container + " w100", props);
-  const controls = useAnimation();
-  const iconControls = useAnimation();
+export const Footer: React.FC<HTMLMotionProps<"footer">> = props => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [classNames, rest] = useClassnames(styles.container + " container--padding w100", props);
+  const isDesktop = useIsDesktop();
 
   const { data } = useAuth();
 
   const handleClick = () => {
-    controls.start(!isOpen ? "open" : "closed");
-    iconControls.start(!isOpen ? "open" : "closed");
-    setIsOpen(prev => !prev);
+    setIsExpanded(!isExpanded);
+    setTimeout(() => window.scroll({ top: document.body.scrollHeight, behavior: "smooth" }), 100);
   };
 
+  useEffect(() => {
+    if (isDesktop) setIsExpanded(true);
+    else setIsExpanded(false);
+  }, [isDesktop]);
+
   return (
-    <footer className={classNames} onClick={() => handleClick()} {...rest}>
+    <motion.footer
+      className={classNames}
+      onClick={() => handleClick()}
+      {...rest}
+      animate={isExpanded ? "open" : "closed"}
+      variants={boxVariants}
+    >
       <div className="flex-column-space-between-flex-start">
-        <div
-          className={styles.box + " w100 flex-column-space-between-flex-start"}
-          // variants={boxVariants}
-          // initial="closed"
-          // animate={controls}
-        >
+        <div className={styles.box + " w100 flex-column-space-between-flex-start"}>
           <div>
-            <div className="flex-row-flex-start-center">
+            <div
+              className={styles.logo + " flex-row-flex-start-center"}
+              style={{ paddingBottom: isExpanded ? 0 : undefined }}
+            >
               <Icons.Chevron.Down
                 className={styles.chevron}
                 initial="closed"
                 variants={iconVariants}
-                animate={iconControls}
+                animate={isExpanded ? "closed" : "open"}
                 transition={{ stiffness: 750, duration: 0.2 }}
               />
               <Logo />
@@ -95,10 +101,20 @@ export const Footer: React.FC<Props> = props => {
               <div>We' d love to hear from you</div>
             </div>
             <div className="flex-row-flex-start-center">
-              <a href="https://www.instagram.com/georgekrax" rel="noreferrer" target="_blank">
+              <a
+                className="flex-row-center-center"
+                href="https://www.instagram.com/georgekrax"
+                rel="noreferrer"
+                target="_blank"
+              >
                 <Image src="/facebook_logo.png" alt="Facebook logo" width={32} height={32} />
               </a>
-              <a href="https://www.instagram.com/georgekrax" rel="noreferrer" target="_blank">
+              <a
+                className="flex-row-center-center"
+                href="https://www.instagram.com/georgekrax"
+                rel="noreferrer"
+                target="_blank"
+              >
                 <Image src="/instagram_logo.webp" alt="Instagram logo" width={32} height={32} />
               </a>
             </div>
@@ -112,7 +128,7 @@ export const Footer: React.FC<Props> = props => {
           <NextLink href="/about/privacy_policy">Privacy Policy</NextLink>
         </small>
       </div>
-    </footer>
+    </motion.footer>
   );
 };
 

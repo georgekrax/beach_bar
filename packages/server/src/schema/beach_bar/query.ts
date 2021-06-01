@@ -1,5 +1,4 @@
-import { COMMON_CONFIG, errors, MyContext } from "@beach_bar/common";
-import { ApolloError, UserInputError } from "apollo-server-errors";
+import { COMMON_CONFIG, MyContext } from "@beach_bar/common";
 import redisKeys from "constants/redisKeys";
 import { BeachBar } from "entity/BeachBar";
 import { BeachBarImgUrl } from "entity/BeachBarImgUrl";
@@ -7,14 +6,10 @@ import { Payment } from "entity/Payment";
 import { UserFavoriteBar } from "entity/UserFavoriteBar";
 import { UserHistory } from "entity/UserHistory";
 import uniqBy from "lodash/uniqby";
-import { arg, booleanArg, extendType, idArg, nullable, stringArg } from "nexus";
+import { booleanArg, extendType, nullable, stringArg } from "nexus";
 import { getConnection, In, Not } from "typeorm";
-import { BeachBarAvailabilityReturnType } from "typings/beach_bar";
-import { TProductAvailability } from "typings/beach_bar/product";
-import { SearchInputType } from "../search/types";
 import { BeachBarImgUrlType } from "./img_url/types";
-import { ProductAvailabilityType } from "./product/types";
-import { BeachBarAvailabilityType, BeachBarType } from "./types";
+import { BeachBarType } from "./types";
 
 export const BeachBarQuery = extendType({
   type: "Query",
@@ -60,57 +55,37 @@ export const BeachBarQuery = extendType({
         return beachBar?.imgUrls || null;
       },
     });
-    t.field("checkBeachBarAvailability", {
-      type: BeachBarAvailabilityType,
-      description: "Check a #beach_bar's availability",
-      args: { beachBarId: idArg(), availability: arg({ type: SearchInputType }) },
-      resolve: async (_, { beachBarId, availability }): Promise<BeachBarAvailabilityReturnType> => {
-        if (!beachBarId || beachBarId.trim().length === 0) throw new UserInputError("Please provide a valid beachBarId");
-        if (!availability) throw new UserInputError("Please provide a valid availability");
-        const { date, timeId } = availability;
-        let { adults, children } = availability;
-        adults = adults || 0;
-        children = children || 0;
-        const totalPeople = adults + children !== 0 ? adults + children : undefined;
+    // t.list.field("availableProducts", {
+    //   type: ProductAvailabilityType,
+    //   description: "Get a list with a #beach_bar's available products",
+    //   args: { beachBarId: idArg(), availability: arg({ type: SearchInputType }) },
+    //   resolve: async (_, { beachBarId, availability }): Promise<AvailableProductsType> => {
+    //     const { date, timeId } = availability;
+    //     let { adults, children } = availability;
+    //     adults = adults || 0;
+    //     children = children || 0;
+    //     const totalPeople = adults + children !== 0 ? adults + children : undefined;
 
-        const beachBar = await BeachBar.findOne({
-          where: { id: beachBarId },
-          relations: ["products", "products.reservedProducts", "products.reservationLimits", "products.reservationLimits.product"],
-        });
-        if (!beachBar) throw new ApolloError(errors.BEACH_BAR_DOES_NOT_EXIST, errors.NOT_FOUND);
-        return beachBar.checkAvailability({ date, timeId, totalPeople });
-      },
-    });
-    t.list.field("availableProducts", {
-      type: ProductAvailabilityType,
-      description: "Get a list with a #beach_bar's available products",
-      args: { beachBarId: idArg(), availability: arg({ type: SearchInputType }) },
-      resolve: async (_, { beachBarId, availability }): Promise<TProductAvailability[]> => {
-        const { date, timeId } = availability;
-        let { adults, children } = availability;
-        adults = adults || 0;
-        children = children || 0;
-        const totalPeople = adults + children !== 0 ? adults + children : undefined;
-
-        const beachBar = await BeachBar.findOne({
-          where: { id: beachBarId },
-          relations: [
-            "products",
-            "products.category",
-            "products.category.components",
-            "products.category.components.component",
-            "products.category.components.component.icon",
-            "products.beachBar",
-            "products.beachBar.products",
-            "products.beachBar.products.reservedProducts",
-            "products.beachBar.products.reservationLimits",
-            "products.beachBar.products.reservationLimits.product",
-          ],
-        });
-        if (!beachBar) throw new ApolloError(errors.BEACH_BAR_DOES_NOT_EXIST, errors.NOT_FOUND);
-        return beachBar.getAvailableProducts({ date, timeId, totalPeople });
-      },
-    });
+    //     const beachBar = await BeachBar.findOne({
+    //       where: { id: beachBarId },
+    //       relations: [
+    //         "products",
+    //         "products.category",
+    //         "products.category.components",
+    //         "products.category.components.component",
+    //         "products.category.components.component.icon",
+    //         "products.beachBar",
+    //         "products.beachBar.products",
+    //         "products.beachBar.products.reservedProducts",
+    //         "products.beachBar.products.reservationLimits",
+    //         "products.beachBar.products.reservationLimits.product",
+    //       ],
+    //     });
+    //     if (!beachBar) throw new ApolloError(errors.BEACH_BAR_DOES_NOT_EXIST, errors.NOT_FOUND);
+    //     const available = await beachBar.getAvailableProducts({ date, timeId });
+    //     return available;
+    //   },
+    // });
     t.list.field("getAllBeachBars", {
       type: BeachBarType,
       description: "A list with all the available #beach_bars",

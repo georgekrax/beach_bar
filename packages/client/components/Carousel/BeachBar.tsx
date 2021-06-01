@@ -1,8 +1,8 @@
 import BeachBarComp, { BeachBarNameAndLocationProps } from "@/components/BeachBar";
+import { FavouriteHeartBox } from "@/components/BeachBar/Favourite/HeartBox";
 import { BeachBar as GraphQLBeachBar } from "@/graphql/generated";
 import { genBarThumbnailAlt } from "@/utils/format";
 import { useClassnames } from "@hashtag-design-system/components";
-import { FavouriteHeartBox } from "@/components/BeachBar/Favourite/HeartBox";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -36,7 +36,7 @@ export const BeachBar: React.FC<
   };
 
   return (
-    <Link href={{ pathname: "/beach/[slug]", query: { slug, redirect: "/" } }} passHref>
+    <Link href={{ pathname: "/beach/[...slug]", query: { slug: [slug], redirect: "/" } }} passHref>
       <a onClick={e => handleClick(e)}>
         <div className={classNames} {...rest}>
           <Image

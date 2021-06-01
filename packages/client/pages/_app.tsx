@@ -6,13 +6,13 @@ import { Context as SearchContext } from "@/components/Search/Context";
 import { INITIAL_APOLLO_STATE, useApollo } from "@/lib/apollo";
 import { ApolloProvider } from "@apollo/client";
 import { ConfigProvider } from "@hashtag-design-system/components";
-// import { Elements } from "@stripe/react-stripe-js";
-// import { loadStripe } from "@stripe/stripe-js";
+import { Elements } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
 import { AnimateSharedLayout } from "framer-motion";
 import { AppProps } from "next/app";
 import Head from "next/head";
 
-// const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY!);
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY!);
 
 function App({ Component, pageProps }: AppProps) {
   const apolloClient = useApollo(undefined, pageProps[INITIAL_APOLLO_STATE]);
@@ -22,7 +22,7 @@ function App({ Component, pageProps }: AppProps) {
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
-      {/* <Elements stripe={stripePromise}> */}
+      <Elements stripe={stripePromise}>
         <ConfigProvider variables={{ ipAddr: undefined }}>
           <AuthContext>
             <SearchContext>
@@ -32,7 +32,7 @@ function App({ Component, pageProps }: AppProps) {
             </SearchContext>
           </AuthContext>
         </ConfigProvider>
-      {/* </Elements> */}
+      </Elements>
     </ApolloProvider>
   );
 }

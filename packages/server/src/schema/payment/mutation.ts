@@ -13,7 +13,8 @@ import { PaymentVoucherCode } from "entity/PaymentVoucherCode";
 import { extendType, idArg, intArg, nullable, stringArg } from "nexus";
 import { getManager, IsNull, Not } from "typeorm";
 import { TDelete } from "typings/.index";
-import { checkVoucherCode, formatMetadata, formatVoucherCodeMetadata, toFixed2 } from "utils/payment";
+import { checkVoucherCode, formatMetadata, formatVoucherCodeMetadata } from "utils/payment";
+import { toFixed2 } from "utils/format";
 import { DeleteGraphQlType } from "../types";
 import { PaymentType } from "./types";
 

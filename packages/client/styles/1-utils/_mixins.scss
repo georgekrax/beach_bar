@@ -33,3 +33,10 @@
     @content;
   }
 }
+
+@mixin products-filters-btn--checked() {
+  &.checked {
+    background: rgba($grey-3, 0.75);
+    border-color: $blue-7;
+  }
+}

@@ -41,7 +41,7 @@ export const Bar: React.FC<Props> = ({ beachBar: { name, defaultCurrency }, prod
       >
         {name}
       </Section.Header>
-      <Select.Hr className="iw100" />
+      {/* <Select.Hr className="iw100" /> */}
       <motion.div
         className="w100"
         animate="animate"

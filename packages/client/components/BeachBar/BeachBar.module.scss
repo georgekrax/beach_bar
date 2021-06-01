@@ -1,38 +1,39 @@
+$img-gap: map-get($em-spacers, 12);
+$product-list-padding: map-get($em-spacers, 16);
+
 .container {
+  position: relative;
   margin: map-get($em-spacers, 16) 0;
 }
 
-.images {
-  $gap: map-get($em-spacers, 12);
+.images > div:first-child {
+  margin-right: $img-gap;
+  min-width: 60%;
+  @include aspect-ratio(100%);
 
-  & > div:first-child {
-    margin-right: $gap;
-    min-width: 36%;
-    @include aspect-ratio(100%);
-
-    &:only-child {
-      margin-right: 0;
-    }
+  &:only-child {
+    margin-right: 0;
   }
 }
 
 .restImgs {
-  flex-wrap: wrap;
-  gap: map-get($em-spacers, 12);
+  gap: $img-gap;
+  min-height: 35vh;
 
   & > div {
     position: relative;
     flex: 1 1 30%;
-    max-width: 66%;
+
+    &:last-child {
+      cursor: pointer;
+    }
+
+    &:last-child:hover > div > div {
+      opacity: 1;
+      cursor: pointer;
+      transform: none;
+    }
   }
-
-  // & > div:last-child {
-  //   margin-bottom: 0;
-  // }
-
-  // & > div > div {
-  //   @include aspect-ratio(100%);
-  // }
 }
 
 .moreImgs {
@@ -44,7 +45,7 @@
   @include transition-2s("ease-out", "transform");
 
   &:hover {
-    transform: scale(1.5);
+    transform: scale(1.2);
   }
 }
 
@@ -86,41 +87,39 @@
 }
 
 .description {
-  margin-top: map-get($em-spacers, 32);
-  color: $grey-8;
+  // margin-top: map-get($em-spacers, 32);
+  margin-top: map-get($em-spacers, 12);
 }
 
 .productsPreview {
   position: relative;
-  border-radius: 14px;
-  margin: map-get($em-spacers, 32) 0;
-  background-color: rgba($blue-3, 0.7);
-
+  margin-top: map-get($em-spacers, 32);
+  
   .list {
-    padding: map-get($em-spacers, 16);
+    padding: $product-list-padding;
     max-height: 23em;
-    overflow: hidden;
+    border-radius: 14px;
+    background-color: rgba($blue-3, 0.7);
   }
 }
 
 .ctaContainer {
-  $external: 1px;
-  $neg-external: -#{$external};
-  position: absolute;
-  left: $neg-external;
-  bottom: $neg-external;
-  width: calc(100% + (#{$external} * 2));
-  height: min(100%, 12.5em);
-  padding: map-get($em-spacers, 20);
+  position: sticky;
+  bottom: 0;
+  padding: map-get($em-spacers, 24) $product-list-padding;
+  padding-top: map-get($em-spacers, 64);
+  margin-top: -45%;
   background: linear-gradient(to top, $grey-1, transparent);
 
-  & > button {
-    position: absolute;
-    bottom: map-get($em-spacers, 32);
+  a {
+    text-decoration: none;
+    max-width: 18em;
+  }
+
+  button {
     border-color: $volcano-5;
     padding: map-get($em-spacers, 16) 0;
     background-color: $volcano-5;
-    width: min(calc(100% - (#{$wrapper-padding} * 2)), 18em);
   }
 }
 
@@ -144,12 +143,31 @@
     margin-top: inherit;
   }
 
+  .images > div:first-child {
+    min-width: 36%;
+  }
+
+  .restImgs {
+    flex-wrap: wrap;
+    flex-direction: row;
+    min-height: auto;
+
+    & > div {
+      max-width: 66%;
+    }
+  }
+
   .productsPreview {
     .list {
       max-height: none;
+
       .ctaContainer {
         display: none;
       }
     }
+  }
+
+  .ctaContainer {
+    display: none;
   }
 }

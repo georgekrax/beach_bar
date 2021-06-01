@@ -76,7 +76,7 @@ const BeachPhotosPage: React.FC = () => {
             {arr?.map((imgs, i) => (
               <div key={i} className="beach_bar__photos w100 flex-row-center-center">
                 {imgs.map(({ id, imgUrl, description }) => (
-                  <div key={id} className="h100">
+                  <div key={id}>
                     <Img src={imgUrl} alt={description} layout="fill" />
                   </div>
                 ))}

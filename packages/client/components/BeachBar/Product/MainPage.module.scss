@@ -1,6 +1,6 @@
 .container {
   & > h4 {
-    margin-top: map-get($em-spacers, 40);
+    margin-top: map-get($em-spacers, 32);
     margin-bottom: map-get($em-spacers, 12);
     color: $grey-9;
   }
@@ -42,14 +42,11 @@
       box-shadow: none;
       border-color: $grey-5;
       border-width: 1px;
+      @include products-filters-btn--checked();
 
       &:hover {
         background: none;
         color: $grey-10;
-      }
-
-      &.checked {
-        background: rgba($grey-4, 0.75);
       }
     }
   }

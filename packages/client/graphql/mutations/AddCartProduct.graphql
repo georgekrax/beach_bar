@@ -1,4 +1,4 @@
-mutation AddCartProduct($cartId: ID!, $productId: ID!, $quantity: Int, $date: Date!, $timeId: ID) {
+mutation AddCartProduct($cartId: ID!, $productId: ID!, $quantity: Int, $date: Date!, $timeId: ID!) {
   addCartProduct(cartId: $cartId, productId: $productId, quantity: $quantity, date: $date, timeId: $timeId) {
     product {
       id

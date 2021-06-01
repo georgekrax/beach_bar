@@ -3,6 +3,7 @@ import range from "lodash/range";
 const partial = {
   MIN_HOUR: 8,
   MAX_HOUR: 22,
+  MAX_BEACH_IMGS: 4,
 };
 
 const REVIEW_VISIT_TYPES = {

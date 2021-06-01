@@ -29,8 +29,6 @@ export const checkVoucherCode = async (refCode: string): Promise<CheckVoucherCod
   } else throw new ApolloError(errors.INVALID_REF_CODE_MESSAGE, errors.INVALID_PRODUCT_OFFER_CODE);
 };
 
-export const toFixed2 = (num: number) => parseFloat(num.toFixed(2));
-
 export const formatMetadata = (str: string) => {
   return "[" + str.toString().replace(/[[\]]/g, "").replace(/},{/g, "}, {").replace(/[:]/g, ": ").replace(/[,]/g, ", ") + "]";
 };

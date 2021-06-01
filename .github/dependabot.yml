@@ -5,8 +5,6 @@ updates:
     schedule:
       interval: "weekly"
     target-branch: "dev"
-    reviewers:
-      - "georgekrax"
     assignees:
       - "georgekrax"
   - package-ecosystem: "npm"
@@ -14,8 +12,6 @@ updates:
     schedule:
       interval: "weekly"
     target-branch: "dev"
-    reviewers:
-      - "georgekrax"
     assignees:
       - "georgekrax"
   - package-ecosystem: "npm"
@@ -23,7 +19,5 @@ updates:
     schedule:
       interval: "weekly"
     target-branch: "dev"
-    reviewers:
-      - "georgekrax"
     assignees:
       - "georgekrax"

@@ -59,7 +59,7 @@ export const MainPage: React.FC<Props> = ({ beachBar: { id, name, slug, avgRatin
   const allReviewScores = useMemo(() => Object.values(REVIEW_SCORES).concat([REVIEW_SCORES_TOP]), []);
   const sortedReviews = useMemo(
     () =>
-      Array.from(reviews).sort((a, b) => {
+      Array.from(filteredArr).sort((a, b) => {
         const aUpvotes = a.votes.filter(({ type: { value } }) => value === "upvote").length;
         const bUpvotes = b.votes.filter(({ type: { value } }) => value === "upvote").length;
         const aProperties: ReviewProperties = {
@@ -112,11 +112,9 @@ export const MainPage: React.FC<Props> = ({ beachBar: { id, name, slug, avgRatin
             ...rest,
             avgRating: ratingValue,
           }));
-          newArr = filterByRating<typeof mappedArr[number]>(
-            filterIds,
-            mappedArr,
-            true
-          ).map(({ avgRating, ...rest }) => ({ ...rest, ratingValue: avgRating }));
+          newArr = filterByRating<typeof mappedArr[number]>(filterIds, mappedArr, true).map(
+            ({ avgRating, ...rest }) => ({ ...rest, ratingValue: avgRating })
+          );
           break;
         case REVIEW_VISIT_TYPES.DAILY_BATH.name:
         case REVIEW_VISIT_TYPES.WEEKEND_GATEWAY.name:
@@ -208,9 +206,9 @@ export const MainPage: React.FC<Props> = ({ beachBar: { id, name, slug, avgRatin
   useEffect(() => setFilteredArr(reviews), [reviews]);
 
   return (
-    <div>
+    <div className="h100" style={{ borderRadius: "inherit" }}>
       <LayoutIconHeader
-        className={styles.header}
+        className={styles.container}
         before={
           whichSectionToShow.verifyId || whichSectionToShow.postReview ? (
             <IconBox
@@ -220,10 +218,18 @@ export const MainPage: React.FC<Props> = ({ beachBar: { id, name, slug, avgRatin
               <Icons.Arrow.Left />
             </IconBox>
           ) : (
-            <Link href="/beach/kikabu" prefetch={false}>
-              <IconBox aria-label="Return to #beach_bar details.">
-                <Icons.Arrow.Left />
-              </IconBox>
+            <Link
+              href={{ pathname: "/beach/[...slug]", query: { slug: [slug] } }}
+              shallow
+              replace
+              passHref
+              scroll={false}
+            >
+              <a>
+                <IconBox aria-label="Return to #beach_bar details.">
+                  <Icons.Arrow.Left />
+                </IconBox>
+              </a>
             </Link>
           )
         }
@@ -236,7 +242,7 @@ export const MainPage: React.FC<Props> = ({ beachBar: { id, name, slug, avgRatin
           )
         }
       >
-        <h5 className="beach_bar__header__name">{name}</h5>
+        <h5>{name}</h5>
       </LayoutIconHeader>
       {whichSectionToShow.verifyId || whichSectionToShow.postReview ? (
         <div>
@@ -279,7 +285,7 @@ export const MainPage: React.FC<Props> = ({ beachBar: { id, name, slug, avgRatin
           </AnimatePresence>
         </div>
       ) : reviews.length > 0 ? (
-        <div>
+        <div className="scrollbar">
           <div className={styles.summary + " flex-row-flex-start-center"}>
             <BeachBar.Review.RatingBox className="header-5 semibold" rating={avgRating} />
             <div>

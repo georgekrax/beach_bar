@@ -1,5 +1,7 @@
-import { SearchContextProvider, INITIAL_SEARCH_VALUES } from "@/utils/contexts/SearchContext";
-import { useReducer, memo } from "react";
+import { INITIAL_SEARCH_VALUES, SearchContextProvider } from "@/utils/contexts/SearchContext";
+import { checkSearchDate } from "@/utils/search";
+import dayjs from "dayjs";
+import { memo, useMemo, useReducer } from "react";
 import { reducer } from "./reducer";
 
 type Props = {
@@ -7,13 +9,19 @@ type Props = {
 };
 
 export const Context: React.FC<Props> = memo(({ initializer, children }) => {
-  const [state, dispatch] = useReducer(reducer, INITIAL_SEARCH_VALUES, () => {
+  const [{ date, ...state }, dispatch] = useReducer(reducer, INITIAL_SEARCH_VALUES, () => {
     let state = INITIAL_SEARCH_VALUES;
     if (initializer) state = { ...state, ...initializer() };
     return state;
   });
 
-  return <SearchContextProvider value={{ ...state, dispatch }}>{children}</SearchContextProvider>;
+  const newDate = useMemo(() => checkSearchDate(date ?? dayjs()), [date]);
+
+  return (
+    <SearchContextProvider value={{ ...state, date: newDate, dispatch }}>
+      {children}
+    </SearchContextProvider>
+  );
 });
 
 Context.displayName = "SearchContext";

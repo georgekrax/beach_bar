@@ -5,6 +5,7 @@ import dayjs from "dayjs";
 import minMax from "dayjs/plugin/minMax";
 import { Cart } from "entity/Cart";
 import { Payment } from "entity/Payment";
+import { Product } from "entity/Product";
 import { uniqBy } from "lodash";
 import uniq from "lodash/uniq";
 import { extendType, idArg, intArg, nullable, stringArg } from "nexus";
@@ -18,6 +19,34 @@ dayjs.extend(minMax);
 export const PaymentQuery = extendType({
   type: "Query",
   definition(t) {
+    t.boolean("hey", {
+      resolve: async (): Promise<boolean> => {
+        const product = await Product.findOne({ where: { id: 105 }, relations: ["reservationLimits", "reservedProducts"] });
+        if (!product) return false;
+        const limits = product.getReservationLimit(dayjs("04/05/2021").format(), "12");
+        if (!limits) return false;
+        const reserved = product.getReservedProducts(dayjs("04/05/2021").format(), "13");
+        const available = reserved.length < limits;
+        console.log(available);
+        return true;
+      },
+    });
+    t.boolean("isProductAvailable", {
+      resolve: async (): Promise<boolean> => {
+        // const me = await isProductAvailable(105, dayjs("04/06/2021"), "13");
+        const product = await Product.findOne({
+          where: { id: "105" },
+          relations: ["reservedProducts", "reservationLimits", "beachBar", "beachBar.products", "beachBar.products.category"],
+        });
+        if (!product) return false;
+        // const remainingAvailable = await redis.hget("available_products:2021-05-31:1300", product.getRedisAvailableProductsKey());
+        const hey = await product.beachBar.calcRecommendedProducts({ date: "2021-05-31", timeId: "13", totalPeople:  5 });
+        // const hey = await product.isAvailable({ date: "2021-05-31", timeId: "13" });
+        console.log(hey);
+        return true;
+        // return !remainingAvailable ? false : (parseInt(remainingAvailable)) > 0;
+      },
+    });
     t.list.field("payments", {
       type: PaymentVisitsType,
       description: "Get a list of payments for a specific / latest month of an authenticated user",

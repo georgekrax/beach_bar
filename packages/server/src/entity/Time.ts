@@ -25,6 +25,12 @@ export class HourTime extends BaseEntity {
 
   @OneToMany(() => ReservedProduct, reservedProduct => reservedProduct.time, { nullable: true })
   reservedProductTimes?: ReservedProduct[];
+
+  @OneToMany(() => BeachBar, beachBar => beachBar.openingTime)
+  beachBarsOpeningTime: BeachBar[];
+
+  @OneToMany(() => BeachBar, beachBar => beachBar.closingTime)
+  beachBarsClosingTime: BeachBar[];
 }
 
 @Entity({ name: "month_time", schema: "public" })
@@ -50,10 +56,4 @@ export class QuarterTime extends BaseEntity {
 
   @Column({ type: "time without time zone", scale: 0, name: "value" })
   value: string;
-
-  @OneToMany(() => BeachBar, beachBar => beachBar.openingTime)
-  beachBarsOpeningTime: BeachBar[];
-
-  @OneToMany(() => BeachBar, beachBar => beachBar.closingTime)
-  beachBarsClosingTime: BeachBar[];
 }

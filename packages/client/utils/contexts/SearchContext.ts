@@ -12,6 +12,7 @@ export type SearchContextType = {
   date?: Dayjs;
   hourTime?: number;
   isCartShown: boolean;
+  cartId?: string;
   people?: {
     adults: number;
     children: number;
@@ -42,14 +43,11 @@ export type SearchContextType = {
 
 export const INITIAL_SEARCH_VALUES: SearchContextType = {
   id: "",
-  date: undefined,
   filterPublicIds: [],
-  people: undefined,
   isCartShown: false,
   map: {
     isDialogShown: false,
     isActive: false,
-    sortedResults: undefined,
   },
   coordinates: {
     latitude: userIpAddr().lat,
@@ -62,7 +60,6 @@ export const INITIAL_SEARCH_VALUES: SearchContextType = {
     isTimePickerShown: false,
     isPeopleShown: false,
   },
-  inputValue: undefined,
   results: {
     arr: [],
     filtered: [],

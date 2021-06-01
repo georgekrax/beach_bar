@@ -80,10 +80,15 @@ export const Product: React.FC<ProductFProps> = ({
         <div className="w100">
           <div className="flex-row-space-between-center">
             {/* <BeachBar.Header as="h6" className="body-16"> */}
-            <span className="d--block">{name}</span>
+            <span className="d--block semibold">{name}</span>
             {/* </BeachBar.Header> */}
             {allowRemove && handleRemoveItem && (
-              <Icons.Close width={14} height={14} onClick={async () => await handleRemoveItem(id)} />
+              <Icons.Close
+                className={styles.removeIcon}
+                width={14}
+                height={14}
+                onClick={async () => await handleRemoveItem(id)}
+              />
             )}
           </div>
           <div className="flex-row-flex-start-center">

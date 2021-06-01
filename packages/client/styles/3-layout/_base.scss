@@ -24,3 +24,12 @@
     flex: inherit;
   }
 }
+
+@include responsive() {
+  .layout__shopping-cart {
+    right: 0;
+    max-width: 26em;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+}

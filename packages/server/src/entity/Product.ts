@@ -1,6 +1,7 @@
 import { errors } from "@beach_bar/common";
 import { ApolloError } from "apollo-server-express";
-import { Dayjs } from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
+import { redis } from "index";
 import {
   BaseEntity,
   Between,
@@ -16,7 +17,6 @@ import {
   UpdateDateColumn,
 } from "typeorm";
 import { ProductAvailabilityHourReturnType } from "typings/beach_bar/product";
-import { checkProductAvailable } from "utils/beach_bar/availability";
 import { checkMinimumProductPrice } from "utils/beach_bar/checkMinimumProductPrice";
 import { checkScopes } from "utils/checkScopes";
 import { softRemove } from "utils/softRemove";
@@ -94,26 +94,53 @@ export class Product extends BaseEntity {
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Dayjs;
 
+  getRedisAvailabilityKey() {
+    return `beach_bar:${this.beachBarId}:product:${this.id}`;
+  }
+
   getReservationLimit(date: string, timeId?: string): number | undefined {
-    const barLimits = this.beachBar.getReservationLimits(date, timeId);
-    const limits = barLimits.filter(({ productId }) => productId.toString() === this.id.toString());
-    if (limits.length > 0 && timeId) {
+    // const barLimits = this.beachBar.getReservationLimits(date, timeId);
+    let limits = this.reservationLimits;
+    if (!limits) return undefined;
+    if (date) limits = limits.filter(limit => dayjs(limit.date).isSame(date));
+    if (timeId) {
       const parsed = parseInt(timeId);
-      const limitNumbers = limits.filter(limit => parsed >= limit.startTimeId && parsed <= limit.endTimeId);
-      if (limitNumbers) return limitNumbers.reduce((sum, i) => sum + i.limitNumber, 0);
-      else return undefined;
-    } else return Math.floor(limits.reduce((sum, i) => sum + i.limitNumber, 0) / limits.length);
+      limits = limits.filter(limit => limit.startTimeId <= parsed && limit.endTimeId >= parsed);
+    }
+    console.log(limits);
+    // if (limits.length > 0 && timeId) {
+    //   const parsed = parseInt(timeId);
+    //   const limitNumbers = limits.filter(limit => parsed >= limit.startTimeId && parsed <= limit.endTimeId);
+    //   if (limitNumbers) return limitNumbers.reduce((sum, i) => sum + i.limitNumber, 0);
+    //   else return undefined;
+    // } else return Math.floor(limits.reduce((sum, i) => sum + i.limitNumber, 0) / limits.length);
+    // return Math.floor(limits.reduce((sum, i) => sum + i.limitNumber, 0) / limits.length);
+    return limits.reduce((sum, i) => sum + i.limitNumber, 0);
   }
 
   getReservedProducts(date: string, timeId?: string): ReservedProduct[] {
-    return this.beachBar
-      .getReservedProducts(date, timeId)
-      .filter(reservedProduct => reservedProduct.productId.toString() === this.id.toString());
+    let reserved = this.reservedProducts;
+    if (!reserved) throw new ApolloError("`reservedProducts` are not fetched with the `Product` entity");
+    if (date) reserved = reserved.filter(product => dayjs(product.date).isSame(date));
+    if (timeId) reserved = reserved.filter(product => product.timeId.toString() === timeId);
+    return reserved;
+    // return this.beachBar
+    //   .getReservedProducts(date, timeId)
+    // .filter(reservedProduct => reservedProduct.productId.toString() === this.id.toString());
   }
 
-  isAvailable(date: string, timeId?: string, totalPeople?: number, elevator: number = 0) {
-    const { quantity } = checkProductAvailable(this, date, timeId, totalPeople, elevator);
-    return { quantity, available: quantity > 0 };
+  // isAvailable(date: string, timeId?: string, totalPeople?: number, elevator: number = 0) {
+  //   const { quantity } = checkProductAvailable(this, date, timeId, totalPeople, elevator);
+  //   return { quantity, available: quantity > 0 };
+  // }
+
+  async isAvailable({ date, timeId, elevator = 0 }: { date: string; timeId: string; elevator?: number }): Promise<boolean> {
+    const availableProducts = await redis.hget(
+      this.beachBar.getRedisAvailabilityKey({ date, timeId }),
+      this.getRedisAvailabilityKey()
+    );
+    if (!availableProducts) return false;
+    return parseInt(availableProducts.toString()) - elevator > 0;
   }
 
   async getHoursAvailability(date: string): Promise<ProductAvailabilityHourReturnType[]> {
@@ -125,9 +152,9 @@ export class Product extends BaseEntity {
 
     const results: ProductAvailabilityHourReturnType[] = [];
     for (let i = 0; i < hourTimes.length; i++) {
-      const element = hourTimes[i];
-      const { available } = this.isAvailable(date, element.id.toString());
-      results.push({ hourTime: element, isAvailable: available });
+      const hourTime = hourTimes[i];
+      const isAvailable = await this.isAvailable({ date, timeId: hourTime.id.toString() });
+      results.push({ hourTime, isAvailable });
     }
     return results;
   }

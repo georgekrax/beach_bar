@@ -37,7 +37,7 @@ export const SelectedDetails: React.FC<MapReducerInitialStateType["selectedBeach
             </div>
           ))}
         </div> */}
-        <Link href={{ pathname: "/beach/[slug]", query: { slug } }} passHref>
+        <Link href={{ pathname: "/beach/[...slug]", query: { slug: [slug] } }} passHref>
           <a className={styles.btn + " btn iw100"}>Go to #beach_bar</a>
         </Link>
       </div>

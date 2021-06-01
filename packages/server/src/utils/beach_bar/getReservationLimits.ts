@@ -14,3 +14,4 @@ export const getReservationLimits = (beachBar: BeachBar, date?: string, timeId?:
   }
   return reservationLimits;
 };
+

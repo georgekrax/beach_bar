@@ -2,11 +2,9 @@
   &__description {
     @extend .light;
     color: $grey-9;
-    text-align: center;
   }
-
+  
   &__other {
-    text-align: center;
     margin: map-get($em-spacers, 16) 0 map-get($em-spacers, 8);
   }
 

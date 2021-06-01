@@ -4,7 +4,9 @@
   border-radius: 14px;
   // background-color: $grey-1;
   color: $grey-9;
+  user-select: none;
   @include transition-2s("ease-out", "background-color");
+  @include products-filters-btn--checked();
 
   & > svg {
     flex-shrink: 0;
@@ -13,10 +15,6 @@
   & > div:not(:only-child) {
     margin-left: 0.65em;
   }
-
-  &.checked {
-    background: rgba($grey-4, 0.75);
-  }
 }
 
 .quantityX {
@@ -24,8 +22,7 @@
 }
 
 .bull {
-  margin: 0 map-get($em-spacers, 4);
-  color: rgba($grey-9, 0.85);
+  margin: 0 0.35em;
 }
 
 .search {

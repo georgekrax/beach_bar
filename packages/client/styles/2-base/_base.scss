@@ -29,6 +29,10 @@
   height: 100% !important;
 }
 
+.h--inherit {
+  height: inherit;
+}
+
 .border-radius--lg {
   border-radius: 999px;
 }
@@ -53,12 +57,33 @@
   display: block !important;
 }
 
+.d--inline {
+  display: inline;
+}
+
 .d--ib {
   display: inline-block;
 }
 
 .id--ib {
   display: inline-block !important;
+}
+
+.d--if {
+  display: inline-flex;
+}
+
+/* Margin */
+.m0 {
+  margin: 0 !important;
+}
+
+.m-tb--auto {
+  margin: auto 0;
+}
+
+.im-tb--auto {
+  margin: auto 0 !important;
 }
 
 .normal {
@@ -107,4 +132,8 @@
 
 .text-ws--nowrap {
   white-space: nowrap;
+}
+
+.text--center {
+  text-align: center;
 }

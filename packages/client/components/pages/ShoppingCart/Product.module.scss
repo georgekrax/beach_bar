@@ -60,3 +60,15 @@
     }
   }
 }
+
+.removeIcon {
+  cursor: pointer;
+  transform-origin: top right;
+  @include transition-2s("ease-out", "transform");
+  transition-duration: .1s;
+
+  &:hover,
+  &:active {
+    transform: scale(1.25);
+  }
+}

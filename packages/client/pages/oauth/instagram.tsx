@@ -52,9 +52,9 @@ const InstagramCallback: React.FC = () => {
   // if (
   //   typeof window !== "undefined" &&
   //   process.env.NODE_ENV !== "production" &&
-  //   window.location.href.includes("192.168.1.7")
+  //   window.location.href.includes("192.168.1.8")
   // )
-  //   router.replace(window.location.href.replace("192.168.1.7:3000", "192.168.1.8:3000"));
+  //   router.replace(window.location.href.replace("192.168.1.8:3000", "192.168.1.8:3000"));
 
   return (
     <OAuth.Redirect provider="Instagram" errors={graphqlErrors}>
@@ -67,7 +67,7 @@ const InstagramCallback: React.FC = () => {
           other={false}
           handleClick={false}
           children={
-            <Auth.Container.FormGroup onSubmit={handleSubmit(authorize)}>
+            <Auth.FormGroup onSubmit={handleSubmit(authorize)}>
               <Input
                 {...email}
                 placeholder="Email"
@@ -75,7 +75,7 @@ const InstagramCallback: React.FC = () => {
                 secondhelptext={{ error: true, value: errors.email?.message }}
               />
               <Auth.CTA btn="Login" errors={graphqlErrors} />
-            </Auth.Container.FormGroup>
+            </Auth.FormGroup>
           }
         />
       </LoginDialog>

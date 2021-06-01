@@ -1679,7 +1679,7 @@ type Mutation {
     date: Date!
 
     """The ID value of the hour time of product use"""
-    timeId: ID
+    timeId: ID!
   ): AddCartProduct!
 
   """Update the quantity of a product in a shopping cart"""
@@ -2218,9 +2218,6 @@ type Query {
   """Check a #beach_bar's availability"""
   checkBeachBarAvailability(beachBarId: ID!, availability: SearchInput!): BeachBarAvailability!
 
-  """Get a list with a #beach_bar's available products"""
-  availableProducts(beachBarId: ID!, availability: SearchInput!): [ProductAvailability!]!
-
   """A list with all the available #beach_bars"""
   getAllBeachBars: [BeachBar!]!
 
@@ -2302,6 +2299,8 @@ type Query {
   Returns the URL where the user will be redirected to login with Instagram
   """
   getInstagramOAuthUrl: URL!
+  hey: Boolean!
+  isProductAvailable: Boolean!
 
   """
   Get a list of payments for a specific / latest month of an authenticated user

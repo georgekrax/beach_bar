@@ -228,7 +228,7 @@ export const reducer = (
           case REVIEW_SCORES.DELIGHTFUL.publicId:
           case REVIEW_SCORES.EXCELLENT.publicId:
           case GENERAL.EXCELLENT.publicId:
-            newArr = filterByRating<typeof newArr[number]>(
+            newArr = filterByRating<any>(
               filterPublicIds,
               newArr.map(({ beachBar: { __typename, ...rest } }) => rest)
             );

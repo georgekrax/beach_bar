@@ -14,5 +14,4 @@ export type ProductAvailabilityHourReturnType = HourTimeReturnType & {
   isAvailable: boolean;
 };
 
-export type TProductAvailability = ProductType & { quantity: number }
-
+export type BeachBarRecommendedProductsType = { product: Product; quantity: number }[];

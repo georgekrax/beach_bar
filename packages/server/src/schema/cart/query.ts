@@ -2,6 +2,7 @@ import { errors, MyContext } from "@beach_bar/common";
 import { ApolloError } from "apollo-server-errors";
 import { UserInputError } from "apollo-server-express";
 import { Cart, CartRepository } from "entity/Cart";
+import ms from "ms";
 import { extendType, idArg, intArg, nullable } from "nexus";
 import { getCustomRepository } from "typeorm";
 import { CartType } from "./types";
@@ -51,9 +52,17 @@ export const CartQuery = extendType({
       type: CartType,
       description: "Get the latest cart of an authenticated user or create one",
       args: { cartId: nullable(idArg({ description: "The ID values of the shopping cart, if it is created previously" })) },
-      resolve: async (_, { cartId }, { payload }: MyContext): Promise<Cart> => {
-        const cart = await getCustomRepository(CartRepository).getOrCreateCart(payload, cartId, true);
+      resolve: async (_, { cartId }, { req, res, payload }: MyContext): Promise<Cart> => {
+        const idCookie = req.cookies["cart_id"];
+        const cart = await getCustomRepository(CartRepository).getOrCreateCart(payload, cartId || parseInt(idCookie), false);
         if (!cart) throw new ApolloError(errors.SOMETHING_WENT_WRONG);
+        if (!idCookie)
+          res.cookie("cart_id", cart.id, {
+            httpOnly: false,
+            secure: process.env.NODE_ENV === "production",
+            maxAge: ms("2 weeks"),
+            sameSite: "strict",
+          });
         return cart;
       },
     });

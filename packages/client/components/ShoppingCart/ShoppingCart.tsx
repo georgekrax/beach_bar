@@ -1,4 +1,5 @@
 import Next from "@/components/Next";
+import { NextMotionContainer } from "@/components/Next/MotionContainer";
 import ShoppingCartPage from "@/components/pages/ShoppingCart";
 import Section from "@/components/Section";
 import { CartDocument, CartQuery, useCartQuery, useDeleteCartProductMutation } from "@/graphql/generated";
@@ -6,10 +7,9 @@ import { useAuth } from "@/utils/hooks";
 import { notify } from "@/utils/notify";
 import { calcCartTotal, calcCartTotalProducts, getCartBeachBars } from "@/utils/payment";
 import { Button, Dialog } from "@hashtag-design-system/components";
-import { NextMotionContainer } from "@/components/Next/MotionContainer";
 import groupBy from "lodash/groupBy";
 import Link from "next/link";
-import { useMemo, useRef, useState } from "react";
+import { memo, useMemo, useRef, useState } from "react";
 import { Total } from "./Total";
 
 type SubComponents = {
@@ -18,10 +18,10 @@ type SubComponents = {
 
 type Props = {};
 
-const ShoppingCart: React.FC<Props> & SubComponents = () => {
+// @ts-expect-error
+const ShoppingCart: React.NamedExoticComponent<Props> & SubComponents = memo(() => {
   const [productToDelete, setProductToDelete] = useState<{ isDialogShown: boolean; cartProductId?: string }>({
     isDialogShown: false,
-    cartProductId: undefined,
   });
   const ref = useRef<HTMLDivElement>(null);
 
@@ -29,8 +29,10 @@ const ShoppingCart: React.FC<Props> & SubComponents = () => {
   const { data, loading, error } = useCartQuery({
     fetchPolicy: "cache-and-network",
     nextFetchPolicy: "cache-first",
+    // variables: { cartId: "252" },
   });
   const [deleteProduct] = useDeleteCartProductMutation();
+  console.log("cart", data);
 
   const handleRemoveItem = async (id: string) => setProductToDelete({ isDialogShown: true, cartProductId: id });
 
@@ -38,13 +40,12 @@ const ShoppingCart: React.FC<Props> & SubComponents = () => {
   const groupedProducts = useMemo(() => beachBars && groupBy(data?.cart?.products, "product.beachBar.id"), [beachBars]);
   const thereIsShoppingCart = useMemo(() => (beachBars ? beachBars.length > 0 : false), [beachBars]);
   const total = useMemo(() => calcCartTotal(data?.cart?.products), [data]);
+  const doNotHave = useMemo(() => !thereIsShoppingCart || error || !data, [thereIsShoppingCart, error, data]);
 
   return (
     <div>
       {loading ? (
         <h2>Loading...</h2>
-      ) : error || !data ? (
-        <h2>Error</h2>
       ) : (
         <NextMotionContainer>
           <div className="flex-row-space-between-center">
@@ -53,11 +54,16 @@ const ShoppingCart: React.FC<Props> & SubComponents = () => {
                 My <span className="normal">cart</span>
               </>
             </Section.PageHeader>
-            {thereIsShoppingCart && (
-              <span className="body-14">Total items: {calcCartTotalProducts(data.cart?.products)}</span>
-            )}
+            {!doNotHave && <span className="body-14">Total items: {calcCartTotalProducts(data!.cart?.products)}</span>}
           </div>
-          {thereIsShoppingCart ? (
+          {doNotHave ? (
+            <Next.DoNotHave msg="Your shopping cart is empty" emoji="😢">
+              <Next.Link href={{ pathname: "/search", query: { box: true } }}>
+                {/* <a>🛒 Continue shopping</a> */}
+                <a>🛒 Continue searching to fill it!</a>
+              </Next.Link>
+            </Next.DoNotHave>
+          ) : (
             <>
               <div className="shopping-cart__bars flex-column-flex-start-flex-start">
                 {(beachBars || [])
@@ -91,13 +97,6 @@ const ShoppingCart: React.FC<Props> & SubComponents = () => {
                 </Link>
               </div>
             </>
-          ) : (
-            <Next.DoNotHave msg="Your shopping cart is empty" emoji="😢">
-              <Next.Link href={{ pathname: "/search", query: { box: true } }}>
-                {/* <a>🛒 Continue shopping</a> */}
-                <a>🛒 Continue searching to fill it!</a>
-              </Next.Link>
-            </Next.DoNotHave>
           )}
           <Dialog
             isShown={productToDelete.isDialogShown}
@@ -135,10 +134,10 @@ const ShoppingCart: React.FC<Props> & SubComponents = () => {
       )}
     </div>
   );
-};
+});
 
 ShoppingCart.Total = Total;
 
 ShoppingCart.displayName = "ShoppingCart";
 
-export default ShoppingCart; 
+export default ShoppingCart;

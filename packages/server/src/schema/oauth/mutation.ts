@@ -100,8 +100,7 @@ export const AuthorizeWithOAuthProviders = extendType({
         sendCookieToken(res, accessToken.token, "access");
 
         try {
-          await redis.hset(user.getRedisKey() as KeyType, "access_token", accessToken.token);
-          await redis.hset(user.getRedisKey() as KeyType, "refresh_token", refreshToken.token);
+          await redis.hset(user.getRedisKey() as KeyType, "access_token", accessToken.token, "refresh_token", refreshToken.token);
 
           user.googleId = googleId;
           user.account.isActive = true;
@@ -277,8 +276,7 @@ export const AuthorizeWithOAuthProviders = extendType({
         sendCookieToken(res, accessToken.token, "access");
 
         try {
-          await redis.hset(user.getRedisKey() as KeyType, "access_token", accessToken.token);
-          await redis.hset(user.getRedisKey() as KeyType, "refresh_token", refreshToken.token);
+          await redis.hset(user.getRedisKey() as KeyType, "access_token", accessToken.token, "refresh_token", refreshToken.token);
 
           user.facebookId = facebookId;
           user.account.isActive = true;
@@ -428,8 +426,7 @@ export const AuthorizeWithOAuthProviders = extendType({
         sendCookieToken(res, accessToken.token, "access");
 
         try {
-          await redis.hset(user.getRedisKey() as KeyType, "access_token", accessToken.token);
-          await redis.hset(user.getRedisKey() as KeyType, "refresh_token", refreshToken.token);
+          await redis.hset(user.getRedisKey() as KeyType, "access_token", accessToken.token, "refresh_token", refreshToken.token);
 
           user.instagramId = instagramId;
           user.account.isActive = true;

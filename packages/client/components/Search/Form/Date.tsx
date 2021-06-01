@@ -13,11 +13,8 @@ export const Date: React.FC<Props> = () => {
   const isDesktop = useIsDesktop();
   const { date, dispatch } = useSearchContext();
 
-  const defaultDate = useMemo(() => checkSearchDate(date ?? dayjs()), [date]);
-
-  const handleDateSelect = (newDate: Dayjs) => {
+  const handleDateSelect = (newDate: Dayjs) =>
     dispatch({ type: SEARCH_ACTIONS.HANDLE_DATE_SELECT, payload: { newDate } });
-  };
 
   return (
     <DatePicker
@@ -39,14 +36,14 @@ export const Date: React.FC<Props> = () => {
       }}
       onChange={({ selectedDate }) => {
         const newDate = selectedDate[0];
-        if (!newDate.isSame(defaultDate)) handleDateSelect(newDate);
+        if (date && !newDate.isSame(date)) handleDateSelect(newDate);
       }}
       disabledDays={{
         days: [],
         from: { date: checkSearchDate(dayjs()).startOf("day") },
         till: { date: dayjs().month(9).date(31) },
       }}
-      defaultDates={[defaultDate]}
+      defaultDates={date ? [date] : undefined}
     />
   );
 };

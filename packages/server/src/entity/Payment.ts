@@ -1,4 +1,4 @@
-import { errors } from "@beach_bar/common";
+import { dayjsFormat, errors } from "@beach_bar/common";
 import { DATA } from "constants/data";
 import dayjs, { Dayjs } from "dayjs";
 import minMax from "dayjs/plugin/minMax";
@@ -17,6 +17,7 @@ import {
 } from "typeorm";
 import { GetRefundPercentage } from "typings/payment";
 import { softRemove } from "utils/softRemove";
+import { redis } from "../index";
 import { BeachBar } from "./BeachBar";
 import { BeachBarReview } from "./BeachBarReview";
 import { Card } from "./Card";
@@ -96,15 +97,21 @@ export class Payment extends BaseEntity {
     if (cartProducts) {
       const newReservedProducts: ReservedProduct[] = [];
       for (let i = 0; i < cartProducts.length; i++) {
-        const cartProduct = cartProducts[i];
-        const newReservedProduct = ReservedProduct.create({
-          product: cartProduct.product,
-          payment: this,
-          date: cartProduct.date,
-          time: cartProduct.time,
-        });
+        const { product, date, time, quantity } = cartProducts[i];
+        const newReservedProduct = ReservedProduct.create({ payment: this, product, date, time });
         await newReservedProduct.save();
         newReservedProducts.push(newReservedProduct);
+        const fDate = date.format(dayjsFormat.ISO_STRING);
+        const redisKey = `available_products:${fDate}:${time.id.toString().padEnd(4, "0")}`;
+        const fTimeId = time.id.toString();
+        const limits = product.getReservationLimit(fDate, fTimeId);
+        if (!limits) {
+          redis.del(redisKey);
+          return;
+        }
+        const reserved = product.getReservedProducts(fDate, fTimeId);
+        const availableLeft = limits - reserved.length - quantity;
+        await redis.hset(redisKey, "beach_bar:" + product.beachBarId + ":product:" + product.id, availableLeft);
       }
 
       if (newReservedProducts.length === 0) throw new Error(errors.SOMETHING_WENT_WRONG);
@@ -126,22 +133,18 @@ export class Payment extends BaseEntity {
     const daysDiff = dayjs(minDate).toDate().getTime() - dayjs().toDate().getTime();
     const refundPercentage = await RefundPercentage.findOne({
       where: { daysMilliseconds: LessThanOrEqual(daysDiff) },
-      order: {
-        daysMilliseconds: "DESC",
-      },
+      order: { daysMilliseconds: "DESC" },
     });
     if (!refundPercentage) return undefined;
 
-    return {
-      refundPercentage,
-      daysDiff,
-    };
+    return { refundPercentage, daysDiff };
   }
 
   hasBeachBarProduct(beachBarId: string): boolean {
     if ((this.cart.products?.length || 0) > 0) {
       return this.cart.products!.some(product => product.product.beachBarId.toString() === beachBarId && !product.product.deletedAt);
-    } else return false;
+    }
+    return false;
   }
 
   getProductsMonth(beachBarId: number): number[] | undefined {

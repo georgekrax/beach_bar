@@ -61,7 +61,7 @@ export const MainPage: React.FC<Props> = ({ products, barCurrencySymbol }) => {
           <BeachBar.SearchInfo bg="blue" />
           <div className={styles.filters}>
             {componentsArr.length > 1 && (
-              <div className={styles.components + " flex-row-flex-start-center"}>
+              <div className={styles.components + " no-scrollbar flex-row-flex-start-center"}>
                 <div className="semibold">Included: </div>
                 {componentsArr.map(({ name, icon: { publicId } }) => (
                   <BeachBar.Feature
@@ -96,7 +96,6 @@ export const MainPage: React.FC<Props> = ({ products, barCurrencySymbol }) => {
               className={styles.product}
               id={id}
               extraDetails
-              addToCart
               defaultCurrencySymbol={barCurrencySymbol}
               {...product}
             />
