@@ -48,7 +48,7 @@
     "@graphql-codegen/typescript-graphql-files-modules": "^1.18.1",
     "@graphql-codegen/typescript-operations": "^1.17.16",
     "@graphql-codegen/typescript-react-apollo": "^2.2.4",
-    "@types/node": "^15.3.1",
+    "@types/node": "^16.3.3",
     "@types/react": "^17.0.6",
     "@types/react-dom": "^17.0.5",
     "@types/react-map-gl": "^5.2.9",
