@@ -1,3 +1,4 @@
+import { softRemove } from "@/utils/softRemove";
 import { Dayjs } from "dayjs";
 import {
   BaseEntity,
@@ -11,7 +12,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { softRemove } from "utils/softRemove";
 import { BeachBarReview } from "./BeachBarReview";
 import { ReviewVoteType } from "./ReviewVoteType";
 import { User } from "./User";
@@ -34,7 +34,7 @@ export class ReviewVote extends BaseEntity {
   @JoinColumn({ name: "review_id" })
   review: BeachBarReview;
 
-  @OneToOne(() => User, user => user.reviewVotes, { nullable: false, cascade: ["soft-remove", "recover"] })
+  @ManyToOne(() => User, user => user.reviewVotes, { nullable: false, cascade: ["soft-remove", "recover"] })
   @JoinColumn({ name: "user_id" })
   user: User;
 

@@ -1,8 +1,14 @@
 import { MyContext } from "@beach_bar/common";
-import { User } from "../entity/User";
-import { TUser } from "../typings/user";
+import { Prisma } from "@prisma/client";
 
-export const userInfoPayloadScope = ({ scope }: NonNullable<MyContext["payload"]>, user: User): TUser => {
+// userInfoPayloadScope()
+export const UserInfoPayloadScopeInclude = Prisma.validator<Prisma.UserInclude>()({
+  account: { include: { country: true } },
+  customer: { include: { reviews: true } },
+});
+type UserInfoPayloadScopeModel = Prisma.UserGetPayload<{ include: typeof UserInfoPayloadScopeInclude }>;
+
+export const userInfoPayloadScope = ({ scope }: NonNullable<MyContext["payload"]>, user: UserInfoPayloadScopeModel) => {
   const { id, account, customer } = user;
 
   return {
@@ -12,54 +18,57 @@ export const userInfoPayloadScope = ({ scope }: NonNullable<MyContext["payload"]
       : undefined,
     account: scope.some(scope => ["beach_bar@crud:user", "beach_bar@read:user_account"].includes(scope))
       ? {
-          id: account.id,
+          id: account?.id,
           user,
           userId: id,
           honorificTitle: scope.some(
-            scope => ["beach_bar@crud:user", "hashtag@read:user_account:person_title"].includes(scope) && user.account.honorificTitle
+            scope => ["beach_bar@crud:user", "hashtag@read:user_account:person_title"].includes(scope) && user.account?.honorificTitle
           )
-            ? account.honorificTitle
+            ? account?.honorificTitle
             : undefined,
-          imgUrl: account.imgUrl && account.imgUrl,
+          imgUrl: account?.imgUrl,
           birthday: scope.some(
             scope =>
-              ["beach_bar@crud:user", "hashtag@read:user_account:birthday_and_age"].includes(scope) && user.account.birthday !== "none"
+              ["beach_bar@crud:user", "hashtag@read:user_account:birthday_and_age"].includes(scope) &&
+              user.account?.birthday?.toString() !== "none"
           )
-            ? account.birthday
+            ? account?.birthday
             : undefined,
           age: scope.some(
-            scope => ["beach_bar@crud:user", "hashtag@read:user_account:birthday_and_age"].includes(scope) && account.age
+            scope => ["beach_bar@crud:user", "hashtag@read:user_account:birthday_and_age"].includes(scope) && account?.age
           )
-            ? account.age
+            ? account?.age
             : undefined,
-          country: scope.some(scope => ["beach_bar@crud:user", "hashtag@read:user_account:country"].includes(scope) && account.country)
-            ? account.country
+          country: scope.some(
+            scope => ["beach_bar@crud:user", "hashtag@read:user_account:country"].includes(scope) && account?.country
+          )
+            ? account?.country
             : undefined,
           countryId: scope.some(
-            scope => ["beach_bar@crud:user", "hashtag@read:user_account:country"].includes(scope) && account.country
+            scope => ["beach_bar@crud:user", "hashtag@read:user_account:country"].includes(scope) && account?.country
           )
-            ? account.country?.id
+            ? account?.country?.id
             : undefined,
-          city: scope.some(scope => ["beach_bar@crud:user", "hashtag@read:user_account:city"].includes(scope) && account.city)
-            ? account.city
+          city: scope.some(scope => ["beach_bar@crud:user", "hashtag@read:user_account:city"].includes(scope) && account?.city)
+            ? account?.city
             : undefined,
           address: scope.some(
-            scope => ["beach_bar@crud:user", "beach_bar@read:user_account:address"].includes(scope) && account.address
+            scope => ["beach_bar@crud:user", "beach_bar@read:user_account:address"].includes(scope) && account?.address
           )
-            ? account.address
+            ? account?.address
             : undefined,
           zipCode: scope.some(
-            scope => ["beach_bar@crud:user", "beach_bar@read:user_account:zip_code"].includes(scope) && account.zipCode
+            scope => ["beach_bar@crud:user", "beach_bar@read:user_account:zip_code"].includes(scope) && account?.zipCode
           )
-            ? account.zipCode
+            ? account?.zipCode
             : undefined,
           phoneNumber: scope.some(
-            scope => ["beach_bar@crud:user", "beach_bar@read:user_account:phone_number"].includes(scope) && account.phoneNumber
+            scope => ["beach_bar@crud:user", "beach_bar@read:user_account:phone_number"].includes(scope) && account?.phoneNumber
           )
-            ? account.phoneNumber
+            ? account?.phoneNumber
             : undefined,
           trackHistory: scope.some(scope => ["beach_bar@crud:user", "beach_bar@read:user_account"].includes(scope))
-            ? account.trackHistory
+            ? account?.trackHistory
             : undefined,
         }
       : undefined,

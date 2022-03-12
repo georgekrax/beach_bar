@@ -1,11 +1,12 @@
-import { dayjsFormat, toSlug } from "@beach_bar/common";
+import relations from "@/constants/relations";
+import { beachBarReviewRatingMaxValue } from "@/constants/_index";
+import { getRedisKey } from "@/utils/db";
+import { softRemove } from "@/utils/softRemove";
+import { errors, TABLES, toSlug } from "@beach_bar/common";
 import { generateId } from "@the_hashtag/common";
-import redisKeys from "constants/redisKeys";
-import relations from "constants/relations";
-import { beachBarReviewRatingMaxValue } from "constants/_index";
+import { ApolloError } from "apollo-server-core";
 import dayjs, { Dayjs } from "dayjs";
-import { Redis } from "ioredis";
-import chunk from "lodash/chunk";
+import isBetween from "dayjs/plugin/isBetween";
 import {
   AfterInsert,
   AfterUpdate,
@@ -25,13 +26,8 @@ import {
   Repository,
   UpdateDateColumn,
 } from "typeorm";
-import { GetBeachBarPaymentDetails } from "typings/beach_bar";
-import { BeachBarRecommendedProductsType } from "typings/beach_bar/product";
-import { getReservationLimits } from "utils/beach_bar/getReservationLimits";
-import { getReservedProducts } from "utils/beach_bar/getReservedProducts";
-import { numberTypeToNum, toFixed2 } from "utils/format";
-import { softRemove } from "utils/softRemove";
 import { redis } from "../index";
+import { AppTransaction } from "./AppTransaction";
 import { BeachBarCategory } from "./BeachBarCategory";
 import { BeachBarFeature } from "./BeachBarFeature";
 import { BeachBarImgUrl } from "./BeachBarImgUrl";
@@ -40,19 +36,21 @@ import { BeachBarOwner } from "./BeachBarOwner";
 import { BeachBarRestaurant } from "./BeachBarRestaurant";
 import { BeachBarReview } from "./BeachBarReview";
 import { BeachBarType } from "./BeachBarType";
+import { CartNote } from "./CartNote";
 import { CouponCode } from "./CouponCode";
 import { Currency } from "./Currency";
+import { Food } from "./Food";
 import { PricingFee } from "./PricingFee";
 import { Product } from "./Product";
 import { ProductReservationLimit } from "./ProductReservationLimit";
-import { ReservedProduct } from "./ReservedProduct";
 import { SearchInputValue } from "./SearchInputValue";
-import { StripeMinimumCurrency } from "./StripeMinimumCurrency";
 import { HourTime } from "./Time";
 import { UserFavoriteBar } from "./UserFavoriteBar";
 
+dayjs.extend(isBetween);
+
 export type AvailableProductsType = { product: Product; remainingAvailable: number }[];
-export type BeachBarCapacityType = { date: string; timeId: string; totalPeople: number };
+export type BeachBarCapacityType = { date: string; startTimeId: number; endTimeId: number; totalPeople: number };
 
 @Entity({ name: "beach_bar", schema: "public" })
 @Check(`"avgRating" >= 0 AND "avgRating" <= ${beachBarReviewRatingMaxValue}`)
@@ -96,14 +94,17 @@ export class BeachBar extends BaseEntity {
   @Column({ type: "boolean", name: "is_active", default: () => false })
   isActive: boolean;
 
-  @Column({ type: "boolean", name: "is_available", default: () => false })
-  isAvailable: boolean;
+  @Column({ type: "boolean", name: "display_regardless_capacity", default: () => false })
+  displayRegardlessCapacity: boolean;
 
   @Column({ type: "boolean", name: "is_manually_controlled", default: () => false })
   isManuallyControlled: boolean;
 
   @Column({ type: "boolean", name: "zero_cart_total" })
   zeroCartTotal: boolean;
+
+  @Column({ type: "boolean", name: "has_completed_sign_up" })
+  hasCompletedSignUp: boolean;
 
   @Column({ type: "integer", name: "opening_time_id" })
   openingTimeId: number;
@@ -170,6 +171,15 @@ export class BeachBar extends BaseEntity {
   @OneToMany(() => CouponCode, couponCode => couponCode.beachBar, { nullable: true })
   couponCodes: CouponCode[];
 
+  @OneToMany(() => Food, food => food.beachBar)
+  foods: Food[];
+
+  @OneToMany(() => CartNote, cartNote => cartNote.beachBar, { nullable: true })
+  cartNotes?: CartNote[];
+
+  @OneToMany(() => AppTransaction, appTransaction => appTransaction.beachBar)
+  appTransactions: AppTransaction[];
+
   @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
   updatedAt: Dayjs;
 
@@ -179,8 +189,8 @@ export class BeachBar extends BaseEntity {
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Dayjs;
 
-  @AfterInsert()
-  @AfterUpdate()
+  @AfterInsert() // Done
+  @AfterUpdate() // Done
   async updateSearchInputValue(): Promise<void> {
     const inputValue = await SearchInputValue.findOne({ beachBarId: this.id });
     if (this.isActive) {
@@ -233,95 +243,88 @@ export class BeachBar extends BaseEntity {
     } else if (inputValue) await inputValue.softRemove();
   }
 
-  getRedisKey(): string {
-    return redisKeys.BEACH_BAR_CACHE_KEY;
+  // getCacheKey(): string {
+  //   return redisKeys.BEACH_BAR_CACHE_KEY;
+  // }
+
+  getAvailabilityKey({ date, timeId }: Pick<BeachBarCapacityType, "date"> & { timeId: number }): string {
+    return `available_products:${date}:${timeId.toString().padStart(2, "0").padEnd(4, "0")}`;
   }
 
-  getRedisAvailabilityKey({ date, timeId }: Omit<BeachBarCapacityType, "totalPeople">): string {
-    return `available_products:${date}:${timeId.padEnd(4, "0")}`;
+  // getReservationLimits({ date, startTimeId, endTimeId }: Omit<BeachBarCapacityType, "totalPeople">): ProductReservationLimit[] {
+  //   return getReservationLimits(this, date, startTimeId, endTimeId);
+  // }
+
+  // getReservedProducts({ date, startTimeId, endTimeId }: Omit<BeachBarCapacityType, "totalPeople">): ReservedProduct[] {
+  //   return getReservedProducts(this, date, startTimeId, endTimeId);
+  // }
+
+  isOwner(userId: number): boolean | never {
+    const owner = this.owners.find(({ owner, deletedAt }) => String(owner.userId) === String(userId) && !deletedAt);
+    if (!owner) throw new ApolloError(errors.YOU_ARE_NOT_BEACH_BAR_OWNER, errors.NOT_FOUND);
+    return owner !== undefined;
   }
 
-  getReservationLimits(date?: string, timeId?: string): ProductReservationLimit[] {
-    return getReservationLimits(this, date, timeId);
-  }
+  // async hasCapacity(args: BeachBarCapacityType, recommendedArr?: BeachBarRecommendedProductsType) {
+  //   const recommendedProducts = recommendedArr ? recommendedArr : await this.calcRecommendedProducts(args);
+  //   return recommendedProducts.length > 0;
+  // }
 
-  getReservedProducts(date?: string, timeId?: string): ReservedProduct[] {
-    return getReservedProducts(this, date, timeId);
-  }
+  // async getAvailableProducts(
+  //   capacity: Pick<Parameters<typeof getAvailableProducts>["0"], "date" | "startTimeId" | "endTimeId">
+  // ): Promise<AvailableProductsType> {
+  //   // First the capacity, and then `this`, because it is a spread operator, and if the capacity contains
+  //   // ID of another Entity, for example the `Product` one, then it will pass as an ID, the Product.id value
+  //   const res = await getAvailableProducts({ ...capacity, ...this });
+  //   return res;
+  // }
 
-  async hasCapacity(args: BeachBarCapacityType, recommendedArr?: BeachBarRecommendedProductsType) {
-    const recommendedProducts = recommendedArr ? recommendedArr : await this.calcRecommendedProducts(args);
-    return recommendedProducts.length > 0;
-  }
+  // async calcRecommendedProducts({ totalPeople, ...capacity }: BeachBarCapacityType): Promise<BeachBarRecommendedProductsType> {
+  // const availableProducts = await this.getAvailableProducts(capacity);
+  //   const filtered = availableProducts.filter(({ product: { maxPeople } }) => maxPeople >= totalPeople);
+  //   if (availableProducts.length === 0) return [];
+  //   if (filtered.length > 0) {
+  //     const { product } = filtered.sort(
+  //       ({ product: { price: aPrice } }, { product: { price: bPrice } }) => numberTypeToNum(aPrice) - numberTypeToNum(bPrice)
+  //     )[0];
+  //     return [{ product, quantity: 1 }];
+  //   }
 
-  async getAvailableProducts({ date, timeId }: Omit<BeachBarCapacityType, "totalPeople">): Promise<AvailableProductsType> {
-    const [_, products] = await redis.hscan(
-      this.getRedisAvailabilityKey({ date, timeId }),
-      0,
-      "MATCH",
-      `beach_bar:${this.id}:product:*`
-    );
-    const groupedProducts: string[][] = chunk(products, 2);
-    const parsedRes = groupedProducts
-      .map(([key, val]) => {
-        const product = this.products.find(({ id }) => id.toString() === key.split(":")[3]);
-        if (!product) return [];
-        return { product, remainingAvailable: parseInt(val) };
-      })
-      .flat();
-    return parsedRes.filter(({ remainingAvailable }) => remainingAvailable > 0);
-  }
-
-  async calcRecommendedProducts({ date, timeId, totalPeople }: BeachBarCapacityType): Promise<BeachBarRecommendedProductsType> {
-    console.log("date", date)
-    console.log(timeId)
-    console.log(totalPeople);
-    const availableProducts = await this.getAvailableProducts({ date, timeId });
-    const filtered = availableProducts.filter(({ product: { maxPeople } }) => maxPeople >= totalPeople);
-    if (availableProducts.length === 0) return [];
-    if (filtered.length > 0) {
-      console.log("hey")
-      const { product } = filtered.sort(
-        ({ product: { price: aPrice } }, { product: { price: bPrice } }) => numberTypeToNum(aPrice) - numberTypeToNum(bPrice)
-      )[0];
-      return [{ product, quantity: 1 }];
-    }
-
-    let res: BeachBarRecommendedProductsType = [];
-    let remainingPeople = totalPeople;
-    // const mostWithRemainings = Math.max(...availableProducts.map(({ remainingAvailable }) => remainingAvailable));
-    if (totalPeople === 0) throw new Error("totalPeople cannot be zero (0)");
-    while (remainingPeople > 0) {
-      const availableWithQuantity = availableProducts
-        .sort((a, b) => a.product.maxPeople - b.product.maxPeople)
-        .map(({ product, remainingAvailable }) => {
-          const maxPeople = product.maxPeople;
-          const quantity = maxPeople >= remainingPeople ? 1 : Math.floor(remainingPeople / maxPeople);
-          // console.log(product.id, totalPeople, quantity, remainingAvailable);
-          return {
-            product,
-            quantity: remainingAvailable < quantity ? remainingAvailable : quantity, // check for availability after new quantity,
-          };
-        })
-        .filter(({ quantity }) => quantity >= 1);
-      // const wholeQuantityArr = availableWithQuantity.filter(({ quantity }) => quantity % 1 === 0);
-      const whoMinQuantity = availableWithQuantity.sort(
-        ({ product: { price: aPrice }, quantity: aQuantity }, { product: { price: bPrice }, quantity: bQuantity }) => {
-          if (aQuantity < bQuantity && numberTypeToNum(aPrice) > numberTypeToNum(bPrice) && res.length > 0) return 1;
-          return aQuantity - bQuantity;
-        }
-      )[0];
-      if (res.find(({ product: { id } }) => whoMinQuantity.product.id === id)) {
-        res = res.map(item => {
-          if (item.product.id === whoMinQuantity.product.id) return { ...item, quantity: item.quantity + whoMinQuantity.quantity };
-          else return item;
-        });
-      } else res.push(whoMinQuantity);
-      remainingPeople =
-        totalPeople - res.reduce((prev, { product: { maxPeople }, quantity }) => prev + Math.floor(quantity) * maxPeople, 0);
-    }
-    return res;
-  }
+  //   let res: BeachBarRecommendedProductsType = [];
+  //   let remainingPeople = totalPeople;
+  //   // const mostWithRemainings = Math.max(...availableProducts.map(({ remainingAvailable }) => remainingAvailable));
+  //   if (totalPeople === 0) throw new Error("totalPeople cannot be zero (0)");
+  //   while (remainingPeople > 0) {
+  //     const availableWithQuantity = availableProducts
+  //       .sort((a, b) => a.product.maxPeople - b.product.maxPeople)
+  //       .map(({ product, remainingAvailable }) => {
+  //         const maxPeople = product.maxPeople;
+  //         const quantity = maxPeople >= remainingPeople ? 1 : Math.floor(remainingPeople / maxPeople);
+  //         // console.log(product.id, totalPeople, quantity, remainingAvailable);
+  //         return {
+  //           product,
+  //           quantity: remainingAvailable < quantity ? remainingAvailable : quantity, // check for availability after new quantity,
+  //         };
+  //       })
+  //       .filter(({ quantity }) => quantity >= 1);
+  //     // const wholeQuantityArr = availableWithQuantity.filter(({ quantity }) => quantity % 1 === 0);
+  //     const whoMinQuantity = availableWithQuantity.sort(
+  //       ({ product: { price: aPrice }, quantity: aQuantity }, { product: { price: bPrice }, quantity: bQuantity }) => {
+  //         if (aQuantity < bQuantity && numberTypeToNum(aPrice) > numberTypeToNum(bPrice) && res.length > 0) return 1;
+  //         return aQuantity - bQuantity;
+  //       }
+  //     )[0];
+  //     if (res.find(({ product: { id } }) => whoMinQuantity.product.id === id)) {
+  //       res = res.map(item => {
+  //         if (item.product.id === whoMinQuantity.product.id) return { ...item, quantity: item.quantity + whoMinQuantity.quantity };
+  //         else return item;
+  //       });
+  //     } else res.push(whoMinQuantity);
+  //     remainingPeople =
+  //       totalPeople - res.reduce((prev, { product: { maxPeople }, quantity }) => prev + Math.floor(quantity) * maxPeople, 0);
+  //   }
+  //   return res;
+  // }
 
   // getAvailableProducts({ date, timeId, totalPeople = 0 }: AvailabilityArgs): TProductAvailability[] {
   //   return this.products
@@ -333,24 +336,39 @@ export class BeachBar extends BaseEntity {
   //     .flat();
   // }
 
-  async getRedisIdx(redis: Redis): Promise<number> {
-    const beachBars = await redis.lrange(this.getRedisKey(), 0, -1);
+  async getRedisIdx(): Promise<number> {
+    const beachBars = await redis.lrange(getRedisKey({ model: "BeachBar" }), 0, -1);
     return beachBars.findIndex((x: string) => JSON.parse(x).id === this.id);
   }
 
-  async update(
-    name?: string,
-    description?: string,
-    thumbnailUrl?: string,
-    contactPhoneNumber?: string,
-    hidePhoneNumber?: boolean,
-    zeroCartTotal?: boolean,
-    isAvailable?: boolean,
-    isActive?: boolean,
-    categoryId?: number,
-    openingTimeId?: number,
-    closingTimeId?: number
-  ): Promise<BeachBar | any> {
+  async update({
+    name,
+    description,
+    thumbnailUrl,
+    contactPhoneNumber,
+    hidePhoneNumber,
+    zeroCartTotal,
+    displayRegardlessCapacity,
+    isActive,
+    categoryId,
+    openingTimeId,
+    closingTimeId,
+  }: Partial<
+    Pick<
+      BeachBar,
+      | "name"
+      | "description"
+      | "thumbnailUrl"
+      | "contactPhoneNumber"
+      | "hidePhoneNumber"
+      | "zeroCartTotal"
+      | "displayRegardlessCapacity"
+      | "isActive"
+      | "categoryId"
+      | "openingTimeId"
+      | "closingTimeId"
+    >
+  >): Promise<BeachBar | never> {
     try {
       if (name && name !== this.name) {
         this.name = name;
@@ -359,23 +377,27 @@ export class BeachBar extends BaseEntity {
       if (description && description !== this.description) this.description = description;
       if (thumbnailUrl && thumbnailUrl !== this.thumbnailUrl) this.thumbnailUrl = thumbnailUrl.toString();
       if (contactPhoneNumber && contactPhoneNumber !== this.contactPhoneNumber) this.contactPhoneNumber = contactPhoneNumber;
-      if (hidePhoneNumber !== null && hidePhoneNumber !== undefined && hidePhoneNumber !== this.hidePhoneNumber)
+      if (hidePhoneNumber != null && hidePhoneNumber !== this.hidePhoneNumber) {
         this.hidePhoneNumber = hidePhoneNumber;
-      if (zeroCartTotal !== null && zeroCartTotal !== undefined && zeroCartTotal !== this.zeroCartTotal)
+      }
+      if (zeroCartTotal != null && zeroCartTotal !== this.zeroCartTotal) {
         this.zeroCartTotal = zeroCartTotal;
-      if (isAvailable !== null && isAvailable !== undefined && isAvailable !== this.isAvailable) this.isAvailable = isAvailable;
-      if (isActive !== null && isActive !== undefined && isActive !== this.isActive) this.isActive = isActive;
-      if (categoryId && categoryId !== this.categoryId) {
-        const category = await BeachBarCategory.findOne(categoryId);
-        if (category) this.category = category;
       }
-      if (openingTimeId && openingTimeId !== this.openingTimeId) {
-        const quarterTime = await HourTime.findOne(openingTimeId);
-        if (quarterTime) this.openingTime = quarterTime;
+      if (displayRegardlessCapacity != null && displayRegardlessCapacity !== this.displayRegardlessCapacity) {
+        this.displayRegardlessCapacity = displayRegardlessCapacity;
       }
-      if (closingTimeId && closingTimeId !== this.closingTimeId) {
-        const quarterTime = await HourTime.findOne(closingTimeId);
-        if (quarterTime) this.closingTime = quarterTime;
+      if (isActive != null && isActive !== this.isActive) this.isActive = isActive;
+      if (categoryId && categoryId.toString() !== this.categoryId.toString()) {
+        const category = TABLES.BEACH_BAR_CATEGORY.find(({ id }) => id.toString() === categoryId.toString());
+        if (category) this.categoryId = category.id;
+      }
+      if (openingTimeId && openingTimeId.toString() !== this.openingTimeId.toString()) {
+        const openingTime = TABLES.HOUR_TIME.find(({ id }) => id.toString() === openingTimeId.toString());
+        if (openingTime) this.openingTime = openingTime as HourTime;
+      }
+      if (closingTimeId && closingTimeId.toString() !== this.closingTimeId.toString()) {
+        const closingTime = TABLES.HOUR_TIME.find(({ id }) => id.toString() === closingTimeId.toString());
+        if (closingTime) this.closingTime = closingTime as HourTime;
       }
       await this.save();
       await this.updateRedis();
@@ -387,10 +409,7 @@ export class BeachBar extends BaseEntity {
 
   async updateRedis(): Promise<void | Error> {
     try {
-      const beachBar = await BeachBar.findOne({
-        where: { id: this.id },
-        relations: relations.BEACH_BAR_EXTENSIVE,
-      });
+      const beachBar = await BeachBar.findOne({ where: { id: this.id }, relations: relations.BEACH_BAR_EXTENSIVE });
       if (!beachBar) throw new Error();
       beachBar.features = beachBar.features.filter(feature => !feature.deletedAt);
       beachBar.products = beachBar.products.filter(product => !product.deletedAt);
@@ -398,9 +417,9 @@ export class BeachBar extends BaseEntity {
         if (product.reservationLimits && product.reservationLimits?.length > 0)
           product.reservationLimits = product.reservationLimits.filter(limit => !limit.deletedAt);
       });
-      const idx = await beachBar.getRedisIdx(redis);
+      const idx = await beachBar.getRedisIdx();
 
-      await redis.lset(beachBar.getRedisKey(), idx, JSON.stringify(beachBar));
+      await redis.lset(getRedisKey({ model: "BeachBar" }), idx, JSON.stringify(beachBar));
     } catch (err) {
       throw new Error(err.message);
     }
@@ -452,6 +471,7 @@ export class BeachBar extends BaseEntity {
     }
   }
 
+  // type GetFullPricingReturnType = { pricingFee: PricingFee };
   // getFullPricingFee(): GetFullPricingReturnType {
   // const pricingFee = this.fee;
   // const currencyFee = await PricingFeeCurrency.findOne({ currencyId: this.defaultCurrencyId });
@@ -459,32 +479,27 @@ export class BeachBar extends BaseEntity {
   // return pricingFee;
   // }
 
-  getPaymentDetails(total: number, stripeFee: number): GetBeachBarPaymentDetails {
-    const beachBarAppFee = toFixed2((total * parseFloat(this.fee.percentageValue.toString())) / 100);
-    // const beachBarAppFee = toFixed2(percentageFee + parseFloat(currencyFee.numericValue.toString()));
-    const transferAmount = toFixed2(total - beachBarAppFee - stripeFee);
-    return { total, transferAmount, beachBarAppFee, stripeFee };
-  }
-
-  async getMinimumCurrency(): Promise<StripeMinimumCurrency | undefined> {
-    const minimumCurrency = await StripeMinimumCurrency.findOne({ currencyId: this.defaultCurrencyId });
-    return minimumCurrency;
-  }
+  // getPaymentDetails(total: number, stripeFee: number): GetBeachBarPaymentDetails {
+  //   const beachBarAppFee = toFixed2((total * +this.fee.percentageValue.toString()) / 100);
+  //   // const beachBarAppFee = toFixed2(percentageFee + parseFloat(currencyFee.numericValue.toString()));
+  //   const transferAmount = toFixed2(total - beachBarAppFee - stripeFee);
+  //   return { total, transferAmount, beachBarAppFee, stripeFee };
+  // }
 
   // checkAvailability({ date, timeId, totalPeople }: AvailabilityArgs): BeachBarAvailabilityReturnType {
   //   return checkAvailability(this, date, timeId, totalPeople);
   // }
 
-  async customSoftRemove(redis: Redis): Promise<any> {
+  async customSoftRemove(): Promise<any> {
     // delete from search dropdown results
     const inputValues = await SearchInputValue.findOne({ beachBarId: this.id });
     if (inputValues) await SearchInputValue.softRemove(inputValues);
 
     // delete #beach_bar in Redis too
     try {
-      const idx = await this.getRedisIdx(redis);
-      await redis.lset(this.getRedisKey(), idx, "");
-      await redis.lrem(this.getRedisKey(), 0, "");
+      const idx = await this.getRedisIdx();
+      await redis.lset(getRedisKey({ model: "BeachBar" }), idx, "");
+      await redis.lrem(getRedisKey({ model: "BeachBar" }), 0, "");
     } catch (err) {
       throw new Error(err.message);
     }
@@ -514,7 +529,7 @@ export class BeachBar extends BaseEntity {
 @EntityRepository(BeachBar)
 export class BeachBarRepository extends Repository<BeachBar> {
   async findInRedis(): Promise<BeachBar[]> {
-    const redisList = await redis.lrange(redisKeys.BEACH_BAR_CACHE_KEY, 0, -1);
+    const redisList = await redis.lrange(getRedisKey({ model: "BeachBar" }), 0, -1);
     return redisList.map((x: string) => JSON.parse(x));
   }
 
@@ -527,11 +542,8 @@ export class BeachBarRepository extends Repository<BeachBar> {
     let reservationLimits: any[] = beachBar.products
       .filter(product => product.reservationLimits && product.reservationLimits.length > 0)
       .map(product => product.reservationLimits)
-      .map(
-        limits =>
-          limits && limits.filter(limit => dayjs(limit.date).format(dayjsFormat.ISO_STRING) === date.format(dayjsFormat.ISO_STRING))
-      )
-      .filter(limit => limit !== null && limit !== undefined && limit.length > 0);
+      .map(limits => limits && limits.filter(({ from, to }) => date.isBetween(from, to, undefined, "[]")))
+      .filter(limit => limit != null && limit.length > 0);
     reservationLimits = [].concat.apply([], ...reservationLimits);
     if (timeId) reservationLimits = reservationLimits.filter(limit => limit.startTimeId >= timeId && limit.endTimeId <= timeId);
 

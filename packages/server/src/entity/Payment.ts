@@ -1,11 +1,13 @@
-import { dayjsFormat, errors } from "@beach_bar/common";
-import { DATA } from "constants/data";
+import { softRemove } from "@/utils/softRemove";
+import { dayjsFormat, errors, TABLES } from "@beach_bar/common";
+import { ApolloError } from "apollo-server-errors";
 import dayjs, { Dayjs } from "dayjs";
 import minMax from "dayjs/plugin/minMax";
 import {
   BaseEntity,
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   LessThanOrEqual,
@@ -15,10 +17,8 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { GetRefundPercentage } from "typings/payment";
-import { softRemove } from "utils/softRemove";
 import { redis } from "../index";
-import { BeachBar } from "./BeachBar";
+import { AppTransaction } from "./AppTransaction";
 import { BeachBarReview } from "./BeachBarReview";
 import { Card } from "./Card";
 import { Cart } from "./Cart";
@@ -28,7 +28,7 @@ import { Product } from "./Product";
 import { RefundPercentage } from "./RefundPercentage";
 import { ReservedProduct } from "./ReservedProduct";
 
-const { STATUSES } = DATA.PAYMENT;
+const { PAYMENT_STATUS } = TABLES;
 
 @Entity({ name: "payment", schema: "public" })
 export class Payment extends BaseEntity {
@@ -65,11 +65,11 @@ export class Payment extends BaseEntity {
   @Column({ type: "decimal", precision: 12, scale: 2, name: "stripe_proccessing_fee" })
   stripeProccessingFee: number;
 
-  @ManyToOne(() => Cart, cart => cart.payment, { nullable: false })
+  @OneToOne(() => Cart, cart => cart.payment, { nullable: false })
   @JoinColumn({ name: "cart_id" })
   cart: Cart;
 
-  @OneToOne(() => Card, card => card.payments, { nullable: false })
+  @ManyToOne(() => Card, card => card.payments, { nullable: false })
   @JoinColumn({ name: "card_id" })
   card: Card;
 
@@ -86,37 +86,45 @@ export class Payment extends BaseEntity {
   @OneToMany(() => ReservedProduct, reservedProduct => reservedProduct.payment, { nullable: true })
   reservedProducts?: ReservedProduct[];
 
-  @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
-  updatedAt: Dayjs;
+  @OneToMany(() => AppTransaction, appTransaction => appTransaction.payment)
+  appTransactions: AppTransaction[];
 
   @CreateDateColumn({ type: "timestamptz", name: "timestamp", default: () => `NOW()` })
   timestamp: Dayjs;
+
+  @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
+  updatedAt: Dayjs;
+
+  @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
+  deletedAt?: Dayjs;
 
   async createReservedProducts(): Promise<ReservedProduct[] | any> {
     const cartProducts = this.cart.products;
     if (cartProducts) {
       const newReservedProducts: ReservedProduct[] = [];
       for (let i = 0; i < cartProducts.length; i++) {
-        const { product, date, time, quantity } = cartProducts[i];
-        const newReservedProduct = ReservedProduct.create({ payment: this, product, date, time });
+        const { product, date, startTime, startTimeId, endTime, endTimeId, quantity } = cartProducts[i];
+        const newReservedProduct = ReservedProduct.create({ payment: this, product, date, startTime, endTime });
         await newReservedProduct.save();
         newReservedProducts.push(newReservedProduct);
         const fDate = date.format(dayjsFormat.ISO_STRING);
-        const redisKey = `available_products:${fDate}:${time.id.toString().padEnd(4, "0")}`;
-        const fTimeId = time.id.toString();
-        const limits = product.getReservationLimit(fDate, fTimeId);
-        if (!limits) {
-          redis.del(redisKey);
-          return;
+        const params = { date: fDate, startTimeId, endTimeId };
+        const limits = product.getReservationLimit(params);
+        const reserved = product.getReservedProducts(params);
+        for (let i = startTimeId; i <= endTimeId; i++) {
+          const redisKey = `available_products:${fDate}:${i.toString().padStart(2, "0").padEnd(4, "0")}`;
+          if (!limits) {
+            await redis.del(redisKey);
+            return;
+          }
+          const availableLeft = limits - reserved.length - quantity;
+          await redis.hset(redisKey, `beach_bar:${product.beachBarId}:product:${product.id}`, availableLeft);
         }
-        const reserved = product.getReservedProducts(fDate, fTimeId);
-        const availableLeft = limits - reserved.length - quantity;
-        await redis.hset(redisKey, "beach_bar:" + product.beachBarId + ":product:" + product.id, availableLeft);
       }
 
       if (newReservedProducts.length === 0) throw new Error(errors.SOMETHING_WENT_WRONG);
 
-      const status = STATUSES.PAID;
+      const status = PAYMENT_STATUS.find(({ name }) => name === "PAID")!;
 
       this.statusId = status.id;
       await this.save();
@@ -124,20 +132,38 @@ export class Payment extends BaseEntity {
     } else throw new Error(errors.SOMETHING_WENT_WRONG);
   }
 
-  async getRefundPercentage(): Promise<GetRefundPercentage | undefined> {
+  async getRefundPercentage(): Promise<any | undefined> {
     dayjs.extend(minMax);
-
     const products = this.cart.products;
-    if (!products) return undefined;
+    if (!products || products.length === 0) return undefined;
     const minDate = dayjs.min(products.map(product => dayjs(product.date)).filter(date => date.isAfter(dayjs())));
-    const daysDiff = dayjs(minDate).toDate().getTime() - dayjs().toDate().getTime();
-    const refundPercentage = await RefundPercentage.findOne({
-      where: { daysMilliseconds: LessThanOrEqual(daysDiff) },
-      order: { daysMilliseconds: "DESC" },
-    });
+    let daysDiff = dayjs(minDate).toDate().getTime() - dayjs().toDate().getTime();
+    if (isNaN(daysDiff)) daysDiff = 0;
+    let refundPercentage: RefundPercentage | undefined = undefined;
+    if (!minDate) refundPercentage = await RefundPercentage.findOne(1);
+    else {
+      refundPercentage = await RefundPercentage.findOne({
+        where: { daysMilliseconds: LessThanOrEqual(daysDiff) },
+        order: { daysMilliseconds: "DESC" },
+      });
+    }
     if (!refundPercentage) return undefined;
 
-    return { refundPercentage, daysDiff };
+    return { refundPercentage: refundPercentage as any, daysDiff };
+  }
+
+  async getRefundDetails(beachBarId?: number) {
+    const refund = await this.getRefundPercentage();
+    if (!refund) throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.SOMETHING_WENT_WRONG);
+    const { refundPercentage, daysDiff } = refund;
+    const cartTotal = this.cart.getTotal(beachBarId, undefined, true);
+    if (cartTotal === undefined) throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.SOMETHING_WENT_WRONG);
+    const { totalWithoutEntryFees } = cartTotal;
+    // if (totalWithoutEntryFees === 0) throw new ApolloError("Your shopping cart total was 0.", errors.CONFLICT);
+    // ! Do not divide by 100, because Stipe processes cents, and the number will be already in cents
+    let refundedAmount = +(totalWithoutEntryFees * +refundPercentage.percentageValue.toString()).toString();
+    refundedAmount = Math.floor(refundedAmount);
+    return { refundedAmount, daysDiff };
   }
 
   hasBeachBarProduct(beachBarId: string): boolean {
@@ -162,13 +188,13 @@ export class Payment extends BaseEntity {
     return beachBarProducts;
   }
 
-  getBeachBars(): BeachBar[] {
-    return this.cart.products?.map(({ product }) => product.beachBar) || [];
-  }
+  // getBeachBars(): BeachBar[] {
+  //   return this.cart.products?.map(({ product }) => product.beachBar) || [];
+  // }
 
   async softRemove(): Promise<any> {
     // await this.cart.customSoftRemove(false);
-    this.statusId = STATUSES.REFUNDED.id;
+    this.statusId = PAYMENT_STATUS.find(({ name }) => name === "REFUNDED")!.id;
     await this.save();
     const findOptions: any = { paymentId: this.id };
     await softRemove(Payment, { id: this.id }, [ReservedProduct], findOptions);

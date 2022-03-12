@@ -1,3 +1,6 @@
+import { genDatesArr } from "@/utils/data";
+import { softRemove } from "@/utils/softRemove";
+import { dayjsFormat, TABLES } from "@beach_bar/common";
 import dayjs, { Dayjs } from "dayjs";
 import {
   AfterInsert,
@@ -13,8 +16,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { softRemove } from "utils/softRemove";
-import { dayjsFormat } from "../../../common/build";
 import { redis } from "./../index";
 import { Product } from "./Product";
 import { HourTime } from "./Time";
@@ -32,8 +33,14 @@ export class ProductReservationLimit extends BaseEntity {
   @Column({ type: "integer", name: "product_id" })
   productId: number;
 
-  @Column({ type: "date", name: "date" })
-  date: string;
+  @Column({ type: "date", name: "from" })
+  from: string;
+
+  @Column({ type: "date", name: "to" })
+  to: string;
+
+  // @Column({ type: "date", name: "date" })
+  // date: string;
 
   @Column({ type: "integer", name: "start_time_id" })
   startTimeId: number;
@@ -62,28 +69,45 @@ export class ProductReservationLimit extends BaseEntity {
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Dayjs;
 
-  @AfterUpdate()
-  @AfterInsert()
-  async setInRedis() {
-    const { product, limitNumber, date, startTimeId, endTimeId } = this;
-    for (let i = startTimeId; startTimeId <= endTimeId; i++) {
-      const redisKey = `available_products:${product.id}:${dayjs(date).format(dayjsFormat.ISO_STRING)}:${i}`;
-      const existingAvailable = await redis.get(redisKey);
-      await redis.set(redisKey, limitNumber - (existingAvailable ? parseInt(existingAvailable) : 0));
+  @AfterUpdate() // Done
+  @AfterInsert() // Done
+  async setInRedis(atDelete: boolean = false) {
+    const {
+      product: { id, beachBarId },
+      limitNumber,
+      from,
+      to,
+      startTimeId,
+      endTimeId,
+    } = this;
+    for (const date of genDatesArr(dayjs(from), dayjs(to))) {
+      for (let i = startTimeId; i <= endTimeId; i++) {
+        const redisKey = `available_products:${dayjs(date).format(dayjsFormat.ISO_STRING)}:${i
+          .toString()
+          .padStart(2, "0")
+          .padEnd(4, "0")}`;
+        const fieldKey = `beach_bar:${beachBarId}:product:${id}`;
+        if (atDelete) {
+          await redis.hdel(redisKey, fieldKey);
+        } else {
+          const existingAvailable = await redis.hget(redisKey, fieldKey);
+          await redis.hset(redisKey, fieldKey, limitNumber - (existingAvailable ? +existingAvailable : 0));
+        }
+      }
     }
   }
 
   async update(limit?: number, startTimeId?: number, endTimeId?: number): Promise<ProductReservationLimit | any> {
     try {
       if (startTimeId && this.startTimeId !== startTimeId && startTimeId > 0) {
-        const startTime = await HourTime.findOne(startTimeId);
-        if (!startTime) throw new Error("Invalid start time of the limit");
-        this.startTime = startTime;
+        const startTime = TABLES.HOUR_TIME.find(({ id }) => id === startTimeId);
+        if (!startTime) throw new Error("Invalid start time of the limit.");
+        this.startTime = startTime as any;
       }
       if (endTimeId && this.endTimeId !== endTimeId && endTimeId > 0) {
-        const endTime = await HourTime.findOne(endTimeId);
-        if (!endTime) throw new Error("Invalid end time of the limit");
-        this.endTime = endTime;
+        const endTime = TABLES.HOUR_TIME.find(({ id }) => id === endTimeId);
+        if (!endTime) throw new Error("Invalid end time of the limit.");
+        this.endTime = endTime as any;
       }
       if (limit && limit !== this.limitNumber && limit > 0) this.limitNumber = limit;
       await this.save();
@@ -95,6 +119,7 @@ export class ProductReservationLimit extends BaseEntity {
   }
 
   async softRemove(): Promise<any> {
+    await this.setInRedis(true);
     await softRemove(ProductReservationLimit, { id: this.id });
     await this.product.beachBar.updateRedis();
   }

@@ -13,7 +13,6 @@ export const softRemove = async (
   }
   if (getConnection().getMetadata(primaryRepo).name === "Payment") {
     await primaryRepo.update(primaryOptions, { isRefunded: true });
-  } else {
-    await getConnection().getRepository(primaryRepo).softDelete(primaryOptions);
   }
+  await getConnection().getRepository(primaryRepo).softDelete(primaryOptions);
 };

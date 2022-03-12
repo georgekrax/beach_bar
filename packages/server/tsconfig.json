@@ -2,19 +2,23 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "sourceMap": false,
-    "target": "ES6",
+    "target": "ESNext",
     "module": "CommonJS",
     "noEmit": false,
     "outDir": "./build",
     "rootDir": "src",
     "moduleResolution": "node",
+    "incremental": true,
+    "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "baseUrl": "./src",
     "paths": {
-      "entity/*": ["entity/*"],
-      "utils/*": ["utils/*"],
-      "constants/*": ["constants/*"],
-      "typings/*": ["typings/*"]
+      "@/entity/*": ["entity/*"],
+      "@/utils/*": ["utils/*"],
+      "@/constants/*": ["constants/*"],
+      "@/typings/*": ["typings/*"],
+      "@/config/*": ["config/*"],
+      "@/graphql/*": ["graphql/*"]
     }
   },
   "exclude": ["node_modules", "build"],

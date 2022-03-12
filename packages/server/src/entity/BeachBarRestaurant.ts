@@ -1,17 +1,17 @@
+import { softRemove } from "@/utils/softRemove";
 import { Dayjs } from "dayjs";
 import {
-    BaseEntity,
-    Column,
-    CreateDateColumn,
-    DeleteDateColumn,
-    Entity,
-    JoinColumn,
-    ManyToOne,
-    OneToMany,
-    PrimaryGeneratedColumn,
-    UpdateDateColumn
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from "typeorm";
-import { softRemove } from "utils/softRemove";
 import { BeachBar } from "./BeachBar";
 import { RestaurantFoodItem } from "./RestaurantFoodItem";
 
@@ -56,7 +56,7 @@ export class BeachBarRestaurant extends BaseEntity {
       if (description && description !== this.description && description.trim().length !== 0) {
         this.description = description;
       }
-      if (isActive !== null && isActive !== undefined && isActive !== this.isActive) {
+      if (isActive != null && isActive !== this.isActive) {
         this.isActive = isActive;
       }
       await this.save();

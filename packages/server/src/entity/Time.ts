@@ -20,11 +20,17 @@ export class HourTime extends BaseEntity {
   @OneToMany(() => ProductReservationLimit, productReservationLimit => productReservationLimit.endTime, { nullable: true })
   reservationLimitEndTimes?: ProductReservationLimit[];
 
-  @OneToMany(() => CartProduct, cartProduct => cartProduct.time, { nullable: true })
-  cartProductTimes?: CartProduct[];
+  @OneToMany(() => CartProduct, cartProduct => cartProduct.startTime, { nullable: true })
+  cartProductStartTimes?: CartProduct[];
 
-  @OneToMany(() => ReservedProduct, reservedProduct => reservedProduct.time, { nullable: true })
-  reservedProductTimes?: ReservedProduct[];
+  @OneToMany(() => CartProduct, cartProduct => cartProduct.endTime, { nullable: true })
+  cartProductEndTimes?: CartProduct[];
+
+  @OneToMany(() => ReservedProduct, reservedProduct => reservedProduct.startTime, { nullable: true })
+  reservedProductStartTimes?: ReservedProduct[];
+
+  @OneToMany(() => ReservedProduct, reservedProduct => reservedProduct.endTime, { nullable: true })
+  reservedProductEndTimes?: ReservedProduct[];
 
   @OneToMany(() => BeachBar, beachBar => beachBar.openingTime)
   beachBarsOpeningTime: BeachBar[];

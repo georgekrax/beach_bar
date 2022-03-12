@@ -1,3 +1,5 @@
+import { checkScopes } from "@/utils/auth";
+import { softRemove } from "@/utils/softRemove";
 import { Dayjs } from "dayjs";
 import {
   BaseEntity,
@@ -10,8 +12,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { checkScopes } from "utils/checkScopes";
-import { softRemove } from "utils/softRemove";
 import { BeachBarRestaurant } from "./BeachBarRestaurant";
 import { RestaurantMenuCategory } from "./RestaurantMenuCategory";
 

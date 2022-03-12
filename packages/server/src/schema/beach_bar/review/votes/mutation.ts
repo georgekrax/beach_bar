@@ -1,49 +1,52 @@
-<<<<<<< HEAD
-import { errors, MyContext } from "@beach_bar/common";
+import { isAuth } from "@/utils/auth";
+import { updateRedis } from "@/utils/db";
+import { errors, TABLES } from "@beach_bar/common";
 import { ApolloError, UserInputError } from "apollo-server-express";
-import { BeachBarReview } from "entity/BeachBarReview";
 import { booleanArg, extendType, idArg, nullable } from "nexus";
-import { TUpdateBeachBarReview } from "typings/beach_bar/review";
-import { isAuth } from "utils/auth/payload";
-import { UpdateBeachBarReviewType } from "../types";
+import { BeachBarReviewType } from "../types";
 
 export const BeachBarReviewVoteMutation = extendType({
   type: "Mutation",
   definition(t) {
     t.field("updateReviewVote", {
-      type: UpdateBeachBarReviewType,
+      type: BeachBarReviewType,
       description: "Upvote or downvote a customer's review on a #beach_bar",
       args: {
         reviewId: idArg({ description: "The ID value of the customer's review" }),
         upvote: nullable(booleanArg({ description: "Set to true if to increment the review's votes" })),
         downvote: nullable(booleanArg({ description: "Set to true if to decrement the review's votes" })),
       },
-      resolve: async (_, { reviewId, upvote, downvote }, { payload }: MyContext): Promise<TUpdateBeachBarReview> => {
+      resolve: async (_, { reviewId, upvote, downvote }, { prisma, payload }) => {
         isAuth(payload);
-        if (!reviewId || reviewId.trim().length === 0)
-          throw new UserInputError("Please provide a valid review ID", { code: errors.INVALID_ARGUMENTS });
-        if (upvote && downvote)
+        if (reviewId.toString().trim().length === 0) {
+          throw new UserInputError("Please provide a valid reviewId", { code: errors.INVALID_ARGUMENTS });
+        }
+        if (upvote && downvote) {
           throw new UserInputError("You cannot upvote and downvote a review simultaneously", { code: errors.INVALID_ARGUMENTS });
+        }
 
-        const review = await BeachBarReview.findOne({
-          where: { id: reviewId },
-          relations: ["beachBar", "customer", "votes", "votes.type", "votes.user"],
-        });
+        const review = await prisma.beachBarReview.findUnique({ where: { id: BigInt(reviewId) } });
         if (!review) throw new ApolloError("Specified review does not exist", errors.NOT_FOUND);
 
         try {
-          await review.vote(payload!.sub, upvote, downvote);
+          const userId = payload!.sub;
+          const userAlreadVote = await prisma.reviewVote.findFirst({ where: { userId, reviewId: review.id } });
 
-          const updatedReview = await BeachBarReview.findOne({
-            where: { id: reviewId },
-            relations: ["beachBar", "customer", "votes", "votes.type", "votes.user"],
-          });
-          if (!updatedReview) throw new ApolloError("Specified review does not exist", errors.NOT_FOUND);
+          const typeId = userAlreadVote?.typeId.toString();
+          if (!userAlreadVote) {
+            await prisma.reviewVote.create({ data: { userId, reviewId: review.id, typeId: upvote ? 1 : 2 } });
+          }
+          // TODO: Fix
+          else if ((typeId === "1" && upvote) || (typeId === "2" && downvote)) {
+            // await userVoteForThisReview.softRemove();
+            await prisma.reviewVote.delete({ where: { id: userAlreadVote.id } });
+          } else if (upvote || downvote) {
+            const type = TABLES.REVIEW_VOTE_TYPE.find(({ value }) => value === (upvote ? "upvote" : "downvote"));
+            if (type) await prisma.reviewVote.update({ where: { id: userAlreadVote.id }, data: { typeId: type.id } });
+          }
 
-          return {
-            review: updatedReview,
-            updated: true,
-          };
+          await updateRedis({ model: "BeachBar", id: review.beachBarId });
+          return review;
         } catch (err) {
           throw new ApolloError(err.message);
         }
@@ -51,57 +54,3 @@ export const BeachBarReviewVoteMutation = extendType({
     });
   },
 });
-=======
-import { errors, MyContext } from "@beach_bar/common";
-import { ApolloError, UserInputError } from "apollo-server-express";
-import { BeachBarReview } from "entity/BeachBarReview";
-import { booleanArg, extendType, idArg, nullable } from "nexus";
-import { TUpdateBeachBarReview } from "typings/beach_bar/review";
-import { isAuth } from "utils/auth/payload";
-import { UpdateBeachBarReviewType } from "../types";
-
-export const BeachBarReviewVoteMutation = extendType({
-  type: "Mutation",
-  definition(t) {
-    t.field("updateReviewVote", {
-      type: UpdateBeachBarReviewType,
-      description: "Upvote or downvote a customer's review on a #beach_bar",
-      args: {
-        reviewId: idArg({ description: "The ID value of the customer's review" }),
-        upvote: nullable(booleanArg({ description: "Set to true if to increment the review's votes" })),
-        downvote: nullable(booleanArg({ description: "Set to true if to decrement the review's votes" })),
-      },
-      resolve: async (_, { reviewId, upvote, downvote }, { payload }: MyContext): Promise<TUpdateBeachBarReview> => {
-        isAuth(payload);
-        if (!reviewId || reviewId.trim().length === 0)
-          throw new UserInputError("Please provide a valid review ID", { code: errors.INVALID_ARGUMENTS });
-        if (upvote && downvote)
-          throw new UserInputError("You cannot upvote and downvote a review simultaneously", { code: errors.INVALID_ARGUMENTS });
-
-        const review = await BeachBarReview.findOne({
-          where: { id: reviewId },
-          relations: ["beachBar", "customer", "votes", "votes.type", "votes.user"],
-        });
-        if (!review) throw new ApolloError("Specified review does not exist", errors.NOT_FOUND);
-
-        try {
-          await review.vote(payload!.sub, upvote, downvote);
-
-          const updatedReview = await BeachBarReview.findOne({
-            where: { id: reviewId },
-            relations: ["beachBar", "customer", "votes", "votes.type", "votes.user"],
-          });
-          if (!updatedReview) throw new ApolloError("Specified review does not exist", errors.NOT_FOUND);
-
-          return {
-            review: updatedReview,
-            updated: true,
-          };
-        } catch (err) {
-          throw new ApolloError(err.message);
-        }
-      },
-    });
-  },
-});
->>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

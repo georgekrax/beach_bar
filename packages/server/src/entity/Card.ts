@@ -1,6 +1,9 @@
+import { softRemove } from "@/utils/softRemove";
+import { TABLES } from "@beach_bar/common";
 import { Dayjs } from "dayjs";
 import { Stripe } from "stripe";
 import {
+  AfterLoad,
   BaseEntity,
   Check,
   Column,
@@ -14,10 +17,8 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
   Repository,
-  AfterLoad,
-  UpdateDateColumn
+  UpdateDateColumn,
 } from "typeorm";
-import { softRemove } from "utils/softRemove";
 import { stripe } from "..";
 import { CardBrand } from "./CardBrand";
 import { Country } from "./Country";
@@ -110,16 +111,15 @@ export class Card extends BaseEntity {
 
   @AfterLoad()
   async updateOnLoad() {
-    if (!this.savedForFuture) await softRemove(Card, { id: this.id }, undefined, { cardId: this.id })
+  if (!this.savedForFuture) await softRemove(Card, { id: this.id }, undefined, { cardId: this.id });
   }
-
 
   async updateCard(cardholderName?: string, expMonth?: number, expYear?: number, isDefault?: boolean, webhook = false): Promise<Card> {
     try {
       if (cardholderName && cardholderName !== this.cardholderName) this.cardholderName = cardholderName;
       if (expMonth && expMonth !== this.expMonth) this.expMonth = expMonth;
       if (expYear && expYear !== this.expYear) this.expYear = expYear;
-      if (isDefault !== null && isDefault !== undefined && isDefault !== this.isDefault) {
+      if (isDefault != null && isDefault !== this.isDefault) {
         if (this.customer.cards) {
           const defaultCards = this.customer.cards.filter(card => card.isDefault === true && card.isExpired === false);
           await Promise.all(defaultCards.map(async card => await getRepository(Card).save({ ...card, isDefault: false })));
@@ -163,16 +163,15 @@ export class Card extends BaseEntity {
 @EntityRepository(Card)
 export class CardRepository extends Repository<Card> {
   async createCard(
-    stripe: Stripe,
     stripeCard: any,
     customer: Customer,
-    brand?: CardBrand,
+    brandId?: number,
     country?: Country,
     isDefault?: boolean,
     savedForFuture?: boolean,
     cardholderName?: string
   ): Promise<Card> {
-    const cards = customer.cards && customer.cards;
+    const cards = customer.cards;
     if (isDefault && cards && cards.length > 0) {
       const defaultCards = cards.filter(card => card.isDefault) || [];
 
@@ -181,7 +180,7 @@ export class CardRepository extends Repository<Card> {
     }
     try {
       const newCustomerCard = Card.create({
-        brand,
+        brandId,
         country,
         customer,
         stripeId: stripeCard.id,
@@ -203,17 +202,17 @@ export class CardRepository extends Repository<Card> {
     }
   }
 
-  async createStripeWebhookCard(stripe: Stripe, stripeCard: any): Promise<void | Error> {
+  async createStripeWebhookCard(stripeCard: any): Promise<void | Error> {
     const customer = await Customer.findOne({ stripeCustomerId: stripeCard.customer });
     if (!customer) throw new Error("Specified customer does not exist");
 
-    const brand = await CardBrand.findOne({
-      where: `"name" ILIKE '${stripeCard.brand.toLowerCase() === "american express" ? "AMEX" : stripeCard.brand}'`,
-    });
+    const brand = TABLES.CARD_BRAND.find(({ name }) =>
+      name.includes(stripeCard.brand.toLowerCase() === "american express" ? "AMEX" : stripeCard.brand)
+    );
     const country = await Country.findOne({ alpha2Code: stripeCard.country });
 
     try {
-      await this.createCard(stripe, stripeCard, customer, brand, country, undefined, stripeCard.name);
+      await this.createCard(stripeCard, customer, brand?.id, country, undefined, stripeCard.name);
     } catch (err) {
       throw new Error(err.message);
     }

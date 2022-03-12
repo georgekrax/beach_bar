@@ -1,4 +1,5 @@
-import redisKeys from "constants/redisKeys";
+import { getRedisKey } from "@/utils/db";
+import { softRemove } from "@/utils/softRemove";
 import { Dayjs } from "dayjs";
 import { Redis } from "ioredis";
 import {
@@ -13,7 +14,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { softRemove } from "utils/softRemove";
 import { redis } from "../index";
 import { Payment } from "./Payment";
 import { Product } from "./Product";
@@ -33,8 +33,11 @@ export class ReservedProduct extends BaseEntity {
   @Column({ type: "date", name: "date" })
   date: Dayjs;
 
-  @Column({ type: "integer", name: "time_id" })
-  timeId: number;
+  @Column({ type: "integer", name: "start_time_id" })
+  startTimeId: number;
+
+  @Column({ type: "integer", name: "end_time_id" })
+  endTimeId: number;
 
   @Column({ type: "boolean", name: "is_refunded", default: () => false })
   isRefunded: boolean;
@@ -47,9 +50,13 @@ export class ReservedProduct extends BaseEntity {
   @JoinColumn({ name: "payment_id" })
   payment: Payment;
 
-  @ManyToOne(() => HourTime, hourTime => hourTime.reservedProductTimes, { nullable: false })
-  @JoinColumn({ name: "time_id" })
-  time: HourTime;
+  @ManyToOne(() => HourTime, hourTime => hourTime.reservedProductStartTimes, { nullable: false })
+  @JoinColumn({ name: "start_time_id" })
+  startTime: HourTime;
+
+  @ManyToOne(() => HourTime, hourTime => hourTime.reservedProductEndTimes, { nullable: false })
+  @JoinColumn({ name: "end_time_id" })
+  endTime: HourTime;
 
   @UpdateDateColumn({ type: "timestamptz", name: "updated_at", default: () => `NOW()` })
   updatedAt: Dayjs;
@@ -60,7 +67,7 @@ export class ReservedProduct extends BaseEntity {
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Dayjs;
 
-  @AfterInsert()
+  @AfterInsert() // Done
   async updateAlsoInRedis(): Promise<void | any> {
     try {
       await this.updateRedis(redis, true);
@@ -70,13 +77,13 @@ export class ReservedProduct extends BaseEntity {
   }
 
   getRedisKey(): string {
-    return `${redisKeys.BEACH_BAR_CACHE_KEY}:${this.product.beachBarId}:${redisKeys.RESERVED_PRODUCT_CACHE_KEY}`;
+    return getRedisKey({ model: "ReservedProduct", beachBarId: this.product.beachBarId });
   }
 
   async getPrice(): Promise<number | undefined> {
     const entryFee = this.product.beachBar.entryFee;
     if (entryFee === undefined) return undefined;
-    
+
     const productTotal = await this.payment.cart.getProductTotal(this.productId);
     if (productTotal === undefined) return undefined;
     return productTotal + entryFee;

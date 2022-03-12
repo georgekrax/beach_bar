@@ -1,5 +1,5 @@
 // import dayjs from "dayjs";
-// import { BeachBarEntryFee } from "entity/BeachBarEntryFee";
+// import { BeachBarEntryFee } from "@/entity/BeachBarEntryFee";
 // import { booleanArg, extendType, intArg, nullable } from "nexus";
 // import { MoreThanOrEqual } from "typeorm";
 // import { BeachBarEntryFeeType } from "./types";

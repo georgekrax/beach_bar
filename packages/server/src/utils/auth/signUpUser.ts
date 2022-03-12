@@ -1,69 +1,40 @@
+import { user as USER_SCOPES } from "@/constants/scopes";
+import { NexusGenArgTypes, NexusGenInputs } from "@/graphql/generated/nexusTypes";
+import { NonReadonly } from "@/typings/index";
+import { getRedisKey } from "@/utils/db";
 import { errors } from "@beach_bar/common";
-import { user as userScopes } from "constants/scopes";
-import { Account } from "entity/Account";
-import { Owner } from "entity/Owner";
-import { User } from "entity/User";
-import { Redis } from "ioredis";
+import { Prisma } from "@prisma/client";
+import { prisma, redis } from "../../index";
 
-export const signUpUser = async (options: {
-  email: string;
-  redis: Redis;
-  isPrimaryOwner: boolean;
-  hashtagId?: bigint;
-  googleId?: any;
-  facebookId?: any;
-  instagramId?: any;
-  instagramUsername?: string | any;
-  firstName?: string;
-  lastName?: string;
-  countryId?: number;
-  city?: string;
-  phoneNumber?: string;
-  birthday?: Date;
-}): Promise<{ user: User } | any> => {
-  const {
-    email,
-    redis,
-    isPrimaryOwner,
-    hashtagId,
-    googleId,
-    facebookId,
-    instagramId,
-    instagramUsername,
-    firstName,
-    lastName,
-    countryId,
-    city,
-    birthday,
-  } = options;
-  const user = await User.findOne({ where: { email }, relations: ["account"] });
-  if (user) return { error: { code: errors.CONFLICT, message: "User already exists" } };
-  const newUser = User.create({
-    email,
-    hashtagId,
-    googleId,
-    facebookId,
-    instagramId,
-    instagramUsername,
-    firstName,
-    lastName,
+type SignUpUserModel = Prisma.UserGetPayload<{ include: { account: true } }>;
+export type SignUpUserOptions = Pick<Partial<SignUpUserModel>, "googleId" | "facebookId" | "instagramId" | "instagramUsername" | "hashtagId"> &
+  Pick<Partial<NonNullable<SignUpUserModel["account"]>>, "countryId" | "city" | "phoneNumber"> &
+  Pick<NexusGenInputs["OAuthUserInput"], "birthday" | "email" | "firstName" | "lastName" | "imgUrl">;
+
+export const signUpUser = async (
+  options: SignUpUserOptions & {
+    isPrimaryOwner: NexusGenArgTypes["Mutation"]["signUp"]["isPrimaryOwner"];
+  }
+) => {
+  const { email, isPrimaryOwner, countryId, city, birthday, ...data } = options;
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (user) throw new Error("User already exists");
+  const newUser = await prisma.user.create({
+    include: { account: true },
+    data: { ...data, email, account: { create: { countryId, city, birthday: birthday ? new Date(birthday?.toString()) : null } } },
   });
 
-  const newUserAccount = Account.create({ countryId, city, birthday });
-
   try {
-    await newUser.save();
-    newUserAccount.user = newUser;
-    await newUserAccount.save();
-    if (isPrimaryOwner) {
-      await Owner.create({ user: newUser }).save();
-    }
+    if (isPrimaryOwner) await prisma.owner.create({ data: { userId: newUser.id } });
   } catch (err) {
-    return { error: { code: errors.INTERNAL_SERVER_ERROR, message: `Something went wrong: ${err.message}` } };
+    throw new Error(errors.INTERNAL_SERVER_ERROR);
   }
 
-  if (isPrimaryOwner) await redis.sadd(newUser.getRedisKey(true) as KeyType, userScopes.PRIMARY_OWNER);
-  else await redis.sadd(newUser.getRedisKey(true) as KeyType, userScopes.SIMPLE_USER);
+  const scopeKey: keyof typeof USER_SCOPES = isPrimaryOwner ? "PRIMARY_OWNER" : "SIMPLE_USER";
+  await redis.sadd(
+    getRedisKey({ model: "User", id: newUser.id, scope: true }),
+    USER_SCOPES[scopeKey] as NonReadonly<typeof USER_SCOPES[typeof scopeKey]>
+  );
 
-  return { user: newUser };
+  return newUser;
 };

@@ -1,0 +1,30 @@
+{
+  "module": {
+    "type": "commonjs"
+  },
+  "minify": true,
+  "jsc": {
+    "target": "es5",
+    "parser": {
+      "syntax": "typescript",
+      "tsx": true,
+      "decorators": true,
+      "dynamicImport": true
+    },
+    "transform": {
+      "legacyDecorator": true,
+      "decoratorMetadata": true
+    },
+    "keepClassNames": true,
+    "loose": true,
+    "baseUrl": "./src",
+    "paths": {
+      "@/entity/*": ["./entity/*"],
+      "@/utils/*": ["./utils/*"],
+      "@/constants/*": ["./constants/*"],
+      "@/typings/*": ["./typings/*"],
+      "@/config/*": ["./config/*"],
+      "@/graphql/*": ["./graphql/*"]
+    }
+  }
+}

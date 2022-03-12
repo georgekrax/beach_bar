@@ -2,10 +2,12 @@
   "compilerOptions": {
     "baseUrl": "./build",
     "paths": {
-      "entity/*": ["entity/*"],
-      "utils/*": ["utils/*"],
-      "constants/*": ["constants/*"],
-      "typings/*": ["typings/*"]
+      "@/entity/*": ["entity/*"],
+      "@/utils/*": ["utils/*"],
+      "@/constants/*": ["constants/*"],
+      "@/typings/*": ["typings/*"],
+      "@/config/*": ["config/*"],
+      "@/graphql/*": ["graphql/*"]
     }
   }
 }

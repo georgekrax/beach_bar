@@ -10,7 +10,7 @@
 //   PrimaryGeneratedColumn,
 //   UpdateDateColumn,
 // } from "typeorm";
-// import { softRemove } from "utils/softRemove";
+// import { softRemove } from "@/utils/softRemove";
 // import { BeachBar } from "./BeachBar";
 
 // @Entity({ name: "beach_bar_entry_fee", schema: "public" })

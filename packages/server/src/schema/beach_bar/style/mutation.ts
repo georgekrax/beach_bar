@@ -1,59 +1,63 @@
-import { errors, MyContext } from "@beach_bar/common";
+import { isAuth, throwScopesUnauthorized } from "@/utils/auth";
+import { updateRedis } from "@/utils/db";
+import { errors, TABLES } from "@beach_bar/common";
 import { ApolloError } from "apollo-server-express";
-import { BeachBar } from "entity/BeachBar";
-import { BeachBarStyle } from "entity/BeachBarStyle";
-import { BeachBarType } from "entity/BeachBarType";
-import { extendType, idArg } from "nexus";
-import { DeleteGraphQlType, SuccessGraphQLType } from "schema/types";
-import { TDelete, TSuccess } from "typings/.index";
-import { isAuth, throwScopesUnauthorized } from "utils/auth/payload";
+import { extendType, idArg, list } from "nexus";
+import { BeachBarStyleType } from "./types";
 
-export const BeachBarTypeCrudMutation = extendType({
+export const BeachBarStyleCrudMutation = extendType({
   type: "Mutation",
   definition(t) {
-    t.field("addBeachBarType", {
-      type: SuccessGraphQLType,
-      description: "Add (assign) a style to a #beach_bar",
-      args: { beachBarId: idArg(), styleId: idArg() },
-      resolve: async (_, { beachBarId, styleId }, { payload }: MyContext): Promise<TSuccess> => {
+    t.list.field("addBeachBarStyles", {
+      type: BeachBarStyleType,
+      description: "Add (assign) styles to a #beach_bar",
+      args: { beachBarId: idArg(), styleIds: list(idArg()) },
+      resolve: async (_, { beachBarId, styleIds }, { prisma, payload }) => {
         isAuth(payload);
-        throwScopesUnauthorized(payload, "You are not allowed to add a style to a #beach_bar", ["beach_bar@crud:beach_bar"]);
+        throwScopesUnauthorized(payload, "You are not allowed to add a style to a #beach_bar.", ["beach_bar@crud:beach_bar"]);
 
-        const beachBar = await BeachBar.findOne(beachBarId);
-        if (!beachBar) throw new ApolloError(errors.BEACH_BAR_DOES_NOT_EXIST, errors.NOT_FOUND);
-
-        const style = await BeachBarStyle.findOne(styleId);
-        if (!style) throw new ApolloError("Invalid style", errors.NOT_FOUND);
-
-        const newBeachBarType = BeachBarType.create({ beachBar, style });
+        const styles = TABLES.BEACH_BAR_STYLE.filter(({ id }) => styleIds.map(val => val.toString()).includes(id.toString()));
+        if (styles.length === 0) throw new ApolloError("Invalid style", errors.NOT_FOUND);
 
         try {
-          await newBeachBarType.save();
+          const newBarStyles = await prisma.beachBar.update({ where: { id: +beachBarId },include: {styles: true}, data: { styles: { set: styles } } });
+          // await prisma.$transaction(
+          //   styles.map(style =>
+          //     prisma.beachBarType.create({
+          //       include: { style: true },
+          //       data: { beachBarId: +beachBarId, styleId: style.id, deletedAt: null },
+          //     })
+          //   )
+          // );
+
+          await updateRedis({ model: "BeachBar", id: +beachBarId });
+          return newBarStyles.styles;
         } catch (err) {
           throw new ApolloError(err.message);
         }
-
-        return { success: true };
       },
     });
-    t.field("deleteBeachBarType", {
-      type: DeleteGraphQlType,
-      description: "Delete (remove) a style from a #beach_bar",
-      args: { beachBarId: idArg(), styleId: idArg() },
-      resolve: async (_, { beachBarId, styleId }, { payload }: MyContext): Promise<TDelete> => {
+    t.boolean("deleteBeachBarStyles", {
+      description: "Delete (remove) styles from a #beach_bar",
+      args: { beachBarId: idArg(), styleIds: list(idArg()) },
+      resolve: async (_, __, { payload }) => {
         isAuth(payload);
         throwScopesUnauthorized(payload, "You are not allowed to delete a style from a #beach_bar", ["beach_bar@crud:beach_bar"]);
 
-        const beachBarType = await BeachBarType.findOne({ beachBarId, styleId });
-        if (!beachBarType) throw new ApolloError("Invalid style", errors.NOT_FOUND);
+        // const barTypes = await BeachBarType.find({ where: { beachBarId, styleId: In(styleIds) }, relations: ["beachBar"] });
+        // if (barTypes.length === 0) throw new ApolloError("Invalid style", errors.NOT_FOUND);
 
         try {
-          await beachBarType.softRemove();
+          // TODO: Fix
+          // for (const element of barTypes) {
+          //   await element.softRemove();
+          // }
+          // await updateRedis({ model: "BeachBar", id: barTypes[0].beachBarId });
         } catch (err) {
           throw new ApolloError(err.message);
         }
 
-        return { deleted: true };
+        return true;
       },
     });
   },

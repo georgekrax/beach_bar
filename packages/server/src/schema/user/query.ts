@@ -1,58 +1,49 @@
-import { errors, MyContext } from "@beach_bar/common";
+import { getRedisKey } from "@/utils/db";
+import { userInfoPayloadScope, UserInfoPayloadScopeInclude } from "@/utils/userInfoPayloadScope";
+import { errors } from "@beach_bar/common";
 import { ApolloError } from "apollo-server-express";
-import redisKeys from "constants/redisKeys";
-import { User } from "entity/User";
 import { extendType } from "nexus";
-import { TUser } from "typings/user";
-import { generateAccessToken } from "utils/auth/generateAuthTokens";
-import { userInfoPayloadScope } from "utils/userInfoPayloadScope";
 import { UserType } from "./types";
 
 export const UserQuery = extendType({
   type: "Query",
   definition(t) {
     t.string("accessToken", {
-      resolve: async (_, __, { redis }) => {
-        const user = await User.findOne(107);
+      resolve: async (_, __, { prisma, redis }) => {
+        const user = await prisma.user.findUnique({ where: { id: 107 } });
         if (!user) return "";
-        const scope = await redis.smembers((redisKeys.USER + ":" + user.id + ":" + redisKeys.USER_SCOPE) as KeyType);
-        return generateAccessToken(user, scope, { expiresIn: "14 days" }).token;
+        const scope = await redis.smembers(getRedisKey({ model: "User", id: user.id, scope: true }));
+        return scope[0];
+        // return generateAccessToken(user, scope, { expiresIn: "14 days" }).token;
+      },
+    });
+    // testing Prisma
+    t.nullable.field("account", {
+      type: "Account",
+      // authorize: () => {
+      // return false;
+      // },
+      resolve: async (_, __, { prisma }) => {
+        const users = await prisma.account.findFirst({
+          where: { userId: 107 },
+          include: { user: true },
+        });
+        return users;
       },
     });
     t.nullable.field("me", {
       type: UserType,
       description: "Returns current authenticated user",
-      resolve: async (_, __, { payload }: MyContext): Promise<TUser | null> => {
+      resolve: async (_, __, { prisma, payload }) => {
         if (!payload) return null;
         if (
           !payload.scope.some(scope => ["profile", "beach_bar@crud:user", "beach_bar@read:user"].includes(scope)) ||
           !payload.scope.includes("email")
-        )
+        ) {
           throw new ApolloError("You are not allowed to access this user's info", errors.UNAUTHORIZED_CODE);
+        }
 
-        const user = await User.findOne({
-          where: { id: payload.sub },
-          relations: [
-            "account",
-            "account.country",
-            "account.country.currency",
-            "customer",
-            "customer.reviews",
-            "customer.reviews.beachBar",
-            "customer.reviews.month",
-            "customer.reviews.visitType",
-            "reviewVotes",
-            "reviewVotes.type",
-            "reviewVotes.review",
-            "reviewVotes.user",
-            "favoriteBars",
-            "favoriteBars.beachBar",
-            "favoriteBars.beachBar.location",
-            "favoriteBars.beachBar.location.country",
-            "favoriteBars.beachBar.location.city",
-            "favoriteBars.beachBar.location.region",
-          ],
-        });
+        const user = await prisma.user.findUnique({ where: { id: payload.sub }, include: UserInfoPayloadScopeInclude });
         if (!user) return null;
 
         return userInfoPayloadScope(payload, user);

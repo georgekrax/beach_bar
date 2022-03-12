@@ -1,25 +1,28 @@
 import { Dayjs } from "dayjs";
 import {
-    BaseEntity,
-    Column,
-    CreateDateColumn,
-    DeleteDateColumn,
-    Entity,
-    JoinColumn,
-    ManyToOne,
-    PrimaryColumn,
-    UpdateDateColumn
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from "typeorm";
-import { softRemove } from "utils/softRemove";
+import { softRemove } from "@/utils/softRemove";
 import { BeachBar } from "./BeachBar";
 import { BeachBarService } from "./BeachBarService";
 
 @Entity({ name: "beach_bar_feature", schema: "public" })
 export class BeachBarFeature extends BaseEntity {
-  @PrimaryColumn({ type: "integer", name: "beach_bar_id" })
+  @PrimaryGeneratedColumn({ type: "bigint" })
+  id: bigint;
+
+  @Column({ type: "integer", name: "beach_bar_id" })
   beachBarId: number;
 
-  @PrimaryColumn({ type: "integer", name: "service_id" })
+  @Column({ type: "integer", name: "service_id" })
   serviceId: number;
 
   @Column({ type: "smallint", name: "quantity", default: () => 1 })
@@ -45,8 +48,8 @@ export class BeachBarFeature extends BaseEntity {
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Dayjs;
 
-  async customSoftRemove(featureId: number): Promise<any> {
-    await softRemove(BeachBarFeature, { beachBarId: this.beachBarId, serviceId: featureId });
+  async customSoftRemove(): Promise<void> {
+    await softRemove(BeachBarFeature, { id: this.id });
     await this.beachBar.updateRedis();
   }
 }

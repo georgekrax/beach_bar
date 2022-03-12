@@ -1,9 +1,9 @@
+import { FileType } from "@/typings/aws";
 import { UploadScalar } from "@the_hashtag/common/dist/graphql";
 import { createWriteStream } from "fs";
 import { nanoid } from "nanoid";
 import { arg, mutationType, nullable, stringArg } from "nexus";
 import path from "path";
-import { FileType } from "typings/aws";
 import { FileGraphQlType } from "./types";
 
 export const Mutation = mutationType({
@@ -12,12 +12,7 @@ export const Mutation = mutationType({
     t.nullable.field("uploadSingleFile", {
       type: FileGraphQlType,
       description: "Upload a single file",
-      args: {
-        file: arg({
-          type: UploadScalar,
-          description: "The file to upload",
-        }),
-      },
+      args: { file: arg({ type: UploadScalar.name, description: "The file to upload" }) },
       resolve: async (_, { file }): Promise<FileType> => {
         const { createReadStream, filename, mimetype, encoding } = await file;
 
@@ -32,15 +27,9 @@ export const Mutation = mutationType({
     });
     t.string("hello", {
       description: "Sample mutation",
-      args: {
-        name: nullable(stringArg()),
-      },
-      resolve: (_, { name }): string => {
-        if (name) {
-          return `Hello ${name}!`;
-        } else {
-          return "Hello world!";
-        }
+      args: { name: nullable(stringArg()) },
+      resolve: async (_, { name }, { payload }) => {
+        return `Hello ${name ? name : payload ? payload.sub : "world"}!`;
       },
     });
   },

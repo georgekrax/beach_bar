@@ -22,7 +22,7 @@ export const VoteTagType = objectType({
     t.field("category", {
       type: VoteCategoryType,
       description: "The voting category these vote results are assigned to",
-      resolve: o => o.category,
+      resolve: o => o["category"],
     });
   },
 });

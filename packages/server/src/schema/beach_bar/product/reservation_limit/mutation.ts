@@ -1,90 +1,81 @@
-import { errors, MyContext } from "@beach_bar/common";
+import { isAuth, throwScopesUnauthorized } from "@/utils/auth";
+import { updateRedis } from "@/utils/db";
+import { errors } from "@beach_bar/common";
 import { DateScalar } from "@the_hashtag/common/dist/graphql";
 import { ApolloError, UserInputError } from "apollo-server-errors";
-import { Product } from "entity/Product";
-import { ProductReservationLimit } from "entity/ProductReservationLimit";
-import { HourTime } from "entity/Time";
-import { arg, extendType, idArg, intArg, list, nullable } from "nexus";
-import { In } from "typeorm";
-import { DeleteType } from "typings/.index";
-import { TAddProductReservationLimit, TUpdateProductReservationLimit } from "typings/beach_bar/product/reservationLimit";
-import { isAuth, throwScopesUnauthorized } from "utils/auth/payload";
-import { DeleteGraphQlType } from "../../../types";
-import { AddProductReservationLimitType, UpdateProductReservationLimitType } from "./types";
+import { arg, extendType, idArg, intArg, nullable } from "nexus";
+import { ProductReservationLimitType } from "./types";
 
 export const ProductReservationLimitCrudMutation = extendType({
   type: "Mutation",
   definition(t) {
     t.field("addProductReservationLimit", {
-      type: AddProductReservationLimitType,
+      type: ProductReservationLimitType,
       description: "Add a reservation limit to a #beach_bar product",
       args: {
         productId: idArg({ description: "The ID value of the product to add this reservation limit" }),
         limit: intArg({ description: "The number to add as a limit a #beach_bar can provide the product, for specific date(s)" }),
-        dates: list(arg({ type: DateScalar, description: "A list of days this limit is applicable for" })),
-        startTimeId: idArg({ description: "The ID value of the hour time from when this limit is applicable" }),
-        endTimeId: idArg({
-          description: "The ID value of the hour time from when this limit is terminated (is not applicable anymore)",
-        }),
+        from: arg({ type: DateScalar.name, description: "The starting date this limit is applicable for" }),
+        to: arg({ type: DateScalar.name, description: "The ending date this limit is applicable for" }),
+        startTimeId: nullable(idArg({ description: "The ID value of the hour time from when this limit is applicable" })),
+        endTimeId: nullable(
+          idArg({ description: "The ID value of the hour time from when this limit is terminated (is not applicable anymore)" })
+        ),
       },
-      resolve: async (
-        _,
-        { productId, limit, dates, startTimeId, endTimeId },
-        { payload }: MyContext
-      ): Promise<TAddProductReservationLimit> => {
+      resolve: async (_, { productId, limit, startTimeId, endTimeId, from, to }, { prisma, payload }) => {
         isAuth(payload);
         throwScopesUnauthorized(payload, "You are not allowed to add a or some reservation limit(s) to a #beach_bar product", [
           "beach_bar@crud:beach_bar",
           "beach_bar@crud:product_reservation_limit",
         ]);
 
-        if (!dates || dates.length === 0) throw new UserInputError("Please provided a valid limit date");
-
-        const product = await Product.findOne({ where: { id: productId }, relations: ["beachBar"] });
+        const product = await prisma.product.findUnique({ where: { id: +productId }, include: { beachBar: true } });
         if (!product) throw new ApolloError("Product was not found", errors.NOT_FOUND);
 
-        const startTime = await HourTime.findOne(startTimeId);
-        if (!startTime) throw new ApolloError("Start time was not found", errors.NOT_FOUND);
+        // let startTime: typeof HOUR_TIME[number] | undefined;
+        // let endTime: typeof HOUR_TIME[number] | undefined;
+        // if (startTimeId && endTimeId) {
+        //   startTime = TABLES.HOUR_TIME.find(({ id }) => id.toString() === startTimeId.toString());
+        //   if (!startTime) throw new ApolloError("Start time was not found", errors.NOT_FOUND);
 
-        const endTime = await HourTime.findOne(endTimeId);
-        if (!endTime) throw new ApolloError("End time was not found", errors.NOT_FOUND);
-
-        const returnResults: ProductReservationLimit[] = [];
+        //   endTime = TABLES.HOUR_TIME.find(({ id }) => id.toString() === endTimeId.toString());
+        //   if (!endTime) throw new ApolloError("End time was not found", errors.NOT_FOUND);
+        // } else {
+        //   const { openingTime, closingTime } = product.beachBar;
+        //   startTime = openingTime as any;
+        //   endTime = closingTime as any;
+        // }
+        const hasBoth = startTimeId && endTimeId;
+        const { openingTimeId, closingTimeId } = product.beachBar;
 
         try {
-          for (let i = 0; i < dates.length; i++) {
-            const newReservationLimit = ProductReservationLimit.create({
+          const newLimit = await prisma.productReservationLimit.create({
+            data: {
+              from: new Date(from.toString()),
+              to: new Date(to.toString()),
               limitNumber: limit,
-              product,
-              date: dates[i],
-              startTime,
-              endTime,
-            });
-            await newReservationLimit.save();
-            returnResults.push(newReservationLimit);
-          }
-          await product.beachBar.updateRedis();
+              productId: product.id,
+              startTimeId: hasBoth ? +startTimeId : openingTimeId,
+              endTimeId: hasBoth ? +endTimeId : closingTimeId,
+            },
+          });
+          await updateRedis({ model: "BeachBar", id: product.beachBarId });
+          return newLimit;
         } catch (err) {
           throw new ApolloError(err.message);
         }
-
-        return { reservationLimit: returnResults, added: true };
       },
     });
     t.field("updateProductReservationLimit", {
-      type: UpdateProductReservationLimitType,
+      type: ProductReservationLimitType,
       description: "Update a #beach_bar's product reservation limit",
       args: {
-        reservationLimitIds: list(idArg()),
+        id: idArg(),
         limit: nullable(intArg()),
-        startTimeId: nullable(idArg()),
-        endTimeId: nullable(idArg()),
+        // startTimeId: nullable(idArg()),
+        // endTimeId: nullable(idArg()),
       },
-      resolve: async (
-        _,
-        { reservationLimitIds, limit, startTimeId, endTimeId },
-        { payload }: MyContext
-      ): Promise<TUpdateProductReservationLimit> => {
+      resolve: async (_, { id, limit }, { prisma, payload }) => {
         isAuth(payload);
         throwScopesUnauthorized(payload, "You are not allowed to update a reservation limit of a #beach_bar's product", [
           "beach_bar@crud:beach_bar",
@@ -92,55 +83,48 @@ export const ProductReservationLimitCrudMutation = extendType({
           "beach_bar@update:product_reservation_limit",
         ]);
 
-        if (!reservationLimitIds || reservationLimitIds.length === 0 || reservationLimitIds.some(limit => limit.trim().length === 0))
-          throw new UserInputError("Please provide valid reservationLimitIds");
-
-        const reservationLimits = await ProductReservationLimit.find({
-          where: { id: In(reservationLimitIds) },
-          relations: ["startTime", "endTime", "product", "product.beachBar"],
-        });
-        if (!reservationLimits || reservationLimits.filter(limit => !limit.product.deletedAt).length === 0)
-          throw new ApolloError("Reservation limits were not found", errors.NOT_FOUND);
+        if (id.toString().trim().length === 0) throw new UserInputError("Please provide valid ID");
 
         try {
-          const updatedReservationLimits: ProductReservationLimit[] = [];
-          for (let i = 0; i < reservationLimits.length; i++) {
-            const updatedReservationLimit = await reservationLimits[i].update(limit, startTimeId, endTimeId);
-            updatedReservationLimits.push(updatedReservationLimit);
-          }
-          if (updatedReservationLimits.length === 0) throw new ApolloError(errors.SOMETHING_WENT_WRONG);
-          return { reservationLimit: updatedReservationLimits, updated: true };
+          const updatedLimit = await prisma.productReservationLimit.update({
+            where: { id: BigInt(id) },
+            include: { product: true },
+            data: { limitNumber: limit || undefined },
+          });
+
+          await updateRedis({ model: "BeachBar", id: updatedLimit.product.beachBarId });
+          return updatedLimit;
         } catch (err) {
           throw new ApolloError(err.message);
         }
       },
     });
-    t.field("deleteProductReservationLimit", {
-      type: DeleteGraphQlType,
+    t.boolean("deleteProductReservationLimit", {
       description: "Delete a or some reservation limit(s) from a #beach_bar's product",
-      args: { reservationLimitIds: list(idArg()) },
-      resolve: async (_, { reservationLimitIds }, { payload }: MyContext): Promise<DeleteType> => {
+      args: { id: idArg() },
+      resolve: async (_, { id }, { payload }) => {
         isAuth(payload);
         throwScopesUnauthorized(payload, "You are not allowed to delete a or some reservation limit(s) from a #beach_bar's product", [
           "beach_bar@crud:beach_bar",
           "beach_bar@crud:product_reservation_limit",
         ]);
 
-        if (!reservationLimitIds || reservationLimitIds.length === 0 || reservationLimitIds.some(limit => limit.trim().length === 0)) throw new UserInputError("Please provide valid reservationLimitIds");
+        if (id.toString().trim().length === 0) throw new UserInputError("Please provide valid ID");
 
-        const reservationLimits = await ProductReservationLimit.find({
-          where: { id: In(reservationLimitIds) },
-          relations: ["product", "product.beachBar"],
-        });
-        if (!reservationLimits) throw new ApolloError("Reservation limits were not found", errors.NOT_FOUND);
+        // const reservationLimit = await ProductReservationLimit.findOne({
+        //   where: { id: id },
+        //   relations: ["product", "product.beachBar"],
+        // });
+        // if (!reservationLimit) throw new ApolloError("Reservation limit was not found", errors.NOT_FOUND);
 
         try {
-          reservationLimits.forEach(async (limit: ProductReservationLimit) => await limit.softRemove());
+          // TODO: Fix
+          // await reservationLimit.softRemove();
         } catch (err) {
           throw new ApolloError(err.message);
         }
 
-        return { deleted: true };
+        return true;
       },
     });
   },

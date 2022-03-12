@@ -1,4 +1,5 @@
-import redisKeys from "constants/redisKeys";
+import { UpdateUserInfo } from "@/typings/user";
+import { softRemove } from "@/utils/softRemove";
 import dayjs, { Dayjs } from "dayjs";
 import {
   BaseEntity,
@@ -11,8 +12,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { UpdateUserInfo } from "typings/user";
-import { softRemove } from "utils/softRemove";
 import { Account } from "./Account";
 import { BeachBarReview } from "./BeachBarReview";
 import { Cart } from "./Cart";
@@ -99,10 +98,10 @@ export class User extends BaseEntity {
     return `${this.firstName ? this.firstName : ""}${this.firstName && this.lastName ? " " : ""}${this.lastName ? this.lastName : ""}`;
   }
 
-  getRedisKey(scope = false): string {
-    if (scope) return `${redisKeys.USER}:${this.id}:${redisKeys.USER_SCOPE}`;
-    return `${redisKeys.USER}:${this.id}`;
-  }
+  // getRedisKey(scope = false): string {
+  //   if (scope) return redisKeys.USER + ":" + this.id + ":" + redisKeys.USER_SCOPE;
+  //   return redisKeys.USER + ":" + this.id;
+  // }
 
   getIsNew(data: UpdateUserInfo): boolean {
     let isNew = false;

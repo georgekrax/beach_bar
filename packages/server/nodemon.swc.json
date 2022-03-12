@@ -1,0 +1,9 @@
+{
+  "restartable": "rs",
+  "watch": ["src"],
+  "exec": "node build/index.js",
+  "ext": "ts, js",
+  "events": {
+    "crash": "fuser -k 4000/tcp"
+  }
+}

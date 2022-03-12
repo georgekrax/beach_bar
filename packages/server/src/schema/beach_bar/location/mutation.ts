@@ -1,20 +1,17 @@
-import { errors, MyContext } from "@beach_bar/common";
+import { isAuth, throwScopesUnauthorized } from "@/utils/auth";
+import { updateRedis } from "@/utils/db";
+import { errors } from "@beach_bar/common";
+import { City, Region } from "@prisma/client";
+import { COUNTRIES_ARR } from "@the_hashtag/common";
 import { ApolloError } from "apollo-server-express";
-import { BeachBar } from "entity/BeachBar";
-import { BeachBarLocation } from "entity/BeachBarLocation";
-import { City } from "entity/City";
-import { Country } from "entity/Country";
-import { Region } from "entity/Region";
 import { extendType, idArg, nullable, stringArg } from "nexus";
-import { TAddBeachBarLocation, TUpdateBeachBarLocation } from "typings/beach_bar/location";
-import { isAuth, throwScopesUnauthorized } from "utils/auth/payload";
-import { AddBeachBarLocationType, UpdateBeachBarLocationType } from "./types";
+import { BeachBarLocationType } from "./types";
 
 export const BeachBarLocationCrudMutation = extendType({
   type: "Mutation",
   definition(t) {
     t.field("addBeachBarLocation", {
-      type: AddBeachBarLocationType,
+      type: BeachBarLocationType,
       description: "Add (assign) a location to a #beach_bar",
       args: {
         beachBarId: idArg(),
@@ -33,74 +30,64 @@ export const BeachBarLocationCrudMutation = extendType({
       resolve: async (
         _,
         { beachBarId, address, zipCode, latitude, longitude, countryId, city, region },
-        { payload }: MyContext
-      ): Promise<TAddBeachBarLocation> => {
+        { prisma, payload }
+      ) => {
         isAuth(payload);
         throwScopesUnauthorized(payload, errors.YOU_ARE_NOT_BEACH_BAR_PRIMARY_OWNER, ["beach_bar@crud:beach_bar"]);
 
-        if (!latitude || latitude.length > 16 || !longitude || longitude.length > 16)
+        if (!latitude || latitude.length > 16 || !longitude || longitude.length > 16) {
           throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.INVALID_ARGUMENTS);
-
-        const beachBar = await BeachBar.findOne({
-          where: { id: beachBarId },
-          relations: ["location", "reviews", "features", "products", "restaurants"],
-        });
-        if (!beachBar) throw new ApolloError(errors.BEACH_BAR_DOES_NOT_EXIST, errors.NOT_FOUND);
-
-        const country = await Country.findOne(countryId);
-        if (!country) throw new ApolloError("Country does not exist", errors.NOT_FOUND);
-
-        let newCity: City | undefined = undefined;
-        newCity = await City.findOne({ where: `"name" ILIKE '${city}'` });
-        if (!newCity) {
-          newCity = City.create({
-            name: city,
-            countryId: country.id,
-            country,
-          });
-          await newCity.save();
         }
 
-        let newRegion: Region | undefined = undefined;
+        const beachBar = await prisma.beachBar.findUnique({ where: { id: +beachBarId } });
+        if (!beachBar) throw new ApolloError(errors.BEACH_BAR_DOES_NOT_EXIST, errors.NOT_FOUND);
+
+        const country = COUNTRIES_ARR.find(({ id }) => id.toString() === countryId.toString());
+        if (!country) throw new ApolloError("Country does not exist", errors.NOT_FOUND);
+
+        let newCity: City | null = null;
+        const cityId = +city;
+        newCity = await prisma.city.findFirst({
+          where: isNaN(cityId) ? { name: { contains: city, mode: "insensitive" } } : { id: cityId },
+        });
+        if (!newCity) newCity = await prisma.city.create({ data: { name: city, countryId: country.id } });
+
+        let newRegion: Region | null = null;
+        const regionId = +(region || 0);
         if (region) {
-          newRegion = await Region.findOne({ where: `"name" ILIKE '${region}'` });
+          newRegion = await prisma.region.findFirst({
+            where: isNaN(regionId) ? { name: { contains: region.toString(), mode: "insensitive" } } : { id: regionId },
+          });
           if (!newRegion) {
-            newRegion = Region.create({
-              name: region,
-              countryId: country.id,
-              country: country,
-              cityId: city.id,
-              city: newCity,
-            });
-            await newRegion.save();
+            newRegion = await prisma.region.create({ data: { name: region.toString(), countryId: country.id, cityId: newCity?.id } });
           }
         }
 
-        const newLocation = BeachBarLocation.create({
-          beachBar,
-          address,
-          zipCode,
-          latitude,
-          longitude,
-          country,
-          city: newCity,
-          region: newRegion,
-        });
-
         try {
-          await newLocation.save();
-          await beachBar.updateRedis();
+          const newLocation = await prisma.beachBarLocation.create({
+            data: {
+              beachBarId: beachBar.id,
+              countryId: country.id,
+              cityId: newCity.id,
+              regionId: newRegion?.id,
+              address,
+              zipCode,
+              latitude,
+              longitude,
+            },
+          });
+          await updateRedis({ model: "BeachBar", id: beachBar.id });
+          return newLocation;
         } catch (err) {
-          if (err.message === 'duplicate key value violates unique constraint "beach_bar_location_beach_bar_id_key"')
+          if (err.message === 'duplicate key value violates unique constraint "beach_bar_location_beach_bar_id_key"') {
             throw new ApolloError("You have already set the location of this #beach_bar.", errors.CONFLICT);
+          }
           throw new ApolloError(err.message);
         }
-
-        return { location: newLocation, added: true };
       },
     });
     t.field("updateBeachBarLocation", {
-      type: UpdateBeachBarLocationType,
+      type: BeachBarLocationType,
       description: "Update the location details of a #beach_bar",
       args: {
         locationId: idArg(),
@@ -112,27 +99,50 @@ export const BeachBarLocationCrudMutation = extendType({
         city: nullable(stringArg()),
         region: nullable(stringArg()),
       },
-      resolve: async (
-        _,
-        { locationId, address, zipCode, latitude, longitude, countryId, city, region },
-        { payload }: MyContext
-      ): Promise<TUpdateBeachBarLocation> => {
+      resolve: async (_, { locationId, address, latitude, longitude, countryId, city, region, ...args }, { prisma, payload }) => {
         isAuth(payload);
         throwScopesUnauthorized(payload, 'You are not allowed to update "this" #beach_bar location details', [
           "beach_bar@crud:beach_bar",
           "beach_bar@update:beach_bar",
         ]);
 
-        const location = await BeachBarLocation.findOne({
-          where: { id: locationId },
-          relations: ["beachBar", "country", "city", "region"],
+        const location = await prisma.beachBarLocation.findUnique({
+          where: { id: +locationId },
+          include: { city: true, region: true },
         });
         if (!location) throw new ApolloError("#beach_bar location does not exist", errors.NOT_FOUND);
 
         try {
-          const updatedLocation = await location.update({ address, zipCode, latitude, longitude, countryId, city, region });
+          let newCity: City | null | undefined = undefined;
+          if (city && city.toLowerCase() !== location.city.name.toLowerCase()) {
+            newCity = await prisma.city.findFirst({ where: { name: { contains: city } } });
+            if (!newCity) newCity = await prisma.city.create({ data: { name: city, countryId: location.countryId } });
+          }
+          let newRegion: Region | null | undefined = undefined;
+          if (region && region.toLowerCase() !== location.region?.name.toLowerCase()) {
+            newRegion = await prisma.region.findFirst({ where: { name: { contains: region } } });
+            if (!newRegion) {
+              newRegion = await prisma.region.create({
+                data: { name: region, countryId: location.countryId, cityId: location.cityId },
+              });
+            }
+          }
 
-          return { location: updatedLocation, updated: true };
+          const updatedLocation = await prisma.beachBarLocation.update({
+            where: { id: location.id },
+            include: { city: true, country: true },
+            data: {
+              ...args,
+              address: address || undefined,
+              latitude: latitude || undefined,
+              longitude: longitude || undefined,
+              countryId: countryId ? +countryId : undefined,
+              cityId: newCity?.id,
+              regionId: newRegion?.id,
+            },
+          });
+          await updateRedis({ model: "BeachBar", id: location.beachBarId });
+          return updatedLocation;
         } catch (err) {
           throw new ApolloError(err.message);
         }

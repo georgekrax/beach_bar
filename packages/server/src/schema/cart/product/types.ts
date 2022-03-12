@@ -1,31 +1,43 @@
-import { DateScalar, DateTimeScalar } from "@the_hashtag/common/dist/graphql";
+import { resolve } from "@/utils/data";
 import { objectType } from "nexus";
-import { ProductType } from "../../beach_bar/product/types";
-import { HourTimeType } from "../../details/time/types";
-import { CartType } from "../types";
+import { CartProduct } from "nexus-prisma";
 
-export const CartProduct = objectType({
-  name: "CartProduct",
+export const CartProductType = objectType({
+  name: CartProduct.$name,
   description: "Represents a shopping cart with its products",
   definition(t) {
-    t.id("id");
-    t.int("quantity");
-    t.field("date", { type: DateScalar, description: "The date of purchase of the product" });
-    t.field("timestamp", { type: DateTimeScalar });
-    t.field("cart", { type: CartType, description: "The shopping cart the product is added to" });
-    t.field("product", { type: ProductType, description: "The product that is added to the shopping cart" });
-    t.field("time", { type: HourTimeType, description: "The hour of use of the product" });
+    // t.id("id");
+    // t.int("quantity");
+    // t.field("date", { type: DateScalar, description: "The date of purchase of the product" });
+    // t.int("people", { description: "The number of people that are going to use the product" });
+    // t.field("timestamp", { type: DateTime.name });
+    // t.field("cart", { type: CartType, description: "The shopping cart the product is added to" });
+    // t.field("product", { type: ProductType, description: "The product that is added to the shopping cart" });
+    // t.field("startTime", { type: HourTimeType, description: "The starting hour of use of the product" });
+    // t.field("endTime", { type: HourTimeType, description: "The ending hour of use of the product" });
+    t.field(CartProduct.id);
+    t.field(CartProduct.quantity);
+    t.field(CartProduct.date);
+    t.field(CartProduct.people);
+    t.field(resolve(CartProduct.cart));
+    t.field(resolve(CartProduct.product));
+    t.field(resolve(CartProduct.startTime));
+    t.field(resolve(CartProduct.endTime));
+    t.field(CartProduct.timestamp);
+    t.nullable.float("total", {
+      resolve: ({ quantity, ...o }): number | null => (o["product"] ? quantity * o["product"]["price"] : null),
+    });
   },
 });
 
-export const AddCartProduct = objectType({
-  name: "AddCartProduct",
-  description: "Info to be returned when a product is added to a shopping cart",
-  definition(t) {
-    t.field("product", { type: CartProduct, description: "The product that is added to the cart" });
-    t.boolean("added");
-  },
-});
+// export const AddCartProduct = objectType({
+//   name: "AddCartProduct",
+//   description: "Info to be returned when a product is added to a shopping cart",
+//   definition(t) {
+//     t.field("product", { type: CartProductType, description: "The product that is added to the cart" });
+//     t.boolean("added");
+//   },
+// });
 
 // export const AddCartProductResult = unionType({
 //   name: "AddCartProductResult",
@@ -41,17 +53,17 @@ export const AddCartProduct = objectType({
 //   },
 // });
 
-export const UpdateCartProduct = objectType({
-  name: "UpdateCartProduct",
-  description: "Info to be returned when a product of a shopping cart is updated",
-  definition(t) {
-    t.field("product", {
-      type: CartProduct,
-      description: "The product that is updated",
-    });
-    t.boolean("updated");
-  },
-});
+// export const UpdateCartProduct = objectType({
+//   name: "UpdateCartProduct",
+//   description: "Info to be returned when a product of a shopping cart is updated",
+//   definition(t) {
+//     t.field("product", {
+//       type: CartProductType,
+//       description: "The product that is updated",
+//     });
+//     t.boolean("updated");
+//   },
+// });
 
 // export const UpdateCartProductResult = unionType({
 //   name: "UpdateCartProductResult",

@@ -1,3 +1,4 @@
+import { softRemove } from "@/utils/softRemove";
 import { Dayjs } from "dayjs";
 import {
   BaseEntity,
@@ -10,7 +11,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { softRemove } from "utils/softRemove";
 import { BeachBar } from "./BeachBar";
 
 @Entity({ name: "beach_bar_img_url", schema: "public" })
@@ -40,15 +40,14 @@ export class BeachBarImgUrl extends BaseEntity {
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Dayjs;
 
-  async update(imgUrl?: string, description?: string): Promise<BeachBarImgUrl | any> {
+  async update(description?: string): Promise<BeachBarImgUrl | never> {
     try {
-      if (imgUrl && imgUrl !== this.imgUrl) {
-        this.imgUrl = imgUrl.toString();
+      // if (imgUrl && imgUrl !== this.imgUrl) this.imgUrl = imgUrl.toString();
+      if (description !== this.description) {
+        this.description = description?.trim().length === 0 ? undefined : description;
+        await this.save();
+        await this.beachBar.updateRedis();
       }
-      if (description && description !== this.description) {
-        this.description = description;
-      }
-      await this.save();
       return this;
     } catch (err) {
       throw new Error(err.message);

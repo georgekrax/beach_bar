@@ -1,8 +1,9 @@
 import { HttpLink } from "apollo-link-http";
-import fetch from "node-fetch";
+
+const fetch = (...args) => import("node-fetch").then(module => module.default([...args] as any));
 
 export const link: any = new HttpLink({
-  uri: `${process.env.HASHTAG_API_HOSTNAME!.toString()}/graphql`,
+  uri: process.env.HASHTAG_API_HOSTNAME + "/graphql",
   fetch: fetch as any,
   credentials: "include",
 });

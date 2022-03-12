@@ -1,31 +1,26 @@
-import { objectType } from "nexus";
-import { UserType } from "../user/types";
+import { enumType, inputObjectType } from "nexus";
 
-export const OAuthAuthorizationType = objectType({
-  name: "OAuthAuthorization",
-  description: "User info to be returned on Google OAuth authorization",
-  definition(t) {
-    t.string("accessToken", { description: "The JWT access token to be returned upon successful login" });
-    t.boolean("signedUp", { description: "A boolean that indicates if the user has successfully signed up" });
-    t.boolean("logined", { description: "A boolean that indicates if the user has successfully logined" });
-    t.field("user", {
-      type: UserType,
-      description: "The user being authorized",
-      resolve: o => o.user,
-    });
+export const OAuthProviderEnum = enumType({
+  name: "OAuthProvider",
+  members: {
+    Hashtag: "#hashtag",
+    Google: "Google",
+    GitHub: "GitHub",
+    Facebook: "Facebook",
+    Instagram: "Instagram",
   },
 });
 
-// export const OAuthAuthorizationResult = unionType({
-//   name: "OAuthAuthorizationResult",
-//   definition(t) {
-//     t.members("OAuthAuthorization", "Error");
-//   },
-//   resolveType: item => {
-//     if (item.error) {
-//       return "Error";
-//     } else {
-//       return "OAuthAuthorization";
-//     }
-//   },
-// });
+export const OAuthUserInput = inputObjectType({
+  name: "OAuthUserInput",
+  description: "User details in when authorizing with an OAuth Provider",
+  definition(t) {
+    t.id("id");
+    t.email("email");
+    t.nullable.string("username");
+    t.nullable.string("firstName");
+    t.nullable.string("lastName");
+    t.nullable.url("imgUrl");
+    t.nullable.date("birthday");
+  },
+});

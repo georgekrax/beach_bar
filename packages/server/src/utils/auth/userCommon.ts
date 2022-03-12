@@ -1,78 +1,53 @@
+import { LoginPlatformType } from "@/config/platformNames";
+import { NexusGenInputs } from "@/graphql/generated/nexusTypes";
+import { Account, LoginDetails } from "@prisma/client";
 import { BROWSERS_ARR, COUNTRIES_ARR, OS_ARR } from "@the_hashtag/common";
-import { LoginPlatformType } from "config/platformNames";
-import { Account } from "entity/Account";
-import { LoginDetails, LoginDetailStatus } from "entity/LoginDetails";
-import { LoginDetailsType } from "typings/.index";
 import UAParser from "ua-parser-js";
+import { prisma } from "../../index";
 
-type findDetailsReturnType = number | undefined;
-type findLoginDetailsType = {
-  details?: Omit<LoginDetailsType, "osId" | "browserId">;
+// findLoginDetails()
+type FindDetailsReturn = number | null;
+type FindLoginDetailsOptions = {
+  details?: NexusGenInputs["UserLoginDetails"] | null;
   uaParser: UAParser;
 };
+type FindLoginDetailsReturn = Pick<LoginDetails, "city" | "osId" | "browserId" | "countryId">;
 
-export const findLoginDetails = ({ details, uaParser }: findLoginDetailsType): LoginDetailsType => {
-  const obj: LoginDetailsType = {
-    osId: undefined,
-    browserId: undefined,
-    countryAlpha2Code: undefined,
-    city: details?.city || undefined,
-  };
-  if (details) {
-    const osName = uaParser.getOS().name || undefined;
-    if (osName) obj.osId = findOs(osName);
-    const browserName = uaParser.getBrowser().name || undefined;
-    if (browserName) obj.browserId = findOs(browserName);
-    if (details.countryAlpha2Code) obj.countryId = findCountry(details.countryAlpha2Code);
-  }
-  return obj;
-};
+export const findLoginDetails = ({ details, uaParser }: FindLoginDetailsOptions): FindLoginDetailsReturn => ({
+  city: details?.city || null,
+  osId: findOs(uaParser.getOS().name),
+  browserId: findOs(uaParser.getBrowser().name),
+  countryId: findCountry(details?.countryAlpha2Code || ""),
+});
 
-export const createUserLoginDetails = async (
-  status: LoginDetailStatus,
-  platform: LoginPlatformType,
-  account: Account,
-  osId?: number,
-  browserId?: number,
-  countryId?: number,
-  city?: string,
-  ipAddr?: string
-): Promise<void> => {
-  const loginDetails = LoginDetails.create({
-    account,
-    platformId: platform.id,
-    browserId,
-    osId,
-    countryId,
-    city,
-    ipAddr: ipAddr || undefined,
-    status,
-  });
+// createLoginDetails()
+type CreateLoginDetailsOptions = {
+  platform: LoginPlatformType;
+  account: Account;
+} & Pick<LoginDetails, "status" | "osId" | "browserId" | "countryId" | "city" | "ipAddr">;
 
+export const createLoginDetails = async ({ platform, account, ...rest }: CreateLoginDetailsOptions): Promise<void> => {
   try {
-    await loginDetails.save();
+    await prisma.loginDetails.create({ data: { ...rest, accountId: account.id, platformId: platform.id } });
   } catch (err) {
     throw new Error(err.message);
   }
 };
 
-export const findOs = (osName: string): findDetailsReturnType => {
-  if (!osName) return undefined;
+export const findOs = (osName?: string): FindDetailsReturn => {
+  if (!osName) return null;
   const os = OS_ARR.find(({ name }) => name.toLowerCase() === osName.toLowerCase());
-  if (!os) return undefined;
-  return os.id;
+  return os?.id || null;
 };
 
-export const findBrowser = (browserName: string): findDetailsReturnType => {
-  if (!browserName) return undefined;
+export const findBrowser = (browserName?: string): FindDetailsReturn => {
+  if (!browserName) return null;
   const browser = BROWSERS_ARR.find(({ name }) => name.toLowerCase() === browserName.toLowerCase());
-  if (!browser) return undefined;
-  return browser.id;
+  return browser?.id || null;
 };
 
-export const findCountry = (countryCode?: string): findDetailsReturnType => {
-  if (!countryCode) return undefined;
+export const findCountry = (countryCode?: string): FindDetailsReturn => {
+  if (!countryCode) return null;
   const country = COUNTRIES_ARR.find(({ alpha2Code }) => alpha2Code === countryCode);
-  if (!country) return undefined;
-  return country.id;
+  return country?.id || null;
 };

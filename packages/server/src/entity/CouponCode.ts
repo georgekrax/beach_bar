@@ -1,5 +1,6 @@
+import { generateIdSpecialCharacters, voucherCodeLength } from "@/constants/_index";
+import { softRemove } from "@/utils/softRemove";
 import { generateId } from "@the_hashtag/common";
-import { generateIdSpecialCharacters, voucherCodeLength } from "constants/_index";
 import { Dayjs } from "dayjs";
 import {
   BaseEntity,
@@ -13,9 +14,8 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
-  UpdateDateColumn
+  UpdateDateColumn,
 } from "typeorm";
-import { softRemove } from "utils/softRemove";
 import { BeachBar } from "./BeachBar";
 import { PaymentVoucherCode } from "./PaymentVoucherCode";
 
@@ -80,21 +80,11 @@ export class CouponCode extends BaseEntity {
   }): Promise<CouponCode[] | { deleted: true } | any> {
     const { title, discountPercentage, validUntil, isActive, timesLimit } = options;
     try {
-      if (title && title !== this.title) {
-        this.title = title;
-      }
-      if (discountPercentage && discountPercentage !== this.discountPercentage) {
-        this.discountPercentage = discountPercentage;
-      }
-      if (validUntil && validUntil !== this.validUntil) {
-        this.validUntil = validUntil;
-      }
-      if (isActive !== null && isActive !== undefined && isActive !== this.isActive) {
-        this.isActive = isActive;
-      }
-      if (timesLimit && timesLimit !== this.timesLimit) {
-        this.timesLimit = timesLimit;
-      }
+      if (title && title !== this.title) this.title = title;
+      if (discountPercentage && discountPercentage !== this.discountPercentage) this.discountPercentage = discountPercentage;
+      if (validUntil && validUntil !== this.validUntil) this.validUntil = validUntil;
+      if (isActive != null && isActive !== this.isActive) this.isActive = isActive;
+      if (timesLimit && timesLimit !== this.timesLimit) this.timesLimit = timesLimit;
       if (timesLimit && timesLimit < this.timesUsed) {
         await this.softRemove();
         return { deleted: true };

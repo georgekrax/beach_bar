@@ -1,10 +1,8 @@
-import { errors } from "@beach_bar/common";
-import { DateScalar } from "@the_hashtag/common/dist/graphql";
+import { getReservationLimit, GetReservationLimitInclude } from "@/utils/product";
+import { errors, TABLES } from "@beach_bar/common";
 import { ApolloError } from "apollo-server-express";
-import { Product } from "entity/Product";
-import { HourTime } from "entity/Time";
-import { arg, extendType, idArg } from "nexus";
-import { AvailableProductReturnType } from "typings/beach_bar/product/reservationLimit";
+import { arg, extendType, FieldType, idArg } from "nexus";
+import { DateScalar } from "@the_hashtag/common/dist/graphql";
 import { AvailableProductType } from "./types";
 
 export const ProductQuery = extendType({
@@ -15,20 +13,19 @@ export const ProductQuery = extendType({
       description: "Get a list with all the hours this product has reservation limits",
       args: {
         productId: idArg(),
-        date: arg({ type: DateScalar, description: "The date to purchase the product. Its default value its the current date" }),
+        date: arg({ type: DateScalar.name, description: "The date to purchase the product. Its default value its the current date" }),
       },
-      resolve: async (_, { productId, date }): Promise<AvailableProductReturnType> => {
-        const product = await Product.findOne(productId);
+      resolve: async (_, { productId, date }, { prisma }) => {
+        const product = await prisma.product.findUnique({ where: { id: +productId }, include: GetReservationLimitInclude });
         if (!product) throw new ApolloError("Product was not found", errors.NOT_FOUND);
 
-        const hourTimes = await HourTime.find();
-        if (!hourTimes || hourTimes.length === 0) throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.INTERNAL_SERVER_ERROR);
-
-        const returnResult: AvailableProductReturnType = [];
+        const hourTimes = TABLES.HOUR_TIME;
+        const returnResult: FieldType<"Query", "hasProductReservationLimit"> = [];
         for (let i = 0; i < hourTimes.length; i++) {
-          const isAvailable = product.getReservationLimit(date, hourTimes[i].id?.toString());
+          const timeId = +hourTimes[i].id?.toString();
+          const isAvailable = getReservationLimit(product, { date, startTimeId: timeId, endTimeId: timeId });
           // * the opposite because we return isAvailable
-          returnResult.push({ hourTime: hourTimes[i], isAvailable: isAvailable ? false : true });
+          returnResult.push({ hourTime: hourTimes[i] as any, isAvailable: isAvailable ? false : true });
         }
 
         return returnResult;

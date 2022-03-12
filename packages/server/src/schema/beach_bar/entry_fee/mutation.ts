@@ -1,12 +1,12 @@
 // import { errors, MyContext } from "@beach_bar/common";
 // import { DateScalar } from "@the_hashtag/common/dist/graphql";
-// import { BeachBar } from "entity/BeachBar";
-// import { BeachBarEntryFee } from "entity/BeachBarEntryFee";
+// import { BeachBar } from "@/entity/BeachBar";
+// import { BeachBarEntryFee } from "@/entity/BeachBarEntryFee";
 // import { arg, extendType, floatArg, idArg, intArg, list, nullable } from "nexus";
 // import { In } from "typeorm";
-// import { DeleteType } from "typings/.index";
-// import { AddBeachBarEntryFeeType, UpdateBeachBarEntryFeeType } from "typings/beach_bar/entry_fee";
-// import { checkScopes } from "utils/checkScopes";
+// import { DeleteType } from "@/typings/index";
+// import { AddBeachBarEntryFeeType, UpdateBeachBarEntryFeeType } from "@/typings/beach_bar/entry_fee";
+// import { checkScopes } from "@/utils/auth";
 // import { DeleteResult } from "../../types";
 // import { AddBeachBarEntryFeeResult, UpdateBeachBarEntryFeeResult } from "./types";
 
@@ -33,7 +33,7 @@
 //         if (!checkScopes(payload, ["beach_bar@crud:beach_bar", "beach_bar@crud:beach_bar_entry_fee"])) {
 //           return { error: { code: errors.UNAUTHORIZED_CODE, message: "You are not allowed to add an entry fee to a #beach_bar" } };
 //         }
-//         if (fee === null || fee === undefined || fee < 0) {
+//         if (fee == null || fee < 0) {
 //           return { error: { code: errors.INVALID_ARGUMENTS, message: "Please provide a valid fee price" } };
 //         }
 //         if (!dates || dates.length === 0) {
@@ -121,7 +121,7 @@
 //         }
 
 //         try {
-//           if (price !== null && price !== undefined && entryFees.some(fee => fee.fee !== price)) {
+//           if (price != null && entryFees.some(fee => fee.fee !== price)) {
 //             const updatedEntryFees: BeachBarEntryFee[] = [];
 //             for (let i = 0; i < entryFees.length; i++) {
 //               const updatedEntryFee = await entryFees[i].update(price);

@@ -14,7 +14,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { softRemove } from "utils/softRemove";
+import { softRemove } from "@/utils/softRemove";
 import { Country } from "./Country";
 import { LoginDetails } from "./LoginDetails";
 import { User } from "./User";
@@ -97,8 +97,8 @@ export class Account extends BaseEntity {
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
   deletedAt?: Dayjs;
 
-  @BeforeInsert()
-  @BeforeUpdate()
+  @BeforeInsert() // Done
+  @BeforeUpdate() // Done
   calculateUsersAge(): void {
     if (this.birthday) {
       const differenceMs = dayjs().subtract(+dayjs(this.birthday), "millisecond");

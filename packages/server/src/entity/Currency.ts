@@ -1,11 +1,7 @@
-import { BaseEntity, Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { BeachBar } from "./BeachBar";
-import { PricingFeeCurrency } from "./PricingFeeCurrency";
 import { Country } from "./Country";
-import { CurrencyProductPrice } from "./CurrencyProductPrice";
 import { Product } from "./Product";
-import { StripeFee } from "./StripeFee";
-import { StripeMinimumCurrency } from "./StripeMinimumCurrency";
 
 @Entity({ name: "currency", schema: "public" })
 export class Currency extends BaseEntity {
@@ -27,18 +23,18 @@ export class Currency extends BaseEntity {
   @OneToMany(() => Country, country => country.currency, { nullable: true })
   countries?: Country[];
 
-  @OneToOne(() => CurrencyProductPrice, currencyProductPrice => currencyProductPrice.currency)
-  productPrice: CurrencyProductPrice;
-
   @OneToMany(() => BeachBar, beachBar => beachBar.defaultCurrency, { nullable: true })
   beachBars?: Product[];
 
-  @OneToMany(() => PricingFeeCurrency, pricingFeeCurrency => pricingFeeCurrency.currency, { nullable: true })
-  beachBarFees?: PricingFeeCurrency[];
+  // @OneToOne(() => CurrencyProductPrice, currencyProductPrice => currencyProductPrice.currency)
+  // productPrice: CurrencyProductPrice;
 
-  @OneToMany(() => StripeFee, stripeFee => stripeFee.currency, { nullable: true })
-  stripeFees?: StripeFee[];
+  // @OneToMany(() => PricingFeeCurrency, pricingFeeCurrency => pricingFeeCurrency.currency, { nullable: true })
+  // beachBarFees?: PricingFeeCurrency[];
 
-  @OneToOne(() => StripeMinimumCurrency, stripeMinimumCurrency => stripeMinimumCurrency.currency)
-  stripeMinimumCurrency: StripeMinimumCurrency;
+  // @OneToMany(() => StripeFee, stripeFee => stripeFee.currency, { nullable: true })
+  // stripeFees?: StripeFee[];
+
+  // @OneToOne(() => StripeMinimumCurrency, stripeMinimumCurrency => stripeMinimumCurrency.currency)
+  // stripeMinimumCurrency: StripeMinimumCurrency;
 }

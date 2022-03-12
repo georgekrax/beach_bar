@@ -1,18 +1,14 @@
-import { errors, MyContext } from "@beach_bar/common";
-import { MONTHS } from "@the_hashtag/common";
+import { Product } from "@/entity/Product";
+import { isAuth } from "@/utils/auth";
+import { getTotal, GetTotalCartInclude } from "@/utils/cart";
+import { getRefundPercentage } from "@/utils/payment";
+import { errors } from "@beach_bar/common";
 import { ApolloError, UserInputError } from "apollo-server-express";
 import dayjs from "dayjs";
 import minMax from "dayjs/plugin/minMax";
-import { Cart } from "entity/Cart";
-import { Payment } from "entity/Payment";
-import { Product } from "entity/Product";
 import { uniqBy } from "lodash";
-import uniq from "lodash/uniq";
-import { extendType, idArg, intArg, nullable, stringArg } from "nexus";
-import { getConnection } from "typeorm";
-import { TPaymentVisits, TPaymentVisitsDate } from "typings/payment";
-import { isAuth } from "utils/auth/payload";
-import { PaymentType, PaymentVisitsDatesTypes, PaymentVisitsType } from "./types";
+import { extendType, idArg, intArg, nullable } from "nexus";
+import { PaymentType, PaymentVisitsType } from "./types";
 
 dayjs.extend(minMax);
 
@@ -23,30 +19,35 @@ export const PaymentQuery = extendType({
       resolve: async (): Promise<boolean> => {
         const product = await Product.findOne({ where: { id: 105 }, relations: ["reservationLimits", "reservedProducts"] });
         if (!product) return false;
-        const limits = product.getReservationLimit(dayjs("04/05/2021").format(), "12");
+        const limits = product.getReservationLimit({ date: dayjs("04/05/2021").format(), startTimeId: 12, endTimeId: 13 });
         if (!limits) return false;
-        const reserved = product.getReservedProducts(dayjs("04/05/2021").format(), "13");
+        const reserved = product.getReservedProducts({ date: dayjs("04/05/2021").format(), startTimeId: 12, endTimeId: 13 });
         const available = reserved.length < limits;
         console.log(available);
         return true;
       },
     });
-    t.boolean("isProductAvailable", {
-      resolve: async (): Promise<boolean> => {
-        // const me = await isProductAvailable(105, dayjs("04/06/2021"), "13");
-        const product = await Product.findOne({
-          where: { id: "105" },
-          relations: ["reservedProducts", "reservationLimits", "beachBar", "beachBar.products", "beachBar.products.category"],
-        });
-        if (!product) return false;
-        // const remainingAvailable = await redis.hget("available_products:2021-05-31:1300", product.getRedisAvailableProductsKey());
-        const hey = await product.beachBar.calcRecommendedProducts({ date: "2021-05-31", timeId: "13", totalPeople:  5 });
-        // const hey = await product.isAvailable({ date: "2021-05-31", timeId: "13" });
-        console.log(hey);
-        return true;
-        // return !remainingAvailable ? false : (parseInt(remainingAvailable)) > 0;
-      },
-    });
+    // t.boolean("isProductAvailable", {
+    //   resolve: async (_, __, {prisma}) => {
+    //     // const me = await isProductAvailable(105, dayjs("04/06/2021"), "13");
+    //     const product = await Product.findOne({
+    //       where: { id: "105" },
+    //       relations: ["reservedProducts", "reservationLimits", "beachBar", "beachBar.products", "beachBar.products.category"],
+    //     });
+    //     if (!product) return false;
+    //     // const remainingAvailable = await redis.hget("available_products:2021-05-31:1300", product.getRedisAvailableProductsKey());
+    //     const hey = await product.beachBar.calcRecommendedProducts({
+    //       date: "2021-05-31",
+    //       startTimeId: 13,
+    //       endTimeId: 14,
+    //       totalPeople: 5,
+    //     });
+    //     // const hey = await product.isAvailable({ date: "2021-05-31", timeId: "13" });
+    //     console.log(hey);
+    //     return true;
+    //     // return !remainingAvailable ? false : (parseInt(remainingAvailable)) > 0;
+    //   },
+    // });
     t.list.field("payments", {
       type: PaymentVisitsType,
       description: "Get a list of payments for a specific / latest month of an authenticated user",
@@ -54,10 +55,12 @@ export const PaymentQuery = extendType({
         monthId: nullable(idArg({ description: "The ID of the month of the payments to fetch" })),
         year: nullable(intArg({ description: "The year of the payments to fetch" })),
       },
-      resolve: async (_, { monthId, year }, { payload }: MyContext): Promise<TPaymentVisits[]> => {
-        monthId = parseInt(monthId);
+      resolve: async (_, { year, ...args }, { payload, prisma }) => {
+        const monthId = args.monthId ? +args.monthId : undefined;
         isAuth(payload);
-        if (monthId < 1 || monthId > 12) throw new UserInputError("Invalid monthId. Please provide a value between 1 and 12");
+        if (monthId && (monthId < 1 || monthId > 12)) {
+          throw new UserInputError("Invalid monthId. Please provide a value between 1 and 12");
+        }
 
         // const payments = await getConnection()
         // .createQueryBuilder(Payment, "payment")
@@ -72,46 +75,54 @@ export const PaymentQuery = extendType({
         // .getMany();
 
         // Even if the payment is refunded, we want to show to the user the details of it
-        const userCarts = await Cart.find({
+        const userCarts = await prisma.cart.findMany({
           where: { userId: payload!.sub },
-          relations: [
-            "payment",
-            "products",
-            "products.time",
-            "products.product",
-            "products.product.beachBar",
-            "products.product.beachBar.location",
-            "products.product.beachBar.location.city",
-            "products.product.beachBar.location.region",
-          ],
-          order: { timestamp: "DESC" },
+          orderBy: { timestamp: "desc" },
+          include: {
+            payment: true,
+            products: {
+              include: {
+                startTime: true,
+                endTime: true,
+                product: { include: { beachBar: true } },
+              },
+            },
+          },
         });
 
         const products = userCarts
-          .filter(cart => cart.payment)
+          .filter(({ payment }) => payment)
           .map(({ products }) => products || [])
           .flat();
-        const uniqDates = uniq(products.map(product => product.date));
+        if (products.length === 0) return [];
+        // const uniqDates = uniq(products.map(product => product.date));
 
-        const latestMonth = monthId ? monthId - 1 : dayjs.max(uniqDates.map(date => dayjs(date))).month();
-        const latestYear = year ? year : dayjs.max(uniqDates.map(date => dayjs(date))).year();
-        const monthProducts = products.filter(({ date }) => dayjs(date).month() === latestMonth && dayjs(date).year() === latestYear);
+        // const latestMonth = monthId ? monthId - 1 : dayjs.max(uniqDates.map(date => dayjs(date))).month();
+        // const latestYear = year ? year : dayjs.max(uniqDates.map(date => dayjs(date))).year();
+        const monthProducts =
+          monthId && year
+            ? products.filter(({ date }) => {
+                const parsedDate = dayjs(date);
+                return (monthId ? parsedDate.month() === monthId - 1 : true) && (year ? parsedDate.year() === year : true);
+              })
+            : products;
         // const uniqMonthProducts = uniq(monthProducts);
         const uniqBeachBars = uniqBy(
           monthProducts.map(({ product: { beachBar } }) => beachBar),
           "id"
         );
-        const res: TPaymentVisits[] = uniqBeachBars.map(beachBar => ({
+        const res = uniqBeachBars.map(beachBar => ({
           beachBar,
           visits: monthProducts
-            .filter(product => String(product.product.beachBarId) === String(beachBar.id))
-            .map(({ date, time, cartId }) => {
+            .filter(({ product: { beachBarId } }) => String(beachBarId) === String(beachBar.id))
+            .map(({ date, startTime, endTime, cartId }) => {
               const payment = userCarts.find(({ id }) => id.toString() === cartId.toString())!.payment!;
               return {
                 date: String(date),
                 isUpcoming: dayjs(date).isAfter(dayjs()),
                 isRefunded: payment.isRefunded ?? false,
-                time: { id: time.id, value: time.value },
+                startTime,
+                endTime,
                 payment,
               };
             }),
@@ -122,95 +133,67 @@ export const PaymentQuery = extendType({
     t.field("payment", {
       type: PaymentType,
       description: "Get the details of a specific payment / trip",
-      args: { refCode: stringArg({ description: "The referral code of the payment to fetch" }) },
-      resolve: async (_, { refCode }): Promise<Payment> => {
-        if (!refCode || refCode.trim().length === 0)
+      args: { refCode: idArg({ description: "The referral code of the payment to fetch" }) },
+      resolve: async (_, { refCode }, { prisma }) => {
+        if (refCode.toString().trim().length === 0) {
           throw new UserInputError("Invalid referral code (ID). Please provide a valid value.");
+        }
 
         // Even if the payment is refunded, we want to show to the user the details of it
-        const payment = await Payment.findOne({
-          where: { refCode },
-          relations: [
-            "status",
-            "cart",
-            "cart.user",
-            "cart.products",
-            "cart.products.time",
-            "cart.products.product",
-            "cart.products.product.beachBar",
-            "cart.products.product.beachBar.defaultCurrency",
-            "cart.products.product.beachBar.location",
-            "cart.products.product.beachBar.location.country",
-            "cart.products.product.beachBar.location.city",
-            "cart.products.product.beachBar.location.region",
-            "card",
-            "card.brand",
-            "card.country",
-            "card.country.currency",
-            "card.customer",
-            "card.customer.user",
-            "card.customer.country",
-            "reservedProducts",
-            "voucherCode",
-            "voucherCode.offerCode",
-            "voucherCode.offerCode.campaign",
-            "voucherCode.offerCode.campaign.products",
-            "voucherCode.couponCode",
-            "voucherCode.couponCode.beachBar",
-          ],
-        });
+        const payment = await prisma.payment.findUnique({ where: { refCode: refCode.toString() } });
         if (!payment) throw new ApolloError("Payment was not found", errors.NOT_FOUND);
         return payment;
       },
     });
     t.float("paymentRefundAmount", {
       description: "Get the amount of refund of a specific payment / trip",
-      args: { refCode: stringArg({ description: "The referral code of the payment to fetch" }) },
-      resolve: async (_, { refCode }): Promise<number> => {
-        if (!refCode || refCode.trim().length === 0)
-          throw new UserInputError("Invalid referral code (ID). Please provide a valid value.", { code: errors.INVALID_ARGUMENTS });
+      args: { refCode: idArg({ description: "The referral code of the payment to fetch" }) },
+      resolve: async (_, { refCode }, { prisma }) => {
+        if (refCode.toString().trim().length === 0) {
+          throw new UserInputError("Invalid refCode. Please provide a valid value", { code: errors.INVALID_ARGUMENTS });
+        }
 
-        const payment = await Payment.findOne({
-          where: { refCode },
-          relations: ["cart", "cart.products", "cart.products.product", "cart.products.product.beachBar"],
+        const payment = await prisma.payment.findUnique({
+          where: { refCode: refCode.toString() },
+          include: { cart: { include: GetTotalCartInclude } },
         });
-        if (!payment) throw new ApolloError("The payment requested does not exits", errors.NOT_FOUND);
+        if (!payment) throw new ApolloError("Payment was not found", errors.NOT_FOUND);
 
-        const cartTotal = await payment.cart.getTotalPrice(true);
-        if (!cartTotal) throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.SOMETHING_WENT_WRONG);
-        const refundPercentage = await payment.getRefundPercentage();
+        const cartTotal = getTotal(payment.cart, { afterToday: false });
+        const refundPercentage = getRefundPercentage(payment);
         if (!refundPercentage) throw new ApolloError(errors.SOMETHING_WENT_WRONG, errors.SOMETHING_WENT_WRONG);
-        const res = cartTotal.totalWithEntryFees * (parseInt(refundPercentage.refundPercentage.percentageValue.toString()) / 100);
-        return parseFloat(res.toFixed(2));
+        const res = cartTotal.totalWithEntryFees * (refundPercentage.percentageValue / 100);
+        return +res.toFixed(2);
       },
     });
-    t.list.field("paymentDates", {
-      type: PaymentVisitsDatesTypes,
-      description: "Get a list with the months and years of the cart products in all the payments of an authenticated user",
-      resolve: async (_, __, { payload }: MyContext): Promise<TPaymentVisitsDate[]> => {
-        isAuth(payload);
+    // t.list.field("paymentDates", {
+    //   type: PaymentVisitsDatesTypes,
+    //   description: "Get a list with the months and years of the cart products in all the payments of an authenticated user",
+    //   resolve: async (_, __, { payload }: MyContext): Promise<TPaymentVisitsDate[]> => {
+    //     isAuth(payload);
 
-        const payments = await getConnection()
-          .createQueryBuilder(Payment, "payment")
-          .leftJoinAndSelect("payment.cart", "cart")
-          .leftJoinAndSelect("cart.products", "cartProduct", "cartProduct.deletedAt IS NULL")
-          .where("cart.userId = :userId", { userId: payload!.sub })
-          .orderBy("cartProduct.date", "DESC")
-          .getMany();
+    //     const payments = await getConnection()
+    //       .createQueryBuilder(Payment, "payment")
+    //       .leftJoinAndSelect("payment.cart", "cart")
+    //       .leftJoinAndSelect("cart.products", "cartProduct", "cartProduct.deletedAt IS NULL")
+    //       .where("cart.userId = :userId", { userId: payload!.sub })
+    //       .orderBy("cartProduct.date", "DESC")
+    //       .getMany();
 
-        const dates = uniq(
-          payments
-            .map(({ cart: { products } }) => products)
-            .flat()
-            .map(product => dayjs(product?.date).format("YYYY-MM"))
-        );
+    //     const dates = uniq(
+    //       payments
+    //         .map(({ cart: { products } }) => products)
+    //         .flat()
+    //         .map(product => dayjs(product?.date).format("YYYY-MM"))
+    //     );
+    //     console.log(dates);
 
-        return dates.map(date => {
-          const day = dayjs(String(date));
-          const month = day.month();
-          return { month: { id: month + 1, value: MONTHS[month], days: day.daysInMonth() }, year: day.year() };
-        });
-      },
-    });
+    //     return dates.map(date => {
+    //       const day = dayjs(String(date));
+    //       const month = day.month();
+    //       return { month: { id: month + 1, value: MONTHS[month], days: day.daysInMonth() }, year: day.year() };
+    //     });
+    //   },
+    // });
   },
 });

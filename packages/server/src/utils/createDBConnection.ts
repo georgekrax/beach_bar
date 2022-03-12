@@ -1,6 +1,10 @@
-import { createConnection, getConnectionOptions } from "typeorm";
+import { createConnection, getConnectionManager, getConnectionOptions } from "typeorm";
 
-export const createDBConnection = async (): Promise<any> => {
-  const connectionOptions = await getConnectionOptions(process.env.NODE_ENV);
-  return await createConnection({ ...connectionOptions, name: "default" });
+const connectionManager = getConnectionManager();
+
+export const createDBConnection = async (): Promise<void> => {
+  if (!connectionManager.has("default")) {
+    const connectionOptions = await getConnectionOptions(process.env.NODE_ENV);
+    await createConnection({ ...connectionOptions, name: "default" });
+  }
 };

@@ -1,82 +1,73 @@
-import { errors, MyContext } from "@beach_bar/common";
+import { isAuth, throwScopesUnauthorized } from "@/utils/auth";
+import { getRedisKey } from "@/utils/db";
+import { errors } from "@beach_bar/common";
+import { BeachBar } from "@prisma/client";
 import { ApolloError } from "apollo-server-express";
-import redisKeys from "constants/redisKeys";
-import { BeachBar } from "entity/BeachBar";
-import { User } from "entity/User";
-import { UserFavoriteBar } from "entity/UserFavoriteBar";
-import { extendType, idArg, intArg } from "nexus";
-import { DeleteResult } from "schema/types";
-import { DeleteType } from "typings/.index";
-import { TUpdateUserFavoriteBarType } from "typings/user/favoriteBars";
-import { checkScopes } from "utils/checkScopes";
-import { UpdateUserFavoriteBarType } from "./types";
+import { extendType, idArg } from "nexus";
+import { UserFavoriteBarType } from "./types";
 
 export const UserFavoriteBarCrudMutation = extendType({
   type: "Mutation",
   definition(t) {
     t.field("updateFavouriteBeachBar", {
-      type: UpdateUserFavoriteBarType,
+      type: UserFavoriteBarType,
       description: "Update a user's #beach_bar favourites list",
       args: { slug: idArg({ description: "The slug of the #beach_bar, to add / remove from the user's favourites list" }) },
-      resolve: async (_, { slug }, { payload, redis }: MyContext): Promise<TUpdateUserFavoriteBarType> => {
-        if (!payload || !payload.sub) throw new ApolloError(errors.NOT_AUTHENTICATED_MESSAGE, errors.NOT_AUTHENTICATED_CODE);
-        if (!checkScopes(payload, ["beach_bar@crud:user"]))
-          throw new ApolloError(errors.NOT_AUTHENTICATED_MESSAGE, errors.UNAUTHORIZED_CODE);
+      resolve: async (_, { slug }, { prisma, redis, payload }) => {
+        isAuth(payload);
+        throwScopesUnauthorized(payload, errors.NOT_AUTHENTICATED_MESSAGE, ["beach_bar@crud:user"]);
 
-        const user = await User.findOne({
-          where: { id: payload.sub },
-          withDeleted: true,
-          relations: ["favoriteBars", "favoriteBars.user", "favoriteBars.beachBar"],
+        const userId = payload!.sub;
+        const user = await prisma.user.findUnique({
+          where: { id: userId },
+          include: { favoriteBars: { include: { beachBar: true } } },
         });
         if (!user) throw new ApolloError(errors.USER_NOT_FOUND_MESSAGE, errors.NOT_FOUND);
 
-        const beachBars: BeachBar[] = (await redis.lrange(redisKeys.BEACH_BAR_CACHE_KEY, 0, -1)).map((x: string) => JSON.parse(x));
+        const beachBars: BeachBar[] = (await redis.lrange(getRedisKey({ model: "BeachBar" }), 0, -1)).map((x: string) =>
+          JSON.parse(x)
+        );
         const beachBar = beachBars.find(bar => bar.slug.toString() === slug);
         if (!beachBar) throw new ApolloError(errors.BEACH_BAR_DOES_NOT_EXIST, errors.NOT_FOUND);
 
         try {
-          let favouriteBar = user.favoriteBars?.find(bar => bar.beachBar.slug.toString() === slug.toString());
-          if (!favouriteBar) {
-            favouriteBar = UserFavoriteBar.create({ beachBar, user });
-            await favouriteBar.save();
-          } else await favouriteBar.softRemove();
+          let favouriteBar = user.favoriteBars?.find(({ beachBar }) => beachBar.slug.toString() === slug.toString());
+          if (favouriteBar) await prisma.userFavoriteBar.delete({ where: { id: favouriteBar.id } });
+          else {
+            favouriteBar = await prisma.userFavoriteBar.create({
+              data: { userId, beachBarId: beachBar.id },
+              include: { beachBar: true },
+            });
+          }
           if (!favouriteBar) throw new ApolloError(errors.SOMETHING_WENT_WRONG);
-          return { favouriteBar, updated: true };
+          return favouriteBar;
         } catch (err) {
           throw new ApolloError(err.message);
         }
       },
     });
-    t.field("deleteUserFavoriteBar", {
-      type: DeleteResult,
+    t.boolean("deleteUserFavoriteBar", {
       description: "Remove a #beach_bar from a user's favorites list",
-      args: { beachBarId: intArg({ description: "The ID value of the #beach_bar, to add to the user's favorites list" }) },
+      args: { beachBarId: idArg({ description: "The ID value of the #beach_bar, to add to the user's favorites list" }) },
       deprecation:
         "You should use the `updateUserFavoriteBar` mutation operation, which handles automatically the creation and removement of a user's #beach_bar",
-      resolve: async (_, { beachBarId }, { payload }: MyContext): Promise<DeleteType> => {
-        if (!payload) {
-          return { error: { code: errors.NOT_AUTHENTICATED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE } };
-        }
-        if (!checkScopes(payload, ["beach_bar@crud:user"])) {
-          return {
-            error: { code: errors.UNAUTHORIZED_CODE, message: errors.NOT_AUTHENTICATED_MESSAGE },
-          };
-        }
+      resolve: async (_, __, { payload }) => {
+        isAuth(payload);
+        throwScopesUnauthorized(payload, errors.NOT_AUTHENTICATED_MESSAGE, ["beach_bar@crud:user"]);
 
-        const favoriteBar = await UserFavoriteBar.findOne({ beachBarId: beachBarId, userId: payload.sub });
-        if (!favoriteBar) {
-          return { error: { code: errors.CONFLICT, message: errors.SOMETHING_WENT_WRONG } };
-        }
+        // const favoriteBar = await prisma.userFavoriteBar.findFirst({ where: { beachBarId: +beachBarId, userId: payload!.sub } });
+
+        // const favoriteBar = await UserFavoriteBar.findOne({ beachBarId: beachBarId, userId: payload!.sub });
+        // if (!favoriteBar) throw new ApolloError("Favorite #beach_bar not found", errors.NOT_FOUND);
 
         try {
-          await favoriteBar.softRemove();
+          // TODO: Fix
+          // await favoriteBar.softRemove();
         } catch (err) {
-          return { error: { message: `${errors.SOMETHING_WENT_WRONG}: ${err.message}` } };
+          throw new ApolloError(errors.SOMETHING_WENT_WRONG + " " + err.message, errors.SOMETHING_WENT_WRONG);
         }
 
-        return {
-          deleted: true,
-        };
+        return true;
       },
     });
   },

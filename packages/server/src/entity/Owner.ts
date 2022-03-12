@@ -1,3 +1,4 @@
+import { softRemove } from "@/utils/softRemove";
 import { Dayjs } from "dayjs";
 import {
   BaseEntity,
@@ -11,7 +12,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { softRemove } from "utils/softRemove";
 import { BeachBarOwner } from "./BeachBarOwner";
 import { ProductPriceHistory } from "./ProductPriceHistory";
 import { User } from "./User";

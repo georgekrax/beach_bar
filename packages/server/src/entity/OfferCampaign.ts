@@ -1,3 +1,4 @@
+import { softRemove } from "@/utils/softRemove";
 import { Dayjs } from "dayjs";
 import {
   BaseEntity,
@@ -12,7 +13,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { softRemove } from "utils/softRemove";
 import { OfferCampaignCode } from "./OfferCampaignCode";
 import { Product } from "./Product";
 
@@ -70,22 +70,14 @@ export class OfferCampaign extends BaseEntity {
       if (productIds && productIds.length >= 1) {
         const products = await Product.find({ where: { id: In(productIds) } });
         if (products.some(product => !product.isActive)) {
-          throw new Error("All the products should be active, in order to be applied for an offer campaign");
+          throw new Error("All the products should be active, in order to be applied for an offer campaign.");
         }
         this.products = products;
       }
-      if (title && title !== this.title) {
-        this.title = title;
-      }
-      if (discountPercentage && discountPercentage !== this.discountPercentage) {
-        this.discountPercentage = discountPercentage;
-      }
-      if (validUntil && validUntil !== this.validUntil) {
-        this.validUntil = validUntil;
-      }
-      if (isActive !== null && isActive !== undefined && isActive !== this.isActive) {
-        this.isActive = isActive;
-      }
+      if (title && title !== this.title) this.title = title;
+      if (discountPercentage && discountPercentage !== this.discountPercentage) this.discountPercentage = discountPercentage;
+      if (validUntil && validUntil !== this.validUntil) this.validUntil = validUntil;
+      if (isActive != null && isActive !== this.isActive) this.isActive = isActive;
       await this.save();
       return this;
     } catch (err) {
@@ -94,12 +86,7 @@ export class OfferCampaign extends BaseEntity {
   }
 
   calculateTotalProductPrice(): number | undefined {
-    if (this.products) {
-      return this.products.reduce((sum, i) => {
-        return parseFloat(sum.toString()) + parseFloat(i.price.toString());
-      }, 0);
-    }
-    return undefined;
+    return this.products?.reduce((sum, i) => +sum.toString() + +i.price.toString(), 0);
   }
 
   async softRemove(): Promise<any> {

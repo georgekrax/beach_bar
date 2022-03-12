@@ -1,7 +1,9 @@
+import { softRemove } from "@/utils/softRemove";
 import { errors, MyContext } from "@beach_bar/common";
 import { validateEmailSchema } from "@the_hashtag/common";
 import { Dayjs } from "dayjs";
 import { Stripe } from "stripe";
+import { stripe } from "../index";
 import {
   BaseEntity,
   Column,
@@ -17,8 +19,6 @@ import {
   Repository,
   UpdateDateColumn,
 } from "typeorm";
-import { TAddCustomer } from "typings/customer";
-import { softRemove } from "utils/softRemove";
 import { Account } from "./Account";
 import { BeachBarReview } from "./BeachBarReview";
 import { Card } from "./Card";
@@ -82,21 +82,22 @@ export class Customer extends BaseEntity {
     return true;
   }
 
-  async update(phoneNumber?: string, countryAlpha2Code?: string): Promise<Customer | any> {
-    try {
-      if (phoneNumber && phoneNumber !== this.phoneNumber && phoneNumber.trim().length !== 0) this.phoneNumber = phoneNumber;
-      if (countryAlpha2Code && countryAlpha2Code.trim().length !== 0) {
-        const country = await Country.findOne({ alpha2Code: countryAlpha2Code });
-        if (country) this.country = country;
-      }
-      await this.save();
-      return this;
-    } catch (err) {
-      throw new Error(err.message);
-    }
-  }
+  // async update(phoneNumber?: string, countryAlpha2Code?: string): Promise<Customer | any> {
+  //   try {
+  //     if (phoneNumber && phoneNumber !== this.phoneNumber && phoneNumber.trim().length !== 0) this.phoneNumber = phoneNumber;
+  //     if (countryAlpha2Code && countryAlpha2Code.trim().length !== 0) {
+  //       const country = await Country.findOne({ alpha2Code: countryAlpha2Code });
+  //       if (country) this.country = country;
+  //     }
+  //     await this.save();
+  //     return this;
+  //   } catch (err) {
+  //     throw new Error(err.message);
+  //   }
+  // }
 
-  async customSoftRemove(stripe: Stripe, webhook = false): Promise<void | never> {
+  // TODO: Fix - replace
+  async customSoftRemove(webhook = false): Promise<void | never> {
     if (!webhook) {
       // delete customer in Stripe too
       try {
@@ -118,7 +119,7 @@ export class CustomerRepository extends Repository<Customer> {
     phoneNumber?: string,
     countryId?: string,
     payload?: MyContext["payload"]
-  ): Promise<TAddCustomer> {
+  ): Promise<Customer> {
     let user: User | undefined = undefined;
     const relations = [
       "account",
@@ -134,7 +135,7 @@ export class CustomerRepository extends Repository<Customer> {
       if (!user) throw new Error(errors.USER_NOT_FOUND_MESSAGE);
     } else user = await User.findOne({ where: { email }, relations });
 
-    if (user && user.customer) return { customer: user.customer, added: false };
+    if (user && user.customer) return user.customer;
 
     if (email && !user) {
       try {
@@ -173,15 +174,16 @@ export class CustomerRepository extends Repository<Customer> {
         phone: newCustomer.phoneNumber,
         metadata: { is_signed_up: user ? "true" : "false" },
       });
-      if (!stripeCustomer && (stripeCustomer.email !== email || stripeCustomer.email !== user?.email))
+      if (!stripeCustomer && (stripeCustomer.email !== email || stripeCustomer.email !== user?.email)) {
         throw new Error(errors.SOMETHING_WENT_WRONG);
+      }
       newCustomer.stripeCustomerId = stripeCustomer.id;
       await newCustomer.save();
     } catch (err) {
       throw new Error(err.message);
     }
 
-    return { customer: newCustomer, added: true };
+    return newCustomer;
   }
 
   async createStripeWebhookCustomer(stripeCustomer: any): Promise<void | Error> {

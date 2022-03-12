@@ -1,10 +1,16 @@
-import { errors, MyContext } from "@beach_bar/common";
+import {
+  getEntryFees,
+  GetEntryFeesInclude,
+  getOrCreateCart,
+  getUniqBeachBars,
+  GetUniqBeachBarsInclude,
+  verifyZeroCart,
+} from "@/utils/cart";
+import { errors } from "@beach_bar/common";
 import { ApolloError } from "apollo-server-errors";
 import { UserInputError } from "apollo-server-express";
-import { Cart, CartRepository } from "entity/Cart";
 import ms from "ms";
-import { extendType, idArg, intArg, nullable } from "nexus";
-import { getCustomRepository } from "typeorm";
+import { extendType, idArg, nullable } from "nexus";
 import { CartType } from "./types";
 
 export const CartQuery = extendType({
@@ -13,37 +19,30 @@ export const CartQuery = extendType({
     t.float("cartEntryFees", {
       args: {
         cartId: idArg({ description: "The ID values of the shopping cart" }),
-        totalPeople: intArg({ description: "How many people will visit the #beach_bar" }),
+        beachBarId: nullable(idArg()),
+        // totalPeople: intArg({ description: "How many people will visit the #beach_bar" }),
       },
-      resolve: async (_, { cartId, totalPeople }): Promise<number | undefined> => {
-        if (!cartId || cartId.trim().length === 0) throw new UserInputError("Please provide a valid cartId");
+      resolve: async (_, { cartId, beachBarId }, { prisma }) => {
+        if (cartId.toString().trim().length === 0) throw new UserInputError("Please provide a valid cartId");
 
-        const cart = await Cart.findOne({
-          where: { id: cartId },
-          relations: ["products", "products.product", "products.product.beachBar"],
-        });
-        if (!cart) throw new ApolloError("Shopping cart was not found");
-        return cart.getTotalEntryFees(totalPeople);
+        const cart = await prisma.cart.findUnique({ where: { id: BigInt(cartId) }, include: GetEntryFeesInclude });
+        if (!cart) throw new ApolloError("Shopping cart was not found.");
+        return getEntryFees(cart, { beachBarId: beachBarId ? +beachBarId : undefined });
       },
     });
     t.boolean("verifyZeroCartTotal", {
       args: { cartId: idArg() },
-      resolve: async (_, { cartId }): Promise<boolean | null> => {
-        const cart = await Cart.findOne({
-          where: { id: cartId },
-          relations: ["products", "products.product", "products.product.beachBar"],
-        });
+      resolve: async (_, { cartId }, { prisma }) => {
+        const cart = await prisma.cart.findUnique({ where: { id: BigInt(cartId) }, include: GetUniqBeachBarsInclude });
         if (!cart) throw new ApolloError("Shopping cart was not found", errors.NOT_FOUND);
 
-        const uniqueBeachBars = cart.getUniqBeachBars();
-        if (!uniqueBeachBars) throw new ApolloError(errors.SOMETHING_WENT_WRONG);
+        const uniqBars = getUniqBeachBars(cart);
 
-        for (let i = 0; i < uniqueBeachBars.length; i++) {
-          const beachBar = uniqueBeachBars[i];
-          const totalPrice = await cart.getBeachBarTotal(beachBar.id);
-          if (totalPrice === undefined) return false;
-          const isZeroCartTotal = cart.verifyZeroCartTotal(beachBar);
-          return isZeroCartTotal === undefined ? false : isZeroCartTotal;
+        for (let i = 0; i < uniqBars.length; i++) {
+          const beachBar = uniqBars[i];
+          // const totalPrice = getTotal(cart, { beachBarId: beachBar.id });
+          // if (totalPrice) return false;
+          return verifyZeroCart({ beachBar });
         }
         return false;
       },
@@ -51,18 +50,20 @@ export const CartQuery = extendType({
     t.field("cart", {
       type: CartType,
       description: "Get the latest cart of an authenticated user or create one",
-      args: { cartId: nullable(idArg({ description: "The ID values of the shopping cart, if it is created previously" })) },
-      resolve: async (_, { cartId }, { req, res, payload }: MyContext): Promise<Cart> => {
+      args: { cartId: nullable(idArg({ description: "The ID value of the shopping cart, if it is created previously" })) },
+      resolve: async (_, { cartId }, { req, res, payload }) => {
         const idCookie = req.cookies["cart_id"];
-        const cart = await getCustomRepository(CartRepository).getOrCreateCart(payload, cartId || parseInt(idCookie), false);
+        const cart = await getOrCreateCart({ payload, cartId: cartId || idCookie, getOnly: false });
         if (!cart) throw new ApolloError(errors.SOMETHING_WENT_WRONG);
-        if (!idCookie)
+        if (!idCookie) {
+          // TODO: Remove cookie in payment
           res.cookie("cart_id", cart.id, {
             httpOnly: false,
             secure: process.env.NODE_ENV === "production",
             maxAge: ms("2 weeks"),
             sameSite: "strict",
           });
+        }
         return cart;
       },
     });

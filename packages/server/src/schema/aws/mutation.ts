@@ -1,9 +1,9 @@
+import { S3PayloadReturnType } from "@/typings/aws";
 import { errors } from "@beach_bar/common";
 import { S3BucketConfigType, s3FormatFileName, transformObjectKey } from "@the_hashtag/common";
 import { ApolloError } from "apollo-server-express";
 import aws from "aws-sdk";
 import { extendType, stringArg } from "nexus";
-import { S3PayloadReturnType } from "typings/aws";
 import { S3PayloadType } from "./types";
 
 const S3_BUCKETS: Record<string, S3BucketConfigType> = {
@@ -11,10 +11,7 @@ const S3_BUCKETS: Record<string, S3BucketConfigType> = {
     name: "user-account-images",
     signatureVersion: "v4",
     region: "eu-west-1",
-    key: {
-      filenameSeparator: "_",
-      length: 12,
-    },
+    key: { filenameSeparator: "_", length: 12 },
   },
 };
 
@@ -47,7 +44,7 @@ export const AWSMutation = extendType({
         };
 
         const signedRequest = await s3.getSignedUrlPromise("putObject", params);
-        const url = `https://${name}.${process.env.AWS_S3_HOSTNAME!.toString()}/${s3Key}`;
+        const url = `https://${name}.${process.env.AWS_S3_HOSTNAME}/${s3Key}`;
 
         return {
           signedRequest,

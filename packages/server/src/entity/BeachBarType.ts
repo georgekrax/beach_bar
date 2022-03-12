@@ -1,6 +1,6 @@
+import { softRemove } from "@/utils/softRemove";
 import { Dayjs } from "dayjs";
 import { BaseEntity, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
-import { softRemove } from "utils/softRemove";
 import { BeachBar } from "./BeachBar";
 import { BeachBarStyle } from "./BeachBarStyle";
 
@@ -24,7 +24,7 @@ export class BeachBarType extends BaseEntity {
   timestamp: Dayjs;
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", nullable: true })
-  deletedAt: Dayjs;
+  deletedAt: Dayjs | null;
 
   async softRemove(): Promise<any> {
     const findOptions: any = { beachBarId: this.beachBarId, styleId: this.styleId };
