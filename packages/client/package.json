@@ -21,7 +21,7 @@
     "@hookform/resolvers": "2.7.1",
     "@stripe/react-stripe-js": "^1.4.1",
     "@stripe/stripe-js": "^1.15.0",
-    "@the_hashtag/common": "1.0.39",
+    "@the_hashtag/common": "1.1.2",
     "@turf/distance": "^6.3.0",
     "antd": "^4.15.5",
     "dayjs": "^1.10.4",
