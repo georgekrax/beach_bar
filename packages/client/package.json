@@ -20,7 +20,6 @@
     "@chakra-ui/react": "^1.8.6",
     "@emotion/react": "11.8.2",
     "@emotion/styled": "11.8.1",
-    "@hashtag-design-system/components": "../../../design_system/packages/components/hashtag-design-system-components-v1.4.9.tgz",
     "@hashtag-design-system/icons": "^0.5.3",
     "@hashtag-design-system/primitives": "1.2.16",
     "@hookform/resolvers": "2.8.8",
