@@ -11,7 +11,7 @@ type Account {
   city: String
   country: Country
   honorificTitle: String
-  id: ID!
+  id: Int!
   imgUrl: String
   phoneNumber: String
   telCountry: Country
@@ -85,7 +85,7 @@ type BeachBar {
   foods: [Food!]!
   hasCompletedSignUp: Boolean
   hidePhoneNumber: Boolean!
-  id: ID!
+  id: Int!
   imgUrls: [BeachBarImgUrl!]!
   isActive: Boolean!
   location: BeachBarLocation!
@@ -113,7 +113,7 @@ Represents a #beach_bar's category
 """
 type BeachBarCategory {
   description: String
-  id: ID!
+  id: Int!
   name: String!
 }
 
@@ -154,7 +154,7 @@ type BeachBarLocation {
   Get the location of the #beach_bar formatted
   """
   formattedLocation: String!
-  id: ID!
+  id: Int!
   latitude: Decimal!
   longitude: Decimal!
   region: Region
@@ -171,7 +171,7 @@ Represents a #beach_bar's owner
 """
 type BeachBarOwner {
   beachBar: BeachBar!
-  id: ID!
+  id: Int!
   isPrimary: Boolean!
   owner: Owner!
   publicInfo: Boolean
@@ -185,7 +185,7 @@ type BeachBarRestaurant {
   beachBar: BeachBar!
   description: String
   foodItems: [RestaurantFoodItem!]!
-  id: ID!
+  id: Int!
   isActive: Boolean!
   name: String!
 }
@@ -215,7 +215,7 @@ Represents a service (feature), which a #beach_bar can provide
 """
 type BeachBarService {
   icon: Icon!
-  id: ID!
+  id: Int!
   name: String!
 }
 
@@ -223,7 +223,7 @@ type BeachBarService {
 The style of a #beach_bar
 """
 type BeachBarStyle {
-  id: ID!
+  id: Int!
   name: String!
 }
 
@@ -259,7 +259,7 @@ type Card {
 Represents the brand of a credit or debit card
 """
 type CardBrand {
-  id: ID!
+  id: Int!
   name: String!
 }
 
@@ -332,7 +332,7 @@ Represents a city of a country
 """
 type City {
   country: Country!
-  id: ID!
+  id: Int!
   name: String!
 }
 
@@ -345,7 +345,7 @@ type Country {
   callingCode: String!
   cities: [City!]!
   currency: Currency!
-  id: ID!
+  id: Int!
   isEu: Boolean!
   name: String!
 }
@@ -354,7 +354,7 @@ type Country {
 Represents a currency
 """
 type Currency {
-  id: ID!
+  id: Int!
   isoCode: String!
   name: String!
   secondSymbol: String
@@ -610,7 +610,7 @@ Represents a category of a food a #beach_bar provides
 """
 type FoodCategory {
   icon: Icon!
-  id: ID!
+  id: Int!
   name: String!
 }
 
@@ -618,7 +618,7 @@ type FoodCategory {
 Represents each hour of the day
 """
 type HourTime {
-  id: ID!
+  id: Int!
   utcValue: Time!
   value: Int!
 }
@@ -632,7 +632,7 @@ scalar IPv4
 Represents a SVG icon to be used in the front-end
 """
 type Icon {
-  id: ID!
+  id: Int!
   name: String!
   publicId: String!
 }
@@ -677,7 +677,7 @@ Represents each month of the year
 """
 type MonthTime {
   days: Int!
-  id: ID!
+  id: Int!
   value: String!
 }
 
@@ -1850,7 +1850,7 @@ input OAuthUserInput {
 Represents a user that is an owner of a #beach_bar
 """
 type Owner {
-  id: ID!
+  id: Int!
   user: User!
 }
 
@@ -1877,7 +1877,7 @@ type Payment {
 Represents the status of a payment
 """
 type PaymentStatus {
-  id: ID!
+  id: Int!
   name: String!
 }
 
@@ -1905,7 +1905,7 @@ type Product {
   category: ProductCategory!
   deletedAt: DateTime
   description: String
-  id: ID!
+  id: Int!
   imgUrl: String
   isActive: Boolean!
   isIndividual: Boolean!
@@ -1946,7 +1946,7 @@ Represents a #beach_bar's product category
 type ProductCategory {
   components: [ProductCategoryComponent!]!
   description: String
-  id: ID!
+  id: Int!
   name: String!
   underscoredName: String!
 }
@@ -1965,7 +1965,7 @@ Represents a component of a product. For example a sunbed.
 """
 type ProductComponent {
   icon: Icon!
-  id: ID!
+  id: Int!
   name: String!
 }
 
@@ -1998,7 +1998,7 @@ type ProductReservationLimit {
 Represents each quarter of the day
 """
 type QuarterTime {
-  id: ID!
+  id: Int!
   utcValue: Time!
   value: DateTime!
 }
@@ -2344,7 +2344,7 @@ Represents a country's or city's region
 type Region {
   city: City!
   country: Country!
-  id: ID!
+  id: Int!
   name: String!
 }
 
@@ -2376,7 +2376,7 @@ type RestaurantFoodItem {
 Represents a category of a #beach_bar's restaurant menu
 """
 type RestaurantMenuCategory {
-  id: ID!
+  id: Int!
   name: String!
 }
 
@@ -2384,7 +2384,7 @@ type RestaurantMenuCategory {
 Represents a review's visit type, by the user
 """
 type ReviewVisitType {
-  id: ID!
+  id: Int!
   name: String!
 }
 
@@ -2404,7 +2404,7 @@ type ReviewVote {
 Represents a vote for a user's review
 """
 type ReviewVoteType {
-  id: ID!
+  id: Int!
   value: String!
 }
 
@@ -2440,7 +2440,7 @@ Represents a filter used by users when searching for (availability at) #beach_ba
 """
 type SearchFilter {
   description: String
-  id: ID!
+  id: Int!
   name: String!
   publicId: String!
 }
@@ -2521,7 +2521,7 @@ type SearchResultType {
 Represents a type of user's search sort filter
 """
 type SearchSort {
-  id: ID!
+  id: Int!
   name: String!
 }
 
@@ -2570,7 +2570,7 @@ type User {
   User's first and last name combines
   """
   fullName: String
-  id: ID!
+  id: Int!
   lastName: String
   reviewVotes: [ReviewVote!]!
 
@@ -2619,7 +2619,7 @@ type UserHistory {
 Represents the type of action a user made
 """
 type UserHistoryActivity {
-  id: ID!
+  id: Int!
   name: String!
 }
 

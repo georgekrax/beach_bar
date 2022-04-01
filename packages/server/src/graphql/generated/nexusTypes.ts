@@ -175,7 +175,7 @@ export interface NexusGenObjects {
     birthday?: NexusGenScalars["DateTime"] | null; // DateTime
     city?: string | null; // String
     honorificTitle?: string | null; // String
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     imgUrl?: string | null; // String
     phoneNumber?: string | null; // String
     trackHistory: boolean; // Boolean!
@@ -204,7 +204,7 @@ export interface NexusGenObjects {
     entryFee?: NexusGenScalars["Decimal"] | null; // Decimal
     hasCompletedSignUp?: boolean | null; // Boolean
     hidePhoneNumber: boolean; // Boolean!
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     isActive: boolean; // Boolean!
     name: string; // String!
     slug: string; // String!
@@ -216,7 +216,7 @@ export interface NexusGenObjects {
   BeachBarCategory: {
     // root type
     description?: string | null; // String
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     name: string; // String!
   };
   BeachBarFeature: {
@@ -238,14 +238,14 @@ export interface NexusGenObjects {
   BeachBarLocation: {
     // root type
     address: string; // String!
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     latitude: NexusGenScalars["Decimal"]; // Decimal!
     longitude: NexusGenScalars["Decimal"]; // Decimal!
     zipCode?: string | null; // String
   };
   BeachBarOwner: {
     // root type
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     isPrimary: boolean; // Boolean!
     publicInfo?: boolean | null; // Boolean
     timestamp: NexusGenScalars["DateTime"]; // DateTime!
@@ -253,7 +253,7 @@ export interface NexusGenObjects {
   BeachBarRestaurant: {
     // root type
     description?: string | null; // String
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     isActive: boolean; // Boolean!
     name: string; // String!
   };
@@ -269,12 +269,12 @@ export interface NexusGenObjects {
   };
   BeachBarService: {
     // root type
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     name: string; // String!
   };
   BeachBarStyle: {
     // root type
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     name: string; // String!
   };
   Card: {
@@ -290,7 +290,7 @@ export interface NexusGenObjects {
   };
   CardBrand: {
     // root type
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     name: string; // String!
   };
   Cart: {
@@ -330,7 +330,7 @@ export interface NexusGenObjects {
   };
   City: {
     // root type
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     name: string; // String!
   };
   Country: {
@@ -338,13 +338,13 @@ export interface NexusGenObjects {
     alpha2Code: string; // String!
     alpha3Code: string; // String!
     callingCode: string; // String!
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     isEu: boolean; // Boolean!
     name: string; // String!
   };
   Currency: {
     // root type
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     isoCode: string; // String!
     name: string; // String!
     secondSymbol?: string | null; // String
@@ -486,16 +486,16 @@ export interface NexusGenObjects {
   };
   FoodCategory: {
     // root type
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     name: string; // String!
   };
   HourTime: {
     // root type
-    id: StringOrNumber; // ID!
+    id: number; // Int!
   };
   Icon: {
     // root type
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     name: string; // String!
     publicId: string; // String!
   };
@@ -510,13 +510,13 @@ export interface NexusGenObjects {
   MonthTime: {
     // root type
     days: number; // Int!
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     value: string; // String!
   };
   Mutation: {};
   Owner: {
     // root type
-    id: StringOrNumber; // ID!
+    id: number; // Int!
   };
   Payment: {
     // root type
@@ -531,7 +531,7 @@ export interface NexusGenObjects {
   };
   PaymentStatus: {
     // root type
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     name: string; // String!
   };
   PaymentVisits: {
@@ -548,7 +548,7 @@ export interface NexusGenObjects {
     // root type
     deletedAt?: NexusGenScalars["DateTime"] | null; // DateTime
     description?: string | null; // String
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     imgUrl?: string | null; // String
     isActive: boolean; // Boolean!
     isIndividual: boolean; // Boolean!
@@ -571,7 +571,7 @@ export interface NexusGenObjects {
   ProductCategory: {
     // root type
     description?: string | null; // String
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     name: string; // String!
     underscoredName: string; // String!
   };
@@ -581,7 +581,7 @@ export interface NexusGenObjects {
   };
   ProductComponent: {
     // root type
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     name: string; // String!
   };
   ProductRecommended: {
@@ -598,13 +598,13 @@ export interface NexusGenObjects {
   };
   QuarterTime: {
     // root type
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     value: NexusGenScalars["DateTime"]; // DateTime!
   };
   Query: {};
   Region: {
     // root type
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     name: string; // String!
   };
   ReservedProduct: {
@@ -622,12 +622,12 @@ export interface NexusGenObjects {
   };
   RestaurantMenuCategory: {
     // root type
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     name: string; // String!
   };
   ReviewVisitType: {
     // root type
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     name: string; // String!
   };
   ReviewVote: {
@@ -638,7 +638,7 @@ export interface NexusGenObjects {
   };
   ReviewVoteType: {
     // root type
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     value: string; // String!
   };
   S3Payload: {
@@ -654,7 +654,7 @@ export interface NexusGenObjects {
   SearchFilter: {
     // root type
     description?: string | null; // String
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     name: string; // String!
     publicId: string; // String!
   };
@@ -672,7 +672,7 @@ export interface NexusGenObjects {
   };
   SearchSort: {
     // root type
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     name: string; // String!
   };
   UpdateReservedProduct: {
@@ -684,7 +684,7 @@ export interface NexusGenObjects {
     // root type
     email: string; // String!
     firstName?: string | null; // String
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     lastName?: string | null; // String
   };
   UserFavoriteBar: {
@@ -699,7 +699,7 @@ export interface NexusGenObjects {
   };
   UserHistoryActivity: {
     // root type
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     name: string; // String!
   };
   UserHistoryExtended: {
@@ -766,7 +766,7 @@ export interface NexusGenFieldTypes {
     city: string | null; // String
     country: NexusGenRootTypes["Country"] | null; // Country
     honorificTitle: string | null; // String
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     imgUrl: string | null; // String
     phoneNumber: string | null; // String
     telCountry: NexusGenRootTypes["Country"] | null; // Country
@@ -803,7 +803,7 @@ export interface NexusGenFieldTypes {
     foods: NexusGenRootTypes["Food"][]; // [Food!]!
     hasCompletedSignUp: boolean | null; // Boolean
     hidePhoneNumber: boolean; // Boolean!
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     imgUrls: NexusGenRootTypes["BeachBarImgUrl"][]; // [BeachBarImgUrl!]!
     isActive: boolean; // Boolean!
     location: NexusGenRootTypes["BeachBarLocation"]; // BeachBarLocation!
@@ -824,7 +824,7 @@ export interface NexusGenFieldTypes {
   BeachBarCategory: {
     // field return type
     description: string | null; // String
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     name: string; // String!
   };
   BeachBarFeature: {
@@ -852,7 +852,7 @@ export interface NexusGenFieldTypes {
     city: NexusGenRootTypes["City"]; // City!
     country: NexusGenRootTypes["Country"]; // Country!
     formattedLocation: string; // String!
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     latitude: NexusGenScalars["Decimal"]; // Decimal!
     longitude: NexusGenScalars["Decimal"]; // Decimal!
     region: NexusGenRootTypes["Region"] | null; // Region
@@ -862,7 +862,7 @@ export interface NexusGenFieldTypes {
   BeachBarOwner: {
     // field return type
     beachBar: NexusGenRootTypes["BeachBar"]; // BeachBar!
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     isPrimary: boolean; // Boolean!
     owner: NexusGenRootTypes["Owner"]; // Owner!
     publicInfo: boolean | null; // Boolean
@@ -873,7 +873,7 @@ export interface NexusGenFieldTypes {
     beachBar: NexusGenRootTypes["BeachBar"]; // BeachBar!
     description: string | null; // String
     foodItems: NexusGenRootTypes["RestaurantFoodItem"][]; // [RestaurantFoodItem!]!
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     isActive: boolean; // Boolean!
     name: string; // String!
   };
@@ -897,12 +897,12 @@ export interface NexusGenFieldTypes {
   BeachBarService: {
     // field return type
     icon: NexusGenRootTypes["Icon"]; // Icon!
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     name: string; // String!
   };
   BeachBarStyle: {
     // field return type
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     name: string; // String!
   };
   Card: {
@@ -921,7 +921,7 @@ export interface NexusGenFieldTypes {
   };
   CardBrand: {
     // field return type
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     name: string; // String!
   };
   Cart: {
@@ -976,7 +976,7 @@ export interface NexusGenFieldTypes {
   City: {
     // field return type
     country: NexusGenRootTypes["Country"]; // Country!
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     name: string; // String!
   };
   Country: {
@@ -986,13 +986,13 @@ export interface NexusGenFieldTypes {
     callingCode: string; // String!
     cities: NexusGenRootTypes["City"][]; // [City!]!
     currency: NexusGenRootTypes["Currency"]; // Currency!
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     isEu: boolean; // Boolean!
     name: string; // String!
   };
   Currency: {
     // field return type
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     isoCode: string; // String!
     name: string; // String!
     secondSymbol: string | null; // String
@@ -1140,18 +1140,18 @@ export interface NexusGenFieldTypes {
   FoodCategory: {
     // field return type
     icon: NexusGenRootTypes["Icon"]; // Icon!
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     name: string; // String!
   };
   HourTime: {
     // field return type
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     utcValue: NexusGenScalars["Time"]; // Time!
     value: number; // Int!
   };
   Icon: {
     // field return type
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     name: string; // String!
     publicId: string; // String!
   };
@@ -1166,7 +1166,7 @@ export interface NexusGenFieldTypes {
   MonthTime: {
     // field return type
     days: number; // Int!
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     value: string; // String!
   };
   Mutation: {
@@ -1245,7 +1245,7 @@ export interface NexusGenFieldTypes {
   };
   Owner: {
     // field return type
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     user: NexusGenRootTypes["User"]; // User!
   };
   Payment: {
@@ -1266,7 +1266,7 @@ export interface NexusGenFieldTypes {
   };
   PaymentStatus: {
     // field return type
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     name: string; // String!
   };
   PaymentVisits: {
@@ -1285,7 +1285,7 @@ export interface NexusGenFieldTypes {
     category: NexusGenRootTypes["ProductCategory"]; // ProductCategory!
     deletedAt: NexusGenScalars["DateTime"] | null; // DateTime
     description: string | null; // String
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     imgUrl: string | null; // String
     isActive: boolean; // Boolean!
     isIndividual: boolean; // Boolean!
@@ -1310,7 +1310,7 @@ export interface NexusGenFieldTypes {
     // field return type
     components: NexusGenRootTypes["ProductCategoryComponent"][]; // [ProductCategoryComponent!]!
     description: string | null; // String
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     name: string; // String!
     underscoredName: string; // String!
   };
@@ -1323,7 +1323,7 @@ export interface NexusGenFieldTypes {
   ProductComponent: {
     // field return type
     icon: NexusGenRootTypes["Icon"]; // Icon!
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     name: string; // String!
   };
   ProductRecommended: {
@@ -1343,7 +1343,7 @@ export interface NexusGenFieldTypes {
   };
   QuarterTime: {
     // field return type
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     utcValue: NexusGenScalars["Time"]; // Time!
     value: NexusGenScalars["DateTime"]; // DateTime!
   };
@@ -1398,7 +1398,7 @@ export interface NexusGenFieldTypes {
     // field return type
     city: NexusGenRootTypes["City"]; // City!
     country: NexusGenRootTypes["Country"]; // Country!
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     name: string; // String!
   };
   ReservedProduct: {
@@ -1421,12 +1421,12 @@ export interface NexusGenFieldTypes {
   };
   RestaurantMenuCategory: {
     // field return type
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     name: string; // String!
   };
   ReviewVisitType: {
     // field return type
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     name: string; // String!
   };
   ReviewVote: {
@@ -1440,7 +1440,7 @@ export interface NexusGenFieldTypes {
   };
   ReviewVoteType: {
     // field return type
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     value: string; // String!
   };
   S3Payload: {
@@ -1456,7 +1456,7 @@ export interface NexusGenFieldTypes {
   SearchFilter: {
     // field return type
     description: string | null; // String
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     name: string; // String!
     publicId: string; // String!
   };
@@ -1479,7 +1479,7 @@ export interface NexusGenFieldTypes {
   };
   SearchSort: {
     // field return type
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     name: string; // String!
   };
   UpdateReservedProduct: {
@@ -1494,7 +1494,7 @@ export interface NexusGenFieldTypes {
     favoriteBars: NexusGenRootTypes["UserFavoriteBar"][]; // [UserFavoriteBar!]!
     firstName: string | null; // String
     fullName: string | null; // String
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     lastName: string | null; // String
     reviewVotes: NexusGenRootTypes["ReviewVote"][]; // [ReviewVote!]!
     reviews: NexusGenRootTypes["BeachBarReview"][] | null; // [BeachBarReview!]
@@ -1515,7 +1515,7 @@ export interface NexusGenFieldTypes {
   };
   UserHistoryActivity: {
     // field return type
-    id: StringOrNumber; // ID!
+    id: number; // Int!
     name: string; // String!
   };
   UserHistoryExtended: {
@@ -1576,7 +1576,7 @@ export interface NexusGenFieldTypeNames {
     city: "String";
     country: "Country";
     honorificTitle: "String";
-    id: "ID";
+    id: "Int";
     imgUrl: "String";
     phoneNumber: "String";
     telCountry: "Country";
@@ -1613,7 +1613,7 @@ export interface NexusGenFieldTypeNames {
     foods: "Food";
     hasCompletedSignUp: "Boolean";
     hidePhoneNumber: "Boolean";
-    id: "ID";
+    id: "Int";
     imgUrls: "BeachBarImgUrl";
     isActive: "Boolean";
     location: "BeachBarLocation";
@@ -1634,7 +1634,7 @@ export interface NexusGenFieldTypeNames {
   BeachBarCategory: {
     // field return type name
     description: "String";
-    id: "ID";
+    id: "Int";
     name: "String";
   };
   BeachBarFeature: {
@@ -1662,7 +1662,7 @@ export interface NexusGenFieldTypeNames {
     city: "City";
     country: "Country";
     formattedLocation: "String";
-    id: "ID";
+    id: "Int";
     latitude: "Decimal";
     longitude: "Decimal";
     region: "Region";
@@ -1672,7 +1672,7 @@ export interface NexusGenFieldTypeNames {
   BeachBarOwner: {
     // field return type name
     beachBar: "BeachBar";
-    id: "ID";
+    id: "Int";
     isPrimary: "Boolean";
     owner: "Owner";
     publicInfo: "Boolean";
@@ -1683,7 +1683,7 @@ export interface NexusGenFieldTypeNames {
     beachBar: "BeachBar";
     description: "String";
     foodItems: "RestaurantFoodItem";
-    id: "ID";
+    id: "Int";
     isActive: "Boolean";
     name: "String";
   };
@@ -1707,12 +1707,12 @@ export interface NexusGenFieldTypeNames {
   BeachBarService: {
     // field return type name
     icon: "Icon";
-    id: "ID";
+    id: "Int";
     name: "String";
   };
   BeachBarStyle: {
     // field return type name
-    id: "ID";
+    id: "Int";
     name: "String";
   };
   Card: {
@@ -1731,7 +1731,7 @@ export interface NexusGenFieldTypeNames {
   };
   CardBrand: {
     // field return type name
-    id: "ID";
+    id: "Int";
     name: "String";
   };
   Cart: {
@@ -1786,7 +1786,7 @@ export interface NexusGenFieldTypeNames {
   City: {
     // field return type name
     country: "Country";
-    id: "ID";
+    id: "Int";
     name: "String";
   };
   Country: {
@@ -1796,13 +1796,13 @@ export interface NexusGenFieldTypeNames {
     callingCode: "String";
     cities: "City";
     currency: "Currency";
-    id: "ID";
+    id: "Int";
     isEu: "Boolean";
     name: "String";
   };
   Currency: {
     // field return type name
-    id: "ID";
+    id: "Int";
     isoCode: "String";
     name: "String";
     secondSymbol: "String";
@@ -1950,18 +1950,18 @@ export interface NexusGenFieldTypeNames {
   FoodCategory: {
     // field return type name
     icon: "Icon";
-    id: "ID";
+    id: "Int";
     name: "String";
   };
   HourTime: {
     // field return type name
-    id: "ID";
+    id: "Int";
     utcValue: "Time";
     value: "Int";
   };
   Icon: {
     // field return type name
-    id: "ID";
+    id: "Int";
     name: "String";
     publicId: "String";
   };
@@ -1976,7 +1976,7 @@ export interface NexusGenFieldTypeNames {
   MonthTime: {
     // field return type name
     days: "Int";
-    id: "ID";
+    id: "Int";
     value: "String";
   };
   Mutation: {
@@ -2055,7 +2055,7 @@ export interface NexusGenFieldTypeNames {
   };
   Owner: {
     // field return type name
-    id: "ID";
+    id: "Int";
     user: "User";
   };
   Payment: {
@@ -2076,7 +2076,7 @@ export interface NexusGenFieldTypeNames {
   };
   PaymentStatus: {
     // field return type name
-    id: "ID";
+    id: "Int";
     name: "String";
   };
   PaymentVisits: {
@@ -2095,7 +2095,7 @@ export interface NexusGenFieldTypeNames {
     category: "ProductCategory";
     deletedAt: "DateTime";
     description: "String";
-    id: "ID";
+    id: "Int";
     imgUrl: "String";
     isActive: "Boolean";
     isIndividual: "Boolean";
@@ -2120,7 +2120,7 @@ export interface NexusGenFieldTypeNames {
     // field return type name
     components: "ProductCategoryComponent";
     description: "String";
-    id: "ID";
+    id: "Int";
     name: "String";
     underscoredName: "String";
   };
@@ -2133,7 +2133,7 @@ export interface NexusGenFieldTypeNames {
   ProductComponent: {
     // field return type name
     icon: "Icon";
-    id: "ID";
+    id: "Int";
     name: "String";
   };
   ProductRecommended: {
@@ -2153,7 +2153,7 @@ export interface NexusGenFieldTypeNames {
   };
   QuarterTime: {
     // field return type name
-    id: "ID";
+    id: "Int";
     utcValue: "Time";
     value: "DateTime";
   };
@@ -2208,7 +2208,7 @@ export interface NexusGenFieldTypeNames {
     // field return type name
     city: "City";
     country: "Country";
-    id: "ID";
+    id: "Int";
     name: "String";
   };
   ReservedProduct: {
@@ -2231,12 +2231,12 @@ export interface NexusGenFieldTypeNames {
   };
   RestaurantMenuCategory: {
     // field return type name
-    id: "ID";
+    id: "Int";
     name: "String";
   };
   ReviewVisitType: {
     // field return type name
-    id: "ID";
+    id: "Int";
     name: "String";
   };
   ReviewVote: {
@@ -2250,7 +2250,7 @@ export interface NexusGenFieldTypeNames {
   };
   ReviewVoteType: {
     // field return type name
-    id: "ID";
+    id: "Int";
     value: "String";
   };
   S3Payload: {
@@ -2266,7 +2266,7 @@ export interface NexusGenFieldTypeNames {
   SearchFilter: {
     // field return type name
     description: "String";
-    id: "ID";
+    id: "Int";
     name: "String";
     publicId: "String";
   };
@@ -2289,7 +2289,7 @@ export interface NexusGenFieldTypeNames {
   };
   SearchSort: {
     // field return type name
-    id: "ID";
+    id: "Int";
     name: "String";
   };
   UpdateReservedProduct: {
@@ -2304,7 +2304,7 @@ export interface NexusGenFieldTypeNames {
     favoriteBars: "UserFavoriteBar";
     firstName: "String";
     fullName: "String";
-    id: "ID";
+    id: "Int";
     lastName: "String";
     reviewVotes: "ReviewVote";
     reviews: "BeachBarReview";
@@ -2325,7 +2325,7 @@ export interface NexusGenFieldTypeNames {
   };
   UserHistoryActivity: {
     // field return type name
-    id: "ID";
+    id: "Int";
     name: "String";
   };
   UserHistoryExtended: {

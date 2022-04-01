@@ -6,6 +6,7 @@
   ],
   "scripts": {
     "build": "cd packages/server && yarn build; cd ../common && yarn build; cd ../frontend && yarn build",
+    "pre:dev": "cd packages/server && yarn swc:generate && cd ../common && tsc",
     "postinstall": "prisma generate"
   }
 }

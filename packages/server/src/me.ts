@@ -1,4 +1,3 @@
-import { PrismaClient } from "@prisma/client";
 import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core/dist/plugin";
 import { ApolloServer } from "apollo-server-express";
 import express from "express";
@@ -26,7 +25,7 @@ import { schema } from "./schema";
 
 export let redis: Redis.Redis;
 
-export const prisma = new PrismaClient({ log: ["query", "info", "warn", "error"] });
+// export const prisma = new PrismaClient({ log: ["query", "info", "warn", "error"] });
 // export const stripe: Stripe = new Stripe(
 //   process.env.NODE_ENV === "production" ? process.env.STRIPE_SECRET_LIVE_KEY : process.env.STRIPE_SECRET_KEY,
 //   { apiVersion: "2020-08-27", typescript: true }
@@ -38,16 +37,16 @@ export const prisma = new PrismaClient({ log: ["query", "info", "warn", "error"]
 // prisma.$use(middleware);
 
 (async (): Promise<void> => {
-  try {
-    redis = new Redis({ password: "@George2016", db: 2, connectTimeout: 1000, reconnectOnError: (): boolean => true });
+  // try {
+  //   redis = new Redis({ password: "@George2016", db: 2, connectTimeout: 1000, reconnectOnError: (): boolean => true });
 
-    redis.on("error", (err: any) => {
-      throw new Error(err.message);
-    });
-  } catch (err) {
-    console.error(err);
-    process.exit(0);
-  }
+  //   redis.on("error", (err: any) => {
+  //     throw new Error(err.message);
+  //   });
+  // } catch (err) {
+  //   console.error(err);
+  //   process.exit(0);
+  // }
 
   const app = express();
 
@@ -92,7 +91,7 @@ export const prisma = new PrismaClient({ log: ["query", "info", "warn", "error"]
   // });
   // await new Promise<void>(resolve => httpServer.listen({ port: 4000 }, resolve));
   // console.log(`🚀 Server ready at http://localhost:4000/graphql`);
-  app.listen({ port: +process.env.PORT! || 4000 }, () => {
+  app.listen({ port: 4000 }, () => {
     console.log(`🚀 Server ready at http://localhost:4000/graphql`);
   });
 })();
