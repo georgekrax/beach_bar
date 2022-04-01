@@ -1,5 +1,6 @@
 import Map from "@/components/Map/Map";
 import { useSearchContext } from "@/utils/contexts/SearchContext";
+import { useConfig } from "@/utils/hooks";
 import { Dialog } from "@hashtag-design-system/components";
 import { SEARCH_ACTIONS } from "./index";
 import styles from "./MapDialog.module.scss";
@@ -7,6 +8,9 @@ import styles from "./MapDialog.module.scss";
 type Props = {};
 
 export const MapDialog: React.FC<Props> = () => {
+  const {
+    variables: { mapDialogWidth },
+  } = useConfig();
   const { map, dispatch } = useSearchContext();
 
   const handleDismiss = (e: React.MouseEvent<HTMLElement>) => {
@@ -22,6 +26,7 @@ export const MapDialog: React.FC<Props> = () => {
       isShown={map.isDialogShown}
       onDismiss={e => handleDismiss(e)}
       overlayProps={{ background: { color: "light", alpha: 0.75 } }}
+      style={{ width: mapDialogWidth }}
     >
       <Map className={styles.map} />
     </Dialog>

@@ -1,89 +1,149 @@
 import { AUTH_ACTIONS } from "@/components/Auth/reducer";
-import Icons from "@/components/Icons";
-import { NextOrContainer } from "@/components/Next/OrContainer";
+import Next from "@/components/Next";
 import { DATA } from "@/config/data";
-import {
-  GetFacebookOAuthUrlDocument,
-  GetGoogleOAuthUrlDocument,
-  GetInstagramOAuthUrlDocument
-} from "@/graphql/generated";
-import { OAuthProvider } from "@/typings/user";
 import { useAuthContext } from "@/utils/contexts/AuthContext";
-import { useApolloClient } from "@apollo/client";
-import { Button, Dialog, DialogFProps, useIsMobile } from "@hashtag-design-system/components";
+import {
+  Box,
+  Button,
+  Flex,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalOverlay,
+  ModalProps,
+} from "@hashtag-design-system/components";
+import { Logo, useToken } from "@hashtag-design-system/icons";
+import { BuiltInProviderType } from "next-auth/providers";
+import { signIn } from "next-auth/react";
 import Image from "next/image";
-import { useRouter } from "next/router";
-import React from "react";
 import styles from "./LoginDialog.module.scss";
-import { Logo } from "./Logo";
 
 type Props = {
-  dialogBtn?: boolean;
-  oauth?: boolean;
+  hasCloseBtn?: boolean;
+  hasOAuth?: boolean;
 };
 
-export const LoginDialog: React.FC<Props & Partial<Pick<DialogFProps, "isShown">>> = ({
-  oauth = true,
-  dialogBtn = true,
-  isShown,
+export const LoginDialog: React.FC<Props & Pick<Partial<ModalProps>, "isOpen">> = ({
+  hasOAuth = true,
+  hasCloseBtn = true,
+  isOpen,
   children,
 }) => {
-  const router = useRouter();
-  const { isMobile } = useIsMobile();
-  const apolloClient = useApolloClient();
+  const loginDialogShape = useToken("sizes", "loginDialogShape");
+  const shadowColor = useToken("colors", "blackAlpha.200");
 
   const { isLoginDialogShown, dispatch } = useAuthContext();
 
   const handleDismiss = () => dispatch({ type: AUTH_ACTIONS.TOGGLE_LOGIN_DIALOG, payload: { bool: false } });
 
-  const handleClick = async (provider: OAuthProvider) => {
-    let url: string;
-    if (provider === "Google")
-      url = await (await apolloClient.query({ query: GetGoogleOAuthUrlDocument })).data.getGoogleOAuthUrl;
-    else if (provider === "Facebook")
-      url = await (await apolloClient.query({ query: GetFacebookOAuthUrlDocument })).data.getFacebookOAuthUrl;
-    else url = await (await apolloClient.query({ query: GetInstagramOAuthUrlDocument })).data.getInstagramOAuthUrl;
-    router.push(url);
+  const handleClick = async (provider: Extract<BuiltInProviderType, "google" | "facebook" | "instagram">) => {
+    // let url: string;
+    signIn(provider);
+    // url = await (await apolloClient.query({ query: GetInstagramOAuthUrlDocument })).data.getInstagramOAuthUrl;
+    // router.push(url);
   };
 
   return (
-    <Dialog
-      className={styles.loginDialog}
-      isShown={isShown ?? isLoginDialogShown}
-      onDismiss={() => handleDismiss()}
-      overlayProps={{ background: { color: "light", alpha: 0.9 } }}
-      style={{ top: !isMobile ? "8%" : undefined }}
-    >
-      <div className={styles.imgContainer}>
-        <Image src="/palm_leaf.png" alt="Palm leaf" width={280} height={200} quality={100} />
-      </div>
-      <div className={styles.rectangle + " layout__login__shape"} />
-      <div className={styles.ellipseContainer + " w100"}>
-        <div className={styles.ellipse + " layout__login__shape"} />
-      </div>
-      <div className={styles.content + " flex-column-flex-start-center"}>
-        <Logo />
-        {dialogBtn && <Dialog.Btn.Close />}
-        <div className={styles.container + " w100 flex-row-flex-start-center"}>{children}</div>
-        {oauth && (
-          <>
-            <NextOrContainer />
-            <div className={styles.oauthContainer + " flex-row-center-center"}>
-              <Button className={styles.oauth} variant="secondary" onClick={() => handleClick("Google")}>
-                <Icons.Logo.Google /> Sign in with Google
-              </Button>
-              <Button className={styles.oauth} variant="secondary" onClick={() => handleClick("Facebook")}>
-                <Image src="/facebook_logo.png" alt="Facebook logo" width={DATA.ICON_SIZE} height={DATA.ICON_SIZE} />
-              </Button>
-              <Button className={styles.oauth} variant="secondary" onClick={() => handleClick("Instagram")}>
-                <Image src="/instagram_logo.webp" alt="Instagram logo" width={DATA.ICON_SIZE} height={DATA.ICON_SIZE} />
-              </Button>
-            </div>
-          </>
-        )}
-      </div>
-    </Dialog>
+    <Modal isOpen={isOpen ?? isLoginDialogShown} onClose={handleDismiss}>
+      <ModalOverlay bg="whiteAlpha.800" />
+      <ModalContent mt={32} borderRadius="loginDialog">
+        <ModalBody p={0}>
+          <Box position="absolute" top="-12vh" left={-16} zIndex="default" overflow="visible">
+            <Image src="/palm_leaf.png" alt="Palm leaf" width={280} height={200} quality={100} />
+          </Box>
+          <Box
+            position="absolute"
+            top={46}
+            right="15%"
+            transform="rotate(-17deg)"
+            borderRadius="10px"
+            bg="#ffcb10"
+            className="layout__login__shape"
+          />
+          <Box
+            position="absolute"
+            top={0}
+            right={0}
+            height="loginDialogShape"
+            overflow="hidden"
+            borderTopRightRadius="loginDialog"
+            className="w100"
+          >
+            <Box
+              position="absolute"
+              top={`calc(${loginDialogShape} / -2)`}
+              right={`calc(${loginDialogShape} / -2)`}
+              borderRadius="50%"
+              bg="blue.500"
+              className="layout__login__shape"
+            />
+          </Box>
+          <Flex
+            flexDirection="column"
+            alignItems="center"
+            position="relative"
+            minHeight={80}
+            mt={20}
+            padding={5}
+            borderRadius="24px"
+            boxShadow={`0px -4px 16px ${shadowColor}`}
+            bg="white"
+            zIndex={2}
+          >
+            <Logo />
+            {hasCloseBtn && <ModalCloseButton zIndex={2} bg="inherit" />}
+            {children}
+            {hasOAuth && (
+              <>
+                <Next.OrContainer />
+                <Flex justifyContent="center" alignItems="center" flexWrap="wrap">
+                  <Button className={styles.oauth} onClick={() => handleClick("google")}>
+                    <Logo.Google.Colored /> Sign in with Google
+                  </Button>
+                  <Button className={styles.oauth} onClick={() => handleClick("facebook")}>
+                    <Image
+                      src="/facebook_logo.png"
+                      alt="Facebook logo"
+                      width={DATA.ICON_SIZE}
+                      height={DATA.ICON_SIZE}
+                    />
+                  </Button>
+                  <Button className={styles.oauth} onClick={() => handleClick("instagram")}>
+                    <Image
+                      src="/instagram_logo.webp"
+                      alt="Instagram logo"
+                      width={DATA.ICON_SIZE}
+                      height={DATA.ICON_SIZE}
+                    />
+                  </Button>
+                </Flex>
+              </>
+            )}
+          </Flex>
+        </ModalBody>
+      </ModalContent>
+    </Modal>
   );
+
+  // return (
+  //   <Dialog
+  //     className={styles.loginDialog}
+  //     isShown={isShown ?? isLoginDialogShown}
+  //     onDismiss={e => {
+  //       try {
+  //         e.nativeEvent.type;
+  //       } catch {
+  //         const targetType = (e.target as HTMLElement).tagName;
+  //         if (targetType === "button".toUpperCase()) return;
+  //       }
+  //       handleDismiss();
+  //     }}
+  //     overlayProps={{ background: { color: "light", alpha: 0.9 } }}
+  //     style={{ top: "unset" }}
+  //   >
+  //   </Dialog>
+  // );
 };
 
 LoginDialog.displayName = "LayoutLoginDialog";

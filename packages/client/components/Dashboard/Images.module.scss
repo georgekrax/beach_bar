@@ -1,0 +1,66 @@
+$gap: map-get($em-spacers, 32);
+
+.list {
+  margin-top: map-get($em-spacers, 40);
+  margin-right: -($gap);
+  gap: map-get($em-spacers, 48) $gap;
+}
+
+.img {
+  position: relative;
+  width: calc(33% - #{$gap});
+  // border-radius: 14px;
+  // border: 2px solid $grey-4;
+
+  & > div:first-child {
+    position: relative;
+    height: 180px;
+  }
+
+  span {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 0.3em map-get($em-spacers, 12);
+    border-radius: 0 12px;
+    border: 1px solid $grey-4;
+    border-top: none;
+    border-right: none;
+    background-color: $grey-2;
+    box-shadow: inset 1px -1px 4px $grey-5;
+    @include font-semibold();
+  }
+}
+
+.edit {
+  margin-top: map-get($em-spacers, 12);
+  padding: map-get($em-spacers, 8);
+  gap: map-get($em-spacers, 12);
+  border-radius: 14px;
+  border: 1px solid $grey-4;
+
+  input {
+    height: map-get($rem-spacers, 40);
+    $bg: $grey-3;
+    border-color: $bg;
+    background-color: $bg;
+
+    &:hover,
+    &:focus {
+      border-color: $primary;
+      background-color: $bg;
+    }
+  }
+}
+
+.deleteBtn {
+  margin-top: auto;
+  padding: 0.2em;
+  border-radius: 8px;
+  border-width: 1px;
+
+  &:hover path {
+    fill: $grey-1;
+    stroke: $grey-1;
+  }
+}

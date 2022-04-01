@@ -1,4 +1,3 @@
-<<<<<<< HEAD:packages/client/graphql/queries/Payments.graphql
 query Payments($monthId: ID, $year: Int) {
 	payments(monthId: $monthId, year: $year) {
 		beachBar {
@@ -18,7 +17,11 @@ query Payments($monthId: ID, $year: Int) {
 			isUpcoming
 			isRefunded
 			date
-			time {
+			startTime {
+				id
+				value
+			}
+			endTime {
 				id
 				value
 			}
@@ -28,35 +31,4 @@ query Payments($monthId: ID, $year: Int) {
 			}
 		}
 	}
-=======
-query Payments($monthId: ID, $year: Int) {
-	payments(monthId: $monthId, year: $year) {
-		beachBar {
-			id
-			name
-			thumbnailUrl
-			location {
-				city {
-					name
-				}
-				region {
-					name
-				}
-			}
-		}
-		visits {
-			isUpcoming
-			isRefunded
-			date
-			time {
-				id
-				value
-			}
-			payment {
-				id
-				refCode
-			}
-		}
-	}
->>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff:packages/client/graphql/queries/GetPayments.graphql
 }

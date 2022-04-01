@@ -24,7 +24,8 @@
       "@/config/*": ["config/*"],
       "@/typings/*": ["typings/*"],
       "@/lib/*": ["lib/*"]
-    }
+    },
+    "incremental": true
   },
   "exclude": ["node_modules", ".next", "out"],
   "include": [

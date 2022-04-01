@@ -1,11 +1,11 @@
-<<<<<<< HEAD
-fragment BeachBarProduct on Product {
+fragment ProductBase on Product {
   id
   name
   description
   imgUrl
   price
   maxPeople
+  minFoodSpending
   category {
     id
     components {
@@ -21,27 +21,20 @@ fragment BeachBarProduct on Product {
     }
   }
 }
-=======
-fragment BeachBarProduct on Product {
-  id
-  name
-  description
-  imgUrl
-  price
-  maxPeople
-  category {
+
+fragment ProductDetails on Product {
+  ...ProductBase
+  beachBar {
     id
-    components {
-      quantity
-      component {
-        id
-        name
-        icon {
-          id
-          publicId
-        }
-      }
+    currency {
+      id
+      symbol
     }
   }
+  reservationLimits {
+    id
+    from
+    to
+    limitNumber
+  }
 }
->>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

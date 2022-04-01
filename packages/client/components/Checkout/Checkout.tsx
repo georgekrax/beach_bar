@@ -1,9 +1,12 @@
-<<<<<<< HEAD
 import { Step } from "./Step";
+import { Customer } from "./Customer";
+import { PaymentMethod } from "./PaymentMethod";
 
-type SubComponents= {
+type SubComponents = {
   Step: typeof Step;
-}
+  Customer: typeof Customer;
+  PaymentMethod: typeof PaymentMethod;
+};
 
 type Props = {};
 
@@ -12,26 +15,9 @@ const Checkout: React.FC<Props> & SubComponents = () => {
 };
 
 Checkout.Step = Step;
+Checkout.Customer = Customer;
+Checkout.PaymentMethod = PaymentMethod;
 
 Checkout.displayName = "Checkout";
 
 export default Checkout;
-=======
-import { Step } from "./Step";
-
-type SubComponents= {
-  Step: typeof Step;
-}
-
-type Props = {};
-
-const Checkout: React.FC<Props> & SubComponents = () => {
-  return <div></div>;
-};
-
-Checkout.Step = Step;
-
-Checkout.displayName = "Checkout";
-
-export default Checkout;
->>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

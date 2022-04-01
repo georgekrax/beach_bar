@@ -1,16 +1,19 @@
-import { useClassnames } from "@hashtag-design-system/components";
-import styles from "./Container.module.scss";
+import { Flex, FlexProps } from "@hashtag-design-system/components";
 
-export const Container: React.FC<Pick<React.ComponentPropsWithoutRef<"div">, "style" | "className">> = ({
-  children,
-  ...props
-}) => {
-  const [classNames, rest] = useClassnames(styles.container + " flex-row-flex-start-center", props);
-
+export const Container: React.FC<FlexProps> = ({ children, ...props }) => {
+  // &::before {
+  //   content: "";
+  //   position: absolute;
+  //   top: 0;
+  //   left: 0;
+  //   width: 40px;
+  //   height: 1px;
+  //   background-color: $grey-6;
+  // }
   return (
-    <div className={classNames} {...rest}>
+    <Flex align="center" position="relative" wrap="wrap" gap={3} mt={4} {...props}>
       {children}
-    </div>
+    </Flex>
   );
 };
 

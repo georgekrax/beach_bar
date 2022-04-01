@@ -1,0 +1,3 @@
+query StripeConnectUrl($phoneNumber: String) {
+  stripeConnectUrl(phoneNumber: $phoneNumber)
+}

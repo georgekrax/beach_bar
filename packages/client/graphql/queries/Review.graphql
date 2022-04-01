@@ -1,23 +1,12 @@
-<<<<<<< HEAD
 query Review($reviewId: ID!) {
   review(reviewId: $reviewId) {
-    ...Review
+    ...BeachBarReviewBase
     beachBar {
       id
       name
-      formattedLocation
+      location {
+        formattedLocation
+      }
     }
   }
 }
-=======
-query Review($reviewId: ID!) {
-  review(reviewId: $reviewId) {
-    ...Review
-    beachBar {
-      id
-      name
-      formattedLocation
-    }
-  }
-}
->>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

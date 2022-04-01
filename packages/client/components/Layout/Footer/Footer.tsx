@@ -1,27 +1,25 @@
 import Icons from "@/components/Icons";
-import { NextLink } from "@/components/Next/Link";
-import { useIsDesktop } from "@/utils/hooks";
+import Next from "@/components/Next";
+import { useIsDevice } from "@/utils/hooks";
 import { useAuth } from "@/utils/hooks/useAuth";
-import { useClassnames } from "@hashtag-design-system/components";
+import { callAllHandlers, cx, MotionBox, MotionBoxProps } from "@hashtag-design-system/components";
 import dayjs from "dayjs";
-import { HTMLMotionProps, motion, Variants } from "framer-motion";
+import { Variants } from "framer-motion";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Logo } from "../Logo";
 import styles from "./Footer.module.scss";
 import { InfoColumn } from "./InfoColumn";
 
-const boxVariants: Variants = {
-  open: { height: "auto" },
-  closed: { height: 76 },
-};
-
+const boxVariants: Variants = { open: { height: "auto" }, closed: { height: 110 } };
 const iconVariants: Variants = { open: { rotate: 180 }, closed: { rotate: 360 } };
 
-export const Footer: React.FC<HTMLMotionProps<"footer">> = props => {
+export type Props = MotionBoxProps;
+
+export const Footer: React.FC<Props> = props => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [classNames, rest] = useClassnames(styles.container + " container--padding w100", props);
-  const isDesktop = useIsDesktop();
+  const _className = cx(styles.container + " container--padding w100", props.className);
+  const { isDesktop } = useIsDevice();
 
   const { data } = useAuth();
 
@@ -36,10 +34,16 @@ export const Footer: React.FC<HTMLMotionProps<"footer">> = props => {
   }, [isDesktop]);
 
   return (
-    <motion.footer
-      className={classNames}
-      onClick={() => handleClick()}
-      {...rest}
+    <MotionBox
+      as="footer"
+      height="fit-content"
+      mt={8}
+      pt="container.pad"
+      bg="gray.50"
+      overflow="hidden"
+      {...props}
+      onClick={e => callAllHandlers(() => handleClick(), props.onClick)(e)}
+      className={_className}
       animate={isExpanded ? "open" : "closed"}
       variants={boxVariants}
     >
@@ -54,14 +58,14 @@ export const Footer: React.FC<HTMLMotionProps<"footer">> = props => {
                 className={styles.chevron}
                 initial="closed"
                 variants={iconVariants}
-                animate={isExpanded ? "closed" : "open"}
+                animate={isExpanded ? "open" : "closed"}
                 transition={{ stiffness: 750, duration: 0.2 }}
               />
               <Logo />
             </div>
-            <small className="d--block body-14 text-ws--nowrap">Built with ❤️ from Greece</small>
+            <small className="d--block body-14 text--nowrap">Made with ❤️ in Greece</small>
           </div>
-          <small className="body-14 text-ws--nowrap">
+          <small className="body-14 text--nowrap">
             Copyright &#169; {dayjs().year()} #beach_bar. <br />
             All rights Reserved.
           </small>
@@ -72,14 +76,6 @@ export const Footer: React.FC<HTMLMotionProps<"footer">> = props => {
             links={[
               { name: "Map", opts: { href: "/map" } },
               { name: "Shopping cart", opts: { href: "/shopping_cart" } },
-            ]}
-          />
-          <InfoColumn
-            header="About us"
-            links={[
-              { name: "About #beach_bar", opts: { href: "/about/beach_bar" } },
-              { name: "News", opts: { href: "/about/news" } },
-              { name: "Contact us", opts: { href: "/contact" } },
             ]}
           />
           {data?.me && (
@@ -95,6 +91,23 @@ export const Footer: React.FC<HTMLMotionProps<"footer">> = props => {
               ]}
             />
           )}
+          <InfoColumn
+            header="About"
+            links={[
+              { name: "About #beach_bar", opts: { href: "/about/beach_bar" } },
+              { name: "News", opts: { href: "/about/news" } },
+              { name: "Create your listing", opts: { href: "/partners" } },
+              { name: "Founder's letter", opts: { href: "/about/what-makes-beach_bar-beach_bar" } },
+            ]}
+          />
+          <InfoColumn
+            header="Support"
+            links={[
+              { name: "Our COVID-19 response", opts: { href: "/support/covid-19" } },
+              { name: "Help center", opts: { href: "/support/help-center" } },
+              { name: "Contact us", opts: { href: "/support/contact" } },
+            ]}
+          />
           <InfoColumn header="Get in touch">
             <div className={styles.getInTouch + " body-14"}>
               <div>Questions or feedback?</div>
@@ -122,13 +135,14 @@ export const Footer: React.FC<HTMLMotionProps<"footer">> = props => {
         </div>
       </div>
       <div className={styles.bottom + " flex-row-space-between-center"}>
-        <small>Book with us your next visit at the beach.</small>
+        <small>Book with us your next visit to the beach</small>
+        {/* <small>Booking.com for your next visit at the beach.</small> */}
         <small>
-          <NextLink href="/about/terms_and_conditions">Terms &amp; Conditions</NextLink> <span>&bull;</span>{" "}
-          <NextLink href="/about/privacy_policy">Privacy Policy</NextLink>
+          <Next.Link link={{ href: "/about/terms_and_conditions" }}>Terms &amp; Conditions</Next.Link>&nbsp;
+          <span>&bull;</span> <Next.Link link={{ href: "/about/privacy_policy" }}>Privacy Policy</Next.Link>
         </small>
       </div>
-    </motion.footer>
+    </MotionBox>
   );
 };
 

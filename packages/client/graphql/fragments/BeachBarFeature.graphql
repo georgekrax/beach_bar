@@ -1,0 +1,14 @@
+fragment FeatureBase on BeachBarFeature {
+  id
+  quantity
+  description
+  service {
+    id
+    name
+    icon {
+      id
+      name
+      publicId
+    }
+  }
+}

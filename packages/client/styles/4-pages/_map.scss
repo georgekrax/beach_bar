@@ -1,3 +1,6 @@
+@use "main" as *;
+@use "2-base/layout" as *;
+
 .map {
   $searchbar-margin-top: map-get($em-spacers, 64);
 

@@ -1,16 +1,17 @@
 import { ApolloClient, ApolloLink } from "@apollo/client";
 import { GetServerSidePropsContext } from "next";
-import { getAuthContext } from "../auth";
 import { cache } from "./cache";
-import { authMiddleware, errorLink, httpLink, ipMiddleware } from "./links";
+import { httpLink, ipMiddleware } from "./links";
 
 export const createApolloClient = (ctx?: GetServerSidePropsContext) => {
-  const authHeaders = ctx && ctx.req && getAuthContext({ req: ctx.req }).headers;
+  // const authHeaders = ctx && ctx.req && getAuthContext({ req: ctx.req }).headers;
   return new ApolloClient({
     ssrMode: typeof window === "undefined",
-    link: ApolloLink.from([ipMiddleware, errorLink(authHeaders), authMiddleware(authHeaders), httpLink]),
+    link: ApolloLink.from([ipMiddleware, httpLink]),
     cache,
-    connectToDevTools: process.env.NODE_ENV !== "production" && process.browser,
+    // connectToDevTools: process.env.NODE_ENV !== "production",
+    connectToDevTools: true,
+    credentials: "include",
     defaultOptions: {
       mutate: {
         errorPolicy: "all",
@@ -19,5 +20,20 @@ export const createApolloClient = (ctx?: GetServerSidePropsContext) => {
         errorPolicy: "all",
       },
     },
+    // resolvers: {
+    //   BeachBar: {
+    //     formattedLocation: ({ location }) => {
+    //       if (!location) return null;
+
+    //       let formattedLocation: string[] = [];
+    //       if (location.region) formattedLocation = [...formattedLocation, location.region.name];
+    //       if (location.city) formattedLocation = [...formattedLocation, location.city.name];
+    //       if (location.country) {
+    //         formattedLocation = [...formattedLocation, location.country.alpha2Code || location.country.name];
+    //       }
+    //       return formattedLocation.join(", ");
+    //     },
+    //   },
+    // },
   });
 };

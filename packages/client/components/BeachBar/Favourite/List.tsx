@@ -1,4 +1,4 @@
-import Carousel from "@/components/Carousel";
+import Carousel from "@/components/Carousel2";
 import Section from "@/components/Section";
 import { useMemo } from "react";
 import styles from "./List.module.scss";

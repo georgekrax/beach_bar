@@ -1,22 +1,25 @@
-import styles from "./IconHeader.module.scss";
+import { Flex, FlexProps } from "@hashtag-design-system/components";
 
-type Props = {
-  before?: React.ReactNode;
-  after?: React.ReactNode;
+type Props = FlexProps & {
+  before?: FlexProps;
+  after?: FlexProps;
 };
 
-const IconHeader: React.FC<Props & Pick<React.ComponentPropsWithoutRef<"div">, "className">> = ({
-  before,
-  after,
-  className,
-  children,
-}) => {
+const IconHeader: React.FC<Props> = ({ before, after, children, ...props }) => {
   return (
-    <div className={styles.container + " flex-row-space-between-center" + (className ? " " + className : "")}>
-      <div className="flex-row-center-center">{before}</div>
+    <Flex justify="space-between" align="flex-start" {...props}>
+      {before && (
+        <Flex justify="center" align="center" gap={4} {...before}>
+          {before.children}
+        </Flex>
+      )}
       {children}
-      <div className="flex-row-center-center">{after}</div>
-    </div>
+      {after && (
+        <Flex justify="center" align="center" gap={4} {...after}>
+          {after.children}
+        </Flex>
+      )}
+    </Flex>
   );
 };
 

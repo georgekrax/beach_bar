@@ -1,18 +1,12 @@
-import { useClassnames } from "@hashtag-design-system/components";
+import { Text, TextProps } from "@hashtag-design-system/components";
 
-export type Props = {
-  semibold?: boolean;
-};
+export type Props = TextProps;
 
-export type FProps = Props & React.ComponentPropsWithoutRef<"span">;
-
-export const Error: React.FC<FProps> = ({ semibold = false, children, ...props }) => {
-  const [classNames, rest] = useClassnames(`feedback error${semibold ? " semibold" : ""}`, props);
-
+export const Error: React.FC<Props> = ({ children, ...props }) => {
   return (
-    <span className={classNames} {...rest}>
+    <Text as="span" display="inline-block" alignSelf="center" textAlign="center" color="error" {...props}>
       {children}
-    </span>
+    </Text>
   );
 };
 

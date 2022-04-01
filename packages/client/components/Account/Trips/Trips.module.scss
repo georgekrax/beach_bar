@@ -1,8 +1,5 @@
-.trip {
-  width: min(85%, 280px);
-}
-
 .container {
+  margin-top: map-get($em-spacers, 24);
   flex-wrap: wrap;
   gap: map-get($em-spacers, 48);
 }
@@ -10,6 +7,7 @@
 @include breakpoint("sm") {
   .container {
     justify-content: flex-start;
-    margin: 0 map-get($em-spacers, 12);
+    margin-right: map-get($em-spacers, 12);
+    margin-left: map-get($em-spacers, 12);
   }
 }

@@ -1,0 +1,7 @@
+.list {
+  margin: map-get($em-spacers, 40) 0;
+
+  & > div {
+    margin-bottom: map-get($em-spacers, 32);
+  }
+}

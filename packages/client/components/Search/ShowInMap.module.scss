@@ -1,55 +1,57 @@
-$padding: map-get($em-spacers, 12);
+// $padding: map-get($em-spacers, 12);
 
-.container {
-  position: relative;
-  height: fit-content;
-  padding: $padding;
-  margin: map-get($em-spacers, 24) 0 map-get($em-spacers, 64);
-  // border: 1px solid $grey-5;
-  border-radius: 14px;
-  background: linear-gradient(116deg, $grey-1 40%, $grey-4);
-  max-width: 25em;
-  cursor: pointer;
+// .container {
+//   position: relative;
+//   height: fit-content;
+//   padding: $padding;
+//   margin: map-get($em-spacers, 24) 0 map-get($em-spacers, 64);
+//   // border: 1px solid $grey-5;
+//   border-radius: 14px;
+//   background: linear-gradient(116deg, $grey-1 40%, $grey-4);
+//   max-width: 25em;
+//   cursor: pointer;
 
-  &:active {
-    background: $grey-3;
-  }
-}
+//   &:active {
+//     background: $grey-3;
+//   }
+// }
 
-.imgContainer {
-  border-radius: 14px;
-  overflow: hidden;
-  margin-right: map-get($em-spacers, 16);
-  flex-shrink: 0;
-}
+// .imgContainer {
+//   border-radius: 14px;
+//   overflow: hidden;
+//   margin-right: map-get($em-spacers, 12);
+//   flex-shrink: 0;
+// }
 
-.content > div {
-  &:first-child {
-    margin-bottom: map-get($em-spacers, 4);
-  }
+// .content > div {
+// $color: $grey-9;
+// color: $color;
 
-  &:last-child span {
-    color: $grey-10;
-  }
-}
+// &:first-child {
+//   margin-bottom: map-get($em-spacers, 4);
+// }
 
-.attribution {
-  position: absolute;
-  top: 100%;
-  left: 7.5%;
-  padding: map-get($em-spacers, 8) $padding;
-  background: linear-gradient(to top, $grey-1, $grey-3 50%);
-  background: $grey-3;
-  border-radius: 0px 0px 10px 10px;
+// &:last-child span {
+//   color: $color;
+// }
+// }
 
-  & > a {
-    text-decoration: none;
-  }
-}
+// .attribution {
+//   position: absolute;
+//   top: 100%;
+//   left: 7.5%;
+//   padding: map-get($em-spacers, 8) $padding;
+//   background: linear-gradient(to top, $grey-1, $grey-3 50%);
+//   background: $grey-3;
+//   border-radius: 0px 0px 10px 10px;
 
-@include breakpoint("md") {
-  .container {
-    margin-top: 0;
-    margin-bottom: map-get($em-spacers, 64);
-  }
-}
+//   & > a {
+//     text-decoration: none;
+//   }
+// }
+
+// @include responsive() {
+//   .container {
+//     margin-bottom: 3.5em;
+//   }
+// }

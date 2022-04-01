@@ -1,15 +1,24 @@
-<<<<<<< HEAD
-query Payment($refCode: String!) {
+query Payment($refCode: ID!, $beachBarId: ID = null) {
   payment(refCode: $refCode) {
     id
     refCode
     isRefunded
+    stripeId
+    stripeProccessingFee
+    appFee
+    total(beachBarId: $beachBarId)
     timestamp
     cart {
       id
       total
-      products {
-        ...BasicCartProduct
+      products(beachBarId: $beachBarId) {
+        ...CartProductBase
+      }
+      foods(beachBarId: $beachBarId) {
+        ...CartFoodBase
+      }
+      notes(beachBarId: $beachBarId) {
+        ...CartNoteBase
       }
     }
     card {
@@ -31,8 +40,7 @@ query Payment($refCode: String!) {
         email
         phoneNumber
         country {
-          id
-          callingCode
+          ...CountryBase
         }
       }
     }
@@ -40,84 +48,22 @@ query Payment($refCode: String!) {
       id
       name
     }
-    voucherCode {
-      id
-      couponCode {
-        id
-        refCode
-        discountPercentage
-      }
-      offerCode {
-        id
-        refCode
-        totalAmount
-        timesUsed
-        campaign {
-          id
-        }
-      }
-    }
+    # voucherCode {
+    #   id
+    #   couponCode {
+    #     id
+    #     refCode
+    #     discountPercentage
+    #   }
+    #   offerCode {
+    #     id
+    #     refCode
+    #     totalAmount
+    #     timesUsed
+    #     campaign {
+    #       id
+    #     }
+    #   }
+    # }
   }
 }
-=======
-query Payment($refCode: String!) {
-  payment(refCode: $refCode) {
-    id
-    refCode
-    isRefunded
-    timestamp
-    cart {
-      id
-      total
-      products {
-        ...BasicCartProduct
-      }
-    }
-    card {
-      id
-      last4
-      brand {
-        id
-        name
-      }
-      country {
-        id
-        currency {
-          id
-          symbol
-        }
-      }
-      customer {
-        id
-        email
-        phoneNumber
-        country {
-          id
-          callingCode
-        }
-      }
-    }
-    status {
-      id
-      name
-    }
-    voucherCode {
-      id
-      couponCode {
-        id
-        refCode
-        discountPercentage
-      }
-      offerCode {
-        id
-        refCode
-        totalAmount
-        timesUsed
-        campaign {
-          id
-        }
-      }
-    }
-  }
-}
->>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

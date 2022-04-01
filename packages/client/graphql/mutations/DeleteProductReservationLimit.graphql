@@ -1,0 +1,3 @@
+mutation DeleteProductReservationLimit($id: ID!) {
+  deleteProductReservationLimit(id: $id)
+}

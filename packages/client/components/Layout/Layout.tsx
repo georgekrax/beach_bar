@@ -1,120 +1,138 @@
-import Auth from "@/components/Auth/Auth";
-import { MapDialog } from "@/components/Search/MapDialog";
-import { SEARCH_ACTIONS } from "@/components/Search/reducer";
-import ShoppingCart from "@/components/ShoppingCart/ShoppingCart";
+import Auth from "@/components/Auth";
+import { SEARCH_ACTIONS } from "@/components/Search";
+import ShoppingCart from "@/components/ShoppingCart";
 import { userIpAddr } from "@/lib/apollo/cache";
 import { IpAddrType } from "@/typings/graphql";
 import { useSearchContext } from "@/utils/contexts";
-import { useConfig } from "@/utils/hooks/useConfig";
-import { useIsDesktop } from "@/utils/hooks/useIsDesktop";
-import { BottomSheet, Dialog, useClassnames, useWindowDimensions } from "@hashtag-design-system/components";
+import { useIsDevice } from "@/utils/hooks";
+import { useReactiveVar } from "@apollo/client";
+import {
+  BottomSheet,
+  Box,
+  BoxProps,
+  cx,
+  useEventListener,
+  useWindowDimensions,
+} from "@hashtag-design-system/components";
 import { AnimatePresence } from "framer-motion";
-import dynamic from "next/dynamic";
 import { memo, useEffect, useState } from "react";
+import { Toaster } from "react-hot-toast";
 import { Footer, LayoutFooterProps } from "./Footer";
-import { Header,  LayoutHeaderProps } from "./Header";
+import { Header, LayoutHeaderProps } from "./Header";
+import { LayoutIconHeader as IconHeader } from "./IconHeader";
 import { LoginDialog } from "./LoginDialog";
+import { Menu } from "./Menu";
 import { LayoutTapBarProps } from "./TapBar";
 
-const IconHeader = dynamic(() => {
-  const prom = import("./IconHeader").then(mod => mod.LayoutIconHeader);
-  return prom;
-});
+// const IconHeader = dynamic(() => {
+//   const prom = import("./IconHeader").then(mod => mod.LayoutIconHeader);
+//   return prom;
+// });
 
 export type Props = {
   header?: false | LayoutHeaderProps;
   footer?: false | LayoutFooterProps;
   tapbar?: boolean | LayoutTapBarProps;
-  container?: React.ComponentPropsWithRef<"div">;
-  main?: React.ComponentPropsWithoutRef<"main">;
+  container?: BoxProps;
+  main?: BoxProps;
   shoppingCart?: boolean;
   children: React.ReactNode;
+  map?: boolean;
+  hasToaster?: boolean;
 };
 
 type SubComponents = {
   IconHeader: typeof IconHeader;
+  Menu: typeof Menu;
 };
 
 // @ts-expect-error
 export const Layout: React.NamedExoticComponent<Props> & SubComponents = memo(
-  ({ header, footer, tapbar = true, container = {}, main = {}, shoppingCart = false, children }) => {
+  ({
+    header,
+    footer,
+    tapbar = true,
+    container = {},
+    main = {},
+    shoppingCart = false,
+    map = false,
+    hasToaster = false,
+    children,
+  }) => {
     const [isKeyboardShown, setIsKeyboardShown] = useState(false);
-    const [containerClassNames, containerRest] = useClassnames("container", container);
-    const isDesktop = useIsDesktop();
-    const { height } = useWindowDimensions();
-    // const { variables, setValue } = useConfig();
+    const _containerClassName = cx("container", container.className);
 
-    const BOTTOM_SHEET_DEFAULT_Y = isDesktop ? 0 : 300;
+    const { isDesktop } = useIsDevice();
+    const { viewport } = useWindowDimensions();
+    const ipAddress = useReactiveVar(userIpAddr);
 
     const { isCartShown, dispatch: searchDispatch } = useSearchContext();
 
-    // const fetchUsersIp = async () => {
-    //   const res = await fetch(
-    //     "http://ip-api.com/json/?fields=status,message,country,countryCode,region,regionName,city,district,zip,lat,lon,timezone,currency,isp,org,as,mobile,query"
-    //   );
-    //   const data: IpAddrType = await res.json();
-    //   if (data.status === "success") {
-    //     userIpAddr(data);
-    //     setValue(prevState => ({ ...prevState, variables: { ...prevState.variables, ipAddr: data } }));
-    //   }
-    // };
+    const fetchUsersIp = async () => {
+      const res = await fetch(
+        "http://ip-api.com/json/?fields=status,message,country,countryCode,region,regionName,city,district,zip,lat,lon,timezone,currency,isp,org,as,mobile,query"
+      );
+      const data: IpAddrType = await res.json();
+      if (res.ok && data.status === "success") {
+        userIpAddr(data);
+        // me.current = data;
+        // setValue(prevState => ({ ...prevState, variables: { ...prevState.variables, ipAddr: data } }));
+      }
+    };
 
-    // const handleFocus = (e: FocusEvent, bool: boolean) => {
-    //   const activeEl = e.target;
-    //   if (
-    //     activeEl &&
-    //     // @ts-expect-error
-    //     ["input", "textarea"].includes(activeEl.tagName.toLowerCase()) &&
-    //     // @ts-expect-error
-    //     !["radio", "checkbox"].includes(activeEl.type)
-    //   )
-    //     setIsKeyboardShown(bool);
-    // };
+    // Fetch user's IP Address
+    const handleFocus = async (e: FocusEvent) => {
+      if (!ipAddress) fetchUsersIp();
 
-    // // Fetch user's IP Address
-    // useEffect(() => {
-    //   if (!variables.ipAddr) fetchUsersIp();
-    //   // console.clear();
+      const activeEl = e.target;
+      if (
+        activeEl &&
+        // @ts-expect-error
+        ["input", "textarea"].includes(activeEl.tagName?.toLowerCase()) &&
+        // @ts-expect-error
+        !["radio", "checkbox"].includes(activeEl.type)
+      ) {
+        setIsKeyboardShown(e.type === "focus");
+      }
+    };
 
-    //   document.addEventListener("focus", e => handleFocus(e, true), true);
-    //   document.addEventListener("blur", e => handleFocus(e, false), true);
+    useEffect(() => {
+      if (!ipAddress) fetchUsersIp();
+    }, [ipAddress?.query]);
 
-    //   return () => {
-    //     document.removeEventListener("focus", e => handleFocus(e, true));
-    //     document.removeEventListener("blur", e => handleFocus(e, false));
-    //   };
-    // }, []);
+    useEventListener("focus", handleFocus, undefined, true);
 
     return (
       <>
         <LoginDialog>
           <Auth />
         </LoginDialog>
-        <MapDialog />
+        {/* {map && <MapDialog />} */}
         {header !== false && <Header {...header} />}
-        <div className={containerClassNames} {...containerRest}>
+        <Box {...container} className={_containerClassName}>
           <AnimatePresence exitBeforeEnter>
-            {/* <Wrapper key="wrapper" {...wrapper}> */}
-            <main {...main} style={{ ...main?.style, height: "fit-content", flexGrow: 1 }}>
-              <div className="wrapper">{children}</div>
-            </main>
-            {/* </Wrapper> */}
+            <Box as="main" height="fit-content" flexGrow={1} {...main}>
+              <div className="wrapper">
+                {hasToaster && <Toaster position="top-center" />}
+                {children}
+              </div>
+            </Box>
           </AnimatePresence>
-        </div>
+        </Box>
         {footer !== false && <Footer {...footer} />}
         {shoppingCart && (
           <BottomSheet
-            className="layout__shopping-cart"
-            isShown={isCartShown}
-            transformTemplate={(_, gen) => gen.replace("300px", BOTTOM_SHEET_DEFAULT_Y + "px")}
-            defaultY={BOTTOM_SHEET_DEFAULT_Y}
-            hugContentsHeight={false}
-            style={{ top: 0 }}
-            onDismiss={() => searchDispatch({ type: SEARCH_ACTIONS.TOGGLE_CART, payload: { bool: false } })}
+            isOpen={isCartShown}
+            // defaultHeight={!isDesktop ? viewport.height - 300 : undefined}
+            defaultHeight={viewport.height - 200}
+            defaultPosition={isDesktop ? "expanded" : undefined}
+            mr={0}
+            ml="auto"
+            // More specificity for CSS
+            sx={{ maxWidth: { md: "27rem !important" }, borderTopRightRadius: { md: "0px !important" } }}
+            onClose={() => searchDispatch({ type: SEARCH_ACTIONS.TOGGLE_CART, payload: { bool: false } })}
           >
-            <Dialog.Content className="search__cart" style={{ maxHeight: height - BOTTOM_SHEET_DEFAULT_Y - 32 }}>
-              <ShoppingCart />
-            </Dialog.Content>
+            <ShoppingCart atLayout closeBtn />
           </BottomSheet>
         )}
         {/* {!isKeyboardShown && isMobile && tapbar && <TapBar />} */}
@@ -124,6 +142,7 @@ export const Layout: React.NamedExoticComponent<Props> & SubComponents = memo(
 );
 
 Layout.IconHeader = IconHeader;
+Layout.Menu = Menu;
 
 Layout.displayName = "Layout";
 

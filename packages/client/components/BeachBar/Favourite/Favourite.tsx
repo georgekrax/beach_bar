@@ -9,17 +9,17 @@ import { FavouriteHeartBox } from "./HeartBox";
 import { List } from "./List";
 
 type SubComponents = {
-  // HeartBox: typeof FavouriteHeartBox;
+  HeartBox: typeof FavouriteHeartBox;
   List: typeof List;
   Canvas: typeof Canvas;
 };
 
-type FProps = FavouriteBeachBarsQuery["favouriteBeachBars"][number]["beachBar"];
+type Props = FavouriteBeachBarsQuery["favouriteBeachBars"][number]["beachBar"];
 
-export const Favourite: React.FC<FProps> & SubComponents = ({ name, slug, thumbnailUrl, formattedLocation }) => {
-  return (
-    <motion.div className={styles.container + " w100 flex-row-flex-start-stretch"} variants={MOTION.productVariants}>
-      <div>
+export const Favourite: React.FC<Props> & SubComponents = ({ name, slug, thumbnailUrl }) => (
+  <motion.div className={styles.container + " w100 flex-row-flex-start-stretch"} variants={MOTION.productVariants}>
+    {thumbnailUrl && (
+      <div className={styles.imgContainer}>
         <Image
           src={thumbnailUrl}
           alt={genBarThumbnailAlt(name)}
@@ -31,18 +31,18 @@ export const Favourite: React.FC<FProps> & SubComponents = ({ name, slug, thumbn
           layout="fill"
         />
       </div>
-      <div className="w100 flex-column-space-between-flex-start">
-        <div>
-          <h6 className="semibold">{name}</h6>
-          <span className="d--block">{formattedLocation}</span>
-        </div>
-        <FavouriteHeartBox beachBarSlug={slug} />
+    )}
+    <div className={styles.content + " w100 flex-column-space-between-flex-start"}>
+      <div>
+        <h6 className="semibold">{name}</h6>
+        {/* <span className="d--block text--grey">{location?.formattedLocation.slice(0, -4)}</span> */}
       </div>
-    </motion.div>
-  );
-};
+      <FavouriteHeartBox beachBarSlug={slug} />
+    </div>
+  </motion.div>
+);
 
-// Favourite.HeartBox = FavouriteHeartBox;
+Favourite.HeartBox = FavouriteHeartBox;
 Favourite.List = List;
 Favourite.Canvas = Canvas;
 

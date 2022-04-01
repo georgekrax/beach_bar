@@ -15,19 +15,19 @@ const Path: React.FC<IconPathBaseFProps> = ({ ...props }) => (
 
 export const History: React.FC<IconBaseFProps> & SubComponents = ({ className, ...props }) => {
   return (
-    <Base className={"icon__stroke--none" + className ? " " + className : ""} {...props}>
+    <Base className={"icon__stroke--none__path" + className ? " " + className : ""} {...props}>
       <Path />
     </Base>
   );
 };
 
-const Filled: React.FC<IconBaseFProps> = ({ ...props }) => {
-  return (
-    <Base {...props}>
-      <Path />
-    </Base>
-  );
-};
+// const Filled: React.FC<IconBaseFProps> = ({ ...props }) => {
+//   return (
+//     <Base {...props}>
+//       <Path />
+//     </Base>
+//   );
+// };
 
 History.Path = Path;
 

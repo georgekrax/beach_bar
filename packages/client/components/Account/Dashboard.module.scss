@@ -1,0 +1,12 @@
+.container {
+  margin-top: map-get($em-spacers, 8);
+  gap: map-get($em-spacers, 20);
+}
+
+@include responsive() {
+  .container {
+    margin-top: map-get($em-spacers, 32);
+    gap: map-get($em-spacers, 48);
+    flex-direction: row !important;
+  }
+}

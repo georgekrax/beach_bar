@@ -1,0 +1,23 @@
+mutation AddProduct(
+  $beachBarId: ID!
+  $name: String!
+  $description: String
+  $categoryId: ID!
+  $price: Float!
+  $maxPeople: Int!
+  $minFoodSpending: Float
+  $imgUrl: URL
+) {
+  addProduct(
+    beachBarId: $beachBarId,
+    name: $name,
+    description: $description,
+    categoryId: $categoryId,
+    price: $price,
+    maxPeople: $maxPeople,
+    minFoodSpending: $minFoodSpending,
+    imgUrl: $imgUrl,
+  ) {
+    ...ProductBase
+  }
+}

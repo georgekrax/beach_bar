@@ -1,5 +1,4 @@
 import Auth from "@/components/Auth";
-import { Container } from "@/components/Auth/Container";
 import { LoginDialog } from "@/components/Layout/LoginDialog";
 import { useChangeUserPasswordMutation } from "@/graphql/generated";
 import { SignUpFormData } from "@/typings/user";
@@ -10,25 +9,18 @@ const Token: React.FC = () => {
   const [changeUserPassword] = useChangeUserPasswordMutation();
 
   const handleSubmit = async ({ email, password }: Omit<SignUpFormData, "confirmPassword">) => {
-    const { token } = router.query;
     const { data, errors } = await changeUserPassword({
-      variables: { email, token: token as string, newPassword: password },
+      variables: { email, newPassword: password, token: String(router.query.token) },
     });
-    if (errors) return { errors };
-    if (!errors && data?.changeUserPassword.success) router.push({ pathname: "/" });
+    if (!data && errors) return { errors };
+    if (data?.changeUserPassword) router.push({ pathname: "/" });
   };
 
   return (
-    <LoginDialog isShown oauth={false} dialogBtn={false}>
-      <Container
-        initial={false}
-        controls={false}
-        variants={false}
-        description="Type your new password"
-        other={false}
-        handleClick={false}
-        children={<Auth.SignUp forgotPassword btn="Reset password" handleFormSubmit={handleSubmit} />}
-      />
+    <LoginDialog isOpen hasOAuth={false} hasCloseBtn={false}>
+      <Auth.Step description="Type your new password">
+        <Auth.SignUp atForgotPassword btn="Reset password" handleFormSubmit={handleSubmit} />
+      </Auth.Step>
     </LoginDialog>
   );
 };

@@ -1,35 +1,29 @@
 import BeachBarComp, { BeachBarNameAndLocationProps } from "@/components/BeachBar";
-import { FavouriteHeartBox } from "@/components/BeachBar/Favourite/HeartBox";
 import { BeachBar as GraphQLBeachBar } from "@/graphql/generated";
 import { genBarThumbnailAlt } from "@/utils/format";
-import { useClassnames } from "@hashtag-design-system/components";
+import { Box, BoxProps, cx } from "@hashtag-design-system/components";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
-import styles from "./BeachBar.module.scss";
 
-type Props = {
-  showFavourite?: boolean;
-  navigateToBar?: boolean;
-};
+type Props = Pick<GraphQLBeachBar, "name" | "slug" | "thumbnailUrl"> &
+  Pick<BeachBarNameAndLocationProps, "location" | "hasLocation" | "hasLocationIcon"> &
+  BoxProps & {
+    hasFavorite?: boolean;
+    navigateToBar?: boolean;
+  };
 
-export const BeachBar: React.FC<
-  Props &
-    Pick<GraphQLBeachBar, "name" | "slug" | "thumbnailUrl" | "formattedLocation"> &
-    Pick<React.ComponentPropsWithoutRef<"div">, "className" | "style" | "onClick"> &
-    Pick<BeachBarNameAndLocationProps, "showLocation" | "showLocationIcon">
-> = ({
+export const BeachBar: React.FC<Props> = ({
+  hasFavorite = true,
+  navigateToBar = true,
+  hasLocation = true,
+  hasLocationIcon,
+  location,
   name,
   slug,
   thumbnailUrl,
-  formattedLocation,
-  showFavourite = true,
-  showLocation = true,
-  showLocationIcon,
-  navigateToBar = true,
   ...props
 }) => {
-  const [classNames, rest] = useClassnames(styles.container, props);
+  const _className = cx("cursor--pointer", props.className);
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (!navigateToBar) e.preventDefault();
@@ -37,28 +31,65 @@ export const BeachBar: React.FC<
 
   return (
     <Link href={{ pathname: "/beach/[...slug]", query: { slug: [slug], redirect: "/" } }} passHref>
-      <a onClick={e => handleClick(e)}>
-        <div className={classNames} {...rest}>
-          <Image
-            src={thumbnailUrl}
-            alt={genBarThumbnailAlt(name)}
-            objectFit="cover"
-            objectPosition="center bottom"
-            layout="fill"
-          />
-          {showFavourite && (
-            <div className={styles.favourite + " zi--md"}>
+      <a onClick={handleClick}>
+        <Box
+          position="relative"
+          width="min(60vw, 200px)"
+          height="min(60vw, 260px)"
+          borderRadius="regular"
+          overflow="hidden"
+          {...props}
+          _after={{
+            content: '""',
+            width: "100%",
+            height: "100%",
+            position: "absolute",
+            left: 0,
+            bottom: 0,
+            zIndex: "least",
+            pointerEvents: "none",
+            bgGradient: "linear-gradient(to top, blackAlpha.400 20%, transparent 40%)",
+          }}
+          className={_className}
+        >
+          {thumbnailUrl && (
+            <Image
+              src={thumbnailUrl}
+              alt={genBarThumbnailAlt(name)}
+              objectFit="cover"
+              objectPosition="center center"
+              layout="fill"
+            />
+          )}
+          {hasFavorite && (
+            <Box
+              position="absolute"
+              top="0"
+              right="0"
+              border="none"
+              padding="5%"
+              zIndex="md"
+              sx={{ "& > div": { transform: "scale(0.8)" } }}
+              onClick={e => e.preventDefault()}
+            >
               <BeachBarComp.Favourite.HeartBox beachBarSlug={slug} />
-            </div>
+            </Box>
           )}
           <BeachBarComp.NameAndLocation
-            className={styles.content}
-            showLocation={showLocation}
-            showLocationIcon={showLocationIcon}
+            position="absolute"
+            hasLocation={hasLocation}
+            hasLocationIcon={hasLocationIcon}
             name={name}
-            formattedLocation={formattedLocation}
+            location={location}
+            left="50%"
+            bottom="5%"
+            width="86%"
+            transform="translateX(-50%)"
+            overflow="hidden"
+            zIndex={2}
+            sx={{ "& > *": { color: "white" }, "div path": { stroke: "none", fill: "white" } }}
           />
-        </div>
+        </Box>
       </a>
     </Link>
   );

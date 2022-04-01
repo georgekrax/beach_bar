@@ -1,214 +1,193 @@
 import Feedback from "@/components/Feedback";
 import Header from "@/components/Header";
-import Icons from "@/components/Icons";
+import Stripe from "@/components/Stripe";
 import {
   CustomerPaymentMethodsDocument,
   CustomerPaymentMethodsQuery,
   useAddCustomerPaymentMethodMutation,
 } from "@/graphql/generated";
 import { PaymentMethodFormData } from "@/pages/account/billing";
-import { useAuth, useConfig } from "@/utils/hooks";
 import { notify } from "@/utils/notify";
-import { Form } from "@hashtag-design-system/components";
-import { Button, Input, Switch, useClassnames } from "@hashtag-design-system/components";
+import { Box, BoxProps, Button, Flex, Form, Input, Switch, useDisclosure } from "@hashtag-design-system/components";
+import Icon from "@hashtag-design-system/icons";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
-import { memo, useEffect, useState } from "react";
-import { FormState, useController, useForm } from "react-hook-form";
-import styles from "./Add.module.scss";
+import { useSession } from "next-auth/react";
+import { memo, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import * as yup from "yup";
 import { PaymentMethod } from "./PaymentMethod";
 
-type FormData = Pick<PaymentMethodFormData, "cardholderName" | "isDefault">;
+export const yupSchema = yup.object().shape({
+  cardholderName: yup.string().min(1, "Cardholder name must be at least 1 characters").required(),
+  isCardValid: yup.boolean().required("required").isTrue("must be hey"),
+});
 
-export type Props = {
-  customerId: string;
-  cardsLength: number;
-  defaultBtn?: boolean;
-  saveForFuturePayments?: boolean;
-  bottomSheet?: boolean;
-  notifyOnSuccess?: boolean;
-  onSubmit?: () => void;
-  onSubmitId?: (cardId: string) => void;
-  onFormState?: (formState: FormState<FormData>) => void;
+type FormData = Pick<PaymentMethodFormData, "cardholderName" | "isDefault"> & {
+  isSavedForFuture: boolean;
+  isCardValid: boolean;
 };
 
-export const Add: React.FC<Props & Pick<React.ComponentPropsWithoutRef<"div">, "className">> = memo(
+export type Props = BoxProps & {
+  customerId: string;
+  cardsLength: number;
+  hasDefaultBtn?: boolean;
+  saveForFuturePayments?: boolean;
+  defaultSaveForFuture?: boolean;
+  atCheckout?: boolean;
+  onSubmit?: (e: React.BaseSyntheticEvent) => void;
+  onSubmitId?: (cardId: string) => void;
+  setIsFormValid?: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
+export const Add: React.FC<Props> = memo(
   ({
     customerId,
     cardsLength,
-    defaultBtn = true,
     saveForFuturePayments = false,
-    bottomSheet = true,
-    notifyOnSuccess = true,
-    children,
-    onSubmit: onPropsSubmit,
+    defaultSaveForFuture = false,
+    atCheckout = false,
+    hasDefaultBtn = !atCheckout,
+    onSubmit: _onSubmit,
     onSubmitId,
-    onFormState,
+    setIsFormValid,
+    children,
     ...props
   }) => {
-    const [savedForFuture, setSavedForFuture] = useState(false);
-    const [isShown, setIsShown] = useState(false);
-    const [classNames, rest] = useClassnames(styles.container + " w100", props);
+    const { isOpen, onOpen, onClose } = useDisclosure();
 
-    const { data: meData } = useAuth();
+    const { data: session } = useSession();
     const [addPaymentMethod] = useAddCustomerPaymentMethodMutation();
 
-    const { handleSubmit, control, formState } = useForm<FormData>({
+    const { register, setValue, handleSubmit, formState } = useForm<FormData>({
       mode: "onBlur",
+      resolver: yupResolver(yupSchema),
       defaultValues: {
-        cardholderName: meData?.me?.fullName || "",
+        cardholderName: (session?.fullName as string) || "",
         isDefault: cardsLength === 0,
+        isSavedForFuture: defaultSaveForFuture,
+        isCardValid: false,
       },
-    });
-    const { field: cardholderName } = useController<FormData, "cardholderName">({ name: "cardholderName", control });
-    const {
-      field: { value, ...isDefault },
-    } = useController<FormData, "isDefault">({
-      name: "isDefault",
-      control,
-      defaultValue: cardsLength === 0,
     });
 
     const stripe = useStripe();
     const elements = useElements();
 
-    const {
-      colors: { red, grey },
-      variables: { primary },
-    } = useConfig();
-
     const onSubmit = async (
-      { cardholderName, isDefault }: FormData,
+      { cardholderName, isDefault, isSavedForFuture }: FormData,
       e: React.BaseSyntheticEvent<object, any, any> | undefined
-    ): Promise<{ id: string | undefined }> => {
+    ): Promise<string | void> => {
       e?.preventDefault();
       // Stripe.js has not loaded yet. Make sure to disable
       // form submission until Stripe.js has loaded.
-      if (!stripe || !elements) {
-        notify("error", "");
-        return { id: undefined };
-      }
+      if (!stripe || !elements) return notify("error", "");
 
       // Get a reference to a mounted CardElement. Elements knows how
       // to find your CardElement because there can only ever be one of
       // each type of element.
       const card = elements.getElement(CardElement);
-      if (!card) {
-        notify("error", "");
-        return { id: undefined };
-      }
+      if (!card) return notify("error", "");
       const result = await stripe.createToken(card);
 
-      if (result.error) {
-        notify("error", result.error.message || "", { somethingWentWrong: { onlyWhenUndefined: true } });
-        return { id: undefined };
-      } else {
-        if (onPropsSubmit) onPropsSubmit();
-        const { data: res, errors } = await addPaymentMethod({
-          variables: {
-            token: result.token.id,
-            customerId,
-            cardholderName,
-            isDefault: saveForFuturePayments || isDefault,
-            savedForFuture,
-          },
-          update: (cache, { data }) => {
-            const cachedData = cache.readQuery<CustomerPaymentMethodsQuery>({
-              query: CustomerPaymentMethodsDocument,
-            });
-            cache.writeQuery<CustomerPaymentMethodsQuery>({
-              query: CustomerPaymentMethodsDocument,
-              data: {
-                customerPaymentMethods: [
-                  ...(Array.from(cachedData?.customerPaymentMethods || []) || []),
-                  data?.addCustomerPaymentMethod.card || [],
-                ].flat(),
-              },
-            });
-          },
-        });
-        if (errors) {
-          errors.forEach(({ message }) => notify("error", message));
-          return { id: undefined };
-        } else {
-          const id = res?.addCustomerPaymentMethod.card.id || "";
-          if (notifyOnSuccess) notify("success", "Success! Your payment method was added.");
-          if (onSubmitId) onSubmitId(id);
-          return { id: res?.addCustomerPaymentMethod.card.id || undefined };
-        }
+      if (result.error) return notify("error", result.error.message || "");
+
+      if (_onSubmit && e) _onSubmit(e);
+      const { data: res, errors } = await addPaymentMethod({
+        variables: {
+          token: result.token.id,
+          customerId,
+          cardholderName,
+          isDefault: saveForFuturePayments || isDefault,
+          savedForFuture: isSavedForFuture,
+        },
+        update: (cache, { data }) => {
+          const cachedData = cache.readQuery<CustomerPaymentMethodsQuery>({ query: CustomerPaymentMethodsDocument });
+          cache.writeQuery<CustomerPaymentMethodsQuery>({
+            query: CustomerPaymentMethodsDocument,
+            data: {
+              customerPaymentMethods: [
+                ...(Array.from(cachedData?.customerPaymentMethods || []) || []),
+                data?.addCustomerPaymentMethod || [],
+              ].flat(),
+            },
+          });
+        },
+      });
+      if (errors || !res) return errors?.forEach(({ message }) => notify("error", message));
+      else {
+        const id = res.addCustomerPaymentMethod.id.toString();
+        if (!atCheckout) notify("success", "Success! Your payment method was added.");
+        onSubmitId?.(id);
+        return id;
       }
     };
 
-    useEffect(() => {
-      if (onFormState) onFormState(formState);
-    }, [formState]);
+    useEffect(() => setIsFormValid?.(formState.isValid), [formState]);
 
-    const { errors } = formState;
+    const { errors, touchedFields } = formState;
+
     return (
-      <div className={classNames} {...rest}>
-        <Button className={styles.btn} variant="secondary" aria-label="Add" onClick={() => setIsShown(true)}>
-          <Icons.Add className="icon--bold" width={16} height={16} />
-          <div>Add</div>
-        </Button>
+      <Box mb={atCheckout ? undefined : 4} {...props}>
+        {/* <Next.Link href="/account/billing/add" prefetch={false} className={styles.add + " d--block"}> */}
+        {!atCheckout && (
+          <Button aria-label="Add" mr="auto" mb={6} py={2} px={3} gap={2} onClick={onOpen}>
+            <Icon.Math.Add />
+            <span>Add</span>
+          </Button>
+        )}
+        {/* </Next.Link> */}
         <Header.Crud
-          bottomSheet={bottomSheet ? { isShown, onDismiss: () => setIsShown(false) } : undefined}
+          closeIcon="close"
+          title="Add payment method"
+          bottomSheet={atCheckout ? undefined : { isOpen, onClose }}
+          container={!atCheckout ? undefined : { display: "none" }}
+          content={
+            !atCheckout
+              ? undefined
+              : { mt: 8, p: 0, overflow: "initial", bg: "transparent", sx: { "& > div": { m: 0 } } }
+          }
           cta={{
             children: "Add",
-            icon: <Icons.Add className="icon--bold" width={16} height={16} />,
+            icon: <Icon.Math.Add />,
             onClick: async (_, dismiss) =>
               handleSubmit(async (data, e) => {
                 const res = await onSubmit(data, e);
-                if (res.id) await dismiss();
+                if (res) await dismiss();
               })(),
           }}
-          title="Add payment method"
         >
-          <Form.Group className={styles.form + " w100"} onSubmit={handleSubmit(onSubmit)}>
-            <CardElement
-              className="w100 input"
-              options={{
-                style: {
-                  base: {
-                    iconColor: primary,
-                    fontSize: "16px",
-                    color: grey["1000"],
-                    "::placeholder": { color: grey["900"] },
-                  },
-                  invalid: { color: red["600"] },
-                },
-              }}
+          <Box as="form" display="flex" flexDir="column" gap={6} onSubmit={handleSubmit(onSubmit)}>
+            <Stripe.CardElement
+              onChange={({ complete }) => setValue("isCardValid", complete, { shouldValidate: true })}
             />
-            <Input
-              {...cardholderName}
-              placeholder="Cardholder name"
-              defaultValue={meData?.me?.fullName}
-              forwardref={cardholderName.ref}
-              secondhelptext={{ error: true, value: errors.cardholderName?.message }}
-            />
-            <div className="w100 flex-column-center-flex-start">
-              {defaultBtn && (
+            <Form.Control isInvalid={touchedFields.cardholderName && !!errors.cardholderName} isOptional={atCheckout}>
+              <Input placeholder="Cardholder name" {...register("cardholderName")} />
+              <Form.ErrorMessage>{errors.cardholderName?.message}</Form.ErrorMessage>
+            </Form.Control>
+            <Flex flexDir="column" justify="center" width="100%">
+              {hasDefaultBtn && (
                 <PaymentMethod.IsDefault
-                  {...isDefault}
-                  showDefault
-                  ref={isDefault.ref as any}
-                  onValue={newVal => isDefault.onChange(newVal)}
+                  hasDefault
                   defaultChecked={cardsLength === 0}
+                  onChange={e => setValue("isDefault", e.target.value === "true")}
                 />
               )}
               {saveForFuturePayments && (
                 <Switch
-                  defaultChecked
-                  label={{ position: "right", value: "Save this card for future payment" }}
-                  onChange={e => setSavedForFuture(e.target.value === "true" ? false : true)}
-                />
+                  defaultChecked={cardsLength === 0}
+                  placement="right"
+                  alignSelf="flex-end"
+                  onChange={e => setValue("isSavedForFuture", e.target.value === "true")}
+                >
+                  Save this card for future payments
+                </Switch>
               )}
-              {errors.isDefault && (
-                <Feedback.Error style={{ alignSelf: "flex-start" }}>{errors.isDefault.message}</Feedback.Error>
-              )}
+              {errors.isDefault && <Feedback.Error alignSelf="flex-start">{errors.isDefault.message}</Feedback.Error>}
               {children}
-            </div>
-          </Form.Group>
+            </Flex>
+          </Box>
         </Header.Crud>
-      </div>
+      </Box>
     );
   }
 );

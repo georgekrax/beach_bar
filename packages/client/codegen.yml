@@ -1,0 +1,27 @@
+schema: "http://localhost:4000/graphql"
+documents: "./graphql/**/*.graphql"
+overwrite: true
+generates:
+  ./graphql/generated.ts:
+    config:
+      avoidOptionals: true
+      immutableTypes: true
+      maybeValue: T | undefined
+      namingConvention:
+        - transformUnderscore: false
+      reactApolloVersion: 3
+      withComponent: false
+      withHOC: false
+      withHooks: true
+      scalars:
+        URL: string
+    plugins:
+      - typescript
+      - typescript-operations
+      - typescript-react-apollo
+  # ./graphql/schema.graphql:
+  #   plugins:
+  #     - schema-ast
+  # ./lib/apollo/apollo-helpers.ts:
+  #   plugins:
+  # - typescript-apollo-client-helpers

@@ -32,6 +32,16 @@ import { Chair } from "./Chair";
 import { Sunbed } from "./Sunbed";
 import { BeachUmbrella } from "./BeachUmbrella";
 import { People } from "./People";
+import { FreshJuice } from "./FreshJuice";
+import { Coffee } from "./Coffee";
+import { SoftDrink } from "./SoftDrink";
+import { RefreshmentDrink } from "./RefreshmentDrink";
+import { Beer } from "./Beer";
+import { AlchoholicDrink } from "./AlchoholicDrink";
+import { TrashBin } from "./TrashBin";
+import { Info } from "./Info";
+import { Question } from "./Question";
+import Food from "./Food";
 import UserAvatar from "./UserAvatar";
 
 type SubComponents = {
@@ -71,6 +81,16 @@ type SubComponents = {
   Chair: typeof Chair;
   Sunbed: typeof Sunbed;
   BeachUmbrella: typeof BeachUmbrella;
+  FreshJuice: typeof FreshJuice;
+  Coffee: typeof Coffee;
+  SoftDrink: typeof SoftDrink;
+  RefreshmentDrink: typeof RefreshmentDrink;
+  Beer: typeof Beer;
+  AlchoholicDrink: typeof AlchoholicDrink;
+  Food: typeof Food;
+  TrashBin: typeof TrashBin;
+  Info: typeof Info;
+  Question: typeof Question;
 };
 
 const Icons: React.FC & SubComponents = () => {
@@ -115,6 +135,16 @@ Icons.People = People;
 Icons.Chair = Chair;
 Icons.Sunbed = Sunbed;
 Icons.BeachUmbrella = BeachUmbrella;
+Icons.FreshJuice = FreshJuice;
+Icons.Coffee = Coffee;
+Icons.SoftDrink = SoftDrink;
+Icons.RefreshmentDrink = RefreshmentDrink;
+Icons.Beer = Beer;
+Icons.AlchoholicDrink = AlchoholicDrink;
+Icons.Food = Food;
+Icons.TrashBin = TrashBin;
+Icons.Info = Info;
+Icons.Question = Question;
 
 export default Icons;
 

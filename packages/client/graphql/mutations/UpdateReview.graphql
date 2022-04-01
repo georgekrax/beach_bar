@@ -1,57 +1,55 @@
 mutation UpdateReview(
-  $reviewId: ID!
+  $id: ID!
   $ratingValue: Int
   $visitTypeId: ID
-  $monthTimeId: ID
+  $monthId: ID
   $positiveComment: String
   $negativeComment: String
-  $review: String
+  $body: String
+  $answer: String
 ) {
   updateReview(
-    reviewId: $reviewId
+    id: $id
     ratingValue: $ratingValue
     visitTypeId: $visitTypeId
-    monthTimeId: $monthTimeId
+    monthId: $monthId
     positiveComment: $positiveComment
     negativeComment: $negativeComment
-    review: $review
+    body: $body
+    answer: $answer
   ) {
-    review {
+    id
+    ratingValue
+    positiveComment
+    negativeComment
+    body
+    answer
+    updatedAt
+    timestamp
+    votes {
       id
-      ratingValue
-      positiveComment
-      negativeComment
-      review
-      updatedAt
-      timestamp
-      votes {
+      user {
         id
-        user {
-          id
-        }
-        type {
-          id
-          value
-        }
       }
-      answer {
-        id
-        body
-      }
-      beachBar {
-        id
-        name
-        formattedLocation
-      }
-      visitType {
-        id
-        name
-      }
-      month {
+      type {
         id
         value
       }
     }
-    updated
+    beachBar {
+      id
+      name
+      # location {
+      #   formattedLocation
+      # }
+    }
+    visitType {
+      id
+      name
+    }
+    month {
+      id
+      value
+    }
   }
 }

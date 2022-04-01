@@ -1,0 +1,19 @@
+mutation AddProductReservationLimit(
+  $productId: ID!
+  $limit: Int!
+  $from: Date!
+  $to: Date!
+  $startTimeId: ID
+  $endTimeId: ID
+) {
+  addProductReservationLimit(
+    productId: $productId
+    limit: $limit
+    from: $from
+    to: $to
+    startTimeId: $startTimeId
+    endTimeId: $endTimeId
+  ) {
+    ...ProductReservationLimitBase
+  }
+}

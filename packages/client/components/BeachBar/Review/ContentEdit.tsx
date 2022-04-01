@@ -1,94 +1,119 @@
 import Account from "@/components/Account";
-import BeachBar from "@/components/BeachBar";
-import Icons from "@/components/Icons";
-import { DATA } from "@/config/data";
-import { ReviewQuery } from "@/graphql/generated";
-import { Input, Select } from "@hashtag-design-system/components";
-import { SelectedItems } from "@hashtag-design-system/components";
+import { BeachBar, BeachBarDocument, ReviewQuery, useAddReviewMutation } from "@/graphql/generated";
+import { notify } from "@/utils/notify";
+import { TABLES } from "@beach_bar/common";
+import { Button, Flex, Form, Input, Select, SelectItem } from "@hashtag-design-system/components";
+import Icon from "@hashtag-design-system/icons";
 import { MONTHS } from "@the_hashtag/common";
 import range from "lodash/range";
-import { useEffect, useState } from "react";
-import styles from "./ContentEdit.module.scss";
+import { useMemo } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { Feedback } from "./Feedback";
 
 export type ReviewFormData = {
   visitTypeId?: string;
-  monthTimeId?: string;
+  monthId?: string;
   rating: number;
   positiveFeedback?: string;
   negativeFeedback?: string;
   reviewBody?: string;
 };
 
-type Props = {
-  none?: boolean;
-  onValue?: (state: ReviewFormData) => void;
+type Props = Partial<
+  Pick<ReviewQuery["review"], "ratingValue" | "visitType" | "month" | "positiveComment" | "negativeComment" | "body">
+> & {
+  beachBar: Pick<BeachBar, "id" | "slug">;
+  hasNone?: boolean;
+  refCode: string;
+  onSubmit?: (data: ReviewFormData) => void;
 };
 
-export const ContentEdit: React.FC<
-  Props &
-    Partial<
-      Pick<
-        ReviewQuery["review"],
-        "ratingValue" | "visitType" | "month" | "positiveComment" | "negativeComment" | "review"
-      >
-    >
-> = ({ ratingValue, visitType, month, positiveComment, negativeComment, review, none = true, onValue }) => {
-  const [formData, setFormData] = useState<ReviewFormData>({
-    monthTimeId: month?.id,
-    visitTypeId: visitType?.id,
-    positiveFeedback: positiveComment,
-    negativeFeedback: negativeComment,
-    rating: ratingValue || 3,
-    reviewBody: review,
+export const ContentEdit: React.FC<Props> = ({
+  ratingValue,
+  visitType,
+  month,
+  positiveComment,
+  negativeComment,
+  body,
+  refCode,
+  beachBar,
+  hasNone = true,
+  children,
+  onSubmit,
+}) => {
+  const { register, watch, getValues, setValue, handleSubmit } = useForm<ReviewFormData>({
+    defaultValues: {
+      monthId: month?.id,
+      visitTypeId: visitType?.id,
+      positiveFeedback: positiveComment,
+      negativeFeedback: negativeComment,
+      rating: ratingValue || 3,
+      reviewBody: body,
+    },
   });
 
-  const visitTypesArr = Object.values(DATA.REVIEW_VISIT_TYPES)
-    .map(({ name }) => name)
-    .concat(none ? "None" : [])
-    .flat();
-  const monthsArr = MONTHS.concat(none ? "None" : []).flat();
+  const [postReview] = useAddReviewMutation();
+
+  const { VISIT_TYPES_ARR, MONTHS_ARR } = useMemo(() => {
+    return {
+      VISIT_TYPES_ARR: [...(hasNone ? ["None" as any] : []), ...TABLES.REVIEW_VISIT_TYPE.map(({ name }) => name)],
+      MONTHS_ARR: [...(hasNone ? ["None" as any] : []), ...MONTHS],
+    };
+  }, [hasNone]);
 
   const genKey = (val: string, idx: number) => idx + "_" + val.toLowerCase().replace(" ", "_");
-  const handleStarClick = (newRating: number) => setFormData(prev => ({ ...prev, rating: newRating }));
 
-  const handleSelect = (items: SelectedItems[], name: Extract<keyof ReviewFormData, "monthTimeId" | "visitTypeId">) => {
-    const selected = items.find(({ selected }) => selected);
+  const handleSelect = (items: SelectItem[], name: Extract<keyof ReviewFormData, "monthId" | "visitTypeId">) => {
+    const selected = items.find(({ isSelected }) => isSelected);
     if (!selected) return;
     const id = selected.id.split("_");
-    console.log(id);
-    setFormData(prev => ({
-      ...prev,
-      [name]: !none ? (parseInt(id[0]) + 1).toString() : id.includes("none") || id[0] === "0" ? id[1] : id[0],
-    }));
+    const newVal = !hasNone ? (+id[0] + 1).toString() : id.includes("none") || id[0] === "0" ? id[1] : id[0];
+    setValue(name, newVal);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) =>
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+  const handlePost: SubmitHandler<ReviewFormData> = async _data => {
+    const { rating, positiveFeedback, negativeFeedback, reviewBody, ...data } = _data;
+    if (!refCode) return notify("error", "Please try to repeat the process.");
 
-  useEffect(() => {
-    if (onValue) onValue(formData);
-  }, [formData]);
+    const { errors } = await postReview({
+      variables: {
+        ...data,
+        beachBarId: beachBar.id,
+        paymentRefCode: refCode,
+        ratingValue: rating,
+        positiveComment: positiveFeedback,
+        negativeComment: negativeFeedback,
+        body: reviewBody,
+      },
+      refetchQueries: [{ query: BeachBarDocument, variables: { slug: beachBar.slug, userVisit: false } }],
+    });
+    if (errors) errors.forEach(({ message }) => notify("error", message));
+    else onSubmit?.(_data);
+  };
 
   return (
-    <>
-      <Account.Trips.Details className={styles.visit} header="Visit information">
+    <form onSubmit={handleSubmit(handlePost)}>
+      <Account.Trips.Details
+        header="Visit information"
+        mt={0}
+        sx={{ button: { minWidth: "10rem" }, "& > div": { _first: { alignItems: "center" } } }}
+      >
+        <button onClick={() => console.log(getValues())}>Click me</button>
         <Account.Trips.Info info="Visit type">
           <Select onSelect={items => handleSelect(items, "visitTypeId")}>
-            <Select.Button>{visitType?.name || "Type"}</Select.Button>
-            <Select.Modal>
+            <Select.Btn>{visitType?.name || "Type"}</Select.Btn>
+            <Select.Modal align="right">
               <Select.Options>
-                {visitTypesArr.map((val, i) => {
+                {VISIT_TYPES_ARR.map((val, i) => {
                   const key = genKey(val, i);
                   return (
                     <Select.Item
                       key={key}
                       id={key}
-                      content={val}
-                      state={!none ? undefined : i.toString() === formData.visitTypeId ? "focus" : undefined}
-                    />
+                      // state={!hasNone ? undefined : i.toString() === formData.visitTypeId ? "focus" : undefined}
+                    >
+                      {val}
+                    </Select.Item>
                   );
                 })}
               </Select.Options>
@@ -96,19 +121,20 @@ export const ContentEdit: React.FC<
           </Select>
         </Account.Trips.Info>
         <Account.Trips.Info info="Visit month">
-          <Select onSelect={items => handleSelect(items, "monthTimeId")}>
-            <Select.Button>{month?.value || "Month"}</Select.Button>
-            <Select.Modal>
+          <Select onSelect={items => handleSelect(items, "monthId")}>
+            <Select.Btn>{month?.value || "Month"}</Select.Btn>
+            <Select.Modal align="right">
               <Select.Options>
-                {monthsArr.map((month, i) => {
+                {MONTHS_ARR.map((month, i) => {
                   const key = genKey(month, i);
                   return (
                     <Select.Item
                       key={key}
                       id={key}
-                      content={month}
-                      state={!none ? undefined : i.toString() === formData.monthTimeId ? "focus" : undefined}
-                    />
+                      // state={!hasNone ? undefined : i.toString() === formData.monthId ? "focus" : undefined}
+                    >
+                      {month}
+                    </Select.Item>
                   );
                 })}
               </Select.Options>
@@ -117,60 +143,57 @@ export const ContentEdit: React.FC<
         </Account.Trips.Info>
       </Account.Trips.Details>
       <Account.Trips.Details header="Feedback">
-        <div className={styles.ratingContainer + " flex-row-center-center"}>
-          {range(1, 6).map(num =>
-            num <= formData.rating ? (
-              <Icons.Star.Colored
+        <Flex justify="center" align="center" gap={2} mt={4} mb={10} color="yellow.400">
+          {range(1, 6).map(num => {
+            const isColored = num <= watch("rating");
+            return (
+              <Icon.Star
                 key={num}
-                width={48}
-                height={48}
-                className={styles.rating + " " + styles.colored}
-                onClick={() => handleStarClick(num)}
+                as={isColored ? Icon.Star.Filled : undefined}
+                boxSize={12}
+                cursor="pointer"
+                onClick={() => setValue("rating", num)}
               />
-            ) : (
-              <Icons.Star
-                key={num}
-                width={48}
-                height={48}
-                className={styles.rating}
-                onClick={() => handleStarClick(num)}
+            );
+          })}
+        </Flex>
+        <Feedback mb={8} isShown positive>
+          <Form.Control>
+            <Form.Label>What did you like?</Form.Label>
+            <Input.Group>
+              <Input.TextArea
+                hasClearBtn
+                rows={4}
+                placeholder="e.g. the location, the sea"
+                hasFloatingPlaceholder={false}
+                {...register("positiveFeedback")}
               />
-            )
-          )}
-        </div>
-        <BeachBar.Review.Feedback className="account-reviews__feedback" isShown positive>
-          <Input.Multiline
-            rows={4}
-            name="positiveFeedback"
-            label="What did you like?"
-            defaultValue={positiveComment}
-            placeholder="e.g. the location, the sea"
-            floatingplaceholder={false}
-            onChange={e => handleChange(e)}
-          />
-        </BeachBar.Review.Feedback>
-        <BeachBar.Review.Feedback className="account-reviews__feedback" isShown>
-          <Input.Multiline
-            rows={4}
-            name="negativeFeedback"
-            label="What could be better?"
-            placeholder=""
-            defaultValue={negativeComment}
-            onChange={e => handleChange(e)}
-          />
-        </BeachBar.Review.Feedback>
+            </Input.Group>
+          </Form.Control>
+        </Feedback>
+        <Feedback isShown>
+          {/* TODO: Change to <Textarea /> */}
+          <Form.Control>
+            <Form.Label>What could be better?</Form.Label>
+            <Input.Group>
+              <Input.TextArea hasClearBtn rows={4} hasFloatingPlaceholder={false} {...register("negativeFeedback")} />
+            </Input.Group>
+          </Form.Control>
+        </Feedback>
       </Account.Trips.Details>
       <Account.Trips.Details header="Review body">
-        <Input.Multiline
-          rows={6}
-          name="reviewBody"
-          label="How was your overall experience?"
-          defaultValue={review}
-          floatingplaceholder={false}
-          onChange={e => handleChange(e)}
-        />
+        <Form.Control>
+          <Form.Label>How was your overall experience?</Form.Label>
+          <Input.Group>
+            <Input.TextArea rows={6} hasFloatingPlaceholder={false} {...register("reviewBody")} />
+          </Input.Group>
+        </Form.Control>
       </Account.Trips.Details>
-    </>
+      <Button type="submit" my={12} ml="auto" colorScheme="orange">
+        Post review
+      </Button>
+      {children}
+    </form>
   );
 };
 

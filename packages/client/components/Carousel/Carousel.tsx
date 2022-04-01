@@ -1,45 +1,65 @@
 import { useCarouselContext } from "@/utils/contexts";
-import { useClassnames, useWindowDimensions } from "@hashtag-design-system/components";
-import React from "react";
+import { callAllHandlers, Flex, FlexProps, MotionFlex, MotionFlexProps, useDimensions } from "@hashtag-design-system/components";
+import { useEffect, useMemo } from "react";
 import { BeachBar } from "./BeachBar";
-import styles from "./Carousel.module.scss";
 import { Context } from "./Context";
-import { ControlBtns } from "./ControlBtns";
+import { ControlBtn } from "./ControlBtn";
 import { Item } from "./Item";
 
 type SubComponents = {
   Item: typeof Item;
   BeachBar: typeof BeachBar;
   Context: typeof Context;
-  ControlBtns: typeof ControlBtns;
+  ControlBtn: typeof ControlBtn;
+  // Visit: typeof Visit;
 };
 
-const Carousel: React.FC<Pick<React.ComponentPropsWithoutRef<"div">, "className" | "style">> & SubComponents = ({
-  children,
-  ...props
-}) => {
-  const [classNames, rest] = useClassnames(styles.container, props);
-  const { containerRef } = useCarouselContext();
-  const { width } = useWindowDimensions();
+type Props = MotionFlexProps & {
+  step?: number;
+  container?: FlexProps;
+};
+
+const Carousel: React.FC<Props> & SubComponents = ({ step = 1, container, children, ...props }) => {
+  const { translateX, trackRef, setStep, handleDrag } = useCarouselContext();
+
+  const trackDimensions = useDimensions(trackRef);
+  const dragConstraint = useMemo(
+    () => (!trackDimensions ? 0 : +(trackDimensions?.borderBox.width * (1 - 15 / 100)).toFixed(2)),
+    [trackDimensions]
+  );
+
+  useEffect(() => setStep(step), [step]);
 
   return (
-    <div className={classNames} {...rest}>
-      <section
-        ref={containerRef}
-        className={styles.scrollableArea + " no-scrollbar flex-row-flex-start-center"}
-        style={{ maxWidth: width - (containerRef.current?.parentElement?.offsetLeft || 0) + "px" }}
+    <Flex overflow="hidden" {...container}>
+      <MotionFlex
+        ref={trackRef}
+        drag="x"
+        dragElastic={0.2}
+        dragConstraints={{ left: -dragConstraint, right: 0 }}
+        animate={{ x: -translateX }}
+        transition={{ duration: 0.6 }}
+        cursor="grab"
+        whiteSpace="nowrap"
+        {...props}
+        onDrag={e => callAllHandlers(() => handleDrag(), props.onDrag as any)(e)}
+        onDragEnd={e => callAllHandlers(() => handleDrag(), props.onDragEnd as any)(e)}
+        onDragTransitionEnd={() => {
+          handleDrag();
+          props.onDragTransitionEnd?.();
+        }}
       >
         {children}
-      </section>
-    </div>
+      </MotionFlex>
+    </Flex>
   );
 };
 
-Carousel.Item = Item;
-Carousel.BeachBar = BeachBar;
-Carousel.Context = Context;
-Carousel.ControlBtns = ControlBtns;
-
 Carousel.displayName = "Carousel";
+
+Carousel.Context = Context;
+Carousel.Item = Item;
+Carousel.ControlBtn = ControlBtn;
+Carousel.BeachBar = BeachBar;
 
 export default Carousel;

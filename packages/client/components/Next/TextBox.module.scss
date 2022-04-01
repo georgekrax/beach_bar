@@ -1,0 +1,32 @@
+.container {
+  padding: map-get($em-spacers, 20);
+  margin: map-get($em-spacers, 24) 0;
+  border: 1px solid $grey-5;
+  border-radius: 14px;
+
+  ul {
+    padding-left: map-get($rem-spacers, 16);
+
+    &:last-of-type {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.icon {
+  padding: em(6);
+  margin-right: map-get($em-spacers, 20);
+  background-color: lighten($primary, 35%);
+  border-radius: 6px;
+
+  path {
+    &:first-child {
+      stroke: $grey-1;
+    }
+
+    &:nth-child(2),
+    + circle {
+      fill: $grey-1 !important;
+    }
+  }
+}

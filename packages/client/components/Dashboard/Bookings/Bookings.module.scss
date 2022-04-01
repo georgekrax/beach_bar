@@ -1,0 +1,50 @@
+.header {
+  padding-bottom: map-get($em-spacers, 8);
+
+  h5 {
+    color: $grey-9;
+  }
+
+  span {
+    margin-left: map-get($em-spacers, 12);
+  }
+}
+
+.active h3 {
+  font-size: 1.25rem !important;
+  line-height: normal !important;
+}
+
+.filters {
+  padding-top: map-get($em-spacers, 16);
+  gap: map-get($em-spacers, 40);
+
+  summary {
+    border-width: 2px;
+    border-color: $grey-4;
+    font-size: 85%;
+  }
+
+  .list {
+    gap: map-get($em-spacers, 16);
+
+    & > div:first-child {
+      gap: inherit;
+      flex-basis: 100%;
+    }
+  }
+}
+
+.table {
+  margin-top: map-get($em-spacers, 32);
+
+  a {
+    width: 100%;
+    display: inline-block;
+    color: unset;
+
+    &:hover {
+      opacity: unset;
+    }
+  }
+}

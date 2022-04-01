@@ -1,37 +1,49 @@
-import { useSearchContext } from "@/utils/contexts";
-import { formatPeopleAdults, formatPeopleChilden } from "@/utils/search";
-import { Input } from "@hashtag-design-system/components";
-import { HANDLE_PEOPLE_CHANGE_PAYLOAD, SEARCH_ACTIONS } from "../index";
-import styles from "./People.module.scss";
+import { useSearchFormContext } from "@/utils/contexts";
+import { formatPeopleAdults, formatPeopleChilden, formatPeopleShort } from "@/utils/search";
+import { Box, Flex, Input, InputIncrDcrGroupProps, Select, Text } from "@hashtag-design-system/components";
+import { useRouter } from "next/router";
+import { useMemo } from "react";
+import { Label } from "../Box/Label";
 
-type Props = {};
+export const People: React.FC = () => {
+  const { query } = useRouter();
+  const { people, handlePeopleChange } = useSearchFormContext();
 
-export const People: React.FC<Props> = () => {
-  const { people, dispatch } = useSearchContext();
-
-  const handlePeopleChange = (name: keyof HANDLE_PEOPLE_CHANGE_PAYLOAD, newVal: number) => {
-    if ((name === "adults" && newVal !== people?.adults) || (name === "children" && newVal !== people?.children)) {
-      dispatch({ type: SEARCH_ACTIONS.HANDLE_PEOPLE_CHANGE, payload: { [name]: newVal } });
-    }
-  };
+  const { qAdults, qChildren } = useMemo(() => ({ qAdults: query.adults, qChildren: query.children }), [query]);
 
   return (
-    <div>
-      <Row
-        quantity={people?.adults || 1}
-        heading={formatPeopleAdults(people?.adults)}
-        description={<>12 years old &amp; more</>}
-      >
-        <Input.IncrDcr defaultValue={1} min={1} max={12} onValue={val => handlePeopleChange("adults", val)} />
-      </Row>
-      <Row
-        quantity={people?.children || 0}
-        heading={formatPeopleChilden(people?.children)}
-        description="Less than 12 years old"
-      >
-        <Input.IncrDcr defaultValue={0} min={0} max={8} onValue={val => handlePeopleChange("children", val)} />
-      </Row>
-    </div>
+    <Select>
+      <Select.Btn>
+        <Label label="People" value={formatPeopleShort(people)} />
+      </Select.Btn>
+      {/* className: styles.people, align: atBeach ? "left" : "right" */}
+      <Select.Modal align="center">
+        <Select.Options gap={5} p={2.5} minWidth={280}>
+          <Row
+            quantity={people?.adults || 1}
+            heading={formatPeopleAdults(people?.adults)}
+            description={<>12 years old &amp; more</>}
+            input={{
+              min: 1,
+              max: 12,
+              defaultValue: qAdults ? +qAdults.toString() : 1,
+              onChange: newVal => handlePeopleChange("adults", newVal),
+            }}
+          />
+          <Row
+            quantity={people?.children || 0}
+            heading={formatPeopleChilden(people?.children)}
+            description="Less than 12 years old"
+            input={{
+              min: 0,
+              max: 8,
+              defaultValue: qChildren ? +qChildren.toString() : 0,
+              onChange: newVal => handlePeopleChange("children", newVal),
+            }}
+          />
+        </Select.Options>
+      </Select.Modal>
+    </Select>
   );
 };
 
@@ -41,19 +53,42 @@ type RowProps = {
   quantity: number;
   heading: string;
   description: React.ReactNode;
+  input: Pick<InputIncrDcrGroupProps, "min" | "max" | "defaultValue" | "onChange">;
 };
 
-export const Row: React.FC<RowProps> = ({ quantity, heading, description, children }) => (
-  <div className={styles.row + " flex-row-space-between-center"}>
-    <div className="flex-row-center-center">
-      <span className={styles.quantity + " header-5 semibold"}>{quantity}</span>
-      <div className="flex-column-center-flex-start">
-        <div>{heading}</div>
-        <span className="d--ib">{description}</span>
-      </div>
-    </div>
-    {children}
-  </div>
+export const Row: React.FC<RowProps> = ({ quantity, heading, description, input }) => (
+  <Flex justifyContent="space-between" alignItems="center" whiteSpace="nowrap">
+    <Flex justifyContent="center" alignItems="center">
+      <Text as="span" width={6} textAlign="center" color="brand.secondary" fontWeight="semibold" fontSize="xl">
+        {quantity}
+      </Text>
+      <Flex flexDirection="column" justifyContent="inherit" ml={3} mr={8}>
+        <Box fontSize="sm">{heading}</Box>
+        <Text as="span" color="gray.600" fontSize="xs">
+          {description}
+        </Text>
+      </Flex>
+    </Flex>
+    <Input.IncrDcrGroup
+      {...input}
+      justifyContent="flex-end"
+      flex={1}
+      sx={{
+        button: {
+          maxWidth: 6,
+          maxHeight: 6,
+          minWidth: "unset",
+          padding: "0px !important",
+          borderRadius: "full",
+          svg: { boxSize: 2.5 },
+        },
+      }}
+    >
+      {/* <Input.IncrDcrStepper colorScheme="blue" color="white" type="decrement" /> */}
+      <Input.IncrDcrStepper type="decrement" />
+      <Input.IncrDcrStepper type="increment" />
+    </Input.IncrDcrGroup>
+  </Flex>
 );
 
 Row.displayName = "SearchFormPeopleRow";

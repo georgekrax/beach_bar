@@ -1,0 +1,184 @@
+$gap: map-get($em-spacers, 24);
+
+.container {
+  margin: map-get($em-spacers, 24) 0;
+}
+
+.month {
+  margin: map-get($em-spacers, 48) 0 map-get($em-spacers, 20);
+
+  div {
+    gap: map-get($em-spacers, 12);
+  }
+}
+
+.month button {
+  $border-color: $grey-6;
+  padding: rem(6);
+  border-radius: 10px;
+  border: 1px solid $border-color;
+  opacity: 0.5;
+  box-shadow: none;
+
+  &:hover:not(:disabled) {
+    opacity: 1;
+
+    path {
+      stroke: $grey-1;
+      stroke-width: 2px;
+    }
+  }
+
+  &:disabled {
+    background-color: $grey-4;
+    border-color: $border-color;
+
+    path {
+      stroke: $grey-7;
+    }
+  }
+}
+
+.dates {
+  margin: map-get($em-spacers, 20) 0;
+
+  div {
+    flex: 0 1 calc(14.28% - #{$gap});
+  }
+}
+
+.calendarNote {
+  margin-top: map-get($em-spacers, 40);
+  margin-left: auto;
+  gap: map-get($em-spacers, 24);
+}
+
+.calendarNote > div {
+  gap: 0.35em;
+
+  & > div:first-child {
+    width: em(32);
+    height: em(32);
+    border-radius: 10px;
+  }
+}
+
+.availability {
+  gap: $gap;
+  margin-right: -($gap);
+}
+
+.item {
+  $selectedScale: scale(1.1);
+  flex: 0 1 calc(14.28% - #{$gap});
+  aspect-ratio: 1 / 1;
+  background-color: $grey-1;
+  border-radius: 14px;
+  border: 1px solid $grey-5;
+  box-shadow: 0px 2px 6px $grey-4;
+  // transition: transform 0.2s, background-color 0.2s ease-out;
+  transition: transform 0.2s ease-out;
+
+  &:hover,
+  &.isAdded {
+    transform: scale(1.1);
+  }
+
+  &.isAdded,
+  &.isSelected {
+    @include font-semibold();
+  }
+
+  &.isAdded {
+    background-color: $green-6;
+  }
+
+  &.isSelected {
+    background-color: $primary;
+  }
+}
+
+.info,
+.limitsList {
+  padding-top: map-get($em-spacers, 32);
+  border-top: 1px solid $grey-7;
+}
+
+.limitsList {
+  margin-top: map-get($em-spacers, 64);
+}
+
+.info {
+  margin-top: map-get($em-spacers, 40);
+  // min-height: rem(268);
+}
+
+.info > div:first-child > div {
+  gap: map-get($em-spacers, 24);
+
+  & > div div {
+    margin-top: map-get($em-spacers, 4);
+  }
+}
+
+.confirm {
+  margin-top: map-get($em-spacers, 40);
+
+  button {
+    padding: map-get($rem-spacers, 8) map-get($rem-spacers, 12);
+    margin-top: map-get($rem-spacers, 20);
+    margin-left: auto;
+    border-color: $grey-5;
+    border-width: 1px;
+
+    &:hover {
+      background-color: $grey-3;
+      color: $grey-10;
+      border-color: $grey-5;
+    }
+  }
+
+  svg {
+    padding-right: map-get($rem-spacers, 8);
+    border-right: 1px solid $grey-6;
+    width: auto;
+  }
+}
+
+.limitItem {
+  $borderColor: $grey-6;
+  $gap: map-get($em-spacers, 16);
+  margin-bottom: map-get($em-spacers, 32);
+  padding: $gap map-get($em-spacers, 24);
+  border-radius: 14px;
+  border: 1px solid $borderColor;
+
+  & > div {
+    gap: $gap;
+  }
+
+  span {
+    padding-right: $gap;
+    border-right: 1px solid $borderColor;
+  }
+}
+
+.editBtns {
+  gap: map-get($em-spacers, 16);
+}
+
+.editBtns button {
+  padding: map-get($em-spacers, 8);
+  border-radius: 10px;
+  border-width: 1px;
+  border-color: $grey-6;
+
+  path {
+    stroke: $grey-8;
+    stroke-width: 2px;
+  }
+
+  &:hover path {
+    stroke: $grey-1;
+  }
+}

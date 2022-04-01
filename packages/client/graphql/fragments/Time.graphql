@@ -1,0 +1,4 @@
+fragment HourValue on HourTime {
+  id
+  value
+}

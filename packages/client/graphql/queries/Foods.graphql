@@ -1,0 +1,5 @@
+query Foods($beachBarId: ID!) {
+  foods(beachBarId: $beachBarId) {
+    ...FoodDetails
+  }
+}

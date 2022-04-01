@@ -124,45 +124,40 @@
 }
 
 .home {
-  &__img {
-    width: 30vw;
-    height: calc(100vh - #{$header-height});
-    flex-shrink: 0;
-  }
+  // &__img {
+  //   position: relative;
+  //   width: 40vw;
+  //   height: 100vh;
+  //   flex-shrink: 0;
+  //   overflow: hidden;
+  //   border-bottom-right-radius: 56px;
+  // }
 
-  &__img__container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: inherit;
-    height: 100vh;
-    overflow: hidden;
-    border-radius: 0 56px 56px 0;
+  // &__img__container {
+  // position: absolute;
+  // top: -$header-height;
+  // right: 0;
+  // height: inherit;
+  // overflow: hidden;
+  // border-radius: 0 56px 56px 0;
 
-    &::before {
-      @extend .w100;
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      height: 15%;
-      background: linear-gradient(to bottom, rgba($grey-10, 0.4), transparent);
-      z-index: 1;
-    }
-  }
+  // &::before {
+  //   @extend .w100;
+  //   content: "";
+  //   position: absolute;
+  //   top: 0;
+  //   left: 0;
+  //   height: 15%;
+  //   background: linear-gradient(to bottom, rgba($grey-10, 0.4), transparent);
+  //   z-index: 1;
+  // }
+  // }
 
   &__main {
-    margin-top: map-get($em-spacers, 24);
-    margin-left: $wrapper-padding;
-    min-width: map-get($em-spacers, 16);
-    // max-height: calc(100vh - #{$header-height});
-    overflow: visible;
-    flex: 1;
-
-    & > div:first-child {
-      margin: 0;
-      margin-bottom: map-get($em-spacers, 24);
-    }
+    $margin-top: map-get($em-spacers, 20);
+    margin-top: $margin-top;
+    margin-left: calc(#{$wrapper-padding} + 0.5em);
+    height: calc(100vh - #{$header-height} - #{$margin-top * 2});
 
     & > div:last-child {
       margin: 0;
@@ -174,60 +169,67 @@
     }
   }
 
-  &__near-you {
-    margin: map-get($em-spacers, 32) 0;
+  // &__near-you {
+  // margin: map-get($em-spacers, 32) 0;
+  // min-height: em(188);
 
-    & > div {
-      position: relative;
-      margin-top: map-get($em-spacers, 12);
-      min-height: 10.5em;
-    }
+  // & > div {
+  // position: relative;
+  // margin-top: map-get($em-spacers, 12);
+  // }
 
-    &__grid-container {
-      position: absolute;
-      top: 0;
-      left: 0;
-      display: grid;
-      gap: map-get($em-spacers, 16) map-get($em-spacers, 48);
-      grid-auto-flow: row;
-      grid-template-columns: repeat(3, max-content);
-      scroll-snap-type: x mandatory;
-      width: 100vw;
-      overflow-x: auto;
-    }
+  // &__grid-container {
+  // position: absolute;
+  // top: 0;
+  // left: 0;
+  // display: grid;
+  // gap: map-get($em-spacers, 20);
+  // grid-auto-flow: row;
+  // grid-template-columns: repeat(3, max-content);
+  // scroll-snap-type: x mandatory;
+  // overflow-x: auto;
+  // cursor: grab;
+  // }
+  // }
 
-    &__last {
-      // Does not need to have a specific width,
-      // due to the column-gap property specified on its parent element
-      min-width: 1px;
-      min-height: map-get($em-spacers, 16);
-    }
-  }
+  // &__user-custom {
+  // gap: map-get($em-spacers, 48);
+  // margin: map-get($em-spacers, 40) 0 map-get($em-spacers, 64);
 
-  &__user-custom {
-    gap: map-get($em-spacers, 48);
-    margin: map-get($em-spacers, 40) 0 map-get($em-spacers, 64);
-
-    & > section {
-      flex: 1 1 auto;
-    }
-  }
+  // & > section {
+  //   flex: 1 1 auto;
+  // }
+  // }
 }
 
-@include breakpoint("md") {
-  .home {
-    &__user-custom {
-      flex-direction: row;
+// @include responsive() {
+// .home__user-custom {
+// flex-direction: row;
 
-      & > section {
-        max-width: 52.5%;
-      }
-    }
-  }
-}
+// & > section {
+//   max-width: 52.5%;
+// }
+// }
+// }
 
-@include breakpoint("xl", "max-width") {
-  .home__near-you > div > div {
-    max-width: calc(100% + (#{$wrapper-padding} * 0.75)) !important;
-  }
-}
+// Not used
+// @include responsive() {
+//   .home__near-you__grid-container {
+//     display: flex;
+//     flex-direction: row;
+//     flex-wrap: wrap;
+//   }
+// }
+
+// @include breakpoint("xl", "max-width") {
+//   .home__near-you > div > div {
+//     max-width: calc(100% + (#{$wrapper-padding} * 0.75)) !important;
+//   }
+// }
+
+// Not used
+// @include breakpoint("xl") {
+//   .home__main {
+//     margin-left: map-get($em-spacers, 64);
+//   }
+// }

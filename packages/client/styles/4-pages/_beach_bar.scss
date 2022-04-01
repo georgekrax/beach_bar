@@ -1,71 +1,71 @@
-.beach_bar {
-  &__heading {
-    position: sticky;
-    top: 0;
-    left: 0;
-    padding: map-get($em-spacers, 20) 0 map-get($em-spacers, 16);
-    background-color: $grey-1;
+// .beach_bar {
+// &__heading {
+// position: sticky;
+// top: 0;
+// left: 0;
+// padding: map-get($em-spacers, 20) 0 map-get($em-spacers, 16);
+// background-color: $grey-1;
 
-    &:before,
-    &:after {
-      @extend .h100;
-      content: "";
-      position: absolute;
-      top: 0;
-      width: $wrapper-padding;
-      background-color: $grey-1;
-    }
+// &:before,
+// &:after {
+//   @extend .h100;
+//   content: "";
+//   position: absolute;
+//   top: 0;
+//   width: $wrapper-padding;
+//   background-color: $grey-1;
+// }
 
-    &:before {
-      right: 100%;
-    }
+// &:before {
+//   right: 100%;
+// }
 
-    &:after {
-      left: 100%;
-    }
+// &:after {
+//   left: 100%;
+// }
 
-    h5 {
-      margin-right: auto;
-    }
+// // h5 {
+// //   margin-right: auto;
+// // }
 
-    & > div:first-child {
-      align-items: flex-start;
+// & > div:first-child {
+// align-items: flex-start;
 
-      & > div:last-child {
-        @extend .d--none;
-      }
-    }
-  }
+// & > div:last-child {
+//   @extend .d--none;
+// }
+// }
+// }
 
-  &__reviews {
-    background-color: $grey-1;
-    margin-left: auto;
-    overflow: hidden;
-  }
+// // &__reviews {
+// //   background-color: $grey-1;
+// //   margin-left: auto;
+// //   overflow: hidden;
+// // }
 
-  &__photos {
-    position: absolute;
-    top: 0;
-    left: 0;
-    border-radius: 14px;
-    background-color: rgba(0, 0, 0, 0.25);
-  }
-}
+// &__photos {
+//   position: absolute;
+//   top: 0;
+//   left: 0;
+//   border-radius: 14px;
+//   background-color: rgba(0, 0, 0, 0.25);
+// }
+// }
 
-@include breakpoint("sm") {
-  .beach_bar {
-    &__heading > div:first-child > div:last-child {
-      display: block;
-      margin: 0;
-      margin-left: map-get($em-spacers, 4);
+// @include breakpoint("sm") {
+// .beach_bar {
+// &__heading > div:first-child > div:last-child {
+// display: block;
+// margin: 0;
+// margin-left: map-get($em-spacers, 4);
 
-      h3 {
-        max-width: none;
-      }
+// h3 {
+//   max-width: none;
+// }
 
-      h3 + div {
-        color: $grey-7;
-      }
-    }
-  }
-}
+// h3 + div {
+//   color: $grey-7;
+// }
+// }
+// }
+// }

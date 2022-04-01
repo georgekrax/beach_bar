@@ -1,0 +1,26 @@
+.container {
+  gap: map-get($rem-spacers, 40);
+
+  & > div:first-child {
+    flex-basis: 75%;
+    gap: map-get($rem-spacers, 32);
+  }
+}
+
+.inputGroup {
+  gap: map-get($em-spacers, 32);
+
+  &:not(:last-child) > div:last-child {
+    flex-basis: 40%;
+  }
+}
+
+.map {
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.navigationCtrl {
+  position: static !important;
+  margin: 3% 0 0 3%;
+}

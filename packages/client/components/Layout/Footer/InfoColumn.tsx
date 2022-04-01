@@ -1,4 +1,4 @@
-import { NextLink } from "@/components/Next/Link";
+import Next from "@/components/Next";
 import { LinkProps } from "next/link";
 import styles from "./InfoColumn.module.scss";
 
@@ -9,13 +9,13 @@ type Props = {
 
 export const InfoColumn: React.FC<Props> = ({ header, links, children }) => {
   return (
-    <div className={styles.container}>
-      <div className="bold">{header}</div>
+    <div className={styles.container + " body-14"}>
+      <div className="bold upper">{header}</div>
       <div>
         {links?.map(({ name, opts }, i) => (
-          <NextLink key={name + "_" + i} passHref prefetch={false} className="d--block body-14" {...opts}>
+          <Next.Link key={name + "_" + i} display="block" link={{ prefetch: false, ...opts }}>
             {name}
-          </NextLink>
+          </Next.Link>
         ))}
         {children}
       </div>

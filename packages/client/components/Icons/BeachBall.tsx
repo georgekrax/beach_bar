@@ -44,7 +44,7 @@ const Filled: React.FC<IconBaseFProps> = ({ ...props }) => {
     <Base {...props}>
       <Path1 filled  />
       <Path2 filled />
-      <Path3 className="icon__filled--white" />
+      <Path3 className="icon__filled--white icon__stroke--none" />
     </Base>
   );
 };

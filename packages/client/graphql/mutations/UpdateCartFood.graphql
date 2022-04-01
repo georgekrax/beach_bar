@@ -1,0 +1,5 @@
+mutation UpdateCartFood($id: ID!, $quantity: Int!) {
+  updateCartFood(id: $id, quantity: $quantity) {
+    ...CartFoodWithCart
+  }
+}

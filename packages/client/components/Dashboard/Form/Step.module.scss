@@ -1,0 +1,19 @@
+.container {
+  margin-top: map-get($em-spacers, 24);
+  margin-bottom: map-get($em-spacers, 80);
+
+  h6 {
+    margin-bottom: map-get($em-spacers, 16);
+  }
+
+  & > div {
+    gap: map-get($em-spacers, 32);
+  }
+
+  // :global {
+  //   .input__container,
+  //   .autosuggest__container {
+  //     max-width: none;
+  //   }
+  // }
+}

@@ -1,0 +1,3 @@
+mutation CompleteBeachBarSignUp($beachBarId: ID!) {
+  completeBeachBarSignUp(beachBarId: $beachBarId)
+}

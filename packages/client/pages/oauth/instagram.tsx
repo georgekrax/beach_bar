@@ -8,7 +8,9 @@ import { userIpAddr } from "@/lib/apollo/cache";
 import { ApolloGraphQLErrors } from "@/typings/graphql";
 import { LoginFormData } from "@/typings/user";
 import { useAuthContext } from "@/utils/contexts";
+import { useAuth } from "@/utils/hooks";
 import { emailSchema } from "@/utils/yup";
+import { useReactiveVar } from "@apollo/client";
 import { Input } from "@hashtag-design-system/components";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useRouter } from "next/router";
@@ -18,7 +20,9 @@ import { useController, useForm } from "react-hook-form";
 type FormData = Pick<LoginFormData, "email">;
 
 const InstagramCallback: React.FC = () => {
+  const router = useRouter();
   const [graphqlErrors, setGraphqlErrors] = useState<ApolloGraphQLErrors>([]);
+
   const {
     handleSubmit,
     control,
@@ -26,9 +30,10 @@ const InstagramCallback: React.FC = () => {
   } = useForm<FormData>({ resolver: yupResolver(emailSchema) });
   const { field: email } = useController<FormData, "email">({ name: "email", control });
 
-  const router = useRouter();
-  const [authorizeWithInstagram] = useAuthorizeWithInstagramMutation();
+  const { handleLogin } = useAuth({ skip: true });
   const { dispatch } = useAuthContext();
+  const [authorizeWithInstagram] = useAuthorizeWithInstagramMutation();
+  const ipAddress = useReactiveVar(userIpAddr);
 
   const authorize = async ({ email }: FormData) => {
     const { code, state } = router.query;
@@ -39,16 +44,14 @@ const InstagramCallback: React.FC = () => {
         state: state as string,
         email,
         isPrimaryOwner: false,
-        loginDetails: { city: userIpAddr().city, countryAlpha2Code: userIpAddr().countryCode },
+        loginDetails: { city: ipAddress?.city, countryAlpha2Code: ipAddress?.countryCode },
       },
     });
     if (mutationErrors) setGraphqlErrors(mutationErrors);
     router.push("/");
   };
 
-  useEffect(() => {
-    dispatch({ type: AUTH_ACTIONS.TOGGLE_LOGIN_DIALOG, payload: { bool: true } });
-  }, []);
+  useEffect(() => handleLogin(), []);
 
   // if (
   //   typeof window !== "undefined" &&
@@ -59,7 +62,7 @@ const InstagramCallback: React.FC = () => {
 
   return (
     <OAuth.Redirect provider="Instagram" errors={graphqlErrors}>
-      <LoginDialog oauth={false} dialogBtn={false}>
+      <LoginDialog hasOAuth={false} hasCloseBtn={false}>
         <Container
           initial={false}
           controls={false}

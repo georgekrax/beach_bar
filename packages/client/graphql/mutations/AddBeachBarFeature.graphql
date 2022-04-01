@@ -1,0 +1,5 @@
+mutation AddBeachBarFeature($beachBarId: ID!, $featureId: ID!, $quantity: Int = 1, $description: String) {
+  addBeachBarFeature(beachBarId: $beachBarId, featureId: $featureId, quantity: $quantity, description: $description) {
+    ...FeatureBase
+  }
+}

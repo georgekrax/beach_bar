@@ -1,0 +1,32 @@
+.dashboard__new {
+  width: 45vw;
+  min-width: 38rem;
+  margin: 0 auto;
+  margin-top: map-get($em-spacers, 32);
+  overflow: hidden;
+
+  .input__container,
+  .autosuggest__container {
+    max-width: none;
+  }
+
+  h4 {
+    margin: 0 0.2em;
+  }
+}
+
+.dashboard-banner {
+  &__pies {
+    $gap: map-get($em-spacers, 40);
+    gap: $gap;
+    margin: map-get($em-spacers, 32) 0;
+
+    & > div {
+      flex-basis: calc(50% - (#{$gap} / 2));
+    }
+  }
+}
+
+.dashboard__settings > div:last-child {
+  overflow: visible !important;
+}

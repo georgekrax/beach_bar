@@ -2,9 +2,10 @@
   $top: 5%;
   width: min(100vw, 56em);
   top: $top !important;
+  padding: map-get($em-spacers, 12);
   // transform: translateY(-15%)
   height: calc(100% - #{$top * 2});
-  padding: map-get($em-spacers, 12);
+  box-sizing: content-box;
 
   & > div {
     border-radius: 14px;
@@ -17,6 +18,7 @@
     .mapboxgl-control-container {
       flex-direction: column;
       align-items: flex-end;
+      justify-content: flex-end;
       left: auto;
       right: 0;
       top: auto;
@@ -38,12 +40,13 @@
   }
 
   &:last-child {
-    align-items: flex-start;
-    min-height: 10.5em;
+    // align-items: flex-start;
+    // min-height: 10.5em;
 
-    & > div:first-child {
-      padding: 0 $margin;
-    }
+    // TODO: Check later
+    // & > div:first-child {
+    //   padding: 0 $margin;
+    // }
     // padding-top: 0;
     // padding-bottom: 0;
   }

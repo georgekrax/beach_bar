@@ -1,55 +1,136 @@
-import Icons from "@/components/Icons";
 import Search from "@/components/Search";
-import { MOTION, NAMES } from "@/config/index";
-import { useSearchContext } from "@/utils/contexts";
-import { genBarThumbnailAlt } from "@/utils/format";
-import { useIsDesktop, useSearchForm } from "@/utils/hooks";
+import { SearchFormContextProvider, SearchFormContextType, useSearchContext } from "@/utils/contexts";
+import { useIsDevice } from "@/utils/hooks";
 import { notify } from "@/utils/notify";
-import { formatHourTime, formatPeopleShort } from "@/utils/search";
+import { dayjsFormat } from "@beach_bar/common";
 import {
-  Autosuggest,
-  AutosuggestFProps,
-  Input,
-  InputFProps,
-  Select,
-  useClassnames,
+  AutosuggestProps,
+  ButtonProps,
+  cx,
+  InputProps,
+  MotionBoxProps,
+  MotionFlex,
 } from "@hashtag-design-system/components";
-import { HTMLMotionProps, motion } from "framer-motion";
-import Image from "next/image";
+import { useRouter } from "next/router";
 import { memo, useRef, useState } from "react";
 import styles from "./Box.module.scss";
-import { Field } from "./Field";
+import { Btn } from "./Btn";
 
-type Props = {
+export type Props = MotionBoxProps & {
   redirectUri?: string;
-  input?: (InputFProps & AutosuggestFProps) | false;
-  inHeader?: boolean;
+  input?: (InputProps & AutosuggestProps) | false;
+  atHeader?: boolean;
   atBeach?: boolean;
+  fields?: { date: boolean; people: boolean };
+  cta?: ButtonProps;
 };
 
-export const Box: React.FC<Props & HTMLMotionProps<"div">> = memo(
-  ({ redirectUri, input, inHeader = false, atBeach = false, onClick, ...props }) => {
-    const [isBtnClicked, setIsBtnClicked] = useState(atBeach);
+export const Box: React.FC<Props> = memo(
+  ({
+    redirectUri,
+    input,
+    atHeader = false,
+    atBeach = false,
+    fields = { date: true, people: true },
+    cta = {},
+    onClick,
+    ...props
+  }) => {
+    const _className = cx(styles.container, atBeach && styles.atBeach, props.className);
+
+    const router = useRouter();
+    const { isDesktop } = useIsDevice();
+    const {
+      _query,
+      form: { suggestions },
+      formatInputValue,
+    } = useSearchContext();
+
+    const [searchValue, setSearchValue] = useState("");
+    const [_inputValuePublicId, _setInputValuePublicId] = useState("");
+    const [date, setDate] = useState<SearchFormContextType["date"]>(_query.date);
+    const [time, setTime] = useState<SearchFormContextType["time"]>(_query.time);
+    const [people, setPeople] = useState<SearchFormContextType["people"]>({
+      adults: _query.adults,
+      children: _query.children || 0,
+    });
+    const [isBtnHovered, setIsBtnHovered] = useState(false);
+
     const autosuggestRef = useRef<HTMLInputElement>(null);
-    const [classNames, rest] = useClassnames(
-      styles.container + " w100 zi--sm border-radius--lg flex-row-flex-start-center",
-      props
-    );
+    const { isMobile } = useIsDevice();
 
-    const isDesktop = useIsDesktop();
-    const { form, inputValue, hourTime, people, map } = useSearchContext();
-    const { searchInputValues, handleChange, formatInputValue, handleSelect: onSelect, handleSearch } = useSearchForm();
+    const focusAutosuggest = () => autosuggestRef?.current?.focus();
 
-    const focusAutosuggest = () => {
-      if (autosuggestRef && autosuggestRef.current) autosuggestRef.current.focus();
+    const handleHover = (timing: "start" | "end") => {
+      if (!atHeader && !atBeach) setIsBtnHovered(timing === "start");
     };
 
-    const handleTransform = (generated: string) => {
-      if (generated.includes("scale(1,")) return generated.split(" scale(1, ")[0];
-      return generated;
+    const handleChange: SearchFormContextType["handleChange"] = newVal => {
+      setSearchValue(newVal);
     };
 
-    // const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const handleDateSelect: SearchFormContextType["handleDateSelect"] = newDate => {
+      if (!newDate.isSame(date, "date")) setDate(newDate);
+    };
+
+    const handleTimeChange: SearchFormContextType["handleTimeChange"] = ([start, end]) => {
+      if (start !== time?.start || end !== time?.end) setTime({ start, end });
+    };
+
+    const handlePeopleChange: SearchFormContextType["handlePeopleChange"] = (type, newVal) => {
+      setPeople(prev => ({ ...prev, [type]: +newVal }));
+    };
+
+    const handleSelect: SearchFormContextType["handleSelect"] = id => {
+      const selectedItem = suggestions.sliced.find(input => input.id === id);
+      if (!selectedItem) return notify("error", "");
+      const { primary } = formatInputValue(selectedItem);
+
+      setSearchValue(primary);
+      _setInputValuePublicId(selectedItem.publicId);
+    };
+
+    const handleBtnClick = async () => {
+      if (!searchValue && !atBeach) return focusAutosuggest();
+
+      handleHover("start");
+
+      const data = {
+        date: date?.format(dayjsFormat.ISO_STRING),
+        time: (time?.start ?? "") + "_" + (time?.end ?? ""),
+      };
+
+      if (!atBeach) {
+        await router.push({
+          pathname: "/search",
+          query: {
+            ...data,
+            ...(_inputValuePublicId && { inputId: _inputValuePublicId }),
+            box: isMobile ? 1 : undefined,
+            searchValue,
+          },
+        });
+      } else {
+        console.log(router.query);
+        await router.replace(
+          {
+            pathname: "/beach/[...slug]",
+            query: {
+              ...router.query,
+              ...data,
+              // ...(_inputValuePublicId && { inputId: _inputValuePublicId }),
+              // box: isMobile ? 1 : undefined,
+              // searchValue,
+            },
+          },
+          undefined,
+          { shallow: true, scroll: false }
+        );
+      }
+      // await handleSearch(!map.isDialogShown);
+    };
+
+    // const handleBtnClick = (e: React.MouseEvent<HTMLDivElement>) => {
     //   if (isDesktop) {
     //     e.preventDefault();
     //     e.stopPropagation();
@@ -61,121 +142,110 @@ export const Box: React.FC<Props & HTMLMotionProps<"div">> = memo(
     //   if (onClick) onClick(e);
     // };
 
-    const handleSelect = (id: typeof searchInputValues.sliced[number]["id"]) => {
-      const selectedItem = searchInputValues.sliced.find(input => input.id === id);
-      if (selectedItem) onSelect(selectedItem);
-      else notify("error", "");
+    const handleTransform = (generated: string) => {
+      if (generated.includes("scale(1,")) return generated.split(" scale(1, ")[0];
+      return generated;
     };
-
-    const handleClick = async () => {
-      if (!inputValue) focusAutosuggest();
-      else {
-        setIsBtnClicked(true);
-        await handleSearch(!map.isDialogShown);
-      }
-    };
-
-    console.log("<Search.Box />");
 
     return (
-      <motion.div
-        className={classNames}
-        initial={false}
-        layout
-        layoutId={MOTION.LAYOUT_IDS.searchBox}
-        transformTemplate={(_, generated) => handleTransform(generated)}
-        // onClick={e => handleClick(e)}
-        {...rest}
+      <SearchFormContextProvider
+        value={{
+          searchValue,
+          date,
+          people,
+          time,
+          autosuggestRef,
+          atHeader,
+          atBeach,
+          isBtnHovered,
+          handleHover,
+          handleChange,
+          handleSelect,
+          handleBtnClick,
+          handleDateSelect,
+          handleTimeChange,
+          handlePeopleChange,
+        }}
       >
-        {!isDesktop ? (
-          <>
-            {input !== false && (
-              <Input floatingplaceholder={false} placeholder={NAMES.SEARCH_BOX_PLACEHOLDER} {...input} />
-            )}
-          </>
-        ) : (
-          <>
-            {input !== false && (
-              <Field select={false} onClick={() => focusAutosuggest()}>
-                <Autosuggest
-                  className={"body-14" + (input?.className ? " " + input.className : "")}
-                  label="Destination"
-                  placeholder={NAMES.SEARCH_BOX_PLACEHOLDER}
-                  defaultValue={form.searchValue}
-                  floatingplaceholder={false}
-                  forwardref={autosuggestRef}
-                  onChange={(val, e) => handleChange(e?.target.value || val)}
-                >
-                  {searchInputValues.error ? (
-                    <h2>Error</h2>
-                  ) : (
-                    <>
-                      {searchInputValues.sliced.map(({ id, beachBar, ...rest }) => {
-                        const { primary, secondary } = formatInputValue({ beachBar, ...rest });
-                        return (
-                          <Select.Item
-                            key={id}
-                            id={id}
-                            content={primary}
-                            className={styles.item}
-                            onClick={() => handleSelect(id)}
-                            htmlContent={{
-                              before: beachBar && (
-                                <div className={styles.item__img + " flex-row-center-center"}>
-                                  <Image
-                                    src={beachBar.thumbnailUrl}
-                                    alt={genBarThumbnailAlt(beachBar.name)}
-                                    width={40}
-                                    height={40}
-                                    objectFit="cover"
-                                    objectPosition="center bottom"
-                                  />
-                                </div>
-                              ),
-                              after: <div className="body-14">{secondary}</div>,
-                            }}
-                          />
-                        );
-                      })}
-                    </>
-                  )}
-                </Autosuggest>
-              </Field>
-            )}
-            <Field select={false}>
-              <Search.Form.Date />
-            </Field>
-            {inHeader && <span></span>}
-            <Field
-              label="Time"
-              value={formatHourTime(hourTime, "Time")}
-              className={styles.time}
-              align={atBeach ? "left" : "center"}
-            >
-              <Search.Form.Time />
-            </Field>
-            {inHeader && <span></span>}
-            <Field
+        <MotionFlex
+          initial={false}
+          animate={false}
+          layout
+          justifyContent="space-between"
+          alignItems="stretch"
+          // gap={5}
+          // py={2}
+          // px={3}
+          // pl={6}
+          gap="1.5em"
+          py="0.5em"
+          px="0.75em"
+          pl="1.5em"
+          borderRadius="full"
+          bg="white"
+          boxShadow="lg"
+          // layoutId={MOTION.LAYOUT_IDS.searchBox}
+          // onClick={handleClick}
+          {...props}
+          transformTemplate={(_, generated) => handleTransform(generated)}
+          sx={{
+            ...(atBeach && {
+              "& > div > button": {
+                fontSize: "0.75em",
+              },
+            }),
+            "& > div:not(:last-child)": {
+              flex: 1,
+              bg: "white",
+              border: "1px solid",
+              borderColor: "gray.300",
+              borderRadius: "regular",
+              transitionProperty: "common",
+              transitionDuration: "normal",
+              _first: { flex: 2, py: 1, px: 4 },
+              _hover: { bg: "gray.100" },
+              "& > button": {
+                py: 1,
+                px: 4,
+                width: "100%",
+                height: "100%",
+                border: "none",
+                boxShadow: "none",
+              },
+            },
+            ...props.sx,
+          }}
+          className={_className}
+        >
+          {input !== false && (
+            // <Field onClick={focusAutosuggest}>
+            <Search.Form.Input />
+            // </Field>
+          )}
+          {/* {input && fields.date && isDesktop && <span />} */}
+          {fields.date && isDesktop && (
+            // <Field>
+            <Search.Form.Date />
+            // </Field>
+          )}
+          {fields.people && isDesktop && (
+            <>
+              {/* <span /> */}
+              {/* <Field
+              select
               label="People"
               value={formatPeopleShort(people)}
-              className={styles.people}
-              align={atBeach ? "center" : "right"}
-            >
+              modal={{ minWidth: 280, display: "block", className: styles.people, align: atBeach ? "left" : "right" }}
+            > */}
               <Search.Form.People />
-            </Field>
-          </>
-        )}
-        <button
-          aria-label="Search"
-          className={
-            styles.cta + (isBtnClicked ? " " + styles.hover : "") + " iborder-radius--lg flex-row-center-center"
-          }
-          onClick={async () => await handleClick()}
-        >
-          <Icons.Search width={20} height={20} />
-          <h4 className="body-16">Search</h4>
-        </button>
-      </motion.div>
+              {/* </Field> */}
+            </>
+          )}
+          <Btn />
+        </MotionFlex>
+      </SearchFormContextProvider>
     );
   }
 );
+
+Box.displayName = "SearchBox";

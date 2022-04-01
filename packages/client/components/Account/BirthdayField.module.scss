@@ -1,0 +1,21 @@
+.container {
+  max-width: 20em;
+  gap: map-get($em-spacers, 16);
+
+  & > div {
+    flex: 1;
+
+    &:first-of-type,
+    &:nth-of-type(2) {
+      flex-basis: 27.5%;
+    }
+
+    &:last-of-type {
+      flex-basis: 40%;
+    }
+
+    input {
+      width: 100%;
+    }
+  }
+}

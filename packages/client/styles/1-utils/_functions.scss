@@ -1,13 +1,27 @@
-@function rating-box-background($rating) {
-  @if $rating == 3 {
-    @return (
-      first: rgba(mix($volcano-5, $success-color, 95%), 0.85),
-      second: rgba(mix($volcano-5, $success-color, 95%), 0.4)
-    );
+@use "sass:math";
+
+@function rating-color($rating, $darken: false) {
+  $color: $primary;
+  $decimal: $rating - math.floor($rating);
+  $rating: math.round($rating);
+  // @if $rating == 3 {
+  //   $color: mix($volcano-5, $success-color, 95%);
+  // } @else {
+  //   $color: mix($success-color, $error-color, $rating * 20%);
+  // }
+  @if $rating <= 1 {
+    $color: $red-4;
+  } @else if $rating <= 2 {
+    $color: $bronze-5;
+  } @else if $rating <= 3 {
+    $color: $volcano-4;
+  } @else if $rating <= 4 {
+    $color: $cyan-6;
   } @else {
-    @return (
-      first: rgba(mix($success-color, $error-color, $rating * 20%), 0.85),
-      second: rgba(mix($success-color, $error-color, $rating * 20%), 0.4)
-    );
+    $color: $green-6;
   }
+  @if $darken {
+    $color: darken($color, $decimal * 20%);
+  }
+  @return (first: rgba($color, 0.85), second: rgba($color, 0.4));
 }

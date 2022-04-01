@@ -1,0 +1,30 @@
+.container {
+  margin-bottom: map-get($em-spacers, 48);
+
+  & > div:first-child > div:first-child {
+    margin-bottom: map-get($em-spacers, 24);
+  }
+}
+
+.data {
+  margin-top: map-get($em-spacers, 96);
+
+  h5 {
+    padding-bottom: map-get($em-spacers, 12);
+
+    + span {
+      margin-left: map-get($em-spacers, 12);
+    }
+  }
+
+  & > div {
+    $gap: map-get($em-spacers, 24);
+    padding-top: map-get($em-spacers, 32);
+    border-top: 2px solid $grey-4;
+    gap: $gap;
+
+    & > div {
+      width: calc(50% - (#{$gap} / 2));
+    }
+  }
+}

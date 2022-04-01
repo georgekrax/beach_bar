@@ -1,5 +1,6 @@
 import { Form, FormGroupFProps } from "@hashtag-design-system/components";
 import { AnimationControls, HTMLMotionProps, motion, Variants } from "framer-motion";
+import Next from "@/components/Next";
 
 export type Props = {
   controls: AnimationControls | false;
@@ -27,17 +28,17 @@ export const Container: React.FC<Props> = ({
       animate={controls}
       variants={variants ? variants : undefined}
       custom={custom}
-      transition={{ duration: 0.8 }}
+      transition={{ duration: 0.4 }}
     >
       <div className="w100 flex-column-center-center" style={{ maxWidth: "17.5em" }}>
         {description && <span className="auth-form__description text--center">{description}</span>}
         {children}
         {other && (
           <div className="auth-form__other text--center">
-            <span>{other.text}</span>{" "}
-            <span className="link" onClick={async () => handleClick && handleClick()}>
+            <span>{other.text}</span>&nbsp;
+            <Next.Link isA={false} onClick={async () => handleClick && handleClick()}>
               {other.link}
-            </span>
+            </Next.Link>
           </div>
         )}
       </div>

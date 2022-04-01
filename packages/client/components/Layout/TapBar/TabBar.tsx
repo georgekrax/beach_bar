@@ -3,8 +3,8 @@ import { animate, motion, useAnimation, useMotionValue } from "framer-motion";
 import range from "lodash/range";
 import { useRouter } from "next/router";
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { CONFIG } from "../../../config";
-import Icons, { TapBarIndicatorIconPath } from "../../Icons";
+import { CONFIG } from "@/config/index";
+import Icons, { TapBarIndicatorIconPath } from "@/components/Icons";
 import { MenuItem } from "./MenuItem";
 import styles from "./TapBar.module.scss";
 

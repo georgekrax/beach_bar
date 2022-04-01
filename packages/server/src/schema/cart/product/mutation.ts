@@ -1,5 +1,5 @@
 import { getOrCreateCart } from "@/utils/cart";
-import { isAvailable, IsAvailableProductInclude } from "@/utils/product";
+import { isAvailable, IsAvailableProductInclude, setRedisReservationLimits } from "@/utils/product";
 import { COMMON_CONFIG, errors, TABLES } from "@beach_bar/common";
 import { DateScalar } from "@the_hashtag/common/dist/graphql";
 import { ApolloError } from "apollo-server-express";
@@ -51,7 +51,7 @@ export const CartProductCrudMutation = extendType({
 
         const endTime = TABLES.HOUR_TIME.find(({ id }) => id.toString() === endTimeId.toString());
         if (!endTime) throw new ApolloError("Invalid end time.", errors.NOT_FOUND);
-        
+
         const hasAvailability = await isAvailable(product, {
           date,
           startTimeId: startTime.id,
@@ -103,16 +103,23 @@ export const CartProductCrudMutation = extendType({
 
         try {
           if (quantity > 0 && cartProduct.quantity !== quantity) {
+            const diff = quantity - cartProduct.quantity;
             const hasAvailability = await isAvailable(cartProduct.product, {
               ...cartProduct,
               date: cartProduct.date.toString(),
-              elevator: Math.abs(quantity - cartProduct.quantity),
+              elevator: Math.abs(diff),
             });
-            if (hasAvailability) {
-              if (quantity) {
-                return await prisma.cartProduct.update({ where: { id: cartProduct.id }, data: { quantity: { set: quantity } } });
-              }
-              // await cartProduct.cart.reload();
+            if (hasAvailability && quantity) {
+              const updatedCartProduct = await prisma.cartProduct.update({
+                where: { id: cartProduct.id },
+                data: { quantity: { set: quantity } },
+                include: { product: true },
+              });
+              setRedisReservationLimits(
+                { ...(updatedCartProduct as any), ...updatedCartProduct.product, from: updatedCartProduct.date, to: updatedCartProduct.date },
+                { atDelete: false, elevator: diff }
+              );
+              return updatedCartProduct;
             } else {
               throw new ApolloError(
                 `If you update the quantity of the product to ${quantity}, the product wil not be available to be purchased, because it exceeds the limit what the #beach_bar has set for this day and hour`,
@@ -131,12 +138,8 @@ export const CartProductCrudMutation = extendType({
       description: "Delete (remove) a product from a shopping cart",
       args: { id: idArg() },
       resolve: async (_, { id }, { prisma }) => {
-        const cartProduct = await prisma.cartProduct.findUnique({ where: { id: BigInt(id) } });
-        if (!cartProduct) throw new ApolloError("Product does not exist in this shopping cart", errors.CONFLICT);
-
         try {
-          // TODO: Fix
-          // await cartProduct.softRemove();
+          await prisma.cartProduct.delete({ where: { id: BigInt(id) } });
         } catch (err) {
           throw new ApolloError(err.message);
         }

@@ -1,0 +1,5 @@
+mutation UpdateBeachBarFeature($id: ID!, $quantity: Int = 1, $description: String) {
+  updateBeachBarFeature(id: $id, quantity: $quantity, description: $description) {
+    ...FeatureBase
+  }
+}

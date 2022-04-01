@@ -1,0 +1,30 @@
+.options {
+  margin-left: 2px;
+  gap: map-get($em-spacers, 16);
+
+  label div {
+    gap: map-get($em-spacers, 16);
+  }
+}
+
+.hours {
+  margin-top: map-get($em-spacers, 12);
+  gap: map-get($em-spacers, 16);
+}
+
+.category {
+  gap: map-get($em-spacers, 24);
+
+  & > div {
+    max-width: 200px;
+    flex: 1;
+  }
+
+  details {
+    width: 100%;
+  }
+
+  summary {
+    width: auto !important;
+  }
+}

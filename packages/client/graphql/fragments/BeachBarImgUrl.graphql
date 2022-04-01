@@ -1,0 +1,7 @@
+fragment BeachBarImgUrlBase on BeachBarImgUrl {
+  id
+  imgUrl
+  description
+  updatedAt
+  timestamp
+}

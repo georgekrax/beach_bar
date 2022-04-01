@@ -1,0 +1,10 @@
+@use "sass:math";
+
+.foods > div {
+  $gap: map-get($em-spacers, 40);
+  gap: math.div($gap, 2) $gap;
+
+  & > div {
+    flex-basis: calc(50% - (#{$gap} / 2)) !important;
+  }
+}

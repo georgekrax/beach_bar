@@ -1,0 +1,48 @@
+$gap: map-get($em-spacers, 24);
+
+.form {
+  margin: map-get($em-spacers, 24) 0;
+
+  + h6 {
+    margin-bottom: map-get($em-spacers, 16);
+  }
+
+  input,
+  textarea {
+    background-color: $grey-1;
+  }
+
+  :global {
+    .input {
+      &__container {
+        max-width: none;
+      }
+
+      &-number {
+        width: 100%;
+      }
+    }
+  }
+}
+
+.components {
+  margin-left: map-get($em-spacers, 24);
+  @include font--italic();
+}
+
+.inputs {
+  gap: $gap;
+}
+
+.inputs > div {
+  flex-basis: calc(50% - #{$gap});
+
+  &:last-child {
+    flex-basis: calc(50% + #{map-get($em-spacers, 16)});
+  }
+
+  & > div:first-child {
+    width: 100%;
+    margin-right: map-get($em-spacers, 16);
+  }
+}

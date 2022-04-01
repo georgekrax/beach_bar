@@ -1,39 +1,42 @@
-.beach_bar {
-  &__header {
-    // color: $grey-9;
-    text-transform: none;
+// Unused
+// .beach_bar {
+//   &__header {
+//     // color: $grey-9;
+//     text-transform: none;
 
-    &__name {
-      margin-top: map-get($em-spacers, 4);
-      margin-right: auto;
-      align-self: flex-start;
-    }
-  }
+//     &__name {
+//       margin-top: map-get($em-spacers, 4);
+//       margin-right: auto;
+//       align-self: flex-start;
+//     }
+//   }
 
-  &__name-and-location {
-    svg {
-      margin-right: 0.3em;
-    }
+//   &__name-and-location {
+//     color: black;
+    
+//     svg {
+//       margin-right: 0.3em;
+//     }
 
-    .beach_bar__header {
-      margin-bottom: 0.15em;
-    }
-  }
+//     .beach_bar__header {
+//       margin-bottom: 0.15em;
+//     }
+//   }
 
-  &__reviews-container {
-    position: fixed;
-    top: 0;
-    right: 0;
-    height: 100vh;
-    width: min(100vw, 32em);
-    // background-color: $grey-1;
+//   &__reviews-container {
+//     position: fixed;
+//     top: 0;
+//     right: 0;
+//     height: 100vh;
+//     width: min(100vw, 32em);
+//     // background-color: $grey-1;
 
-    & > div > div {
-      padding: 0 map-get($em-spacers, 32);
+//     & > div > div {
+//       padding: 0 map-get($em-spacers, 32);
 
-      &:first-child {
-        padding-top: map-get($em-spacers, 32);
-      }
-    }
-  }
-}
+//       &:first-child {
+//         padding-top: map-get($em-spacers, 32);
+//       }
+//     }
+//   }
+// }

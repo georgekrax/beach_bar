@@ -6,11 +6,9 @@ import { HTMLMotionProps, motion } from "framer-motion";
 import { SEARCH_ACTIONS } from "../reducer";
 import styles from "./CurrentLocation.module.scss";
 
-type Props = {};
+type Props = HTMLMotionProps<"div">;
 
-type FProps = Props & HTMLMotionProps<"div">;
-
-export const CurrentLocation: React.FC<FProps> = ({ ...props }) => {
+export const CurrentLocation: React.FC<Props> = ({ ...props }) => {
   const { dispatch } = useSearchContext();
 
   const handleLocation = async (success: boolean, pos?: GeolocationPosition) => {

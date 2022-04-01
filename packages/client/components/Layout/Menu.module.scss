@@ -1,0 +1,84 @@
+$underline-height: 3.5px;
+$underline-width: 3px;
+
+.container {
+  position: relative;
+  width: 100vw;
+  transform: translateX(-#{$wrapper-padding});
+  overflow-x: scroll;
+  overflow-y: visible;
+  border-left: 2px solid $grey-4;
+}
+
+.outerContainer {
+  position: relative;
+  margin: map-get($em-spacers, 16) 0;
+}
+
+.item {
+  // position: relative;
+  margin-right: map-get($em-spacers, 20);
+  @include transition-2s("ease-in-out", "color");
+
+  a,
+  div {
+    color: $grey-7;
+  }
+}
+
+.sublinks {
+  height: 0;
+  margin: map-get($em-spacers, 8) 0 map-get($em-spacers, 12);
+  overflow: hidden;
+
+  a {
+    margin: 0 0 map-get($em-spacers, 12) map-get($em-spacers, 8);
+  }
+}
+
+.underline {
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 30%;
+  height: $underline-height;
+  background-color: $volcano-5;
+}
+
+@include responsive() {
+  .outerContainer {
+    margin-top: 0;
+  }
+
+  .container {
+    width: auto;
+    padding-left: map-get($em-spacers, 16);
+    padding-bottom: map-get($em-spacers, 16);
+    flex-direction: column;
+    align-items: flex-start !important;
+    overflow: auto;
+    transform: none;
+  }
+
+  .underline {
+    top: 0;
+    height: 12.5%;
+    width: $underline-width;
+    border-radius: 0;
+  }
+
+  .item {
+    margin-right: 0;
+    margin-bottom: map-get($em-spacers, 12);
+
+    &:last-of-type {
+      margin-bottom: 0;
+    }
+
+    h6 {
+      @include body-16();
+      font-weight: unset;
+      // @include font-semibold();
+    }
+  }
+}

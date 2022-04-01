@@ -11,3 +11,23 @@
     display: none;
   }
 }
+
+// .divider {
+//   height: 1px;
+//   margin-top: map-get($em-spacers, 8);
+//   margin-bottom: map-get($em-spacers, 12);
+//   background-color: $grey-3;
+// }
+
+// @include responsive() {
+//   .btn + div > div > div {
+//     max-width: 20em !important;
+//   }
+// }
+
+@include unresponsive() {
+  .divider,
+  .divider + div {
+    display: none;
+  }
+}

@@ -1,0 +1,8 @@
+.container {
+  margin: map-get($em-spacers, 16) 0 map-get($em-spacers, 80);
+  gap: map-get($em-spacers, 64);
+
+  & > div:last-child {
+    overflow: auto;
+  }
+}

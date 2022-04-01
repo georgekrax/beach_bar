@@ -1,10 +1,14 @@
-fragment Country on Country {
+fragment CountryBase on Country {
   id
   name
   alpha2Code
   alpha3Code
   callingCode
   isEu
+}
+
+fragment Country on Country {
+  ...CountryBase
   cities {
     id
     name

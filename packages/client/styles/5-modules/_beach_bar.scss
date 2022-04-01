@@ -1,6 +1,6 @@
 @mixin list {
   @for $i from 1 through $rating-boxes-length {
-    $value: rating-box-background($i);
+    $value: rating-color($i);
     $stroke: map-get($value, "first");
 
     .rating--#{$i} {

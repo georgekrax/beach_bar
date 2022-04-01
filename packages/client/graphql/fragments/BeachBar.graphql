@@ -1,25 +1,34 @@
-<<<<<<< HEAD
-fragment DetailsBeachBar on BeachBar {
+fragment BeachBarBase on BeachBar {
   id
   name
   slug
   thumbnailUrl
   description
   avgRating
-  isAvailable
-  formattedLocation
+  displayRegardlessCapacity
   contactPhoneNumber
   hidePhoneNumber
+  zeroCartTotal
+  hasCompletedSignUp
+  isActive
+  displayRegardlessCapacity
+}
+
+fragment DetailsBeachBar on BeachBar {
+  ...BeachBarBase
+  category {
+    id
+    name
+  }
   location {
     id
     address
     zipCode
     longitude
     latitude
+    formattedLocation
     country {
-      id
-      name
-      callingCode
+      ...CountryBase
     }
     city {
       id
@@ -58,66 +67,8 @@ fragment SearchBeachBar on BeachBar {
   payments {
     id
   }
-}
-=======
-fragment DetailsBeachBar on BeachBar {
-  id
-  name
-  slug
-  thumbnailUrl
-  description
-  avgRating
-  isAvailable
-  formattedLocation
-  contactPhoneNumber
-  hidePhoneNumber
-  location {
+  currency {
     id
-    address
-    zipCode
-    longitude
-    latitude
-    country {
-      id
-      name
-      callingCode
-    }
-    city {
-      id
-      name
-    }
-    region {
-      id
-      name
-    }
-  }
-  features {
-    quantity
-    service {
-      id
-      name
-      icon {
-        id
-        publicId
-      }
-    }
-  }
-  styles {
-    id
-    name
-  }
-  restaurants {
-    id
+    symbol
   }
 }
-
-fragment SearchBeachBar on BeachBar {
-  ...DetailsBeachBar
-  reviews {
-    id
-  }
-  payments {
-    id
-  }
-}
->>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

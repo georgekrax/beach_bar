@@ -1,10 +1,28 @@
 .icon {
+  // path,
+  // circle {
+  //   stroke-width: 1px;
+  //   stroke: $grey-10;
+  // }
+
+  &--bold path {
+    stroke-width: 2.5px !important;
+  }
+
   &__stroke--sm {
     stroke-width: 1px;
   }
 
-  &__stroke--none path {
-    stroke: none;
+  &__stroke--none {
+    stroke: none !important;
+  }
+
+  &__stroke--none__path path {
+    @extend .icon__stroke--none;
+  }
+
+  &__stroke--white path {
+    stroke: $grey-1;
   }
 
   &__filled-path {
@@ -13,9 +31,13 @@
     }
   }
 
-  &__filled--white {
-    stroke: none !important;
-    fill: $grey-1 !important;
+  &__filled {
+    &--white {
+      fill: $grey-1 !important;
+    }
+    &--black {
+      fill: $grey-10 !important;
+    }
   }
 
   &-stroke {
@@ -108,6 +130,110 @@
 
     &--parking-sign circle {
       fill: $color;
+    }
+
+    &--fresh-juice {
+      &__glass {
+        fill: $orange-3;
+        stroke: $orange-3;
+      }
+
+      &__ice-cubes {
+        fill: $orange-2;
+      }
+    }
+
+    &--coffee {
+      &__seed {
+        fill: $green-6;
+      }
+
+      &__paper {
+        fill: $bronze-5;
+      }
+
+      &__spoot {
+        fill: $grey-8;
+      }
+    }
+
+    &--soft-drink {
+      &__brand {
+        fill: $yellow-4;
+      }
+
+      &__lane,
+      &__sticker-edges {
+        fill: $orange-3;
+      }
+
+      &__sticker {
+        fill: $red-4;
+      }
+
+      &__spoot {
+        fill: $orange-2;
+      }
+    }
+
+    &--refreshment-drink {
+      &__ice-cube {
+        fill: $green-5;
+      }
+
+      &__liquid {
+        fill: $green-6;
+      }
+
+      &__sliced-fruit {
+        fill: $yellow-4;
+      }
+    }
+
+    &--beer {
+      &__mounting {
+        fill: $orange-5;
+      }
+
+      &__foam {
+        fill: $orange-3;
+      }
+
+      &__glass {
+        fill: $yellow-4;
+      }
+
+      &__spoot {
+        fill: $grey-4;
+      }
+    }
+
+    &--alchoholic-drink {
+      &__glass {
+        fill: $cyan-1;
+      }
+
+      &__liquid {
+        fill: $yellow-3;
+      }
+
+      &__olive {
+        fill: $green-7;
+      }
+    }
+
+    &--food-cutlery {
+      &__tops {
+        fill: $grey-5;
+      }
+
+      &__knive-base {
+        fill: $orange-4;
+      }
+
+      &__fork-base {
+        fill: $red-4;
+      }
     }
   }
 }

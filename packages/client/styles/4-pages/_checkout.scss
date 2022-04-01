@@ -1,40 +1,42 @@
+$m-header: map-get($rem-spacers, 32);
+
 .checkout {
-  &__header {
-    margin: map-get($em-spacers, 16) 0;
-    padding: 0 1.5rem;
-    color: $grey-9;
-    font-size: 2rem;
-  }
+  // &__header {
+  //   margin: $m-header 0;
+  //   // padding: 0 1.5rem;
+  //   color: $grey-9;
+  //   font-size: 2rem;
+  // }
 
-  &__carousel {
-    position: relative;
-    padding: 0 $wrapper-padding;
-    max-height: 78vh;
-    overflow-y: scroll;
-    overflow-x: hidden;
-  }
+  // &__carousel {
+  //   position: relative;
+  //   padding: 0 $wrapper-padding;
+  //   max-height: 78vh;
+  //   overflow-y: scroll;
+  //   overflow-x: hidden;
+  // }
 
-  &__auth {
-    max-width: 30em;
+  // &__auth {
+  // max-width: 30em;
 
-    & > div,
-    form > div,
-    form > div > div:first-child > div:first-child {
-      margin-bottom: map-get($em-spacers, 24);
-    }
+  // & > div,
+  // form > div,
+  // form > div > div:first-child > div:first-child {
+  //   margin-bottom: map-get($em-spacers, 24);
+  // }
 
-    form > div > div:nth-child(2) {
-      margin: map-get($em-spacers, 16) 0;
-    }
+  // form > div > div:nth-child(2) {
+  //   margin: map-get($em-spacers, 16) 0;
+  // }
 
-    form button {
-      align-self: center;
-    }
+  // form button {
+  //   align-self: center;
+  // }
 
-    & > div > div:first-child {
-      flex-shrink: 0;
-    }
-  }
+  // & > div > div:first-child {
+  //   flex-shrink: 0;
+  // }
+  // }
 
   &__cards {
     margin: map-get($em-spacers, 16) 0 map-get($em-spacers, 8);
@@ -57,91 +59,90 @@
     }
   }
 
-  &__other-method {
-    margin-top: map-get($em-spacers, 16);
+  // &__pay-now {
+  // button {
+  // align-self: center;
+  // width: min(86%, 380px);
+  // margin-top: map-get($em-spacers, 24);
+  // font-size: 1.15rem;
+  // @include transition-2s("ease-out", "opacity");
 
-    label {
-      @extend .body-16;
-    }
+  // &.btnLoading {
+  //   opacity: 0.5;
+  // }
+  // }
 
-    & > button {
-      @extend .d--none;
-    }
+  // // & > div > div:first-child {
+  // //   margin-bottom: 0;
+  // // }
 
-    & > div {
-      & > div:first-child {
-        @extend .d--none;
-      }
+  // &__fees {
+  //   margin: map-get($em-spacers, 8) 0;
 
-      & > div:last-child {
-        all: unset;
-      }
+  //   div {
+  //     margin-right: 0.35em;
+  //   }
+  // }
+  // }
 
-      button {
-        margin: map-get($em-spacers, 32) auto 0;
-      }
-    }
-  }
+  // &__success > div {
+  // svg {
+  //   transform-origin: 50% 50% !important;
+  // }
 
-  &__pay-now {
-    button {
-      align-self: center;
-      width: min(86%, 380px);
-      margin-top: map-get($em-spacers, 24);
-      font-size: 1.15rem;
-      @include transition-2s("ease-out", "opacity");
-
-      &.loading {
-        opacity: 0.5;
-      }
-    }
-
-    & > div > div:first-child {
-      margin-bottom: 0;
-    }
-
-    &__fees {
-      margin: map-get($em-spacers, 8) 0;
-
-      div {
-        margin-right: 0.35em;
-      }
-    }
-  }
-
-  &__success > div {
-    svg {
-      transform-origin: 50% 50% !important;
-    }
-
-    &:last-child > div:first-child {
-      margin: map-get($em-spacers, 16) 0 map-get($em-spacers, 8);
-    }
-  }
+  // &:last-child > div:first-child {
+  //   margin: map-get($em-spacers, 16) 0 map-get($em-spacers, 8);
+  // }
+  // }
 }
 
-@include breakpoint("xs", "max-width") {
-  .checkout {
-    &__auth > form {
-      button {
-        align-self: center;
-        margin-right: auto;
-        margin-left: auto;
-      }
+// @include responsive() {
+// .checkout {
+// &__container {
+//   position: relative;
+//   gap: map-get($em-spacers, 32);
+//   flex-direction: row !important;
 
-      & > button {
-        margin-top: map-get($em-spacers, 64);
-      }
+//   & > div:first-child {
+//     overflow: auto;
+//   }
 
-      & > div {
-        flex-direction: column;
-      }
+//   & > div:last-child {
+//     margin-top: calc(-28px - #{$m-header});
+//     // padding: map-get($em-spacers, 16);
+//     padding-top: 0;
+//     flex-basis: 42%;
+//   }
+// }
 
-      & > div > div:nth-child(2) {
-        flex-direction: row;
-        padding: map-get($em-spacers, 24);
-        margin: 0;
-      }
-    }
-  }
-}
+// &__auth form > button {
+//   margin-top: map-get($em-spacers, 48);
+// }
+// }
+// }
+
+// @include breakpoint("xs", "max-width") {
+// .checkout {
+// &__auth > form {
+//   button {
+//     align-self: center;
+//     margin-right: auto;
+//     margin-left: auto;
+//   }
+
+//   & > button {
+//     margin-top: map-get($em-spacers, 64);
+//   }
+
+//   & > div {
+//     flex-direction: column;
+//   }
+
+//   & > div > div:nth-child(2) {
+//     flex-direction: row;
+//     padding: map-get($em-spacers, 24);
+//     margin: 0;
+//   }
+// }
+//   }
+// }

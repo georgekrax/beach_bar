@@ -1,0 +1,93 @@
+@use "sass:math";
+
+.container,
+.chart,
+.info > div:first-child {
+  border: 2px solid $grey-4;
+  border-left: none;
+}
+
+.container {
+  min-height: em(280);
+  border-right: none;
+}
+
+.chart,
+.info > div {
+  padding: map-get($em-spacers, 16);
+}
+
+.chart,
+.info {
+  align-self: stretch;
+}
+
+.chart {
+  min-width: 0;
+  padding-left: 0;
+  flex: 1;
+  border-top: none;
+  border-bottom: none;
+
+  // & > div:first-child {
+  //   margin-bottom: map-get($em-spacers, 8);
+  //   justify-content: flex-end;
+  // }
+}
+
+.value {
+  margin: map-get($rem-spacers, 8) 0 0.35rem;
+  // for loading state
+  max-width: 8rem;
+
+  + span {
+    max-width: map-get($rem-spacers, 64);
+  }
+
+  ~ div {
+    margin-top: auto;
+  }
+}
+
+.info {
+  flex-basis: 27.5%;
+}
+
+.selectBtn {
+  width: 8.1rem !important;
+  padding: 0;
+  // padding: map-get($em-spacers, 4) map-get($em-spacers, 8);
+  gap: map-get($em-spacers, 16);
+  border-radius: 6px;
+  border: none;
+  box-shadow: none;
+}
+
+@mixin rating($rating) {
+  $color: map-get(rating-color($rating, true), "first");
+  color: $color;
+  text-shadow: 0 0 2px $color;
+}
+
+.capacity h6 {
+  &[data-rating^="0"],
+  &[data-rating^="1"] {
+    @include rating(1);
+  }
+
+  &[data-rating^="2"] {
+    @include rating(2);
+  }
+
+  &[data-rating^="3"] {
+    @include rating(3);
+  }
+
+  &[data-rating^="4"] {
+    @include rating(4);
+  }
+
+  &[data-rating^="5"] {
+    @include rating(5);
+  }
+}

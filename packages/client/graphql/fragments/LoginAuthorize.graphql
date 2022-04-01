@@ -1,0 +1,15 @@
+fragment LoginAuthorize on LoginAuthorize {
+  accessToken
+  refreshToken
+  scope
+  user {
+    id
+    email
+    firstName
+    lastName
+    fullName
+    account {
+      imgUrl
+    }
+  }
+}

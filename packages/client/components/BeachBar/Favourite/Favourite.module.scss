@@ -2,27 +2,30 @@
   border-radius: 14px;
   border: 1px solid $grey-6;
   padding: map-get($em-spacers, 12);
+}
 
-  & > div:first-child {
-    position: relative;
-    width: 7em;
-    height: auto;
-    min-height: max(7em, 13.5vh);
-    margin-right: map-get($em-spacers, 16);
-    border-radius: 14px;
-    overflow: hidden;
-    flex-shrink: 0;
+.imgContainer {
+  position: relative;
+  width: 7em;
+  height: auto;
+  min-height: max(7em, 13.5vh);
+  margin-right: map-get($em-spacers, 16);
+  border-radius: 14px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.content {
+  h6 {
+    color: $grey-9;
   }
 
-  & > div:last-child > div {
-    & > span {
-      color: $grey-8;
-      margin: 0.15em 0 map-get($em-spacers, 8);
-    }
+  span {
+    margin: 0.15em 0 map-get($em-spacers, 8);
+  }
 
-    & > h6 {
-      color: $grey-9;
-    }
+  & > div:last-child {
+    align-self: flex-end;
   }
 }
 
@@ -30,15 +33,20 @@
   .container {
     max-width: 14em;
     flex-direction: column;
+  }
 
-    & > div:first-child {
-      width: 100%;
-      min-height: 10em;
-      margin-bottom: map-get($em-spacers, 12);
-    }
+  .imgContainer {
+    width: 100%;
+    min-height: 10em;
+    margin-right: 0;
+    margin-bottom: map-get($em-spacers, 12);
+  }
 
-    & > div:last-child > div {
-      flex: 1;
+  .content {
+    flex-direction: row;
+
+    & > div:last-child {
+      align-self: center;
     }
   }
 }

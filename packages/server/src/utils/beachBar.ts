@@ -51,10 +51,12 @@ export const getAvailableProducts = async (
   let products: string[] = [];
   for (let i = +startTimeId; i <= +endTimeId; i++) {
     const [_, arr] = await redis.hscan(
-      `available_products:${date}:${i.toString().padStart(2, "0").padEnd(4, "0")}`,
+      `available_products:${dayjs(date).format(dayjsFormat.ISO_STRING)}:${i.toString().padStart(2, "0").padEnd(4, "0")}`,
       0,
       "MATCH",
-      `beach_bar:${id}:product:*`
+      `beach_bar:${id}:product:*`,
+      "COUNT",
+      Math.pow(10, 10)
     );
     products = [...products, ...arr];
   }
@@ -92,7 +94,7 @@ export const getPaymentDetails = <T extends GetPaymentDetailsBeachBar>(
   { appFee }: T,
   { total, stripeFee = 0 }: GetPaymentDetailsOptions
 ) => {
-  const barFee = toFixed2((total * +appFee.percentageValue.toString()) / 100);
+  const barFee = toFixed2((total * appFee.percentageValue.toNumber()) / 100);
   // const beachBarAppFee = toFixed2(percentageFee + parseFloat(currencyFee.numericValue.toString()));
   const transferAmount = toFixed2(total - barFee - stripeFee);
   return { total, transferAmount, barFee, stripeFee };

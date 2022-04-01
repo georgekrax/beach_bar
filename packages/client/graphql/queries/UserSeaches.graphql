@@ -1,10 +1,9 @@
-<<<<<<< HEAD:packages/client/graphql/queries/UserSeaches.graphql
 query UserSearches($limit: Int) {
   userSearches(limit: $limit) {
     id
-    searchDate
-    searchAdults
-    searchChildren
+    date
+    adults
+    children
     inputValue {
       id
       city {
@@ -23,29 +22,3 @@ query UserSearches($limit: Int) {
     }
   }
 }
-=======
-query UserSearches($limit: Int) {
-  userSearches(limit: $limit) {
-    id
-    searchDate
-    searchAdults
-    searchChildren
-    inputValue {
-      id
-      city {
-        id
-        name
-      }
-      region {
-        id
-        name
-      }
-      beachBar {
-        id
-        name
-        thumbnailUrl
-      }
-    }
-  }
-}
->>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff:packages/client/graphql/queries/GetLatestUserSeaches.graphql

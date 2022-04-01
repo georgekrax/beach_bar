@@ -1,12 +1,12 @@
 var path = require("path");
 
 module.exports = {
+  swcMinify: true,
+  reactStrictMode: true,
   typescript: {
     transpileOnly: true,
   },
-  reactStrictMode: true,
   future: {
-    webpack5: true,
     strictPostcssConfiguration: true,
   },
   images: {
@@ -30,24 +30,24 @@ module.exports = {
     precision: 3,
     prependData: '@use "main.scss" as *;',
   },
-  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
-    config.plugins.push(new webpack.IgnorePlugin(/\/__tests__\//));
-    config.module.rules.push({
-      test: /\.(graphql|gql)$/,
-      exclude: /node_modules/,
-      loader: "graphql-tag/loader",
-    });
+  // webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+  //   config.plugins.push(new webpack.IgnorePlugin(/\/__tests__\//));
+  //   config.module.rules.push({
+  //     test: /\.(graphql|gql)$/,
+  //     exclude: /node_modules/,
+  //     loader: "graphql-tag/loader",
+  //   });
 
-    // if (isServer) config.plugins.push(new webpack.IgnorePlugin(/\/.scss\//));
-    // if (dev) config.plugins.push(c => (c.options.devtool = "eval-source-map"))
-    // config.plugins.push(
-    //   new webpack.ProgressPlugin((percentage, message, ...args) => {
-    //     // e.g. Output each progress message directly to the console:
-    //     console.info(percentage, message, ...args);
-    //   })
-    // );
+  //   // if (isServer) config.plugins.push(new webpack.IgnorePlugin(/\/.scss\//));
+  //   // if (dev) config.plugins.push(c => (c.options.devtool = "eval-source-map"))
+  //   // config.plugins.push(
+  //   //   new webpack.ProgressPlugin((percentage, message, ...args) => {
+  //   //     // e.g. Output each progress message directly to the console:
+  //   //     console.info(percentage, message, ...args);
+  //   //   })
+  //   // );
 
-    // ! Important: return the modified config
-    return config;
-  },
+  //   // ! Return the modified config
+  //   return config;
+  // },
 };

@@ -1,0 +1,7 @@
+fragment CartNoteBase on CartNote {
+  id
+  body
+  beachBar {
+    id
+  }
+}

@@ -12,18 +12,15 @@ mutation UpdateCustomerPaymentMethod(
     cardholderName: $cardholderName
     isDefault: $isDefault
   ) {
-    card {
+    id
+    expMonth
+    expYear
+    cardholderName
+    isDefault
+    last4
+    brand {
       id
-      expMonth
-      expYear
-      cardholderName
-      isDefault
-      last4
-      brand {
-        id
-        name
-      }
+      name
     }
-    updated
   }
 }

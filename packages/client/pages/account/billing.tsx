@@ -1,24 +1,18 @@
 import Account, { AccountPaymentMethodEditProps } from "@/components/Account";
 import Layout from "@/components/Layout";
-import { NextMotionContainer } from "@/components/Next/MotionContainer"
-import { NextDoNotHave } from "@/components/Next/DoNotHave"
+import Next from "@/components/Next";
 import {
   Card,
-  CustomerDocument,
   CustomerPaymentMethodsDocument,
   CustomerPaymentMethodsQuery,
-  useCustomerPaymentMethodsQuery,
   useCustomerQuery,
   useDeleteCustomerPaymentMethodMutation,
   useUpdateCustomerPaymentMethodMutation,
 } from "@/graphql/generated";
-import { initializeApollo, INITIAL_APOLLO_STATE } from "@/lib/apollo";
 import { notify } from "@/utils/notify";
-import { Dialog } from "@hashtag-design-system/components";
+import { Dialog, DialogDismissInfoType } from "@hashtag-design-system/components";
 import { motion } from "framer-motion";
-import { GetServerSideProps } from "next";
 import { useMemo, useState } from "react";
-import { Toaster } from "react-hot-toast";
 
 const variants = {
   initial: {},
@@ -31,49 +25,37 @@ export type PaymentMethodFormData = {
 } & Pick<Card, "id" | "cardholderName" | "last4" | "isDefault">;
 
 export type FuncPaymentMethodFormData = Omit<PaymentMethodFormData, "isDefault"> &
-  Partial<Pick<PaymentMethodFormData, "isDefault">>;
+  Pick<Partial<PaymentMethodFormData>, "isDefault">;
 
-const Billing: React.FC = () => {
-  const [cardToEdit, setCardToEdit] = useState<AccountPaymentMethodEditProps["card"] | null>(null);
-  const [cardToDelete, setCardToDelete] = useState<Pick<PaymentMethodFormData, "id"> | null>(null);
+const AccountBillingPage: React.FC = () => {
+  const [updateInfo, setUpdateInfo] = useState<{
+    edit?: AccountPaymentMethodEditProps["card"];
+    deleteId?: PaymentMethodFormData["id"];
+  }>({});
 
-  const { data: customerData } = useCustomerQuery();
-  const { data, loading, error } = useCustomerPaymentMethodsQuery();
+  const { data, loading, error } = useCustomerQuery();
   const [updatePaymentMethod] = useUpdateCustomerPaymentMethodMutation();
   const [deletePaymentMethod] = useDeleteCustomerPaymentMethodMutation();
 
   const sorted = useMemo(
-    () =>
-      data && data.customerPaymentMethods
-        ? data.customerPaymentMethods
-            ?.map(({ __typename, ...card }) => card)
-            .sort((a, b) => parseInt(b.id) - parseInt(a.id))
-        : [],
+    () => Array.from(data?.customer.cards || []).sort((a, b) => Number(b.isDefault) - Number(a.isDefault)),
     [data]
   );
 
-  const handleEdit = async (card: FuncPaymentMethodFormData, toast: boolean): Promise<boolean> => {
+  const handleEdit = async (
+    card: Parameters<AccountPaymentMethodEditProps["handleEdit"]>["0"],
+    toast: boolean
+  ): Promise<boolean> => {
     if (!card) {
       if (toast) notify("error", "");
       return false;
     }
     const { id, year, month, cardholderName, isDefault } = card;
-    const { errors } = await updatePaymentMethod({
+    const { data, errors } = await updatePaymentMethod({
       variables: { cardId: id, expMonth: month, expYear: year, cardholderName, isDefault },
-      optimisticResponse: {
-        __typename: "Mutation",
-        updateCustomerPaymentMethod: {
-          __typename: "UpdateCard",
-          updated: true,
-          // @ts-expect-error
-          card: { __typename: "Card", expMonth: month, expYear: year, isDefault: isDefault ?? false, ...card },
-        },
-      },
       update: (cache, { data }) => {
-        const cachedData = cache.readQuery<CustomerPaymentMethodsQuery>({
-          query: CustomerPaymentMethodsDocument,
-        });
-        const newCard = data?.updateCustomerPaymentMethod.card;
+        const cachedData = cache.readQuery<CustomerPaymentMethodsQuery>({ query: CustomerPaymentMethodsDocument });
+        const newCard = data?.updateCustomerPaymentMethod;
         if (!newCard) return;
         const updated = cachedData?.customerPaymentMethods?.map(prevCard => {
           if (prevCard.id === newCard.id) return newCard;
@@ -88,7 +70,7 @@ const Billing: React.FC = () => {
         });
       },
     });
-    if (errors) {
+    if (errors && !data) {
       errors.forEach(({ message }) => notify("error", message));
       return false;
     } else {
@@ -97,90 +79,82 @@ const Billing: React.FC = () => {
     }
   };
 
+  const handleRemoveDismiss = async ({ cancel }: DialogDismissInfoType) => {
+    const { deleteId } = updateInfo;
+    if (!deleteId || cancel) return setUpdateInfo({ deleteId: undefined });
+    const { data, errors } = await deletePaymentMethod({
+      variables: { cardId: deleteId },
+      update: cache => {
+        const cachedData = cache.readQuery<CustomerPaymentMethodsQuery>({
+          query: CustomerPaymentMethodsDocument,
+        });
+        const newArr = cachedData?.customerPaymentMethods?.filter(({ id }) => id !== deleteId);
+        cache.writeQuery<CustomerPaymentMethodsQuery>({
+          query: CustomerPaymentMethodsDocument,
+          data: { customerPaymentMethods: newArr || [] },
+        });
+      },
+    });
+    setUpdateInfo({ deleteId: undefined });
+    if (!data && errors) errors.forEach(({ message }) => notify("error", message));
+  };
+
   return (
-    <Layout>
-      <Toaster position="top-center" />
-      <Account.Header />
-      <Account.Menu defaultSelected="/billing" />
-      {loading ? (
-        <h2>Loading...</h2>
-      ) : error || !data || !data.customerPaymentMethods || !customerData ? (
-        <h2>Error</h2>
-      ) : (
-        <NextMotionContainer>
-          <Account.PaymentMethod.Add
-            cardsLength={data.customerPaymentMethods.length}
-            customerId={customerData.customer.customer.id}
-          />
-          {sorted.length > 0 ? (
-            <motion.div
-              className="w100 flex-column-center-flex-end"
-              initial="initial"
-              animate="animate"
-              variants={variants}
-            >
-              {sorted.map(card => (
-                <Account.PaymentMethod
-                  key={card.id}
-                  card={{ ...card, brand: card.brand?.name as any }}
-                  isDefault={card.isDefault}
-                  handleEdit={handleEdit}
-                  onEditClick={() => setCardToEdit({ ...card, brand: card.brand?.name as any })}
-                  onRemoveClick={() => setCardToDelete({ id: card.id })}
-                />
-              ))}
-            </motion.div>
-          ) : (
-            <NextDoNotHave msg="You have not added a payment method yet." emoji="💳" />
-          )}
-          <Account.PaymentMethod.Edit
-            card={cardToEdit || undefined}
-            onDismiss={() => setCardToEdit(null)}
-            handleEdit={handleEdit}
-          />
-          <Dialog
-            isShown={cardToDelete !== null}
-            onDismiss={async (_, { cancel }) => {
-              if (!cardToDelete || cancel) return;
-              const deleteCardId = cardToDelete.id;
-              const { errors } = await deletePaymentMethod({
-                variables: { cardId: deleteCardId },
-                update: cache =>
-                  cache.modify({
-                    fields: {
-                      getCustomerPaymentMethods(list, { readField }) {
-                        return list.filter(n => readField("id", n) !== deleteCardId);
-                      },
-                    },
-                  }),
-              });
-              if (errors) errors.forEach(({ message }) => notify("error", message));
-              else setCardToDelete(null);
-            }}
-          >
-            <Dialog.Content style={{ textAlign: "center" }}>
-              <Dialog.Title>Are you sure you want to remove this payment method from your account?</Dialog.Title>
-            </Dialog.Content>
-            <Dialog.Btn.Group>
-              <Dialog.Btn>No</Dialog.Btn>
-              <Dialog.Btn confirm>Yes</Dialog.Btn>
-            </Dialog.Btn.Group>
-          </Dialog>
-        </NextMotionContainer>
-      )}
+    <Layout hasToaster>
+      <Account.Dashboard defaultSelected="/account/billing">
+        {loading ? (
+          <h2>Loading...</h2>
+        ) : error || !data?.customer ? (
+          <h2>Error</h2>
+        ) : (
+          <Next.MotionContainer>
+            <Account.PaymentMethod.Add
+              defaultSaveForFuture
+              cardsLength={data.customer.cards?.length || 0}
+              customerId={data.customer.id}
+            />
+            {sorted.length > 0 ? (
+              <motion.div
+                className="account__billing__list w100 flex-row-center-center flex--wrap"
+                initial="initial"
+                animate="animate"
+                variants={variants}
+              >
+                {sorted.map(card => (
+                  <Account.PaymentMethod
+                    key={card.id}
+                    card={{ ...card, brand: card.brand?.name as any }}
+                    isDefault={card.isDefault}
+                    handleEdit={handleEdit}
+                    onEditClick={() => setUpdateInfo({ edit: { ...card, brand: card.brand?.name as any } })}
+                    onRemoveClick={() => setUpdateInfo({ deleteId: card.id })}
+                  />
+                ))}
+              </motion.div>
+            ) : (
+              <Next.DoNotHave emoji="💳" msg="You have not added a payment method yet." />
+            )}
+            <Account.PaymentMethod.Edit
+              card={updateInfo.edit}
+              handleEdit={handleEdit}
+              onDismiss={() => setUpdateInfo({ edit: undefined })}
+            />
+            <Dialog isShown={!!updateInfo.deleteId} onDismiss={async (_, info) => await handleRemoveDismiss(info)}>
+              <Dialog.Content className="text--center">
+                <Dialog.Title>Are you sure you want to remove this payment method from your account?</Dialog.Title>
+              </Dialog.Content>
+              <Dialog.Btn.Group className="account__billing__remove-btns">
+                <Dialog.Btn>No</Dialog.Btn>
+                <Dialog.Btn confirm>Yes</Dialog.Btn>
+              </Dialog.Btn.Group>
+            </Dialog>
+          </Next.MotionContainer>
+        )}
+      </Account.Dashboard>
     </Layout>
   );
 };
 
-Billing.displayName = "AccountBilling";
+AccountBillingPage.displayName = "AccountBillingPage";
 
-export default Billing;
-
-export const getServerSideProps: GetServerSideProps = async ctx => {
-  const apolloClient = initializeApollo(ctx);
-
-  await apolloClient.query({ query: CustomerDocument });
-  await apolloClient.query({ query: CustomerPaymentMethodsDocument });
-
-  return { props: { [INITIAL_APOLLO_STATE]: apolloClient.cache.extract() } };
-};
+export default AccountBillingPage;

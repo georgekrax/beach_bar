@@ -1,23 +1,39 @@
+import { BeachBar } from "@/graphql/generated";
 import { genReviewRating } from "@/utils/format";
+import { getRatingColor } from "@/utils/styles";
+import { Flex, FlexProps } from "@hashtag-design-system/components";
 import { useMemo } from "react";
-import styles from "./RatingBox.module.scss";
 
-type Props = {
-  rating: number;
-};
+type Props = Pick<BeachBar, "avgRating"> &
+  FlexProps & {
+    atBeach?: boolean;
+  };
 
-export const RatingBox: React.FC<Props & Pick<React.ComponentPropsWithoutRef<"div">, "className">> = ({
-  rating,
-  className,
-}) => {
-  const { floored, val } = useMemo(() => genReviewRating(rating), [rating]);
+export const RatingBox: React.FC<Props> = ({ avgRating, atBeach = false, ...props }) => {
+  const { rating, clrs } = useMemo(() => {
+    return {
+      rating: genReviewRating(avgRating),
+      clrs: getRatingColor(avgRating),
+    };
+  }, [avgRating]);
 
   return (
-    <div
-      className={styles.box + " " + ` rating--${floored} flex-row-center-center` + (className ? " " + className : "")}
+    <Flex
+      justify="center"
+      align="center"
+      boxSize="2em"
+      p="0.5em"
+      borderRadius="regular"
+      borderBottomLeftRadius={0}
+      color="white"
+      bgGradient={`linear(to bottom left, ${clrs.first}, ${clrs.second})`}
+      fontWeight={atBeach ? "semibold" : undefined}
+      className={atBeach ? " header-5" : ""}
+      data-rating={rating.floored}
+      {...props}
     >
-      {val}
-    </div>
+      {rating.val}
+    </Flex>
   );
 };
 

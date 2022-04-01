@@ -28,28 +28,29 @@ mutation UpdateUser(
     zipCode: $zipCode
     trackHistory: $trackHistory
   ) {
-    updated
-    user {
+    id
+    email
+    firstName
+    lastName
+    account {
       id
-      email
-      firstName
-      lastName
-      account {
-        id
-        honorificTitle
-        birthday
-        age
-        address
-        zipCode
-        trackHistory
-        imgUrl
-        city
-        phoneNumber
-        telCountry {
+      honorificTitle
+      birthday
+      age
+      address
+      zipCode
+      trackHistory
+      imgUrl
+      city
+      phoneNumber
+      telCountry {
+        ...CountryBase
+      }
+      country {
+        ...CountryBase
+        currency {
           id
-        }
-        country {
-          id
+          name
         }
       }
     }

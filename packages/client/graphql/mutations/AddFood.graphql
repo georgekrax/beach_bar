@@ -1,0 +1,19 @@
+mutation AddFood(
+  $beachBarId: ID!
+  $name: String!
+  $categoryId: ID!
+  $ingredients: String
+  $price: Float!
+  $maxQuantity: Int
+) {
+  addFood(
+    beachBarId: $beachBarId
+    name: $name
+    categoryId: $categoryId
+    ingredients: $ingredients
+    price: $price
+    maxQuantity: $maxQuantity
+  ) {
+    ...FoodDetails
+  }
+}

@@ -1,6 +1,8 @@
-export { useConfig } from "./useConfig";
-export { useCarouselItem } from "./useCarouselItem";
 export { useAuth } from "./useAuth";
+export { useConfig } from "./useConfig";
+export { useHookForm } from "./useHookForm";
 export { useInitialRender } from "./useInitialRender";
-export { useIsDesktop } from "./useIsDesktop";
-export { useSearchForm } from "./useSeachForm";
+export { useIsDevice } from "./useIsDevice";
+export { useSearchMe as useSearch } from "./useSeach";
+export { useDashboard } from "./useDashboard";
+export { useQueryFilters } from "./useQueryFilters";

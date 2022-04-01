@@ -16,7 +16,7 @@ export const verifyZeroCart = ({ beachBar }: VerifyZeroCartOptions): boolean => 
 export const GetProductsInclude = Prisma.validator<Prisma.CartInclude>()({
   products: { include: { product: true } },
 });
-type GetProductsCart = Prisma.CartGetPayload<{ include: typeof GetProductsInclude }>;
+type GetProductsCart = Pick<Prisma.CartGetPayload<{ include: typeof GetProductsInclude }>, "products">;
 type GetProductsOptions = { beachBarId: number };
 
 export const getProducts = <T extends GetProductsCart>(cart: T, { beachBarId }: GetProductsOptions): T["products"] => {
@@ -59,7 +59,7 @@ export const getEntryFees = (cart: GetEntryFeesCart, { beachBarId, products }: G
   // const entryFee = await BeachBarEntryFee.findOne({ where: { beachBar, date: productDate } });
   // if (entryFee) entryFeeTotal = entryFeeTotal + parseFloat(entryFee.fee.toString());
   beachBars.forEach(({ id, entryFee }) => {
-    const arr = products || getProducts(cart, { beachBarId: id });
+    const arr = getProducts(products ? { products } : cart, { beachBarId: id });
     entryFeeTotal = entryFeeTotal + arr.reduce((prev, { people }) => prev + people * (entryFee?.toNumber() || 0), 0);
   });
   return entryFeeTotal;
@@ -111,11 +111,13 @@ export const checkAllProductsAvailable = async ({
   const booleanArr = await Promise.all(
     products.map(async item => {
       const { product, date, startTimeId, endTimeId, quantity: elevator } = item;
-      const bool = await !isAvailable(product, { startTimeId, endTimeId, elevator, date: date.toString() });
-      return { ...item, isAvailable: bool };
+      const bool = await isAvailable(product, { startTimeId, endTimeId, elevator, date: date.toString() });
+      console.log(bool);
+      return { ...item, isAvailable: !bool };
     })
   );
   const notAvailable = booleanArr.filter(({ isAvailable }) => isAvailable).map(({ isAvailable, ...product }) => product);
+  console.log(notAvailable);
   return { bool: notAvailable.length == 0, notAvailable: notAvailable };
 };
 
@@ -146,21 +148,22 @@ export const getOrCreateCart = async ({
   cartId,
   getOnly = false,
 }: GetOrCreateCartOptions): Promise<GetOrCreateCartCart | null> => {
-  if (payload?.sub && !cartId) {
-    let cart = await prisma.cart.findFirst({ ...FIND_CART_OPTIONS, where: { userId: payload.sub, payment: null } });
-
-    if (!cart && !getOnly) {
-      const user = await prisma.user.findUnique({ where: { id: payload.sub } });
-      if (!user) return null;
-      cart = await createCart({ userId: user.id });
-    }
-    return cart;
+  let cart;
+  if (cartId || payload?.sub) {
+    cart = await prisma.cart.findFirst({
+      ...FIND_CART_OPTIONS,
+      where: { payment: null, ...(cartId ? { id: BigInt(cartId) } : payload?.sub && { userId: payload.sub }) },
+    });
   }
-  if (cartId) {
-    const cart = await prisma.cart.findFirst({ ...FIND_CART_OPTIONS, where: { id: BigInt(cartId), payment: null } });
+  if (!cart && !getOnly) cart = await createCart({ userId: payload?.sub });
 
-    if (!cart && !getOnly) return await createCart();
-    return cart;
-  } else if (!cartId && !getOnly) return await createCart();
-  else return null;
+  if (payload?.sub && cart.userId !== payload.sub) {
+    await prisma.cart.deleteMany({ where: { userId: payload.sub } });
+    cart = await prisma.cart.update({
+      where: { id: cart.id },
+      data: { userId: payload.sub },
+      include: FIND_CART_OPTIONS.include,
+    });
+  }
+  return cart;
 };

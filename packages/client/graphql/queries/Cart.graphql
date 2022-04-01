@@ -1,21 +1,15 @@
-<<<<<<< HEAD
 query Cart($cartId: ID) {
   cart(cartId: $cartId) {
     id
     total
     products {
-      ...BasicCartProduct
+      ...CartProductBase
+    }
+    foods {
+      ...CartFoodBase
+    }
+    notes {
+      ...CartNoteBase
     }
   }
 }
-=======
-query Cart($cartId: ID) {
-  cart(cartId: $cartId) {
-    id
-    total
-    products {
-      ...BasicCartProduct
-    }
-  }
-}
->>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

@@ -1,0 +1,28 @@
+// .item {
+// margin: 0;
+// padding-right: map-get($em-spacers, 12);
+// padding-left: map-get($em-spacers, 12);
+// border-radius: 0;
+
+// label {
+//   display: grid;
+//   grid-template-columns: auto 1fr;
+//   grid-template-rows: repeat(2, auto);
+//   grid-auto-flow: column;
+
+//   & > div:nth-last-child(2) {
+//     color: $grey-10;
+
+//     + div {
+//       color: $grey-7;
+//     }
+//   }
+// }
+
+// &__img {
+//   border-radius: 14px;
+//   overflow: hidden;
+//   margin-right: map-get($em-spacers, 12);
+//   grid-row: 1 / 3;
+// }
+// }

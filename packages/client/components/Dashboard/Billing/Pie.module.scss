@@ -1,0 +1,44 @@
+.container {
+  position: relative;
+  min-height: rem(168);
+  padding: map-get($em-spacers, 24);
+  border-radius: 32px;
+
+  & > div:last-child {
+    align-self: stretch;
+  }
+}
+
+.info {
+  align-self: stretch;
+
+  h6 {
+    margin-bottom: map-get($em-spacers, 4);
+    font-weight: 500;
+  }
+
+  h3 {
+    font-size: 1.75rem !important;
+  }
+}
+
+.arrow path {
+  stroke: inherit;
+}
+
+.percent {
+  position: relative;
+  margin-top: map-get($em-spacers, 16);
+  border-radius: 50%;
+
+  svg {
+    position: absolute;
+    transform: rotate(-90deg);
+  }
+
+  h6, 
+  circle {
+    color: $grey-9;
+    stroke: $grey-9;
+  }
+}

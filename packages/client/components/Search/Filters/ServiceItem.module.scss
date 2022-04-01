@@ -58,10 +58,10 @@ $icon-color: $volcano-6;
   }
 }
 
-@include breakpoint("md") {
+@include responsive() {
   .icon {
     margin-right: map-get($em-spacers, 4);
-    display: none;
+    // display: none;
 
     svg {
       width: 16px !important;

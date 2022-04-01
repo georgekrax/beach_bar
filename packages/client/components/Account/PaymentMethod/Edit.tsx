@@ -5,28 +5,36 @@ import { cardHolderSchema, monthSchema, yearSchema } from "@/utils/yup";
 import { BottomSheetFProps, CreditCardProps, Form, Input } from "@hashtag-design-system/components";
 import { yupResolver } from "@hookform/resolvers/yup";
 import dayjs from "dayjs";
-import { useController, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import styles from "./Edit.module.scss";
+import { useHookForm } from "@/utils/hooks";
 import { PaymentMethod } from "./PaymentMethod";
 
 type FormData = Omit<FuncPaymentMethodFormData, "id" | "isDefault">;
 
 export type Props = {
   card?: Pick<Card, "id" | "cardholderName" | "expMonth" | "expYear" | "last4"> & Pick<CreditCardProps, "brand">;
-  handleEdit: (card: FuncPaymentMethodFormData, toast: boolean) => Promise<boolean>;
+  handleEdit: (card: { id: string } & Omit<Partial<FuncPaymentMethodFormData>, "id">, toast: boolean) => Promise<boolean>;
 };
 
-export type FProps = Props & Required<Pick<BottomSheetFProps, "onDismiss">>;
-
-export const Edit: React.FC<FProps> = ({ card, onDismiss, handleEdit }) => {
+export const Edit: React.FC<Props & Required<Pick<BottomSheetFProps, "onDismiss">>> = ({
+  card,
+  onDismiss,
+  handleEdit,
+}) => {
   const {
     handleSubmit,
-    control,
     formState: { errors },
-  } = useForm<FormData>({ resolver: yupResolver(yearSchema.concat(monthSchema).concat(cardHolderSchema)) });
-  const { field: month } = useController<FormData, "month">({ name: "month", control });
-  const { field: year } = useController<FormData, "year">({ name: "year", control });
-  const { field: cardholderName } = useController<FormData, "cardholderName">({ name: "cardholderName", control });
+    ...form
+  } = useForm<FormData>({
+    resolver: yupResolver(yearSchema.concat(monthSchema, cardHolderSchema)),
+    defaultValues: {
+      ...card,
+      month: card?.expMonth,
+      year: card?.expYear,
+    },
+  });
+  const { handleChange } = useHookForm<FormData>(form);
 
   const onSubmit = async ({ year, month, cardholderName }: FormData): Promise<boolean> => {
     if (!card) return false;
@@ -38,7 +46,9 @@ export const Edit: React.FC<FProps> = ({ card, onDismiss, handleEdit }) => {
 
   return (
     <Header.Crud
-      bottomSheet={{ isShown: card !== null && card !== undefined, onDismiss }}
+      closeIcon="close"
+      title="Edit payment method"
+      bottomSheet={{ isShown: card != null, onDismiss }}
       cta={{
         children: "Save",
         onClick: async (_, dismiss) =>
@@ -47,47 +57,41 @@ export const Edit: React.FC<FProps> = ({ card, onDismiss, handleEdit }) => {
             if (res) await dismiss();
           })(),
       }}
-      title="Edit payment method"
     >
-      <Form.Group as="form" className={styles.form}>
-        {card && (
-          <>
-            <div className="w100 flex-row-space-between-flex-start">
-              <div className={styles.expiration + " flex-row-flex-start-flex-end"}>
-                <Input.Number
-                  {...month}
-                  min={1}
-                  max={12}
-                  defaultValue={card.expMonth}
-                  label="Expiration"
-                  placeholder="Month"
-                  floatingplaceholder
-                  forwardref={month.ref}
-                  secondhelptext={{ error: true, value: errors.month?.message }}
-                />
-                <Input.Number
-                  {...year}
-                  min={dayjs().year()}
-                  max={dayjs().year() + 100}
-                  defaultValue={card.expYear}
-                  placeholder="Year"
-                  floatingplaceholder
-                  forwardref={year.ref}
-                  secondhelptext={{ error: true, value: errors.year?.message }}
-                />
-              </div>
-              <PaymentMethod.CardBrand brand={card.brand} />
+      {card && (
+        <Form.Group as="form" className={styles.form}>
+          <div className="w100 flex-row-space-between-flex-start">
+            <div className={styles.expiration + " flex-row-flex-start-flex-end"}>
+              <Input.Number
+                min={1}
+                max={12}
+                defaultValue={card.expMonth}
+                label="Expiration"
+                placeholder="Month"
+                floatingplaceholder
+                secondhelptext={{ error: true, value: errors.month?.message }}
+                onValue={newVal => handleChange("month", newVal, true)}
+              />
+              <Input.Number
+                min={dayjs().year()}
+                max={dayjs().year() + 100}
+                defaultValue={card.expYear}
+                placeholder="Year"
+                floatingplaceholder
+                secondhelptext={{ error: true, value: errors.year?.message }}
+                onValue={newVal => handleChange("year", newVal, true)}
+              />
             </div>
-            <Input
-              {...cardholderName}
-              label="Cardholder name"
-              defaultValue={card.cardholderName}
-              forwardref={cardholderName.ref}
-              secondhelptext={{ error: true, value: errors.cardholderName?.message }}
-            />
-          </>
-        )}
-      </Form.Group>
+            <PaymentMethod.CardBrand brand={card.brand} />
+          </div>
+          <Input
+            label="Cardholder name"
+            defaultValue={card.cardholderName}
+            secondhelptext={{ error: true, value: errors.cardholderName?.message }}
+            onChange={e => handleChange("cardholderName", e.target.value)}
+          />
+        </Form.Group>
+      )}
     </Header.Crud>
   );
 };

@@ -1,11 +1,15 @@
 .container {
-  position: sticky;
-  top: 0;
-  left: 0;
+  // // position: sticky;
+  // top: 0;
+  // left: 0;
   height: $header-height;
+  // backdrop filters only show if the background is set to none or the background color has alpha. Reducing the Opacity on /// the element is not enough.
   // background-color: $grey-1;
-  z-index: 100;
+  // z-index: 100;
+  // background-color: rgba($grey-1, 0.75);
   // backdrop-filter: saturate(180%) blur(20px);
+  // saturate(180%) blur(5px)
+  // rgba(255, 255, 255, 0.8)
 
   & > * {
     color: $grey-9;
@@ -16,35 +20,33 @@
   }
 }
 
-.userFirstName {
-  margin-right: map-get($em-spacers, 20);
+.ripple {
+  width: 20px;
+  height: 20px;
+  position: absolute;
+  display: block;
+  border-radius: 9999px;
+  background: var(--hashtag-colors-white);
+  z-index: -1;
 }
 
-// .nav {
+// .searchBar {
+// width: max(28rem, 40%);
+// height: rem(62);
+// margin: auto;
+// font-size: 75%;
+
+// // summary + div label,
+// // p div:first-child {
+// //   display: none;
+// // }
+
+// // & > div {
+// //   flex-basis: 25%;
+// //   margin: 0;
+// // }
+
+// // & > button {
+// //   padding: map-get($em-spacers, 8) map-get($em-spacers, 12);
+// // }
 // }
-
-.searchBar {
-  font-size: 75%;
-  width: max(25rem, 40%);
-  margin: auto;
-
-  summary + div label,
-  p div:first-child {
-    display: none;
-  }
-
-  & > div {
-    flex-basis: 25%;
-    margin: 0;
-  }
-
-  & > button {
-    padding: map-get($em-spacers, 8) map-get($em-spacers, 12);
-  }
-}
-
-@include breakpoint("md", "max-width") {
-  .userFirstName {
-    display: none;
-  }
-}

@@ -3,7 +3,6 @@
     "lib": ["DOM", "es5", "es6", "ESNext"],
     "removeComments": true,
     "noEmit": false,
-
     "strict": false,
     "noImplicitAny": false,
     "strictNullChecks": true,

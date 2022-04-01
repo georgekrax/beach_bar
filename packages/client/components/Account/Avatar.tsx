@@ -1,27 +1,29 @@
-import { useAuth } from "@/utils/hooks";
-import { useClassnames } from "@hashtag-design-system/components";
+import { chakra, ChakraProps, cx } from "@hashtag-design-system/components";
+import { useSession } from "next-auth/react";
 import Image, { ImageProps } from "next/image";
-import styles from "./Avatar.module.scss";
 
-export const Avatar: React.FC<Partial<ImageProps>> = ({ src, ...props }) => {
-  const [classNames, rest] = useClassnames(styles.avatar, props);
-  const { data } = useAuth();
+const ChakraImage = chakra(Image, {
+  shouldForwardProp: prop => {
+    return ["src", "width", "height", "alt", "objectFit", "objectPosition", "priority", "quality"].includes(prop);
+  },
+});
+
+export const Avatar: React.FC<Partial<ImageProps> & ChakraProps> = ({ src, boxSize = 48, ...props }) => {
+  const { data: session } = useSession();
 
   return (
-    <>
-      <Image
-        className={classNames}
-        src={data?.me?.account.imgUrl || src || "/user_default.jpg"}
-        alt="Authenticated user's account image"
-        width={48}
-        height={48}
-        objectFit="cover"
-        objectPosition="center"
-        priority
-        quality={100}
-        {...rest}
-      />
-    </>
+    <ChakraImage
+      alt="Authenticated user's account image"
+      priority
+      width={boxSize}
+      height={boxSize}
+      objectFit="cover"
+      objectPosition="center"
+      quality={100}
+      borderRadius="regular"
+      {...props}
+      src={(session?.image as string | undefined | null) || src || "/user_default.jpg"}
+    />
   );
 };
 

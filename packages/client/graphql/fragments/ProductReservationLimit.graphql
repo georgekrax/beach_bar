@@ -1,0 +1,17 @@
+fragment ProductReservationLimitBase on ProductReservationLimit {
+  id
+  from
+  to
+  limitNumber
+  product {
+    id
+  }
+  startTime {
+    id
+    value
+  }
+  endTime {
+    id
+    value
+  }
+}

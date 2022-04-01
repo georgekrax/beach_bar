@@ -1,19 +1,16 @@
 mutation UpdateReviewVote($reviewId: ID!, $upvote: Boolean, $downvote: Boolean) {
   updateReviewVote(reviewId: $reviewId, upvote: $upvote, downvote: $downvote) {
-    review {
+    id
+    ratingValue
+    votes {
       id
-      ratingValue
-      votes {
+      user {
         id
-        user {
-          id
-        }
-        type {
-          id
-          value
-        }
+      }
+      type {
+        id
+        value
       }
     }
-    updated
   }
 }

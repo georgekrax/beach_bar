@@ -1,0 +1,5 @@
+query Food($id: ID!) {
+  food(id: $id) {
+    ...FoodDetails
+  }
+}

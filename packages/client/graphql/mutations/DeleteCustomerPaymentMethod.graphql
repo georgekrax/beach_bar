@@ -1,5 +1,3 @@
 mutation DeleteCustomerPaymentMethod($cardId: ID!) {
-	deleteCustomerPaymentMethod(cardId: $cardId) {
-		deleted
-	}
+	deleteCustomerPaymentMethod(cardId: $cardId)
 }

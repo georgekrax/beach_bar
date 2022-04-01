@@ -1,0 +1,38 @@
+query DashboardHomePage($beachBarId: ID!, $dates: DashboardDatesArg = null) {
+  dashboardHomePage(beachBarId: $beachBarId, dates: $dates) {
+    balance {
+      revenue
+      grossVolume {
+        ...DashboardDateValue
+      }
+      successfulPayments {
+        id
+      }
+    }
+    capacity {
+      percentage
+      totalMaxPeopleCapacity
+      totalHourCustomers
+      reservedProducts
+      availableProducts
+    }
+    totalCustomers {
+      ...DashboardDateValue
+    }
+    grossVolume {
+      ...DashboardDateValue
+    }
+    avgSpendPerPerson {
+      ...DashboardDateValue
+    }
+    avgRating {
+      ...DashboardDateValue
+    }
+    newCustomers {
+      date
+      customers {
+        id
+      }
+    }
+  }
+}

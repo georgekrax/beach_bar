@@ -96,6 +96,7 @@ declare global {
       USER_PERSONALIZED_BEACH_BARS_LENGTH: number;
       MAX_PRODUCT_QUANTITY: number;
       HOSTNAME_WITH_HTTP: string;
+      CART_COOKIE_NAME: string;
 
       JWT_COOKIE_NAME: string;
       JWT_SECRET: string;

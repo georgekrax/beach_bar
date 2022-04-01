@@ -56,10 +56,13 @@ const MODELS = Object.keys(SOFT_DELETED_MODELS);
 
 const checkModel = (model: string): boolean => MODELS.includes(model);
 
-const checkParams: Prisma.Middleware<any> = async (params, next) => {
+const checkParams = (params: Parameters<Prisma.Middleware<any>>[0]): boolean => {
   if (typeof params.args.where?.id === "string") {
     switch (params.model) {
       case "BeachBarReview":
+        params.args.where.id = BigInt(params.args.where.id);
+        break;
+      case "CartProduct":
         params.args.where.id = BigInt(params.args.where.id);
         break;
 
@@ -67,8 +70,7 @@ const checkParams: Prisma.Middleware<any> = async (params, next) => {
         break;
     }
   }
-  if (!params.model || !checkModel(params.model)) return next(params);
-  return false;
+  return (params.model && checkModel(params.model)) ?? false;
 };
 
 const withDeleted = (params: Prisma.MiddlewareParams): Prisma.MiddlewareParams => {
@@ -104,8 +106,9 @@ const manyParams = (params: Prisma.MiddlewareParams): Prisma.MiddlewareParams =>
 // };
 
 export const softDeleteFind: Prisma.Middleware<any> = async (params, next) => {
-  const res = await checkParams(params, next);
-  if (res !== false) return res;
+  const res = checkParams(params);
+  console.log("find", res, params.action, params.model);
+  if (!res) return next(params);
 
   if (params.action === "findUnique" || params.action === "findFirst") {
     // params.args.include = params.args.include
@@ -126,15 +129,16 @@ export const softDeleteFind: Prisma.Middleware<any> = async (params, next) => {
 };
 
 export const softDeleteUpdate: Prisma.Middleware<any> = async (params, next) => {
-  const res = await checkParams(params, next);
-  if (res !== false) return res;
+  const res = checkParams(params);
+  console.log("update", res, params.action, params.model);
+  if (!res) return next(params);
 
-  if (params.action === "update") {
-    // Change to updateMany - you cannot filter by anything except ID / unique with findUnique
-    params.action = "updateMany";
-    // params.args.where[DELETE_KEY] = null;
-    firstParams(params);
-  }
+  // if (params.action === "update") {
+  //   // Change to updateMany - you cannot filter by anything except ID / unique with findUnique
+  //   params.action = "updateMany";
+  //   // params.args.where[DELETE_KEY] = null;
+  //   firstParams(params);
+  // }
   if (params.action === "updateMany") {
     if (params.args.where != undefined) manyParams(params);
     else params["args"] = { ...params.args, where: { ...params.args?.["where"], [DELETE_KEY]: null } };
@@ -143,10 +147,10 @@ export const softDeleteUpdate: Prisma.Middleware<any> = async (params, next) => 
 };
 
 export const softDelete: Prisma.Middleware<any> = async (params, next) => {
-  const res = await checkParams(params, next);
-  if (res !== false) return res;
+  const res = checkParams(params);
+  if (!res || !params.action.includes("delete")) return next(params);
 
-  if (!params.action.includes("delete")) return next(params);
+  console.log("delete", res, params.action, params.model);
   const now = dayjs().toISOString(); // new Date()
   if (params.action === "delete") {
     // Delete queries
@@ -169,6 +173,7 @@ export const softDelete: Prisma.Middleware<any> = async (params, next) => {
       await prisma[camelCase(item)].updateMany({ where, data: { deletedAt: now } });
     }
   }
+
   switch (params.model) {
     case "BeachBar":
       // Delete from search dropdown results
@@ -191,7 +196,6 @@ export const softDelete: Prisma.Middleware<any> = async (params, next) => {
     case "BeachBarReview":
     case "Food":
     case "Product":
-    case "ProductReservationLimit":
     case "ReservedProduct":
     case "RestaurantFoodItem":
     case "ReviewVote":
@@ -257,7 +261,7 @@ export const middleware: Prisma.Middleware<any> = async (params, next) => {
   switch (params.model) {
     case "Account": {
       const birthday = params.args?.birthday;
-      if (birthday) {
+      if (birthday && (params.action.includes("update") || params.action.includes("create"))) {
         const differenceMs = dayjs().subtract(+dayjs(birthday), "millisecond");
         const parsedAge = Math.abs(dayjs(differenceMs).year() - 1970);
         params.args.age = parsedAge;
@@ -266,12 +270,12 @@ export const middleware: Prisma.Middleware<any> = async (params, next) => {
     }
     case "ProductReservationLimit": {
       const result = await next(params);
-      if (params.action.includes("update") || params.action.includes("create") || params.action.includes("delete")) {
+      if (params.action.includes("update") || params.action.includes("create")) {
         const limit = await prisma.productReservationLimit.findUnique({
-          where: { id: result.id },
+          where: { id: result?.id || params.args.where?.id },
           include: SetRedisReservationLimitsInclude,
         });
-        if (limit) await setRedisReservationLimits(limit, { atDelete: params.action.includes("delete") });
+        if (limit) await setRedisReservationLimits(limit, { atDelete: false });
       }
       return result;
     }
@@ -289,6 +293,14 @@ export const middleware: Prisma.Middleware<any> = async (params, next) => {
       await updateRedis({ model: "ReservedProduct", id: result.id, atCreate: true });
       return result;
     }
+    // case "CartProduct": {
+    //   const result = await next(params);
+    //   if (params.action.includes("update") && params.args?.data?.quantity) {
+    //     const newQuantity = result.quantity;
+    //     setRedisReservationLimits({ ...result, ...result.product, from: result.date, to: result.date }, { atDelete: false, elevator: diff });
+    //   }
+    //   return result;
+    // }
 
     default:
       return next(params);

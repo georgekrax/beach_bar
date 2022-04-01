@@ -1,4 +1,4 @@
-export const errors =  Object.freeze({
+export const errors = {
   NOT_FOUND: "not_found",
   NOT_ACTIVE: "not_active",
   CONFLICT: "conflict",
@@ -35,4 +35,4 @@ export const errors =  Object.freeze({
   MAX_CHILDREN_ERROR_CODE: "max_children",
   INVALID_PRODUCT_OFFER_CODE: "invalid_product_offer",
   INVALID_REF_CODE_MESSAGE: "Specified referral code is invalid",
-});
+} as const;

@@ -5,6 +5,7 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "cd packages/server && yarn build; cd ../common && yarn build; cd ../frontend && yarn build"
+    "build": "cd packages/server && yarn build; cd ../common && yarn build; cd ../frontend && yarn build",
+    "postinstall": "prisma generate"
   }
 }

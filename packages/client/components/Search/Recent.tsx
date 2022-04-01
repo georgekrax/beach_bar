@@ -29,10 +29,10 @@ export const Recent: React.FC<Props> = ({ searches }) => {
 
 Recent.displayName = "SearchRecent";
 
-const Item: React.FC<Props["searches"][number]> = ({ id, searchAdults, searchChildren, inputValue, searchDate }) => {
-  const people = useMemo(() => searchAdults + (searchChildren || 0), [searchAdults, searchChildren]);
+const Item: React.FC<Props["searches"][number]> = ({ id, adults, children, date, inputValue }) => {
+  const people = useMemo(() => adults + (children || 0), [adults, children]);
   const searchValue = useMemo(() => formatSearchValue(inputValue), [inputValue]);
-  const parsedDate = useMemo(() => dayjs(searchDate), [searchDate]);
+  const parsedDate = useMemo(() => dayjs(date), [date]);
 
   return (
     <Link href={{ pathname: "/search", query: { id, redirect: "/" } }}>

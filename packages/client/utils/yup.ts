@@ -1,6 +1,9 @@
 import dayjs from "dayjs";
 import * as yup from "yup";
 
+export const requiredString = yup.string().min(1).required();
+export const textSchema = yup.string().max(255);
+
 export const emailSchema = yup.object().shape({
   email: yup.string().email("Please provide a valid email address").required("Please provide an email address"),
 });
@@ -33,8 +36,6 @@ export const yearSchema = yup.object().shape({
     .max(dayjs().year() + 100)
     .required("Please provide valid year"),
 });
-
-export const textSchema = yup.string().max(255);
 
 export const cardHolderSchema = yup.object().shape({
   cardholderName: textSchema.required("Please provide a cardholder name"),

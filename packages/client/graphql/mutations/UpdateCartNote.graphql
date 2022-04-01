@@ -1,0 +1,5 @@
+mutation UpdateCartNote($id: ID!, $body: String!) {
+  updateCartNote(id: $id, body: $body) {
+    ...CartNoteBase
+  }
+}

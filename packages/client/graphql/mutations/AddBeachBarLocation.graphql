@@ -1,0 +1,39 @@
+mutation AddBeachBarLocation(
+  $beachBarId: ID!
+  $address: String!
+  $zipCode: String
+  $countryId: ID!
+  $city: String!
+  $region: ID
+  $latitude: String!
+  $longitude: String!
+) {
+  addBeachBarLocation(
+    beachBarId: $beachBarId
+    address: $address
+    zipCode: $zipCode
+    countryId: $countryId
+    city: $city
+    region: $region
+    latitude: $latitude
+    longitude: $longitude
+  ) {
+    id
+    address
+    zipCode
+    latitude
+    longitude
+    whereIs
+    country {
+      ...CountryBase
+    }
+    city {
+      id
+      name
+    }
+    region {
+      id
+      name
+    }
+  }
+}

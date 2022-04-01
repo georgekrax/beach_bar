@@ -1,0 +1,6 @@
+mutation AddBeachBarStyles($beachBarId: ID!, $styleIds: [ID!]!) {
+  addBeachBarStyles(beachBarId: $beachBarId, styleIds: $styleIds) {
+    id
+    name
+  }
+}

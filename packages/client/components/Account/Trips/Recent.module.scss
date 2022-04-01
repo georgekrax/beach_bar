@@ -1,0 +1,24 @@
+.container {
+  margin-bottom: map-get($em-spacers, 8);
+}
+
+.carousel {
+  min-height: 27em;
+  margin-top: -(map-get($em-spacers, 16));
+
+  section {
+    height: auto;
+    padding: map-get($em-spacers, 8);
+    gap: map-get($em-spacers, 48);
+
+    & > div {
+      align-self: stretch;
+    }
+  }
+}
+
+@include responsive() {
+  .container {
+    margin-bottom: map-get($em-spacers, 16);
+  }
+}

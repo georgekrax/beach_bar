@@ -1,4 +1,5 @@
-import { ApolloLink, fromPromise, HttpLink } from "@apollo/client";
+import { fromPromise, HttpLink } from "@apollo/client";
+import { setContext } from "@apollo/client/link/context";
 import { onError } from "@apollo/client/link/error";
 import { errors as commonErrors } from "@beach_bar/common";
 import { getAuthContext } from "../auth";
@@ -13,30 +14,17 @@ export const httpLink = new HttpLink({
   },
 });
 
-export const ipMiddleware = new ApolloLink((operation, forward) => {
-  operation.setContext(({ headers, ...context }) => ({
+export const ipMiddleware = setContext(async (_, { headers, ...context }) => {
+  // const session = await getSession();
+  const ip_address = userIpAddr()?.query;
+  return {
     ...context,
     headers: {
       ...headers,
-      ip_address: userIpAddr().query,
+      ...(ip_address && { ip_address }),
     },
-  }));
-
-  return forward(operation);
+  };
 });
-
-export const authMiddleware = (headers?: ReturnType<typeof getAuthContext>["headers"]) =>
-  new ApolloLink((operation, forward) => {
-    operation.setContext(({ headers: operationHeaders, ...context }) => ({
-      ...context,
-      headers: {
-        ...headers,
-        ...operationHeaders,
-      },
-    }));
-
-    return forward(operation);
-  });
 
 export const errorLink = (headers?: ReturnType<typeof getAuthContext>["headers"]) =>
   onError(({ operation, graphQLErrors, networkError, forward }) => {

@@ -102,7 +102,7 @@ export const ProductReservationLimitCrudMutation = extendType({
     t.boolean("deleteProductReservationLimit", {
       description: "Delete a or some reservation limit(s) from a #beach_bar's product",
       args: { id: idArg() },
-      resolve: async (_, { id }, { payload }) => {
+      resolve: async (_, { id }, { prisma, payload }) => {
         isAuth(payload);
         throwScopesUnauthorized(payload, "You are not allowed to delete a or some reservation limit(s) from a #beach_bar's product", [
           "beach_bar@crud:beach_bar",
@@ -111,15 +111,8 @@ export const ProductReservationLimitCrudMutation = extendType({
 
         if (id.toString().trim().length === 0) throw new UserInputError("Please provide valid ID");
 
-        // const reservationLimit = await ProductReservationLimit.findOne({
-        //   where: { id: id },
-        //   relations: ["product", "product.beachBar"],
-        // });
-        // if (!reservationLimit) throw new ApolloError("Reservation limit was not found", errors.NOT_FOUND);
-
         try {
-          // TODO: Fix
-          // await reservationLimit.softRemove();
+          await prisma.productReservationLimit.delete({ where: { id: BigInt(id) } });
         } catch (err) {
           throw new ApolloError(err.message);
         }

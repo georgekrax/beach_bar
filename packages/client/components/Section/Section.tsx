@@ -1,5 +1,5 @@
-import { Header } from "./Header/Header";
-import { PageHeader } from "./PageHeader/PageHeader";
+import { Header } from "./Header";
+import { PageHeader } from "./PageHeader";
 
 type SubComponents = {
   Header: typeof Header;

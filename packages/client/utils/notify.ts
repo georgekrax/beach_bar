@@ -1,5 +1,5 @@
 import toast, { ToastOptions } from "react-hot-toast";
-import { CONFIG } from "../config";
+import { CONFIG } from "@/config/index";
 
 export type NotifyOptions = {
   assertive?: boolean;
@@ -14,8 +14,9 @@ export const notify = (
   let options = { ...params };
   let msg: string = "";
   if (somethingWentWrong) {
-    if (typeof somethingWentWrong === "object" && somethingWentWrong.onlyWhenUndefined)
+    if (typeof somethingWentWrong === "object" && somethingWentWrong.onlyWhenUndefined) {
       msg = message ? message : CONFIG.ERRORS.SWW;
+    }
     else msg = CONFIG.ERRORS.SWW + " " + message.replace("Something went wrong.", "");
   } else msg = message;
   if (assertive) options = { ...options, ...CONFIG.NOTIFICATIONS.Assertive };
@@ -45,3 +46,8 @@ export const shareWithSocials = (name?: string, at = "at") => {
     // notify("error", "Unfortunately, sharing is not supported by your system.", { somethingWentWrong: false });
   }
 };
+
+// https://stackoverflow.com/a/39914235/13142787
+export const sleep = (ms: number) => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}

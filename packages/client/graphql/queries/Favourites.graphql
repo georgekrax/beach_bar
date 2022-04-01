@@ -1,14 +1,16 @@
 query GetUserFavouriteBeachBars {
   favouriteBeachBars {
+    id
     beachBar {
       id
       name
-      thumbnailUrl
-      location {
-        city {
-          name
-        }
-      }
+      slug
+      # thumbnailUrl
+      # location {
+      #   city {
+      #     name
+      #   }
+      # }
     }
   }
 }

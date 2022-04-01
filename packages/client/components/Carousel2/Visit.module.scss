@@ -1,0 +1,143 @@
+@mixin datePickerContent() {
+  &::before {
+    content: "Select the date of your trip";
+    @include bottom-sheet__title();
+  }
+
+  :global {
+    .select__modal {
+      padding-top: 0;
+    }
+
+    .date-picker__months-container {
+      display: none;
+    }
+  }
+}
+
+$container-padding--left-right: map-get($em-spacers, 20);
+
+.container {
+  position: relative;
+  border-radius: 14px;
+  align-self: stretch;
+  background-color: $grey-1;
+  box-shadow: 2px 1px 24px $grey-5;
+}
+
+.imgContainer > div {
+  box-shadow: 0px 6px 8px $grey-4;
+  border-radius: 14px;
+  transform: scale(1.05);
+}
+
+.content,
+.dates {
+  padding: map-get($em-spacers, 16) 0;
+}
+
+.content {
+  padding-right: $container-padding--left-right;
+  padding-left: $container-padding--left-right;
+}
+
+.content {
+  details > summary {
+    padding: 0.5em 0.75em;
+    margin-bottom: -(map-get($em-spacers, 4));
+
+    svg {
+      display: none;
+    }
+  }
+
+  & > div > div:first-child {
+    align-self: flex-end;
+  }
+
+  :global {
+    .select__modal {
+      width: max-content;
+      min-width: 220px;
+    }
+  }
+}
+
+.datePicker > div:last-child {
+  @include datePickerContent();
+}
+
+.dates {
+  background-color: $grey-4;
+  list-style-type: none;
+  margin: 0;
+  border-radius: 24px 24px 14px 14px;
+
+  ul {
+    margin: 0;
+    padding: 0 $container-padding--left-right;
+    max-height: 5em;
+    overflow-y: scroll;
+  }
+}
+
+.dateItem {
+  margin: map-get($em-spacers, 12) 0;
+
+  &:first-child {
+    margin-top: 0;
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  svg {
+    margin-right: map-get($em-spacers, 8);
+
+    path {
+      stroke-width: 5px;
+      stroke: $grey-7;
+    }
+  }
+
+  & > div > span {
+    color: $grey-9;
+  }
+
+  & > span {
+    color: $grey-8;
+  }
+}
+
+.select {
+  &__content::before {
+    content: "Select the hour of your trip" !important;
+    @include bottom-sheet__title();
+  }
+
+  &[data-ismobile="false"] > div > div:last-child {
+    @extend .select__content;
+  }
+
+  &__bottomSheet > div > div:last-child {
+    padding-top: 0;
+    @extend .select__content;
+  }
+}
+
+@include responsive() {
+  .datePicker > div {
+    &::before {
+      content: none !important;
+    }
+
+    & > div {
+      top: 20%;
+
+      & > div:last-child {
+        @include datePickerContent();
+      }
+    }
+  }
+}

@@ -1,0 +1,5 @@
+mutation UpdateProductReservationLimit($id: ID!, $limit: Int!) {
+  updateProductReservationLimit(id: $id, limit: $limit) {
+    ...ProductReservationLimitBase
+  }
+}

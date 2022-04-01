@@ -1,7 +1,6 @@
 import { MOTION } from "@/config/index";
-import { SearchContextType } from "@/utils/contexts";
+import { SearchContextType, useSearchContext } from "@/utils/contexts";
 import { genBarThumbnailAlt } from "@/utils/format";
-import { useSearchForm } from "@/utils/hooks";
 import { AnimationControls, motion } from "framer-motion";
 import Image from "next/image";
 import { useMemo } from "react";
@@ -24,13 +23,11 @@ export const Suggestion: React.FC<Props> = ({
   onClick,
   ...props
 }) => {
-  const {formatInputValue} = useSearchForm();
-  const { primary, secondary } = useMemo(() => formatInputValue({ beachBar, country, city, region }), [
-    beachBar,
-    country,
-    city,
-    region,
-  ]);
+  const { formatInputValue } = useSearchContext();
+  const { primary, secondary } = useMemo(
+    () => formatInputValue({ beachBar, country, city, region }),
+    [beachBar?.id, country?.id, city?.id, region?.id]
+  );
 
   return (
     <motion.li
@@ -46,7 +43,7 @@ export const Suggestion: React.FC<Props> = ({
         <div className="header-6 semibold">{primary}</div>
         {secondary && <div>{secondary}</div>}
       </div>
-      {beachBar && (
+      {beachBar?.thumbnailUrl && (
         <Image
           src={beachBar.thumbnailUrl}
           alt={genBarThumbnailAlt(beachBar.name)}

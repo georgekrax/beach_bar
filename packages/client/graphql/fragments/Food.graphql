@@ -1,0 +1,19 @@
+fragment FoodBase on Food {
+  id
+  name
+  price
+  ingredients
+  maxQuantity
+}
+
+fragment FoodDetails on Food {
+  ...FoodBase
+  category {
+    id
+    name
+    icon {
+      id
+      publicId
+    }
+  }
+}

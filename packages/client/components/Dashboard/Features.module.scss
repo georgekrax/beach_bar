@@ -1,0 +1,58 @@
+.list,
+.edit {
+  margin-bottom: map-get($em-spacers, 48);
+}
+
+.list {
+  max-width: map-get($breakpoints, "sm");
+  overflow: unset;
+
+  button {
+    flex-grow: 1;
+    max-width: 33%;
+  }
+}
+
+.edit {
+  min-width: 30rem;
+  padding: map-get($em-spacers, 24);
+  border: 1px solid $grey-5;
+  border-radius: 14px;
+
+  button {
+    align-self: flex-end;
+    border-radius: 10px;
+  }
+
+  &#{Btn} {
+    padding: map-get($em-spacers, 8) map-get($em-spacers, 12);
+  }
+}
+
+.edit > div {
+  &:first-child {
+    gap: map-get($em-spacers, 24);
+  }
+
+  &:last-child {
+    gap: map-get($em-spacers, 16);
+    margin-left: map-get($em-spacers, 24);
+  }
+}
+
+.deleteBtn {
+  padding: map-get($em-spacers, 4);
+
+  &:hover path {
+    fill: $grey-1;
+    stroke: $grey-1;
+  }
+}
+
+.atDashboard {
+  gap: map-get($em-spacers, 48);
+
+  .list button {
+    max-width: none;
+  }
+}

@@ -1,18 +1,17 @@
 import Layout from "@/components/Layout";
-import ShoppingCartComp from "@/components/ShoppingCart";
-import { initializeApollo, INITIAL_APOLLO_STATE } from "@/lib/apollo";
-import { getAuth } from "@/lib/auth";
-import { GetServerSideProps } from "next";
+import ShoppingCart from "@/components/ShoppingCart";
 
-const ShoppingCart: React.FC = () => {
+const ShoppingCartPage: React.FC = () => {
   return (
-    <Layout header={{ withAuth: false }}>
-      <ShoppingCartComp />
+    <Layout header={{ auth: false }}>
+      <ShoppingCart />
     </Layout>
   );
 };
 
-export default ShoppingCart;
+ShoppingCartPage.displayName= "ShoppingCartPage";
+
+export default ShoppingCartPage;
 
 // export const getServerSideProps: GetServerSideProps = async ctx => {
 //   const apolloClient = initializeApollo(ctx);
@@ -76,7 +75,7 @@ export default ShoppingCart;
 //         </div>
 //       </>
 //     ) : (
-//       <Next.DoNotHave msg="Your shopping cart is empty" emoji="😢">
+//       <Next.DoNotHave msg="Your shopping cart is empty." emoji="😢">
 //         <Next.Link href={{ pathname: "/search", query: { box: true } }}>
 //           {/* <a>🛒 Continue shopping</a> */}
 //           <a>🛒 Continue searching to fill it!</a>

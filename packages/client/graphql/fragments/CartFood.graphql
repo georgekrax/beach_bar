@@ -1,0 +1,27 @@
+fragment CartFoodBase on CartFood {
+id
+quantity
+timestamp
+food {
+  ...FoodBase
+  beachBar {
+    id
+  }
+  category {
+    id
+    name
+    icon {
+      id
+      publicId
+    }
+  }
+}
+}
+
+fragment CartFoodWithCart on CartFood {
+  ...CartFoodBase
+  cart {
+    id
+    total
+  }
+}

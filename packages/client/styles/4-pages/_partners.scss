@@ -1,0 +1,152 @@
+$columnGap: map-get($em-spacers, 80);
+
+.partners,
+.partners ~ div {
+  margin-bottom: map-get($em-spacers, 80);
+
+  &:last-child {
+    margin-bottom: map-get($em-spacers, 40);
+  }
+}
+
+.partners,
+.partners__footer {
+  background-color: $volcano-4;
+}
+
+.partners {
+  padding: map-get($em-spacers, 48) 0;
+  padding-bottom: map-get($em-spacers, 24);
+  padding-left: 7.5%;
+  padding-right: 7.5%;
+  gap: map-get($em-spacers, 40);
+  border-radius: 0 0 24px 24px;
+
+  span > div {
+    @extend .d--ib;
+  }
+
+  ~ div {
+    margin-top: map-get($em-spacers, 32);
+  }
+
+  &__header {
+    line-height: 1.35em;
+    font-size: 2.25rem;
+
+    span:first-of-type > div {
+      @extend .d--block;
+    }
+  }
+
+  &__benefits {
+    gap: map-get($em-spacers, 48) $columnGap;
+
+    & > div > div:last-child {
+      margin-top: map-get($em-spacers, 8);
+    }
+  }
+
+  &__features ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+
+    li {
+      margin: map-get($em-spacers, 24) 0;
+      gap: map-get($em-spacers, 12);
+    }
+  }
+
+  &__footer {
+    margin-left: -($wrapper-padding);
+    margin-right: -($wrapper-padding);
+    padding: map-get($em-spacers, 40) 5%;
+    gap: map-get($em-spacers, 40);
+
+    button {
+      margin-top: map-get($em-spacers, 16);
+      padding-left: map-get($em-spacers, 24);
+      padding-right: map-get($em-spacers, 24);
+    }
+  }
+}
+
+@include breakpoint("xl") {
+  .partners__faq {
+    $gap: map-get($em-spacers, 32);
+    flex-direction: row !important;
+    gap: $gap;
+
+    & > div {
+      flex-basis: calc(50% - (#{$gap} / 2));
+
+      & > div {
+        margin-bottom: map-get($em-spacers, 24);
+      }
+    }
+  }
+}
+
+@include responsive() {
+  .partners,
+  .partners ~ div {
+    margin-bottom: map-get($em-spacers, 96);
+  }
+
+  .partners {
+    padding-left: 10%;
+    padding-right: 10%;
+    padding-bottom: map-get($em-spacers, 48);
+
+    &__header {
+      font-size: 3rem;
+
+      span:first-of-type {
+        display: inline-block;
+      }
+    }
+
+    &__benefits {
+      $flexBasis: calc(50% - (#{$columnGap} / 2));
+      flex-direction: row !important;
+
+      & > div {
+        max-width: $flexBasis;
+        flex: 1 1 $flexBasis;
+      }
+    }
+
+    &__footer {
+      max-width: 90%;
+      margin-left: auto;
+      margin-right: auto;
+      gap: unset;
+      align-items: center !important;
+      flex-direction: row !important;
+      border-radius: 24px;
+
+      h2 {
+        line-height: map-get($em-spacers, 24);
+      }
+
+      div:last-of-type {
+        text-align: center;
+      }
+
+      button {
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      div:first-of-type {
+        width: 2px !important;
+        height: unset;
+        display: block;
+        margin: map-get($em-spacers, 8) 0;
+        align-self: stretch;
+        background-color: $grey-1;
+      }
+    }
+  }
+}

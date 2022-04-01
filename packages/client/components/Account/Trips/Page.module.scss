@@ -1,0 +1,55 @@
+.container {
+  margin: map-get($em-spacers, 32) 0;
+}
+
+.status > span {
+  text-transform: uppercase;
+}
+
+.card {
+  margin-bottom: auto;
+  margin-right: map-get($em-spacers, 8);
+
+  & > span:first-child {
+    transform: translateY(10%);
+  }
+}
+
+.refundMsg {
+  margin-top: map-get($em-spacers, 16);
+  padding-top: map-get($em-spacers, 12);
+  border-top: 1px solid $grey-6;
+
+  & > span {
+    padding-bottom: 0.1em;
+    border-bottom: 1px solid $grey-8;
+  }
+}
+
+@include responsive() {
+  .container {
+    display: grid !important;
+    grid-template-columns: 1fr 1.5fr;
+    grid-template-rows: auto auto;
+    margin-bottom: 0;
+    gap: map-get($em-spacers, 48) map-get($em-spacers, 96);
+
+    & > div:nth-child(3) {
+      margin-top: 0;
+      grid-column: 2 / 3;
+      grid-row: 1 / span 3;
+    }
+
+    &.atDashboard {
+    }
+  }
+
+  .beachItem > div:nth-child(2) > div:nth-child(2) > div {
+    $gap: map-get($em-spacers, 20);
+    gap: $gap;
+
+    & > div {
+      flex-basis: calc(50% - (#{$gap} / 2));
+    }
+  }
+}

@@ -1,0 +1,5 @@
+query Product($id: ID!) {
+  product(id: $id) {
+    ...ProductDetails
+  }
+}

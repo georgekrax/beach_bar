@@ -1,19 +1,15 @@
-import { useAuthContext } from "@/utils/contexts/AuthContext";
-import { Button, ButtonFProps, useClassnames } from "@hashtag-design-system/components";
-import styles from "./LoginBtn.module.scss";
-import { AUTH_ACTIONS } from "./reducer";
+import { useAuth } from "@/utils/hooks";
+import { Button, ButtonProps, callAllHandlers } from "@hashtag-design-system/components";
 
-export const LoginBtn: React.FC<ButtonFProps> = props => {
-  const [classNames, rest] = useClassnames(styles.btn, props);
-
-  // const { dispatch } = useAuthContext();
+export const LoginBtn: React.FC<ButtonProps> = props => {
+  const { handleLogin } = useAuth({ skip: true });
 
   return (
     <Button
-      variant="secondary"
-      className={classNames}
-      // onClick={() => dispatch({ type: AUTH_ACTIONS.TOGGLE_LOGIN_DIALOG, payload: { bool: true } })}
-      {...rest}
+    // variant="secondary"
+      color="gray.600"
+      {...props}
+      onClick={e => callAllHandlers(() => handleLogin(), props.onClick)(e)}
     >
       Login
     </Button>

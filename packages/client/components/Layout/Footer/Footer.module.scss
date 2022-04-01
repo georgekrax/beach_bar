@@ -1,9 +1,10 @@
 .container {
-  height: fit-content;
-  background-color: $grey-2;
-  margin-top: map-get($em-spacers, 64);
-  cursor: pointer;
-  overflow: hidden;
+  // height: fit-content;
+  // background-color: $grey-2;
+  // margin-top: map-get($em-spacers, 32);
+  // padding-top: $wrapper-padding;
+  // cursor: pointer;
+  // overflow: hidden;
   @include transition-2s("ease-in", "background-color");
 
   // & > div:first-child {
@@ -35,12 +36,31 @@
 }
 
 .details {
-  gap: map-get($em-spacers, 64);
+  gap: map-get($em-spacers, 48);
   flex-wrap: wrap;
   margin-top: map-get($em-spacers, 32);
+}
 
-  & > div:last-child {
+.details > div {
+  &:first-child {
+    order: 1;
+  }
+
+  &:nth-child(2) {
+    order: 3;
+  }
+
+  &:nth-child(3) {
+    order: 2;
+  }
+
+  &:nth-child(4) {
+    order: 4;
+  }
+
+  &:last-child {
     flex: 1;
+    order: 5;
   }
 }
 
@@ -107,10 +127,20 @@
     flex-wrap: nowrap;
     margin-top: 0;
   }
+
+  .details > div {
+    order: unset !important;
+  }
 }
 
 @include responsive("max-width") {
   .container:active {
     background-color: $grey-3;
+  }
+}
+
+@include breakpoint("xl") {
+  .details {
+    gap: map-get($em-spacers, 64);
   }
 }

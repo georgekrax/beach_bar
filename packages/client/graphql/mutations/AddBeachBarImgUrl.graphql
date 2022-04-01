@@ -1,0 +1,5 @@
+mutation AddBeachBarImgUrl($beachBarId: ID!, $imgUrl: URL!, $description: String) {
+  addBeachBarImgUrl(beachBarId: $beachBarId, imgUrl: $imgUrl, description: $description) {
+    ...BeachBarImgUrlBase
+  }
+}

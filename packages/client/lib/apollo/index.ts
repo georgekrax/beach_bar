@@ -9,8 +9,8 @@ type InitialStateType = Record<string, any>;
 
 export const INITIAL_APOLLO_STATE = "initialApolloState";
 
-export const initializeApollo = (me?: GetServerSidePropsContext, initialState: InitialStateType = {}) => {
-  const _apolloClient = apolloClient ?? createApolloClient(me);
+export const initializeApollo = (ctx?: GetServerSidePropsContext, initialState: InitialStateType = {}) => {
+  const _apolloClient = apolloClient ?? createApolloClient(ctx);
 
   if (initialState) {
     const existingCache = _apolloClient.extract();

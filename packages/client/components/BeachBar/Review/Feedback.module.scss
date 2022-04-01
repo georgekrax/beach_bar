@@ -1,14 +1,14 @@
-.container {
-  &:not(:only-child):first-child {
-    margin: map-get($em-spacers, 16) 0;
-  }
+// .container {
+// &:not(:only-child):first-child {
+//   margin: map-get($em-spacers, 16) 0;
+// }
 
-  & > svg {
-    flex-shrink: 0;
-    margin-right: map-get($em-spacers, 16);
-  }
-}
+// & > svg {
+//   flex-shrink: 0;
+//   margin-right: map-get($em-spacers, 16);
+// }
+// }
 
-.negative > * {
-  stroke: $grey-7 !important;
-}
+// // .negative > * {
+// //   stroke: $grey-7 !important;
+// // }

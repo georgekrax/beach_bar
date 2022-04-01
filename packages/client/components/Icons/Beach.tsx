@@ -61,13 +61,13 @@ export const Beach: React.FC<IconBaseFProps> & SubComponents = ({ ...props }) =>
   );
 };
 
-const Filled: React.FC<IconBaseFProps> = ({ ...props }) => {
-  return (
-    <Base {...props}>
-      <Path1 d="M8.25 12h7.5M12 15.75v-7.5" />
-    </Base>
-  );
-};
+// const Filled: React.FC<IconBaseFProps> = ({ ...props }) => {
+//   return (
+//     <Base {...props}>
+//       <Path1 d="M8.25 12h7.5M12 15.75v-7.5" />
+//     </Base>
+//   );
+// };
 
 Beach.displayName = "IconBeach";
 Path1.displayName = "IconBeachPath1";

@@ -1,0 +1,52 @@
+$reports-gap: map-get($em-spacers, 24);
+$tables-gap: map-get($em-spacers, 64);
+
+.container {
+  & > h4 {
+    color: $grey-9;
+  }
+
+  & > div {
+    margin-bottom: map-get($em-spacers, 64);
+  }
+}
+
+.reports {
+  gap: $reports-gap;
+  margin: $dashboard-header-padding 0;
+  padding: map-get($em-spacers, 32) 0;
+  border: 2px solid $grey-4;
+  border-left: none;
+  border-right: none;
+
+  & > div {
+    width: calc(50% - #{$reports-gap});
+    flex-grow: 1;
+
+    &:nth-child(3) {
+      order: 1;
+    }
+  }
+}
+
+.tables {
+  gap: $tables-gap;
+
+  & > div {
+    width: calc(50% - (#{$tables-gap} / 2));
+  }
+
+  h6 {
+    margin-bottom: $dashboard-header-padding;
+  }
+}
+
+@include breakpoint("xl") {
+  .reports > div {
+    width: calc(33.3% - #{$reports-gap});
+
+    &:nth-child(3) {
+      order: unset;
+    }
+  }
+}

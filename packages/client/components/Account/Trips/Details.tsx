@@ -1,20 +1,18 @@
-import { useClassnames } from "@hashtag-design-system/components";
+import { cx, Box, BoxProps } from "@hashtag-design-system/components";
 import styles from "./Details.module.scss";
 
-type Props = {
+type Props = BoxProps & {
   header?: string;
 };
 
-type FProps = Props & React.ComponentPropsWithoutRef<"div">;
-
-export const Details: React.FC<FProps> = ({ header, children, ...props }) => {
-  const [classNames, rest] = useClassnames(styles.container + " w100", props);
+export const Details: React.FC<Props> = ({ header, children, ...props }) => {
+  const _className = cx(styles.container + " w100", props.className);
 
   return (
-    <div className={classNames} {...rest}>
+    <Box {...props} className={_className}>
       {header && <h5 className="upper normal body-16">{header}</h5>}
       {children}
-    </div>
+    </Box>
   );
 };
 

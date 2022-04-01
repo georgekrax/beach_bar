@@ -1,5 +1,5 @@
 import { Box } from "./Box";
-import { Context } from "./Context";
+// import { Context } from "./Context";
 import { Filters } from "./Filters";
 import { Form } from "./Form";
 // import { MapDialog } from "./MapDialog";
@@ -10,7 +10,7 @@ import { ShowInMap } from "./ShowInMap";
 type SubComponents = {
   Box: typeof Box;
   Form: typeof Form;
-  Context: typeof Context;
+  // Context: typeof Context;
   Filters: typeof Filters;
   ShowInMap: typeof ShowInMap;
   Recent: typeof Recent;
@@ -26,7 +26,7 @@ const Search: React.FC<Props> & SubComponents = () => {
 
 Search.Box = Box;
 Search.Form = Form;
-Search.Context = Context;
+// Search.Context = Context;
 Search.Filters = Filters;
 Search.ShowInMap = ShowInMap;
 Search.Recent = Recent;

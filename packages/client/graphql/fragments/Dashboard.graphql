@@ -1,0 +1,10 @@
+fragment DashboardDateValue on DashboardDateValue {
+  date
+  value
+}
+
+fragment DashboardBillingField on DashboardBillingField {
+  revenue {
+    ...DashboardDateValue
+  }
+}

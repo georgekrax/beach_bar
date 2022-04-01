@@ -1,16 +1,17 @@
-.container {
-  padding-top: map-get($em-spacers, 16);
-  padding-bottom: map-get($em-spacers, 24);
-  padding-left: $wrapper-padding;
+// .container {
+// padding-top: map-get($em-spacers, 16);
+// padding-bottom: map-get($em-spacers, 24);
+// padding-left: $wrapper-padding;
+// background-color: $grey-1;
 
-  & > div:first-child {
-    position: relative;
-  }
-}
+//   & > div:first-child {
+//     position: relative;
+//   }
+// }
 
 .filters {
-  margin-left: map-get($em-spacers, 16);
-  overflow-x: scroll;
+  // margin-left: map-get($em-spacers, 16);
+  // overflow-x: scroll;
 
   span {
     margin-right: map-get($em-spacers, 20);
@@ -20,25 +21,25 @@
     &.active {
       color: $grey-10;
     }
-  }
 
-  span:last-child {
-    padding-right: $wrapper-padding;
-  }
-}
-
-.heading {
-  margin-bottom: map-get($em-spacers, 32);
-}
-
-@include breakpoint("md") {
-  .container {
-    padding: map-get($em-spacers, 20);
-    border: 2px solid $grey-4;
-    border-radius: 14px;
-  }
-
-  .heading {
-    margin-bottom: map-get($em-spacers, 24);
+    &:last-child {
+      padding-right: $wrapper-padding;
+    }
   }
 }
+
+// .heading {
+//   margin-bottom: map-get($em-spacers, 32);
+// }
+
+// @include responsive() {
+// .container {
+//   padding: map-get($em-spacers, 16);
+//   border: 2px solid $grey-4;
+//   border-radius: 14px;
+// }
+
+// .heading {
+//   margin-bottom: map-get($em-spacers, 24);
+// }
+// }

@@ -1,0 +1,13 @@
+.container {
+  color: $grey-10;
+  margin-right: 2.75em;
+  flex: 0 0 auto;
+}
+
+.overflowPadding:last-child {
+  padding-right: 25%;
+
+  .container {
+    margin-right: 0;
+  }
+}

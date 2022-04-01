@@ -19,7 +19,7 @@ export const SwimmingPool: React.FC<IconBaseFProps> & SubComponents = ({ ...prop
 );
 
 const Colored: React.FC<IconBaseFProps> = ({ ...props }) => (
-  <SwimmingPool className="icon__colored--fill icon__stroke--none" {...props} />
+  <SwimmingPool className="icon__colored--fill icon__stroke--none__path" {...props} />
 );
 
 SwimmingPool.displayName = "IconSwimmingPool";

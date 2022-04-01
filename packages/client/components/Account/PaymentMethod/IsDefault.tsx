@@ -1,27 +1,27 @@
-import { RadioButton, RadioButtonFProps, useClassnames } from "@hashtag-design-system/components";
-import styles from "./IsDefault.module.scss";
+import { Heading, HeadingProps, Radio, RadioProps } from "@hashtag-design-system/components";
 
-export type Props = {
-  showDefault?: boolean;
-  ref?: React.RefAttributes<HTMLInputElement>["ref"];
-  headerProps?: React.ComponentPropsWithoutRef<"h6">;
+export type Props = RadioProps & {
+  hasDefault?: boolean;
+  header?: HeadingProps;
   text?: "default" | "selected";
 };
 
-export type FProps = Props & RadioButtonFProps;
-
-export const IsDefault: React.FC<FProps> = ({ showDefault = false, ref, headerProps = {}, text = "default", ...props }) => {
-  const [classNames, rest] = useClassnames("body-16 normal upper", headerProps);
-
+export const IsDefault: React.FC<Props> = ({ hasDefault = true, header = {}, text = "default", ...props }) => {
   return (
-    <div className={styles.container + " flex-row-center-center"}>
-      <RadioButton ref={ref} {...props} />
-      {showDefault && (
-        <h6 className={classNames} {...rest}>
-          {text}
-        </h6>
-      )}
-    </div>
+    <Radio {...props}>
+      <Heading
+        as="h6"
+        size="sm"
+        transform="translateY(-1px)"
+        fontWeight="normal"
+        textTransform="uppercase"
+        color="brand.secondary"
+        opacity={hasDefault && props.isChecked ? 1 : 0}
+        {...header}
+      >
+        {text}
+      </Heading>
+    </Radio>
   );
 };
 

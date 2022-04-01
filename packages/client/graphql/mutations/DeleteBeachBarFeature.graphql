@@ -1,0 +1,3 @@
+mutation DeleteBeachBarFeature($id: ID!) {
+  deleteBeachBarFeature(id: $id)
+}

@@ -1,0 +1,55 @@
+$gap: map-get($rem-spacers, 32);
+
+.container {
+  gap: $gap;
+}
+
+.header {
+  margin-bottom: $gap + map-get($rem-spacers, 8);
+
+  h4 {
+    color: $grey-9;
+  }
+}
+
+.review {
+  font-size: 0.875rem;
+  flex-grow: 0;
+  flex-shrink: 1;
+  flex-basis: calc(50% - (#{$gap} / 2)) !important;
+  justify-content: flex-start;
+
+  & > div:last-child {
+    $padding: map-get($em-spacers, 16);
+    height: 100%;
+    max-width: none;
+    margin-left: -($padding);
+    margin-bottom: -($padding);
+    width: calc(100% + (#{$padding} * 2));
+
+    & > div,
+    textarea {
+      height: inherit;
+    }
+
+    textarea {
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+
+      $bg: $grey-3;
+      border-color: $bg;
+      background-color: $bg;
+
+      &:hover,
+      &:focus {
+        $bg: $grey-4;
+        border-color: $bg;
+        background-color: $bg;
+      }
+    }
+
+    label {
+      background-color: unset !important;
+    }
+  }
+}

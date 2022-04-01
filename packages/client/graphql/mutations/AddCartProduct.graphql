@@ -1,13 +1,27 @@
-mutation AddCartProduct($cartId: ID!, $productId: ID!, $quantity: Int, $date: Date!, $timeId: ID!) {
-  addCartProduct(cartId: $cartId, productId: $productId, quantity: $quantity, date: $date, timeId: $timeId) {
+mutation AddCartProduct(
+  $cartId: ID!
+  $productId: ID!
+  $quantity: Int
+  $date: Date!
+  $people: Int!
+  $startTimeId: ID!
+  $endTimeId: ID!
+) {
+  addCartProduct(
+    cartId: $cartId
+    productId: $productId
+    quantity: $quantity
+    date: $date
+    people: $people
+    startTimeId: $startTimeId
+    endTimeId: $endTimeId
+  ) {
+    id
+    quantity
+    people
     product {
       id
-      quantity
-      product {
-        id
-        name
-      }
+      name
     }
-    added
   }
 }

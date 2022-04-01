@@ -24,7 +24,7 @@ export const CartFoodCrudMutation = extendType({
         const cart = await getOrCreateCart({ payload, cartId });
         if (!cart) throw new ApolloError("Please create a new shopping cart", errors.NOT_FOUND);
 
-        const food = await prisma.food.findUnique({ where: { id: BigInt(foodId) }, include: {} });
+        const food = await prisma.food.findUnique({ where: { id: BigInt(foodId) } });
         if (!food) throw new ApolloError("Food was not found", errors.NOT_FOUND);
         const maxQuantity = food.maxQuantity;
         if (quantity && quantity > maxQuantity) {
@@ -76,12 +76,8 @@ export const CartFoodCrudMutation = extendType({
       description: "Delete (remove) a food from a shopping cart",
       args: { id: idArg() },
       resolve: async (_, { id }, { prisma }): Promise<boolean> => {
-        const cartFood = await prisma.cartFood.findUnique({ where: { id: BigInt(id) } });
-        if (!cartFood) throw new ApolloError("Food does not exist in this shopping cart", errors.CONFLICT);
-
         try {
-          // TODO: Fix
-          // await cartFood.softRemove();
+          await prisma.cartFood.delete({ where: { id: BigInt(id) } });
         } catch (err) {
           throw new ApolloError(err.message);
         }

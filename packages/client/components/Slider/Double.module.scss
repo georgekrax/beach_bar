@@ -1,0 +1,138 @@
+@use "sass:math";
+
+$thumb-size: map-get($em-spacers, 32);
+$track-height: em(5);
+$active-clr: $volcano-5;
+$paddingY: map-get($em-spacers, 4);
+$paddingX: map-get($em-spacers, 8);
+
+@mixin thumb--base() {
+  height: $thumb-size;
+  width: $thumb-size;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.container {
+  --percent1: "0%";
+  --percent2: "0%";
+  position: relative;
+  min-height: $thumb-size;
+}
+
+.input,
+.track {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+}
+
+.track {
+  $track-bg-clr: $grey-4;
+  height: $track-height;
+  background: linear-gradient(
+    to right,
+    $track-bg-clr var(--percent1),
+    $active-clr var(--percent1),
+    $active-clr var(--percent2),
+    $track-bg-clr var(--percent2)
+  );
+}
+
+.input {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-color: transparent;
+  outline: none;
+  pointer-events: none;
+
+  &::-webkit-slider-runnable-track {
+    -webkit-appearance: none;
+  }
+
+  &::-moz-range-track {
+    -moz-appearance: none;
+  }
+
+  &::-ms-track {
+    appearance: none;
+  }
+
+  &::-webkit-slider-runnable-track,
+  &::-moz-range-track,
+  &::-ms-track {
+    height: $track-height;
+  }
+
+  // ! This is not going to work
+  // &::-webkit-slider-thumb {
+  // &::-moz-range-thumb {
+  // ...styles
+  // }
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    @include thumb--base();
+  }
+
+  &::-moz-range-thumb {
+    -webkit-appearance: none;
+    @include thumb--base();
+  }
+
+  &::-ms-thumb {
+    appearance: none;
+    @include thumb--base();
+  }
+
+  &:active + .thumb {
+    background-color: $grey-1;
+    color: $grey-9;
+  }
+}
+
+.thumb {
+  position: absolute;
+  padding: $paddingY $paddingX;
+  min-height: $thumb-size;
+  min-width: $thumb-size;
+  border: 2px solid $active-clr;
+  user-select: none;
+  pointer-events: none;
+  background-color: $active-clr;
+  color: $grey-1;
+  @include transition-2s("ease-out", "background-color, color");
+
+  &:first-of-type {
+    padding-right: $paddingY;
+    padding-left: $paddingX;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  &:nth-of-type(2) {
+    padding-right: $paddingY;
+    padding-left: $paddingX;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+}
+
+@include responsive() {
+  .thumb {
+    $smallerPadding: math.div($paddingY, 2);
+    padding: $smallerPadding $paddingY;
+
+    &:first-of-type {
+      padding-right: $smallerPadding;
+      padding-left: $paddingY;
+    }
+
+    &:nth-of-type(2) {
+      padding-right: $paddingY;
+      padding-left: $smallerPadding;
+    }
+  }
+}

@@ -1,19 +1,19 @@
-.box {
-  border: 1px solid $grey-7;
-  border-radius: 14px;
-  padding: map-get($em-spacers, 8);
-  background-color: $grey-1;
-  cursor: pointer;
-  @include transition-2s("ease-out", "background-color, opacity");
+// .box {
+// border: 1px solid $grey-7;
+// border-radius: 14px;
+// padding: map-get($em-spacers, 8);
+// background-color: $grey-1;
+// cursor: pointer;
+// @include transition-2s("ease-out", "background-color, opacity");
 
-  &:active {
-    opacity: 0.5;
-    background-color: $grey-3;
-  }
+// &:active {
+//   opacity: 0.5;
+//   background-color: $grey-3;
+// }
 
-  @media (hover: hover) {
-    &:hover {
-      opacity: 0.5;
-    }
-  }
-}
+// @media (hover: hover) {
+//   &:hover {
+//     opacity: 0.5;
+//   }
+// }
+// }

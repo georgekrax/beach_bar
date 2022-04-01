@@ -19,20 +19,24 @@
 }
 
 .searchBar {
+  $margin: map-get($em-spacers, 24);
   position: absolute;
   margin: 0;
   padding: $wrapper-padding;
+  // So that you can click on a marker below the searchBar
+  // not having to be 2em below the searchBar
+  padding-bottom: 0;
 
   // margin: $wrapper-padding;
   // margin-top: map-get($em-spacers, 4);
   // margin-right: map-get($em-spacers, 16);
 
-  .closeDialog {
-    margin-left: map-get($em-spacers, 32);
+  .redirectBtn {
+    margin-right: $margin;
   }
 
-  & > div:first-child {
-    margin: 0;
+  .closeDialog {
+    margin-left: $margin;
   }
 }
 
@@ -52,14 +56,24 @@
   background: linear-gradient(to top, $grey-1 50%, transparent 70%);
 
   & > div {
-    padding: 0 $wrapper-padding;
-
-    &:first-child > div > section > div:last-child {
-      padding-right: 0;
+    &:first-child {
+      padding: 0 $wrapper-padding;
     }
 
     &:last-child {
-      margin-bottom: map-get($em-spacers, 8);
+      padding: 0;
+      margin-bottom: map-get($em-spacers, 16);
+      border: none;
     }
   }
+}
+
+.error {
+  margin: 0 auto;
+  margin-top: map-get($em-spacers, 32);
+  padding: map-get($em-spacers, 16);
+  width: fit-content;
+  background-color: $grey-1;
+  border-radius: 16px;
+  // box-shadow
 }

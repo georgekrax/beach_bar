@@ -1,0 +1,48 @@
+query DashboardBilling($beachBarId: ID!, $dates: DashboardDatesArg = null) {
+  dashboardBilling(beachBarId: $beachBarId, dates: $dates) {
+    avgProducts {
+      ...DashboardDateValue
+    }
+    avgFoods {
+      ...DashboardDateValue
+    }
+    products {
+      revenue {
+        ...DashboardDateValue
+      }
+      mostCommon {
+        timesBooked
+        product {
+          id
+          name
+        }
+      }
+    }
+    foods {
+      revenue {
+        ...DashboardDateValue
+      }
+      mostCommon {
+        timesPurchased
+        food {
+          id
+          name
+        }
+      }
+    }
+    refundedPayments {
+      date
+      payments {
+        id
+        refCode
+        isRefunded
+      }
+    }
+    customersCountries {
+      value
+      country {
+        ...CountryBase
+      }
+    }
+  }
+}

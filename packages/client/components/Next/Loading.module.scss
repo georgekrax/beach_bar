@@ -1,0 +1,15 @@
+.loading {
+  background-color: $loading-bg;
+}
+
+.text {
+  min-height: map-get($rem-spacers, 16);
+}
+
+.spinner circle {
+  stroke: $volcano-5 !important;
+}
+
+.screen {
+  min-height: 30vh;
+}

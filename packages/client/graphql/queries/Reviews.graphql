@@ -1,0 +1,14 @@
+query Reviews {
+  reviews {
+    ...BeachBarReviewBase
+    beachBar {
+      id
+      name
+      slug
+    }
+    payment {
+      id
+      timestamp
+    }
+  }
+}

@@ -1,22 +1,22 @@
-.container {
-  $bg: $volcano-2;
-  background-color: $bg;
-  // border-color: $bg;
-  align-self: center;
-  @include transition-2s("ease-out", "opacity");
+// .container {
+// $bg: $volcano-2;
+// background-color: $bg;
+// border-color: $bg;
+// align-self: center;
+// @include transition-2s("ease-out", "opacity");
 
-  & > svg:last-child {
-    position: absolute;
-  }
+// & > svg:last-child {
+//   position: absolute;
+// }
 
-  &:active {
-    opacity: 0.8;
-    background-color: $bg;
-  }
+// &:active {
+//   opacity: 0.8;
+//   background-color: $bg;
+// }
 
-  :global {
-    @include path--filled-classNames() {
-      fill: $red-5 !important;
-    }
-  }
-}
+// :global {
+//   @include path--filled-classNames() {
+//     fill: $red-5 !important;
+//   }
+// }
+// }

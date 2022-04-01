@@ -1,19 +1,12 @@
-import Icons from "@/components/Icons";
 import { MOTION } from "@/config/index";
 import { BasicCardFragment } from "@/graphql/generated";
-import { Button, CreditCard } from "@hashtag-design-system/components";
-import { motion } from "framer-motion";
-import { useMemo } from "react";
+import { CreditCard, Flex, IconButton, MotionBox } from "@hashtag-design-system/components";
+import Icon from "@hashtag-design-system/icons";
 import { Add } from "./Add";
 import { CardBrand } from "./CardBrand";
 import { Edit } from "./Edit";
-import {
-  AccountPaymentMethodEditProps,
-  AccountPaymentMethodIsDefaultFProps,
-  AccountPaymentMethodIsDefaultProps,
-} from "./index";
+import { AccountPaymentMethodEditProps, AccountPaymentMethodIsDefaultProps } from "./index";
 import { IsDefault } from "./IsDefault";
-import styles from "./PaymentMethod.module.scss";
 
 type SubComponents = {
   Edit: typeof Edit;
@@ -22,72 +15,76 @@ type SubComponents = {
   CardBrand: typeof CardBrand;
 };
 
-type Props = {
-  card: BasicCardFragment;
-  isDefault?: boolean;
-  onEditClick?: React.ComponentPropsWithoutRef<"button">["onClick"];
-  onRemoveClick?: React.ComponentPropsWithoutRef<"button">["onClick"];
-  edit?: boolean;
-  remove?: boolean;
-  defaultText?: AccountPaymentMethodIsDefaultProps["text"];
-};
+type Props = Partial<Pick<AccountPaymentMethodEditProps, "handleEdit">> &
+  Pick<React.ComponentPropsWithoutRef<"div">, "onClick"> & {
+    card: BasicCardFragment;
+    isDefault?: boolean;
+    onEditClick?: React.ComponentPropsWithoutRef<"button">["onClick"];
+    onRemoveClick?: React.ComponentPropsWithoutRef<"button">["onClick"];
+    edit?: boolean;
+    remove?: boolean;
+    defaultText?: AccountPaymentMethodIsDefaultProps["text"];
+  };
 
-export const PaymentMethod: React.FC<
-  Props &
-    Partial<Pick<AccountPaymentMethodEditProps, "handleEdit">> &
-    Pick<React.ComponentPropsWithoutRef<"div">, "onClick"> &
-    Pick<AccountPaymentMethodIsDefaultFProps, "onValue">
-> &
-  SubComponents = ({
+export const PaymentMethod: React.FC<Props> & SubComponents = ({
+  card,
   isDefault,
+  defaultText,
   edit = true,
   remove = true,
-  defaultText,
   handleEdit,
   onEditClick,
   onRemoveClick,
   onClick,
-  onValue,
-  card,
 }) => {
-  const isItDefault = useMemo(() => isDefault, [isDefault, card]);
-
   return (
-    <motion.div className={styles.container + " w100"} variants={MOTION.productVariants} onClick={onClick}>
-      <div className={styles.cardContainer + " zi--md w100"}>
-        <CreditCard
-          brand={card.brand?.name as any}
-          creditNum={card.last4}
-          ownerName={card.cardholderName}
-          expirationDate={card.expMonth + "/" + card?.expYear.toString().slice(-2)}
-        />
-      </div>
-      <div className={styles.edit + " w100 flex-row-space-between-center"}>
+    <MotionBox variants={MOTION.productVariants} onClick={onClick}>
+      <CreditCard
+        brand={card.brand?.name as any}
+        creditNum={card.last4}
+        owner={card.cardholderName}
+        expirationDate={card.expMonth + "/" + card?.expYear?.toString().slice(-2)}
+        zIndex="md"
+        width="inherit"
+        bgGradient="linear(to right, #ec008c, #fc6767)"
+        boxShadow="inset 0px 0px 12px rgba(0 0 0 / 25%)"
+      />
+      <Flex
+        justify="space-between"
+        align="center"
+        width="84%"
+        mx="auto"
+        py={2.5}
+        px={4}
+        bg="gray.200"
+        borderBottomRadius="regular"
+        transform="translateY(-2px)"
+        cursor="pointer"
+      >
         <IsDefault
-          showDefault={isItDefault}
-          defaultChecked={isItDefault}
-          checked={isItDefault}
+          isChecked={isDefault}
           text={defaultText}
-          onValue={async newVal => {
-            if (newVal !== isItDefault && handleEdit)
-              await handleEdit({ ...card, month: card.expMonth, year: card.expYear, isDefault: newVal }, false);
-            if (onValue) onValue(newVal);
+          onClick={async e => {
+            const newVal = (e.target as HTMLInputElement).value === "true";
+            if (newVal !== isDefault && handleEdit) {
+              await handleEdit({ ...card, id: card.id.toString(), isDefault: newVal }, false);
+            }
           }}
         />
-        <div className={styles.actions + " flex-row-flex-start-center"}>
+        <Flex align="inherit" gap={3}>
           {edit && (
-            <Button variant="secondary" aria-label="Edit" onClick={onEditClick}>
-              <Icons.Edit />
-            </Button>
+            <IconButton variant="outline" colorScheme="teal" aria-label="Edit" onClick={onEditClick}>
+              <Icon.Edit boxSize={5} />
+            </IconButton>
           )}
           {remove && (
-            <Button variant="secondary" aria-label="Remove" onClick={onRemoveClick}>
-              <Icons.Close.Circle />
-            </Button>
+            <IconButton variant="outline" colorScheme="teal" aria-label="Remove" onClick={onRemoveClick}>
+              <Icon.CloseCircle boxSize={5} />
+            </IconButton>
           )}
-        </div>
-      </div>
-    </motion.div>
+        </Flex>
+      </Flex>
+    </MotionBox>
   );
 };
 

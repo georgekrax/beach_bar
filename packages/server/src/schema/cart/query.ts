@@ -52,12 +52,12 @@ export const CartQuery = extendType({
       description: "Get the latest cart of an authenticated user or create one",
       args: { cartId: nullable(idArg({ description: "The ID value of the shopping cart, if it is created previously" })) },
       resolve: async (_, { cartId }, { req, res, payload }) => {
-        const idCookie = req.cookies["cart_id"];
+        const idCookie = req.cookies[process.env.CART_COOKIE_NAME];
         const cart = await getOrCreateCart({ payload, cartId: cartId || idCookie, getOnly: false });
         if (!cart) throw new ApolloError(errors.SOMETHING_WENT_WRONG);
-        if (!idCookie) {
+        if (!idCookie || String(idCookie) !== String(cart.id)) {
           // TODO: Remove cookie in payment
-          res.cookie("cart_id", cart.id, {
+          res.cookie(process.env.CART_COOKIE_NAME, cart.id, {
             httpOnly: false,
             secure: process.env.NODE_ENV === "production",
             maxAge: ms("2 weeks"),

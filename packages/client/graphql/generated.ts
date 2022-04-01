@@ -1,10 +1,11 @@
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
 export type Maybe<T> = T | undefined;
+export type InputMaybe<T> = T | undefined;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
-const defaultOptions =  {}
+const defaultOptions = {} as const;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -12,28 +13,503 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
-  BigInt: any;
+  /**
+   * The `BigInt` scalar type represents non-fractional signed whole numeric values.
+   * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt
+   */
+  BigInt: number;
+  /** The `Byte` scalar type represents byte value as a Buffer */
+  Bytes: any;
   /** Use JavaScript Date object for date-only fields. */
-  Date: any;
-  /** Use JavaScript Date object for date/time fields. */
-  DateTime: any;
+  Date: string;
+  /** A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
+  DateTime: string;
+  /** An arbitrary-precision Decimal type */
+  Decimal: any;
   /** A field whose value conforms to the standard internet email address format as specified in RFC822: https://www.w3.org/Protocols/rfc822/. */
-  Email: any;
+  Email: string;
   /** A field whose value is a IPv4 address: https://en.wikipedia.org/wiki/IPv4. */
-  IPv4: any;
-  /** The `JSON` scalar type represents JSON values as specified by ECMA-404 */
-  JSON: any;
+  IPv4: string;
+  /** The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
+  Json: any;
   /** A time string at UTC, such as 10:15:30Z */
-  Time: any;
-  /** The `Upload` scalar type represents a file upload. */
-  Upload: any;
+  Time: string;
   /** A field whose value conforms to the standard URL format as specified in RFC3986: https://www.ietf.org/rfc/rfc3986.txt. */
   URL: string;
+  /** The `Upload` scalar type represents a file upload. */
+  Upload: any;
+};
+
+/** Represents a user's account */
+export type Account = {
+  readonly __typename?: 'Account';
+  readonly address: Maybe<Scalars['String']>;
+  readonly age: Maybe<Scalars['Int']>;
+  readonly birthday: Maybe<Scalars['DateTime']>;
+  readonly city: Maybe<Scalars['String']>;
+  readonly country: Maybe<Country>;
+  readonly honorificTitle: Maybe<Scalars['String']>;
+  readonly id: Scalars['ID'];
+  readonly imgUrl: Maybe<Scalars['String']>;
+  readonly phoneNumber: Maybe<Scalars['String']>;
+  readonly telCountry: Maybe<Country>;
+  readonly trackHistory: Scalars['Boolean'];
+  readonly user: User;
+  readonly zipCode: Maybe<Scalars['String']>;
+};
+
+/** Info to be returned when a payment is created (made) */
+export type AddPayment = {
+  readonly __typename?: 'AddPayment';
+  /** A boolean that indicates if the payments have been successfully created (made) */
+  readonly added: Scalars['Boolean'];
+  /** The payment that is created (made) */
+  readonly payment: Payment;
+};
+
+export type AddPaymentResult = AddPayment | Error;
+
+/** Info to be returned when a product is marked (added) as a reserved one from a payment */
+export type AddReservedProduct = {
+  readonly __typename?: 'AddReservedProduct';
+  /** A boolean that indicates if the product has been successfully marked as a reserved one */
+  readonly added: Scalars['Boolean'];
+  /** The product that is marked as a reserved one */
+  readonly reservedProduct: ReservedProduct;
+};
+
+export type AddReservedProductResult = AddReservedProduct | Error;
+
+/** Info to be returned, when checking if a #beach_bar product is available */
+export type AvailableProduct = {
+  readonly __typename?: 'AvailableProduct';
+  /** The hour, to check if available */
+  readonly hourTime: HourTime;
+  /** A boolean that indicates if the product is available in the hour time */
+  readonly isAvailable: Scalars['Boolean'];
+};
+
+/** Represents a #beach_bar */
+export type BeachBar = {
+  readonly __typename?: 'BeachBar';
+  readonly avgRating: Scalars['Float'];
+  readonly category: BeachBarCategory;
+  readonly closingTime: HourTime;
+  readonly contactPhoneNumber: Scalars['String'];
+  readonly currency: Currency;
+  readonly description: Maybe<Scalars['String']>;
+  readonly displayRegardlessCapacity: Scalars['Boolean'];
+  readonly entryFee: Maybe<Scalars['Decimal']>;
+  readonly features: ReadonlyArray<BeachBarFeature>;
+  readonly foods: ReadonlyArray<Food>;
+  readonly hasCompletedSignUp: Maybe<Scalars['Boolean']>;
+  readonly hidePhoneNumber: Scalars['Boolean'];
+  readonly id: Scalars['ID'];
+  readonly imgUrls: ReadonlyArray<BeachBarImgUrl>;
+  readonly isActive: Scalars['Boolean'];
+  readonly location: BeachBarLocation;
+  readonly name: Scalars['String'];
+  readonly openingTime: HourTime;
+  readonly owners: ReadonlyArray<BeachBarOwner>;
+  /** A list with all the payments of a #beach_bar */
+  readonly payments: ReadonlyArray<Payment>;
+  readonly products: ReadonlyArray<Product>;
+  readonly restaurants: ReadonlyArray<BeachBarRestaurant>;
+  readonly reviews: ReadonlyArray<BeachBarReview>;
+  readonly slug: Scalars['String'];
+  readonly styles: ReadonlyArray<BeachBarStyle>;
+  readonly thumbnailUrl: Maybe<Scalars['String']>;
+  readonly timestamp: Scalars['DateTime'];
+  readonly updatedAt: Scalars['DateTime'];
+  readonly zeroCartTotal: Scalars['Boolean'];
+};
+
+/** Represents a #beach_bar's category */
+export type BeachBarCategory = {
+  readonly __typename?: 'BeachBarCategory';
+  readonly description: Maybe<Scalars['String']>;
+  readonly id: Scalars['ID'];
+  readonly name: Scalars['String'];
+};
+
+/** Represents a #beach_bar's feature (service) & its details */
+export type BeachBarFeature = {
+  readonly __typename?: 'BeachBarFeature';
+  readonly beachBar: BeachBar;
+  readonly description: Maybe<Scalars['String']>;
+  readonly id: Scalars['BigInt'];
+  readonly quantity: Scalars['Int'];
+  readonly service: BeachBarService;
+  readonly timestamp: Scalars['DateTime'];
+  readonly updatedAt: Scalars['DateTime'];
+};
+
+/** Represents a #beach_bar's image (URL value) */
+export type BeachBarImgUrl = {
+  readonly __typename?: 'BeachBarImgUrl';
+  readonly beachBar: BeachBar;
+  readonly description: Maybe<Scalars['String']>;
+  readonly id: Scalars['BigInt'];
+  readonly imgUrl: Scalars['String'];
+  readonly timestamp: Scalars['DateTime'];
+  readonly updatedAt: Scalars['DateTime'];
+};
+
+/** Represents a #beach_bar's location details */
+export type BeachBarLocation = {
+  readonly __typename?: 'BeachBarLocation';
+  readonly address: Scalars['String'];
+  readonly city: City;
+  readonly country: Country;
+  /** Get the location of the #beach_bar formatted */
+  readonly formattedLocation: Scalars['String'];
+  readonly id: Scalars['ID'];
+  readonly latitude: Scalars['Decimal'];
+  readonly longitude: Scalars['Decimal'];
+  readonly region: Maybe<Region>;
+  /** The 'point' value generated from latitude & longitude, provided by the PostGIS PostgreSQL extension */
+  readonly whereIs: Maybe<ReadonlyArray<Scalars['Float']>>;
+  readonly zipCode: Maybe<Scalars['String']>;
+};
+
+/** Represents a #beach_bar's owner */
+export type BeachBarOwner = {
+  readonly __typename?: 'BeachBarOwner';
+  readonly beachBar: BeachBar;
+  readonly id: Scalars['ID'];
+  readonly isPrimary: Scalars['Boolean'];
+  readonly owner: Owner;
+  readonly publicInfo: Maybe<Scalars['Boolean']>;
+  readonly timestamp: Scalars['DateTime'];
+};
+
+/** Represents a #beach_bar's restaurant */
+export type BeachBarRestaurant = {
+  readonly __typename?: 'BeachBarRestaurant';
+  readonly beachBar: BeachBar;
+  readonly description: Maybe<Scalars['String']>;
+  readonly foodItems: ReadonlyArray<RestaurantFoodItem>;
+  readonly id: Scalars['ID'];
+  readonly isActive: Scalars['Boolean'];
+  readonly name: Scalars['String'];
+};
+
+/** Represents a #beach_bar's review, by a customer */
+export type BeachBarReview = {
+  readonly __typename?: 'BeachBarReview';
+  readonly answer: Maybe<Scalars['String']>;
+  readonly beachBar: BeachBar;
+  readonly body: Maybe<Scalars['String']>;
+  readonly customer: Customer;
+  readonly id: Scalars['ID'];
+  readonly month: Maybe<MonthTime>;
+  readonly negativeComment: Maybe<Scalars['String']>;
+  readonly payment: Payment;
+  readonly positiveComment: Maybe<Scalars['String']>;
+  readonly ratingValue: Scalars['Int'];
+  readonly timestamp: Scalars['DateTime'];
+  readonly updatedAt: Scalars['DateTime'];
+  readonly visitType: Maybe<ReviewVisitType>;
+  readonly votes: ReadonlyArray<ReviewVote>;
+};
+
+/** Represents a service (feature), which a #beach_bar can provide */
+export type BeachBarService = {
+  readonly __typename?: 'BeachBarService';
+  readonly icon: Icon;
+  readonly id: Scalars['ID'];
+  readonly name: Scalars['String'];
+};
+
+/** The style of a #beach_bar */
+export type BeachBarStyle = {
+  readonly __typename?: 'BeachBarStyle';
+  readonly id: Scalars['ID'];
+  readonly name: Scalars['String'];
+};
+
+/** Represents a customer's credit or debit card */
+export type Card = {
+  readonly __typename?: 'Card';
+  readonly brand: Maybe<CardBrand>;
+  readonly cardholderName: Scalars['String'];
+  readonly country: Maybe<Country>;
+  readonly customer: Customer;
+  readonly expMonth: Maybe<Scalars['Int']>;
+  readonly expYear: Maybe<Scalars['Int']>;
+  readonly id: Scalars['BigInt'];
+  readonly isDefault: Scalars['Boolean'];
+  readonly last4: Scalars['String'];
+  readonly stripeId: Scalars['String'];
+  readonly type: Scalars['String'];
+};
+
+/** Represents the brand of a credit or debit card */
+export type CardBrand = {
+  readonly __typename?: 'CardBrand';
+  readonly id: Scalars['ID'];
+  readonly name: Scalars['String'];
+};
+
+/** Represents a shopping cart */
+export type Cart = {
+  readonly __typename?: 'Cart';
+  readonly foods: ReadonlyArray<CartFood>;
+  readonly foodsTotal: Scalars['Decimal'];
+  readonly id: Scalars['BigInt'];
+  readonly notes: ReadonlyArray<CartNote>;
+  readonly products: ReadonlyArray<CartProduct>;
+  readonly productstotal: Scalars['Decimal'];
+  readonly total: Scalars['Decimal'];
+  readonly user: Maybe<User>;
 };
 
 
+/** Represents a shopping cart */
+export type CartFoodsArgs = {
+  beachBarId: InputMaybe<Scalars['ID']>;
+};
 
 
+/** Represents a shopping cart */
+export type CartNotesArgs = {
+  beachBarId: InputMaybe<Scalars['ID']>;
+};
+
+
+/** Represents a shopping cart */
+export type CartProductsArgs = {
+  beachBarId: InputMaybe<Scalars['ID']>;
+};
+
+/** Represents a food listed in a shoppingcart */
+export type CartFood = {
+  readonly __typename?: 'CartFood';
+  readonly cart: Cart;
+  readonly date: Maybe<Scalars['DateTime']>;
+  readonly deletedAt: Maybe<Scalars['DateTime']>;
+  readonly food: Food;
+  readonly id: Scalars['BigInt'];
+  readonly quantity: Scalars['Int'];
+  readonly timestamp: Scalars['DateTime'];
+  readonly total: Maybe<Scalars['Float']>;
+  readonly updatedAt: Scalars['DateTime'];
+};
+
+/** Represents a note of the user, added in its shopping cart, for the #beach_bar(s), it is going to visit */
+export type CartNote = {
+  readonly __typename?: 'CartNote';
+  readonly beachBar: BeachBar;
+  readonly body: Scalars['String'];
+  readonly cart: Cart;
+  readonly id: Scalars['BigInt'];
+  readonly timestamp: Scalars['DateTime'];
+};
+
+/** Represents a shopping cart with its products */
+export type CartProduct = {
+  readonly __typename?: 'CartProduct';
+  readonly cart: Cart;
+  readonly date: Scalars['DateTime'];
+  readonly endTime: HourTime;
+  readonly id: Scalars['BigInt'];
+  readonly people: Scalars['Int'];
+  readonly product: Product;
+  readonly quantity: Scalars['Int'];
+  readonly startTime: HourTime;
+  readonly timestamp: Scalars['DateTime'];
+  readonly total: Maybe<Scalars['Float']>;
+};
+
+/** Represents an object with an array of cities and regions */
+export type CitiesAndRegions = {
+  readonly __typename?: 'CitiesAndRegions';
+  readonly cities: ReadonlyArray<City>;
+  readonly regions: ReadonlyArray<Region>;
+};
+
+/** Represents a city of a country */
+export type City = {
+  readonly __typename?: 'City';
+  readonly country: Country;
+  readonly id: Scalars['ID'];
+  readonly name: Scalars['String'];
+};
+
+/** Represents a country */
+export type Country = {
+  readonly __typename?: 'Country';
+  readonly alpha2Code: Scalars['String'];
+  readonly alpha3Code: Scalars['String'];
+  readonly callingCode: Scalars['String'];
+  readonly cities: ReadonlyArray<City>;
+  readonly currency: Currency;
+  readonly id: Scalars['ID'];
+  readonly isEu: Scalars['Boolean'];
+  readonly name: Scalars['String'];
+};
+
+/** Represents a currency */
+export type Currency = {
+  readonly __typename?: 'Currency';
+  readonly id: Scalars['ID'];
+  readonly isoCode: Scalars['String'];
+  readonly name: Scalars['String'];
+  readonly secondSymbol: Maybe<Scalars['String']>;
+  readonly symbol: Scalars['String'];
+};
+
+/** Represents a customer */
+export type Customer = {
+  readonly __typename?: 'Customer';
+  readonly cards: ReadonlyArray<Card>;
+  readonly country: Maybe<Country>;
+  readonly email: Maybe<Scalars['String']>;
+  readonly id: Scalars['BigInt'];
+  readonly phoneNumber: Maybe<Scalars['String']>;
+  readonly user: Maybe<User>;
+};
+
+/** Revenue and number of successful payments of a #beach_bar */
+export type DashboardBalance = {
+  readonly __typename?: 'DashboardBalance';
+  /** Today's gross volume of each operating hour */
+  readonly grossVolume: ReadonlyArray<DashboardDateValue>;
+  readonly revenue: Scalars['Float'];
+  readonly successfulPayments: ReadonlyArray<Payment>;
+};
+
+/** Data fetched for the dashboard billing page */
+export type DashboardBilling = {
+  readonly __typename?: 'DashboardBilling';
+  /** Average foods purchased per payment */
+  readonly avgFoods: ReadonlyArray<DashboardDateValue>;
+  /** Average product booked per payment */
+  readonly avgProducts: ReadonlyArray<DashboardDateValue>;
+  readonly customersCountries: ReadonlyArray<DashboardBillingCustomerCountries>;
+  readonly foods: DashboardBillingFoods;
+  readonly products: DashboardBillingProducts;
+  readonly refundedPayments: ReadonlyArray<DashboardBillingRefundedPayments>;
+};
+
+export type DashboardBillingCustomerCountries = {
+  readonly __typename?: 'DashboardBillingCustomerCountries';
+  readonly country: Country;
+  readonly value: Scalars['Int'];
+};
+
+export type DashboardBillingField = {
+  readonly revenue: ReadonlyArray<DashboardDateValue>;
+};
+
+/** Foods revenue, difference from the yesterday, average foods per payment */
+export type DashboardBillingFoods = DashboardBillingField & {
+  readonly __typename?: 'DashboardBillingFoods';
+  readonly mostCommon: ReadonlyArray<DashboardBillingMostCommonFoods>;
+  readonly revenue: ReadonlyArray<DashboardDateValue>;
+};
+
+export type DashboardBillingMostCommonFoods = {
+  readonly __typename?: 'DashboardBillingMostCommonFoods';
+  readonly food: Food;
+  readonly timesPurchased: Scalars['Int'];
+};
+
+export type DashboardBillingMostCommonProducts = {
+  readonly __typename?: 'DashboardBillingMostCommonProducts';
+  readonly product: Product;
+  readonly timesBooked: Scalars['Int'];
+};
+
+/** Products revenue, difference from the yesterday, average products per payment */
+export type DashboardBillingProducts = DashboardBillingField & {
+  readonly __typename?: 'DashboardBillingProducts';
+  readonly mostCommon: ReadonlyArray<DashboardBillingMostCommonProducts>;
+  readonly revenue: ReadonlyArray<DashboardDateValue>;
+};
+
+export type DashboardBillingRefundedPayments = {
+  readonly __typename?: 'DashboardBillingRefundedPayments';
+  readonly date: Scalars['Date'];
+  readonly payments: ReadonlyArray<Payment>;
+};
+
+/** Data fetched for the dashboard bookings page */
+export type DashboardBookings = {
+  readonly __typename?: 'DashboardBookings';
+  readonly bookings: ReadonlyArray<Payment>;
+  readonly capacity: DashboardBookingsCapacity;
+  readonly mostActive: DashboardMostActive;
+};
+
+/** Capacity percentage of customers and number of products booked */
+export type DashboardBookingsCapacity = {
+  readonly __typename?: 'DashboardBookingsCapacity';
+  readonly arr: ReadonlyArray<DashboardCapacityPercentage>;
+  readonly maxCapacity: ReadonlyArray<DashboardMaxCapacity>;
+  readonly totalCustomers: ReadonlyArray<DashboardDateValue>;
+  readonly totalHourCustomers: ReadonlyArray<DashboardDateValue>;
+};
+
+/** Capacity percentage of customers and number of products booked */
+export type DashboardCapacity = {
+  readonly __typename?: 'DashboardCapacity';
+  readonly availableProducts: Scalars['Int'];
+  readonly percentage: Scalars['Float'];
+  readonly reservedProducts: Scalars['Int'];
+  readonly totalHourCustomers: Scalars['Int'];
+  readonly totalMaxPeopleCapacity: Scalars['Int'];
+};
+
+export type DashboardCapacityPercentage = {
+  readonly __typename?: 'DashboardCapacityPercentage';
+  readonly date: Scalars['Date'];
+  readonly percentage: Scalars['Float'];
+};
+
+export type DashboardDateValue = {
+  readonly __typename?: 'DashboardDateValue';
+  readonly date: Scalars['DateTime'];
+  readonly value: Scalars['Float'];
+};
+
+/** The arguments to fetch data for a specific time period */
+export type DashboardDatesArg = {
+  readonly end: InputMaybe<Scalars['DateTime']>;
+  readonly start: InputMaybe<Scalars['DateTime']>;
+};
+
+/** Data (of the day) fetched for a #beach_bar's dashboard homepage */
+export type DashboardHomePage = {
+  readonly __typename?: 'DashboardHomePage';
+  readonly avgRating: ReadonlyArray<DashboardDateValue>;
+  readonly avgSpendPerPerson: ReadonlyArray<DashboardDateValue>;
+  readonly balance: DashboardBalance;
+  readonly capacity: DashboardCapacity;
+  readonly grossVolume: ReadonlyArray<DashboardDateValue>;
+  readonly newCustomers: ReadonlyArray<DashboardNewCustomers>;
+  readonly totalCustomers: ReadonlyArray<DashboardDateValue>;
+};
+
+export type DashboardMaxCapacity = {
+  readonly __typename?: 'DashboardMaxCapacity';
+  readonly availableProducts: Scalars['Int'];
+  readonly date: Scalars['Date'];
+  readonly limitPeople: Scalars['Int'];
+};
+
+export type DashboardMostActive = {
+  readonly __typename?: 'DashboardMostActive';
+  readonly hour: Scalars['Int'];
+  readonly weekDay: Scalars['String'];
+};
+
+/** The new customers of a #beach_bar on a specific date */
+export type DashboardNewCustomers = {
+  readonly __typename?: 'DashboardNewCustomers';
+  readonly customers: ReadonlyArray<Customer>;
+  readonly date: Scalars['Date'];
+};
 
 /** Represents a formatted error */
 export type Error = {
@@ -51,852 +527,37 @@ export type ErrorObject = {
   readonly message: Maybe<Scalars['String']>;
 };
 
-
-
-
-
-
-/** Represents the payload (data) of Amazon Web Services (AWS) S3 */
-export type S3Payload = {
-  readonly __typename?: 'S3Payload';
-  readonly signedRequest: Scalars['URL'];
-  /** The presigned URL gives you access to the object identified in the URL, to upload the user's image */
-  readonly url: Scalars['URL'];
+/** Represents a user's uploaded file */
+export type File = {
+  readonly __typename?: 'File';
+  /** A string representing the file encoding, such as 7bit */
+  readonly encoding: Scalars['String'];
+  /** A string representing the name of the uploaded file */
+  readonly filename: Scalars['String'];
+  /** A string representing the MIME type of the uploaded file, such as image/jpeg */
+  readonly mimetype: Scalars['String'];
 };
 
-/** Represents a #beach_bar's image (URL value) */
-export type BeachBarImgUrl = {
-  readonly __typename?: 'BeachBarImgUrl';
-  readonly id: Scalars['ID'];
-  readonly imgUrl: Scalars['URL'];
-  /** A short description about what the image represents. The characters of the description should not exceed the number 175 */
-  readonly description: Maybe<Scalars['String']>;
+/** Represents a food item - product of a #beach_bar */
+export type Food = {
+  readonly __typename?: 'Food';
   readonly beachBar: BeachBar;
-  readonly updatedAt: Scalars['DateTime'];
-  readonly timestamp: Scalars['DateTime'];
-};
-
-/** Info to be returned when an image (URL) is added to a #beach_bar */
-export type AddBeachBarImgUrl = {
-  readonly __typename?: 'AddBeachBarImgUrl';
-  /** The image that is added */
-  readonly imgUrl: BeachBarImgUrl;
-  /** Indicates if the image (URL) has been successfully been added to the #beach_bar */
-  readonly added: Scalars['Boolean'];
-};
-
-/** Info to be returned when the details of #beach_bar's image, are updated */
-export type UpdateBeachBarImgUrl = {
-  readonly __typename?: 'UpdateBeachBarImgUrl';
-  /** The image that is updated */
-  readonly imgUrl: BeachBarImgUrl;
-  /** Indicates if the image details have been successfully updated */
-  readonly updated: Scalars['Boolean'];
-};
-
-/** Represents a #beach_bar's location details */
-export type BeachBarLocation = {
-  readonly __typename?: 'BeachBarLocation';
-  readonly id: Scalars['ID'];
-  /** The street address of the #beach_bar */
-  readonly address: Scalars['String'];
-  /** The zip code of the #beach_bar, for its street address */
-  readonly zipCode: Maybe<Scalars['String']>;
-  /** The latitude of the #beach_bar in the maps, provided by Mapbox */
-  readonly latitude: Scalars['Float'];
-  /** The longitude of the #beach_bar in the maps, provided by Mapbox */
-  readonly longitude: Scalars['Float'];
-  /** The 'point' value generated from latitude & longitude, provided by the PostGIS PostgreSQL extension */
-  readonly whereIs: Maybe<ReadonlyArray<Scalars['Float']>>;
-  /** The country the #beach_bar is located at */
-  readonly country: Country;
-  /** The city the #beach_bar is located at */
-  readonly city: City;
-  /** The region the #beach_bar is located at */
-  readonly region: Maybe<Region>;
-};
-
-/** Info to be returned when location is added (assigned) to a #beach_bar */
-export type AddBeachBarLocation = {
-  readonly __typename?: 'AddBeachBarLocation';
-  /** The location of the #beach_bar that is added */
-  readonly location: BeachBarLocation;
-  /** A boolean that indicates if the #beach_bar locations has been successfully being added */
-  readonly added: Scalars['Boolean'];
-};
-
-/** Info to be returned when the details of #beach_bar location are updated */
-export type UpdateBeachBarLocation = {
-  readonly __typename?: 'UpdateBeachBarLocation';
-  /** The #beach_bar location that is updated */
-  readonly location: BeachBarLocation;
-  /** A boolean that indicates if the #beach_bar location details have been successfully updated */
-  readonly updated: Scalars['Boolean'];
-};
-
-/** Represents a coupon code interface for a #beach_bar */
-export type CouponCodeInterface = {
-  readonly id: Scalars['ID'];
-  readonly refCode: Scalars['String'];
-  readonly title: Scalars['String'];
-  readonly discountPercentage: Scalars['Float'];
-  readonly isActive: Scalars['Boolean'];
-  readonly validUntil: Maybe<Scalars['DateTime']>;
-  /** Represents how many times this coupon code can be used */
-  readonly timesLimit: Scalars['Int'];
-  /** Represents the times this coupon code has been used */
-  readonly timesUsed: Scalars['Int'];
-  /** The #beach_bar this coupon code applies to */
-  readonly beachBar: Maybe<BeachBar>;
-};
-
-/** Represents an offer code interface for an offer campaign */
-export type OfferCampaignCodeInterface = {
-  readonly id: Scalars['ID'];
-  readonly refCode: Scalars['String'];
-  /** The total amount to make a discount from */
-  readonly totalAmount: Scalars['Float'];
-  /** Represents how many times this offer code has been used */
-  readonly timesUsed: Scalars['Int'];
-  /** The campaign the offer code is assigned to */
-  readonly campaign: OfferCampaign;
-  readonly timestamp: Scalars['DateTime'];
+  readonly category: FoodCategory;
   readonly deletedAt: Maybe<Scalars['DateTime']>;
-};
-
-/** Represents a coupon code */
-export type CouponCode = CouponCodeInterface & {
-  readonly __typename?: 'CouponCode';
-  readonly id: Scalars['ID'];
-  readonly refCode: Scalars['String'];
-  readonly title: Scalars['String'];
-  readonly discountPercentage: Scalars['Float'];
-  readonly isActive: Scalars['Boolean'];
-  readonly validUntil: Maybe<Scalars['DateTime']>;
-  /** Represents how many times this coupon code can be used */
-  readonly timesLimit: Scalars['Int'];
-  /** Represents the times this coupon code has been used */
-  readonly timesUsed: Scalars['Int'];
-  /** The #beach_bar this coupon code applies to */
-  readonly beachBar: Maybe<BeachBar>;
-};
-
-/** Represents an offer campaign of a #beach_bar */
-export type OfferCampaign = {
-  readonly __typename?: 'OfferCampaign';
-  readonly id: Scalars['ID'];
-  readonly title: Scalars['String'];
-  readonly discountPercentage: Scalars['Float'];
-  readonly isActive: Scalars['Boolean'];
-  readonly validUntil: Maybe<Scalars['DateTime']>;
-  /** A list of products that are discounted via the campaign */
-  readonly products: ReadonlyArray<Product>;
-};
-
-/** Represents an offer code for a campaign of a product */
-export type OfferCampaignCode = OfferCampaignCodeInterface & {
-  readonly __typename?: 'OfferCampaignCode';
-  readonly id: Scalars['ID'];
-  readonly refCode: Scalars['String'];
-  /** The total amount to make a discount from */
-  readonly totalAmount: Scalars['Float'];
-  /** Represents how many times this offer code has been used */
-  readonly timesUsed: Scalars['Int'];
-  /** The campaign the offer code is assigned to */
-  readonly campaign: OfferCampaign;
-  readonly timestamp: Scalars['DateTime'];
-  readonly deletedAt: Maybe<Scalars['DateTime']>;
-};
-
-export type VoucherCodeQueryResult = CouponCode | OfferCampaignCode | Error;
-
-/** Info to be returned when a coupon code is added (issued) */
-export type AddCouponCode = {
-  readonly __typename?: 'AddCouponCode';
-  /** The coupon code that is added */
-  readonly couponCode: CouponCode;
-  /** Indicates if the coupon code has been successfully added */
-  readonly added: Scalars['Boolean'];
-};
-
-/** Info to be returned when a coupon code details are updated */
-export type UpdateCouponCode = {
-  readonly __typename?: 'UpdateCouponCode';
-  /** The coupon code that is updated */
-  readonly couponCode: CouponCode;
-  /** Indicates if the coupon code has been successfully updated */
-  readonly updated: Scalars['Boolean'];
-  /** Indicates if the coupon code has been deleted */
-  readonly deleted: Scalars['Boolean'];
-};
-
-/** Info to be returned when an offer campaign is added to a or some #beach_bar's product(s) */
-export type AddOfferCampaign = {
-  readonly __typename?: 'AddOfferCampaign';
-  /** The offer campaign that is added */
-  readonly offerCampaign: OfferCampaign;
-  /** Indicates if the offer campaign has been successfully added */
-  readonly added: Scalars['Boolean'];
-};
-
-/** Info to be returned when an offer campaign details are updated */
-export type UpdateOfferCampaign = {
-  readonly __typename?: 'UpdateOfferCampaign';
-  /** The offer campaign that is updated */
-  readonly offerCampaign: OfferCampaign;
-  /** Indicates if the offer campaign details have been successfully updated */
-  readonly updated: Scalars['Boolean'];
-};
-
-/** Info to be returned when a new offer code, of an offer campaign, is added (issued) */
-export type AddOfferCampaignCode = {
-  readonly __typename?: 'AddOfferCampaignCode';
-  /** The offer code that is added (issued) */
-  readonly offerCode: OfferCampaignCode;
-  /** Indicates if the offer code has been successfully added (issued) */
-  readonly added: Scalars['Boolean'];
-};
-
-/** Represents a coupon code, with its referral code revealed */
-export type CouponCodeReveal = CouponCodeInterface & {
-  readonly __typename?: 'CouponCodeReveal';
-  readonly id: Scalars['ID'];
-  /** The referral code of the coupon code, to use and get a discount */
-  readonly refCode: Scalars['String'];
-  readonly title: Scalars['String'];
-  readonly discountPercentage: Scalars['Float'];
-  readonly isActive: Scalars['Boolean'];
-  readonly validUntil: Maybe<Scalars['DateTime']>;
-  /** Represents how many times this coupon code can be used */
-  readonly timesLimit: Scalars['Int'];
-  /** Represents the times this coupon code has been used */
-  readonly timesUsed: Scalars['Int'];
-  /** The #beach_bar this coupon code applies to */
-  readonly beachBar: Maybe<BeachBar>;
-};
-
-/** Represents an offer campaign code, with its referral code revealed */
-export type OfferCampaignCodeReveal = OfferCampaignCodeInterface & {
-  readonly __typename?: 'OfferCampaignCodeReveal';
-  readonly id: Scalars['ID'];
-  /** The referral code of the offer campaign code, to use and get a discount */
-  readonly refCode: Scalars['String'];
-  /** The total amount to make a discount from */
-  readonly totalAmount: Scalars['Float'];
-  /** Represents how many times this offer code has been used */
-  readonly timesUsed: Scalars['Int'];
-  /** The campaign the offer code is assigned to */
-  readonly campaign: OfferCampaign;
-  readonly timestamp: Scalars['DateTime'];
-  readonly deletedAt: Maybe<Scalars['DateTime']>;
-};
-
-/** Represents a the limit number, on how many times a product can be provided by a #beach_bar on a specific date */
-export type ProductReservationLimit = {
-  readonly __typename?: 'ProductReservationLimit';
   readonly id: Scalars['BigInt'];
-  readonly limitNumber: Scalars['Int'];
-  /** The date this limit is applicable for the product */
-  readonly date: Scalars['Date'];
-  /** The product this limit is assigned to */
-  readonly product: Product;
-  /** The hour that this limit is applicable for */
-  readonly startTime: HourTime;
-  /** The hour that this limit ends */
-  readonly endTime: HourTime;
-};
-
-/** Info to be returned when a reservation limit is added to a #beach_bar's product */
-export type AddProductReservationLimit = {
-  readonly __typename?: 'AddProductReservationLimit';
-  /** The reservation limit that is added */
-  readonly reservationLimit: ReadonlyArray<ProductReservationLimit>;
-  /** A boolean that indicates if the limit has been successfully added to the product */
-  readonly added: Scalars['Boolean'];
-};
-
-/** Info to be returned when a reservation limit of a #beach_bar's product is updated */
-export type UpdateProductReservationLimit = {
-  readonly __typename?: 'UpdateProductReservationLimit';
-  /** The reservation limit that is updated */
-  readonly reservationLimit: ReadonlyArray<ProductReservationLimit>;
-  /** A boolean that indicates if the limit details has been successfully updated */
-  readonly updated: Scalars['Boolean'];
-};
-
-/** Info to be returned, when checking if a #beach_bar product is available */
-export type AvailableProduct = {
-  readonly __typename?: 'AvailableProduct';
-  /** The hour, to check if available */
-  readonly hourTime: HourTime;
-  /** A boolean that indicates if the product is available in the hour time */
-  readonly isAvailable: Scalars['Boolean'];
-};
-
-/** Represents a product of a #beach_bar */
-export type Product = {
-  readonly __typename?: 'Product';
-  readonly id: Scalars['ID'];
+  readonly ingredients: Maybe<Scalars['String']>;
+  readonly maxQuantity: Scalars['Int'];
   readonly name: Scalars['String'];
-  readonly description: Maybe<Scalars['String']>;
-  readonly price: Scalars['Float'];
-  readonly isActive: Scalars['Boolean'];
-  readonly isIndividual: Scalars['Boolean'];
-  readonly maxPeople: Scalars['Int'];
-  readonly imgUrl: Maybe<Scalars['URL']>;
-  /** The #beach_bar that sells the product */
-  readonly beachBar: BeachBar;
-  /** The category of the product */
-  readonly category: ProductCategory;
-  readonly updatedAt: Scalars['DateTime'];
-  readonly deletedAt: Maybe<Scalars['DateTime']>;
-};
-
-/** Represents a product of a #beach_bar, and info about it's rest availability quantity */
-export type ProductAvailability = {
-  readonly __typename?: 'ProductAvailability';
-  readonly product: Product;
-  /** How many other's products of this type are available for purchase */
-  readonly quantity: Scalars['Int'];
-};
-
-/** Info to be returned when a product is added to a #beach_bar */
-export type AddProduct = {
-  readonly __typename?: 'AddProduct';
-  /** The product that is added */
-  readonly product: Product;
-  /** A boolean that indicates if the product has been successfully added to the #beach_bar */
-  readonly added: Scalars['Boolean'];
-};
-
-/** Info to be returned when a product of a #beach_bar is updated */
-export type UpdateProduct = {
-  readonly __typename?: 'UpdateProduct';
-  /** The product that is updated */
-  readonly product: Product;
-  /** A boolean that indicates if the product has been successfully updated */
-  readonly updated: Scalars['Boolean'];
-};
-
-/** The info to be returned when checking for a #beach_bar product's availability hour times */
-export type ProductAvailabilityHour = {
-  readonly __typename?: 'ProductAvailabilityHour';
-  /** The hour time of a day */
-  readonly hourTime: HourTime;
-  readonly isAvailable: Scalars['Boolean'];
-};
-
-/** Represents a category of a #beach_bar's restaurant menu */
-export type RestaurantMenuCategory = {
-  readonly __typename?: 'RestaurantMenuCategory';
-  readonly id: Scalars['ID'];
-  readonly name: Scalars['String'];
-};
-
-/** Represents a #beach_bar's restaurant food item (product) in its menu catalog */
-export type RestaurantFoodItem = {
-  readonly __typename?: 'RestaurantFoodItem';
-  readonly id: Scalars['ID'];
-  readonly name: Scalars['String'];
-  readonly price: Scalars['Float'];
-  /** The URL value of the food item's picture */
-  readonly imgUrl: Maybe<Scalars['URL']>;
-  /** The menu category this food item is associated to */
-  readonly menuCategory: RestaurantMenuCategory;
-};
-
-/** Info to be returned when a food item is added to a #beach_bar's restaurant */
-export type AddRestaurantFoodItem = {
-  readonly __typename?: 'AddRestaurantFoodItem';
-  /** The food item being added & its info */
-  readonly foodItem: RestaurantFoodItem;
-  /** A boolean that indicates if the food item has been successfully being added to a restaurant */
-  readonly added: Scalars['Boolean'];
-};
-
-/** Info to be returned when the food item of #beach_bar restaurant, is updated */
-export type UpdateRestaurantFoodItem = {
-  readonly __typename?: 'UpdateRestaurantFoodItem';
-  /** The food item being updated */
-  readonly foodItem: RestaurantFoodItem;
-  /** A boolean that indicates if the food item has been successfully updated */
-  readonly updated: Scalars['Boolean'];
-};
-
-/** Represents a #beach_bar's restaurant */
-export type BeachBarRestaurant = {
-  readonly __typename?: 'BeachBarRestaurant';
-  /** The ID value of the restaurant */
-  readonly id: Scalars['ID'];
-  /** The name of the restaurant */
-  readonly name: Scalars['String'];
-  /** A short description (info) about the restaurant */
-  readonly description: Maybe<Scalars['String']>;
-  /** A boolean that indicates if the restaurant is active. It can be changed by the primary owner of the #beach_bar */
-  readonly isActive: Scalars['Boolean'];
-  /** The #beach_bar this restaurant is owned by */
-  readonly beachBar: BeachBar;
-  /** A list of food items (products) in the menu of the restaurant */
-  readonly foodItems: ReadonlyArray<RestaurantFoodItem>;
-};
-
-/** Info to be returned when a restaurant is added to a #beach_bar */
-export type AddBeachBarRestaurant = {
-  readonly __typename?: 'AddBeachBarRestaurant';
-  /** The restaurant that is added & its info */
-  readonly restaurant: BeachBarRestaurant;
-  /** A boolean that indicates if the restaurant has been successfully being added to the #beach_bar */
-  readonly added: Scalars['Boolean'];
-};
-
-/** Info to be returned when the details of #beach_bar restaurant, are updated */
-export type UpdateBeachBarRestaurant = {
-  readonly __typename?: 'UpdateBeachBarRestaurant';
-  /** The restaurant that is updated */
-  readonly restaurant: BeachBarRestaurant;
-  /** A boolean that indicates if the restaurant details have been successfully updated */
-  readonly updated: Scalars['Boolean'];
-};
-
-/** Represents a vote for a user's review */
-export type ReviewVoteType = {
-  readonly __typename?: 'ReviewVoteType';
-  /** The ID value of the vote type */
-  readonly id: Scalars['ID'];
-  /** The type value of the vote */
-  readonly value: Scalars['String'];
-};
-
-/** Represents a vote for a user's review */
-export type ReviewVote = {
-  readonly __typename?: 'ReviewVote';
-  /** The ID value of the vote */
-  readonly id: Scalars['ID'];
-  /** The review of where the vote is added */
-  readonly review: BeachBarReview;
-  /** The user that added the vote */
-  readonly user: User;
-  /** The type of the vote */
-  readonly type: ReviewVoteType;
-  /** The last time the vote was updated, in the format of a timestamp */
-  readonly updatedAt: Scalars['DateTime'];
-  /** The timestamp recorded, when the vote was created */
+  readonly price: Scalars['Decimal'];
   readonly timestamp: Scalars['DateTime'];
-};
-
-/** Represents an answer for a review of a #beach_bar, by the owner */
-export type ReviewAnswer = {
-  readonly __typename?: 'ReviewAnswer';
-  /** The ID value of the particular review answer */
-  readonly id: Scalars['ID'];
-  /** The body (content) of the review answer, written by the reviewed #beach_bar's owner */
-  readonly body: Scalars['String'];
-  /** The review this answer is assigned to */
-  readonly review: BeachBarReview;
-  /** The last time user's account was updated, in the format of a timestamp */
   readonly updatedAt: Scalars['DateTime'];
-  /** The timestamp recorded, when the user's account was created */
-  readonly timestamp: Scalars['DateTime'];
 };
 
-/** Info to be returned when an answer is added to a customer's review */
-export type AddReviewAnswer = {
-  readonly __typename?: 'AddReviewAnswer';
-  /** The answer that is added to the review */
-  readonly answer: ReviewAnswer;
-  /** A boolean that indicates if the answer has been successfully being added to the customer's review */
-  readonly added: Scalars['Boolean'];
-};
-
-/** Info to be returned when the answer of a customer's review is updated */
-export type UpdateReviewAnswer = {
-  readonly __typename?: 'UpdateReviewAnswer';
-  /** The review answer that is updated */
-  readonly answer: ReviewAnswer;
-  /** A boolean that indicates if the review answer has been successfully updated */
-  readonly updated: Scalars['Boolean'];
-};
-
-/** Represents a #beach_bar's review, by a customer */
-export type BeachBarReview = {
-  readonly __typename?: 'BeachBarReview';
-  /** The ID value of the review */
-  readonly id: Scalars['ID'];
-  /** The user's rating, between 0 and 10 */
-  readonly ratingValue: Scalars['Int'];
-  /** A positive comment for the #beach_bar */
-  readonly positiveComment: Maybe<Scalars['String']>;
-  /** A negative comment for the #beach_bar */
-  readonly negativeComment: Maybe<Scalars['String']>;
-  /** A summary (description) of the user's overall review */
-  readonly review: Maybe<Scalars['String']>;
-  readonly beachBar: BeachBar;
-  /** The votes of users for this review */
-  readonly votes: ReadonlyArray<ReviewVote>;
-  /** The answer of the #beach_bar to this review */
-  readonly answer: Maybe<ReviewAnswer>;
-  /** The customer that submitted the particular review for the #beach_bar */
-  readonly customer: Customer;
-  /** The type of visit for the user */
-  readonly visitType: Maybe<ReviewVisitType>;
-  /** The visited month of the customer visited the #beach_bar */
-  readonly month: Maybe<MonthTime>;
-  /** The relevant payment the user made, to be able to review a #beach_bar's products */
-  readonly payment: Payment;
-  readonly updatedAt: Scalars['DateTime'];
-  readonly timestamp: Scalars['DateTime'];
-};
-
-/** Info to be returned when a review is added to a #beach_bar */
-export type AddBeachBarReview = {
-  readonly __typename?: 'AddBeachBarReview';
-  /** The review that is added */
-  readonly review: BeachBarReview;
-  /** A boolean that indicates if the review has been successfully being added to the #beach_bar */
-  readonly added: Scalars['Boolean'];
-};
-
-/** Info to be returned when the details of a customer's review, are updated */
-export type UpdateBeachBarReview = {
-  readonly __typename?: 'UpdateBeachBarReview';
-  /** The review that is updated */
-  readonly review: BeachBarReview;
-  /** A boolean that indicates if the review has been successfully updated */
-  readonly updated: Scalars['Boolean'];
-};
-
-/** Represents a service (feature), which a #beach_bar can provide */
-export type BeachBarService = {
-  readonly __typename?: 'BeachBarService';
-  readonly id: Scalars['ID'];
-  readonly name: Scalars['String'];
-  /** Details about which icon to be used in the front-end */
+/** Represents a category of a food a #beach_bar provides */
+export type FoodCategory = {
+  readonly __typename?: 'FoodCategory';
   readonly icon: Icon;
-};
-
-/** Represents a #beach_bar's feature (service) & its details */
-export type BeachBarFeature = {
-  readonly __typename?: 'BeachBarFeature';
-  /** The feature (service) the #beach_bar provides */
-  readonly service: BeachBarService;
-  /** The #beach_bar that provides the feature (service) */
-  readonly beachBar: BeachBar;
-  /** An integer that indicates the quantity of the service, a #beach_bar provides */
-  readonly quantity: Scalars['Int'];
-  /** A short description about the service */
-  readonly description: Maybe<Scalars['String']>;
-  readonly updatedAt: Scalars['DateTime'];
-  readonly timestamp: Scalars['DateTime'];
-};
-
-/** Info to be returned when a feature is added (assigned) to a #beach_bar */
-export type AddBeachBarFeature = {
-  readonly __typename?: 'AddBeachBarFeature';
-  /** The feature that will be added (assigned) to the #beach_bar */
-  readonly feature: BeachBarFeature;
-  /** A boolean that indicates if the feature has been successfully added (assigned) to the #beach_bar */
-  readonly added: Scalars['Boolean'];
-};
-
-/** Info to be returned when the info of a feature of a #beach_bar, are updated */
-export type UpdateBeachBarFeature = {
-  readonly __typename?: 'UpdateBeachBarFeature';
-  /** The feature that will be updated */
-  readonly feature: BeachBarFeature;
-  /** A boolean that indicates if the feature has been successfully updated */
-  readonly updated: Scalars['Boolean'];
-};
-
-/** Represents a #beach_bar */
-export type BeachBar = {
-  readonly __typename?: 'BeachBar';
-  /** The ID value of the #beach_bar */
   readonly id: Scalars['ID'];
-  /** The name of the #beach_bar */
-  readonly name: Scalars['String'];
-  /** The "slugified" name of the #beach_bar, in a URL friendly way */
-  readonly slug: Scalars['String'];
-  /** A description text about the #beach_bar */
-  readonly description: Maybe<Scalars['String']>;
-  /** The entry fee this #beach_bar has applied for guests */
-  readonly entryFee: Maybe<Scalars['Float']>;
-  /** The average rating of all the user reviews for this #beach_bar */
-  readonly avgRating: Scalars['Float'];
-  readonly thumbnailUrl: Scalars['URL'];
-  /** A phone number to contact the #beach_bar directly */
-  readonly contactPhoneNumber: Scalars['String'];
-  /** A boolean that indicates if to NOT display the #beach_bar contact phone number */
-  readonly hidePhoneNumber: Scalars['Boolean'];
-  /** A boolean that indicates if the #beach_bar is active or not */
-  readonly isActive: Scalars['Boolean'];
-  /** A boolean that indicates if the #beach_bar is shown in the search results, even if it has no availability */
-  readonly isAvailable: Scalars['Boolean'];
-  /** The location of the #beach_bar */
-  readonly location: BeachBarLocation;
-  /** Get the location of the #beach_bar formatted */
-  readonly formattedLocation: Scalars['String'];
-  /** A list with all the payments of a #beach_bar */
-  readonly payments: ReadonlyArray<Payment>;
-  /** The category (type) of the #beach_bar */
-  readonly category: BeachBarCategory;
-  /** A list with all the #beach_bar's images (URL values) */
-  readonly imgUrls: ReadonlyArray<BeachBarImgUrl>;
-  /** A list with all the #beach_bar's products */
-  readonly products: ReadonlyArray<Product>;
-  /** A list of all the reviews of the #beach_bar */
-  readonly reviews: ReadonlyArray<BeachBarReview>;
-  /** A list of all the #beach_bar's features */
-  readonly features: ReadonlyArray<BeachBarFeature>;
-  /** A list of all the styles the #beach_bar is associated with */
-  readonly styles: Maybe<ReadonlyArray<BeachBarStyle>>;
-  /** A list of all the restaurants of a #beach_bar */
-  readonly restaurants: Maybe<ReadonlyArray<BeachBarRestaurant>>;
-  /** The default currency of the #beach_bar */
-  readonly defaultCurrency: Currency;
-  /** A list of all the owners of the #beach_bar */
-  readonly owners: ReadonlyArray<BeachBarOwner>;
-  /** The opening quarter time of the #beach_bar, in the time zone of its country */
-  readonly openingTime: QuarterTime;
-  /** The closing quarter time of the #beach_bar, in the time zone of its country */
-  readonly closingTime: QuarterTime;
-  /** The last time the #beach_bar was updated, in the format of a timestamp */
-  readonly updatedAt: Scalars['DateTime'];
-  /** The timestamp recorded, when the #beach_bar was created */
-  readonly timestamp: Scalars['DateTime'];
-};
-
-export type BeachBarResult = BeachBar | Error;
-
-/** Info to be returned when a #beach_bar is added (registered) to the platform */
-export type AddBeachBar = {
-  readonly __typename?: 'AddBeachBar';
-  /** The #beach_bar that is added */
-  readonly beachBar: BeachBar;
-  /** A boolean that indicates if the #beach_bar has been successfully being registered */
-  readonly added: Scalars['Boolean'];
-};
-
-/** Info to be returned when the details of #beach_bar are updated */
-export type UpdateBeachBar = {
-  readonly __typename?: 'UpdateBeachBar';
-  /** The #beach_bar that is updated */
-  readonly beachBar: BeachBar;
-  /** A boolean that indicates if the #beach_bar details have been successfully updated */
-  readonly updated: Scalars['Boolean'];
-};
-
-/** Boolean values to show if the #beach_bar is available */
-export type BeachBarAvailability = {
-  readonly __typename?: 'BeachBarAvailability';
-  /** A boolean that indicates if the #beach_bar has availability for the dates selected */
-  readonly hasAvailability: Maybe<Scalars['Boolean']>;
-  /** A boolean that indicates if the #beach_bar has availability for the people selected */
-  readonly hasCapacity: Maybe<Scalars['Boolean']>;
-};
-
-/** Represents a shopping cart with its products */
-export type CartProduct = {
-  readonly __typename?: 'CartProduct';
-  readonly id: Scalars['ID'];
-  readonly quantity: Scalars['Int'];
-  /** The date of purchase of the product */
-  readonly date: Scalars['Date'];
-  readonly timestamp: Scalars['DateTime'];
-  /** The shopping cart the product is added to */
-  readonly cart: Cart;
-  /** The product that is added to the shopping cart */
-  readonly product: Product;
-  /** The hour of use of the product */
-  readonly time: HourTime;
-};
-
-/** Info to be returned when a product is added to a shopping cart */
-export type AddCartProduct = {
-  readonly __typename?: 'AddCartProduct';
-  /** The product that is added to the cart */
-  readonly product: CartProduct;
-  readonly added: Scalars['Boolean'];
-};
-
-/** Info to be returned when a product of a shopping cart is updated */
-export type UpdateCartProduct = {
-  readonly __typename?: 'UpdateCartProduct';
-  /** The product that is updated */
-  readonly product: CartProduct;
-  readonly updated: Scalars['Boolean'];
-};
-
-/** Represents a shopping cart */
-export type Cart = Node & {
-  readonly __typename?: 'Cart';
-  readonly id: Scalars['ID'];
-  readonly total: Scalars['Float'];
-  /** The use that has created this shopping cart */
-  readonly user: Maybe<User>;
-  /** A list with all the cart products */
-  readonly products: Maybe<ReadonlyArray<CartProduct>>;
-};
-
-/** Represents a customer's credit or debit card */
-export type Card = {
-  readonly __typename?: 'Card';
-  readonly id: Scalars['ID'];
-  readonly type: Scalars['String'];
-  readonly expMonth: Scalars['Int'];
-  readonly expYear: Scalars['Int'];
-  readonly last4: Scalars['String'];
-  readonly cardholderName: Scalars['String'];
-  readonly isDefault: Scalars['Boolean'];
-  readonly stripeId: Scalars['String'];
-  /** The customer that owns this credit or debit card */
-  readonly customer: Customer;
-  /** The brand of the credit or debit card */
-  readonly brand: Maybe<CardBrand>;
-  /** The country of the customer's card */
-  readonly country: Maybe<Country>;
-};
-
-/** Info to be returned when a card is added to a customer */
-export type AddCard = {
-  readonly __typename?: 'AddCard';
-  /** The card that is added to a customer */
-  readonly card: Card;
-  /** A boolean that indicates if the card has been successfully added */
-  readonly added: Scalars['Boolean'];
-};
-
-/** Info to be returned when a customer card details are updated */
-export type UpdateCard = {
-  readonly __typename?: 'UpdateCard';
-  /** The card that is updated */
-  readonly card: Card;
-  /** A boolean that indicates if the card details have been successfully updated */
-  readonly updated: Scalars['Boolean'];
-};
-
-/** Represents a customer */
-export type Customer = {
-  readonly __typename?: 'Customer';
-  readonly id: Scalars['ID'];
-  readonly email: Scalars['Email'];
-  readonly phoneNumber: Maybe<Scalars['String']>;
-  /** The user that is a customer too */
-  readonly user: Maybe<User>;
-  /** A list of all the customers cards */
-  readonly cards: Maybe<ReadonlyArray<Card>>;
-  /** The country of the customer */
-  readonly country: Maybe<Country>;
-};
-
-/** Info to be returned when a customer is added (registered) */
-export type AddCustomer = {
-  readonly __typename?: 'AddCustomer';
-  /** The customer that is added (registered) */
-  readonly customer: Customer;
-  readonly added: Scalars['Boolean'];
-};
-
-/** Info to be returned when a customer details are updated */
-export type UpdateCustomer = {
-  readonly __typename?: 'UpdateCustomer';
-  /** The customer that is updated */
-  readonly customer: Customer;
-  readonly updated: Scalars['Boolean'];
-};
-
-/** Represents the brand of a credit or debit card */
-export type CardBrand = {
-  readonly __typename?: 'CardBrand';
-  readonly id: Scalars['ID'];
-  readonly name: Scalars['String'];
-};
-
-/** Represents a city of a country */
-export type City = {
-  readonly __typename?: 'City';
-  /** The ID of the city */
-  readonly id: Scalars['ID'];
-  /** The name of the city */
-  readonly name: Scalars['String'];
-  /** The country of the city */
-  readonly country: Maybe<Country>;
-};
-
-/** Represents a currency */
-export type Currency = {
-  readonly __typename?: 'Currency';
-  readonly id: Scalars['ID'];
-  /** The name of the currency */
-  readonly name: Scalars['String'];
-  /** The ISO code of the currency internationally */
-  readonly isoCode: Scalars['String'];
-  /** The currency's symbol */
-  readonly symbol: Scalars['String'];
-  /** The currency's second (alternative) symbol */
-  readonly secondSymbol: Maybe<Scalars['String']>;
-};
-
-/** Represents a country */
-export type Country = {
-  readonly __typename?: 'Country';
-  /** The ID of the country */
-  readonly id: Scalars['ID'];
-  /** The name of the country */
-  readonly name: Scalars['String'];
-  /** The ISO 2 Alpha registered code of the country */
-  readonly alpha2Code: Scalars['String'];
-  /** The ISO 3 Alpha registered code of the country */
-  readonly alpha3Code: Scalars['String'];
-  /** The calling code of the country */
-  readonly callingCode: Scalars['String'];
-  /** A boolean that indicates if the country is part of European Union (EU) */
-  readonly isEu: Scalars['Boolean'];
-  /** The cities of the country */
-  readonly cities: Maybe<ReadonlyArray<City>>;
-  /** The currency of the country */
-  readonly currency: Currency;
-};
-
-/** Represents the status of a payment */
-export type PaymentStatus = {
-  readonly __typename?: 'PaymentStatus';
-  readonly id: Scalars['ID'];
-  readonly name: Scalars['String'];
-};
-
-/** Represents a component of a product. For example a sunbed. */
-export type ProductComponent = {
-  readonly __typename?: 'ProductComponent';
-  readonly id: Scalars['ID'];
-  readonly name: Scalars['String'];
-  /** Details about which icon to be used in the front-end */
-  readonly icon: Icon;
-};
-
-/** Represents a component of a product category, including the quantity that each category has. */
-export type ProductCategoryComponent = {
-  readonly __typename?: 'ProductCategoryComponent';
-  readonly quantity: Scalars['Int'];
-  readonly component: ProductComponent;
-  readonly category: ProductCategory;
-};
-
-/** Represents a #beach_bar's product category */
-export type ProductCategory = {
-  readonly __typename?: 'ProductCategory';
-  readonly id: Scalars['ID'];
-  readonly name: Scalars['String'];
-  readonly underscoredName: Scalars['String'];
-  readonly description: Maybe<Scalars['String']>;
-  /** The components of a category's product */
-  readonly components: ReadonlyArray<ProductCategoryComponent>;
-};
-
-/** Represents a review's visit type, by the user */
-export type ReviewVisitType = {
-  readonly __typename?: 'ReviewVisitType';
-  readonly id: Scalars['ID'];
-  /** The name of the particular visit type */
   readonly name: Scalars['String'];
 };
 
@@ -904,33 +565,8 @@ export type ReviewVisitType = {
 export type HourTime = {
   readonly __typename?: 'HourTime';
   readonly id: Scalars['ID'];
-  readonly value: Scalars['String'];
   readonly utcValue: Scalars['Time'];
-};
-
-/** Represents each quarter of the day */
-export type QuarterTime = {
-  readonly __typename?: 'QuarterTime';
-  readonly id: Scalars['ID'];
-  readonly value: Scalars['String'];
-  readonly utcValue: Scalars['Time'];
-};
-
-/** Represents each month of the year */
-export type MonthTime = {
-  readonly __typename?: 'MonthTime';
-  readonly id: Scalars['ID'];
-  readonly value: Scalars['String'];
-  /** The days (count) of a month */
-  readonly days: Scalars['Int'];
-};
-
-/** Represents a #beach_bar's category */
-export type BeachBarCategory = {
-  readonly __typename?: 'BeachBarCategory';
-  readonly id: Scalars['ID'];
-  readonly name: Scalars['String'];
-  readonly description: Maybe<Scalars['String']>;
+  readonly value: Scalars['Int'];
 };
 
 /** Represents a SVG icon to be used in the front-end */
@@ -938,186 +574,539 @@ export type Icon = {
   readonly __typename?: 'Icon';
   readonly id: Scalars['ID'];
   readonly name: Scalars['String'];
-  /** A unique public ID for the icon, to be matched in the front-end */
   readonly publicId: Scalars['String'];
 };
 
-/** Represents a voting category */
-export type VoteCategory = {
-  readonly __typename?: 'VoteCategory';
-  readonly id: Scalars['ID'];
-  readonly title: Scalars['String'];
-  readonly description: Scalars['String'];
-  readonly refCode: Scalars['String'];
+/** User info to be returned on login */
+export type LoginAuthorize = {
+  readonly __typename?: 'LoginAuthorize';
+  /** The access token to authenticate & authorize the user */
+  readonly accessToken: Scalars['String'];
+  /** A boolean that indicates if the user has also signed up, because it is a new one */
+  readonly isNewUser: Scalars['Boolean'];
+  /** The access token to authenticate & authorize the user */
+  readonly refreshToken: Scalars['String'];
+  /** A list of the user scopes */
+  readonly scope: ReadonlyArray<Scalars['String']>;
+  /** The user (object) that logins */
+  readonly user: User;
 };
 
-/** Represents the votes (voting result) of a voting category */
-export type VoteTag = {
-  readonly __typename?: 'VoteTag';
+/** Represents each month of the year */
+export type MonthTime = {
+  readonly __typename?: 'MonthTime';
+  readonly days: Scalars['Int'];
   readonly id: Scalars['ID'];
-  readonly upvotes: Scalars['Int'];
-  readonly downvotes: Scalars['Int'];
-  readonly totalVotes: Maybe<Scalars['Int']>;
-  /** The voting category these vote results are assigned to */
-  readonly category: VoteCategory;
+  readonly value: Scalars['String'];
 };
 
 /** Mutation */
 export type Mutation = {
   readonly __typename?: 'Mutation';
-  /** Upload a single file */
-  readonly uploadSingleFile: Maybe<File>;
-  /** Sample mutation */
-  readonly hello: Scalars['String'];
-  /** Sign the S3 URL for an object */
-  readonly signS3: S3Payload;
-  /** Add an image (URL) to a #beach_bar */
-  readonly addBeachBarImgUrl: AddBeachBarImgUrl;
-  /** Update the details of a #beach_bar's image */
-  readonly updateBeachBaImgUrl: UpdateBeachBarImgUrl;
-  /** Delete an image (URL) from a #beach_bar */
-  readonly deleteBeachBarImgUrl: Delete;
-  /** Add (assign) a location to a #beach_bar */
-  readonly addBeachBarLocation: AddBeachBarLocation;
-  /** Update the location details of a #beach_bar */
-  readonly updateBeachBarLocation: UpdateBeachBarLocation;
-  readonly cacheBeachBars: Scalars['Boolean'];
   /** Add (register) a new #beach_bar to the platform */
-  readonly addBeachBar: AddBeachBar;
-  /** Update a #beach_bar details */
-  readonly updateBeachBar: UpdateBeachBar;
-  /** Delete (remove) a #beach_bar from the platform */
-  readonly deleteBeachBar: Delete;
-  /** Add a product to a #beach_bar */
-  readonly addProduct: AddProduct;
-  /** Update a #beach_bar's product info */
-  readonly updateProduct: UpdateProduct;
-  /** Delete (remove) a product from a #beach_bar */
-  readonly deleteProduct: Delete;
-  /** Restore a (soft) deleted #beach_bar product */
-  readonly restoreBeachBarProduct: UpdateProduct;
-  /** Add a coupon code */
-  readonly addCouponCode: AddCouponCode;
-  /** Update a coupon code */
-  readonly updateCouponCode: UpdateCouponCode;
-  readonly deleteCouponCode: Delete;
-  /** Add an offer campaign to a #beach_bar */
-  readonly addOfferCampaign: AddOfferCampaign;
-  /** Update the details of an offer campaign of a #beach_bar */
-  readonly updateOfferCampaign: UpdateOfferCampaign;
-  /** Delete an offer campaign of a #beach_bar */
-  readonly deleteOfferCampaign: Delete;
-  /** Add (issue) a new offer code */
-  readonly addOfferCampaignCode: AddOfferCampaignCode;
-  /** Delete (invalidate) an offer code of an offer campaign */
-  readonly deleteOfferCode: Delete;
-  /** Add a reservation limit to a #beach_bar product */
-  readonly addProductReservationLimit: AddProductReservationLimit;
-  /** Update a #beach_bar's product reservation limit */
-  readonly updateProductReservationLimit: UpdateProductReservationLimit;
-  /** Delete a or some reservation limit(s) from a #beach_bar's product */
-  readonly deleteProductReservationLimit: Delete;
-  /** Add a food item to a #beach_bar restaurant */
-  readonly addRestaurantFoodItem: AddRestaurantFoodItem;
-  /** Update a #beach_bar's restaurant food item details */
-  readonly updateRestaurantFoodItem: UpdateRestaurantFoodItem;
-  /** Delete (remove) a food item from a #beach_bar's restaurant */
-  readonly deleteRestaurantFoodItem: Delete;
-  /** Add a restaurant of a #beach_bar */
-  readonly addBeachBarRestaurant: AddBeachBarRestaurant;
-  /** Update the restaurant details of a #beach_bar */
-  readonly updateBeachBarRestaurant: UpdateBeachBarRestaurant;
-  /** Delete (remove) a restaurant from a #beach_bar */
-  readonly deleteBeachBarRestaurant: Delete;
-  /** Upvote or downvote a customer's review on a #beach_bar */
-  readonly updateReviewVote: UpdateBeachBarReview;
-  /** Add a reply to a #beach_bar's review, by its owner */
-  readonly addReviewAnswer: AddReviewAnswer;
-  /** Update the body of a #beach_bar's review reply */
-  readonly updateReviewAnswer: UpdateReviewAnswer;
-  /** Delete (remove) a reply from a #beach_bar's review */
-  readonly deleteReviewAnswer: Delete;
-  /** Verify a user's payment to submit review */
-  readonly verifyUserPaymentForReview: Scalars['Boolean'];
-  /** Add a customer's review on a #beach_bar */
-  readonly addReview: AddBeachBarReview;
-  /** Update a customer's review on a #beach_bar */
-  readonly updateReview: UpdateBeachBarReview;
-  /** Delete a customer's review on a #beach_bar */
-  readonly deleteReview: Delete;
-  /** Add (assign) a feature to a #beach_bar */
-  readonly addBeachBarFeature: AddBeachBarFeature;
-  /** Update a feature of a #beach_bar */
-  readonly updateBeachBarFeature: UpdateBeachBarFeature;
-  /** Delete (remove) a feature (service) from a #beach_bar */
-  readonly deleteBeachBarFeature: Delete;
-  /** Delete a cart after a transaction. This mutation is also called if the user is not authenticated & closes the browser tab */
-  readonly deleteCart: Delete;
-  /** Add a product to a shopping cart */
-  readonly addCartProduct: AddCartProduct;
-  /** Update the quantity of a product in a shopping cart */
-  readonly updateCartProduct: UpdateCartProduct;
-  /** Delete (remove) a product from a shopping cart */
-  readonly deleteCartProduct: DeleteResult;
-  /** Add a payment method (credit / debit card) to a customer */
-  readonly addCustomerPaymentMethod: AddCard;
-  /** Update the details of customer's card */
-  readonly updateCustomerPaymentMethod: UpdateCard;
-  /** Delete (remove) a payment method (credit / debit card) from a customer */
-  readonly deleteCustomerPaymentMethod: Delete;
-  /** Update a customer's details */
-  readonly updateCustomer: UpdateCustomer;
-  /** Delete (remove) a customer */
-  readonly deleteCustomer: Delete;
-  /** Authorize a user with Google */
-  readonly authorizeWithGoogle: OAuthAuthorization;
-  /** Authorize a user with Facebook */
-  readonly authorizeWithFacebook: OAuthAuthorization;
-  /** Authorize a user with Instagram */
-  readonly authorizeWithInstagram: OAuthAuthorization;
+  readonly addBeachBar: BeachBar;
+  /** Add (assign) a feature to a #beach_bar. */
+  readonly addBeachBarFeature: BeachBarFeature;
+  /** Add an image (URL) to a #beach_bar */
+  readonly addBeachBarImgUrl: BeachBarImgUrl;
+  /** Add (assign) a location to a #beach_bar */
+  readonly addBeachBarLocation: BeachBarLocation;
   /** Add (assign) another owner to a #beach_bar too. Only available for the primary owner of a #beach_bar */
-  readonly addBeachBarOwner: AddBeachBarOwner;
-  /** Update a #beach_bar's owner info */
-  readonly updateBeachBarOwner: UpdateBeachBarOwner;
-  /** Delete (remove) an owner from a #beach_bar */
-  readonly deleteBeachBarOwner: DeleteResult;
+  readonly addBeachBarOwner: BeachBarOwner;
+  /** Add a restaurant of a #beach_bar */
+  readonly addBeachBarRestaurant: BeachBarRestaurant;
+  /** Add (assign) styles to a #beach_bar */
+  readonly addBeachBarStyles: ReadonlyArray<BeachBarStyle>;
+  /** Add a food to a shopping cart */
+  readonly addCartFood: CartFood;
+  /** Add a note to a shopping cart's #beach_bar */
+  readonly addCartNote: CartNote;
+  /** Add a product to a shopping cart */
+  readonly addCartProduct: CartProduct;
+  /** Add a payment method (credit / debit card) to a customer */
+  readonly addCustomerPaymentMethod: Card;
+  /** Add a food to a #beach_bar */
+  readonly addFood: Food;
+  /** Add a product to a #beach_bar */
+  readonly addProduct: Product;
+  /** Add a reservation limit to a #beach_bar product */
+  readonly addProductReservationLimit: ProductReservationLimit;
+  /** Add a food item to a #beach_bar restaurant */
+  readonly addRestaurantFoodItem: RestaurantFoodItem;
+  /** Add a customer's review on a #beach_bar */
+  readonly addReview: BeachBarReview;
+  readonly authorize: LoginAuthorize;
+  /** Authorize a user with Facebook */
+  readonly authorizeWithFacebook: LoginAuthorize;
+  /** Authorize a user with Google */
+  readonly authorizeWithGoogle: LoginAuthorize;
+  /** Authorize a user with Instagram */
+  readonly authorizeWithInstagram: LoginAuthorize;
+  readonly cacheBeachBars: Scalars['Boolean'];
+  /** Change a user's password */
+  readonly changeUserPassword: Scalars['Boolean'];
   /** Make a payment using a customer's shopping cart */
   readonly checkout: Payment;
-  /** Refund a payment */
-  readonly refundPayment: Delete;
-  /** Update a previous user's search */
-  readonly updateSearch: UserSearch;
-  /** Update a user's #beach_bar favourites list */
-  readonly updateFavouriteBeachBar: UpdateUserFavoriteBar;
+  /** Event fired when a #beach_bar has completed the sign up process */
+  readonly completeBeachBarSignUp: Scalars['Boolean'];
+  /** Delete (remove) a #beach_bar from the platform */
+  readonly deleteBeachBar: Scalars['Boolean'];
+  /** Delete (remove) a feature (service) from a #beach_bar. */
+  readonly deleteBeachBarFeature: Scalars['Boolean'];
+  /** Delete an image (URL) from a #beach_bar */
+  readonly deleteBeachBarImgUrl: Scalars['Boolean'];
+  /** Delete (remove) an owner from a #beach_bar */
+  readonly deleteBeachBarOwner: Scalars['Boolean'];
+  /** Delete (remove) a restaurant from a #beach_bar */
+  readonly deleteBeachBarRestaurant: Scalars['Boolean'];
+  /** Delete (remove) styles from a #beach_bar */
+  readonly deleteBeachBarStyles: Scalars['Boolean'];
+  /** Delete a cart after a transaction. This mutation is also called if the user is not authenticated & closes the browser tab */
+  readonly deleteCart: Scalars['Boolean'];
+  /** Delete (remove) a food from a shopping cart */
+  readonly deleteCartFood: Scalars['Boolean'];
+  /** Delete (remove) a product from a shopping cart */
+  readonly deleteCartProduct: Scalars['Boolean'];
+  /** Delete (remove) a customer */
+  readonly deleteCustomer: Scalars['Boolean'];
+  /** Delete (remove) a payment method (credit / debit card) from a customer */
+  readonly deleteCustomerPaymentMethod: Scalars['Boolean'];
+  /** Delete (remove) a food from a #beach_bar */
+  readonly deleteFood: Scalars['Boolean'];
+  /** Delete (remove) a product from a #beach_bar */
+  readonly deleteProduct: Scalars['Boolean'];
+  /** Delete a or some reservation limit(s) from a #beach_bar's product */
+  readonly deleteProductReservationLimit: Scalars['Boolean'];
+  /** Delete (remove) a food item from a #beach_bar's restaurant */
+  readonly deleteRestaurantFoodItem: Scalars['Boolean'];
+  /** Delete a customer's review on a #beach_bar */
+  readonly deleteReview: Scalars['Boolean'];
   /**
    * Remove a #beach_bar from a user's favorites list
    * @deprecated You should use the `updateUserFavoriteBar` mutation operation, which handles automatically the creation and removement of a user's #beach_bar
    */
-  readonly deleteUserFavoriteBar: DeleteResult;
+  readonly deleteUserFavoriteBar: Scalars['Boolean'];
+  /** Sample mutation */
+  readonly hello: Scalars['String'];
+  /** Login a user */
+  readonly login: LoginAuthorize;
+  /** Logout a user */
+  readonly logout: Scalars['Boolean'];
+  /** Refund a payment */
+  readonly refundPayment: Scalars['Boolean'];
+  /** Restore a (soft) deleted #beach_bar product */
+  readonly restoreBeachBarProduct: Product;
+  /** Sends a link to the user's email address to change its password */
+  readonly sendForgotPasswordLink: Scalars['Boolean'];
+  /** Sign the S3 URL for an object */
+  readonly signS3: S3Payload;
   /** Sign up a user */
   readonly signUp: User;
-  /** Login a user */
-  readonly login: UserLogin;
-  /** Logout a user */
-  readonly logout: Success;
-  /** Sends a link to the user's email address to change its password */
-  readonly sendForgotPasswordLink: Success;
-  /** Change a user's password */
-  readonly changeUserPassword: Success;
+  /** Update the details of a #beach_bar's image */
+  readonly updateBeachBaImgUrl: BeachBarImgUrl;
+  /** Update a #beach_bar details */
+  readonly updateBeachBar: BeachBar;
+  /** Update a feature of a #beach_bar. */
+  readonly updateBeachBarFeature: BeachBarFeature;
+  /** Update the location details of a #beach_bar */
+  readonly updateBeachBarLocation: BeachBarLocation;
+  /** Update a #beach_bar's owner info */
+  readonly updateBeachBarOwner: BeachBarOwner;
+  /** Update the restaurant details of a #beach_bar */
+  readonly updateBeachBarRestaurant: BeachBarRestaurant;
+  /** Update the quantity of a food in a shopping cart */
+  readonly updateCartFood: CartFood;
+  /** Update the body of a shopping's cart note */
+  readonly updateCartNote: CartNote;
+  /** Update the quantity of a product in a shopping cart */
+  readonly updateCartProduct: CartProduct;
+  /** Update a customer's details */
+  readonly updateCustomer: Customer;
+  /** Update the details of customer's card */
+  readonly updateCustomerPaymentMethod: Card;
+  /** Update a user's #beach_bar favourites list */
+  readonly updateFavouriteBeachBar: UserFavoriteBar;
+  /** Update a #beach_bar's food info */
+  readonly updateFood: Food;
+  /** Update a #beach_bar's product info */
+  readonly updateProduct: Product;
+  /** Update a #beach_bar's product reservation limit */
+  readonly updateProductReservationLimit: ProductReservationLimit;
+  /** Update a #beach_bar's restaurant food item details */
+  readonly updateRestaurantFoodItem: RestaurantFoodItem;
+  /** Update a customer's review on a #beach_bar */
+  readonly updateReview: BeachBarReview;
+  /** Upvote or downvote a customer's review on a #beach_bar */
+  readonly updateReviewVote: BeachBarReview;
+  /** Update a previous user's search */
+  readonly updateSearch: UserSearch;
   /** Update a user's info */
-  readonly updateUser: UserUpdate;
+  readonly updateUser: User;
+  /** Upload a single file */
+  readonly uploadSingleFile: Maybe<File>;
+  /** Verify a user's payment to submit review */
+  readonly verifyUserPaymentForReview: Scalars['Boolean'];
 };
 
 
 /** Mutation */
-export type MutationUploadSingleFileArgs = {
-  file: Scalars['Upload'];
+export type MutationAddBeachBarArgs = {
+  categoryId: Scalars['ID'];
+  closingTimeId: Scalars['ID'];
+  code: Scalars['String'];
+  contactPhoneNumber: Scalars['String'];
+  description: InputMaybe<Scalars['String']>;
+  hidePhoneNumber?: InputMaybe<Scalars['Boolean']>;
+  name: Scalars['String'];
+  openingTimeId: Scalars['ID'];
+  state: Scalars['String'];
+  thumbnailUrl: InputMaybe<Scalars['URL']>;
+  zeroCartTotal: Scalars['Boolean'];
+};
+
+
+/** Mutation */
+export type MutationAddBeachBarFeatureArgs = {
+  beachBarId: Scalars['ID'];
+  description: InputMaybe<Scalars['String']>;
+  featureId: Scalars['ID'];
+  quantity?: Scalars['Int'];
+};
+
+
+/** Mutation */
+export type MutationAddBeachBarImgUrlArgs = {
+  beachBarId: Scalars['ID'];
+  description: InputMaybe<Scalars['String']>;
+  imgUrl: Scalars['URL'];
+};
+
+
+/** Mutation */
+export type MutationAddBeachBarLocationArgs = {
+  address: Scalars['String'];
+  beachBarId: Scalars['ID'];
+  city: Scalars['String'];
+  countryId: Scalars['ID'];
+  latitude: Scalars['String'];
+  longitude: Scalars['String'];
+  region: InputMaybe<Scalars['ID']>;
+  zipCode: InputMaybe<Scalars['String']>;
+};
+
+
+/** Mutation */
+export type MutationAddBeachBarOwnerArgs = {
+  beachBarId: Scalars['ID'];
+  isPrimary?: InputMaybe<Scalars['Boolean']>;
+  userId: InputMaybe<Scalars['ID']>;
+};
+
+
+/** Mutation */
+export type MutationAddBeachBarRestaurantArgs = {
+  beachBarId: Scalars['ID'];
+  description: InputMaybe<Scalars['String']>;
+  isActive?: InputMaybe<Scalars['Boolean']>;
+  name: Scalars['String'];
+};
+
+
+/** Mutation */
+export type MutationAddBeachBarStylesArgs = {
+  beachBarId: Scalars['ID'];
+  styleIds: ReadonlyArray<Scalars['ID']>;
+};
+
+
+/** Mutation */
+export type MutationAddCartFoodArgs = {
+  cartId: Scalars['ID'];
+  foodId: Scalars['ID'];
+  quantity: InputMaybe<Scalars['Int']>;
+};
+
+
+/** Mutation */
+export type MutationAddCartNoteArgs = {
+  beachBarId: Scalars['ID'];
+  body: Scalars['String'];
+  cartId: Scalars['ID'];
+};
+
+
+/** Mutation */
+export type MutationAddCartProductArgs = {
+  cartId: Scalars['ID'];
+  date: Scalars['Date'];
+  endTimeId: Scalars['ID'];
+  people: Scalars['Int'];
+  productId: Scalars['ID'];
+  quantity: InputMaybe<Scalars['Int']>;
+  startTimeId: Scalars['ID'];
+};
+
+
+/** Mutation */
+export type MutationAddCustomerPaymentMethodArgs = {
+  cardholderName: Scalars['String'];
+  customerId: InputMaybe<Scalars['ID']>;
+  isDefault?: InputMaybe<Scalars['Boolean']>;
+  savedForFuture?: InputMaybe<Scalars['Boolean']>;
+  source: Scalars['String'];
+};
+
+
+/** Mutation */
+export type MutationAddFoodArgs = {
+  beachBarId: Scalars['ID'];
+  categoryId: Scalars['ID'];
+  ingredients: InputMaybe<Scalars['String']>;
+  maxQuantity: InputMaybe<Scalars['Int']>;
+  name: Scalars['String'];
+  price: Scalars['Float'];
+};
+
+
+/** Mutation */
+export type MutationAddProductArgs = {
+  beachBarId: Scalars['ID'];
+  categoryId: Scalars['ID'];
+  description: InputMaybe<Scalars['String']>;
+  imgUrl: InputMaybe<Scalars['URL']>;
+  isActive?: InputMaybe<Scalars['Boolean']>;
+  maxPeople: Scalars['Int'];
+  minFoodSpending: InputMaybe<Scalars['Float']>;
+  name: Scalars['String'];
+  price: Scalars['Float'];
+};
+
+
+/** Mutation */
+export type MutationAddProductReservationLimitArgs = {
+  endTimeId: InputMaybe<Scalars['ID']>;
+  from: Scalars['Date'];
+  limit: Scalars['Int'];
+  productId: Scalars['ID'];
+  startTimeId: InputMaybe<Scalars['ID']>;
+  to: Scalars['Date'];
+};
+
+
+/** Mutation */
+export type MutationAddRestaurantFoodItemArgs = {
+  imgUrl: InputMaybe<Scalars['URL']>;
+  menuCategoryId: Scalars['Int'];
+  name: Scalars['String'];
+  price: Scalars['Float'];
+  restaurantId: Scalars['ID'];
+};
+
+
+/** Mutation */
+export type MutationAddReviewArgs = {
+  beachBarId: Scalars['ID'];
+  body: InputMaybe<Scalars['String']>;
+  monthId: InputMaybe<Scalars['ID']>;
+  negativeComment: InputMaybe<Scalars['String']>;
+  paymentRefCode: InputMaybe<Scalars['String']>;
+  positiveComment: InputMaybe<Scalars['String']>;
+  ratingValue: Scalars['Int'];
+  visitTypeId: InputMaybe<Scalars['ID']>;
+};
+
+
+/** Mutation */
+export type MutationAuthorizeArgs = {
+  isPrimaryOwner?: InputMaybe<Scalars['Boolean']>;
+  loginDetails: InputMaybe<UserLoginDetails>;
+  provider: OAuthProvider;
+  user: OAuthUserInput;
+};
+
+
+/** Mutation */
+export type MutationAuthorizeWithFacebookArgs = {
+  code: Scalars['String'];
+  isPrimaryOwner?: InputMaybe<Scalars['Boolean']>;
+  loginDetails: InputMaybe<UserLoginDetails>;
+  state: Scalars['String'];
+};
+
+
+/** Mutation */
+export type MutationAuthorizeWithGoogleArgs = {
+  code: Scalars['String'];
+  isPrimaryOwner?: InputMaybe<Scalars['Boolean']>;
+  loginDetails: InputMaybe<UserLoginDetails>;
+  state: Scalars['String'];
+};
+
+
+/** Mutation */
+export type MutationAuthorizeWithInstagramArgs = {
+  code: Scalars['String'];
+  email: Scalars['Email'];
+  isPrimaryOwner?: InputMaybe<Scalars['Boolean']>;
+  loginDetails: InputMaybe<UserLoginDetails>;
+  state: Scalars['String'];
+};
+
+
+/** Mutation */
+export type MutationChangeUserPasswordArgs = {
+  email: Scalars['Email'];
+  newPassword: Scalars['String'];
+  token: Scalars['String'];
+};
+
+
+/** Mutation */
+export type MutationCheckoutArgs = {
+  cardId: Scalars['ID'];
+  cartId: Scalars['ID'];
+  voucherCode: InputMaybe<Scalars['String']>;
+};
+
+
+/** Mutation */
+export type MutationCompleteBeachBarSignUpArgs = {
+  beachBarId: Scalars['ID'];
+};
+
+
+/** Mutation */
+export type MutationDeleteBeachBarArgs = {
+  id: Scalars['ID'];
+};
+
+
+/** Mutation */
+export type MutationDeleteBeachBarFeatureArgs = {
+  id: Scalars['ID'];
+};
+
+
+/** Mutation */
+export type MutationDeleteBeachBarImgUrlArgs = {
+  id: Scalars['ID'];
+};
+
+
+/** Mutation */
+export type MutationDeleteBeachBarOwnerArgs = {
+  beachBarId: Scalars['ID'];
+  ownerId: Scalars['ID'];
+};
+
+
+/** Mutation */
+export type MutationDeleteBeachBarRestaurantArgs = {
+  id: Scalars['ID'];
+};
+
+
+/** Mutation */
+export type MutationDeleteBeachBarStylesArgs = {
+  beachBarId: Scalars['ID'];
+  styleIds: ReadonlyArray<Scalars['ID']>;
+};
+
+
+/** Mutation */
+export type MutationDeleteCartArgs = {
+  cartId: Scalars['ID'];
+};
+
+
+/** Mutation */
+export type MutationDeleteCartFoodArgs = {
+  id: Scalars['ID'];
+};
+
+
+/** Mutation */
+export type MutationDeleteCartProductArgs = {
+  id: Scalars['ID'];
+};
+
+
+/** Mutation */
+export type MutationDeleteCustomerArgs = {
+  customerId: InputMaybe<Scalars['ID']>;
+};
+
+
+/** Mutation */
+export type MutationDeleteCustomerPaymentMethodArgs = {
+  cardId: Scalars['ID'];
+};
+
+
+/** Mutation */
+export type MutationDeleteFoodArgs = {
+  foodId: Scalars['ID'];
+};
+
+
+/** Mutation */
+export type MutationDeleteProductArgs = {
+  productId: Scalars['ID'];
+};
+
+
+/** Mutation */
+export type MutationDeleteProductReservationLimitArgs = {
+  id: Scalars['ID'];
+};
+
+
+/** Mutation */
+export type MutationDeleteRestaurantFoodItemArgs = {
+  id: Scalars['ID'];
+};
+
+
+/** Mutation */
+export type MutationDeleteReviewArgs = {
+  id: Scalars['ID'];
+};
+
+
+/** Mutation */
+export type MutationDeleteUserFavoriteBarArgs = {
+  beachBarId: Scalars['ID'];
 };
 
 
 /** Mutation */
 export type MutationHelloArgs = {
-  name: Maybe<Scalars['String']>;
+  name: InputMaybe<Scalars['String']>;
+};
+
+
+/** Mutation */
+export type MutationLoginArgs = {
+  loginDetails: InputMaybe<UserLoginDetails>;
+  userCredentials: UserCredentials;
+};
+
+
+/** Mutation */
+export type MutationRefundPaymentArgs = {
+  id: Scalars['ID'];
+};
+
+
+/** Mutation */
+export type MutationRestoreBeachBarProductArgs = {
+  productId: Scalars['ID'];
+};
+
+
+/** Mutation */
+export type MutationSendForgotPasswordLinkArgs = {
+  email: Scalars['Email'];
 };
 
 
@@ -1130,503 +1119,111 @@ export type MutationSignS3Args = {
 
 
 /** Mutation */
-export type MutationAddBeachBarImgUrlArgs = {
-  beachBarId: Scalars['ID'];
-  imgUrl: Scalars['URL'];
-  description: Maybe<Scalars['String']>;
+export type MutationSignUpArgs = {
+  isPrimaryOwner?: InputMaybe<Scalars['Boolean']>;
+  userCredentials: UserCredentials;
 };
 
 
 /** Mutation */
 export type MutationUpdateBeachBaImgUrlArgs = {
-  imgUrlId: Scalars['ID'];
-  imgUrl: Maybe<Scalars['URL']>;
-  description: Maybe<Scalars['String']>;
-};
-
-
-/** Mutation */
-export type MutationDeleteBeachBarImgUrlArgs = {
-  imgUrlId: Scalars['ID'];
-};
-
-
-/** Mutation */
-export type MutationAddBeachBarLocationArgs = {
-  beachBarId: Scalars['ID'];
-  address: Scalars['String'];
-  zipCode: Maybe<Scalars['String']>;
-  latitude: Scalars['String'];
-  longitude: Scalars['String'];
-  countryId: Scalars['ID'];
-  city: Scalars['String'];
-  region: Maybe<Scalars['ID']>;
-};
-
-
-/** Mutation */
-export type MutationUpdateBeachBarLocationArgs = {
-  locationId: Scalars['ID'];
-  address: Maybe<Scalars['String']>;
-  zipCode: Maybe<Scalars['String']>;
-  latitude: Maybe<Scalars['String']>;
-  longitude: Maybe<Scalars['String']>;
-  countryId: Maybe<Scalars['ID']>;
-  city: Maybe<Scalars['String']>;
-  region: Maybe<Scalars['String']>;
-};
-
-
-/** Mutation */
-export type MutationAddBeachBarArgs = {
-  name: Scalars['String'];
-  description: Maybe<Scalars['String']>;
-  thumbnailUrl: Maybe<Scalars['String']>;
-  contactPhoneNumber: Scalars['String'];
-  hidePhoneNumber?: Scalars['Boolean'];
-  zeroCartTotal: Scalars['Boolean'];
-  categoryId: Scalars['ID'];
-  openingTimeId: Scalars['ID'];
-  closingTimeId: Scalars['ID'];
-  code: Scalars['String'];
-  state: Scalars['String'];
+  description: InputMaybe<Scalars['String']>;
+  id: Scalars['ID'];
 };
 
 
 /** Mutation */
 export type MutationUpdateBeachBarArgs = {
-  beachBarId: Scalars['ID'];
-  name: Maybe<Scalars['String']>;
-  description: Maybe<Scalars['String']>;
-  thumbnailUrl: Maybe<Scalars['String']>;
-  contactPhoneNumber: Maybe<Scalars['String']>;
-  hidePhoneNumber: Maybe<Scalars['Boolean']>;
-  zeroCartTotal: Maybe<Scalars['Boolean']>;
-  isAvailable: Maybe<Scalars['Boolean']>;
-  isActive: Maybe<Scalars['Boolean']>;
-  categoryId: Maybe<Scalars['ID']>;
-  openingTimeId: Maybe<Scalars['ID']>;
-  closingTimeId: Maybe<Scalars['ID']>;
-};
-
-
-/** Mutation */
-export type MutationDeleteBeachBarArgs = {
-  beachBarId: Scalars['ID'];
-};
-
-
-/** Mutation */
-export type MutationAddProductArgs = {
-  beachBarId: Scalars['ID'];
-  name: Scalars['String'];
-  description: Maybe<Scalars['String']>;
-  categoryId: Scalars['ID'];
-  price: Scalars['Float'];
-  isActive?: Maybe<Scalars['Boolean']>;
-  maxPeople: Scalars['Int'];
-  imgUrl: Scalars['URL'];
-};
-
-
-/** Mutation */
-export type MutationUpdateProductArgs = {
-  productId: Scalars['ID'];
-  name: Scalars['String'];
-  description: Maybe<Scalars['String']>;
-  categoryId: Maybe<Scalars['ID']>;
-  price: Maybe<Scalars['Float']>;
-  isActive: Maybe<Scalars['Boolean']>;
-  maxPeople: Scalars['Int'];
-  imgUrl: Maybe<Scalars['URL']>;
-};
-
-
-/** Mutation */
-export type MutationDeleteProductArgs = {
-  productId: Scalars['ID'];
-};
-
-
-/** Mutation */
-export type MutationRestoreBeachBarProductArgs = {
-  productId: Scalars['ID'];
-};
-
-
-/** Mutation */
-export type MutationAddCouponCodeArgs = {
-  title: Scalars['String'];
-  discountPercentage: Scalars['Float'];
-  beachBarId: Maybe<Scalars['ID']>;
-  validUntil: Scalars['DateTime'];
-  isActive?: Scalars['Boolean'];
-  timesLimit: Scalars['Int'];
-};
-
-
-/** Mutation */
-export type MutationUpdateCouponCodeArgs = {
-  couponCodeId: Scalars['ID'];
-  title: Maybe<Scalars['String']>;
-  discountPercentage: Maybe<Scalars['Float']>;
-  validUntil: Maybe<Scalars['DateTime']>;
-  isActive: Maybe<Scalars['Boolean']>;
-  timesLimit: Maybe<Scalars['Int']>;
-};
-
-
-/** Mutation */
-export type MutationDeleteCouponCodeArgs = {
-  couponCodeId: Scalars['ID'];
-};
-
-
-/** Mutation */
-export type MutationAddOfferCampaignArgs = {
-  productIds: ReadonlyArray<Scalars['ID']>;
-  title: Scalars['String'];
-  discountPercentage: Scalars['Float'];
-  validUntil: Scalars['DateTime'];
-  isActive?: Scalars['Boolean'];
-};
-
-
-/** Mutation */
-export type MutationUpdateOfferCampaignArgs = {
-  offerCampaignId: Scalars['ID'];
-  productIds: ReadonlyArray<Maybe<Scalars['ID']>>;
-  title: Maybe<Scalars['String']>;
-  discountPercentage: Maybe<Scalars['Float']>;
-  validUntil: Maybe<Scalars['DateTime']>;
-  isActive: Maybe<Scalars['Boolean']>;
-};
-
-
-/** Mutation */
-export type MutationDeleteOfferCampaignArgs = {
-  offerCampaignId: Scalars['ID'];
-};
-
-
-/** Mutation */
-export type MutationAddOfferCampaignCodeArgs = {
-  offerCampaignId: Scalars['ID'];
-};
-
-
-/** Mutation */
-export type MutationDeleteOfferCodeArgs = {
-  offerCodeId: Scalars['ID'];
-};
-
-
-/** Mutation */
-export type MutationAddProductReservationLimitArgs = {
-  productId: Scalars['ID'];
-  limit: Scalars['Int'];
-  dates: ReadonlyArray<Scalars['Date']>;
-  startTimeId: Scalars['ID'];
-  endTimeId: Scalars['ID'];
-};
-
-
-/** Mutation */
-export type MutationUpdateProductReservationLimitArgs = {
-  reservationLimitIds: ReadonlyArray<Scalars['ID']>;
-  limit: Maybe<Scalars['Int']>;
-  startTimeId: Maybe<Scalars['ID']>;
-  endTimeId: Maybe<Scalars['ID']>;
-};
-
-
-/** Mutation */
-export type MutationDeleteProductReservationLimitArgs = {
-  reservationLimitIds: ReadonlyArray<Scalars['ID']>;
-};
-
-
-/** Mutation */
-export type MutationAddRestaurantFoodItemArgs = {
-  restaurantId: Scalars['ID'];
-  name: Scalars['String'];
-  price: Scalars['Float'];
-  menuCategoryId: Scalars['Int'];
-  imgUrl: Maybe<Scalars['URL']>;
-};
-
-
-/** Mutation */
-export type MutationUpdateRestaurantFoodItemArgs = {
-  foodItemId: Scalars['ID'];
-  name: Maybe<Scalars['String']>;
-  price: Maybe<Scalars['Float']>;
-  menuCategoryId: Maybe<Scalars['ID']>;
-  imgUrl: Maybe<Scalars['String']>;
-};
-
-
-/** Mutation */
-export type MutationDeleteRestaurantFoodItemArgs = {
-  foodItemId: Scalars['ID'];
-};
-
-
-/** Mutation */
-export type MutationAddBeachBarRestaurantArgs = {
-  beachBarId: Scalars['ID'];
-  name: Scalars['String'];
-  description: Maybe<Scalars['String']>;
-  isActive?: Maybe<Scalars['Boolean']>;
-};
-
-
-/** Mutation */
-export type MutationUpdateBeachBarRestaurantArgs = {
-  restaurantId: Scalars['ID'];
-  name: Maybe<Scalars['String']>;
-  description: Maybe<Scalars['String']>;
-  isActive: Maybe<Scalars['Boolean']>;
-};
-
-
-/** Mutation */
-export type MutationDeleteBeachBarRestaurantArgs = {
-  restaurantId: Scalars['ID'];
-};
-
-
-/** Mutation */
-export type MutationUpdateReviewVoteArgs = {
-  reviewId: Scalars['ID'];
-  upvote: Maybe<Scalars['Boolean']>;
-  downvote: Maybe<Scalars['Boolean']>;
-};
-
-
-/** Mutation */
-export type MutationAddReviewAnswerArgs = {
-  reviewId: Scalars['ID'];
-  body: Scalars['String'];
-};
-
-
-/** Mutation */
-export type MutationUpdateReviewAnswerArgs = {
-  answerId: Scalars['ID'];
-  body: Maybe<Scalars['String']>;
-};
-
-
-/** Mutation */
-export type MutationDeleteReviewAnswerArgs = {
-  answerId: Scalars['ID'];
-};
-
-
-/** Mutation */
-export type MutationVerifyUserPaymentForReviewArgs = {
-  beachBarId: Scalars['ID'];
-  refCode: Maybe<Scalars['String']>;
-};
-
-
-/** Mutation */
-export type MutationAddReviewArgs = {
-  beachBarId: Scalars['ID'];
-  paymentRefCode: Maybe<Scalars['String']>;
-  ratingValue: Scalars['Int'];
-  visitTypeId: Maybe<Scalars['ID']>;
-  monthTimeId: Maybe<Scalars['ID']>;
-  positiveComment: Maybe<Scalars['String']>;
-  negativeComment: Maybe<Scalars['String']>;
-  review: Maybe<Scalars['String']>;
-};
-
-
-/** Mutation */
-export type MutationUpdateReviewArgs = {
-  reviewId: Scalars['ID'];
-  ratingValue: Maybe<Scalars['Int']>;
-  visitTypeId: Maybe<Scalars['ID']>;
-  monthTimeId: Maybe<Scalars['ID']>;
-  positiveComment: Maybe<Scalars['String']>;
-  negativeComment: Maybe<Scalars['String']>;
-  review: Maybe<Scalars['String']>;
-};
-
-
-/** Mutation */
-export type MutationDeleteReviewArgs = {
-  reviewId: Scalars['ID'];
-};
-
-
-/** Mutation */
-export type MutationAddBeachBarFeatureArgs = {
-  beachBarId: Scalars['ID'];
-  featureId: Scalars['ID'];
-  quantity?: Scalars['Int'];
-  description: Maybe<Scalars['String']>;
+  categoryId: InputMaybe<Scalars['ID']>;
+  closingTimeId: InputMaybe<Scalars['ID']>;
+  contactPhoneNumber: InputMaybe<Scalars['String']>;
+  description: InputMaybe<Scalars['String']>;
+  displayRegardlessCapacity: InputMaybe<Scalars['Boolean']>;
+  hidePhoneNumber: InputMaybe<Scalars['Boolean']>;
+  id: Scalars['ID'];
+  isActive: InputMaybe<Scalars['Boolean']>;
+  name: InputMaybe<Scalars['String']>;
+  openingTimeId: InputMaybe<Scalars['ID']>;
+  thumbnailUrl: InputMaybe<Scalars['URL']>;
+  zeroCartTotal: InputMaybe<Scalars['Boolean']>;
 };
 
 
 /** Mutation */
 export type MutationUpdateBeachBarFeatureArgs = {
-  beachBarId: Scalars['ID'];
-  featureId: Scalars['ID'];
-  quantity: Maybe<Scalars['Int']>;
-  description: Maybe<Scalars['String']>;
-};
-
-
-/** Mutation */
-export type MutationDeleteBeachBarFeatureArgs = {
-  beachBarId: Scalars['ID'];
-  featureId: Scalars['ID'];
-};
-
-
-/** Mutation */
-export type MutationDeleteCartArgs = {
-  cartId: Scalars['ID'];
-};
-
-
-/** Mutation */
-export type MutationAddCartProductArgs = {
-  cartId: Scalars['ID'];
-  productId: Scalars['ID'];
-  quantity?: Maybe<Scalars['Int']>;
-  date: Scalars['Date'];
-  timeId: Scalars['ID'];
-};
-
-
-/** Mutation */
-export type MutationUpdateCartProductArgs = {
+  description: InputMaybe<Scalars['String']>;
   id: Scalars['ID'];
-  quantity: Maybe<Scalars['Int']>;
+  quantity: InputMaybe<Scalars['Int']>;
 };
 
 
 /** Mutation */
-export type MutationDeleteCartProductArgs = {
-  id: Scalars['ID'];
-};
-
-
-/** Mutation */
-export type MutationAddCustomerPaymentMethodArgs = {
-  source: Scalars['String'];
-  customerId: Maybe<Scalars['ID']>;
-  cardholderName: Scalars['String'];
-  isDefault?: Maybe<Scalars['Boolean']>;
-  savedForFuture?: Maybe<Scalars['Boolean']>;
-};
-
-
-/** Mutation */
-export type MutationUpdateCustomerPaymentMethodArgs = {
-  cardId: Scalars['ID'];
-  cardholderName: Maybe<Scalars['String']>;
-  expMonth: Maybe<Scalars['Int']>;
-  expYear: Maybe<Scalars['Int']>;
-  isDefault: Maybe<Scalars['Boolean']>;
-};
-
-
-/** Mutation */
-export type MutationDeleteCustomerPaymentMethodArgs = {
-  cardId: Scalars['ID'];
-};
-
-
-/** Mutation */
-export type MutationUpdateCustomerArgs = {
-  customerId: Scalars['ID'];
-  phoneNumber: Maybe<Scalars['String']>;
-  countryIsoCode: Maybe<Scalars['String']>;
-};
-
-
-/** Mutation */
-export type MutationDeleteCustomerArgs = {
-  customerId: Maybe<Scalars['ID']>;
-};
-
-
-/** Mutation */
-export type MutationAuthorizeWithGoogleArgs = {
-  code: Scalars['String'];
-  state: Scalars['String'];
-  loginDetails: Maybe<UserLoginDetails>;
-  isPrimaryOwner?: Maybe<Scalars['Boolean']>;
-};
-
-
-/** Mutation */
-export type MutationAuthorizeWithFacebookArgs = {
-  code: Scalars['String'];
-  state: Scalars['String'];
-  loginDetails: Maybe<UserLoginDetails>;
-  isPrimaryOwner?: Maybe<Scalars['Boolean']>;
-};
-
-
-/** Mutation */
-export type MutationAuthorizeWithInstagramArgs = {
-  email: Scalars['Email'];
-  code: Scalars['String'];
-  state: Scalars['String'];
-  loginDetails: Maybe<UserLoginDetails>;
-  isPrimaryOwner?: Maybe<Scalars['Boolean']>;
-};
-
-
-/** Mutation */
-export type MutationAddBeachBarOwnerArgs = {
-  beachBarId: Scalars['ID'];
-  userId: Maybe<Scalars['ID']>;
-  isPrimary?: Maybe<Scalars['Boolean']>;
+export type MutationUpdateBeachBarLocationArgs = {
+  address: InputMaybe<Scalars['String']>;
+  city: InputMaybe<Scalars['String']>;
+  countryId: InputMaybe<Scalars['ID']>;
+  latitude: InputMaybe<Scalars['String']>;
+  locationId: Scalars['ID'];
+  longitude: InputMaybe<Scalars['String']>;
+  region: InputMaybe<Scalars['String']>;
+  zipCode: InputMaybe<Scalars['String']>;
 };
 
 
 /** Mutation */
 export type MutationUpdateBeachBarOwnerArgs = {
   beachBarId: Scalars['ID'];
-  userId: Maybe<Scalars['ID']>;
-  publicInfo: Maybe<Scalars['Boolean']>;
-  isPrimary?: Maybe<Scalars['Boolean']>;
+  isPrimary?: InputMaybe<Scalars['Boolean']>;
+  ownerId: Scalars['ID'];
+  publicInfo: InputMaybe<Scalars['Boolean']>;
 };
 
 
 /** Mutation */
-export type MutationDeleteBeachBarOwnerArgs = {
-  beachBarId: Scalars['ID'];
-  userId: Maybe<Scalars['ID']>;
+export type MutationUpdateBeachBarRestaurantArgs = {
+  description: InputMaybe<Scalars['String']>;
+  isActive: InputMaybe<Scalars['Boolean']>;
+  name: InputMaybe<Scalars['String']>;
+  restaurantId: Scalars['ID'];
 };
 
 
 /** Mutation */
-export type MutationCheckoutArgs = {
-  cartId: Scalars['ID'];
+export type MutationUpdateCartFoodArgs = {
+  id: Scalars['ID'];
+  quantity: Scalars['Int'];
+};
+
+
+/** Mutation */
+export type MutationUpdateCartNoteArgs = {
+  body: Scalars['String'];
+  id: Scalars['ID'];
+};
+
+
+/** Mutation */
+export type MutationUpdateCartProductArgs = {
+  id: Scalars['ID'];
+  quantity: InputMaybe<Scalars['Int']>;
+};
+
+
+/** Mutation */
+export type MutationUpdateCustomerArgs = {
+  countryIsoCode: InputMaybe<Scalars['String']>;
+  customerId: Scalars['ID'];
+  phoneNumber: InputMaybe<Scalars['String']>;
+};
+
+
+/** Mutation */
+export type MutationUpdateCustomerPaymentMethodArgs = {
   cardId: Scalars['ID'];
-  totalPeople?: Maybe<Scalars['Int']>;
-  voucherCode: Maybe<Scalars['String']>;
-};
-
-
-/** Mutation */
-export type MutationRefundPaymentArgs = {
-  paymentId: Scalars['ID'];
-};
-
-
-/** Mutation */
-export type MutationUpdateSearchArgs = {
-  searchId: Scalars['ID'];
-  filterIds: Maybe<ReadonlyArray<Scalars['String']>>;
+  cardholderName: InputMaybe<Scalars['String']>;
+  expMonth: InputMaybe<Scalars['Int']>;
+  expYear: InputMaybe<Scalars['Int']>;
+  isDefault: InputMaybe<Scalars['Boolean']>;
 };
 
 
@@ -1637,201 +1234,160 @@ export type MutationUpdateFavouriteBeachBarArgs = {
 
 
 /** Mutation */
-export type MutationDeleteUserFavoriteBarArgs = {
-  beachBarId: Scalars['Int'];
+export type MutationUpdateFoodArgs = {
+  categoryId: InputMaybe<Scalars['ID']>;
+  id: Scalars['ID'];
+  ingredients: InputMaybe<Scalars['String']>;
+  maxQuantity: InputMaybe<Scalars['Int']>;
+  name: InputMaybe<Scalars['String']>;
+  price: InputMaybe<Scalars['Float']>;
 };
 
 
 /** Mutation */
-export type MutationSignUpArgs = {
-  userCredentials: UserCredentials;
-  isPrimaryOwner?: Maybe<Scalars['Boolean']>;
+export type MutationUpdateProductArgs = {
+  categoryId: InputMaybe<Scalars['ID']>;
+  description: InputMaybe<Scalars['String']>;
+  imgUrl: InputMaybe<Scalars['URL']>;
+  isActive: InputMaybe<Scalars['Boolean']>;
+  maxPeople: InputMaybe<Scalars['Int']>;
+  minFoodSpending: InputMaybe<Scalars['Float']>;
+  name: InputMaybe<Scalars['String']>;
+  price: InputMaybe<Scalars['Float']>;
+  productId: Scalars['ID'];
 };
 
 
 /** Mutation */
-export type MutationLoginArgs = {
-  userCredentials: UserCredentials;
-  loginDetails: Maybe<UserLoginDetails>;
+export type MutationUpdateProductReservationLimitArgs = {
+  id: Scalars['ID'];
+  limit: InputMaybe<Scalars['Int']>;
 };
 
 
 /** Mutation */
-export type MutationSendForgotPasswordLinkArgs = {
-  email: Scalars['Email'];
+export type MutationUpdateRestaurantFoodItemArgs = {
+  foodItemId: Scalars['ID'];
+  imgUrl: InputMaybe<Scalars['URL']>;
+  menuCategoryId: InputMaybe<Scalars['ID']>;
+  name: InputMaybe<Scalars['String']>;
+  price: InputMaybe<Scalars['Float']>;
 };
 
 
 /** Mutation */
-export type MutationChangeUserPasswordArgs = {
-  email: Scalars['Email'];
-  token: Scalars['String'];
-  newPassword: Scalars['String'];
+export type MutationUpdateReviewArgs = {
+  answer: InputMaybe<Scalars['String']>;
+  body: InputMaybe<Scalars['String']>;
+  id: Scalars['ID'];
+  monthId: InputMaybe<Scalars['ID']>;
+  negativeComment: InputMaybe<Scalars['String']>;
+  positiveComment: InputMaybe<Scalars['String']>;
+  ratingValue: InputMaybe<Scalars['Int']>;
+  visitTypeId: InputMaybe<Scalars['ID']>;
+};
+
+
+/** Mutation */
+export type MutationUpdateReviewVoteArgs = {
+  downvote: InputMaybe<Scalars['Boolean']>;
+  reviewId: Scalars['ID'];
+  upvote: InputMaybe<Scalars['Boolean']>;
+};
+
+
+/** Mutation */
+export type MutationUpdateSearchArgs = {
+  filterIds: InputMaybe<ReadonlyArray<Scalars['String']>>;
+  searchId: Scalars['ID'];
 };
 
 
 /** Mutation */
 export type MutationUpdateUserArgs = {
-  email: Maybe<Scalars['Email']>;
-  firstName: Maybe<Scalars['String']>;
-  lastName: Maybe<Scalars['String']>;
-  imgUrl: Maybe<Scalars['URL']>;
-  honorificTitle: Maybe<Scalars['String']>;
-  birthday: Maybe<Scalars['String']>;
-  countryId: Maybe<Scalars['ID']>;
-  city: Maybe<Scalars['String']>;
-  phoneNumber: Maybe<Scalars['String']>;
-  telCountryId: Maybe<Scalars['ID']>;
-  address: Maybe<Scalars['String']>;
-  zipCode: Maybe<Scalars['String']>;
-  trackHistory: Maybe<Scalars['Boolean']>;
+  address: InputMaybe<Scalars['String']>;
+  birthday: InputMaybe<Scalars['String']>;
+  city: InputMaybe<Scalars['String']>;
+  countryId: InputMaybe<Scalars['ID']>;
+  email: InputMaybe<Scalars['Email']>;
+  firstName: InputMaybe<Scalars['String']>;
+  honorificTitle: InputMaybe<Scalars['String']>;
+  imgUrl: InputMaybe<Scalars['URL']>;
+  lastName: InputMaybe<Scalars['String']>;
+  phoneNumber: InputMaybe<Scalars['String']>;
+  telCountryId: InputMaybe<Scalars['ID']>;
+  trackHistory: InputMaybe<Scalars['Boolean']>;
+  zipCode: InputMaybe<Scalars['String']>;
 };
 
-/** User info to be returned on Google OAuth authorization */
-export type OAuthAuthorization = {
-  readonly __typename?: 'OAuthAuthorization';
-  /** The JWT access token to be returned upon successful login */
-  readonly accessToken: Scalars['String'];
-  /** A boolean that indicates if the user has successfully signed up */
-  readonly signedUp: Scalars['Boolean'];
-  /** A boolean that indicates if the user has successfully logined */
-  readonly logined: Scalars['Boolean'];
-  /** The user being authorized */
-  readonly user: User;
+
+/** Mutation */
+export type MutationUploadSingleFileArgs = {
+  file: Scalars['Upload'];
+};
+
+
+/** Mutation */
+export type MutationVerifyUserPaymentForReviewArgs = {
+  beachBarId: Scalars['ID'];
+  refCode: InputMaybe<Scalars['String']>;
+};
+
+export enum OAuthProvider {
+  Facebook = 'Facebook',
+  GitHub = 'GitHub',
+  Google = 'Google',
+  Hashtag = 'Hashtag',
+  Instagram = 'Instagram'
+}
+
+/** User details in when authorizing with an OAuth Provider */
+export type OAuthUserInput = {
+  readonly birthday: InputMaybe<Scalars['Date']>;
+  readonly email: Scalars['Email'];
+  readonly firstName: InputMaybe<Scalars['String']>;
+  readonly id: Scalars['ID'];
+  readonly imgUrl: InputMaybe<Scalars['URL']>;
+  readonly lastName: InputMaybe<Scalars['String']>;
+  readonly username: InputMaybe<Scalars['String']>;
 };
 
 /** Represents a user that is an owner of a #beach_bar */
 export type Owner = {
   readonly __typename?: 'Owner';
   readonly id: Scalars['ID'];
-  /** The user that is the owner or one of the owners of the #beach_bar */
   readonly user: User;
-};
-
-/** Represents a #beach_bar's owner */
-export type BeachBarOwner = {
-  readonly __typename?: 'BeachBarOwner';
-  /** A boolean that indicates if the owner is the user that also created the #beach_bar & can make modifications */
-  readonly isPrimary: Scalars['Boolean'];
-  /** A boolean that indicates if the owner info (contact details) are allowed to be presented to the public */
-  readonly publicInfo: Scalars['Boolean'];
-  /** The #beach_bar the user is assigned to as an owner, either as a primary one or not */
-  readonly beachBar: BeachBar;
-  /** The owner of the #beach_bar */
-  readonly owner: Owner;
-  /** The date and time the owner was added (assigned) to the #beach_bar */
-  readonly timestamp: Scalars['DateTime'];
-};
-
-/** Info to be returned when an owner is added (assigned) to a #beach_bar */
-export type AddBeachBarOwner = {
-  readonly __typename?: 'AddBeachBarOwner';
-  /** The owner being added & its info */
-  readonly owner: Maybe<BeachBarOwner>;
-  /** A boolean that indicates if the owner has been successfully being added (assigned) to a #beach_bar */
-  readonly added: Maybe<Scalars['Boolean']>;
-};
-
-/** Info to be returned when the info of a #beach_bar owner, are updated */
-export type UpdateBeachBarOwner = {
-  readonly __typename?: 'UpdateBeachBarOwner';
-  /** The owner being added & its info */
-  readonly owner: BeachBarOwner;
-  /** A boolean that indicates if the owner info have been successfully updated */
-  readonly updated: Scalars['Boolean'];
-};
-
-/** Represents a reserved product */
-export type ReservedProduct = {
-  readonly __typename?: 'ReservedProduct';
-  readonly id: Scalars['BigInt'];
-  readonly date: Scalars['Date'];
-  /** A boolean that indicates if the product was refunded from the payment */
-  readonly isRefunded: Scalars['Boolean'];
-  /** The hour (time) that this product was reserved for */
-  readonly time: HourTime;
-  /** The product that is reserved */
-  readonly product: Product;
-  /** The payment that this product was reserved by */
-  readonly payment: Payment;
-};
-
-/** Info to be returned when a product is marked (added) as a reserved one from a payment */
-export type AddReservedProduct = {
-  readonly __typename?: 'AddReservedProduct';
-  /** The product that is marked as a reserved one */
-  readonly reservedProduct: ReservedProduct;
-  /** A boolean that indicates if the product has been successfully marked as a reserved one */
-  readonly added: Scalars['Boolean'];
-};
-
-export type AddReservedProductResult = AddReservedProduct | Error;
-
-/** Info to be returned when a reserved product details are updated */
-export type UpdateReservedProduct = {
-  readonly __typename?: 'UpdateReservedProduct';
-  /** The reserved product that is updated */
-  readonly reservedProduct: ReservedProduct;
-  /** A boolean that indicates if the reserved product details have been successfully updated */
-  readonly updated: Scalars['Boolean'];
-};
-
-export type UpdateReservedProductResult = UpdateReservedProduct | Error;
-
-/** Represents the offer codes added to a payment */
-export type PaymentOfferCode = {
-  readonly __typename?: 'PaymentOfferCode';
-  readonly id: Scalars['ID'];
-  /** The payment that holds these offer codes */
-  readonly payment: Payment;
-  /** A coupon code added to the payment */
-  readonly couponCode: Maybe<CouponCode>;
-  /** A campaign offer code added to the payment */
-  readonly offerCode: Maybe<OfferCampaignCode>;
 };
 
 /** Represents a payment */
 export type Payment = {
   readonly __typename?: 'Payment';
-  readonly id: Scalars['ID'];
-  /** A unique identifier (referral code) of the payment */
-  readonly refCode: Scalars['String'];
-  /** Stripe's ID value of the payment */
-  readonly stripeId: Scalars['String'];
-  /** A boolean that indicates if the whole payment was refunded */
-  readonly isRefunded: Scalars['Boolean'];
-  /** The shopping cart this payment is associated to */
-  readonly cart: Cart;
-  /** The credit or debit card this payment is associated to */
+  readonly appFee: Scalars['Decimal'];
   readonly card: Card;
-  /** The status of the payment */
-  readonly status: PaymentStatus;
-  /** A coupon or an offer campaign code used, to apply a discount, at this payment */
-  readonly voucherCode: Maybe<PaymentOfferCode>;
-  /** A list with all the reserved products of the payment */
-  readonly reservedProducts: Maybe<ReadonlyArray<ReservedProduct>>;
-  /** The timestamp recorded, when the payment was created / paid */
-  readonly timestamp: Scalars['DateTime'];
-};
-
-/** Info to be returned when a payment is created (made) */
-export type AddPayment = {
-  readonly __typename?: 'AddPayment';
-  /** The payment that is created (made) */
-  readonly payment: Payment;
-  /** A boolean that indicates if the payments have been successfully created (made) */
-  readonly added: Scalars['Boolean'];
-};
-
-export type AddPaymentResult = AddPayment | Error;
-
-export type Visit = {
-  readonly __typename?: 'Visit';
-  readonly isUpcoming: Scalars['Boolean'];
+  readonly cart: Cart;
+  readonly deletedAt: Maybe<Scalars['DateTime']>;
+  readonly id: Scalars['BigInt'];
   readonly isRefunded: Scalars['Boolean'];
-  readonly time: HourTime;
-  readonly date: Scalars['Date'];
-  readonly payment: Payment;
+  readonly refCode: Scalars['String'];
+  readonly reservedProducts: ReadonlyArray<ReservedProduct>;
+  readonly status: PaymentStatus;
+  readonly stripeId: Scalars['String'];
+  readonly stripeProccessingFee: Scalars['Decimal'];
+  readonly timestamp: Scalars['DateTime'];
+  readonly total: Maybe<Scalars['Float']>;
+};
+
+
+/** Represents a payment */
+export type PaymentTotalArgs = {
+  beachBarId: InputMaybe<Scalars['ID']>;
+};
+
+/** Represents the status of a payment */
+export type PaymentStatus = {
+  readonly __typename?: 'PaymentStatus';
+  readonly id: Scalars['ID'];
+  readonly name: Scalars['String'];
 };
 
 /** Represents a payment as a user's visit */
@@ -1848,143 +1404,206 @@ export type PaymentVisitsDates = {
   readonly year: Scalars['Int'];
 };
 
+/** Represents a product of a #beach_bar */
+export type Product = {
+  readonly __typename?: 'Product';
+  readonly beachBar: BeachBar;
+  readonly category: ProductCategory;
+  readonly deletedAt: Maybe<Scalars['DateTime']>;
+  readonly description: Maybe<Scalars['String']>;
+  readonly id: Scalars['ID'];
+  readonly imgUrl: Maybe<Scalars['String']>;
+  readonly isActive: Scalars['Boolean'];
+  readonly isIndividual: Scalars['Boolean'];
+  readonly maxPeople: Scalars['Int'];
+  readonly minFoodSpending: Maybe<Scalars['Float']>;
+  readonly name: Scalars['String'];
+  readonly price: Scalars['Float'];
+  readonly reservationLimits: ReadonlyArray<ProductReservationLimit>;
+  readonly updatedAt: Scalars['DateTime'];
+};
+
+/** Represents a product of a #beach_bar, and info about it's rest availability quantity */
+export type ProductAvailability = {
+  readonly __typename?: 'ProductAvailability';
+  readonly product: Product;
+  /** How many other's products of this type are available for purchase */
+  readonly quantity: Scalars['Int'];
+};
+
+/** The info to be returned when checking for a #beach_bar product's availability hour times */
+export type ProductAvailabilityHour = {
+  readonly __typename?: 'ProductAvailabilityHour';
+  /** The hour time of a day */
+  readonly hourTime: HourTime;
+  readonly isAvailable: Scalars['Boolean'];
+};
+
+/** Represents a #beach_bar's product category */
+export type ProductCategory = {
+  readonly __typename?: 'ProductCategory';
+  readonly components: ReadonlyArray<ProductCategoryComponent>;
+  readonly description: Maybe<Scalars['String']>;
+  readonly id: Scalars['ID'];
+  readonly name: Scalars['String'];
+  readonly underscoredName: Scalars['String'];
+};
+
+/** Represents a component of a product category, including the quantity that each category has. */
+export type ProductCategoryComponent = {
+  readonly __typename?: 'ProductCategoryComponent';
+  readonly category: ProductCategory;
+  readonly component: ProductComponent;
+  readonly quantity: Scalars['Int'];
+};
+
+/** Represents a component of a product. For example a sunbed. */
+export type ProductComponent = {
+  readonly __typename?: 'ProductComponent';
+  readonly icon: Icon;
+  readonly id: Scalars['ID'];
+  readonly name: Scalars['String'];
+};
+
+/** Represents a recommended product of a #beach_bar, depending on a user's search */
+export type ProductRecommended = {
+  readonly __typename?: 'ProductRecommended';
+  readonly product: Product;
+  /** How many other's products of this type to purchase */
+  readonly quantity: Scalars['Int'];
+};
+
+/** Represents a the limit number, on how many times a product can be provided by a #beach_bar on a specific date */
+export type ProductReservationLimit = {
+  readonly __typename?: 'ProductReservationLimit';
+  readonly endTime: Maybe<HourTime>;
+  readonly from: Scalars['DateTime'];
+  readonly id: Scalars['BigInt'];
+  readonly limitNumber: Scalars['Int'];
+  readonly product: Product;
+  readonly startTime: Maybe<HourTime>;
+  readonly to: Scalars['DateTime'];
+};
+
+/** Represents each quarter of the day */
+export type QuarterTime = {
+  readonly __typename?: 'QuarterTime';
+  readonly id: Scalars['ID'];
+  readonly utcValue: Scalars['Time'];
+  readonly value: Scalars['DateTime'];
+};
+
 /** Query */
 export type Query = {
   readonly __typename?: 'Query';
-  readonly hello: Scalars['String'];
-  /** Get the product offer or coupon, based on its referral code */
-  readonly getVoucherCode: VoucherCodeQueryResult;
-  /** Get a list with all the offer campaigns of a #beach_bar */
-  readonly getBeachBarOfferCampaigns: ReadonlyArray<OfferCampaign>;
-  /** Get a coupon's code details & its referral code */
-  readonly revealCouponCode: CouponCodeReveal;
-  /** Get an offer's campaign code details + its referral code */
-  readonly revealOfferCampaignCode: OfferCampaignCodeReveal;
-  /** Get all products of a #beach_bar */
-  readonly beachBarProducts: ReadonlyArray<Product>;
-  /** Fetch a list with all the available hour times of a product */
-  readonly getProductAvailabilityHours: ReadonlyArray<ProductAvailabilityHour>;
-  readonly getProductAvailabilityQuantity: Scalars['Int'];
-  /** Get a list with all the hours this product has reservation limits */
-  readonly hasProductReservationLimit: ReadonlyArray<AvailableProduct>;
+  readonly accessToken: Scalars['String'];
+  readonly account: Maybe<Account>;
+  readonly accountLink: Scalars['String'];
+  /** Fetch the other available hours a #beach_bar is available during that time */
+  readonly availableHours: ReadonlyArray<HourTime>;
+  /** Fetch the available product of a #beach_bar for a date and a time period */
+  readonly availableProducts: ReadonlyArray<Product>;
   /** Get the details of a #beach_bar */
   readonly beachBar: Maybe<BeachBar>;
   /** Get the images of a #beach_bar */
   readonly beachBarImgs: Maybe<ReadonlyArray<BeachBarImgUrl>>;
-  /** Check a #beach_bar's availability */
-  readonly checkBeachBarAvailability: BeachBarAvailability;
-  /** A list with all the available #beach_bars */
-  readonly getAllBeachBars: ReadonlyArray<BeachBar>;
-  /** A list with all the #beach_bars, related to a user or are top selections */
-  readonly getPersonalizedBeachBars: ReadonlyArray<BeachBar>;
-  /** A list with 6 #beach_bars, near to the user's location */
-  readonly nearBeachBars: ReadonlyArray<BeachBar>;
-  /** Get a list with all the months in a review, by the product purchase */
-  readonly getPaymentProductsMonth: Maybe<ReadonlyArray<MonthTime>>;
-  /** Get a list of all the reviews of an authenticated user */
-  readonly userReviews: ReadonlyArray<BeachBarReview>;
-  /** Get the details of a a review of an authenticated user */
-  readonly review: BeachBarReview;
-  readonly cartEntryFees: Scalars['Float'];
-  readonly verifyZeroCartTotal: Scalars['Boolean'];
   /** Get the latest cart of an authenticated user or create one */
   readonly cart: Cart;
+  readonly cartEntryFees: Scalars['Float'];
+  /** Fetch all the cities of #beach_bar's locations */
+  readonly citiesAndRegions: CitiesAndRegions;
+  /** Get or create a customer, depending on current authenticated or not user */
+  readonly customer: Customer;
   /** Get a list with all the payments methods (credit / debit cards) of the current authenticated user */
   readonly customerPaymentMethods: ReadonlyArray<Card>;
-  /** Get or create a customer, depending on current authenticated or not user */
-  readonly customer: AddCustomer;
-  /** Returns the URL where the #beach_bar (owner) will be redirected to authorize and register with Stripe, for its connect account */
-  readonly getStripeConnectOAuthUrl: Maybe<Scalars['URL']>;
-  /** Returns the URL where the user will be redirected to login with Google */
-  readonly getGoogleOAuthUrl: Scalars['URL'];
+  /** Fetch the billing data for the dashboard */
+  readonly dashboardBilling: DashboardBilling;
+  /** Fetch the booking data (reservations) for the dashboard */
+  readonly dashboardBookings: DashboardBookings;
+  /** Fetch the homepage data (of the day) for #beach_bar's dashboard */
+  readonly dashboardHomePage: DashboardHomePage;
+  /** Get a user's favourite #beach_bars list */
+  readonly favouriteBeachBars: ReadonlyArray<UserFavoriteBar>;
+  /** Get information for a food or drink of a #beach_bar */
+  readonly food: Maybe<Food>;
+  /** Get all foods and drinks of a #beach_bar */
+  readonly foods: ReadonlyArray<Food>;
+  /** A list with all the available #beach_bars */
+  readonly getAllBeachBars: ReadonlyArray<BeachBar>;
   /** Returns the URL where the user will be redirected to login with Facebook */
   readonly getFacebookOAuthUrl: Scalars['URL'];
+  /** Returns the URL where the user will be redirected to login with Google */
+  readonly getGoogleOAuthUrl: Scalars['URL'];
   /** Returns the URL where the user will be redirected to login with Instagram */
   readonly getInstagramOAuthUrl: Scalars['URL'];
+  /** A list with all the #beach_bars, related to a user or are top selections */
+  readonly getPersonalizedBeachBars: ReadonlyArray<BeachBar>;
+  /** Fetch a list with all the available hour times of a product */
+  readonly getProductAvailabilityHours: ReadonlyArray<ProductAvailabilityHour>;
+  readonly getProductAvailabilityQuantity: Scalars['Int'];
+  /** Returns the Stripe dashboard URL where the #beach_bar can access its Stripe dashboard, to view all transactions and payments */
+  readonly getStripeLoginLink: Scalars['URL'];
+  /** Get a list with all the hours this product has reservation limits */
+  readonly hasProductReservationLimit: ReadonlyArray<AvailableProduct>;
+  readonly hello: Scalars['String'];
   readonly hey: Scalars['Boolean'];
-  readonly isProductAvailable: Scalars['Boolean'];
-  /** Get a list of payments for a specific / latest month of an authenticated user */
-  readonly payments: ReadonlyArray<PaymentVisits>;
+  /** Returns current authenticated user */
+  readonly me: Maybe<User>;
+  /** A list with #beach_bars, near to the user's location */
+  readonly nearBeachBars: ReadonlyArray<BeachBar>;
   /** Get the details of a specific payment / trip */
   readonly payment: Payment;
   /** Get the amount of refund of a specific payment / trip */
   readonly paymentRefundAmount: Scalars['Float'];
-  /** Get a list with the months and years of the cart products in all the payments of an authenticated user */
-  readonly paymentDates: ReadonlyArray<PaymentVisitsDates>;
-  /** Returns a list of formatted search input values */
-  readonly searchInputValues: ReadonlyArray<SearchInputValue>;
-  /** Get a list with a user's latest searches */
-  readonly userSearches: ReadonlyArray<UserSearch>;
+  /** Get a list of payments for a specific / latest month of an authenticated user */
+  readonly payments: ReadonlyArray<PaymentVisits>;
+  /** Get a #beach_bar's product information */
+  readonly product: Maybe<Product>;
+  /** Get all products of a #beach_bar */
+  readonly products: ReadonlyArray<Product>;
+  /** Get the details of a a review of an authenticated user */
+  readonly review: BeachBarReview;
+  /** Get a list of all the reviews of an authenticated user */
+  readonly reviews: Maybe<ReadonlyArray<BeachBarReview>>;
   /** Search for available #beach_bars */
   readonly search: Search;
+  /** Returns a list of formatted search input values */
+  readonly searchInputValues: ReadonlyArray<SearchInputValue>;
+  /** Returns the URL where the #beach_bar (owner) will be redirected to authorize and register with Stripe, for its connect account */
+  readonly stripeConnectUrl: Maybe<Scalars['URL']>;
   /** Returns a list of user's recorded / saved history */
   readonly userHistory: ReadonlyArray<UserHistoryExtended>;
-  /** Get a user's favourite #beach_bars list */
-  readonly favouriteBeachBars: ReadonlyArray<UserFavoriteBar>;
-  readonly accessToken: Scalars['String'];
-  /** Returns current authenticated user */
-  readonly me: Maybe<User>;
+  /** Get a list with a user's latest searches */
+  readonly userSearches: ReadonlyArray<UserSearch>;
+  readonly verifyZeroCartTotal: Scalars['Boolean'];
 };
 
 
 /** Query */
-export type QueryGetVoucherCodeArgs = {
-  refCode: Scalars['String'];
+export type QueryAccountLinkArgs = {
+  id: Scalars['ID'];
 };
 
 
 /** Query */
-export type QueryGetBeachBarOfferCampaignsArgs = {
-  beachBarId: Scalars['Int'];
-};
-
-
-/** Query */
-export type QueryRevealCouponCodeArgs = {
-  couponCodeId: Scalars['ID'];
-};
-
-
-/** Query */
-export type QueryRevealOfferCampaignCodeArgs = {
-  offerCampaignCodeId: Scalars['ID'];
-};
-
-
-/** Query */
-export type QueryBeachBarProductsArgs = {
+export type QueryAvailableHoursArgs = {
   beachBarId: Scalars['ID'];
-  isActive?: Maybe<Scalars['Boolean']>;
-  isDeleted?: Maybe<Scalars['Boolean']>;
-};
-
-
-/** Query */
-export type QueryGetProductAvailabilityHoursArgs = {
-  productId: Scalars['ID'];
   date: Scalars['Date'];
 };
 
 
 /** Query */
-export type QueryGetProductAvailabilityQuantityArgs = {
-  productId: Scalars['ID'];
-  date: Scalars['Date'];
-  timeId: Scalars['Int'];
-};
-
-
-/** Query */
-export type QueryHasProductReservationLimitArgs = {
-  productId: Scalars['ID'];
-  date: Scalars['Date'];
+export type QueryAvailableProductsArgs = {
+  availability: InputMaybe<SearchInput>;
+  beachBarId: Scalars['ID'];
 };
 
 
 /** Query */
 export type QueryBeachBarArgs = {
-  slug: Scalars['String'];
-  userVisit?: Maybe<Scalars['Boolean']>;
+  id: InputMaybe<Scalars['ID']>;
+  slug: InputMaybe<Scalars['String']>;
+  userVisit?: InputMaybe<Scalars['Boolean']>;
 };
 
 
@@ -1995,9 +1614,91 @@ export type QueryBeachBarImgsArgs = {
 
 
 /** Query */
-export type QueryCheckBeachBarAvailabilityArgs = {
+export type QueryCartArgs = {
+  cartId: InputMaybe<Scalars['ID']>;
+};
+
+
+/** Query */
+export type QueryCartEntryFeesArgs = {
+  beachBarId: InputMaybe<Scalars['ID']>;
+  cartId: Scalars['ID'];
+};
+
+
+/** Query */
+export type QueryCustomerArgs = {
+  countryId: InputMaybe<Scalars['ID']>;
+  email: InputMaybe<Scalars['Email']>;
+  phoneNumber: InputMaybe<Scalars['String']>;
+};
+
+
+/** Query */
+export type QueryDashboardBillingArgs = {
   beachBarId: Scalars['ID'];
-  availability: SearchInput;
+  dates: InputMaybe<DashboardDatesArg>;
+};
+
+
+/** Query */
+export type QueryDashboardBookingsArgs = {
+  beachBarId: Scalars['ID'];
+  dates: InputMaybe<DashboardDatesArg>;
+};
+
+
+/** Query */
+export type QueryDashboardHomePageArgs = {
+  beachBarId: Scalars['ID'];
+  dates: InputMaybe<DashboardDatesArg>;
+};
+
+
+/** Query */
+export type QueryFavouriteBeachBarsArgs = {
+  limit: InputMaybe<Scalars['Int']>;
+};
+
+
+/** Query */
+export type QueryFoodArgs = {
+  id: Scalars['ID'];
+};
+
+
+/** Query */
+export type QueryFoodsArgs = {
+  beachBarId: Scalars['ID'];
+};
+
+
+/** Query */
+export type QueryGetProductAvailabilityHoursArgs = {
+  date: Scalars['Date'];
+  productId: Scalars['ID'];
+};
+
+
+/** Query */
+export type QueryGetProductAvailabilityQuantityArgs = {
+  date: Scalars['Date'];
+  endTimeId: Scalars['Int'];
+  productId: Scalars['ID'];
+  startTimeId: Scalars['Int'];
+};
+
+
+/** Query */
+export type QueryGetStripeLoginLinkArgs = {
+  beachBarId: Scalars['ID'];
+};
+
+
+/** Query */
+export type QueryHasProductReservationLimitArgs = {
+  date: Scalars['Date'];
+  productId: Scalars['ID'];
 };
 
 
@@ -2005,13 +1706,38 @@ export type QueryCheckBeachBarAvailabilityArgs = {
 export type QueryNearBeachBarsArgs = {
   latitude: Scalars['String'];
   longitude: Scalars['String'];
+  take: InputMaybe<Scalars['Int']>;
 };
 
 
 /** Query */
-export type QueryGetPaymentProductsMonthArgs = {
+export type QueryPaymentArgs = {
+  refCode: Scalars['ID'];
+};
+
+
+/** Query */
+export type QueryPaymentRefundAmountArgs = {
+  refCode: Scalars['ID'];
+};
+
+
+/** Query */
+export type QueryPaymentsArgs = {
+  monthId: InputMaybe<Scalars['ID']>;
+  year: InputMaybe<Scalars['Int']>;
+};
+
+
+/** Query */
+export type QueryProductArgs = {
+  id: Scalars['ID'];
+};
+
+
+/** Query */
+export type QueryProductsArgs = {
   beachBarId: Scalars['ID'];
-  refCode: Maybe<Scalars['String']>;
 };
 
 
@@ -2022,9 +1748,25 @@ export type QueryReviewArgs = {
 
 
 /** Query */
-export type QueryCartEntryFeesArgs = {
-  cartId: Scalars['ID'];
-  totalPeople: Scalars['Int'];
+export type QuerySearchArgs = {
+  availability: InputMaybe<SearchInput>;
+  filterIds: InputMaybe<ReadonlyArray<Scalars['String']>>;
+  inputId: InputMaybe<Scalars['ID']>;
+  searchId: InputMaybe<Scalars['ID']>;
+  searchValue: InputMaybe<Scalars['String']>;
+  sortId: InputMaybe<Scalars['ID']>;
+};
+
+
+/** Query */
+export type QueryStripeConnectUrlArgs = {
+  phoneNumber: InputMaybe<Scalars['String']>;
+};
+
+
+/** Query */
+export type QueryUserSearchesArgs = {
+  limit: InputMaybe<Scalars['Int']>;
 };
 
 
@@ -2033,94 +1775,75 @@ export type QueryVerifyZeroCartTotalArgs = {
   cartId: Scalars['ID'];
 };
 
-
-/** Query */
-export type QueryCartArgs = {
-  cartId: Maybe<Scalars['ID']>;
-};
-
-
-/** Query */
-export type QueryCustomerArgs = {
-  email: Maybe<Scalars['Email']>;
-  phoneNumber: Maybe<Scalars['String']>;
-  countryId: Maybe<Scalars['ID']>;
-};
-
-
-/** Query */
-export type QueryPaymentsArgs = {
-  monthId: Maybe<Scalars['ID']>;
-  year: Maybe<Scalars['Int']>;
-};
-
-
-/** Query */
-export type QueryPaymentArgs = {
-  refCode: Scalars['String'];
-};
-
-
-/** Query */
-export type QueryPaymentRefundAmountArgs = {
-  refCode: Scalars['String'];
-};
-
-
-/** Query */
-export type QueryUserSearchesArgs = {
-  limit: Maybe<Scalars['Int']>;
-};
-
-
-/** Query */
-export type QuerySearchArgs = {
-  inputId: Maybe<Scalars['ID']>;
-  inputValue: Maybe<Scalars['String']>;
-  availability: Maybe<SearchInput>;
-  searchId: Maybe<Scalars['ID']>;
-  filterIds: Maybe<ReadonlyArray<Scalars['String']>>;
-  sortId: Maybe<Scalars['ID']>;
-};
-
-
-/** Query */
-export type QueryFavouriteBeachBarsArgs = {
-  limit: Maybe<Scalars['Int']>;
-};
-
-/** Represents a user search */
-export type UserSearch = {
-  readonly __typename?: 'UserSearch';
-  readonly id: Scalars['ID'];
-  readonly searchDate: Scalars['Date'];
-  readonly searchAdults: Scalars['Int'];
-  readonly searchChildren: Maybe<Scalars['Int']>;
-  /** The user that made the search */
-  readonly user: Maybe<User>;
-  /** The input value that the user searched for */
-  readonly inputValue: SearchInputValue;
-  /** A sort filter used by the user, in its search */
-  readonly filters: ReadonlyArray<SearchFilter>;
-  /** The input value that the user searched for */
-  readonly sort: Maybe<SearchSort>;
-  readonly updatedAt: Scalars['DateTime'];
-  readonly timestamp: Scalars['DateTime'];
-};
-
-/** Represents a type of user's search sort filter */
-export type SearchSort = {
-  readonly __typename?: 'SearchSort';
+/** Represents a country's or city's region */
+export type Region = {
+  readonly __typename?: 'Region';
+  readonly city: City;
+  readonly country: Country;
   readonly id: Scalars['ID'];
   readonly name: Scalars['String'];
 };
 
-/** Represents the info (results) to be returned on user search */
-export type SearchResultType = {
-  readonly __typename?: 'SearchResultType';
-  /** The #beach_bar found in the search */
-  readonly beachBar: BeachBar;
-  readonly availability: BeachBarAvailability;
+/** Represents a reserved product */
+export type ReservedProduct = {
+  readonly __typename?: 'ReservedProduct';
+  readonly date: Scalars['DateTime'];
+  readonly endTime: HourTime;
+  readonly id: Scalars['BigInt'];
+  readonly isRefunded: Scalars['Boolean'];
+  readonly payment: Payment;
+  readonly product: Product;
+  readonly startTime: HourTime;
+};
+
+/** Represents a #beach_bar's restaurant food item (product) in its menu catalog */
+export type RestaurantFoodItem = {
+  readonly __typename?: 'RestaurantFoodItem';
+  readonly id: Scalars['BigInt'];
+  readonly imgUrl: Maybe<Scalars['String']>;
+  readonly menuCategory: RestaurantMenuCategory;
+  readonly name: Scalars['String'];
+  readonly price: Scalars['Decimal'];
+};
+
+/** Represents a category of a #beach_bar's restaurant menu */
+export type RestaurantMenuCategory = {
+  readonly __typename?: 'RestaurantMenuCategory';
+  readonly id: Scalars['ID'];
+  readonly name: Scalars['String'];
+};
+
+/** Represents a review's visit type, by the user */
+export type ReviewVisitType = {
+  readonly __typename?: 'ReviewVisitType';
+  readonly id: Scalars['ID'];
+  readonly name: Scalars['String'];
+};
+
+/** Represents a vote for a user's review */
+export type ReviewVote = {
+  readonly __typename?: 'ReviewVote';
+  readonly id: Scalars['BigInt'];
+  readonly review: BeachBarReview;
+  readonly timestamp: Scalars['DateTime'];
+  readonly type: ReviewVoteType;
+  readonly updatedAt: Scalars['DateTime'];
+  readonly user: User;
+};
+
+/** Represents a vote for a user's review */
+export type ReviewVoteType = {
+  readonly __typename?: 'ReviewVoteType';
+  readonly id: Scalars['ID'];
+  readonly value: Scalars['String'];
+};
+
+/** Represents the payload (data) of Amazon Web Services (AWS) S3 */
+export type S3Payload = {
+  readonly __typename?: 'S3Payload';
+  readonly signedRequest: Scalars['URL'];
+  /** The presigned URL gives you access to the object identified in the URL, to upload the user's image */
+  readonly url: Scalars['URL'];
 };
 
 /** Represents the info to be returned when a user searches for (availability) at #beach_bars */
@@ -2132,204 +1855,87 @@ export type Search = {
   readonly search: UserSearch;
 };
 
+/** Represents a filter used by users when searching for (availability at) #beach_bars */
+export type SearchFilter = {
+  readonly __typename?: 'SearchFilter';
+  readonly description: Maybe<Scalars['String']>;
+  readonly id: Scalars['ID'];
+  readonly name: Scalars['String'];
+  readonly publicId: Scalars['String'];
+};
+
 /** The arguments (args) used at #beach_bar search or availability */
 export type SearchInput = {
-  /** The date to search availability at #beach_bars */
-  readonly date: Scalars['Date'];
-  /** The ID value of the hour time to search availability for */
-  readonly timeId: Maybe<Scalars['ID']>;
   /** The number of adults to search availability at #beach_bars. Its value should be less or equal to 12 adults */
   readonly adults: Scalars['Int'];
   /** The number of children to search availability at #beach_bars. Its value should be less or equal to 8 children */
-  readonly children: Maybe<Scalars['Int']>;
+  readonly children: InputMaybe<Scalars['Int']>;
+  /** The date to search availability at #beach_bars */
+  readonly date: Scalars['Date'];
+  /** The ID value of the hour time the user will leave the #beach_bar */
+  readonly endTimeId: Scalars['ID'];
+  /** The ID value of the hour time the user will arrive at the #beach_bar */
+  readonly startTimeId: Scalars['ID'];
 };
 
 /** Represents a potential input value of a user's search */
 export type SearchInputValue = {
   readonly __typename?: 'SearchInputValue';
-  readonly id: Scalars['ID'];
-  /** A unique identifier (ID) for public use */
-  readonly publicId: Scalars['String'];
+  readonly beachBar: Maybe<BeachBar>;
+  readonly city: Maybe<City>;
+  readonly country: Maybe<Country>;
   /** The search input value formatted into a string */
   readonly formattedValue: Scalars['String'];
-  /** The country of the input value */
-  readonly country: Maybe<Country>;
-  /** The city of the input value */
-  readonly city: Maybe<City>;
-  /** The region of the input value */
-  readonly region: Maybe<Region>;
-  /** The #beach_bar of the input value */
-  readonly beachBar: Maybe<BeachBar>;
-};
-
-/** Represents a filter used by users when searching for (availability at) #beach_bars */
-export type SearchFilter = {
-  readonly __typename?: 'SearchFilter';
-  readonly id: Scalars['ID'];
-  /** A unique identifier (ID) for public use */
+  readonly id: Scalars['BigInt'];
   readonly publicId: Scalars['String'];
-  readonly name: Scalars['String'];
-  /** A short description about the filter, what is its value, and when to use */
-  readonly description: Maybe<Scalars['String']>;
+  readonly region: Maybe<Region>;
 };
 
-/** The base of a GraphQL Node */
-export type Node = {
-  readonly id: Scalars['ID'];
-};
-
-/** Represents a user's uploaded file */
-export type File = {
-  readonly __typename?: 'File';
-  /** A string representing the name of the uploaded file */
-  readonly filename: Scalars['String'];
-  /** A string representing the MIME type of the uploaded file, such as image/jpeg */
-  readonly mimetype: Scalars['String'];
-  /** A string representing the file encoding, such as 7bit */
-  readonly encoding: Scalars['String'];
-};
-
-/** Info to be returned upon successful operation */
-export type Success = {
-  readonly __typename?: 'Success';
-  /** A boolean that indicates if the operation was successful */
-  readonly success: Scalars['Boolean'];
-};
-
-/** Info to be returned upon successful UPDATE operation */
-export type Update = {
-  /** A boolean that indicates if the information were updated */
-  readonly updated: Scalars['Boolean'];
-};
-
-export type SuccessResult = Success | Error;
-
-/** Info to be returned upon successful deletion */
-export type Delete = {
-  readonly __typename?: 'Delete';
-  /** A boolean that indicates if the delete operation was successful */
-  readonly deleted: Scalars['Boolean'];
-};
-
-export type DeleteResult = Delete | Error;
-
-/** The timestamp of when something was created */
-export type Timestamp = {
-  readonly timestamp: Scalars['DateTime'];
-};
-
-/** Represents a user's account */
-export type UserAccount = {
-  readonly __typename?: 'UserAccount';
-  /** The ID value of the user's account */
-  readonly id: Scalars['ID'];
-  /** The user's honorific title. Its value can be null or 'Mr', 'Mrs', 'Ms', 'Miss', 'Sr', 'Dr', 'Lady' */
-  readonly honorificTitle: Maybe<Scalars['String']>;
-  /** The URL value of user's account profile picture */
-  readonly imgUrl: Maybe<Scalars['String']>;
-  /** User's birthday date */
-  readonly birthday: Maybe<Scalars['Date']>;
-  /** User's age */
-  readonly age: Maybe<Scalars['Int']>;
-  /** The house of office street address of the user */
-  readonly address: Maybe<Scalars['String']>;
-  /** The zip code of the house or office street address of the user */
-  readonly zipCode: Maybe<Scalars['String']>;
-  /** The city of the user */
-  readonly city: Maybe<Scalars['String']>;
-  /** The phone number of the user */
-  readonly phoneNumber: Maybe<Scalars['String']>;
-  /** The user info of the particular account */
-  readonly user: User;
-  /** The country of the user */
-  readonly country: Maybe<Country>;
-  /** The country of the user's phone number */
-  readonly telCountry: Maybe<Country>;
-  /** Indicates if to track some of user's actions */
-  readonly trackHistory: Scalars['Boolean'];
-};
-
-/** Represents the type of action a user made */
-export type UserHistoryActivity = {
-  readonly __typename?: 'UserHistoryActivity';
-  readonly id: Scalars['ID'];
-  readonly name: Scalars['String'];
-};
-
-/** Represents a user's recorded / saved action */
-export type UserHistory = Timestamp & {
-  readonly __typename?: 'UserHistory';
-  readonly timestamp: Scalars['DateTime'];
-  readonly id: Scalars['ID'];
-  /** The action type of the user */
-  readonly activity: UserHistoryActivity;
-  /** The ID of what the user accessed */
-  readonly objectId: Scalars['ID'];
-  /** The user that made the recorded / saved action */
-  readonly user: User;
-};
-
-/** Represents a user's action, with details about the objectId */
-export type UserHistoryExtended = {
-  readonly __typename?: 'UserHistoryExtended';
-  /** The info of the recorded / saved action of the user */
-  readonly userHistory: UserHistory;
-  /** Details about the #beach_bar the user may have visited */
-  readonly beachBar: Maybe<BeachBar>;
-  /** Details about what the user searched */
-  readonly search: Maybe<UserSearch>;
-};
-
-/** A user's favorite #beach_bar */
-export type UserFavoriteBar = {
-  readonly __typename?: 'UserFavoriteBar';
-  /** The user object */
-  readonly user: User;
-  /** One of user's favorite #beach_bar */
+/** Represents the info (results) to be returned on user search */
+export type SearchResultType = {
+  readonly __typename?: 'SearchResultType';
+  /** The #beach_bar (object) found in the search */
   readonly beachBar: BeachBar;
+  /** A boolean that indicates if the #beach_bar has availability for the people selected */
+  readonly hasCapacity: Scalars['Boolean'];
+  /** A list with all the recommended products for a user's search, depending on #beach_bar's availability and products prices */
+  readonly recommendedProducts: ReadonlyArray<ProductRecommended>;
+  /** The total price of the recommended products */
+  readonly totalPrice: Scalars['Float'];
 };
 
-/** Info to be returned when a user's #beach_bar favourite list is updated */
-export type UpdateUserFavoriteBar = {
-  readonly __typename?: 'UpdateUserFavoriteBar';
-  /** The #beach_bar that is added / removed */
-  readonly favouriteBar: UserFavoriteBar;
-  /** A boolean that indicates if the user's favorites #beach_bar list is updated */
+/** Represents a type of user's search sort filter */
+export type SearchSort = {
+  readonly __typename?: 'SearchSort';
+  readonly id: Scalars['ID'];
+  readonly name: Scalars['String'];
+};
+
+/** Info to be returned when a reserved product details are updated */
+export type UpdateReservedProduct = {
+  readonly __typename?: 'UpdateReservedProduct';
+  /** The reserved product that is updated */
+  readonly reservedProduct: ReservedProduct;
+  /** A boolean that indicates if the reserved product details have been successfully updated */
   readonly updated: Scalars['Boolean'];
 };
+
+export type UpdateReservedProductResult = Error | UpdateReservedProduct;
 
 /** Represents a user */
 export type User = {
   readonly __typename?: 'User';
-  /** User's ID value */
-  readonly id: Scalars['ID'];
-  /** User's email address */
-  readonly email: Scalars['Email'];
-  /** User's first (given) name */
+  readonly account: Maybe<Account>;
+  readonly email: Scalars['String'];
+  readonly favoriteBars: ReadonlyArray<UserFavoriteBar>;
   readonly firstName: Maybe<Scalars['String']>;
-  /** User's last (family) name */
-  readonly lastName: Maybe<Scalars['String']>;
   /** User's first and last name combines */
   readonly fullName: Maybe<Scalars['String']>;
-  /** User's account info */
-  readonly account: UserAccount;
-  /** A user's review on a #beach_bar */
-  readonly reviews: ReadonlyArray<BeachBarReview>;
-  /** A list with all the user's favorite #beach_bars */
-  readonly favoriteBars: ReadonlyArray<UserFavoriteBar>;
-  /** A list of all the votes of the user */
+  readonly id: Scalars['ID'];
+  readonly lastName: Maybe<Scalars['String']>;
   readonly reviewVotes: ReadonlyArray<ReviewVote>;
-};
-
-export type UserTypeResult = User | Error;
-
-/** User info to be returned on login */
-export type UserLogin = {
-  readonly __typename?: 'UserLogin';
-  /** The user (object) that logins */
-  readonly user: User;
-  /** The access token to authenticate & authorize the user */
-  readonly accessToken: Scalars['String'];
+  /** A user's review on a #beach_bar */
+  readonly reviews: Maybe<ReadonlyArray<BeachBarReview>>;
 };
 
 /** Credentials of user to sign up / login */
@@ -2340,299 +1946,316 @@ export type UserCredentials = {
   readonly password: Scalars['String'];
 };
 
-/** User details in login. The user's IP address is passed via the context */
-export type UserLoginDetails = {
-  /** The city name from where user logins from */
-  readonly city: Maybe<Scalars['String']>;
-  /** The alpha 2 code of the country, from where the user logins */
-  readonly countryAlpha2Code: Maybe<Scalars['String']>;
-};
-
-/** User details to be returned on update */
-export type UserUpdate = Update & {
-  readonly __typename?: 'UserUpdate';
-  /** A boolean that indicates if the information were updated */
-  readonly updated: Scalars['Boolean'];
+/** A user's favorite #beach_bar */
+export type UserFavoriteBar = {
+  readonly __typename?: 'UserFavoriteBar';
+  readonly beachBar: BeachBar;
+  readonly id: Scalars['BigInt'];
   readonly user: User;
 };
 
-/** Represents a country's or city's region */
-export type Region = {
-  readonly __typename?: 'Region';
-  readonly id: Scalars['ID'];
-  readonly name: Scalars['String'];
-  /** The country the region is located at */
-  readonly country: Country;
-  /** The city the region is located at */
-  readonly city: Maybe<City>;
+/** Represents a user's recorded / saved action */
+export type UserHistory = {
+  readonly __typename?: 'UserHistory';
+  readonly activity: UserHistoryActivity;
+  readonly id: Scalars['BigInt'];
+  readonly objectId: Maybe<Scalars['BigInt']>;
+  readonly timestamp: Scalars['DateTime'];
+  readonly user: Maybe<User>;
 };
 
-/** The style of a #beach_bar */
-export type BeachBarStyle = {
-  readonly __typename?: 'BeachBarStyle';
+/** Represents the type of action a user made */
+export type UserHistoryActivity = {
+  readonly __typename?: 'UserHistoryActivity';
   readonly id: Scalars['ID'];
   readonly name: Scalars['String'];
 };
 
-export type DetailsBeachBarFragment = (
-  { readonly __typename?: 'BeachBar' }
-  & Pick<BeachBar, 'id' | 'name' | 'slug' | 'thumbnailUrl' | 'description' | 'avgRating' | 'isAvailable' | 'formattedLocation' | 'contactPhoneNumber' | 'hidePhoneNumber'>
-  & { readonly location: (
-    { readonly __typename?: 'BeachBarLocation' }
-    & Pick<BeachBarLocation, 'id' | 'address' | 'zipCode' | 'longitude' | 'latitude'>
-    & { readonly country: (
-      { readonly __typename?: 'Country' }
-      & Pick<Country, 'id' | 'name' | 'callingCode'>
-    ), readonly city: (
-      { readonly __typename?: 'City' }
-      & Pick<City, 'id' | 'name'>
-    ), readonly region: Maybe<(
-      { readonly __typename?: 'Region' }
-      & Pick<Region, 'id' | 'name'>
-    )> }
-  ), readonly features: ReadonlyArray<(
-    { readonly __typename?: 'BeachBarFeature' }
-    & Pick<BeachBarFeature, 'quantity'>
-    & { readonly service: (
-      { readonly __typename?: 'BeachBarService' }
-      & Pick<BeachBarService, 'id' | 'name'>
-      & { readonly icon: (
-        { readonly __typename?: 'Icon' }
-        & Pick<Icon, 'id' | 'publicId'>
-      ) }
-    ) }
-  )>, readonly styles: Maybe<ReadonlyArray<(
-    { readonly __typename?: 'BeachBarStyle' }
-    & Pick<BeachBarStyle, 'id' | 'name'>
-  )>>, readonly restaurants: Maybe<ReadonlyArray<(
-    { readonly __typename?: 'BeachBarRestaurant' }
-    & Pick<BeachBarRestaurant, 'id'>
-  )>> }
-);
+/** Represents a user's action, with details about the objectId */
+export type UserHistoryExtended = {
+  readonly __typename?: 'UserHistoryExtended';
+  /** Details about the #beach_bar the user may have visited */
+  readonly beachBar: Maybe<BeachBar>;
+  /** Details about what the user searched */
+  readonly search: Maybe<UserSearch>;
+  /** The info of the recorded / saved action of the user */
+  readonly userHistory: UserHistory;
+};
 
-export type SearchBeachBarFragment = (
-  { readonly __typename?: 'BeachBar' }
-  & { readonly reviews: ReadonlyArray<(
-    { readonly __typename?: 'BeachBarReview' }
-    & Pick<BeachBarReview, 'id'>
-  )>, readonly payments: ReadonlyArray<(
-    { readonly __typename?: 'Payment' }
-    & Pick<Payment, 'id'>
-  )> }
-  & DetailsBeachBarFragment
-);
+/** User details in login. The user's IP address is passed via the context */
+export type UserLoginDetails = {
+  readonly city: InputMaybe<Scalars['String']>;
+  /** The alpha 2 code of the country, from where the user logins */
+  readonly countryAlpha2Code: InputMaybe<Scalars['String']>;
+};
 
-export type BasicCardFragment = (
-  { readonly __typename?: 'Card' }
-  & Pick<Card, 'id' | 'expMonth' | 'expYear' | 'last4' | 'cardholderName' | 'isDefault'>
-  & { readonly brand: Maybe<(
-    { readonly __typename?: 'CardBrand' }
-    & Pick<CardBrand, 'id' | 'name'>
-  )> }
-);
+/** Represents a user search */
+export type UserSearch = {
+  readonly __typename?: 'UserSearch';
+  readonly adults: Maybe<Scalars['Int']>;
+  readonly children: Maybe<Scalars['Int']>;
+  readonly date: Maybe<Scalars['DateTime']>;
+  readonly filters: ReadonlyArray<SearchFilter>;
+  readonly id: Scalars['BigInt'];
+  readonly inputValue: SearchInputValue;
+  readonly sort: Maybe<SearchSort>;
+  readonly timestamp: Scalars['DateTime'];
+  readonly updatedAt: Scalars['DateTime'];
+  readonly user: Maybe<User>;
+};
 
-export type BasicCartProductFragment = (
-  { readonly __typename?: 'CartProduct' }
-  & Pick<CartProduct, 'id' | 'quantity' | 'date' | 'timestamp'>
-  & { readonly time: (
-    { readonly __typename?: 'HourTime' }
-    & Pick<HourTime, 'id' | 'value'>
-  ), readonly product: (
-    { readonly __typename?: 'Product' }
-    & Pick<Product, 'id' | 'name' | 'price' | 'imgUrl'>
-    & { readonly beachBar: (
-      { readonly __typename?: 'BeachBar' }
-      & Pick<BeachBar, 'id' | 'name' | 'thumbnailUrl' | 'formattedLocation'>
-      & { readonly defaultCurrency: (
-        { readonly __typename?: 'Currency' }
-        & Pick<Currency, 'symbol'>
-      ) }
-    ) }
-  ) }
-);
+export type UserTypeResult = Error | User;
 
-export type CountryFragment = (
-  { readonly __typename?: 'Country' }
-  & Pick<Country, 'id' | 'name' | 'alpha2Code' | 'alpha3Code' | 'callingCode' | 'isEu'>
-  & { readonly cities: Maybe<ReadonlyArray<(
-    { readonly __typename?: 'City' }
-    & Pick<City, 'id' | 'name'>
-  )>>, readonly currency: (
-    { readonly __typename?: 'Currency' }
-    & Pick<Currency, 'id' | 'name' | 'isoCode' | 'symbol' | 'secondSymbol'>
-  ) }
-);
+export type Visit = {
+  readonly __typename?: 'Visit';
+  readonly date: Scalars['Date'];
+  readonly endTime: HourTime;
+  readonly isRefunded: Scalars['Boolean'];
+  readonly isUpcoming: Scalars['Boolean'];
+  readonly payment: Payment;
+  readonly startTime: HourTime;
+};
 
-export type BeachBarProductFragment = (
-  { readonly __typename?: 'Product' }
-  & Pick<Product, 'id' | 'name' | 'description' | 'imgUrl' | 'price' | 'maxPeople'>
-  & { readonly category: (
-    { readonly __typename?: 'ProductCategory' }
-    & Pick<ProductCategory, 'id'>
-    & { readonly components: ReadonlyArray<(
-      { readonly __typename?: 'ProductCategoryComponent' }
-      & Pick<ProductCategoryComponent, 'quantity'>
-      & { readonly component: (
-        { readonly __typename?: 'ProductComponent' }
-        & Pick<ProductComponent, 'id' | 'name'>
-        & { readonly icon: (
-          { readonly __typename?: 'Icon' }
-          & Pick<Icon, 'id' | 'publicId'>
-        ) }
-      ) }
-    )> }
-  ) }
-);
+/** Represents a voting category */
+export type VoteCategory = {
+  readonly __typename?: 'VoteCategory';
+  readonly description: Scalars['String'];
+  readonly id: Scalars['ID'];
+  readonly refCode: Scalars['String'];
+  readonly title: Scalars['String'];
+};
 
-export type ReviewFragment = (
-  { readonly __typename?: 'BeachBarReview' }
-  & Pick<BeachBarReview, 'id' | 'ratingValue' | 'review' | 'positiveComment' | 'negativeComment' | 'updatedAt' | 'timestamp'>
-  & { readonly votes: ReadonlyArray<(
-    { readonly __typename?: 'ReviewVote' }
-    & Pick<ReviewVote, 'id'>
-    & { readonly user: (
-      { readonly __typename?: 'User' }
-      & Pick<User, 'id'>
-    ), readonly type: (
-      { readonly __typename?: 'ReviewVoteType' }
-      & Pick<ReviewVoteType, 'id' | 'value'>
-    ) }
-  )>, readonly month: Maybe<(
-    { readonly __typename?: 'MonthTime' }
-    & Pick<MonthTime, 'id' | 'value'>
-  )>, readonly visitType: Maybe<(
-    { readonly __typename?: 'ReviewVisitType' }
-    & Pick<ReviewVisitType, 'id' | 'name'>
-  )>, readonly answer: Maybe<(
-    { readonly __typename?: 'ReviewAnswer' }
-    & Pick<ReviewAnswer, 'id' | 'body' | 'updatedAt'>
-  )>, readonly customer: (
-    { readonly __typename?: 'Customer' }
-    & Pick<Customer, 'id'>
-    & { readonly user: Maybe<(
-      { readonly __typename?: 'User' }
-      & Pick<User, 'id' | 'fullName'>
-      & { readonly account: (
-        { readonly __typename?: 'UserAccount' }
-        & Pick<UserAccount, 'id' | 'imgUrl'>
-      ) }
-    )> }
-  ) }
-);
+/** Represents the votes (voting result) of a voting category */
+export type VoteTag = {
+  readonly __typename?: 'VoteTag';
+  /** The voting category these vote results are assigned to */
+  readonly category: VoteCategory;
+  readonly downvotes: Scalars['Int'];
+  readonly id: Scalars['ID'];
+  readonly totalVotes: Maybe<Scalars['Int']>;
+  readonly upvotes: Scalars['Int'];
+};
 
-export type SearchInputValueFragment = (
-  { readonly __typename?: 'SearchInputValue' }
-  & Pick<SearchInputValue, 'id' | 'publicId' | 'formattedValue'>
-  & { readonly country: Maybe<(
-    { readonly __typename?: 'Country' }
-    & Pick<Country, 'id' | 'name' | 'alpha2Code'>
-  )>, readonly city: Maybe<(
-    { readonly __typename?: 'City' }
-    & Pick<City, 'id' | 'name'>
-    & { readonly country: Maybe<(
-      { readonly __typename?: 'Country' }
-      & Pick<Country, 'id' | 'alpha2Code'>
-    )> }
-  )>, readonly region: Maybe<(
-    { readonly __typename?: 'Region' }
-    & Pick<Region, 'id' | 'name'>
-    & { readonly country: (
-      { readonly __typename?: 'Country' }
-      & Pick<Country, 'id' | 'alpha2Code'>
-    ) }
-  )>, readonly beachBar: Maybe<(
-    { readonly __typename?: 'BeachBar' }
-    & Pick<BeachBar, 'id' | 'name' | 'thumbnailUrl' | 'formattedLocation'>
-    & { readonly location: (
-      { readonly __typename?: 'BeachBarLocation' }
-      & Pick<BeachBarLocation, 'longitude' | 'latitude'>
-      & { readonly country: (
-        { readonly __typename?: 'Country' }
-        & Pick<Country, 'id' | 'name' | 'alpha2Code'>
-      ), readonly city: (
-        { readonly __typename?: 'City' }
-        & Pick<City, 'id' | 'name'>
-      ), readonly region: Maybe<(
-        { readonly __typename?: 'Region' }
-        & Pick<Region, 'id' | 'name'>
-      )> }
-    ) }
-  )> }
-);
+export type BeachBarBaseFragment = { readonly __typename?: 'BeachBar', readonly id: string, readonly name: string, readonly slug: string, readonly thumbnailUrl: string | undefined, readonly description: string | undefined, readonly avgRating: number, readonly displayRegardlessCapacity: boolean, readonly contactPhoneNumber: string, readonly hidePhoneNumber: boolean, readonly zeroCartTotal: boolean, readonly hasCompletedSignUp: boolean | undefined, readonly isActive: boolean };
+
+export type DetailsBeachBarFragment = { readonly __typename?: 'BeachBar', readonly id: string, readonly name: string, readonly slug: string, readonly thumbnailUrl: string | undefined, readonly description: string | undefined, readonly avgRating: number, readonly displayRegardlessCapacity: boolean, readonly contactPhoneNumber: string, readonly hidePhoneNumber: boolean, readonly zeroCartTotal: boolean, readonly hasCompletedSignUp: boolean | undefined, readonly isActive: boolean, readonly category: { readonly __typename?: 'BeachBarCategory', readonly id: string, readonly name: string }, readonly location: { readonly __typename?: 'BeachBarLocation', readonly id: string, readonly address: string, readonly zipCode: string | undefined, readonly longitude: any, readonly latitude: any, readonly formattedLocation: string, readonly country: { readonly __typename?: 'Country', readonly id: string, readonly name: string, readonly alpha2Code: string, readonly alpha3Code: string, readonly callingCode: string, readonly isEu: boolean }, readonly city: { readonly __typename?: 'City', readonly id: string, readonly name: string }, readonly region: { readonly __typename?: 'Region', readonly id: string, readonly name: string } | undefined }, readonly features: ReadonlyArray<{ readonly __typename?: 'BeachBarFeature', readonly quantity: number, readonly service: { readonly __typename?: 'BeachBarService', readonly id: string, readonly name: string, readonly icon: { readonly __typename?: 'Icon', readonly id: string, readonly publicId: string } } }>, readonly styles: ReadonlyArray<{ readonly __typename?: 'BeachBarStyle', readonly id: string, readonly name: string }>, readonly restaurants: ReadonlyArray<{ readonly __typename?: 'BeachBarRestaurant', readonly id: string }> };
+
+export type SearchBeachBarFragment = { readonly __typename?: 'BeachBar', readonly id: string, readonly name: string, readonly slug: string, readonly thumbnailUrl: string | undefined, readonly description: string | undefined, readonly avgRating: number, readonly displayRegardlessCapacity: boolean, readonly contactPhoneNumber: string, readonly hidePhoneNumber: boolean, readonly zeroCartTotal: boolean, readonly hasCompletedSignUp: boolean | undefined, readonly isActive: boolean, readonly reviews: ReadonlyArray<{ readonly __typename?: 'BeachBarReview', readonly id: string }>, readonly payments: ReadonlyArray<{ readonly __typename?: 'Payment', readonly id: number }>, readonly currency: { readonly __typename?: 'Currency', readonly id: string, readonly symbol: string }, readonly category: { readonly __typename?: 'BeachBarCategory', readonly id: string, readonly name: string }, readonly location: { readonly __typename?: 'BeachBarLocation', readonly id: string, readonly address: string, readonly zipCode: string | undefined, readonly longitude: any, readonly latitude: any, readonly formattedLocation: string, readonly country: { readonly __typename?: 'Country', readonly id: string, readonly name: string, readonly alpha2Code: string, readonly alpha3Code: string, readonly callingCode: string, readonly isEu: boolean }, readonly city: { readonly __typename?: 'City', readonly id: string, readonly name: string }, readonly region: { readonly __typename?: 'Region', readonly id: string, readonly name: string } | undefined }, readonly features: ReadonlyArray<{ readonly __typename?: 'BeachBarFeature', readonly quantity: number, readonly service: { readonly __typename?: 'BeachBarService', readonly id: string, readonly name: string, readonly icon: { readonly __typename?: 'Icon', readonly id: string, readonly publicId: string } } }>, readonly styles: ReadonlyArray<{ readonly __typename?: 'BeachBarStyle', readonly id: string, readonly name: string }>, readonly restaurants: ReadonlyArray<{ readonly __typename?: 'BeachBarRestaurant', readonly id: string }> };
+
+export type FeatureBaseFragment = { readonly __typename?: 'BeachBarFeature', readonly id: number, readonly quantity: number, readonly description: string | undefined, readonly service: { readonly __typename?: 'BeachBarService', readonly id: string, readonly name: string, readonly icon: { readonly __typename?: 'Icon', readonly id: string, readonly name: string, readonly publicId: string } } };
+
+export type BeachBarImgUrlBaseFragment = { readonly __typename?: 'BeachBarImgUrl', readonly id: number, readonly imgUrl: string, readonly description: string | undefined, readonly updatedAt: string, readonly timestamp: string };
+
+export type BeachBarReviewBaseFragment = { readonly __typename?: 'BeachBarReview', readonly id: string, readonly ratingValue: number, readonly body: string | undefined, readonly answer: string | undefined, readonly positiveComment: string | undefined, readonly negativeComment: string | undefined, readonly updatedAt: string, readonly timestamp: string, readonly votes: ReadonlyArray<{ readonly __typename?: 'ReviewVote', readonly id: number, readonly user: { readonly __typename?: 'User', readonly id: string }, readonly type: { readonly __typename?: 'ReviewVoteType', readonly id: string, readonly value: string } }>, readonly month: { readonly __typename?: 'MonthTime', readonly id: string, readonly value: string } | undefined, readonly visitType: { readonly __typename?: 'ReviewVisitType', readonly id: string, readonly name: string } | undefined, readonly customer: { readonly __typename?: 'Customer', readonly id: number, readonly user: { readonly __typename?: 'User', readonly id: string, readonly fullName: string | undefined, readonly account: { readonly __typename?: 'Account', readonly id: string, readonly imgUrl: string | undefined } | undefined } | undefined } };
+
+export type BasicCardFragment = { readonly __typename?: 'Card', readonly id: number, readonly expMonth: number | undefined, readonly expYear: number | undefined, readonly last4: string, readonly cardholderName: string, readonly isDefault: boolean, readonly brand: { readonly __typename?: 'CardBrand', readonly id: string, readonly name: string } | undefined };
+
+export type CartFoodBaseFragment = { readonly __typename?: 'CartFood', readonly id: number, readonly quantity: number, readonly timestamp: string, readonly food: { readonly __typename?: 'Food', readonly id: number, readonly name: string, readonly price: any, readonly ingredients: string | undefined, readonly maxQuantity: number, readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string }, readonly category: { readonly __typename?: 'FoodCategory', readonly id: string, readonly name: string, readonly icon: { readonly __typename?: 'Icon', readonly id: string, readonly publicId: string } } } };
+
+export type CartFoodWithCartFragment = { readonly __typename?: 'CartFood', readonly id: number, readonly quantity: number, readonly timestamp: string, readonly cart: { readonly __typename?: 'Cart', readonly id: number, readonly total: any }, readonly food: { readonly __typename?: 'Food', readonly id: number, readonly name: string, readonly price: any, readonly ingredients: string | undefined, readonly maxQuantity: number, readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string }, readonly category: { readonly __typename?: 'FoodCategory', readonly id: string, readonly name: string, readonly icon: { readonly __typename?: 'Icon', readonly id: string, readonly publicId: string } } } };
+
+export type CartNoteBaseFragment = { readonly __typename?: 'CartNote', readonly id: number, readonly body: string, readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string } };
+
+export type CartProductBaseFragment = { readonly __typename?: 'CartProduct', readonly id: number, readonly quantity: number, readonly date: string, readonly people: number, readonly timestamp: string, readonly startTime: { readonly __typename?: 'HourTime', readonly id: string, readonly value: number }, readonly endTime: { readonly __typename?: 'HourTime', readonly id: string, readonly value: number }, readonly product: { readonly __typename?: 'Product', readonly id: string, readonly name: string, readonly price: number, readonly imgUrl: string | undefined, readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string, readonly name: string, readonly thumbnailUrl: string | undefined, readonly location: { readonly __typename?: 'BeachBarLocation', readonly formattedLocation: string }, readonly currency: { readonly __typename?: 'Currency', readonly id: string, readonly symbol: string } } } };
+
+export type CountryBaseFragment = { readonly __typename?: 'Country', readonly id: string, readonly name: string, readonly alpha2Code: string, readonly alpha3Code: string, readonly callingCode: string, readonly isEu: boolean };
+
+export type CountryFragment = { readonly __typename?: 'Country', readonly id: string, readonly name: string, readonly alpha2Code: string, readonly alpha3Code: string, readonly callingCode: string, readonly isEu: boolean, readonly cities: ReadonlyArray<{ readonly __typename?: 'City', readonly id: string, readonly name: string }>, readonly currency: { readonly __typename?: 'Currency', readonly id: string, readonly name: string, readonly isoCode: string, readonly symbol: string, readonly secondSymbol: string | undefined } };
+
+export type DashboardDateValueFragment = { readonly __typename?: 'DashboardDateValue', readonly date: string, readonly value: number };
+
+type DashboardBillingField_DashboardBillingFoods_Fragment = { readonly __typename?: 'DashboardBillingFoods', readonly revenue: ReadonlyArray<{ readonly __typename?: 'DashboardDateValue', readonly date: string, readonly value: number }> };
+
+type DashboardBillingField_DashboardBillingProducts_Fragment = { readonly __typename?: 'DashboardBillingProducts', readonly revenue: ReadonlyArray<{ readonly __typename?: 'DashboardDateValue', readonly date: string, readonly value: number }> };
+
+export type DashboardBillingFieldFragment = DashboardBillingField_DashboardBillingFoods_Fragment | DashboardBillingField_DashboardBillingProducts_Fragment;
+
+export type FoodBaseFragment = { readonly __typename?: 'Food', readonly id: number, readonly name: string, readonly price: any, readonly ingredients: string | undefined, readonly maxQuantity: number };
+
+export type FoodDetailsFragment = { readonly __typename?: 'Food', readonly id: number, readonly name: string, readonly price: any, readonly ingredients: string | undefined, readonly maxQuantity: number, readonly category: { readonly __typename?: 'FoodCategory', readonly id: string, readonly name: string, readonly icon: { readonly __typename?: 'Icon', readonly id: string, readonly publicId: string } } };
+
+export type LoginAuthorizeFragment = { readonly __typename?: 'LoginAuthorize', readonly accessToken: string, readonly refreshToken: string, readonly scope: ReadonlyArray<string>, readonly user: { readonly __typename?: 'User', readonly id: string, readonly email: string, readonly firstName: string | undefined, readonly lastName: string | undefined, readonly fullName: string | undefined, readonly account: { readonly __typename?: 'Account', readonly imgUrl: string | undefined } | undefined } };
+
+export type ProductBaseFragment = { readonly __typename?: 'Product', readonly id: string, readonly name: string, readonly description: string | undefined, readonly imgUrl: string | undefined, readonly price: number, readonly maxPeople: number, readonly minFoodSpending: number | undefined, readonly category: { readonly __typename?: 'ProductCategory', readonly id: string, readonly components: ReadonlyArray<{ readonly __typename?: 'ProductCategoryComponent', readonly quantity: number, readonly component: { readonly __typename?: 'ProductComponent', readonly id: string, readonly name: string, readonly icon: { readonly __typename?: 'Icon', readonly id: string, readonly publicId: string } } }> } };
+
+export type ProductDetailsFragment = { readonly __typename?: 'Product', readonly id: string, readonly name: string, readonly description: string | undefined, readonly imgUrl: string | undefined, readonly price: number, readonly maxPeople: number, readonly minFoodSpending: number | undefined, readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string, readonly currency: { readonly __typename?: 'Currency', readonly id: string, readonly symbol: string } }, readonly reservationLimits: ReadonlyArray<{ readonly __typename?: 'ProductReservationLimit', readonly id: number, readonly from: string, readonly to: string, readonly limitNumber: number }>, readonly category: { readonly __typename?: 'ProductCategory', readonly id: string, readonly components: ReadonlyArray<{ readonly __typename?: 'ProductCategoryComponent', readonly quantity: number, readonly component: { readonly __typename?: 'ProductComponent', readonly id: string, readonly name: string, readonly icon: { readonly __typename?: 'Icon', readonly id: string, readonly publicId: string } } }> } };
+
+export type ProductReservationLimitBaseFragment = { readonly __typename?: 'ProductReservationLimit', readonly id: number, readonly from: string, readonly to: string, readonly limitNumber: number, readonly product: { readonly __typename?: 'Product', readonly id: string }, readonly startTime: { readonly __typename?: 'HourTime', readonly id: string, readonly value: number } | undefined, readonly endTime: { readonly __typename?: 'HourTime', readonly id: string, readonly value: number } | undefined };
+
+export type SearchInputValueFragment = { readonly __typename?: 'SearchInputValue', readonly id: number, readonly publicId: string, readonly formattedValue: string, readonly country: { readonly __typename?: 'Country', readonly id: string, readonly name: string, readonly alpha2Code: string, readonly alpha3Code: string, readonly callingCode: string, readonly isEu: boolean } | undefined, readonly city: { readonly __typename?: 'City', readonly id: string, readonly name: string, readonly country: { readonly __typename?: 'Country', readonly id: string, readonly name: string, readonly alpha2Code: string, readonly alpha3Code: string, readonly callingCode: string, readonly isEu: boolean } } | undefined, readonly region: { readonly __typename?: 'Region', readonly id: string, readonly name: string, readonly country: { readonly __typename?: 'Country', readonly id: string, readonly name: string, readonly alpha2Code: string, readonly alpha3Code: string, readonly callingCode: string, readonly isEu: boolean } } | undefined, readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string, readonly name: string, readonly thumbnailUrl: string | undefined, readonly location: { readonly __typename?: 'BeachBarLocation', readonly longitude: any, readonly latitude: any, readonly formattedLocation: string, readonly country: { readonly __typename?: 'Country', readonly id: string, readonly name: string, readonly alpha2Code: string, readonly alpha3Code: string, readonly callingCode: string, readonly isEu: boolean }, readonly city: { readonly __typename?: 'City', readonly id: string, readonly name: string }, readonly region: { readonly __typename?: 'Region', readonly id: string, readonly name: string } | undefined } } | undefined };
+
+export type HourValueFragment = { readonly __typename?: 'HourTime', readonly id: string, readonly value: number };
+
+export type AddBeachBarMutationVariables = Exact<{
+  name: Scalars['String'];
+  description: Scalars['String'];
+  thumbnailUrl: Scalars['URL'];
+  contactPhoneNumber: Scalars['String'];
+  hidePhoneNumber?: InputMaybe<Scalars['Boolean']>;
+  zeroCartTotal: Scalars['Boolean'];
+  categoryId: Scalars['ID'];
+  openingTimeId: Scalars['ID'];
+  closingTimeId: Scalars['ID'];
+  code: Scalars['String'];
+  state: Scalars['String'];
+}>;
+
+
+export type AddBeachBarMutation = { readonly __typename?: 'Mutation', readonly addBeachBar: { readonly __typename?: 'BeachBar', readonly id: string, readonly name: string, readonly slug: string, readonly thumbnailUrl: string | undefined, readonly description: string | undefined, readonly avgRating: number, readonly displayRegardlessCapacity: boolean, readonly contactPhoneNumber: string, readonly hidePhoneNumber: boolean, readonly zeroCartTotal: boolean, readonly hasCompletedSignUp: boolean | undefined, readonly isActive: boolean } };
+
+export type AddBeachBarFeatureMutationVariables = Exact<{
+  beachBarId: Scalars['ID'];
+  featureId: Scalars['ID'];
+  quantity?: InputMaybe<Scalars['Int']>;
+  description: InputMaybe<Scalars['String']>;
+}>;
+
+
+export type AddBeachBarFeatureMutation = { readonly __typename?: 'Mutation', readonly addBeachBarFeature: { readonly __typename?: 'BeachBarFeature', readonly id: number, readonly quantity: number, readonly description: string | undefined, readonly service: { readonly __typename?: 'BeachBarService', readonly id: string, readonly name: string, readonly icon: { readonly __typename?: 'Icon', readonly id: string, readonly name: string, readonly publicId: string } } } };
+
+export type AddBeachBarImgUrlMutationVariables = Exact<{
+  beachBarId: Scalars['ID'];
+  imgUrl: Scalars['URL'];
+  description: InputMaybe<Scalars['String']>;
+}>;
+
+
+export type AddBeachBarImgUrlMutation = { readonly __typename?: 'Mutation', readonly addBeachBarImgUrl: { readonly __typename?: 'BeachBarImgUrl', readonly id: number, readonly imgUrl: string, readonly description: string | undefined, readonly updatedAt: string, readonly timestamp: string } };
+
+export type AddBeachBarLocationMutationVariables = Exact<{
+  beachBarId: Scalars['ID'];
+  address: Scalars['String'];
+  zipCode: InputMaybe<Scalars['String']>;
+  countryId: Scalars['ID'];
+  city: Scalars['String'];
+  region: InputMaybe<Scalars['ID']>;
+  latitude: Scalars['String'];
+  longitude: Scalars['String'];
+}>;
+
+
+export type AddBeachBarLocationMutation = { readonly __typename?: 'Mutation', readonly addBeachBarLocation: { readonly __typename?: 'BeachBarLocation', readonly id: string, readonly address: string, readonly zipCode: string | undefined, readonly latitude: any, readonly longitude: any, readonly whereIs: ReadonlyArray<number> | undefined, readonly country: { readonly __typename?: 'Country', readonly id: string, readonly name: string, readonly alpha2Code: string, readonly alpha3Code: string, readonly callingCode: string, readonly isEu: boolean }, readonly city: { readonly __typename?: 'City', readonly id: string, readonly name: string }, readonly region: { readonly __typename?: 'Region', readonly id: string, readonly name: string } | undefined } };
+
+export type AddBeachBarOwnerMutationVariables = Exact<{
+  beachBarId: Scalars['ID'];
+  userId: InputMaybe<Scalars['ID']>;
+  isPrimary?: InputMaybe<Scalars['Boolean']>;
+}>;
+
+
+export type AddBeachBarOwnerMutation = { readonly __typename?: 'Mutation', readonly addBeachBarOwner: { readonly __typename?: 'BeachBarOwner', readonly id: string, readonly isPrimary: boolean, readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string }, readonly owner: { readonly __typename?: 'Owner', readonly id: string, readonly user: { readonly __typename?: 'User', readonly id: string } } } };
+
+export type AddBeachBarStylesMutationVariables = Exact<{
+  beachBarId: Scalars['ID'];
+  styleIds: ReadonlyArray<Scalars['ID']> | Scalars['ID'];
+}>;
+
+
+export type AddBeachBarStylesMutation = { readonly __typename?: 'Mutation', readonly addBeachBarStyles: ReadonlyArray<{ readonly __typename?: 'BeachBarStyle', readonly id: string, readonly name: string }> };
+
+export type AddCartFoodMutationVariables = Exact<{
+  cartId: Scalars['ID'];
+  foodId: Scalars['ID'];
+  quantity: InputMaybe<Scalars['Int']>;
+}>;
+
+
+export type AddCartFoodMutation = { readonly __typename?: 'Mutation', readonly addCartFood: { readonly __typename?: 'CartFood', readonly id: number, readonly quantity: number, readonly timestamp: string, readonly cart: { readonly __typename?: 'Cart', readonly id: number, readonly total: any }, readonly food: { readonly __typename?: 'Food', readonly id: number, readonly name: string, readonly price: any, readonly ingredients: string | undefined, readonly maxQuantity: number, readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string }, readonly category: { readonly __typename?: 'FoodCategory', readonly id: string, readonly name: string, readonly icon: { readonly __typename?: 'Icon', readonly id: string, readonly publicId: string } } } } };
+
+export type AddCartNoteMutationVariables = Exact<{
+  cartId: Scalars['ID'];
+  beachBarId: Scalars['ID'];
+  body: Scalars['String'];
+}>;
+
+
+export type AddCartNoteMutation = { readonly __typename?: 'Mutation', readonly addCartNote: { readonly __typename?: 'CartNote', readonly id: number, readonly body: string, readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string } } };
 
 export type AddCartProductMutationVariables = Exact<{
   cartId: Scalars['ID'];
   productId: Scalars['ID'];
-  quantity: Maybe<Scalars['Int']>;
+  quantity: InputMaybe<Scalars['Int']>;
   date: Scalars['Date'];
-  timeId: Scalars['ID'];
+  people: Scalars['Int'];
+  startTimeId: Scalars['ID'];
+  endTimeId: Scalars['ID'];
 }>;
 
 
-export type AddCartProductMutation = (
-  { readonly __typename?: 'Mutation' }
-  & { readonly addCartProduct: (
-    { readonly __typename?: 'AddCartProduct' }
-    & Pick<AddCartProduct, 'added'>
-    & { readonly product: (
-      { readonly __typename?: 'CartProduct' }
-      & Pick<CartProduct, 'id' | 'quantity'>
-      & { readonly product: (
-        { readonly __typename?: 'Product' }
-        & Pick<Product, 'id' | 'name'>
-      ) }
-    ) }
-  ) }
-);
+export type AddCartProductMutation = { readonly __typename?: 'Mutation', readonly addCartProduct: { readonly __typename?: 'CartProduct', readonly id: number, readonly quantity: number, readonly people: number, readonly product: { readonly __typename?: 'Product', readonly id: string, readonly name: string } } };
 
 export type AddCustomerPaymentMethodMutationVariables = Exact<{
   token: Scalars['String'];
   customerId: Scalars['ID'];
   cardholderName: Scalars['String'];
-  isDefault?: Maybe<Scalars['Boolean']>;
-  savedForFuture?: Maybe<Scalars['Boolean']>;
+  isDefault?: InputMaybe<Scalars['Boolean']>;
+  savedForFuture?: InputMaybe<Scalars['Boolean']>;
 }>;
 
 
-export type AddCustomerPaymentMethodMutation = (
-  { readonly __typename?: 'Mutation' }
-  & { readonly addCustomerPaymentMethod: (
-    { readonly __typename?: 'AddCard' }
-    & Pick<AddCard, 'added'>
-    & { readonly card: (
-      { readonly __typename?: 'Card' }
-      & Pick<Card, 'id' | 'expMonth' | 'expYear' | 'last4' | 'cardholderName' | 'isDefault'>
-      & { readonly brand: Maybe<(
-        { readonly __typename?: 'CardBrand' }
-        & Pick<CardBrand, 'id' | 'name'>
-      )> }
-    ) }
-  ) }
-);
+export type AddCustomerPaymentMethodMutation = { readonly __typename?: 'Mutation', readonly addCustomerPaymentMethod: { readonly __typename?: 'Card', readonly id: number, readonly expMonth: number | undefined, readonly expYear: number | undefined, readonly last4: string, readonly cardholderName: string, readonly isDefault: boolean, readonly brand: { readonly __typename?: 'CardBrand', readonly id: string, readonly name: string } | undefined } };
+
+export type AddFoodMutationVariables = Exact<{
+  beachBarId: Scalars['ID'];
+  name: Scalars['String'];
+  categoryId: Scalars['ID'];
+  ingredients: InputMaybe<Scalars['String']>;
+  price: Scalars['Float'];
+  maxQuantity: InputMaybe<Scalars['Int']>;
+}>;
+
+
+export type AddFoodMutation = { readonly __typename?: 'Mutation', readonly addFood: { readonly __typename?: 'Food', readonly id: number, readonly name: string, readonly price: any, readonly ingredients: string | undefined, readonly maxQuantity: number, readonly category: { readonly __typename?: 'FoodCategory', readonly id: string, readonly name: string, readonly icon: { readonly __typename?: 'Icon', readonly id: string, readonly publicId: string } } } };
+
+export type AddProductMutationVariables = Exact<{
+  beachBarId: Scalars['ID'];
+  name: Scalars['String'];
+  description: InputMaybe<Scalars['String']>;
+  categoryId: Scalars['ID'];
+  price: Scalars['Float'];
+  maxPeople: Scalars['Int'];
+  minFoodSpending: InputMaybe<Scalars['Float']>;
+  imgUrl: InputMaybe<Scalars['URL']>;
+}>;
+
+
+export type AddProductMutation = { readonly __typename?: 'Mutation', readonly addProduct: { readonly __typename?: 'Product', readonly id: string, readonly name: string, readonly description: string | undefined, readonly imgUrl: string | undefined, readonly price: number, readonly maxPeople: number, readonly minFoodSpending: number | undefined, readonly category: { readonly __typename?: 'ProductCategory', readonly id: string, readonly components: ReadonlyArray<{ readonly __typename?: 'ProductCategoryComponent', readonly quantity: number, readonly component: { readonly __typename?: 'ProductComponent', readonly id: string, readonly name: string, readonly icon: { readonly __typename?: 'Icon', readonly id: string, readonly publicId: string } } }> } } };
+
+export type AddProductReservationLimitMutationVariables = Exact<{
+  productId: Scalars['ID'];
+  limit: Scalars['Int'];
+  from: Scalars['Date'];
+  to: Scalars['Date'];
+  startTimeId: InputMaybe<Scalars['ID']>;
+  endTimeId: InputMaybe<Scalars['ID']>;
+}>;
+
+
+export type AddProductReservationLimitMutation = { readonly __typename?: 'Mutation', readonly addProductReservationLimit: { readonly __typename?: 'ProductReservationLimit', readonly id: number, readonly from: string, readonly to: string, readonly limitNumber: number, readonly product: { readonly __typename?: 'Product', readonly id: string }, readonly startTime: { readonly __typename?: 'HourTime', readonly id: string, readonly value: number } | undefined, readonly endTime: { readonly __typename?: 'HourTime', readonly id: string, readonly value: number } | undefined } };
 
 export type AddReviewMutationVariables = Exact<{
   beachBarId: Scalars['ID'];
-  paymentRefCode: Maybe<Scalars['String']>;
+  paymentRefCode?: InputMaybe<Scalars['String']>;
   ratingValue: Scalars['Int'];
-  visitTypeId: Maybe<Scalars['ID']>;
-  monthTimeId: Maybe<Scalars['ID']>;
-  positiveComment: Maybe<Scalars['String']>;
-  negativeComment: Maybe<Scalars['String']>;
-  review: Maybe<Scalars['String']>;
+  visitTypeId?: InputMaybe<Scalars['ID']>;
+  monthId?: InputMaybe<Scalars['ID']>;
+  positiveComment?: InputMaybe<Scalars['String']>;
+  negativeComment?: InputMaybe<Scalars['String']>;
+  body?: InputMaybe<Scalars['String']>;
 }>;
 
 
-export type AddReviewMutation = (
-  { readonly __typename?: 'Mutation' }
-  & { readonly addReview: (
-    { readonly __typename?: 'AddBeachBarReview' }
-    & Pick<AddBeachBarReview, 'added'>
-    & { readonly review: (
-      { readonly __typename?: 'BeachBarReview' }
-      & Pick<BeachBarReview, 'id'>
-    ) }
-  ) }
-);
+export type AddReviewMutation = { readonly __typename?: 'Mutation', readonly addReview: { readonly __typename?: 'BeachBarReview', readonly id: string } };
+
+export type AuthorizeMutationVariables = Exact<{
+  user: OAuthUserInput;
+  provider: OAuthProvider;
+  isPrimaryOwner?: InputMaybe<Scalars['Boolean']>;
+  loginDetails?: InputMaybe<UserLoginDetails>;
+}>;
+
+
+export type AuthorizeMutation = { readonly __typename?: 'Mutation', readonly authorize: { readonly __typename?: 'LoginAuthorize', readonly accessToken: string, readonly refreshToken: string, readonly scope: ReadonlyArray<string>, readonly user: { readonly __typename?: 'User', readonly id: string, readonly email: string, readonly firstName: string | undefined, readonly lastName: string | undefined, readonly fullName: string | undefined, readonly account: { readonly __typename?: 'Account', readonly imgUrl: string | undefined } | undefined } } };
 
 export type ChangeUserPasswordMutationVariables = Exact<{
   email: Scalars['Email'];
@@ -2641,138 +2264,119 @@ export type ChangeUserPasswordMutationVariables = Exact<{
 }>;
 
 
-export type ChangeUserPasswordMutation = (
-  { readonly __typename?: 'Mutation' }
-  & { readonly changeUserPassword: (
-    { readonly __typename?: 'Success' }
-    & Pick<Success, 'success'>
-  ) }
-);
+export type ChangeUserPasswordMutation = { readonly __typename?: 'Mutation', readonly changeUserPassword: boolean };
 
 export type CheckoutMutationVariables = Exact<{
   cartId: Scalars['ID'];
   cardId: Scalars['ID'];
-  totalPeople?: Maybe<Scalars['Int']>;
 }>;
 
 
-export type CheckoutMutation = (
-  { readonly __typename?: 'Mutation' }
-  & { readonly checkout: (
-    { readonly __typename?: 'Payment' }
-    & Pick<Payment, 'id' | 'refCode'>
-  ) }
-);
+export type CheckoutMutation = { readonly __typename?: 'Mutation', readonly checkout: { readonly __typename?: 'Payment', readonly id: number, readonly refCode: string } };
+
+export type CompleteBeachBarSignUpMutationVariables = Exact<{
+  beachBarId: Scalars['ID'];
+}>;
+
+
+export type CompleteBeachBarSignUpMutation = { readonly __typename?: 'Mutation', readonly completeBeachBarSignUp: boolean };
+
+export type DeleteBeachBarFeatureMutationVariables = Exact<{
+  id: Scalars['ID'];
+}>;
+
+
+export type DeleteBeachBarFeatureMutation = { readonly __typename?: 'Mutation', readonly deleteBeachBarFeature: boolean };
+
+export type DeleteBeachBarImgUrlMutationVariables = Exact<{
+  id: Scalars['ID'];
+}>;
+
+
+export type DeleteBeachBarImgUrlMutation = { readonly __typename?: 'Mutation', readonly deleteBeachBarImgUrl: boolean };
+
+export type DeleteCartFoodMutationVariables = Exact<{
+  id: Scalars['ID'];
+}>;
+
+
+export type DeleteCartFoodMutation = { readonly __typename?: 'Mutation', readonly deleteCartFood: boolean };
 
 export type DeleteCartProductMutationVariables = Exact<{
   id: Scalars['ID'];
 }>;
 
 
-export type DeleteCartProductMutation = (
-  { readonly __typename?: 'Mutation' }
-  & { readonly deleteCartProduct: (
-    { readonly __typename?: 'Delete' }
-    & Pick<Delete, 'deleted'>
-  ) | (
-    { readonly __typename?: 'Error' }
-    & { readonly error: Maybe<(
-      { readonly __typename?: 'ErrorObject' }
-      & Pick<ErrorObject, 'code' | 'message'>
-    )> }
-  ) }
-);
+export type DeleteCartProductMutation = { readonly __typename?: 'Mutation', readonly deleteCartProduct: boolean };
 
 export type DeleteCustomerPaymentMethodMutationVariables = Exact<{
   cardId: Scalars['ID'];
 }>;
 
 
-export type DeleteCustomerPaymentMethodMutation = (
-  { readonly __typename?: 'Mutation' }
-  & { readonly deleteCustomerPaymentMethod: (
-    { readonly __typename?: 'Delete' }
-    & Pick<Delete, 'deleted'>
-  ) }
-);
+export type DeleteCustomerPaymentMethodMutation = { readonly __typename?: 'Mutation', readonly deleteCustomerPaymentMethod: boolean };
+
+export type DeleteFoodMutationVariables = Exact<{
+  foodId: Scalars['ID'];
+}>;
+
+
+export type DeleteFoodMutation = { readonly __typename?: 'Mutation', readonly deleteFood: boolean };
+
+export type DeleteProductMutationVariables = Exact<{
+  productId: Scalars['ID'];
+}>;
+
+
+export type DeleteProductMutation = { readonly __typename?: 'Mutation', readonly deleteProduct: boolean };
+
+export type DeleteProductReservationLimitMutationVariables = Exact<{
+  id: Scalars['ID'];
+}>;
+
+
+export type DeleteProductReservationLimitMutation = { readonly __typename?: 'Mutation', readonly deleteProductReservationLimit: boolean };
 
 export type DeleteReviewMutationVariables = Exact<{
-  reviewId: Scalars['ID'];
+  id: Scalars['ID'];
 }>;
 
 
-export type DeleteReviewMutation = (
-  { readonly __typename?: 'Mutation' }
-  & { readonly deleteReview: (
-    { readonly __typename?: 'Delete' }
-    & Pick<Delete, 'deleted'>
-  ) }
-);
+export type DeleteReviewMutation = { readonly __typename?: 'Mutation', readonly deleteReview: boolean };
 
 export type HelloMutationVariables = Exact<{
-  name: Maybe<Scalars['String']>;
+  name: InputMaybe<Scalars['String']>;
 }>;
 
 
-export type HelloMutation = (
-  { readonly __typename?: 'Mutation' }
-  & Pick<Mutation, 'hello'>
-);
+export type HelloMutation = { readonly __typename?: 'Mutation', readonly hello: string };
 
 export type LoginMutationVariables = Exact<{
   userCredentials: UserCredentials;
-  loginDetails: Maybe<UserLoginDetails>;
+  loginDetails?: InputMaybe<UserLoginDetails>;
 }>;
 
 
-export type LoginMutation = (
-  { readonly __typename?: 'Mutation' }
-  & { readonly login: (
-    { readonly __typename?: 'UserLogin' }
-    & Pick<UserLogin, 'accessToken'>
-    & { readonly user: (
-      { readonly __typename?: 'User' }
-      & Pick<User, 'id' | 'email'>
-    ) }
-  ) }
-);
+export type LoginMutation = { readonly __typename?: 'Mutation', readonly login: { readonly __typename?: 'LoginAuthorize', readonly accessToken: string, readonly refreshToken: string, readonly scope: ReadonlyArray<string>, readonly user: { readonly __typename?: 'User', readonly id: string, readonly email: string, readonly firstName: string | undefined, readonly lastName: string | undefined, readonly fullName: string | undefined, readonly account: { readonly __typename?: 'Account', readonly imgUrl: string | undefined } | undefined } } };
 
 export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 
 
-export type LogoutMutation = (
-  { readonly __typename?: 'Mutation' }
-  & { readonly logout: (
-    { readonly __typename?: 'Success' }
-    & Pick<Success, 'success'>
-  ) }
-);
+export type LogoutMutation = { readonly __typename?: 'Mutation', readonly logout: boolean };
 
 export type RefundPaymentMutationVariables = Exact<{
-  paymentId: Scalars['ID'];
+  id: Scalars['ID'];
 }>;
 
 
-export type RefundPaymentMutation = (
-  { readonly __typename?: 'Mutation' }
-  & { readonly refundPayment: (
-    { readonly __typename?: 'Delete' }
-    & Pick<Delete, 'deleted'>
-  ) }
-);
+export type RefundPaymentMutation = { readonly __typename?: 'Mutation', readonly refundPayment: boolean };
 
 export type SendForgotPasswordLinkMutationVariables = Exact<{
   email: Scalars['Email'];
 }>;
 
 
-export type SendForgotPasswordLinkMutation = (
-  { readonly __typename?: 'Mutation' }
-  & { readonly sendForgotPasswordLink: (
-    { readonly __typename?: 'Success' }
-    & Pick<Success, 'success'>
-  ) }
-);
+export type SendForgotPasswordLinkMutation = { readonly __typename?: 'Mutation', readonly sendForgotPasswordLink: boolean };
 
 export type SignS3MutationVariables = Exact<{
   filename: Scalars['String'];
@@ -2781,865 +2385,489 @@ export type SignS3MutationVariables = Exact<{
 }>;
 
 
-export type SignS3Mutation = (
-  { readonly __typename?: 'Mutation' }
-  & { readonly signS3: (
-    { readonly __typename?: 'S3Payload' }
-    & Pick<S3Payload, 'signedRequest' | 'url'>
-  ) }
-);
+export type SignS3Mutation = { readonly __typename?: 'Mutation', readonly signS3: { readonly __typename?: 'S3Payload', readonly signedRequest: string, readonly url: string } };
 
 export type SignUpMutationVariables = Exact<{
   userCredentials: UserCredentials;
-  isPrimaryOwner?: Maybe<Scalars['Boolean']>;
+  isPrimaryOwner?: InputMaybe<Scalars['Boolean']>;
 }>;
 
 
-export type SignUpMutation = (
-  { readonly __typename?: 'Mutation' }
-  & { readonly signUp: (
-    { readonly __typename?: 'User' }
-    & Pick<User, 'id'>
-  ) }
-);
+export type SignUpMutation = { readonly __typename?: 'Mutation', readonly signUp: { readonly __typename?: 'User', readonly id: string } };
+
+export type UpdateBeachBarMutationVariables = Exact<{
+  id: Scalars['ID'];
+  name: InputMaybe<Scalars['String']>;
+  description: InputMaybe<Scalars['String']>;
+  thumbnailUrl: InputMaybe<Scalars['URL']>;
+  contactPhoneNumber: InputMaybe<Scalars['String']>;
+  hidePhoneNumber: InputMaybe<Scalars['Boolean']>;
+  zeroCartTotal: InputMaybe<Scalars['Boolean']>;
+  isActive: InputMaybe<Scalars['Boolean']>;
+  displayRegardlessCapacity: InputMaybe<Scalars['Boolean']>;
+  categoryId: InputMaybe<Scalars['ID']>;
+  openingTimeId: InputMaybe<Scalars['ID']>;
+  closingTimeId: InputMaybe<Scalars['ID']>;
+}>;
+
+
+export type UpdateBeachBarMutation = { readonly __typename?: 'Mutation', readonly updateBeachBar: { readonly __typename?: 'BeachBar', readonly id: string, readonly name: string, readonly slug: string, readonly thumbnailUrl: string | undefined, readonly description: string | undefined, readonly avgRating: number, readonly displayRegardlessCapacity: boolean, readonly contactPhoneNumber: string, readonly hidePhoneNumber: boolean, readonly zeroCartTotal: boolean, readonly hasCompletedSignUp: boolean | undefined, readonly isActive: boolean } };
+
+export type UpdateBeachBarFeatureMutationVariables = Exact<{
+  id: Scalars['ID'];
+  quantity?: InputMaybe<Scalars['Int']>;
+  description: InputMaybe<Scalars['String']>;
+}>;
+
+
+export type UpdateBeachBarFeatureMutation = { readonly __typename?: 'Mutation', readonly updateBeachBarFeature: { readonly __typename?: 'BeachBarFeature', readonly id: number, readonly quantity: number, readonly description: string | undefined, readonly service: { readonly __typename?: 'BeachBarService', readonly id: string, readonly name: string, readonly icon: { readonly __typename?: 'Icon', readonly id: string, readonly name: string, readonly publicId: string } } } };
+
+export type UpdateBeachBarImgUrlMutationVariables = Exact<{
+  id: Scalars['ID'];
+  description: InputMaybe<Scalars['String']>;
+}>;
+
+
+export type UpdateBeachBarImgUrlMutation = { readonly __typename?: 'Mutation', readonly updateBeachBaImgUrl: { readonly __typename?: 'BeachBarImgUrl', readonly id: number, readonly imgUrl: string, readonly description: string | undefined, readonly updatedAt: string, readonly timestamp: string } };
+
+export type UpdateCartFoodMutationVariables = Exact<{
+  id: Scalars['ID'];
+  quantity: Scalars['Int'];
+}>;
+
+
+export type UpdateCartFoodMutation = { readonly __typename?: 'Mutation', readonly updateCartFood: { readonly __typename?: 'CartFood', readonly id: number, readonly quantity: number, readonly timestamp: string, readonly cart: { readonly __typename?: 'Cart', readonly id: number, readonly total: any }, readonly food: { readonly __typename?: 'Food', readonly id: number, readonly name: string, readonly price: any, readonly ingredients: string | undefined, readonly maxQuantity: number, readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string }, readonly category: { readonly __typename?: 'FoodCategory', readonly id: string, readonly name: string, readonly icon: { readonly __typename?: 'Icon', readonly id: string, readonly publicId: string } } } } };
+
+export type UpdateCartNoteMutationVariables = Exact<{
+  id: Scalars['ID'];
+  body: Scalars['String'];
+}>;
+
+
+export type UpdateCartNoteMutation = { readonly __typename?: 'Mutation', readonly updateCartNote: { readonly __typename?: 'CartNote', readonly id: number, readonly body: string, readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string } } };
 
 export type UpdateCartProductMutationVariables = Exact<{
   id: Scalars['ID'];
-  quantity: Maybe<Scalars['Int']>;
+  quantity: InputMaybe<Scalars['Int']>;
 }>;
 
 
-export type UpdateCartProductMutation = (
-  { readonly __typename?: 'Mutation' }
-  & { readonly updateCartProduct: (
-    { readonly __typename?: 'UpdateCartProduct' }
-    & Pick<UpdateCartProduct, 'updated'>
-    & { readonly product: (
-      { readonly __typename?: 'CartProduct' }
-      & Pick<CartProduct, 'id' | 'quantity'>
-    ) }
-  ) }
-);
+export type UpdateCartProductMutation = { readonly __typename?: 'Mutation', readonly updateCartProduct: { readonly __typename?: 'CartProduct', readonly id: number, readonly quantity: number } };
 
 export type UpdateCustomerPaymentMethodMutationVariables = Exact<{
   cardId: Scalars['ID'];
-  expMonth: Maybe<Scalars['Int']>;
-  expYear: Maybe<Scalars['Int']>;
-  cardholderName: Maybe<Scalars['String']>;
-  isDefault: Maybe<Scalars['Boolean']>;
+  expMonth: InputMaybe<Scalars['Int']>;
+  expYear: InputMaybe<Scalars['Int']>;
+  cardholderName: InputMaybe<Scalars['String']>;
+  isDefault: InputMaybe<Scalars['Boolean']>;
 }>;
 
 
-export type UpdateCustomerPaymentMethodMutation = (
-  { readonly __typename?: 'Mutation' }
-  & { readonly updateCustomerPaymentMethod: (
-    { readonly __typename?: 'UpdateCard' }
-    & Pick<UpdateCard, 'updated'>
-    & { readonly card: (
-      { readonly __typename?: 'Card' }
-      & Pick<Card, 'id' | 'expMonth' | 'expYear' | 'cardholderName' | 'isDefault' | 'last4'>
-      & { readonly brand: Maybe<(
-        { readonly __typename?: 'CardBrand' }
-        & Pick<CardBrand, 'id' | 'name'>
-      )> }
-    ) }
-  ) }
-);
+export type UpdateCustomerPaymentMethodMutation = { readonly __typename?: 'Mutation', readonly updateCustomerPaymentMethod: { readonly __typename?: 'Card', readonly id: number, readonly expMonth: number | undefined, readonly expYear: number | undefined, readonly cardholderName: string, readonly isDefault: boolean, readonly last4: string, readonly brand: { readonly __typename?: 'CardBrand', readonly id: string, readonly name: string } | undefined } };
 
 export type UpdateFavouriteBeachBarMutationVariables = Exact<{
   slug: Scalars['ID'];
 }>;
 
 
-export type UpdateFavouriteBeachBarMutation = (
-  { readonly __typename?: 'Mutation' }
-  & { readonly updateFavouriteBeachBar: (
-    { readonly __typename?: 'UpdateUserFavoriteBar' }
-    & Pick<UpdateUserFavoriteBar, 'updated'>
-  ) }
-);
+export type UpdateFavouriteBeachBarMutation = { readonly __typename?: 'Mutation', readonly updateFavouriteBeachBar: { readonly __typename?: 'UserFavoriteBar', readonly id: number, readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string, readonly name: string, readonly thumbnailUrl: string | undefined } } };
 
-export type UpdateReviewMutationVariables = Exact<{
-  reviewId: Scalars['ID'];
-  ratingValue: Maybe<Scalars['Int']>;
-  visitTypeId: Maybe<Scalars['ID']>;
-  monthTimeId: Maybe<Scalars['ID']>;
-  positiveComment: Maybe<Scalars['String']>;
-  negativeComment: Maybe<Scalars['String']>;
-  review: Maybe<Scalars['String']>;
+export type UpdateFoodMutationVariables = Exact<{
+  id: Scalars['ID'];
+  name: InputMaybe<Scalars['String']>;
+  categoryId: InputMaybe<Scalars['ID']>;
+  ingredients: InputMaybe<Scalars['String']>;
+  price: InputMaybe<Scalars['Float']>;
+  maxQuantity: InputMaybe<Scalars['Int']>;
 }>;
 
 
-export type UpdateReviewMutation = (
-  { readonly __typename?: 'Mutation' }
-  & { readonly updateReview: (
-    { readonly __typename?: 'UpdateBeachBarReview' }
-    & Pick<UpdateBeachBarReview, 'updated'>
-    & { readonly review: (
-      { readonly __typename?: 'BeachBarReview' }
-      & Pick<BeachBarReview, 'id' | 'ratingValue' | 'positiveComment' | 'negativeComment' | 'review' | 'updatedAt' | 'timestamp'>
-      & { readonly votes: ReadonlyArray<(
-        { readonly __typename?: 'ReviewVote' }
-        & Pick<ReviewVote, 'id'>
-        & { readonly user: (
-          { readonly __typename?: 'User' }
-          & Pick<User, 'id'>
-        ), readonly type: (
-          { readonly __typename?: 'ReviewVoteType' }
-          & Pick<ReviewVoteType, 'id' | 'value'>
-        ) }
-      )>, readonly answer: Maybe<(
-        { readonly __typename?: 'ReviewAnswer' }
-        & Pick<ReviewAnswer, 'id' | 'body'>
-      )>, readonly beachBar: (
-        { readonly __typename?: 'BeachBar' }
-        & Pick<BeachBar, 'id' | 'name' | 'formattedLocation'>
-      ), readonly visitType: Maybe<(
-        { readonly __typename?: 'ReviewVisitType' }
-        & Pick<ReviewVisitType, 'id' | 'name'>
-      )>, readonly month: Maybe<(
-        { readonly __typename?: 'MonthTime' }
-        & Pick<MonthTime, 'id' | 'value'>
-      )> }
-    ) }
-  ) }
-);
+export type UpdateFoodMutation = { readonly __typename?: 'Mutation', readonly updateFood: { readonly __typename?: 'Food', readonly id: number, readonly name: string, readonly price: any, readonly ingredients: string | undefined, readonly maxQuantity: number, readonly category: { readonly __typename?: 'FoodCategory', readonly id: string, readonly name: string, readonly icon: { readonly __typename?: 'Icon', readonly id: string, readonly publicId: string } } } };
+
+export type UpdateProductMutationVariables = Exact<{
+  productId: Scalars['ID'];
+  name: InputMaybe<Scalars['String']>;
+  description: InputMaybe<Scalars['String']>;
+  categoryId: InputMaybe<Scalars['ID']>;
+  price: InputMaybe<Scalars['Float']>;
+  maxPeople: InputMaybe<Scalars['Int']>;
+  minFoodSpending: InputMaybe<Scalars['Float']>;
+  imgUrl: InputMaybe<Scalars['URL']>;
+}>;
+
+
+export type UpdateProductMutation = { readonly __typename?: 'Mutation', readonly updateProduct: { readonly __typename?: 'Product', readonly id: string, readonly name: string, readonly description: string | undefined, readonly imgUrl: string | undefined, readonly price: number, readonly maxPeople: number, readonly minFoodSpending: number | undefined, readonly category: { readonly __typename?: 'ProductCategory', readonly id: string, readonly components: ReadonlyArray<{ readonly __typename?: 'ProductCategoryComponent', readonly quantity: number, readonly component: { readonly __typename?: 'ProductComponent', readonly id: string, readonly name: string, readonly icon: { readonly __typename?: 'Icon', readonly id: string, readonly publicId: string } } }> } } };
+
+export type UpdateProductReservationLimitMutationVariables = Exact<{
+  id: Scalars['ID'];
+  limit: Scalars['Int'];
+}>;
+
+
+export type UpdateProductReservationLimitMutation = { readonly __typename?: 'Mutation', readonly updateProductReservationLimit: { readonly __typename?: 'ProductReservationLimit', readonly id: number, readonly from: string, readonly to: string, readonly limitNumber: number, readonly product: { readonly __typename?: 'Product', readonly id: string }, readonly startTime: { readonly __typename?: 'HourTime', readonly id: string, readonly value: number } | undefined, readonly endTime: { readonly __typename?: 'HourTime', readonly id: string, readonly value: number } | undefined } };
+
+export type UpdateReviewMutationVariables = Exact<{
+  id: Scalars['ID'];
+  ratingValue: InputMaybe<Scalars['Int']>;
+  visitTypeId: InputMaybe<Scalars['ID']>;
+  monthId: InputMaybe<Scalars['ID']>;
+  positiveComment: InputMaybe<Scalars['String']>;
+  negativeComment: InputMaybe<Scalars['String']>;
+  body: InputMaybe<Scalars['String']>;
+  answer: InputMaybe<Scalars['String']>;
+}>;
+
+
+export type UpdateReviewMutation = { readonly __typename?: 'Mutation', readonly updateReview: { readonly __typename?: 'BeachBarReview', readonly id: string, readonly ratingValue: number, readonly positiveComment: string | undefined, readonly negativeComment: string | undefined, readonly body: string | undefined, readonly answer: string | undefined, readonly updatedAt: string, readonly timestamp: string, readonly votes: ReadonlyArray<{ readonly __typename?: 'ReviewVote', readonly id: number, readonly user: { readonly __typename?: 'User', readonly id: string }, readonly type: { readonly __typename?: 'ReviewVoteType', readonly id: string, readonly value: string } }>, readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string, readonly name: string }, readonly visitType: { readonly __typename?: 'ReviewVisitType', readonly id: string, readonly name: string } | undefined, readonly month: { readonly __typename?: 'MonthTime', readonly id: string, readonly value: string } | undefined } };
 
 export type UpdateReviewVoteMutationVariables = Exact<{
   reviewId: Scalars['ID'];
-  upvote: Maybe<Scalars['Boolean']>;
-  downvote: Maybe<Scalars['Boolean']>;
+  upvote: InputMaybe<Scalars['Boolean']>;
+  downvote: InputMaybe<Scalars['Boolean']>;
 }>;
 
 
-export type UpdateReviewVoteMutation = (
-  { readonly __typename?: 'Mutation' }
-  & { readonly updateReviewVote: (
-    { readonly __typename?: 'UpdateBeachBarReview' }
-    & Pick<UpdateBeachBarReview, 'updated'>
-    & { readonly review: (
-      { readonly __typename?: 'BeachBarReview' }
-      & Pick<BeachBarReview, 'id' | 'ratingValue'>
-      & { readonly votes: ReadonlyArray<(
-        { readonly __typename?: 'ReviewVote' }
-        & Pick<ReviewVote, 'id'>
-        & { readonly user: (
-          { readonly __typename?: 'User' }
-          & Pick<User, 'id'>
-        ), readonly type: (
-          { readonly __typename?: 'ReviewVoteType' }
-          & Pick<ReviewVoteType, 'id' | 'value'>
-        ) }
-      )> }
-    ) }
-  ) }
-);
+export type UpdateReviewVoteMutation = { readonly __typename?: 'Mutation', readonly updateReviewVote: { readonly __typename?: 'BeachBarReview', readonly id: string, readonly ratingValue: number, readonly votes: ReadonlyArray<{ readonly __typename?: 'ReviewVote', readonly id: number, readonly user: { readonly __typename?: 'User', readonly id: string }, readonly type: { readonly __typename?: 'ReviewVoteType', readonly id: string, readonly value: string } }> } };
 
 export type UpdateUserMutationVariables = Exact<{
-  email: Maybe<Scalars['Email']>;
-  firstName: Maybe<Scalars['String']>;
-  lastName: Maybe<Scalars['String']>;
-  imgUrl: Maybe<Scalars['URL']>;
-  honorificTitle: Maybe<Scalars['String']>;
-  birthday: Maybe<Scalars['String']>;
-  countryId: Maybe<Scalars['ID']>;
-  city: Maybe<Scalars['String']>;
-  phoneNumber: Maybe<Scalars['String']>;
-  telCountryId: Maybe<Scalars['ID']>;
-  address: Maybe<Scalars['String']>;
-  zipCode: Maybe<Scalars['String']>;
-  trackHistory: Maybe<Scalars['Boolean']>;
+  email: InputMaybe<Scalars['Email']>;
+  firstName: InputMaybe<Scalars['String']>;
+  lastName: InputMaybe<Scalars['String']>;
+  imgUrl: InputMaybe<Scalars['URL']>;
+  honorificTitle: InputMaybe<Scalars['String']>;
+  birthday: InputMaybe<Scalars['String']>;
+  countryId: InputMaybe<Scalars['ID']>;
+  city: InputMaybe<Scalars['String']>;
+  phoneNumber: InputMaybe<Scalars['String']>;
+  telCountryId: InputMaybe<Scalars['ID']>;
+  address: InputMaybe<Scalars['String']>;
+  zipCode: InputMaybe<Scalars['String']>;
+  trackHistory: InputMaybe<Scalars['Boolean']>;
 }>;
 
 
-export type UpdateUserMutation = (
-  { readonly __typename?: 'Mutation' }
-  & { readonly updateUser: (
-    { readonly __typename?: 'UserUpdate' }
-    & Pick<UserUpdate, 'updated'>
-    & { readonly user: (
-      { readonly __typename?: 'User' }
-      & Pick<User, 'id' | 'email' | 'firstName' | 'lastName'>
-      & { readonly account: (
-        { readonly __typename?: 'UserAccount' }
-        & Pick<UserAccount, 'id' | 'honorificTitle' | 'birthday' | 'age' | 'address' | 'zipCode' | 'trackHistory' | 'imgUrl' | 'city' | 'phoneNumber'>
-        & { readonly telCountry: Maybe<(
-          { readonly __typename?: 'Country' }
-          & Pick<Country, 'id'>
-        )>, readonly country: Maybe<(
-          { readonly __typename?: 'Country' }
-          & Pick<Country, 'id'>
-        )> }
-      ) }
-    ) }
-  ) }
-);
+export type UpdateUserMutation = { readonly __typename?: 'Mutation', readonly updateUser: { readonly __typename?: 'User', readonly id: string, readonly email: string, readonly firstName: string | undefined, readonly lastName: string | undefined, readonly account: { readonly __typename?: 'Account', readonly id: string, readonly honorificTitle: string | undefined, readonly birthday: string | undefined, readonly age: number | undefined, readonly address: string | undefined, readonly zipCode: string | undefined, readonly trackHistory: boolean, readonly imgUrl: string | undefined, readonly city: string | undefined, readonly phoneNumber: string | undefined, readonly telCountry: { readonly __typename?: 'Country', readonly id: string, readonly name: string, readonly alpha2Code: string, readonly alpha3Code: string, readonly callingCode: string, readonly isEu: boolean } | undefined, readonly country: { readonly __typename?: 'Country', readonly id: string, readonly name: string, readonly alpha2Code: string, readonly alpha3Code: string, readonly callingCode: string, readonly isEu: boolean, readonly currency: { readonly __typename?: 'Currency', readonly id: string, readonly name: string } } | undefined } | undefined } };
 
 export type VerifyUserPaymentForReviewMutationVariables = Exact<{
   beachBarId: Scalars['ID'];
-  refCode: Maybe<Scalars['String']>;
+  refCode: InputMaybe<Scalars['String']>;
 }>;
 
 
-export type VerifyUserPaymentForReviewMutation = (
-  { readonly __typename?: 'Mutation' }
-  & Pick<Mutation, 'verifyUserPaymentForReview'>
-);
+export type VerifyUserPaymentForReviewMutation = { readonly __typename?: 'Mutation', readonly verifyUserPaymentForReview: boolean };
 
 export type AuthorizeWithFacebookMutationVariables = Exact<{
   code: Scalars['String'];
   state: Scalars['String'];
-  isPrimaryOwner?: Maybe<Scalars['Boolean']>;
-  loginDetails: Maybe<UserLoginDetails>;
+  isPrimaryOwner?: InputMaybe<Scalars['Boolean']>;
+  loginDetails: InputMaybe<UserLoginDetails>;
 }>;
 
 
-export type AuthorizeWithFacebookMutation = (
-  { readonly __typename?: 'Mutation' }
-  & { readonly authorizeWithFacebook: (
-    { readonly __typename?: 'OAuthAuthorization' }
-    & { readonly user: (
-      { readonly __typename?: 'User' }
-      & Pick<User, 'id' | 'email'>
-    ) }
-  ) }
-);
+export type AuthorizeWithFacebookMutation = { readonly __typename?: 'Mutation', readonly authorizeWithFacebook: { readonly __typename?: 'LoginAuthorize', readonly user: { readonly __typename?: 'User', readonly id: string, readonly email: string } } };
 
 export type AuthorizeWithGoogleMutationVariables = Exact<{
   code: Scalars['String'];
   state: Scalars['String'];
-  isPrimaryOwner?: Maybe<Scalars['Boolean']>;
-  loginDetails: Maybe<UserLoginDetails>;
+  isPrimaryOwner?: InputMaybe<Scalars['Boolean']>;
+  loginDetails: InputMaybe<UserLoginDetails>;
 }>;
 
 
-export type AuthorizeWithGoogleMutation = (
-  { readonly __typename?: 'Mutation' }
-  & { readonly authorizeWithGoogle: (
-    { readonly __typename?: 'OAuthAuthorization' }
-    & { readonly user: (
-      { readonly __typename?: 'User' }
-      & Pick<User, 'id' | 'email'>
-    ) }
-  ) }
-);
+export type AuthorizeWithGoogleMutation = { readonly __typename?: 'Mutation', readonly authorizeWithGoogle: { readonly __typename?: 'LoginAuthorize', readonly user: { readonly __typename?: 'User', readonly id: string, readonly email: string } } };
 
 export type AuthorizeWithInstagramMutationVariables = Exact<{
   code: Scalars['String'];
   state: Scalars['String'];
   email: Scalars['Email'];
-  isPrimaryOwner?: Maybe<Scalars['Boolean']>;
-  loginDetails: Maybe<UserLoginDetails>;
+  isPrimaryOwner?: InputMaybe<Scalars['Boolean']>;
+  loginDetails: InputMaybe<UserLoginDetails>;
 }>;
 
 
-export type AuthorizeWithInstagramMutation = (
-  { readonly __typename?: 'Mutation' }
-  & { readonly authorizeWithInstagram: (
-    { readonly __typename?: 'OAuthAuthorization' }
-    & { readonly user: (
-      { readonly __typename?: 'User' }
-      & Pick<User, 'id' | 'email'>
-    ) }
-  ) }
-);
+export type AuthorizeWithInstagramMutation = { readonly __typename?: 'Mutation', readonly authorizeWithInstagram: { readonly __typename?: 'LoginAuthorize', readonly user: { readonly __typename?: 'User', readonly id: string, readonly email: string } } };
+
+export type AvailableHoursQueryVariables = Exact<{
+  beachBarId: Scalars['ID'];
+  date: Scalars['Date'];
+}>;
+
+
+export type AvailableHoursQuery = { readonly __typename?: 'Query', readonly availableHours: ReadonlyArray<{ readonly __typename?: 'HourTime', readonly id: string, readonly value: number, readonly utcValue: string }> };
+
+export type AvailableProductsQueryVariables = Exact<{
+  beachBarId: Scalars['ID'];
+  availability: InputMaybe<SearchInput>;
+}>;
+
+
+export type AvailableProductsQuery = { readonly __typename?: 'Query', readonly availableProducts: ReadonlyArray<{ readonly __typename?: 'Product', readonly id: string, readonly name: string, readonly description: string | undefined, readonly imgUrl: string | undefined, readonly price: number, readonly maxPeople: number, readonly minFoodSpending: number | undefined, readonly category: { readonly __typename?: 'ProductCategory', readonly id: string, readonly components: ReadonlyArray<{ readonly __typename?: 'ProductCategoryComponent', readonly quantity: number, readonly component: { readonly __typename?: 'ProductComponent', readonly id: string, readonly name: string, readonly icon: { readonly __typename?: 'Icon', readonly id: string, readonly publicId: string } } }> } }> };
 
 export type BeachBarQueryVariables = Exact<{
-  slug: Scalars['String'];
-  userVisit: Maybe<Scalars['Boolean']>;
+  slug?: InputMaybe<Scalars['String']>;
+  id?: InputMaybe<Scalars['ID']>;
+  userVisit?: InputMaybe<Scalars['Boolean']>;
 }>;
 
 
-export type BeachBarQuery = (
-  { readonly __typename?: 'Query' }
-  & { readonly beachBar: Maybe<(
-    { readonly __typename?: 'BeachBar' }
-    & { readonly reviews: ReadonlyArray<(
-      { readonly __typename?: 'BeachBarReview' }
-      & { readonly payment: (
-        { readonly __typename?: 'Payment' }
-        & Pick<Payment, 'id' | 'timestamp'>
-      ) }
-      & ReviewFragment
-    )>, readonly imgUrls: ReadonlyArray<(
-      { readonly __typename?: 'BeachBarImgUrl' }
-      & Pick<BeachBarImgUrl, 'id' | 'imgUrl' | 'description' | 'timestamp'>
-    )>, readonly defaultCurrency: (
-      { readonly __typename?: 'Currency' }
-      & Pick<Currency, 'id' | 'symbol'>
-    ), readonly products: ReadonlyArray<(
-      { readonly __typename?: 'Product' }
-      & BeachBarProductFragment
-    )> }
-    & DetailsBeachBarFragment
-  )> }
-);
-
-export type BeachBarImgsQueryVariables = Exact<{
-  slug: Scalars['String'];
-}>;
-
-
-export type BeachBarImgsQuery = (
-  { readonly __typename?: 'Query' }
-  & { readonly beachBarImgs: Maybe<ReadonlyArray<(
-    { readonly __typename?: 'BeachBarImgUrl' }
-    & Pick<BeachBarImgUrl, 'id' | 'imgUrl' | 'description' | 'timestamp'>
-  )>> }
-);
+export type BeachBarQuery = { readonly __typename?: 'Query', readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string, readonly name: string, readonly slug: string, readonly thumbnailUrl: string | undefined, readonly description: string | undefined, readonly avgRating: number, readonly displayRegardlessCapacity: boolean, readonly contactPhoneNumber: string, readonly hidePhoneNumber: boolean, readonly zeroCartTotal: boolean, readonly hasCompletedSignUp: boolean | undefined, readonly isActive: boolean, readonly openingTime: { readonly __typename?: 'HourTime', readonly id: string, readonly value: number, readonly utcValue: string }, readonly closingTime: { readonly __typename?: 'HourTime', readonly id: string, readonly value: number, readonly utcValue: string }, readonly reviews: ReadonlyArray<{ readonly __typename?: 'BeachBarReview', readonly id: string, readonly ratingValue: number, readonly body: string | undefined, readonly answer: string | undefined, readonly positiveComment: string | undefined, readonly negativeComment: string | undefined, readonly updatedAt: string, readonly timestamp: string, readonly payment: { readonly __typename?: 'Payment', readonly id: number, readonly timestamp: string }, readonly votes: ReadonlyArray<{ readonly __typename?: 'ReviewVote', readonly id: number, readonly user: { readonly __typename?: 'User', readonly id: string }, readonly type: { readonly __typename?: 'ReviewVoteType', readonly id: string, readonly value: string } }>, readonly month: { readonly __typename?: 'MonthTime', readonly id: string, readonly value: string } | undefined, readonly visitType: { readonly __typename?: 'ReviewVisitType', readonly id: string, readonly name: string } | undefined, readonly customer: { readonly __typename?: 'Customer', readonly id: number, readonly user: { readonly __typename?: 'User', readonly id: string, readonly fullName: string | undefined, readonly account: { readonly __typename?: 'Account', readonly id: string, readonly imgUrl: string | undefined } | undefined } | undefined } }>, readonly imgUrls: ReadonlyArray<{ readonly __typename?: 'BeachBarImgUrl', readonly id: number, readonly imgUrl: string, readonly description: string | undefined, readonly timestamp: string }>, readonly currency: { readonly __typename?: 'Currency', readonly id: string, readonly symbol: string }, readonly features: ReadonlyArray<{ readonly __typename?: 'BeachBarFeature', readonly quantity: number, readonly id: number, readonly description: string | undefined, readonly service: { readonly __typename?: 'BeachBarService', readonly id: string, readonly name: string, readonly icon: { readonly __typename?: 'Icon', readonly id: string, readonly publicId: string, readonly name: string } } }>, readonly products: ReadonlyArray<{ readonly __typename?: 'Product', readonly id: string, readonly name: string, readonly description: string | undefined, readonly imgUrl: string | undefined, readonly price: number, readonly maxPeople: number, readonly minFoodSpending: number | undefined, readonly category: { readonly __typename?: 'ProductCategory', readonly id: string, readonly components: ReadonlyArray<{ readonly __typename?: 'ProductCategoryComponent', readonly quantity: number, readonly component: { readonly __typename?: 'ProductComponent', readonly id: string, readonly name: string, readonly icon: { readonly __typename?: 'Icon', readonly id: string, readonly publicId: string } } }> } }>, readonly foods: ReadonlyArray<{ readonly __typename?: 'Food', readonly id: number, readonly name: string, readonly price: any, readonly ingredients: string | undefined, readonly maxQuantity: number, readonly category: { readonly __typename?: 'FoodCategory', readonly id: string, readonly name: string, readonly icon: { readonly __typename?: 'Icon', readonly id: string, readonly publicId: string } } }>, readonly category: { readonly __typename?: 'BeachBarCategory', readonly id: string, readonly name: string }, readonly location: { readonly __typename?: 'BeachBarLocation', readonly id: string, readonly address: string, readonly zipCode: string | undefined, readonly longitude: any, readonly latitude: any, readonly formattedLocation: string, readonly country: { readonly __typename?: 'Country', readonly id: string, readonly name: string, readonly alpha2Code: string, readonly alpha3Code: string, readonly callingCode: string, readonly isEu: boolean }, readonly city: { readonly __typename?: 'City', readonly id: string, readonly name: string }, readonly region: { readonly __typename?: 'Region', readonly id: string, readonly name: string } | undefined }, readonly styles: ReadonlyArray<{ readonly __typename?: 'BeachBarStyle', readonly id: string, readonly name: string }>, readonly restaurants: ReadonlyArray<{ readonly __typename?: 'BeachBarRestaurant', readonly id: string }> } | undefined };
 
 export type CartQueryVariables = Exact<{
-  cartId: Maybe<Scalars['ID']>;
+  cartId: InputMaybe<Scalars['ID']>;
 }>;
 
 
-export type CartQuery = (
-  { readonly __typename?: 'Query' }
-  & { readonly cart: (
-    { readonly __typename?: 'Cart' }
-    & Pick<Cart, 'id' | 'total'>
-    & { readonly products: Maybe<ReadonlyArray<(
-      { readonly __typename?: 'CartProduct' }
-      & BasicCartProductFragment
-    )>> }
-  ) }
-);
+export type CartQuery = { readonly __typename?: 'Query', readonly cart: { readonly __typename?: 'Cart', readonly id: number, readonly total: any, readonly products: ReadonlyArray<{ readonly __typename?: 'CartProduct', readonly id: number, readonly quantity: number, readonly date: string, readonly people: number, readonly timestamp: string, readonly startTime: { readonly __typename?: 'HourTime', readonly id: string, readonly value: number }, readonly endTime: { readonly __typename?: 'HourTime', readonly id: string, readonly value: number }, readonly product: { readonly __typename?: 'Product', readonly id: string, readonly name: string, readonly price: number, readonly imgUrl: string | undefined, readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string, readonly name: string, readonly thumbnailUrl: string | undefined, readonly location: { readonly __typename?: 'BeachBarLocation', readonly formattedLocation: string }, readonly currency: { readonly __typename?: 'Currency', readonly id: string, readonly symbol: string } } } }>, readonly foods: ReadonlyArray<{ readonly __typename?: 'CartFood', readonly id: number, readonly quantity: number, readonly timestamp: string, readonly food: { readonly __typename?: 'Food', readonly id: number, readonly name: string, readonly price: any, readonly ingredients: string | undefined, readonly maxQuantity: number, readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string }, readonly category: { readonly __typename?: 'FoodCategory', readonly id: string, readonly name: string, readonly icon: { readonly __typename?: 'Icon', readonly id: string, readonly publicId: string } } } }>, readonly notes: ReadonlyArray<{ readonly __typename?: 'CartNote', readonly id: number, readonly body: string, readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string } }> } };
 
 export type CartEntryFeesQueryVariables = Exact<{
   cartId: Scalars['ID'];
-  totalPeople: Scalars['Int'];
+  beachBarId?: InputMaybe<Scalars['ID']>;
 }>;
 
 
-export type CartEntryFeesQuery = (
-  { readonly __typename?: 'Query' }
-  & Pick<Query, 'cartEntryFees'>
-);
+export type CartEntryFeesQuery = { readonly __typename?: 'Query', readonly cartEntryFees: number };
+
+export type CitiesAndRegionsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type CitiesAndRegionsQuery = { readonly __typename?: 'Query', readonly citiesAndRegions: { readonly __typename?: 'CitiesAndRegions', readonly cities: ReadonlyArray<{ readonly __typename?: 'City', readonly id: string, readonly name: string, readonly country: { readonly __typename?: 'Country', readonly id: string, readonly name: string, readonly alpha2Code: string, readonly alpha3Code: string, readonly callingCode: string, readonly isEu: boolean } }>, readonly regions: ReadonlyArray<{ readonly __typename?: 'Region', readonly id: string, readonly name: string, readonly country: { readonly __typename?: 'Country', readonly id: string, readonly name: string, readonly alpha2Code: string, readonly alpha3Code: string, readonly callingCode: string, readonly isEu: boolean }, readonly city: { readonly __typename?: 'City', readonly id: string, readonly name: string } }> } };
 
 export type CustomerQueryVariables = Exact<{
-  email: Maybe<Scalars['Email']>;
-  phoneNumber: Maybe<Scalars['String']>;
-  countryId: Maybe<Scalars['ID']>;
+  email: InputMaybe<Scalars['Email']>;
+  phoneNumber: InputMaybe<Scalars['String']>;
+  countryId: InputMaybe<Scalars['ID']>;
 }>;
 
 
-export type CustomerQuery = (
-  { readonly __typename?: 'Query' }
-  & { readonly customer: (
-    { readonly __typename?: 'AddCustomer' }
-    & { readonly customer: (
-      { readonly __typename?: 'Customer' }
-      & Pick<Customer, 'id' | 'email'>
-      & { readonly user: Maybe<(
-        { readonly __typename?: 'User' }
-        & Pick<User, 'id' | 'email'>
-      )>, readonly cards: Maybe<ReadonlyArray<(
-        { readonly __typename?: 'Card' }
-        & BasicCardFragment
-      )>> }
-    ) }
-  ) }
-);
+export type CustomerQuery = { readonly __typename?: 'Query', readonly customer: { readonly __typename?: 'Customer', readonly id: number, readonly email: string | undefined, readonly user: { readonly __typename?: 'User', readonly id: string, readonly email: string } | undefined, readonly cards: ReadonlyArray<{ readonly __typename?: 'Card', readonly id: number, readonly expMonth: number | undefined, readonly expYear: number | undefined, readonly last4: string, readonly cardholderName: string, readonly isDefault: boolean, readonly brand: { readonly __typename?: 'CardBrand', readonly id: string, readonly name: string } | undefined }> } };
 
 export type CustomerPaymentMethodsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type CustomerPaymentMethodsQuery = (
-  { readonly __typename?: 'Query' }
-  & { readonly customerPaymentMethods: ReadonlyArray<(
-    { readonly __typename?: 'Card' }
-    & BasicCardFragment
-  )> }
-);
+export type CustomerPaymentMethodsQuery = { readonly __typename?: 'Query', readonly customerPaymentMethods: ReadonlyArray<{ readonly __typename?: 'Card', readonly id: number, readonly expMonth: number | undefined, readonly expYear: number | undefined, readonly last4: string, readonly cardholderName: string, readonly isDefault: boolean, readonly brand: { readonly __typename?: 'CardBrand', readonly id: string, readonly name: string } | undefined }> };
 
-export type FavouriteBeachBarsQueryVariables = Exact<{
-  limit: Maybe<Scalars['Int']>;
+export type DashboardBillingQueryVariables = Exact<{
+  beachBarId: Scalars['ID'];
+  dates?: InputMaybe<DashboardDatesArg>;
 }>;
 
 
-export type FavouriteBeachBarsQuery = (
-  { readonly __typename?: 'Query' }
-  & { readonly favouriteBeachBars: ReadonlyArray<(
-    { readonly __typename?: 'UserFavoriteBar' }
-    & { readonly beachBar: (
-      { readonly __typename?: 'BeachBar' }
-      & Pick<BeachBar, 'id' | 'name' | 'slug' | 'thumbnailUrl' | 'formattedLocation'>
-    ) }
-  )> }
-);
+export type DashboardBillingQuery = { readonly __typename?: 'Query', readonly dashboardBilling: { readonly __typename?: 'DashboardBilling', readonly avgProducts: ReadonlyArray<{ readonly __typename?: 'DashboardDateValue', readonly date: string, readonly value: number }>, readonly avgFoods: ReadonlyArray<{ readonly __typename?: 'DashboardDateValue', readonly date: string, readonly value: number }>, readonly products: { readonly __typename?: 'DashboardBillingProducts', readonly revenue: ReadonlyArray<{ readonly __typename?: 'DashboardDateValue', readonly date: string, readonly value: number }>, readonly mostCommon: ReadonlyArray<{ readonly __typename?: 'DashboardBillingMostCommonProducts', readonly timesBooked: number, readonly product: { readonly __typename?: 'Product', readonly id: string, readonly name: string } }> }, readonly foods: { readonly __typename?: 'DashboardBillingFoods', readonly revenue: ReadonlyArray<{ readonly __typename?: 'DashboardDateValue', readonly date: string, readonly value: number }>, readonly mostCommon: ReadonlyArray<{ readonly __typename?: 'DashboardBillingMostCommonFoods', readonly timesPurchased: number, readonly food: { readonly __typename?: 'Food', readonly id: number, readonly name: string } }> }, readonly refundedPayments: ReadonlyArray<{ readonly __typename?: 'DashboardBillingRefundedPayments', readonly date: string, readonly payments: ReadonlyArray<{ readonly __typename?: 'Payment', readonly id: number, readonly refCode: string, readonly isRefunded: boolean }> }>, readonly customersCountries: ReadonlyArray<{ readonly __typename?: 'DashboardBillingCustomerCountries', readonly value: number, readonly country: { readonly __typename?: 'Country', readonly id: string, readonly name: string, readonly alpha2Code: string, readonly alpha3Code: string, readonly callingCode: string, readonly isEu: boolean } }> } };
+
+export type DashboardBookingsQueryVariables = Exact<{
+  beachBarId: Scalars['ID'];
+  dates?: InputMaybe<DashboardDatesArg>;
+}>;
+
+
+export type DashboardBookingsQuery = { readonly __typename?: 'Query', readonly dashboardBookings: { readonly __typename?: 'DashboardBookings', readonly mostActive: { readonly __typename?: 'DashboardMostActive', readonly hour: number, readonly weekDay: string }, readonly capacity: { readonly __typename?: 'DashboardBookingsCapacity', readonly arr: ReadonlyArray<{ readonly __typename?: 'DashboardCapacityPercentage', readonly date: string, readonly percentage: number }>, readonly totalCustomers: ReadonlyArray<{ readonly __typename?: 'DashboardDateValue', readonly date: string, readonly value: number }>, readonly totalHourCustomers: ReadonlyArray<{ readonly __typename?: 'DashboardDateValue', readonly date: string, readonly value: number }>, readonly maxCapacity: ReadonlyArray<{ readonly __typename?: 'DashboardMaxCapacity', readonly date: string, readonly limitPeople: number, readonly availableProducts: number }> }, readonly bookings: ReadonlyArray<{ readonly __typename?: 'Payment', readonly id: number, readonly refCode: string, readonly isRefunded: boolean, readonly timestamp: string, readonly deletedAt: string | undefined, readonly total: number | undefined, readonly status: { readonly __typename?: 'PaymentStatus', readonly id: string, readonly name: string }, readonly cart: { readonly __typename?: 'Cart', readonly id: number, readonly notes: ReadonlyArray<{ readonly __typename?: 'CartNote', readonly id: number, readonly body: string, readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string } }>, readonly products: ReadonlyArray<{ readonly __typename?: 'CartProduct', readonly id: number, readonly date: string, readonly quantity: number, readonly people: number, readonly total: number | undefined, readonly startTime: { readonly __typename?: 'HourTime', readonly id: string, readonly value: number }, readonly endTime: { readonly __typename?: 'HourTime', readonly id: string, readonly value: number }, readonly product: { readonly __typename?: 'Product', readonly id: string, readonly name: string, readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string } } }>, readonly foods: ReadonlyArray<{ readonly __typename?: 'CartFood', readonly id: number, readonly date: string | undefined, readonly quantity: number, readonly total: number | undefined, readonly food: { readonly __typename?: 'Food', readonly id: number, readonly name: string, readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string } } }> }, readonly card: { readonly __typename?: 'Card', readonly id: number, readonly customer: { readonly __typename?: 'Customer', readonly id: number, readonly user: { readonly __typename?: 'User', readonly id: string, readonly fullName: string | undefined } | undefined }, readonly country: { readonly __typename?: 'Country', readonly id: string, readonly currency: { readonly __typename?: 'Currency', readonly id: string, readonly name: string, readonly symbol: string } } | undefined } }> } };
+
+export type DashboardHomePageQueryVariables = Exact<{
+  beachBarId: Scalars['ID'];
+  dates?: InputMaybe<DashboardDatesArg>;
+}>;
+
+
+export type DashboardHomePageQuery = { readonly __typename?: 'Query', readonly dashboardHomePage: { readonly __typename?: 'DashboardHomePage', readonly balance: { readonly __typename?: 'DashboardBalance', readonly revenue: number, readonly grossVolume: ReadonlyArray<{ readonly __typename?: 'DashboardDateValue', readonly date: string, readonly value: number }>, readonly successfulPayments: ReadonlyArray<{ readonly __typename?: 'Payment', readonly id: number }> }, readonly capacity: { readonly __typename?: 'DashboardCapacity', readonly percentage: number, readonly totalMaxPeopleCapacity: number, readonly totalHourCustomers: number, readonly reservedProducts: number, readonly availableProducts: number }, readonly totalCustomers: ReadonlyArray<{ readonly __typename?: 'DashboardDateValue', readonly date: string, readonly value: number }>, readonly grossVolume: ReadonlyArray<{ readonly __typename?: 'DashboardDateValue', readonly date: string, readonly value: number }>, readonly avgSpendPerPerson: ReadonlyArray<{ readonly __typename?: 'DashboardDateValue', readonly date: string, readonly value: number }>, readonly avgRating: ReadonlyArray<{ readonly __typename?: 'DashboardDateValue', readonly date: string, readonly value: number }>, readonly newCustomers: ReadonlyArray<{ readonly __typename?: 'DashboardNewCustomers', readonly date: string, readonly customers: ReadonlyArray<{ readonly __typename?: 'Customer', readonly id: number }> }> } };
+
+export type FavouriteBeachBarsQueryVariables = Exact<{
+  limit: InputMaybe<Scalars['Int']>;
+}>;
+
+
+export type FavouriteBeachBarsQuery = { readonly __typename?: 'Query', readonly favouriteBeachBars: ReadonlyArray<{ readonly __typename?: 'UserFavoriteBar', readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string, readonly name: string, readonly slug: string, readonly thumbnailUrl: string | undefined } }> };
 
 export type GetUserFavouriteBeachBarsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetUserFavouriteBeachBarsQuery = (
-  { readonly __typename?: 'Query' }
-  & { readonly favouriteBeachBars: ReadonlyArray<(
-    { readonly __typename?: 'UserFavoriteBar' }
-    & { readonly beachBar: (
-      { readonly __typename?: 'BeachBar' }
-      & Pick<BeachBar, 'id' | 'name' | 'thumbnailUrl'>
-      & { readonly location: (
-        { readonly __typename?: 'BeachBarLocation' }
-        & { readonly city: (
-          { readonly __typename?: 'City' }
-          & Pick<City, 'name'>
-        ) }
-      ) }
-    ) }
-  )> }
-);
+export type GetUserFavouriteBeachBarsQuery = { readonly __typename?: 'Query', readonly favouriteBeachBars: ReadonlyArray<{ readonly __typename?: 'UserFavoriteBar', readonly id: number, readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string, readonly name: string, readonly slug: string } }> };
+
+export type FoodQueryVariables = Exact<{
+  id: Scalars['ID'];
+}>;
+
+
+export type FoodQuery = { readonly __typename?: 'Query', readonly food: { readonly __typename?: 'Food', readonly id: number, readonly name: string, readonly price: any, readonly ingredients: string | undefined, readonly maxQuantity: number, readonly category: { readonly __typename?: 'FoodCategory', readonly id: string, readonly name: string, readonly icon: { readonly __typename?: 'Icon', readonly id: string, readonly publicId: string } } } | undefined };
+
+export type FoodsQueryVariables = Exact<{
+  beachBarId: Scalars['ID'];
+}>;
+
+
+export type FoodsQuery = { readonly __typename?: 'Query', readonly foods: ReadonlyArray<{ readonly __typename?: 'Food', readonly id: number, readonly name: string, readonly price: any, readonly ingredients: string | undefined, readonly maxQuantity: number, readonly category: { readonly __typename?: 'FoodCategory', readonly id: string, readonly name: string, readonly icon: { readonly __typename?: 'Icon', readonly id: string, readonly publicId: string } } }> };
 
 export type GetPersonalizedBeachBarsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetPersonalizedBeachBarsQuery = (
-  { readonly __typename?: 'Query' }
-  & { readonly getPersonalizedBeachBars: ReadonlyArray<(
-    { readonly __typename?: 'BeachBar' }
-    & Pick<BeachBar, 'id' | 'name' | 'slug' | 'thumbnailUrl' | 'formattedLocation'>
-    & { readonly location: (
-      { readonly __typename?: 'BeachBarLocation' }
-      & Pick<BeachBarLocation, 'latitude' | 'longitude'>
-      & { readonly city: (
-        { readonly __typename?: 'City' }
-        & Pick<City, 'name'>
-      ), readonly region: Maybe<(
-        { readonly __typename?: 'Region' }
-        & Pick<Region, 'name'>
-      )> }
-    ) }
-  )> }
-);
+export type GetPersonalizedBeachBarsQuery = { readonly __typename?: 'Query', readonly getPersonalizedBeachBars: ReadonlyArray<{ readonly __typename?: 'BeachBar', readonly id: string, readonly name: string, readonly slug: string, readonly thumbnailUrl: string | undefined, readonly location: { readonly __typename?: 'BeachBarLocation', readonly latitude: any, readonly longitude: any, readonly formattedLocation: string, readonly city: { readonly __typename?: 'City', readonly name: string }, readonly region: { readonly __typename?: 'Region', readonly name: string } | undefined } }> };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = (
-  { readonly __typename?: 'Query' }
-  & { readonly me: Maybe<(
-    { readonly __typename?: 'User' }
-    & Pick<User, 'id' | 'email' | 'firstName' | 'lastName' | 'fullName'>
-    & { readonly account: (
-      { readonly __typename?: 'UserAccount' }
-      & Pick<UserAccount, 'id' | 'honorificTitle' | 'birthday' | 'age' | 'address' | 'zipCode' | 'imgUrl' | 'city' | 'trackHistory' | 'phoneNumber'>
-      & { readonly telCountry: Maybe<(
-        { readonly __typename?: 'Country' }
-        & Pick<Country, 'id' | 'name'>
-      )>, readonly country: Maybe<(
-        { readonly __typename?: 'Country' }
-        & Pick<Country, 'id' | 'name'>
-        & { readonly currency: (
-          { readonly __typename?: 'Currency' }
-          & Pick<Currency, 'id' | 'symbol'>
-        ) }
-      )> }
-    ), readonly reviewVotes: ReadonlyArray<(
-      { readonly __typename?: 'ReviewVote' }
-      & Pick<ReviewVote, 'id'>
-      & { readonly type: (
-        { readonly __typename?: 'ReviewVoteType' }
-        & Pick<ReviewVoteType, 'id' | 'value'>
-      ), readonly review: (
-        { readonly __typename?: 'BeachBarReview' }
-        & Pick<BeachBarReview, 'id'>
-      ) }
-    )>, readonly favoriteBars: ReadonlyArray<(
-      { readonly __typename?: 'UserFavoriteBar' }
-      & { readonly beachBar: (
-        { readonly __typename?: 'BeachBar' }
-        & Pick<BeachBar, 'id' | 'name' | 'slug' | 'thumbnailUrl' | 'formattedLocation'>
-      ) }
-    )> }
-  )> }
-);
+export type MeQuery = { readonly __typename?: 'Query', readonly me: { readonly __typename?: 'User', readonly id: string, readonly email: string, readonly firstName: string | undefined, readonly lastName: string | undefined, readonly fullName: string | undefined, readonly account: { readonly __typename?: 'Account', readonly id: string, readonly honorificTitle: string | undefined, readonly birthday: string | undefined, readonly age: number | undefined, readonly address: string | undefined, readonly zipCode: string | undefined, readonly imgUrl: string | undefined, readonly city: string | undefined, readonly trackHistory: boolean, readonly phoneNumber: string | undefined, readonly telCountry: { readonly __typename?: 'Country', readonly id: string, readonly name: string, readonly alpha2Code: string, readonly alpha3Code: string, readonly callingCode: string, readonly isEu: boolean } | undefined, readonly country: { readonly __typename?: 'Country', readonly id: string, readonly name: string, readonly alpha2Code: string, readonly alpha3Code: string, readonly callingCode: string, readonly isEu: boolean, readonly currency: { readonly __typename?: 'Currency', readonly id: string, readonly symbol: string } } | undefined } | undefined, readonly reviewVotes: ReadonlyArray<{ readonly __typename?: 'ReviewVote', readonly id: number, readonly type: { readonly __typename?: 'ReviewVoteType', readonly id: string, readonly value: string }, readonly review: { readonly __typename?: 'BeachBarReview', readonly id: string } }>, readonly favoriteBars: ReadonlyArray<{ readonly __typename?: 'UserFavoriteBar', readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string, readonly name: string, readonly slug: string, readonly thumbnailUrl: string | undefined, readonly location: { readonly __typename?: 'BeachBarLocation', readonly id: string, readonly formattedLocation: string, readonly city: { readonly __typename?: 'City', readonly id: string, readonly name: string }, readonly region: { readonly __typename?: 'Region', readonly id: string, readonly name: string } | undefined } } }> } | undefined };
 
 export type NearBeachBarsQueryVariables = Exact<{
   latitude: Scalars['String'];
   longitude: Scalars['String'];
+  take?: InputMaybe<Scalars['Int']>;
 }>;
 
 
-export type NearBeachBarsQuery = (
-  { readonly __typename?: 'Query' }
-  & { readonly nearBeachBars: ReadonlyArray<(
-    { readonly __typename?: 'BeachBar' }
-    & Pick<BeachBar, 'id' | 'name' | 'slug' | 'thumbnailUrl'>
-    & { readonly location: (
-      { readonly __typename?: 'BeachBarLocation' }
-      & Pick<BeachBarLocation, 'latitude' | 'longitude'>
-    ) }
-  )> }
-);
+export type NearBeachBarsQuery = { readonly __typename?: 'Query', readonly nearBeachBars: ReadonlyArray<{ readonly __typename?: 'BeachBar', readonly id: string, readonly name: string, readonly slug: string, readonly thumbnailUrl: string | undefined, readonly location: { readonly __typename?: 'BeachBarLocation', readonly latitude: any, readonly longitude: any } }> };
 
 export type PaymentQueryVariables = Exact<{
-  refCode: Scalars['String'];
+  refCode: Scalars['ID'];
+  beachBarId?: InputMaybe<Scalars['ID']>;
 }>;
 
 
-export type PaymentQuery = (
-  { readonly __typename?: 'Query' }
-  & { readonly payment: (
-    { readonly __typename?: 'Payment' }
-    & Pick<Payment, 'id' | 'refCode' | 'isRefunded' | 'timestamp'>
-    & { readonly cart: (
-      { readonly __typename?: 'Cart' }
-      & Pick<Cart, 'id' | 'total'>
-      & { readonly products: Maybe<ReadonlyArray<(
-        { readonly __typename?: 'CartProduct' }
-        & BasicCartProductFragment
-      )>> }
-    ), readonly card: (
-      { readonly __typename?: 'Card' }
-      & Pick<Card, 'id' | 'last4'>
-      & { readonly brand: Maybe<(
-        { readonly __typename?: 'CardBrand' }
-        & Pick<CardBrand, 'id' | 'name'>
-      )>, readonly country: Maybe<(
-        { readonly __typename?: 'Country' }
-        & Pick<Country, 'id'>
-        & { readonly currency: (
-          { readonly __typename?: 'Currency' }
-          & Pick<Currency, 'id' | 'symbol'>
-        ) }
-      )>, readonly customer: (
-        { readonly __typename?: 'Customer' }
-        & Pick<Customer, 'id' | 'email' | 'phoneNumber'>
-        & { readonly country: Maybe<(
-          { readonly __typename?: 'Country' }
-          & Pick<Country, 'id' | 'callingCode'>
-        )> }
-      ) }
-    ), readonly status: (
-      { readonly __typename?: 'PaymentStatus' }
-      & Pick<PaymentStatus, 'id' | 'name'>
-    ), readonly voucherCode: Maybe<(
-      { readonly __typename?: 'PaymentOfferCode' }
-      & Pick<PaymentOfferCode, 'id'>
-      & { readonly couponCode: Maybe<(
-        { readonly __typename?: 'CouponCode' }
-        & Pick<CouponCode, 'id' | 'refCode' | 'discountPercentage'>
-      )>, readonly offerCode: Maybe<(
-        { readonly __typename?: 'OfferCampaignCode' }
-        & Pick<OfferCampaignCode, 'id' | 'refCode' | 'totalAmount' | 'timesUsed'>
-        & { readonly campaign: (
-          { readonly __typename?: 'OfferCampaign' }
-          & Pick<OfferCampaign, 'id'>
-        ) }
-      )> }
-    )> }
-  ) }
-);
+export type PaymentQuery = { readonly __typename?: 'Query', readonly payment: { readonly __typename?: 'Payment', readonly id: number, readonly refCode: string, readonly isRefunded: boolean, readonly stripeId: string, readonly stripeProccessingFee: any, readonly appFee: any, readonly total: number | undefined, readonly timestamp: string, readonly cart: { readonly __typename?: 'Cart', readonly id: number, readonly total: any, readonly products: ReadonlyArray<{ readonly __typename?: 'CartProduct', readonly id: number, readonly quantity: number, readonly date: string, readonly people: number, readonly timestamp: string, readonly startTime: { readonly __typename?: 'HourTime', readonly id: string, readonly value: number }, readonly endTime: { readonly __typename?: 'HourTime', readonly id: string, readonly value: number }, readonly product: { readonly __typename?: 'Product', readonly id: string, readonly name: string, readonly price: number, readonly imgUrl: string | undefined, readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string, readonly name: string, readonly thumbnailUrl: string | undefined, readonly location: { readonly __typename?: 'BeachBarLocation', readonly formattedLocation: string }, readonly currency: { readonly __typename?: 'Currency', readonly id: string, readonly symbol: string } } } }>, readonly foods: ReadonlyArray<{ readonly __typename?: 'CartFood', readonly id: number, readonly quantity: number, readonly timestamp: string, readonly food: { readonly __typename?: 'Food', readonly id: number, readonly name: string, readonly price: any, readonly ingredients: string | undefined, readonly maxQuantity: number, readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string }, readonly category: { readonly __typename?: 'FoodCategory', readonly id: string, readonly name: string, readonly icon: { readonly __typename?: 'Icon', readonly id: string, readonly publicId: string } } } }>, readonly notes: ReadonlyArray<{ readonly __typename?: 'CartNote', readonly id: number, readonly body: string, readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string } }> }, readonly card: { readonly __typename?: 'Card', readonly id: number, readonly last4: string, readonly brand: { readonly __typename?: 'CardBrand', readonly id: string, readonly name: string } | undefined, readonly country: { readonly __typename?: 'Country', readonly id: string, readonly currency: { readonly __typename?: 'Currency', readonly id: string, readonly symbol: string } } | undefined, readonly customer: { readonly __typename?: 'Customer', readonly id: number, readonly email: string | undefined, readonly phoneNumber: string | undefined, readonly country: { readonly __typename?: 'Country', readonly id: string, readonly name: string, readonly alpha2Code: string, readonly alpha3Code: string, readonly callingCode: string, readonly isEu: boolean } | undefined } }, readonly status: { readonly __typename?: 'PaymentStatus', readonly id: string, readonly name: string } } };
 
 export type PaymentRefundAmountQueryVariables = Exact<{
-  refCode: Scalars['String'];
+  refCode: Scalars['ID'];
 }>;
 
 
-export type PaymentRefundAmountQuery = (
-  { readonly __typename?: 'Query' }
-  & Pick<Query, 'paymentRefundAmount'>
-);
+export type PaymentRefundAmountQuery = { readonly __typename?: 'Query', readonly paymentRefundAmount: number };
 
 export type PaymentsQueryVariables = Exact<{
-  monthId: Maybe<Scalars['ID']>;
-  year: Maybe<Scalars['Int']>;
+  monthId: InputMaybe<Scalars['ID']>;
+  year: InputMaybe<Scalars['Int']>;
 }>;
 
 
-export type PaymentsQuery = (
-  { readonly __typename?: 'Query' }
-  & { readonly payments: ReadonlyArray<(
-    { readonly __typename?: 'PaymentVisits' }
-    & { readonly beachBar: (
-      { readonly __typename?: 'BeachBar' }
-      & Pick<BeachBar, 'id' | 'name' | 'thumbnailUrl'>
-      & { readonly location: (
-        { readonly __typename?: 'BeachBarLocation' }
-        & { readonly city: (
-          { readonly __typename?: 'City' }
-          & Pick<City, 'name'>
-        ), readonly region: Maybe<(
-          { readonly __typename?: 'Region' }
-          & Pick<Region, 'name'>
-        )> }
-      ) }
-    ), readonly visits: ReadonlyArray<(
-      { readonly __typename?: 'Visit' }
-      & Pick<Visit, 'isUpcoming' | 'isRefunded' | 'date'>
-      & { readonly time: (
-        { readonly __typename?: 'HourTime' }
-        & Pick<HourTime, 'id' | 'value'>
-      ), readonly payment: (
-        { readonly __typename?: 'Payment' }
-        & Pick<Payment, 'id' | 'refCode'>
-      ) }
-    )> }
-  )> }
-);
+export type PaymentsQuery = { readonly __typename?: 'Query', readonly payments: ReadonlyArray<{ readonly __typename?: 'PaymentVisits', readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string, readonly name: string, readonly thumbnailUrl: string | undefined, readonly location: { readonly __typename?: 'BeachBarLocation', readonly city: { readonly __typename?: 'City', readonly name: string }, readonly region: { readonly __typename?: 'Region', readonly name: string } | undefined } }, readonly visits: ReadonlyArray<{ readonly __typename?: 'Visit', readonly isUpcoming: boolean, readonly isRefunded: boolean, readonly date: string, readonly startTime: { readonly __typename?: 'HourTime', readonly id: string, readonly value: number }, readonly endTime: { readonly __typename?: 'HourTime', readonly id: string, readonly value: number }, readonly payment: { readonly __typename?: 'Payment', readonly id: number, readonly refCode: string } }> }> };
 
-export type PaymentDatesQueryVariables = Exact<{ [key: string]: never; }>;
+export type ProductQueryVariables = Exact<{
+  id: Scalars['ID'];
+}>;
 
 
-export type PaymentDatesQuery = (
-  { readonly __typename?: 'Query' }
-  & { readonly paymentDates: ReadonlyArray<(
-    { readonly __typename?: 'PaymentVisitsDates' }
-    & Pick<PaymentVisitsDates, 'year'>
-    & { readonly month: (
-      { readonly __typename?: 'MonthTime' }
-      & Pick<MonthTime, 'id' | 'value'>
-    ) }
-  )> }
-);
+export type ProductQuery = { readonly __typename?: 'Query', readonly product: { readonly __typename?: 'Product', readonly id: string, readonly name: string, readonly description: string | undefined, readonly imgUrl: string | undefined, readonly price: number, readonly maxPeople: number, readonly minFoodSpending: number | undefined, readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string, readonly currency: { readonly __typename?: 'Currency', readonly id: string, readonly symbol: string } }, readonly reservationLimits: ReadonlyArray<{ readonly __typename?: 'ProductReservationLimit', readonly id: number, readonly from: string, readonly to: string, readonly limitNumber: number }>, readonly category: { readonly __typename?: 'ProductCategory', readonly id: string, readonly components: ReadonlyArray<{ readonly __typename?: 'ProductCategoryComponent', readonly quantity: number, readonly component: { readonly __typename?: 'ProductComponent', readonly id: string, readonly name: string, readonly icon: { readonly __typename?: 'Icon', readonly id: string, readonly publicId: string } } }> } } | undefined };
+
+export type ProductsQueryVariables = Exact<{
+  beachBarId: Scalars['ID'];
+}>;
+
+
+export type ProductsQuery = { readonly __typename?: 'Query', readonly products: ReadonlyArray<{ readonly __typename?: 'Product', readonly id: string, readonly name: string, readonly description: string | undefined, readonly imgUrl: string | undefined, readonly price: number, readonly maxPeople: number, readonly minFoodSpending: number | undefined, readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string, readonly currency: { readonly __typename?: 'Currency', readonly id: string, readonly symbol: string } }, readonly reservationLimits: ReadonlyArray<{ readonly __typename?: 'ProductReservationLimit', readonly id: number, readonly from: string, readonly to: string, readonly limitNumber: number }>, readonly category: { readonly __typename?: 'ProductCategory', readonly id: string, readonly components: ReadonlyArray<{ readonly __typename?: 'ProductCategoryComponent', readonly quantity: number, readonly component: { readonly __typename?: 'ProductComponent', readonly id: string, readonly name: string, readonly icon: { readonly __typename?: 'Icon', readonly id: string, readonly publicId: string } } }> } }> };
 
 export type ReviewQueryVariables = Exact<{
   reviewId: Scalars['ID'];
 }>;
 
 
-export type ReviewQuery = (
-  { readonly __typename?: 'Query' }
-  & { readonly review: (
-    { readonly __typename?: 'BeachBarReview' }
-    & { readonly beachBar: (
-      { readonly __typename?: 'BeachBar' }
-      & Pick<BeachBar, 'id' | 'name' | 'formattedLocation'>
-    ) }
-    & ReviewFragment
-  ) }
-);
+export type ReviewQuery = { readonly __typename?: 'Query', readonly review: { readonly __typename?: 'BeachBarReview', readonly id: string, readonly ratingValue: number, readonly body: string | undefined, readonly answer: string | undefined, readonly positiveComment: string | undefined, readonly negativeComment: string | undefined, readonly updatedAt: string, readonly timestamp: string, readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string, readonly name: string, readonly location: { readonly __typename?: 'BeachBarLocation', readonly formattedLocation: string } }, readonly votes: ReadonlyArray<{ readonly __typename?: 'ReviewVote', readonly id: number, readonly user: { readonly __typename?: 'User', readonly id: string }, readonly type: { readonly __typename?: 'ReviewVoteType', readonly id: string, readonly value: string } }>, readonly month: { readonly __typename?: 'MonthTime', readonly id: string, readonly value: string } | undefined, readonly visitType: { readonly __typename?: 'ReviewVisitType', readonly id: string, readonly name: string } | undefined, readonly customer: { readonly __typename?: 'Customer', readonly id: number, readonly user: { readonly __typename?: 'User', readonly id: string, readonly fullName: string | undefined, readonly account: { readonly __typename?: 'Account', readonly id: string, readonly imgUrl: string | undefined } | undefined } | undefined } } };
+
+export type ReviewsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ReviewsQuery = { readonly __typename?: 'Query', readonly reviews: ReadonlyArray<{ readonly __typename?: 'BeachBarReview', readonly id: string, readonly ratingValue: number, readonly body: string | undefined, readonly answer: string | undefined, readonly positiveComment: string | undefined, readonly negativeComment: string | undefined, readonly updatedAt: string, readonly timestamp: string, readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string, readonly name: string, readonly slug: string }, readonly payment: { readonly __typename?: 'Payment', readonly id: number, readonly timestamp: string }, readonly votes: ReadonlyArray<{ readonly __typename?: 'ReviewVote', readonly id: number, readonly user: { readonly __typename?: 'User', readonly id: string }, readonly type: { readonly __typename?: 'ReviewVoteType', readonly id: string, readonly value: string } }>, readonly month: { readonly __typename?: 'MonthTime', readonly id: string, readonly value: string } | undefined, readonly visitType: { readonly __typename?: 'ReviewVisitType', readonly id: string, readonly name: string } | undefined, readonly customer: { readonly __typename?: 'Customer', readonly id: number, readonly user: { readonly __typename?: 'User', readonly id: string, readonly fullName: string | undefined, readonly account: { readonly __typename?: 'Account', readonly id: string, readonly imgUrl: string | undefined } | undefined } | undefined } }> | undefined };
 
 export type SearchQueryVariables = Exact<{
-  inputId: Maybe<Scalars['ID']>;
-  inputValue: Maybe<Scalars['String']>;
-  availability: Maybe<SearchInput>;
-  searchId: Maybe<Scalars['ID']>;
-  filterIds: Maybe<ReadonlyArray<Scalars['String']> | Scalars['String']>;
-  sortId: Maybe<Scalars['ID']>;
+  inputId: InputMaybe<Scalars['ID']>;
+  searchValue: InputMaybe<Scalars['String']>;
+  availability: InputMaybe<SearchInput>;
+  searchId?: InputMaybe<Scalars['ID']>;
+  filterIds?: InputMaybe<ReadonlyArray<Scalars['String']> | Scalars['String']>;
+  sortId?: InputMaybe<Scalars['ID']>;
 }>;
 
 
-export type SearchQuery = (
-  { readonly __typename?: 'Query' }
-  & { readonly search: (
-    { readonly __typename?: 'Search' }
-    & { readonly results: ReadonlyArray<(
-      { readonly __typename?: 'SearchResultType' }
-      & { readonly beachBar: (
-        { readonly __typename?: 'BeachBar' }
-        & SearchBeachBarFragment
-      ), readonly availability: (
-        { readonly __typename?: 'BeachBarAvailability' }
-        & Pick<BeachBarAvailability, 'hasAvailability' | 'hasCapacity'>
-      ) }
-    )>, readonly search: (
-      { readonly __typename?: 'UserSearch' }
-      & Pick<UserSearch, 'id'>
-      & { readonly filters: ReadonlyArray<(
-        { readonly __typename?: 'SearchFilter' }
-        & Pick<SearchFilter, 'id' | 'publicId'>
-      )>, readonly sort: Maybe<(
-        { readonly __typename?: 'SearchSort' }
-        & Pick<SearchSort, 'id' | 'name'>
-      )>, readonly inputValue: (
-        { readonly __typename?: 'SearchInputValue' }
-        & SearchInputValueFragment
-      ) }
-    ) }
-  ) }
-);
+export type SearchQuery = { readonly __typename?: 'Query', readonly search: { readonly __typename?: 'Search', readonly results: ReadonlyArray<{ readonly __typename?: 'SearchResultType', readonly hasCapacity: boolean, readonly totalPrice: number, readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string, readonly name: string, readonly slug: string, readonly thumbnailUrl: string | undefined, readonly description: string | undefined, readonly avgRating: number, readonly displayRegardlessCapacity: boolean, readonly contactPhoneNumber: string, readonly hidePhoneNumber: boolean, readonly zeroCartTotal: boolean, readonly hasCompletedSignUp: boolean | undefined, readonly isActive: boolean, readonly reviews: ReadonlyArray<{ readonly __typename?: 'BeachBarReview', readonly id: string }>, readonly payments: ReadonlyArray<{ readonly __typename?: 'Payment', readonly id: number }>, readonly currency: { readonly __typename?: 'Currency', readonly id: string, readonly symbol: string }, readonly category: { readonly __typename?: 'BeachBarCategory', readonly id: string, readonly name: string }, readonly location: { readonly __typename?: 'BeachBarLocation', readonly id: string, readonly address: string, readonly zipCode: string | undefined, readonly longitude: any, readonly latitude: any, readonly formattedLocation: string, readonly country: { readonly __typename?: 'Country', readonly id: string, readonly name: string, readonly alpha2Code: string, readonly alpha3Code: string, readonly callingCode: string, readonly isEu: boolean }, readonly city: { readonly __typename?: 'City', readonly id: string, readonly name: string }, readonly region: { readonly __typename?: 'Region', readonly id: string, readonly name: string } | undefined }, readonly features: ReadonlyArray<{ readonly __typename?: 'BeachBarFeature', readonly quantity: number, readonly service: { readonly __typename?: 'BeachBarService', readonly id: string, readonly name: string, readonly icon: { readonly __typename?: 'Icon', readonly id: string, readonly publicId: string } } }>, readonly styles: ReadonlyArray<{ readonly __typename?: 'BeachBarStyle', readonly id: string, readonly name: string }>, readonly restaurants: ReadonlyArray<{ readonly __typename?: 'BeachBarRestaurant', readonly id: string }> }, readonly recommendedProducts: ReadonlyArray<{ readonly __typename?: 'ProductRecommended', readonly quantity: number, readonly product: { readonly __typename?: 'Product', readonly id: string, readonly name: string, readonly maxPeople: number, readonly price: number } }> }>, readonly search: { readonly __typename?: 'UserSearch', readonly id: number, readonly date: string | undefined, readonly filters: ReadonlyArray<{ readonly __typename?: 'SearchFilter', readonly id: string, readonly publicId: string }>, readonly sort: { readonly __typename?: 'SearchSort', readonly id: string, readonly name: string } | undefined, readonly inputValue: { readonly __typename?: 'SearchInputValue', readonly id: number, readonly publicId: string, readonly formattedValue: string, readonly country: { readonly __typename?: 'Country', readonly id: string, readonly name: string, readonly alpha2Code: string, readonly alpha3Code: string, readonly callingCode: string, readonly isEu: boolean } | undefined, readonly city: { readonly __typename?: 'City', readonly id: string, readonly name: string, readonly country: { readonly __typename?: 'Country', readonly id: string, readonly name: string, readonly alpha2Code: string, readonly alpha3Code: string, readonly callingCode: string, readonly isEu: boolean } } | undefined, readonly region: { readonly __typename?: 'Region', readonly id: string, readonly name: string, readonly country: { readonly __typename?: 'Country', readonly id: string, readonly name: string, readonly alpha2Code: string, readonly alpha3Code: string, readonly callingCode: string, readonly isEu: boolean } } | undefined, readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string, readonly name: string, readonly thumbnailUrl: string | undefined, readonly location: { readonly __typename?: 'BeachBarLocation', readonly longitude: any, readonly latitude: any, readonly formattedLocation: string, readonly country: { readonly __typename?: 'Country', readonly id: string, readonly name: string, readonly alpha2Code: string, readonly alpha3Code: string, readonly callingCode: string, readonly isEu: boolean }, readonly city: { readonly __typename?: 'City', readonly id: string, readonly name: string }, readonly region: { readonly __typename?: 'Region', readonly id: string, readonly name: string } | undefined } } | undefined } } } };
 
 export type SearchInputValuesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type SearchInputValuesQuery = (
-  { readonly __typename?: 'Query' }
-  & { readonly searchInputValues: ReadonlyArray<(
-    { readonly __typename?: 'SearchInputValue' }
-    & SearchInputValueFragment
-  )> }
-);
+export type SearchInputValuesQuery = { readonly __typename?: 'Query', readonly searchInputValues: ReadonlyArray<{ readonly __typename?: 'SearchInputValue', readonly id: number, readonly publicId: string, readonly formattedValue: string, readonly country: { readonly __typename?: 'Country', readonly id: string, readonly name: string, readonly alpha2Code: string, readonly alpha3Code: string, readonly callingCode: string, readonly isEu: boolean } | undefined, readonly city: { readonly __typename?: 'City', readonly id: string, readonly name: string, readonly country: { readonly __typename?: 'Country', readonly id: string, readonly name: string, readonly alpha2Code: string, readonly alpha3Code: string, readonly callingCode: string, readonly isEu: boolean } } | undefined, readonly region: { readonly __typename?: 'Region', readonly id: string, readonly name: string, readonly country: { readonly __typename?: 'Country', readonly id: string, readonly name: string, readonly alpha2Code: string, readonly alpha3Code: string, readonly callingCode: string, readonly isEu: boolean } } | undefined, readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string, readonly name: string, readonly thumbnailUrl: string | undefined, readonly location: { readonly __typename?: 'BeachBarLocation', readonly longitude: any, readonly latitude: any, readonly formattedLocation: string, readonly country: { readonly __typename?: 'Country', readonly id: string, readonly name: string, readonly alpha2Code: string, readonly alpha3Code: string, readonly callingCode: string, readonly isEu: boolean }, readonly city: { readonly __typename?: 'City', readonly id: string, readonly name: string }, readonly region: { readonly __typename?: 'Region', readonly id: string, readonly name: string } | undefined } } | undefined }> };
+
+export type StripeConnectUrlQueryVariables = Exact<{
+  phoneNumber: InputMaybe<Scalars['String']>;
+}>;
+
+
+export type StripeConnectUrlQuery = { readonly __typename?: 'Query', readonly stripeConnectUrl: string | undefined };
 
 export type UserHistoryQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type UserHistoryQuery = (
-  { readonly __typename?: 'Query' }
-  & { readonly userHistory: ReadonlyArray<(
-    { readonly __typename?: 'UserHistoryExtended' }
-    & { readonly userHistory: (
-      { readonly __typename?: 'UserHistory' }
-      & Pick<UserHistory, 'id' | 'objectId' | 'timestamp'>
-      & { readonly activity: (
-        { readonly __typename?: 'UserHistoryActivity' }
-        & Pick<UserHistoryActivity, 'id' | 'name'>
-      ) }
-    ), readonly beachBar: Maybe<(
-      { readonly __typename?: 'BeachBar' }
-      & Pick<BeachBar, 'id' | 'name' | 'formattedLocation'>
-    )>, readonly search: Maybe<(
-      { readonly __typename?: 'UserSearch' }
-      & Pick<UserSearch, 'id' | 'searchDate' | 'searchAdults' | 'searchChildren'>
-      & { readonly inputValue: (
-        { readonly __typename?: 'SearchInputValue' }
-        & Pick<SearchInputValue, 'formattedValue'>
-      ) }
-    )> }
-  )> }
-);
-
-export type UserReviewsQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type UserReviewsQuery = (
-  { readonly __typename?: 'Query' }
-  & { readonly userReviews: ReadonlyArray<(
-    { readonly __typename?: 'BeachBarReview' }
-    & Pick<BeachBarReview, 'id' | 'ratingValue' | 'positiveComment' | 'negativeComment' | 'review' | 'updatedAt' | 'timestamp'>
-    & { readonly votes: ReadonlyArray<(
-      { readonly __typename?: 'ReviewVote' }
-      & Pick<ReviewVote, 'id'>
-      & { readonly user: (
-        { readonly __typename?: 'User' }
-        & Pick<User, 'id'>
-      ), readonly type: (
-        { readonly __typename?: 'ReviewVoteType' }
-        & Pick<ReviewVoteType, 'id' | 'value'>
-      ) }
-    )>, readonly answer: Maybe<(
-      { readonly __typename?: 'ReviewAnswer' }
-      & Pick<ReviewAnswer, 'id' | 'body'>
-    )>, readonly beachBar: (
-      { readonly __typename?: 'BeachBar' }
-      & Pick<BeachBar, 'id' | 'name'>
-    ), readonly visitType: Maybe<(
-      { readonly __typename?: 'ReviewVisitType' }
-      & Pick<ReviewVisitType, 'id' | 'name'>
-    )>, readonly month: Maybe<(
-      { readonly __typename?: 'MonthTime' }
-      & Pick<MonthTime, 'id' | 'value'>
-    )> }
-  )> }
-);
+export type UserHistoryQuery = { readonly __typename?: 'Query', readonly userHistory: ReadonlyArray<{ readonly __typename?: 'UserHistoryExtended', readonly userHistory: { readonly __typename?: 'UserHistory', readonly id: number, readonly objectId: number | undefined, readonly timestamp: string, readonly activity: { readonly __typename?: 'UserHistoryActivity', readonly id: string, readonly name: string } }, readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string, readonly name: string, readonly location: { readonly __typename?: 'BeachBarLocation', readonly formattedLocation: string } } | undefined, readonly search: { readonly __typename?: 'UserSearch', readonly id: number, readonly date: string | undefined, readonly adults: number | undefined, readonly children: number | undefined, readonly inputValue: { readonly __typename?: 'SearchInputValue', readonly formattedValue: string } } | undefined }> };
 
 export type UserSearchesQueryVariables = Exact<{
-  limit: Maybe<Scalars['Int']>;
+  limit: InputMaybe<Scalars['Int']>;
 }>;
 
 
-export type UserSearchesQuery = (
-  { readonly __typename?: 'Query' }
-  & { readonly userSearches: ReadonlyArray<(
-    { readonly __typename?: 'UserSearch' }
-    & Pick<UserSearch, 'id' | 'searchDate' | 'searchAdults' | 'searchChildren'>
-    & { readonly inputValue: (
-      { readonly __typename?: 'SearchInputValue' }
-      & Pick<SearchInputValue, 'id'>
-      & { readonly city: Maybe<(
-        { readonly __typename?: 'City' }
-        & Pick<City, 'id' | 'name'>
-      )>, readonly region: Maybe<(
-        { readonly __typename?: 'Region' }
-        & Pick<Region, 'id' | 'name'>
-      )>, readonly beachBar: Maybe<(
-        { readonly __typename?: 'BeachBar' }
-        & Pick<BeachBar, 'id' | 'name' | 'thumbnailUrl'>
-      )> }
-    ) }
-  )> }
-);
+export type UserSearchesQuery = { readonly __typename?: 'Query', readonly userSearches: ReadonlyArray<{ readonly __typename?: 'UserSearch', readonly id: number, readonly date: string | undefined, readonly adults: number | undefined, readonly children: number | undefined, readonly inputValue: { readonly __typename?: 'SearchInputValue', readonly id: number, readonly city: { readonly __typename?: 'City', readonly id: string, readonly name: string } | undefined, readonly region: { readonly __typename?: 'Region', readonly id: string, readonly name: string } | undefined, readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string, readonly name: string, readonly thumbnailUrl: string | undefined } | undefined } }> };
 
 export type GetFacebookOAuthUrlQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetFacebookOAuthUrlQuery = (
-  { readonly __typename?: 'Query' }
-  & Pick<Query, 'getFacebookOAuthUrl'>
-);
+export type GetFacebookOAuthUrlQuery = { readonly __typename?: 'Query', readonly getFacebookOAuthUrl: string };
 
 export type GetGoogleOAuthUrlQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetGoogleOAuthUrlQuery = (
-  { readonly __typename?: 'Query' }
-  & Pick<Query, 'getGoogleOAuthUrl'>
-);
+export type GetGoogleOAuthUrlQuery = { readonly __typename?: 'Query', readonly getGoogleOAuthUrl: string };
 
 export type GetInstagramOAuthUrlQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetInstagramOAuthUrlQuery = (
-  { readonly __typename?: 'Query' }
-  & Pick<Query, 'getInstagramOAuthUrl'>
-);
+export type GetInstagramOAuthUrlQuery = { readonly __typename?: 'Query', readonly getInstagramOAuthUrl: string };
 
 export type IndexPageQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type IndexPageQuery = (
-  { readonly __typename?: 'Query' }
-  & { readonly getPersonalizedBeachBars: ReadonlyArray<(
-    { readonly __typename?: 'BeachBar' }
-    & Pick<BeachBar, 'name' | 'thumbnailUrl'>
-    & { readonly location: (
-      { readonly __typename?: 'BeachBarLocation' }
-      & { readonly city: (
-        { readonly __typename?: 'City' }
-        & Pick<City, 'name'>
-      ), readonly region: Maybe<(
-        { readonly __typename?: 'Region' }
-        & Pick<Region, 'name'>
-      )> }
-    ) }
-  )>, readonly favouriteBeachBars: ReadonlyArray<(
-    { readonly __typename?: 'UserFavoriteBar' }
-    & { readonly beachBar: (
-      { readonly __typename?: 'BeachBar' }
-      & Pick<BeachBar, 'id' | 'name' | 'thumbnailUrl'>
-      & { readonly location: (
-        { readonly __typename?: 'BeachBarLocation' }
-        & { readonly city: (
-          { readonly __typename?: 'City' }
-          & Pick<City, 'name'>
-        ) }
-      ) }
-    ) }
-  )> }
-);
+export type IndexPageQuery = { readonly __typename?: 'Query', readonly getPersonalizedBeachBars: ReadonlyArray<{ readonly __typename?: 'BeachBar', readonly name: string, readonly thumbnailUrl: string | undefined, readonly location: { readonly __typename?: 'BeachBarLocation', readonly city: { readonly __typename?: 'City', readonly name: string }, readonly region: { readonly __typename?: 'Region', readonly name: string } | undefined } }>, readonly favouriteBeachBars: ReadonlyArray<{ readonly __typename?: 'UserFavoriteBar', readonly beachBar: { readonly __typename?: 'BeachBar', readonly id: string, readonly name: string, readonly thumbnailUrl: string | undefined, readonly location: { readonly __typename?: 'BeachBarLocation', readonly city: { readonly __typename?: 'City', readonly name: string } } } }> };
 
 export type GetAllBeachBarsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetAllBeachBarsQuery = (
-  { readonly __typename?: 'Query' }
-  & { readonly getAllBeachBars: ReadonlyArray<(
-    { readonly __typename?: 'BeachBar' }
-    & SearchBeachBarFragment
-  )> }
-);
+export type GetAllBeachBarsQuery = { readonly __typename?: 'Query', readonly getAllBeachBars: ReadonlyArray<{ readonly __typename?: 'BeachBar', readonly id: string, readonly name: string, readonly slug: string, readonly thumbnailUrl: string | undefined, readonly description: string | undefined, readonly avgRating: number, readonly displayRegardlessCapacity: boolean, readonly contactPhoneNumber: string, readonly hidePhoneNumber: boolean, readonly zeroCartTotal: boolean, readonly hasCompletedSignUp: boolean | undefined, readonly isActive: boolean, readonly payments: ReadonlyArray<{ readonly __typename?: 'Payment', readonly id: number }>, readonly category: { readonly __typename?: 'BeachBarCategory', readonly id: string, readonly name: string }, readonly location: { readonly __typename?: 'BeachBarLocation', readonly id: string, readonly address: string, readonly zipCode: string | undefined, readonly longitude: any, readonly latitude: any, readonly formattedLocation: string, readonly country: { readonly __typename?: 'Country', readonly id: string, readonly name: string, readonly alpha2Code: string, readonly alpha3Code: string, readonly callingCode: string, readonly isEu: boolean }, readonly city: { readonly __typename?: 'City', readonly id: string, readonly name: string }, readonly region: { readonly __typename?: 'Region', readonly id: string, readonly name: string } | undefined }, readonly features: ReadonlyArray<{ readonly __typename?: 'BeachBarFeature', readonly quantity: number, readonly service: { readonly __typename?: 'BeachBarService', readonly id: string, readonly name: string, readonly icon: { readonly __typename?: 'Icon', readonly id: string, readonly publicId: string } } }>, readonly styles: ReadonlyArray<{ readonly __typename?: 'BeachBarStyle', readonly id: string, readonly name: string }>, readonly restaurants: ReadonlyArray<{ readonly __typename?: 'BeachBarRestaurant', readonly id: string }> }> };
 
-export const DetailsBeachBarFragmentDoc = gql`
-    fragment DetailsBeachBar on BeachBar {
+export const BeachBarBaseFragmentDoc = gql`
+    fragment BeachBarBase on BeachBar {
   id
   name
   slug
   thumbnailUrl
   description
   avgRating
-  isAvailable
-  formattedLocation
+  displayRegardlessCapacity
   contactPhoneNumber
   hidePhoneNumber
+  zeroCartTotal
+  hasCompletedSignUp
+  isActive
+  displayRegardlessCapacity
+}
+    `;
+export const CountryBaseFragmentDoc = gql`
+    fragment CountryBase on Country {
+  id
+  name
+  alpha2Code
+  alpha3Code
+  callingCode
+  isEu
+}
+    `;
+export const DetailsBeachBarFragmentDoc = gql`
+    fragment DetailsBeachBar on BeachBar {
+  ...BeachBarBase
+  category {
+    id
+    name
+  }
   location {
     id
     address
     zipCode
     longitude
     latitude
+    formattedLocation
     country {
-      id
-      name
-      callingCode
+      ...CountryBase
     }
     city {
       id
@@ -3669,7 +2897,8 @@ export const DetailsBeachBarFragmentDoc = gql`
     id
   }
 }
-    `;
+    ${BeachBarBaseFragmentDoc}
+${CountryBaseFragmentDoc}`;
 export const SearchBeachBarFragmentDoc = gql`
     fragment SearchBeachBar on BeachBar {
   ...DetailsBeachBar
@@ -3679,99 +2908,43 @@ export const SearchBeachBarFragmentDoc = gql`
   payments {
     id
   }
-}
-    ${DetailsBeachBarFragmentDoc}`;
-export const BasicCardFragmentDoc = gql`
-    fragment BasicCard on Card {
-  id
-  expMonth
-  expYear
-  last4
-  cardholderName
-  isDefault
-  brand {
-    id
-    name
-  }
-}
-    `;
-export const BasicCartProductFragmentDoc = gql`
-    fragment BasicCartProduct on CartProduct {
-  id
-  quantity
-  date
-  timestamp
-  time {
-    id
-    value
-  }
-  product {
-    id
-    name
-    price
-    imgUrl
-    beachBar {
-      id
-      name
-      thumbnailUrl
-      formattedLocation
-      defaultCurrency {
-        symbol
-      }
-    }
-  }
-}
-    `;
-export const CountryFragmentDoc = gql`
-    fragment Country on Country {
-  id
-  name
-  alpha2Code
-  alpha3Code
-  callingCode
-  isEu
-  cities {
-    id
-    name
-  }
   currency {
     id
-    name
-    isoCode
     symbol
-    secondSymbol
   }
 }
-    `;
-export const BeachBarProductFragmentDoc = gql`
-    fragment BeachBarProduct on Product {
+    ${DetailsBeachBarFragmentDoc}`;
+export const FeatureBaseFragmentDoc = gql`
+    fragment FeatureBase on BeachBarFeature {
   id
-  name
+  quantity
   description
-  imgUrl
-  price
-  maxPeople
-  category {
+  service {
     id
-    components {
-      quantity
-      component {
-        id
-        name
-        icon {
-          id
-          publicId
-        }
-      }
+    name
+    icon {
+      id
+      name
+      publicId
     }
   }
 }
     `;
-export const ReviewFragmentDoc = gql`
-    fragment Review on BeachBarReview {
+export const BeachBarImgUrlBaseFragmentDoc = gql`
+    fragment BeachBarImgUrlBase on BeachBarImgUrl {
+  id
+  imgUrl
+  description
+  updatedAt
+  timestamp
+}
+    `;
+export const BeachBarReviewBaseFragmentDoc = gql`
+    fragment BeachBarReviewBase on BeachBarReview {
   id
   ratingValue
-  review
+  body
+  answer
   positiveComment
   negativeComment
   updatedAt
@@ -3794,11 +2967,6 @@ export const ReviewFragmentDoc = gql`
     id
     name
   }
-  answer {
-    id
-    body
-    updatedAt
-  }
   customer {
     id
     user {
@@ -3812,44 +2980,256 @@ export const ReviewFragmentDoc = gql`
   }
 }
     `;
+export const BasicCardFragmentDoc = gql`
+    fragment BasicCard on Card {
+  id
+  expMonth
+  expYear
+  last4
+  cardholderName
+  isDefault
+  brand {
+    id
+    name
+  }
+}
+    `;
+export const FoodBaseFragmentDoc = gql`
+    fragment FoodBase on Food {
+  id
+  name
+  price
+  ingredients
+  maxQuantity
+}
+    `;
+export const CartFoodBaseFragmentDoc = gql`
+    fragment CartFoodBase on CartFood {
+  id
+  quantity
+  timestamp
+  food {
+    ...FoodBase
+    beachBar {
+      id
+    }
+    category {
+      id
+      name
+      icon {
+        id
+        publicId
+      }
+    }
+  }
+}
+    ${FoodBaseFragmentDoc}`;
+export const CartFoodWithCartFragmentDoc = gql`
+    fragment CartFoodWithCart on CartFood {
+  ...CartFoodBase
+  cart {
+    id
+    total
+  }
+}
+    ${CartFoodBaseFragmentDoc}`;
+export const CartNoteBaseFragmentDoc = gql`
+    fragment CartNoteBase on CartNote {
+  id
+  body
+  beachBar {
+    id
+  }
+}
+    `;
+export const CartProductBaseFragmentDoc = gql`
+    fragment CartProductBase on CartProduct {
+  id
+  quantity
+  date
+  people
+  timestamp
+  startTime {
+    id
+    value
+  }
+  endTime {
+    id
+    value
+  }
+  product {
+    id
+    name
+    price
+    imgUrl
+    beachBar {
+      id
+      name
+      thumbnailUrl
+      location {
+        formattedLocation
+      }
+      currency {
+        id
+        symbol
+      }
+    }
+  }
+}
+    `;
+export const CountryFragmentDoc = gql`
+    fragment Country on Country {
+  ...CountryBase
+  cities {
+    id
+    name
+  }
+  currency {
+    id
+    name
+    isoCode
+    symbol
+    secondSymbol
+  }
+}
+    ${CountryBaseFragmentDoc}`;
+export const DashboardDateValueFragmentDoc = gql`
+    fragment DashboardDateValue on DashboardDateValue {
+  date
+  value
+}
+    `;
+export const DashboardBillingFieldFragmentDoc = gql`
+    fragment DashboardBillingField on DashboardBillingField {
+  revenue {
+    ...DashboardDateValue
+  }
+}
+    ${DashboardDateValueFragmentDoc}`;
+export const FoodDetailsFragmentDoc = gql`
+    fragment FoodDetails on Food {
+  ...FoodBase
+  category {
+    id
+    name
+    icon {
+      id
+      publicId
+    }
+  }
+}
+    ${FoodBaseFragmentDoc}`;
+export const LoginAuthorizeFragmentDoc = gql`
+    fragment LoginAuthorize on LoginAuthorize {
+  accessToken
+  refreshToken
+  scope
+  user {
+    id
+    email
+    firstName
+    lastName
+    fullName
+    account {
+      imgUrl
+    }
+  }
+}
+    `;
+export const ProductBaseFragmentDoc = gql`
+    fragment ProductBase on Product {
+  id
+  name
+  description
+  imgUrl
+  price
+  maxPeople
+  minFoodSpending
+  category {
+    id
+    components {
+      quantity
+      component {
+        id
+        name
+        icon {
+          id
+          publicId
+        }
+      }
+    }
+  }
+}
+    `;
+export const ProductDetailsFragmentDoc = gql`
+    fragment ProductDetails on Product {
+  ...ProductBase
+  beachBar {
+    id
+    currency {
+      id
+      symbol
+    }
+  }
+  reservationLimits {
+    id
+    from
+    to
+    limitNumber
+  }
+}
+    ${ProductBaseFragmentDoc}`;
+export const ProductReservationLimitBaseFragmentDoc = gql`
+    fragment ProductReservationLimitBase on ProductReservationLimit {
+  id
+  from
+  to
+  limitNumber
+  product {
+    id
+  }
+  startTime {
+    id
+    value
+  }
+  endTime {
+    id
+    value
+  }
+}
+    `;
 export const SearchInputValueFragmentDoc = gql`
     fragment SearchInputValue on SearchInputValue {
   id
   publicId
   formattedValue
   country {
-    id
-    name
-    alpha2Code
+    ...CountryBase
   }
   city {
     id
     name
     country {
-      id
-      alpha2Code
+      ...CountryBase
     }
   }
   region {
     id
     name
     country {
-      id
-      alpha2Code
+      ...CountryBase
     }
   }
   beachBar {
     id
     name
     thumbnailUrl
-    formattedLocation
     location {
       longitude
       latitude
+      formattedLocation
       country {
-        id
-        name
-        alpha2Code
+        ...CountryBase
       }
       city {
         id
@@ -3862,25 +3242,385 @@ export const SearchInputValueFragmentDoc = gql`
     }
   }
 }
+    ${CountryBaseFragmentDoc}`;
+export const HourValueFragmentDoc = gql`
+    fragment HourValue on HourTime {
+  id
+  value
+}
     `;
+export const AddBeachBarDocument = gql`
+    mutation AddBeachBar($name: String!, $description: String!, $thumbnailUrl: URL!, $contactPhoneNumber: String!, $hidePhoneNumber: Boolean = false, $zeroCartTotal: Boolean!, $categoryId: ID!, $openingTimeId: ID!, $closingTimeId: ID!, $code: String!, $state: String!) {
+  addBeachBar(
+    name: $name
+    description: $description
+    thumbnailUrl: $thumbnailUrl
+    contactPhoneNumber: $contactPhoneNumber
+    hidePhoneNumber: $hidePhoneNumber
+    zeroCartTotal: $zeroCartTotal
+    categoryId: $categoryId
+    openingTimeId: $openingTimeId
+    closingTimeId: $closingTimeId
+    code: $code
+    state: $state
+  ) {
+    ...BeachBarBase
+  }
+}
+    ${BeachBarBaseFragmentDoc}`;
+export type AddBeachBarMutationFn = Apollo.MutationFunction<AddBeachBarMutation, AddBeachBarMutationVariables>;
+
+/**
+ * __useAddBeachBarMutation__
+ *
+ * To run a mutation, you first call `useAddBeachBarMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddBeachBarMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addBeachBarMutation, { data, loading, error }] = useAddBeachBarMutation({
+ *   variables: {
+ *      name: // value for 'name'
+ *      description: // value for 'description'
+ *      thumbnailUrl: // value for 'thumbnailUrl'
+ *      contactPhoneNumber: // value for 'contactPhoneNumber'
+ *      hidePhoneNumber: // value for 'hidePhoneNumber'
+ *      zeroCartTotal: // value for 'zeroCartTotal'
+ *      categoryId: // value for 'categoryId'
+ *      openingTimeId: // value for 'openingTimeId'
+ *      closingTimeId: // value for 'closingTimeId'
+ *      code: // value for 'code'
+ *      state: // value for 'state'
+ *   },
+ * });
+ */
+export function useAddBeachBarMutation(baseOptions?: Apollo.MutationHookOptions<AddBeachBarMutation, AddBeachBarMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AddBeachBarMutation, AddBeachBarMutationVariables>(AddBeachBarDocument, options);
+      }
+export type AddBeachBarMutationHookResult = ReturnType<typeof useAddBeachBarMutation>;
+export type AddBeachBarMutationResult = Apollo.MutationResult<AddBeachBarMutation>;
+export type AddBeachBarMutationOptions = Apollo.BaseMutationOptions<AddBeachBarMutation, AddBeachBarMutationVariables>;
+export const AddBeachBarFeatureDocument = gql`
+    mutation AddBeachBarFeature($beachBarId: ID!, $featureId: ID!, $quantity: Int = 1, $description: String) {
+  addBeachBarFeature(
+    beachBarId: $beachBarId
+    featureId: $featureId
+    quantity: $quantity
+    description: $description
+  ) {
+    ...FeatureBase
+  }
+}
+    ${FeatureBaseFragmentDoc}`;
+export type AddBeachBarFeatureMutationFn = Apollo.MutationFunction<AddBeachBarFeatureMutation, AddBeachBarFeatureMutationVariables>;
+
+/**
+ * __useAddBeachBarFeatureMutation__
+ *
+ * To run a mutation, you first call `useAddBeachBarFeatureMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddBeachBarFeatureMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addBeachBarFeatureMutation, { data, loading, error }] = useAddBeachBarFeatureMutation({
+ *   variables: {
+ *      beachBarId: // value for 'beachBarId'
+ *      featureId: // value for 'featureId'
+ *      quantity: // value for 'quantity'
+ *      description: // value for 'description'
+ *   },
+ * });
+ */
+export function useAddBeachBarFeatureMutation(baseOptions?: Apollo.MutationHookOptions<AddBeachBarFeatureMutation, AddBeachBarFeatureMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AddBeachBarFeatureMutation, AddBeachBarFeatureMutationVariables>(AddBeachBarFeatureDocument, options);
+      }
+export type AddBeachBarFeatureMutationHookResult = ReturnType<typeof useAddBeachBarFeatureMutation>;
+export type AddBeachBarFeatureMutationResult = Apollo.MutationResult<AddBeachBarFeatureMutation>;
+export type AddBeachBarFeatureMutationOptions = Apollo.BaseMutationOptions<AddBeachBarFeatureMutation, AddBeachBarFeatureMutationVariables>;
+export const AddBeachBarImgUrlDocument = gql`
+    mutation AddBeachBarImgUrl($beachBarId: ID!, $imgUrl: URL!, $description: String) {
+  addBeachBarImgUrl(
+    beachBarId: $beachBarId
+    imgUrl: $imgUrl
+    description: $description
+  ) {
+    ...BeachBarImgUrlBase
+  }
+}
+    ${BeachBarImgUrlBaseFragmentDoc}`;
+export type AddBeachBarImgUrlMutationFn = Apollo.MutationFunction<AddBeachBarImgUrlMutation, AddBeachBarImgUrlMutationVariables>;
+
+/**
+ * __useAddBeachBarImgUrlMutation__
+ *
+ * To run a mutation, you first call `useAddBeachBarImgUrlMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddBeachBarImgUrlMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addBeachBarImgUrlMutation, { data, loading, error }] = useAddBeachBarImgUrlMutation({
+ *   variables: {
+ *      beachBarId: // value for 'beachBarId'
+ *      imgUrl: // value for 'imgUrl'
+ *      description: // value for 'description'
+ *   },
+ * });
+ */
+export function useAddBeachBarImgUrlMutation(baseOptions?: Apollo.MutationHookOptions<AddBeachBarImgUrlMutation, AddBeachBarImgUrlMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AddBeachBarImgUrlMutation, AddBeachBarImgUrlMutationVariables>(AddBeachBarImgUrlDocument, options);
+      }
+export type AddBeachBarImgUrlMutationHookResult = ReturnType<typeof useAddBeachBarImgUrlMutation>;
+export type AddBeachBarImgUrlMutationResult = Apollo.MutationResult<AddBeachBarImgUrlMutation>;
+export type AddBeachBarImgUrlMutationOptions = Apollo.BaseMutationOptions<AddBeachBarImgUrlMutation, AddBeachBarImgUrlMutationVariables>;
+export const AddBeachBarLocationDocument = gql`
+    mutation AddBeachBarLocation($beachBarId: ID!, $address: String!, $zipCode: String, $countryId: ID!, $city: String!, $region: ID, $latitude: String!, $longitude: String!) {
+  addBeachBarLocation(
+    beachBarId: $beachBarId
+    address: $address
+    zipCode: $zipCode
+    countryId: $countryId
+    city: $city
+    region: $region
+    latitude: $latitude
+    longitude: $longitude
+  ) {
+    id
+    address
+    zipCode
+    latitude
+    longitude
+    whereIs
+    country {
+      ...CountryBase
+    }
+    city {
+      id
+      name
+    }
+    region {
+      id
+      name
+    }
+  }
+}
+    ${CountryBaseFragmentDoc}`;
+export type AddBeachBarLocationMutationFn = Apollo.MutationFunction<AddBeachBarLocationMutation, AddBeachBarLocationMutationVariables>;
+
+/**
+ * __useAddBeachBarLocationMutation__
+ *
+ * To run a mutation, you first call `useAddBeachBarLocationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddBeachBarLocationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addBeachBarLocationMutation, { data, loading, error }] = useAddBeachBarLocationMutation({
+ *   variables: {
+ *      beachBarId: // value for 'beachBarId'
+ *      address: // value for 'address'
+ *      zipCode: // value for 'zipCode'
+ *      countryId: // value for 'countryId'
+ *      city: // value for 'city'
+ *      region: // value for 'region'
+ *      latitude: // value for 'latitude'
+ *      longitude: // value for 'longitude'
+ *   },
+ * });
+ */
+export function useAddBeachBarLocationMutation(baseOptions?: Apollo.MutationHookOptions<AddBeachBarLocationMutation, AddBeachBarLocationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AddBeachBarLocationMutation, AddBeachBarLocationMutationVariables>(AddBeachBarLocationDocument, options);
+      }
+export type AddBeachBarLocationMutationHookResult = ReturnType<typeof useAddBeachBarLocationMutation>;
+export type AddBeachBarLocationMutationResult = Apollo.MutationResult<AddBeachBarLocationMutation>;
+export type AddBeachBarLocationMutationOptions = Apollo.BaseMutationOptions<AddBeachBarLocationMutation, AddBeachBarLocationMutationVariables>;
+export const AddBeachBarOwnerDocument = gql`
+    mutation AddBeachBarOwner($beachBarId: ID!, $userId: ID, $isPrimary: Boolean = false) {
+  addBeachBarOwner(
+    beachBarId: $beachBarId
+    userId: $userId
+    isPrimary: $isPrimary
+  ) {
+    id
+    isPrimary
+    beachBar {
+      id
+    }
+    owner {
+      id
+      user {
+        id
+      }
+    }
+  }
+}
+    `;
+export type AddBeachBarOwnerMutationFn = Apollo.MutationFunction<AddBeachBarOwnerMutation, AddBeachBarOwnerMutationVariables>;
+
+/**
+ * __useAddBeachBarOwnerMutation__
+ *
+ * To run a mutation, you first call `useAddBeachBarOwnerMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddBeachBarOwnerMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addBeachBarOwnerMutation, { data, loading, error }] = useAddBeachBarOwnerMutation({
+ *   variables: {
+ *      beachBarId: // value for 'beachBarId'
+ *      userId: // value for 'userId'
+ *      isPrimary: // value for 'isPrimary'
+ *   },
+ * });
+ */
+export function useAddBeachBarOwnerMutation(baseOptions?: Apollo.MutationHookOptions<AddBeachBarOwnerMutation, AddBeachBarOwnerMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AddBeachBarOwnerMutation, AddBeachBarOwnerMutationVariables>(AddBeachBarOwnerDocument, options);
+      }
+export type AddBeachBarOwnerMutationHookResult = ReturnType<typeof useAddBeachBarOwnerMutation>;
+export type AddBeachBarOwnerMutationResult = Apollo.MutationResult<AddBeachBarOwnerMutation>;
+export type AddBeachBarOwnerMutationOptions = Apollo.BaseMutationOptions<AddBeachBarOwnerMutation, AddBeachBarOwnerMutationVariables>;
+export const AddBeachBarStylesDocument = gql`
+    mutation AddBeachBarStyles($beachBarId: ID!, $styleIds: [ID!]!) {
+  addBeachBarStyles(beachBarId: $beachBarId, styleIds: $styleIds) {
+    id
+    name
+  }
+}
+    `;
+export type AddBeachBarStylesMutationFn = Apollo.MutationFunction<AddBeachBarStylesMutation, AddBeachBarStylesMutationVariables>;
+
+/**
+ * __useAddBeachBarStylesMutation__
+ *
+ * To run a mutation, you first call `useAddBeachBarStylesMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddBeachBarStylesMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addBeachBarStylesMutation, { data, loading, error }] = useAddBeachBarStylesMutation({
+ *   variables: {
+ *      beachBarId: // value for 'beachBarId'
+ *      styleIds: // value for 'styleIds'
+ *   },
+ * });
+ */
+export function useAddBeachBarStylesMutation(baseOptions?: Apollo.MutationHookOptions<AddBeachBarStylesMutation, AddBeachBarStylesMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AddBeachBarStylesMutation, AddBeachBarStylesMutationVariables>(AddBeachBarStylesDocument, options);
+      }
+export type AddBeachBarStylesMutationHookResult = ReturnType<typeof useAddBeachBarStylesMutation>;
+export type AddBeachBarStylesMutationResult = Apollo.MutationResult<AddBeachBarStylesMutation>;
+export type AddBeachBarStylesMutationOptions = Apollo.BaseMutationOptions<AddBeachBarStylesMutation, AddBeachBarStylesMutationVariables>;
+export const AddCartFoodDocument = gql`
+    mutation AddCartFood($cartId: ID!, $foodId: ID!, $quantity: Int) {
+  addCartFood(cartId: $cartId, foodId: $foodId, quantity: $quantity) {
+    ...CartFoodWithCart
+  }
+}
+    ${CartFoodWithCartFragmentDoc}`;
+export type AddCartFoodMutationFn = Apollo.MutationFunction<AddCartFoodMutation, AddCartFoodMutationVariables>;
+
+/**
+ * __useAddCartFoodMutation__
+ *
+ * To run a mutation, you first call `useAddCartFoodMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddCartFoodMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addCartFoodMutation, { data, loading, error }] = useAddCartFoodMutation({
+ *   variables: {
+ *      cartId: // value for 'cartId'
+ *      foodId: // value for 'foodId'
+ *      quantity: // value for 'quantity'
+ *   },
+ * });
+ */
+export function useAddCartFoodMutation(baseOptions?: Apollo.MutationHookOptions<AddCartFoodMutation, AddCartFoodMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AddCartFoodMutation, AddCartFoodMutationVariables>(AddCartFoodDocument, options);
+      }
+export type AddCartFoodMutationHookResult = ReturnType<typeof useAddCartFoodMutation>;
+export type AddCartFoodMutationResult = Apollo.MutationResult<AddCartFoodMutation>;
+export type AddCartFoodMutationOptions = Apollo.BaseMutationOptions<AddCartFoodMutation, AddCartFoodMutationVariables>;
+export const AddCartNoteDocument = gql`
+    mutation AddCartNote($cartId: ID!, $beachBarId: ID!, $body: String!) {
+  addCartNote(cartId: $cartId, beachBarId: $beachBarId, body: $body) {
+    ...CartNoteBase
+  }
+}
+    ${CartNoteBaseFragmentDoc}`;
+export type AddCartNoteMutationFn = Apollo.MutationFunction<AddCartNoteMutation, AddCartNoteMutationVariables>;
+
+/**
+ * __useAddCartNoteMutation__
+ *
+ * To run a mutation, you first call `useAddCartNoteMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddCartNoteMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addCartNoteMutation, { data, loading, error }] = useAddCartNoteMutation({
+ *   variables: {
+ *      cartId: // value for 'cartId'
+ *      beachBarId: // value for 'beachBarId'
+ *      body: // value for 'body'
+ *   },
+ * });
+ */
+export function useAddCartNoteMutation(baseOptions?: Apollo.MutationHookOptions<AddCartNoteMutation, AddCartNoteMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AddCartNoteMutation, AddCartNoteMutationVariables>(AddCartNoteDocument, options);
+      }
+export type AddCartNoteMutationHookResult = ReturnType<typeof useAddCartNoteMutation>;
+export type AddCartNoteMutationResult = Apollo.MutationResult<AddCartNoteMutation>;
+export type AddCartNoteMutationOptions = Apollo.BaseMutationOptions<AddCartNoteMutation, AddCartNoteMutationVariables>;
 export const AddCartProductDocument = gql`
-    mutation AddCartProduct($cartId: ID!, $productId: ID!, $quantity: Int, $date: Date!, $timeId: ID!) {
+    mutation AddCartProduct($cartId: ID!, $productId: ID!, $quantity: Int, $date: Date!, $people: Int!, $startTimeId: ID!, $endTimeId: ID!) {
   addCartProduct(
     cartId: $cartId
     productId: $productId
     quantity: $quantity
     date: $date
-    timeId: $timeId
+    people: $people
+    startTimeId: $startTimeId
+    endTimeId: $endTimeId
   ) {
+    id
+    quantity
+    people
     product {
       id
-      quantity
-      product {
-        id
-        name
-      }
+      name
     }
-    added
   }
 }
     `;
@@ -3903,7 +3643,9 @@ export type AddCartProductMutationFn = Apollo.MutationFunction<AddCartProductMut
  *      productId: // value for 'productId'
  *      quantity: // value for 'quantity'
  *      date: // value for 'date'
- *      timeId: // value for 'timeId'
+ *      people: // value for 'people'
+ *      startTimeId: // value for 'startTimeId'
+ *      endTimeId: // value for 'endTimeId'
  *   },
  * });
  */
@@ -3923,19 +3665,16 @@ export const AddCustomerPaymentMethodDocument = gql`
     isDefault: $isDefault
     savedForFuture: $savedForFuture
   ) {
-    card {
+    id
+    expMonth
+    expYear
+    last4
+    cardholderName
+    isDefault
+    brand {
       id
-      expMonth
-      expYear
-      last4
-      cardholderName
-      isDefault
-      brand {
-        id
-        name
-      }
+      name
     }
-    added
   }
 }
     `;
@@ -3969,22 +3708,158 @@ export function useAddCustomerPaymentMethodMutation(baseOptions?: Apollo.Mutatio
 export type AddCustomerPaymentMethodMutationHookResult = ReturnType<typeof useAddCustomerPaymentMethodMutation>;
 export type AddCustomerPaymentMethodMutationResult = Apollo.MutationResult<AddCustomerPaymentMethodMutation>;
 export type AddCustomerPaymentMethodMutationOptions = Apollo.BaseMutationOptions<AddCustomerPaymentMethodMutation, AddCustomerPaymentMethodMutationVariables>;
+export const AddFoodDocument = gql`
+    mutation AddFood($beachBarId: ID!, $name: String!, $categoryId: ID!, $ingredients: String, $price: Float!, $maxQuantity: Int) {
+  addFood(
+    beachBarId: $beachBarId
+    name: $name
+    categoryId: $categoryId
+    ingredients: $ingredients
+    price: $price
+    maxQuantity: $maxQuantity
+  ) {
+    ...FoodDetails
+  }
+}
+    ${FoodDetailsFragmentDoc}`;
+export type AddFoodMutationFn = Apollo.MutationFunction<AddFoodMutation, AddFoodMutationVariables>;
+
+/**
+ * __useAddFoodMutation__
+ *
+ * To run a mutation, you first call `useAddFoodMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddFoodMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addFoodMutation, { data, loading, error }] = useAddFoodMutation({
+ *   variables: {
+ *      beachBarId: // value for 'beachBarId'
+ *      name: // value for 'name'
+ *      categoryId: // value for 'categoryId'
+ *      ingredients: // value for 'ingredients'
+ *      price: // value for 'price'
+ *      maxQuantity: // value for 'maxQuantity'
+ *   },
+ * });
+ */
+export function useAddFoodMutation(baseOptions?: Apollo.MutationHookOptions<AddFoodMutation, AddFoodMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AddFoodMutation, AddFoodMutationVariables>(AddFoodDocument, options);
+      }
+export type AddFoodMutationHookResult = ReturnType<typeof useAddFoodMutation>;
+export type AddFoodMutationResult = Apollo.MutationResult<AddFoodMutation>;
+export type AddFoodMutationOptions = Apollo.BaseMutationOptions<AddFoodMutation, AddFoodMutationVariables>;
+export const AddProductDocument = gql`
+    mutation AddProduct($beachBarId: ID!, $name: String!, $description: String, $categoryId: ID!, $price: Float!, $maxPeople: Int!, $minFoodSpending: Float, $imgUrl: URL) {
+  addProduct(
+    beachBarId: $beachBarId
+    name: $name
+    description: $description
+    categoryId: $categoryId
+    price: $price
+    maxPeople: $maxPeople
+    minFoodSpending: $minFoodSpending
+    imgUrl: $imgUrl
+  ) {
+    ...ProductBase
+  }
+}
+    ${ProductBaseFragmentDoc}`;
+export type AddProductMutationFn = Apollo.MutationFunction<AddProductMutation, AddProductMutationVariables>;
+
+/**
+ * __useAddProductMutation__
+ *
+ * To run a mutation, you first call `useAddProductMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddProductMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addProductMutation, { data, loading, error }] = useAddProductMutation({
+ *   variables: {
+ *      beachBarId: // value for 'beachBarId'
+ *      name: // value for 'name'
+ *      description: // value for 'description'
+ *      categoryId: // value for 'categoryId'
+ *      price: // value for 'price'
+ *      maxPeople: // value for 'maxPeople'
+ *      minFoodSpending: // value for 'minFoodSpending'
+ *      imgUrl: // value for 'imgUrl'
+ *   },
+ * });
+ */
+export function useAddProductMutation(baseOptions?: Apollo.MutationHookOptions<AddProductMutation, AddProductMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AddProductMutation, AddProductMutationVariables>(AddProductDocument, options);
+      }
+export type AddProductMutationHookResult = ReturnType<typeof useAddProductMutation>;
+export type AddProductMutationResult = Apollo.MutationResult<AddProductMutation>;
+export type AddProductMutationOptions = Apollo.BaseMutationOptions<AddProductMutation, AddProductMutationVariables>;
+export const AddProductReservationLimitDocument = gql`
+    mutation AddProductReservationLimit($productId: ID!, $limit: Int!, $from: Date!, $to: Date!, $startTimeId: ID, $endTimeId: ID) {
+  addProductReservationLimit(
+    productId: $productId
+    limit: $limit
+    from: $from
+    to: $to
+    startTimeId: $startTimeId
+    endTimeId: $endTimeId
+  ) {
+    ...ProductReservationLimitBase
+  }
+}
+    ${ProductReservationLimitBaseFragmentDoc}`;
+export type AddProductReservationLimitMutationFn = Apollo.MutationFunction<AddProductReservationLimitMutation, AddProductReservationLimitMutationVariables>;
+
+/**
+ * __useAddProductReservationLimitMutation__
+ *
+ * To run a mutation, you first call `useAddProductReservationLimitMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddProductReservationLimitMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addProductReservationLimitMutation, { data, loading, error }] = useAddProductReservationLimitMutation({
+ *   variables: {
+ *      productId: // value for 'productId'
+ *      limit: // value for 'limit'
+ *      from: // value for 'from'
+ *      to: // value for 'to'
+ *      startTimeId: // value for 'startTimeId'
+ *      endTimeId: // value for 'endTimeId'
+ *   },
+ * });
+ */
+export function useAddProductReservationLimitMutation(baseOptions?: Apollo.MutationHookOptions<AddProductReservationLimitMutation, AddProductReservationLimitMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AddProductReservationLimitMutation, AddProductReservationLimitMutationVariables>(AddProductReservationLimitDocument, options);
+      }
+export type AddProductReservationLimitMutationHookResult = ReturnType<typeof useAddProductReservationLimitMutation>;
+export type AddProductReservationLimitMutationResult = Apollo.MutationResult<AddProductReservationLimitMutation>;
+export type AddProductReservationLimitMutationOptions = Apollo.BaseMutationOptions<AddProductReservationLimitMutation, AddProductReservationLimitMutationVariables>;
 export const AddReviewDocument = gql`
-    mutation AddReview($beachBarId: ID!, $paymentRefCode: String, $ratingValue: Int!, $visitTypeId: ID, $monthTimeId: ID, $positiveComment: String, $negativeComment: String, $review: String) {
+    mutation AddReview($beachBarId: ID!, $paymentRefCode: String = null, $ratingValue: Int!, $visitTypeId: ID = null, $monthId: ID = null, $positiveComment: String = null, $negativeComment: String = null, $body: String = null) {
   addReview(
     beachBarId: $beachBarId
     paymentRefCode: $paymentRefCode
     ratingValue: $ratingValue
     visitTypeId: $visitTypeId
-    monthTimeId: $monthTimeId
+    monthId: $monthId
     positiveComment: $positiveComment
     negativeComment: $negativeComment
-    review: $review
+    body: $body
   ) {
-    review {
-      id
-    }
-    added
+    id
   }
 }
     `;
@@ -4007,10 +3882,10 @@ export type AddReviewMutationFn = Apollo.MutationFunction<AddReviewMutation, Add
  *      paymentRefCode: // value for 'paymentRefCode'
  *      ratingValue: // value for 'ratingValue'
  *      visitTypeId: // value for 'visitTypeId'
- *      monthTimeId: // value for 'monthTimeId'
+ *      monthId: // value for 'monthId'
  *      positiveComment: // value for 'positiveComment'
  *      negativeComment: // value for 'negativeComment'
- *      review: // value for 'review'
+ *      body: // value for 'body'
  *   },
  * });
  */
@@ -4021,11 +3896,50 @@ export function useAddReviewMutation(baseOptions?: Apollo.MutationHookOptions<Ad
 export type AddReviewMutationHookResult = ReturnType<typeof useAddReviewMutation>;
 export type AddReviewMutationResult = Apollo.MutationResult<AddReviewMutation>;
 export type AddReviewMutationOptions = Apollo.BaseMutationOptions<AddReviewMutation, AddReviewMutationVariables>;
+export const AuthorizeDocument = gql`
+    mutation Authorize($user: OAuthUserInput!, $provider: OAuthProvider!, $isPrimaryOwner: Boolean = false, $loginDetails: UserLoginDetails = null) {
+  authorize(
+    user: $user
+    provider: $provider
+    isPrimaryOwner: $isPrimaryOwner
+    loginDetails: $loginDetails
+  ) {
+    ...LoginAuthorize
+  }
+}
+    ${LoginAuthorizeFragmentDoc}`;
+export type AuthorizeMutationFn = Apollo.MutationFunction<AuthorizeMutation, AuthorizeMutationVariables>;
+
+/**
+ * __useAuthorizeMutation__
+ *
+ * To run a mutation, you first call `useAuthorizeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAuthorizeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [authorizeMutation, { data, loading, error }] = useAuthorizeMutation({
+ *   variables: {
+ *      user: // value for 'user'
+ *      provider: // value for 'provider'
+ *      isPrimaryOwner: // value for 'isPrimaryOwner'
+ *      loginDetails: // value for 'loginDetails'
+ *   },
+ * });
+ */
+export function useAuthorizeMutation(baseOptions?: Apollo.MutationHookOptions<AuthorizeMutation, AuthorizeMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AuthorizeMutation, AuthorizeMutationVariables>(AuthorizeDocument, options);
+      }
+export type AuthorizeMutationHookResult = ReturnType<typeof useAuthorizeMutation>;
+export type AuthorizeMutationResult = Apollo.MutationResult<AuthorizeMutation>;
+export type AuthorizeMutationOptions = Apollo.BaseMutationOptions<AuthorizeMutation, AuthorizeMutationVariables>;
 export const ChangeUserPasswordDocument = gql`
     mutation ChangeUserPassword($email: Email!, $token: String!, $newPassword: String!) {
-  changeUserPassword(email: $email, token: $token, newPassword: $newPassword) {
-    success
-  }
+  changeUserPassword(email: $email, token: $token, newPassword: $newPassword)
 }
     `;
 export type ChangeUserPasswordMutationFn = Apollo.MutationFunction<ChangeUserPasswordMutation, ChangeUserPasswordMutationVariables>;
@@ -4057,8 +3971,8 @@ export type ChangeUserPasswordMutationHookResult = ReturnType<typeof useChangeUs
 export type ChangeUserPasswordMutationResult = Apollo.MutationResult<ChangeUserPasswordMutation>;
 export type ChangeUserPasswordMutationOptions = Apollo.BaseMutationOptions<ChangeUserPasswordMutation, ChangeUserPasswordMutationVariables>;
 export const CheckoutDocument = gql`
-    mutation Checkout($cartId: ID!, $cardId: ID!, $totalPeople: Int = 1) {
-  checkout(cartId: $cartId, cardId: $cardId, totalPeople: $totalPeople) {
+    mutation Checkout($cartId: ID!, $cardId: ID!) {
+  checkout(cartId: $cartId, cardId: $cardId) {
     id
     refCode
   }
@@ -4081,7 +3995,6 @@ export type CheckoutMutationFn = Apollo.MutationFunction<CheckoutMutation, Check
  *   variables: {
  *      cartId: // value for 'cartId'
  *      cardId: // value for 'cardId'
- *      totalPeople: // value for 'totalPeople'
  *   },
  * });
  */
@@ -4092,19 +4005,133 @@ export function useCheckoutMutation(baseOptions?: Apollo.MutationHookOptions<Che
 export type CheckoutMutationHookResult = ReturnType<typeof useCheckoutMutation>;
 export type CheckoutMutationResult = Apollo.MutationResult<CheckoutMutation>;
 export type CheckoutMutationOptions = Apollo.BaseMutationOptions<CheckoutMutation, CheckoutMutationVariables>;
+export const CompleteBeachBarSignUpDocument = gql`
+    mutation CompleteBeachBarSignUp($beachBarId: ID!) {
+  completeBeachBarSignUp(beachBarId: $beachBarId)
+}
+    `;
+export type CompleteBeachBarSignUpMutationFn = Apollo.MutationFunction<CompleteBeachBarSignUpMutation, CompleteBeachBarSignUpMutationVariables>;
+
+/**
+ * __useCompleteBeachBarSignUpMutation__
+ *
+ * To run a mutation, you first call `useCompleteBeachBarSignUpMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCompleteBeachBarSignUpMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [completeBeachBarSignUpMutation, { data, loading, error }] = useCompleteBeachBarSignUpMutation({
+ *   variables: {
+ *      beachBarId: // value for 'beachBarId'
+ *   },
+ * });
+ */
+export function useCompleteBeachBarSignUpMutation(baseOptions?: Apollo.MutationHookOptions<CompleteBeachBarSignUpMutation, CompleteBeachBarSignUpMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CompleteBeachBarSignUpMutation, CompleteBeachBarSignUpMutationVariables>(CompleteBeachBarSignUpDocument, options);
+      }
+export type CompleteBeachBarSignUpMutationHookResult = ReturnType<typeof useCompleteBeachBarSignUpMutation>;
+export type CompleteBeachBarSignUpMutationResult = Apollo.MutationResult<CompleteBeachBarSignUpMutation>;
+export type CompleteBeachBarSignUpMutationOptions = Apollo.BaseMutationOptions<CompleteBeachBarSignUpMutation, CompleteBeachBarSignUpMutationVariables>;
+export const DeleteBeachBarFeatureDocument = gql`
+    mutation DeleteBeachBarFeature($id: ID!) {
+  deleteBeachBarFeature(id: $id)
+}
+    `;
+export type DeleteBeachBarFeatureMutationFn = Apollo.MutationFunction<DeleteBeachBarFeatureMutation, DeleteBeachBarFeatureMutationVariables>;
+
+/**
+ * __useDeleteBeachBarFeatureMutation__
+ *
+ * To run a mutation, you first call `useDeleteBeachBarFeatureMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteBeachBarFeatureMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteBeachBarFeatureMutation, { data, loading, error }] = useDeleteBeachBarFeatureMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteBeachBarFeatureMutation(baseOptions?: Apollo.MutationHookOptions<DeleteBeachBarFeatureMutation, DeleteBeachBarFeatureMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteBeachBarFeatureMutation, DeleteBeachBarFeatureMutationVariables>(DeleteBeachBarFeatureDocument, options);
+      }
+export type DeleteBeachBarFeatureMutationHookResult = ReturnType<typeof useDeleteBeachBarFeatureMutation>;
+export type DeleteBeachBarFeatureMutationResult = Apollo.MutationResult<DeleteBeachBarFeatureMutation>;
+export type DeleteBeachBarFeatureMutationOptions = Apollo.BaseMutationOptions<DeleteBeachBarFeatureMutation, DeleteBeachBarFeatureMutationVariables>;
+export const DeleteBeachBarImgUrlDocument = gql`
+    mutation DeleteBeachBarImgUrl($id: ID!) {
+  deleteBeachBarImgUrl(id: $id)
+}
+    `;
+export type DeleteBeachBarImgUrlMutationFn = Apollo.MutationFunction<DeleteBeachBarImgUrlMutation, DeleteBeachBarImgUrlMutationVariables>;
+
+/**
+ * __useDeleteBeachBarImgUrlMutation__
+ *
+ * To run a mutation, you first call `useDeleteBeachBarImgUrlMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteBeachBarImgUrlMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteBeachBarImgUrlMutation, { data, loading, error }] = useDeleteBeachBarImgUrlMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteBeachBarImgUrlMutation(baseOptions?: Apollo.MutationHookOptions<DeleteBeachBarImgUrlMutation, DeleteBeachBarImgUrlMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteBeachBarImgUrlMutation, DeleteBeachBarImgUrlMutationVariables>(DeleteBeachBarImgUrlDocument, options);
+      }
+export type DeleteBeachBarImgUrlMutationHookResult = ReturnType<typeof useDeleteBeachBarImgUrlMutation>;
+export type DeleteBeachBarImgUrlMutationResult = Apollo.MutationResult<DeleteBeachBarImgUrlMutation>;
+export type DeleteBeachBarImgUrlMutationOptions = Apollo.BaseMutationOptions<DeleteBeachBarImgUrlMutation, DeleteBeachBarImgUrlMutationVariables>;
+export const DeleteCartFoodDocument = gql`
+    mutation DeleteCartFood($id: ID!) {
+  deleteCartFood(id: $id)
+}
+    `;
+export type DeleteCartFoodMutationFn = Apollo.MutationFunction<DeleteCartFoodMutation, DeleteCartFoodMutationVariables>;
+
+/**
+ * __useDeleteCartFoodMutation__
+ *
+ * To run a mutation, you first call `useDeleteCartFoodMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteCartFoodMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteCartFoodMutation, { data, loading, error }] = useDeleteCartFoodMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteCartFoodMutation(baseOptions?: Apollo.MutationHookOptions<DeleteCartFoodMutation, DeleteCartFoodMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteCartFoodMutation, DeleteCartFoodMutationVariables>(DeleteCartFoodDocument, options);
+      }
+export type DeleteCartFoodMutationHookResult = ReturnType<typeof useDeleteCartFoodMutation>;
+export type DeleteCartFoodMutationResult = Apollo.MutationResult<DeleteCartFoodMutation>;
+export type DeleteCartFoodMutationOptions = Apollo.BaseMutationOptions<DeleteCartFoodMutation, DeleteCartFoodMutationVariables>;
 export const DeleteCartProductDocument = gql`
     mutation DeleteCartProduct($id: ID!) {
-  deleteCartProduct(id: $id) {
-    ... on Delete {
-      deleted
-    }
-    ... on Error {
-      error {
-        code
-        message
-      }
-    }
-  }
+  deleteCartProduct(id: $id)
 }
     `;
 export type DeleteCartProductMutationFn = Apollo.MutationFunction<DeleteCartProductMutation, DeleteCartProductMutationVariables>;
@@ -4135,9 +4162,7 @@ export type DeleteCartProductMutationResult = Apollo.MutationResult<DeleteCartPr
 export type DeleteCartProductMutationOptions = Apollo.BaseMutationOptions<DeleteCartProductMutation, DeleteCartProductMutationVariables>;
 export const DeleteCustomerPaymentMethodDocument = gql`
     mutation DeleteCustomerPaymentMethod($cardId: ID!) {
-  deleteCustomerPaymentMethod(cardId: $cardId) {
-    deleted
-  }
+  deleteCustomerPaymentMethod(cardId: $cardId)
 }
     `;
 export type DeleteCustomerPaymentMethodMutationFn = Apollo.MutationFunction<DeleteCustomerPaymentMethodMutation, DeleteCustomerPaymentMethodMutationVariables>;
@@ -4166,11 +4191,102 @@ export function useDeleteCustomerPaymentMethodMutation(baseOptions?: Apollo.Muta
 export type DeleteCustomerPaymentMethodMutationHookResult = ReturnType<typeof useDeleteCustomerPaymentMethodMutation>;
 export type DeleteCustomerPaymentMethodMutationResult = Apollo.MutationResult<DeleteCustomerPaymentMethodMutation>;
 export type DeleteCustomerPaymentMethodMutationOptions = Apollo.BaseMutationOptions<DeleteCustomerPaymentMethodMutation, DeleteCustomerPaymentMethodMutationVariables>;
+export const DeleteFoodDocument = gql`
+    mutation DeleteFood($foodId: ID!) {
+  deleteFood(foodId: $foodId)
+}
+    `;
+export type DeleteFoodMutationFn = Apollo.MutationFunction<DeleteFoodMutation, DeleteFoodMutationVariables>;
+
+/**
+ * __useDeleteFoodMutation__
+ *
+ * To run a mutation, you first call `useDeleteFoodMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteFoodMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteFoodMutation, { data, loading, error }] = useDeleteFoodMutation({
+ *   variables: {
+ *      foodId: // value for 'foodId'
+ *   },
+ * });
+ */
+export function useDeleteFoodMutation(baseOptions?: Apollo.MutationHookOptions<DeleteFoodMutation, DeleteFoodMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteFoodMutation, DeleteFoodMutationVariables>(DeleteFoodDocument, options);
+      }
+export type DeleteFoodMutationHookResult = ReturnType<typeof useDeleteFoodMutation>;
+export type DeleteFoodMutationResult = Apollo.MutationResult<DeleteFoodMutation>;
+export type DeleteFoodMutationOptions = Apollo.BaseMutationOptions<DeleteFoodMutation, DeleteFoodMutationVariables>;
+export const DeleteProductDocument = gql`
+    mutation DeleteProduct($productId: ID!) {
+  deleteProduct(productId: $productId)
+}
+    `;
+export type DeleteProductMutationFn = Apollo.MutationFunction<DeleteProductMutation, DeleteProductMutationVariables>;
+
+/**
+ * __useDeleteProductMutation__
+ *
+ * To run a mutation, you first call `useDeleteProductMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteProductMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteProductMutation, { data, loading, error }] = useDeleteProductMutation({
+ *   variables: {
+ *      productId: // value for 'productId'
+ *   },
+ * });
+ */
+export function useDeleteProductMutation(baseOptions?: Apollo.MutationHookOptions<DeleteProductMutation, DeleteProductMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteProductMutation, DeleteProductMutationVariables>(DeleteProductDocument, options);
+      }
+export type DeleteProductMutationHookResult = ReturnType<typeof useDeleteProductMutation>;
+export type DeleteProductMutationResult = Apollo.MutationResult<DeleteProductMutation>;
+export type DeleteProductMutationOptions = Apollo.BaseMutationOptions<DeleteProductMutation, DeleteProductMutationVariables>;
+export const DeleteProductReservationLimitDocument = gql`
+    mutation DeleteProductReservationLimit($id: ID!) {
+  deleteProductReservationLimit(id: $id)
+}
+    `;
+export type DeleteProductReservationLimitMutationFn = Apollo.MutationFunction<DeleteProductReservationLimitMutation, DeleteProductReservationLimitMutationVariables>;
+
+/**
+ * __useDeleteProductReservationLimitMutation__
+ *
+ * To run a mutation, you first call `useDeleteProductReservationLimitMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteProductReservationLimitMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteProductReservationLimitMutation, { data, loading, error }] = useDeleteProductReservationLimitMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteProductReservationLimitMutation(baseOptions?: Apollo.MutationHookOptions<DeleteProductReservationLimitMutation, DeleteProductReservationLimitMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteProductReservationLimitMutation, DeleteProductReservationLimitMutationVariables>(DeleteProductReservationLimitDocument, options);
+      }
+export type DeleteProductReservationLimitMutationHookResult = ReturnType<typeof useDeleteProductReservationLimitMutation>;
+export type DeleteProductReservationLimitMutationResult = Apollo.MutationResult<DeleteProductReservationLimitMutation>;
+export type DeleteProductReservationLimitMutationOptions = Apollo.BaseMutationOptions<DeleteProductReservationLimitMutation, DeleteProductReservationLimitMutationVariables>;
 export const DeleteReviewDocument = gql`
-    mutation DeleteReview($reviewId: ID!) {
-  deleteReview(reviewId: $reviewId) {
-    deleted
-  }
+    mutation DeleteReview($id: ID!) {
+  deleteReview(id: $id)
 }
     `;
 export type DeleteReviewMutationFn = Apollo.MutationFunction<DeleteReviewMutation, DeleteReviewMutationVariables>;
@@ -4188,7 +4304,7 @@ export type DeleteReviewMutationFn = Apollo.MutationFunction<DeleteReviewMutatio
  * @example
  * const [deleteReviewMutation, { data, loading, error }] = useDeleteReviewMutation({
  *   variables: {
- *      reviewId: // value for 'reviewId'
+ *      id: // value for 'id'
  *   },
  * });
  */
@@ -4231,16 +4347,12 @@ export type HelloMutationHookResult = ReturnType<typeof useHelloMutation>;
 export type HelloMutationResult = Apollo.MutationResult<HelloMutation>;
 export type HelloMutationOptions = Apollo.BaseMutationOptions<HelloMutation, HelloMutationVariables>;
 export const LoginDocument = gql`
-    mutation Login($userCredentials: UserCredentials!, $loginDetails: UserLoginDetails) {
+    mutation Login($userCredentials: UserCredentials!, $loginDetails: UserLoginDetails = null) {
   login(userCredentials: $userCredentials, loginDetails: $loginDetails) {
-    user {
-      id
-      email
-    }
-    accessToken
+    ...LoginAuthorize
   }
 }
-    `;
+    ${LoginAuthorizeFragmentDoc}`;
 export type LoginMutationFn = Apollo.MutationFunction<LoginMutation, LoginMutationVariables>;
 
 /**
@@ -4270,9 +4382,7 @@ export type LoginMutationResult = Apollo.MutationResult<LoginMutation>;
 export type LoginMutationOptions = Apollo.BaseMutationOptions<LoginMutation, LoginMutationVariables>;
 export const LogoutDocument = gql`
     mutation Logout {
-  logout {
-    success
-  }
+  logout
 }
     `;
 export type LogoutMutationFn = Apollo.MutationFunction<LogoutMutation, LogoutMutationVariables>;
@@ -4301,10 +4411,8 @@ export type LogoutMutationHookResult = ReturnType<typeof useLogoutMutation>;
 export type LogoutMutationResult = Apollo.MutationResult<LogoutMutation>;
 export type LogoutMutationOptions = Apollo.BaseMutationOptions<LogoutMutation, LogoutMutationVariables>;
 export const RefundPaymentDocument = gql`
-    mutation RefundPayment($paymentId: ID!) {
-  refundPayment(paymentId: $paymentId) {
-    deleted
-  }
+    mutation RefundPayment($id: ID!) {
+  refundPayment(id: $id)
 }
     `;
 export type RefundPaymentMutationFn = Apollo.MutationFunction<RefundPaymentMutation, RefundPaymentMutationVariables>;
@@ -4322,7 +4430,7 @@ export type RefundPaymentMutationFn = Apollo.MutationFunction<RefundPaymentMutat
  * @example
  * const [refundPaymentMutation, { data, loading, error }] = useRefundPaymentMutation({
  *   variables: {
- *      paymentId: // value for 'paymentId'
+ *      id: // value for 'id'
  *   },
  * });
  */
@@ -4335,9 +4443,7 @@ export type RefundPaymentMutationResult = Apollo.MutationResult<RefundPaymentMut
 export type RefundPaymentMutationOptions = Apollo.BaseMutationOptions<RefundPaymentMutation, RefundPaymentMutationVariables>;
 export const SendForgotPasswordLinkDocument = gql`
     mutation SendForgotPasswordLink($email: Email!) {
-  sendForgotPasswordLink(email: $email) {
-    success
-  }
+  sendForgotPasswordLink(email: $email)
 }
     `;
 export type SendForgotPasswordLinkMutationFn = Apollo.MutationFunction<SendForgotPasswordLinkMutation, SendForgotPasswordLinkMutationVariables>;
@@ -4436,14 +4542,205 @@ export function useSignUpMutation(baseOptions?: Apollo.MutationHookOptions<SignU
 export type SignUpMutationHookResult = ReturnType<typeof useSignUpMutation>;
 export type SignUpMutationResult = Apollo.MutationResult<SignUpMutation>;
 export type SignUpMutationOptions = Apollo.BaseMutationOptions<SignUpMutation, SignUpMutationVariables>;
+export const UpdateBeachBarDocument = gql`
+    mutation UpdateBeachBar($id: ID!, $name: String, $description: String, $thumbnailUrl: URL, $contactPhoneNumber: String, $hidePhoneNumber: Boolean, $zeroCartTotal: Boolean, $isActive: Boolean, $displayRegardlessCapacity: Boolean, $categoryId: ID, $openingTimeId: ID, $closingTimeId: ID) {
+  updateBeachBar(
+    id: $id
+    name: $name
+    description: $description
+    thumbnailUrl: $thumbnailUrl
+    contactPhoneNumber: $contactPhoneNumber
+    hidePhoneNumber: $hidePhoneNumber
+    zeroCartTotal: $zeroCartTotal
+    isActive: $isActive
+    displayRegardlessCapacity: $displayRegardlessCapacity
+    categoryId: $categoryId
+    openingTimeId: $openingTimeId
+    closingTimeId: $closingTimeId
+  ) {
+    ...BeachBarBase
+  }
+}
+    ${BeachBarBaseFragmentDoc}`;
+export type UpdateBeachBarMutationFn = Apollo.MutationFunction<UpdateBeachBarMutation, UpdateBeachBarMutationVariables>;
+
+/**
+ * __useUpdateBeachBarMutation__
+ *
+ * To run a mutation, you first call `useUpdateBeachBarMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateBeachBarMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateBeachBarMutation, { data, loading, error }] = useUpdateBeachBarMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      name: // value for 'name'
+ *      description: // value for 'description'
+ *      thumbnailUrl: // value for 'thumbnailUrl'
+ *      contactPhoneNumber: // value for 'contactPhoneNumber'
+ *      hidePhoneNumber: // value for 'hidePhoneNumber'
+ *      zeroCartTotal: // value for 'zeroCartTotal'
+ *      isActive: // value for 'isActive'
+ *      displayRegardlessCapacity: // value for 'displayRegardlessCapacity'
+ *      categoryId: // value for 'categoryId'
+ *      openingTimeId: // value for 'openingTimeId'
+ *      closingTimeId: // value for 'closingTimeId'
+ *   },
+ * });
+ */
+export function useUpdateBeachBarMutation(baseOptions?: Apollo.MutationHookOptions<UpdateBeachBarMutation, UpdateBeachBarMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateBeachBarMutation, UpdateBeachBarMutationVariables>(UpdateBeachBarDocument, options);
+      }
+export type UpdateBeachBarMutationHookResult = ReturnType<typeof useUpdateBeachBarMutation>;
+export type UpdateBeachBarMutationResult = Apollo.MutationResult<UpdateBeachBarMutation>;
+export type UpdateBeachBarMutationOptions = Apollo.BaseMutationOptions<UpdateBeachBarMutation, UpdateBeachBarMutationVariables>;
+export const UpdateBeachBarFeatureDocument = gql`
+    mutation UpdateBeachBarFeature($id: ID!, $quantity: Int = 1, $description: String) {
+  updateBeachBarFeature(id: $id, quantity: $quantity, description: $description) {
+    ...FeatureBase
+  }
+}
+    ${FeatureBaseFragmentDoc}`;
+export type UpdateBeachBarFeatureMutationFn = Apollo.MutationFunction<UpdateBeachBarFeatureMutation, UpdateBeachBarFeatureMutationVariables>;
+
+/**
+ * __useUpdateBeachBarFeatureMutation__
+ *
+ * To run a mutation, you first call `useUpdateBeachBarFeatureMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateBeachBarFeatureMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateBeachBarFeatureMutation, { data, loading, error }] = useUpdateBeachBarFeatureMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      quantity: // value for 'quantity'
+ *      description: // value for 'description'
+ *   },
+ * });
+ */
+export function useUpdateBeachBarFeatureMutation(baseOptions?: Apollo.MutationHookOptions<UpdateBeachBarFeatureMutation, UpdateBeachBarFeatureMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateBeachBarFeatureMutation, UpdateBeachBarFeatureMutationVariables>(UpdateBeachBarFeatureDocument, options);
+      }
+export type UpdateBeachBarFeatureMutationHookResult = ReturnType<typeof useUpdateBeachBarFeatureMutation>;
+export type UpdateBeachBarFeatureMutationResult = Apollo.MutationResult<UpdateBeachBarFeatureMutation>;
+export type UpdateBeachBarFeatureMutationOptions = Apollo.BaseMutationOptions<UpdateBeachBarFeatureMutation, UpdateBeachBarFeatureMutationVariables>;
+export const UpdateBeachBarImgUrlDocument = gql`
+    mutation UpdateBeachBarImgUrl($id: ID!, $description: String) {
+  updateBeachBaImgUrl(id: $id, description: $description) {
+    ...BeachBarImgUrlBase
+  }
+}
+    ${BeachBarImgUrlBaseFragmentDoc}`;
+export type UpdateBeachBarImgUrlMutationFn = Apollo.MutationFunction<UpdateBeachBarImgUrlMutation, UpdateBeachBarImgUrlMutationVariables>;
+
+/**
+ * __useUpdateBeachBarImgUrlMutation__
+ *
+ * To run a mutation, you first call `useUpdateBeachBarImgUrlMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateBeachBarImgUrlMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateBeachBarImgUrlMutation, { data, loading, error }] = useUpdateBeachBarImgUrlMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      description: // value for 'description'
+ *   },
+ * });
+ */
+export function useUpdateBeachBarImgUrlMutation(baseOptions?: Apollo.MutationHookOptions<UpdateBeachBarImgUrlMutation, UpdateBeachBarImgUrlMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateBeachBarImgUrlMutation, UpdateBeachBarImgUrlMutationVariables>(UpdateBeachBarImgUrlDocument, options);
+      }
+export type UpdateBeachBarImgUrlMutationHookResult = ReturnType<typeof useUpdateBeachBarImgUrlMutation>;
+export type UpdateBeachBarImgUrlMutationResult = Apollo.MutationResult<UpdateBeachBarImgUrlMutation>;
+export type UpdateBeachBarImgUrlMutationOptions = Apollo.BaseMutationOptions<UpdateBeachBarImgUrlMutation, UpdateBeachBarImgUrlMutationVariables>;
+export const UpdateCartFoodDocument = gql`
+    mutation UpdateCartFood($id: ID!, $quantity: Int!) {
+  updateCartFood(id: $id, quantity: $quantity) {
+    ...CartFoodWithCart
+  }
+}
+    ${CartFoodWithCartFragmentDoc}`;
+export type UpdateCartFoodMutationFn = Apollo.MutationFunction<UpdateCartFoodMutation, UpdateCartFoodMutationVariables>;
+
+/**
+ * __useUpdateCartFoodMutation__
+ *
+ * To run a mutation, you first call `useUpdateCartFoodMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateCartFoodMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateCartFoodMutation, { data, loading, error }] = useUpdateCartFoodMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      quantity: // value for 'quantity'
+ *   },
+ * });
+ */
+export function useUpdateCartFoodMutation(baseOptions?: Apollo.MutationHookOptions<UpdateCartFoodMutation, UpdateCartFoodMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateCartFoodMutation, UpdateCartFoodMutationVariables>(UpdateCartFoodDocument, options);
+      }
+export type UpdateCartFoodMutationHookResult = ReturnType<typeof useUpdateCartFoodMutation>;
+export type UpdateCartFoodMutationResult = Apollo.MutationResult<UpdateCartFoodMutation>;
+export type UpdateCartFoodMutationOptions = Apollo.BaseMutationOptions<UpdateCartFoodMutation, UpdateCartFoodMutationVariables>;
+export const UpdateCartNoteDocument = gql`
+    mutation UpdateCartNote($id: ID!, $body: String!) {
+  updateCartNote(id: $id, body: $body) {
+    ...CartNoteBase
+  }
+}
+    ${CartNoteBaseFragmentDoc}`;
+export type UpdateCartNoteMutationFn = Apollo.MutationFunction<UpdateCartNoteMutation, UpdateCartNoteMutationVariables>;
+
+/**
+ * __useUpdateCartNoteMutation__
+ *
+ * To run a mutation, you first call `useUpdateCartNoteMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateCartNoteMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateCartNoteMutation, { data, loading, error }] = useUpdateCartNoteMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      body: // value for 'body'
+ *   },
+ * });
+ */
+export function useUpdateCartNoteMutation(baseOptions?: Apollo.MutationHookOptions<UpdateCartNoteMutation, UpdateCartNoteMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateCartNoteMutation, UpdateCartNoteMutationVariables>(UpdateCartNoteDocument, options);
+      }
+export type UpdateCartNoteMutationHookResult = ReturnType<typeof useUpdateCartNoteMutation>;
+export type UpdateCartNoteMutationResult = Apollo.MutationResult<UpdateCartNoteMutation>;
+export type UpdateCartNoteMutationOptions = Apollo.BaseMutationOptions<UpdateCartNoteMutation, UpdateCartNoteMutationVariables>;
 export const UpdateCartProductDocument = gql`
     mutation UpdateCartProduct($id: ID!, $quantity: Int) {
   updateCartProduct(id: $id, quantity: $quantity) {
-    updated
-    product {
-      id
-      quantity
-    }
+    id
+    quantity
   }
 }
     `;
@@ -4483,19 +4780,16 @@ export const UpdateCustomerPaymentMethodDocument = gql`
     cardholderName: $cardholderName
     isDefault: $isDefault
   ) {
-    card {
+    id
+    expMonth
+    expYear
+    cardholderName
+    isDefault
+    last4
+    brand {
       id
-      expMonth
-      expYear
-      cardholderName
-      isDefault
-      last4
-      brand {
-        id
-        name
-      }
+      name
     }
-    updated
   }
 }
     `;
@@ -4532,7 +4826,12 @@ export type UpdateCustomerPaymentMethodMutationOptions = Apollo.BaseMutationOpti
 export const UpdateFavouriteBeachBarDocument = gql`
     mutation UpdateFavouriteBeachBar($slug: ID!) {
   updateFavouriteBeachBar(slug: $slug) {
-    updated
+    id
+    beachBar {
+      id
+      name
+      thumbnailUrl
+    }
   }
 }
     `;
@@ -4562,54 +4861,176 @@ export function useUpdateFavouriteBeachBarMutation(baseOptions?: Apollo.Mutation
 export type UpdateFavouriteBeachBarMutationHookResult = ReturnType<typeof useUpdateFavouriteBeachBarMutation>;
 export type UpdateFavouriteBeachBarMutationResult = Apollo.MutationResult<UpdateFavouriteBeachBarMutation>;
 export type UpdateFavouriteBeachBarMutationOptions = Apollo.BaseMutationOptions<UpdateFavouriteBeachBarMutation, UpdateFavouriteBeachBarMutationVariables>;
+export const UpdateFoodDocument = gql`
+    mutation UpdateFood($id: ID!, $name: String, $categoryId: ID, $ingredients: String, $price: Float, $maxQuantity: Int) {
+  updateFood(
+    id: $id
+    name: $name
+    categoryId: $categoryId
+    ingredients: $ingredients
+    price: $price
+    maxQuantity: $maxQuantity
+  ) {
+    ...FoodDetails
+  }
+}
+    ${FoodDetailsFragmentDoc}`;
+export type UpdateFoodMutationFn = Apollo.MutationFunction<UpdateFoodMutation, UpdateFoodMutationVariables>;
+
+/**
+ * __useUpdateFoodMutation__
+ *
+ * To run a mutation, you first call `useUpdateFoodMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateFoodMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateFoodMutation, { data, loading, error }] = useUpdateFoodMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      name: // value for 'name'
+ *      categoryId: // value for 'categoryId'
+ *      ingredients: // value for 'ingredients'
+ *      price: // value for 'price'
+ *      maxQuantity: // value for 'maxQuantity'
+ *   },
+ * });
+ */
+export function useUpdateFoodMutation(baseOptions?: Apollo.MutationHookOptions<UpdateFoodMutation, UpdateFoodMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateFoodMutation, UpdateFoodMutationVariables>(UpdateFoodDocument, options);
+      }
+export type UpdateFoodMutationHookResult = ReturnType<typeof useUpdateFoodMutation>;
+export type UpdateFoodMutationResult = Apollo.MutationResult<UpdateFoodMutation>;
+export type UpdateFoodMutationOptions = Apollo.BaseMutationOptions<UpdateFoodMutation, UpdateFoodMutationVariables>;
+export const UpdateProductDocument = gql`
+    mutation UpdateProduct($productId: ID!, $name: String, $description: String, $categoryId: ID, $price: Float, $maxPeople: Int, $minFoodSpending: Float, $imgUrl: URL) {
+  updateProduct(
+    productId: $productId
+    name: $name
+    description: $description
+    categoryId: $categoryId
+    price: $price
+    maxPeople: $maxPeople
+    minFoodSpending: $minFoodSpending
+    imgUrl: $imgUrl
+  ) {
+    ...ProductBase
+  }
+}
+    ${ProductBaseFragmentDoc}`;
+export type UpdateProductMutationFn = Apollo.MutationFunction<UpdateProductMutation, UpdateProductMutationVariables>;
+
+/**
+ * __useUpdateProductMutation__
+ *
+ * To run a mutation, you first call `useUpdateProductMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateProductMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateProductMutation, { data, loading, error }] = useUpdateProductMutation({
+ *   variables: {
+ *      productId: // value for 'productId'
+ *      name: // value for 'name'
+ *      description: // value for 'description'
+ *      categoryId: // value for 'categoryId'
+ *      price: // value for 'price'
+ *      maxPeople: // value for 'maxPeople'
+ *      minFoodSpending: // value for 'minFoodSpending'
+ *      imgUrl: // value for 'imgUrl'
+ *   },
+ * });
+ */
+export function useUpdateProductMutation(baseOptions?: Apollo.MutationHookOptions<UpdateProductMutation, UpdateProductMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateProductMutation, UpdateProductMutationVariables>(UpdateProductDocument, options);
+      }
+export type UpdateProductMutationHookResult = ReturnType<typeof useUpdateProductMutation>;
+export type UpdateProductMutationResult = Apollo.MutationResult<UpdateProductMutation>;
+export type UpdateProductMutationOptions = Apollo.BaseMutationOptions<UpdateProductMutation, UpdateProductMutationVariables>;
+export const UpdateProductReservationLimitDocument = gql`
+    mutation UpdateProductReservationLimit($id: ID!, $limit: Int!) {
+  updateProductReservationLimit(id: $id, limit: $limit) {
+    ...ProductReservationLimitBase
+  }
+}
+    ${ProductReservationLimitBaseFragmentDoc}`;
+export type UpdateProductReservationLimitMutationFn = Apollo.MutationFunction<UpdateProductReservationLimitMutation, UpdateProductReservationLimitMutationVariables>;
+
+/**
+ * __useUpdateProductReservationLimitMutation__
+ *
+ * To run a mutation, you first call `useUpdateProductReservationLimitMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateProductReservationLimitMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateProductReservationLimitMutation, { data, loading, error }] = useUpdateProductReservationLimitMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      limit: // value for 'limit'
+ *   },
+ * });
+ */
+export function useUpdateProductReservationLimitMutation(baseOptions?: Apollo.MutationHookOptions<UpdateProductReservationLimitMutation, UpdateProductReservationLimitMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateProductReservationLimitMutation, UpdateProductReservationLimitMutationVariables>(UpdateProductReservationLimitDocument, options);
+      }
+export type UpdateProductReservationLimitMutationHookResult = ReturnType<typeof useUpdateProductReservationLimitMutation>;
+export type UpdateProductReservationLimitMutationResult = Apollo.MutationResult<UpdateProductReservationLimitMutation>;
+export type UpdateProductReservationLimitMutationOptions = Apollo.BaseMutationOptions<UpdateProductReservationLimitMutation, UpdateProductReservationLimitMutationVariables>;
 export const UpdateReviewDocument = gql`
-    mutation UpdateReview($reviewId: ID!, $ratingValue: Int, $visitTypeId: ID, $monthTimeId: ID, $positiveComment: String, $negativeComment: String, $review: String) {
+    mutation UpdateReview($id: ID!, $ratingValue: Int, $visitTypeId: ID, $monthId: ID, $positiveComment: String, $negativeComment: String, $body: String, $answer: String) {
   updateReview(
-    reviewId: $reviewId
+    id: $id
     ratingValue: $ratingValue
     visitTypeId: $visitTypeId
-    monthTimeId: $monthTimeId
+    monthId: $monthId
     positiveComment: $positiveComment
     negativeComment: $negativeComment
-    review: $review
+    body: $body
+    answer: $answer
   ) {
-    review {
+    id
+    ratingValue
+    positiveComment
+    negativeComment
+    body
+    answer
+    updatedAt
+    timestamp
+    votes {
       id
-      ratingValue
-      positiveComment
-      negativeComment
-      review
-      updatedAt
-      timestamp
-      votes {
+      user {
         id
-        user {
-          id
-        }
-        type {
-          id
-          value
-        }
       }
-      answer {
-        id
-        body
-      }
-      beachBar {
-        id
-        name
-        formattedLocation
-      }
-      visitType {
-        id
-        name
-      }
-      month {
+      type {
         id
         value
       }
     }
-    updated
+    beachBar {
+      id
+      name
+    }
+    visitType {
+      id
+      name
+    }
+    month {
+      id
+      value
+    }
   }
 }
     `;
@@ -4628,13 +5049,14 @@ export type UpdateReviewMutationFn = Apollo.MutationFunction<UpdateReviewMutatio
  * @example
  * const [updateReviewMutation, { data, loading, error }] = useUpdateReviewMutation({
  *   variables: {
- *      reviewId: // value for 'reviewId'
+ *      id: // value for 'id'
  *      ratingValue: // value for 'ratingValue'
  *      visitTypeId: // value for 'visitTypeId'
- *      monthTimeId: // value for 'monthTimeId'
+ *      monthId: // value for 'monthId'
  *      positiveComment: // value for 'positiveComment'
  *      negativeComment: // value for 'negativeComment'
- *      review: // value for 'review'
+ *      body: // value for 'body'
+ *      answer: // value for 'answer'
  *   },
  * });
  */
@@ -4648,21 +5070,18 @@ export type UpdateReviewMutationOptions = Apollo.BaseMutationOptions<UpdateRevie
 export const UpdateReviewVoteDocument = gql`
     mutation UpdateReviewVote($reviewId: ID!, $upvote: Boolean, $downvote: Boolean) {
   updateReviewVote(reviewId: $reviewId, upvote: $upvote, downvote: $downvote) {
-    review {
+    id
+    ratingValue
+    votes {
       id
-      ratingValue
-      votes {
+      user {
         id
-        user {
-          id
-        }
-        type {
-          id
-          value
-        }
+      }
+      type {
+        id
+        value
       }
     }
-    updated
   }
 }
     `;
@@ -4711,34 +5130,35 @@ export const UpdateUserDocument = gql`
     zipCode: $zipCode
     trackHistory: $trackHistory
   ) {
-    updated
-    user {
+    id
+    email
+    firstName
+    lastName
+    account {
       id
-      email
-      firstName
-      lastName
-      account {
-        id
-        honorificTitle
-        birthday
-        age
-        address
-        zipCode
-        trackHistory
-        imgUrl
-        city
-        phoneNumber
-        telCountry {
+      honorificTitle
+      birthday
+      age
+      address
+      zipCode
+      trackHistory
+      imgUrl
+      city
+      phoneNumber
+      telCountry {
+        ...CountryBase
+      }
+      country {
+        ...CountryBase
+        currency {
           id
-        }
-        country {
-          id
+          name
         }
       }
     }
   }
 }
-    `;
+    ${CountryBaseFragmentDoc}`;
 export type UpdateUserMutationFn = Apollo.MutationFunction<UpdateUserMutation, UpdateUserMutationVariables>;
 
 /**
@@ -4943,12 +5363,96 @@ export function useAuthorizeWithInstagramMutation(baseOptions?: Apollo.MutationH
 export type AuthorizeWithInstagramMutationHookResult = ReturnType<typeof useAuthorizeWithInstagramMutation>;
 export type AuthorizeWithInstagramMutationResult = Apollo.MutationResult<AuthorizeWithInstagramMutation>;
 export type AuthorizeWithInstagramMutationOptions = Apollo.BaseMutationOptions<AuthorizeWithInstagramMutation, AuthorizeWithInstagramMutationVariables>;
+export const AvailableHoursDocument = gql`
+    query AvailableHours($beachBarId: ID!, $date: Date!) {
+  availableHours(beachBarId: $beachBarId, date: $date) {
+    id
+    value
+    utcValue
+  }
+}
+    `;
+
+/**
+ * __useAvailableHoursQuery__
+ *
+ * To run a query within a React component, call `useAvailableHoursQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAvailableHoursQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAvailableHoursQuery({
+ *   variables: {
+ *      beachBarId: // value for 'beachBarId'
+ *      date: // value for 'date'
+ *   },
+ * });
+ */
+export function useAvailableHoursQuery(baseOptions: Apollo.QueryHookOptions<AvailableHoursQuery, AvailableHoursQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AvailableHoursQuery, AvailableHoursQueryVariables>(AvailableHoursDocument, options);
+      }
+export function useAvailableHoursLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AvailableHoursQuery, AvailableHoursQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AvailableHoursQuery, AvailableHoursQueryVariables>(AvailableHoursDocument, options);
+        }
+export type AvailableHoursQueryHookResult = ReturnType<typeof useAvailableHoursQuery>;
+export type AvailableHoursLazyQueryHookResult = ReturnType<typeof useAvailableHoursLazyQuery>;
+export type AvailableHoursQueryResult = Apollo.QueryResult<AvailableHoursQuery, AvailableHoursQueryVariables>;
+export const AvailableProductsDocument = gql`
+    query AvailableProducts($beachBarId: ID!, $availability: SearchInput) {
+  availableProducts(beachBarId: $beachBarId, availability: $availability) {
+    ...ProductBase
+  }
+}
+    ${ProductBaseFragmentDoc}`;
+
+/**
+ * __useAvailableProductsQuery__
+ *
+ * To run a query within a React component, call `useAvailableProductsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAvailableProductsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAvailableProductsQuery({
+ *   variables: {
+ *      beachBarId: // value for 'beachBarId'
+ *      availability: // value for 'availability'
+ *   },
+ * });
+ */
+export function useAvailableProductsQuery(baseOptions: Apollo.QueryHookOptions<AvailableProductsQuery, AvailableProductsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AvailableProductsQuery, AvailableProductsQueryVariables>(AvailableProductsDocument, options);
+      }
+export function useAvailableProductsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AvailableProductsQuery, AvailableProductsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AvailableProductsQuery, AvailableProductsQueryVariables>(AvailableProductsDocument, options);
+        }
+export type AvailableProductsQueryHookResult = ReturnType<typeof useAvailableProductsQuery>;
+export type AvailableProductsLazyQueryHookResult = ReturnType<typeof useAvailableProductsLazyQuery>;
+export type AvailableProductsQueryResult = Apollo.QueryResult<AvailableProductsQuery, AvailableProductsQueryVariables>;
 export const BeachBarDocument = gql`
-    query BeachBar($slug: String!, $userVisit: Boolean) {
-  beachBar(slug: $slug, userVisit: $userVisit) {
+    query BeachBar($slug: String = null, $id: ID = null, $userVisit: Boolean = true) {
+  beachBar(slug: $slug, id: $id, userVisit: $userVisit) {
     ...DetailsBeachBar
+    openingTime {
+      id
+      value
+      utcValue
+    }
+    closingTime {
+      id
+      value
+      utcValue
+    }
     reviews {
-      ...Review
+      ...BeachBarReviewBase
       payment {
         id
         timestamp
@@ -4960,18 +5464,26 @@ export const BeachBarDocument = gql`
       description
       timestamp
     }
-    defaultCurrency {
+    currency {
       id
       symbol
     }
+    features {
+      ...FeatureBase
+    }
     products {
-      ...BeachBarProduct
+      ...ProductBase
+    }
+    foods {
+      ...FoodDetails
     }
   }
 }
     ${DetailsBeachBarFragmentDoc}
-${ReviewFragmentDoc}
-${BeachBarProductFragmentDoc}`;
+${BeachBarReviewBaseFragmentDoc}
+${FeatureBaseFragmentDoc}
+${ProductBaseFragmentDoc}
+${FoodDetailsFragmentDoc}`;
 
 /**
  * __useBeachBarQuery__
@@ -4986,11 +5498,12 @@ ${BeachBarProductFragmentDoc}`;
  * const { data, loading, error } = useBeachBarQuery({
  *   variables: {
  *      slug: // value for 'slug'
+ *      id: // value for 'id'
  *      userVisit: // value for 'userVisit'
  *   },
  * });
  */
-export function useBeachBarQuery(baseOptions: Apollo.QueryHookOptions<BeachBarQuery, BeachBarQueryVariables>) {
+export function useBeachBarQuery(baseOptions?: Apollo.QueryHookOptions<BeachBarQuery, BeachBarQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<BeachBarQuery, BeachBarQueryVariables>(BeachBarDocument, options);
       }
@@ -5001,55 +5514,25 @@ export function useBeachBarLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<B
 export type BeachBarQueryHookResult = ReturnType<typeof useBeachBarQuery>;
 export type BeachBarLazyQueryHookResult = ReturnType<typeof useBeachBarLazyQuery>;
 export type BeachBarQueryResult = Apollo.QueryResult<BeachBarQuery, BeachBarQueryVariables>;
-export const BeachBarImgsDocument = gql`
-    query BeachBarImgs($slug: String!) {
-  beachBarImgs(slug: $slug) {
-    id
-    imgUrl
-    description
-    timestamp
-  }
-}
-    `;
-
-/**
- * __useBeachBarImgsQuery__
- *
- * To run a query within a React component, call `useBeachBarImgsQuery` and pass it any options that fit your needs.
- * When your component renders, `useBeachBarImgsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useBeachBarImgsQuery({
- *   variables: {
- *      slug: // value for 'slug'
- *   },
- * });
- */
-export function useBeachBarImgsQuery(baseOptions: Apollo.QueryHookOptions<BeachBarImgsQuery, BeachBarImgsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<BeachBarImgsQuery, BeachBarImgsQueryVariables>(BeachBarImgsDocument, options);
-      }
-export function useBeachBarImgsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<BeachBarImgsQuery, BeachBarImgsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<BeachBarImgsQuery, BeachBarImgsQueryVariables>(BeachBarImgsDocument, options);
-        }
-export type BeachBarImgsQueryHookResult = ReturnType<typeof useBeachBarImgsQuery>;
-export type BeachBarImgsLazyQueryHookResult = ReturnType<typeof useBeachBarImgsLazyQuery>;
-export type BeachBarImgsQueryResult = Apollo.QueryResult<BeachBarImgsQuery, BeachBarImgsQueryVariables>;
 export const CartDocument = gql`
     query Cart($cartId: ID) {
   cart(cartId: $cartId) {
     id
     total
     products {
-      ...BasicCartProduct
+      ...CartProductBase
+    }
+    foods {
+      ...CartFoodBase
+    }
+    notes {
+      ...CartNoteBase
     }
   }
 }
-    ${BasicCartProductFragmentDoc}`;
+    ${CartProductBaseFragmentDoc}
+${CartFoodBaseFragmentDoc}
+${CartNoteBaseFragmentDoc}`;
 
 /**
  * __useCartQuery__
@@ -5079,8 +5562,8 @@ export type CartQueryHookResult = ReturnType<typeof useCartQuery>;
 export type CartLazyQueryHookResult = ReturnType<typeof useCartLazyQuery>;
 export type CartQueryResult = Apollo.QueryResult<CartQuery, CartQueryVariables>;
 export const CartEntryFeesDocument = gql`
-    query CartEntryFees($cartId: ID!, $totalPeople: Int!) {
-  cartEntryFees(cartId: $cartId, totalPeople: $totalPeople)
+    query CartEntryFees($cartId: ID!, $beachBarId: ID = null) {
+  cartEntryFees(cartId: $cartId, beachBarId: $beachBarId)
 }
     `;
 
@@ -5097,7 +5580,7 @@ export const CartEntryFeesDocument = gql`
  * const { data, loading, error } = useCartEntryFeesQuery({
  *   variables: {
  *      cartId: // value for 'cartId'
- *      totalPeople: // value for 'totalPeople'
+ *      beachBarId: // value for 'beachBarId'
  *   },
  * });
  */
@@ -5112,19 +5595,68 @@ export function useCartEntryFeesLazyQuery(baseOptions?: Apollo.LazyQueryHookOpti
 export type CartEntryFeesQueryHookResult = ReturnType<typeof useCartEntryFeesQuery>;
 export type CartEntryFeesLazyQueryHookResult = ReturnType<typeof useCartEntryFeesLazyQuery>;
 export type CartEntryFeesQueryResult = Apollo.QueryResult<CartEntryFeesQuery, CartEntryFeesQueryVariables>;
+export const CitiesAndRegionsDocument = gql`
+    query CitiesAndRegions {
+  citiesAndRegions {
+    cities {
+      id
+      name
+      country {
+        ...CountryBase
+      }
+    }
+    regions {
+      id
+      name
+      country {
+        ...CountryBase
+      }
+      city {
+        id
+        name
+      }
+    }
+  }
+}
+    ${CountryBaseFragmentDoc}`;
+
+/**
+ * __useCitiesAndRegionsQuery__
+ *
+ * To run a query within a React component, call `useCitiesAndRegionsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCitiesAndRegionsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCitiesAndRegionsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useCitiesAndRegionsQuery(baseOptions?: Apollo.QueryHookOptions<CitiesAndRegionsQuery, CitiesAndRegionsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CitiesAndRegionsQuery, CitiesAndRegionsQueryVariables>(CitiesAndRegionsDocument, options);
+      }
+export function useCitiesAndRegionsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CitiesAndRegionsQuery, CitiesAndRegionsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CitiesAndRegionsQuery, CitiesAndRegionsQueryVariables>(CitiesAndRegionsDocument, options);
+        }
+export type CitiesAndRegionsQueryHookResult = ReturnType<typeof useCitiesAndRegionsQuery>;
+export type CitiesAndRegionsLazyQueryHookResult = ReturnType<typeof useCitiesAndRegionsLazyQuery>;
+export type CitiesAndRegionsQueryResult = Apollo.QueryResult<CitiesAndRegionsQuery, CitiesAndRegionsQueryVariables>;
 export const CustomerDocument = gql`
     query Customer($email: Email, $phoneNumber: String, $countryId: ID) {
   customer(email: $email, phoneNumber: $phoneNumber, countryId: $countryId) {
-    customer {
+    id
+    email
+    user {
       id
       email
-      user {
-        id
-        email
-      }
-      cards {
-        ...BasicCard
-      }
+    }
+    cards {
+      ...BasicCard
     }
   }
 }
@@ -5193,6 +5725,285 @@ export function useCustomerPaymentMethodsLazyQuery(baseOptions?: Apollo.LazyQuer
 export type CustomerPaymentMethodsQueryHookResult = ReturnType<typeof useCustomerPaymentMethodsQuery>;
 export type CustomerPaymentMethodsLazyQueryHookResult = ReturnType<typeof useCustomerPaymentMethodsLazyQuery>;
 export type CustomerPaymentMethodsQueryResult = Apollo.QueryResult<CustomerPaymentMethodsQuery, CustomerPaymentMethodsQueryVariables>;
+export const DashboardBillingDocument = gql`
+    query DashboardBilling($beachBarId: ID!, $dates: DashboardDatesArg = null) {
+  dashboardBilling(beachBarId: $beachBarId, dates: $dates) {
+    avgProducts {
+      ...DashboardDateValue
+    }
+    avgFoods {
+      ...DashboardDateValue
+    }
+    products {
+      revenue {
+        ...DashboardDateValue
+      }
+      mostCommon {
+        timesBooked
+        product {
+          id
+          name
+        }
+      }
+    }
+    foods {
+      revenue {
+        ...DashboardDateValue
+      }
+      mostCommon {
+        timesPurchased
+        food {
+          id
+          name
+        }
+      }
+    }
+    refundedPayments {
+      date
+      payments {
+        id
+        refCode
+        isRefunded
+      }
+    }
+    customersCountries {
+      value
+      country {
+        ...CountryBase
+      }
+    }
+  }
+}
+    ${DashboardDateValueFragmentDoc}
+${CountryBaseFragmentDoc}`;
+
+/**
+ * __useDashboardBillingQuery__
+ *
+ * To run a query within a React component, call `useDashboardBillingQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDashboardBillingQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDashboardBillingQuery({
+ *   variables: {
+ *      beachBarId: // value for 'beachBarId'
+ *      dates: // value for 'dates'
+ *   },
+ * });
+ */
+export function useDashboardBillingQuery(baseOptions: Apollo.QueryHookOptions<DashboardBillingQuery, DashboardBillingQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DashboardBillingQuery, DashboardBillingQueryVariables>(DashboardBillingDocument, options);
+      }
+export function useDashboardBillingLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DashboardBillingQuery, DashboardBillingQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DashboardBillingQuery, DashboardBillingQueryVariables>(DashboardBillingDocument, options);
+        }
+export type DashboardBillingQueryHookResult = ReturnType<typeof useDashboardBillingQuery>;
+export type DashboardBillingLazyQueryHookResult = ReturnType<typeof useDashboardBillingLazyQuery>;
+export type DashboardBillingQueryResult = Apollo.QueryResult<DashboardBillingQuery, DashboardBillingQueryVariables>;
+export const DashboardBookingsDocument = gql`
+    query DashboardBookings($beachBarId: ID!, $dates: DashboardDatesArg = null) {
+  dashboardBookings(beachBarId: $beachBarId, dates: $dates) {
+    mostActive {
+      hour
+      weekDay
+    }
+    capacity {
+      arr {
+        date
+        percentage
+      }
+      totalCustomers {
+        ...DashboardDateValue
+      }
+      totalHourCustomers {
+        ...DashboardDateValue
+      }
+      maxCapacity {
+        date
+        limitPeople
+        availableProducts
+      }
+    }
+    bookings {
+      id
+      refCode
+      isRefunded
+      timestamp
+      deletedAt
+      total(beachBarId: $beachBarId)
+      status {
+        id
+        name
+      }
+      cart {
+        id
+        notes(beachBarId: $beachBarId) {
+          id
+          body
+          beachBar {
+            id
+          }
+        }
+        products(beachBarId: $beachBarId) {
+          id
+          date
+          quantity
+          people
+          total
+          startTime {
+            ...HourValue
+          }
+          endTime {
+            ...HourValue
+          }
+          product {
+            id
+            name
+            beachBar {
+              id
+            }
+          }
+        }
+        foods(beachBarId: $beachBarId) {
+          id
+          date
+          quantity
+          total
+          food {
+            id
+            name
+            beachBar {
+              id
+            }
+          }
+        }
+      }
+      card {
+        id
+        customer {
+          id
+          user {
+            id
+            fullName
+          }
+        }
+        country {
+          id
+          currency {
+            id
+            name
+            symbol
+          }
+        }
+      }
+    }
+  }
+}
+    ${DashboardDateValueFragmentDoc}
+${HourValueFragmentDoc}`;
+
+/**
+ * __useDashboardBookingsQuery__
+ *
+ * To run a query within a React component, call `useDashboardBookingsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDashboardBookingsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDashboardBookingsQuery({
+ *   variables: {
+ *      beachBarId: // value for 'beachBarId'
+ *      dates: // value for 'dates'
+ *   },
+ * });
+ */
+export function useDashboardBookingsQuery(baseOptions: Apollo.QueryHookOptions<DashboardBookingsQuery, DashboardBookingsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DashboardBookingsQuery, DashboardBookingsQueryVariables>(DashboardBookingsDocument, options);
+      }
+export function useDashboardBookingsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DashboardBookingsQuery, DashboardBookingsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DashboardBookingsQuery, DashboardBookingsQueryVariables>(DashboardBookingsDocument, options);
+        }
+export type DashboardBookingsQueryHookResult = ReturnType<typeof useDashboardBookingsQuery>;
+export type DashboardBookingsLazyQueryHookResult = ReturnType<typeof useDashboardBookingsLazyQuery>;
+export type DashboardBookingsQueryResult = Apollo.QueryResult<DashboardBookingsQuery, DashboardBookingsQueryVariables>;
+export const DashboardHomePageDocument = gql`
+    query DashboardHomePage($beachBarId: ID!, $dates: DashboardDatesArg = null) {
+  dashboardHomePage(beachBarId: $beachBarId, dates: $dates) {
+    balance {
+      revenue
+      grossVolume {
+        ...DashboardDateValue
+      }
+      successfulPayments {
+        id
+      }
+    }
+    capacity {
+      percentage
+      totalMaxPeopleCapacity
+      totalHourCustomers
+      reservedProducts
+      availableProducts
+    }
+    totalCustomers {
+      ...DashboardDateValue
+    }
+    grossVolume {
+      ...DashboardDateValue
+    }
+    avgSpendPerPerson {
+      ...DashboardDateValue
+    }
+    avgRating {
+      ...DashboardDateValue
+    }
+    newCustomers {
+      date
+      customers {
+        id
+      }
+    }
+  }
+}
+    ${DashboardDateValueFragmentDoc}`;
+
+/**
+ * __useDashboardHomePageQuery__
+ *
+ * To run a query within a React component, call `useDashboardHomePageQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDashboardHomePageQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDashboardHomePageQuery({
+ *   variables: {
+ *      beachBarId: // value for 'beachBarId'
+ *      dates: // value for 'dates'
+ *   },
+ * });
+ */
+export function useDashboardHomePageQuery(baseOptions: Apollo.QueryHookOptions<DashboardHomePageQuery, DashboardHomePageQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DashboardHomePageQuery, DashboardHomePageQueryVariables>(DashboardHomePageDocument, options);
+      }
+export function useDashboardHomePageLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DashboardHomePageQuery, DashboardHomePageQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DashboardHomePageQuery, DashboardHomePageQueryVariables>(DashboardHomePageDocument, options);
+        }
+export type DashboardHomePageQueryHookResult = ReturnType<typeof useDashboardHomePageQuery>;
+export type DashboardHomePageLazyQueryHookResult = ReturnType<typeof useDashboardHomePageLazyQuery>;
+export type DashboardHomePageQueryResult = Apollo.QueryResult<DashboardHomePageQuery, DashboardHomePageQueryVariables>;
 export const FavouriteBeachBarsDocument = gql`
     query FavouriteBeachBars($limit: Int) {
   favouriteBeachBars(limit: $limit) {
@@ -5201,7 +6012,6 @@ export const FavouriteBeachBarsDocument = gql`
       name
       slug
       thumbnailUrl
-      formattedLocation
     }
   }
 }
@@ -5237,15 +6047,11 @@ export type FavouriteBeachBarsQueryResult = Apollo.QueryResult<FavouriteBeachBar
 export const GetUserFavouriteBeachBarsDocument = gql`
     query GetUserFavouriteBeachBars {
   favouriteBeachBars {
+    id
     beachBar {
       id
       name
-      thumbnailUrl
-      location {
-        city {
-          name
-        }
-      }
+      slug
     }
   }
 }
@@ -5277,6 +6083,76 @@ export function useGetUserFavouriteBeachBarsLazyQuery(baseOptions?: Apollo.LazyQ
 export type GetUserFavouriteBeachBarsQueryHookResult = ReturnType<typeof useGetUserFavouriteBeachBarsQuery>;
 export type GetUserFavouriteBeachBarsLazyQueryHookResult = ReturnType<typeof useGetUserFavouriteBeachBarsLazyQuery>;
 export type GetUserFavouriteBeachBarsQueryResult = Apollo.QueryResult<GetUserFavouriteBeachBarsQuery, GetUserFavouriteBeachBarsQueryVariables>;
+export const FoodDocument = gql`
+    query Food($id: ID!) {
+  food(id: $id) {
+    ...FoodDetails
+  }
+}
+    ${FoodDetailsFragmentDoc}`;
+
+/**
+ * __useFoodQuery__
+ *
+ * To run a query within a React component, call `useFoodQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFoodQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFoodQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useFoodQuery(baseOptions: Apollo.QueryHookOptions<FoodQuery, FoodQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FoodQuery, FoodQueryVariables>(FoodDocument, options);
+      }
+export function useFoodLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FoodQuery, FoodQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FoodQuery, FoodQueryVariables>(FoodDocument, options);
+        }
+export type FoodQueryHookResult = ReturnType<typeof useFoodQuery>;
+export type FoodLazyQueryHookResult = ReturnType<typeof useFoodLazyQuery>;
+export type FoodQueryResult = Apollo.QueryResult<FoodQuery, FoodQueryVariables>;
+export const FoodsDocument = gql`
+    query Foods($beachBarId: ID!) {
+  foods(beachBarId: $beachBarId) {
+    ...FoodDetails
+  }
+}
+    ${FoodDetailsFragmentDoc}`;
+
+/**
+ * __useFoodsQuery__
+ *
+ * To run a query within a React component, call `useFoodsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFoodsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFoodsQuery({
+ *   variables: {
+ *      beachBarId: // value for 'beachBarId'
+ *   },
+ * });
+ */
+export function useFoodsQuery(baseOptions: Apollo.QueryHookOptions<FoodsQuery, FoodsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FoodsQuery, FoodsQueryVariables>(FoodsDocument, options);
+      }
+export function useFoodsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FoodsQuery, FoodsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FoodsQuery, FoodsQueryVariables>(FoodsDocument, options);
+        }
+export type FoodsQueryHookResult = ReturnType<typeof useFoodsQuery>;
+export type FoodsLazyQueryHookResult = ReturnType<typeof useFoodsLazyQuery>;
+export type FoodsQueryResult = Apollo.QueryResult<FoodsQuery, FoodsQueryVariables>;
 export const GetPersonalizedBeachBarsDocument = gql`
     query GetPersonalizedBeachBars {
   getPersonalizedBeachBars {
@@ -5284,10 +6160,10 @@ export const GetPersonalizedBeachBarsDocument = gql`
     name
     slug
     thumbnailUrl
-    formattedLocation
     location {
       latitude
       longitude
+      formattedLocation
       city {
         name
       }
@@ -5345,12 +6221,10 @@ export const MeDocument = gql`
       trackHistory
       phoneNumber
       telCountry {
-        id
-        name
+        ...CountryBase
       }
       country {
-        id
-        name
+        ...CountryBase
         currency {
           id
           symbol
@@ -5373,12 +6247,23 @@ export const MeDocument = gql`
         name
         slug
         thumbnailUrl
-        formattedLocation
+        location {
+          id
+          formattedLocation
+          city {
+            id
+            name
+          }
+          region {
+            id
+            name
+          }
+        }
       }
     }
   }
 }
-    `;
+    ${CountryBaseFragmentDoc}`;
 
 /**
  * __useMeQuery__
@@ -5407,8 +6292,8 @@ export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
 export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
 export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
 export const NearBeachBarsDocument = gql`
-    query NearBeachBars($latitude: String!, $longitude: String!) {
-  nearBeachBars(latitude: $latitude, longitude: $longitude) {
+    query NearBeachBars($latitude: String!, $longitude: String!, $take: Int = 6) {
+  nearBeachBars(latitude: $latitude, longitude: $longitude, take: $take) {
     id
     name
     slug
@@ -5435,6 +6320,7 @@ export const NearBeachBarsDocument = gql`
  *   variables: {
  *      latitude: // value for 'latitude'
  *      longitude: // value for 'longitude'
+ *      take: // value for 'take'
  *   },
  * });
  */
@@ -5450,17 +6336,27 @@ export type NearBeachBarsQueryHookResult = ReturnType<typeof useNearBeachBarsQue
 export type NearBeachBarsLazyQueryHookResult = ReturnType<typeof useNearBeachBarsLazyQuery>;
 export type NearBeachBarsQueryResult = Apollo.QueryResult<NearBeachBarsQuery, NearBeachBarsQueryVariables>;
 export const PaymentDocument = gql`
-    query Payment($refCode: String!) {
+    query Payment($refCode: ID!, $beachBarId: ID = null) {
   payment(refCode: $refCode) {
     id
     refCode
     isRefunded
+    stripeId
+    stripeProccessingFee
+    appFee
+    total(beachBarId: $beachBarId)
     timestamp
     cart {
       id
       total
-      products {
-        ...BasicCartProduct
+      products(beachBarId: $beachBarId) {
+        ...CartProductBase
+      }
+      foods(beachBarId: $beachBarId) {
+        ...CartFoodBase
+      }
+      notes(beachBarId: $beachBarId) {
+        ...CartNoteBase
       }
     }
     card {
@@ -5482,8 +6378,7 @@ export const PaymentDocument = gql`
         email
         phoneNumber
         country {
-          id
-          callingCode
+          ...CountryBase
         }
       }
     }
@@ -5491,26 +6386,12 @@ export const PaymentDocument = gql`
       id
       name
     }
-    voucherCode {
-      id
-      couponCode {
-        id
-        refCode
-        discountPercentage
-      }
-      offerCode {
-        id
-        refCode
-        totalAmount
-        timesUsed
-        campaign {
-          id
-        }
-      }
-    }
   }
 }
-    ${BasicCartProductFragmentDoc}`;
+    ${CartProductBaseFragmentDoc}
+${CartFoodBaseFragmentDoc}
+${CartNoteBaseFragmentDoc}
+${CountryBaseFragmentDoc}`;
 
 /**
  * __usePaymentQuery__
@@ -5525,6 +6406,7 @@ export const PaymentDocument = gql`
  * const { data, loading, error } = usePaymentQuery({
  *   variables: {
  *      refCode: // value for 'refCode'
+ *      beachBarId: // value for 'beachBarId'
  *   },
  * });
  */
@@ -5540,7 +6422,7 @@ export type PaymentQueryHookResult = ReturnType<typeof usePaymentQuery>;
 export type PaymentLazyQueryHookResult = ReturnType<typeof usePaymentLazyQuery>;
 export type PaymentQueryResult = Apollo.QueryResult<PaymentQuery, PaymentQueryVariables>;
 export const PaymentRefundAmountDocument = gql`
-    query PaymentRefundAmount($refCode: String!) {
+    query PaymentRefundAmount($refCode: ID!) {
   paymentRefundAmount(refCode: $refCode)
 }
     `;
@@ -5592,7 +6474,11 @@ export const PaymentsDocument = gql`
       isUpcoming
       isRefunded
       date
-      time {
+      startTime {
+        id
+        value
+      }
+      endTime {
         id
         value
       }
@@ -5633,56 +6519,90 @@ export function usePaymentsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<P
 export type PaymentsQueryHookResult = ReturnType<typeof usePaymentsQuery>;
 export type PaymentsLazyQueryHookResult = ReturnType<typeof usePaymentsLazyQuery>;
 export type PaymentsQueryResult = Apollo.QueryResult<PaymentsQuery, PaymentsQueryVariables>;
-export const PaymentDatesDocument = gql`
-    query PaymentDates {
-  paymentDates {
-    month {
-      id
-      value
-    }
-    year
+export const ProductDocument = gql`
+    query Product($id: ID!) {
+  product(id: $id) {
+    ...ProductDetails
   }
 }
-    `;
+    ${ProductDetailsFragmentDoc}`;
 
 /**
- * __usePaymentDatesQuery__
+ * __useProductQuery__
  *
- * To run a query within a React component, call `usePaymentDatesQuery` and pass it any options that fit your needs.
- * When your component renders, `usePaymentDatesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useProductQuery` and pass it any options that fit your needs.
+ * When your component renders, `useProductQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = usePaymentDatesQuery({
+ * const { data, loading, error } = useProductQuery({
  *   variables: {
+ *      id: // value for 'id'
  *   },
  * });
  */
-export function usePaymentDatesQuery(baseOptions?: Apollo.QueryHookOptions<PaymentDatesQuery, PaymentDatesQueryVariables>) {
+export function useProductQuery(baseOptions: Apollo.QueryHookOptions<ProductQuery, ProductQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<PaymentDatesQuery, PaymentDatesQueryVariables>(PaymentDatesDocument, options);
+        return Apollo.useQuery<ProductQuery, ProductQueryVariables>(ProductDocument, options);
       }
-export function usePaymentDatesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PaymentDatesQuery, PaymentDatesQueryVariables>) {
+export function useProductLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ProductQuery, ProductQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<PaymentDatesQuery, PaymentDatesQueryVariables>(PaymentDatesDocument, options);
+          return Apollo.useLazyQuery<ProductQuery, ProductQueryVariables>(ProductDocument, options);
         }
-export type PaymentDatesQueryHookResult = ReturnType<typeof usePaymentDatesQuery>;
-export type PaymentDatesLazyQueryHookResult = ReturnType<typeof usePaymentDatesLazyQuery>;
-export type PaymentDatesQueryResult = Apollo.QueryResult<PaymentDatesQuery, PaymentDatesQueryVariables>;
+export type ProductQueryHookResult = ReturnType<typeof useProductQuery>;
+export type ProductLazyQueryHookResult = ReturnType<typeof useProductLazyQuery>;
+export type ProductQueryResult = Apollo.QueryResult<ProductQuery, ProductQueryVariables>;
+export const ProductsDocument = gql`
+    query Products($beachBarId: ID!) {
+  products(beachBarId: $beachBarId) {
+    ...ProductDetails
+  }
+}
+    ${ProductDetailsFragmentDoc}`;
+
+/**
+ * __useProductsQuery__
+ *
+ * To run a query within a React component, call `useProductsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useProductsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useProductsQuery({
+ *   variables: {
+ *      beachBarId: // value for 'beachBarId'
+ *   },
+ * });
+ */
+export function useProductsQuery(baseOptions: Apollo.QueryHookOptions<ProductsQuery, ProductsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ProductsQuery, ProductsQueryVariables>(ProductsDocument, options);
+      }
+export function useProductsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ProductsQuery, ProductsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ProductsQuery, ProductsQueryVariables>(ProductsDocument, options);
+        }
+export type ProductsQueryHookResult = ReturnType<typeof useProductsQuery>;
+export type ProductsLazyQueryHookResult = ReturnType<typeof useProductsLazyQuery>;
+export type ProductsQueryResult = Apollo.QueryResult<ProductsQuery, ProductsQueryVariables>;
 export const ReviewDocument = gql`
     query Review($reviewId: ID!) {
   review(reviewId: $reviewId) {
-    ...Review
+    ...BeachBarReviewBase
     beachBar {
       id
       name
-      formattedLocation
+      location {
+        formattedLocation
+      }
     }
   }
 }
-    ${ReviewFragmentDoc}`;
+    ${BeachBarReviewBaseFragmentDoc}`;
 
 /**
  * __useReviewQuery__
@@ -5711,11 +6631,54 @@ export function useReviewLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<Rev
 export type ReviewQueryHookResult = ReturnType<typeof useReviewQuery>;
 export type ReviewLazyQueryHookResult = ReturnType<typeof useReviewLazyQuery>;
 export type ReviewQueryResult = Apollo.QueryResult<ReviewQuery, ReviewQueryVariables>;
+export const ReviewsDocument = gql`
+    query Reviews {
+  reviews {
+    ...BeachBarReviewBase
+    beachBar {
+      id
+      name
+      slug
+    }
+    payment {
+      id
+      timestamp
+    }
+  }
+}
+    ${BeachBarReviewBaseFragmentDoc}`;
+
+/**
+ * __useReviewsQuery__
+ *
+ * To run a query within a React component, call `useReviewsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useReviewsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useReviewsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useReviewsQuery(baseOptions?: Apollo.QueryHookOptions<ReviewsQuery, ReviewsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ReviewsQuery, ReviewsQueryVariables>(ReviewsDocument, options);
+      }
+export function useReviewsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ReviewsQuery, ReviewsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ReviewsQuery, ReviewsQueryVariables>(ReviewsDocument, options);
+        }
+export type ReviewsQueryHookResult = ReturnType<typeof useReviewsQuery>;
+export type ReviewsLazyQueryHookResult = ReturnType<typeof useReviewsLazyQuery>;
+export type ReviewsQueryResult = Apollo.QueryResult<ReviewsQuery, ReviewsQueryVariables>;
 export const SearchDocument = gql`
-    query Search($inputId: ID, $inputValue: String, $availability: SearchInput, $searchId: ID, $filterIds: [String!], $sortId: ID) {
+    query Search($inputId: ID, $searchValue: String, $availability: SearchInput, $searchId: ID = null, $filterIds: [String!] = null, $sortId: ID = null) {
   search(
     inputId: $inputId
-    inputValue: $inputValue
+    searchValue: $searchValue
     availability: $availability
     searchId: $searchId
     filterIds: $filterIds
@@ -5725,13 +6688,21 @@ export const SearchDocument = gql`
       beachBar {
         ...SearchBeachBar
       }
-      availability {
-        hasAvailability
-        hasCapacity
+      hasCapacity
+      totalPrice
+      recommendedProducts {
+        product {
+          id
+          name
+          maxPeople
+          price
+        }
+        quantity
       }
     }
     search {
       id
+      date
       filters {
         id
         publicId
@@ -5762,7 +6733,7 @@ ${SearchInputValueFragmentDoc}`;
  * const { data, loading, error } = useSearchQuery({
  *   variables: {
  *      inputId: // value for 'inputId'
- *      inputValue: // value for 'inputValue'
+ *      searchValue: // value for 'searchValue'
  *      availability: // value for 'availability'
  *      searchId: // value for 'searchId'
  *      filterIds: // value for 'filterIds'
@@ -5815,6 +6786,39 @@ export function useSearchInputValuesLazyQuery(baseOptions?: Apollo.LazyQueryHook
 export type SearchInputValuesQueryHookResult = ReturnType<typeof useSearchInputValuesQuery>;
 export type SearchInputValuesLazyQueryHookResult = ReturnType<typeof useSearchInputValuesLazyQuery>;
 export type SearchInputValuesQueryResult = Apollo.QueryResult<SearchInputValuesQuery, SearchInputValuesQueryVariables>;
+export const StripeConnectUrlDocument = gql`
+    query StripeConnectUrl($phoneNumber: String) {
+  stripeConnectUrl(phoneNumber: $phoneNumber)
+}
+    `;
+
+/**
+ * __useStripeConnectUrlQuery__
+ *
+ * To run a query within a React component, call `useStripeConnectUrlQuery` and pass it any options that fit your needs.
+ * When your component renders, `useStripeConnectUrlQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useStripeConnectUrlQuery({
+ *   variables: {
+ *      phoneNumber: // value for 'phoneNumber'
+ *   },
+ * });
+ */
+export function useStripeConnectUrlQuery(baseOptions?: Apollo.QueryHookOptions<StripeConnectUrlQuery, StripeConnectUrlQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<StripeConnectUrlQuery, StripeConnectUrlQueryVariables>(StripeConnectUrlDocument, options);
+      }
+export function useStripeConnectUrlLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<StripeConnectUrlQuery, StripeConnectUrlQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<StripeConnectUrlQuery, StripeConnectUrlQueryVariables>(StripeConnectUrlDocument, options);
+        }
+export type StripeConnectUrlQueryHookResult = ReturnType<typeof useStripeConnectUrlQuery>;
+export type StripeConnectUrlLazyQueryHookResult = ReturnType<typeof useStripeConnectUrlLazyQuery>;
+export type StripeConnectUrlQueryResult = Apollo.QueryResult<StripeConnectUrlQuery, StripeConnectUrlQueryVariables>;
 export const UserHistoryDocument = gql`
     query UserHistory {
   userHistory {
@@ -5830,13 +6834,15 @@ export const UserHistoryDocument = gql`
     beachBar {
       id
       name
-      formattedLocation
+      location {
+        formattedLocation
+      }
     }
     search {
       id
-      searchDate
-      searchAdults
-      searchChildren
+      date
+      adults
+      children
       inputValue {
         formattedValue
       }
@@ -5871,79 +6877,13 @@ export function useUserHistoryLazyQuery(baseOptions?: Apollo.LazyQueryHookOption
 export type UserHistoryQueryHookResult = ReturnType<typeof useUserHistoryQuery>;
 export type UserHistoryLazyQueryHookResult = ReturnType<typeof useUserHistoryLazyQuery>;
 export type UserHistoryQueryResult = Apollo.QueryResult<UserHistoryQuery, UserHistoryQueryVariables>;
-export const UserReviewsDocument = gql`
-    query UserReviews {
-  userReviews {
-    id
-    ratingValue
-    positiveComment
-    negativeComment
-    review
-    updatedAt
-    timestamp
-    votes {
-      id
-      user {
-        id
-      }
-      type {
-        id
-        value
-      }
-    }
-    answer {
-      id
-      body
-    }
-    beachBar {
-      id
-      name
-    }
-    visitType {
-      id
-      name
-    }
-    month {
-      id
-      value
-    }
-  }
-}
-    `;
-
-/**
- * __useUserReviewsQuery__
- *
- * To run a query within a React component, call `useUserReviewsQuery` and pass it any options that fit your needs.
- * When your component renders, `useUserReviewsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useUserReviewsQuery({
- *   variables: {
- *   },
- * });
- */
-export function useUserReviewsQuery(baseOptions?: Apollo.QueryHookOptions<UserReviewsQuery, UserReviewsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<UserReviewsQuery, UserReviewsQueryVariables>(UserReviewsDocument, options);
-      }
-export function useUserReviewsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UserReviewsQuery, UserReviewsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<UserReviewsQuery, UserReviewsQueryVariables>(UserReviewsDocument, options);
-        }
-export type UserReviewsQueryHookResult = ReturnType<typeof useUserReviewsQuery>;
-export type UserReviewsLazyQueryHookResult = ReturnType<typeof useUserReviewsLazyQuery>;
-export type UserReviewsQueryResult = Apollo.QueryResult<UserReviewsQuery, UserReviewsQueryVariables>;
 export const UserSearchesDocument = gql`
     query UserSearches($limit: Int) {
   userSearches(limit: $limit) {
     id
-    searchDate
-    searchAdults
-    searchChildren
+    date
+    adults
+    children
     inputValue {
       id
       city {
@@ -6145,10 +7085,13 @@ export type IndexPageQueryResult = Apollo.QueryResult<IndexPageQuery, IndexPageQ
 export const GetAllBeachBarsDocument = gql`
     query GetAllBeachBars {
   getAllBeachBars {
-    ...SearchBeachBar
+    ...DetailsBeachBar
+    payments {
+      id
+    }
   }
 }
-    ${SearchBeachBarFragmentDoc}`;
+    ${DetailsBeachBarFragmentDoc}`;
 
 /**
  * __useGetAllBeachBarsQuery__

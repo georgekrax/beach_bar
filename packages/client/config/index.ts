@@ -1,5 +1,5 @@
 import errors from "./errors";
-import * as motion from "./motion";
+import * as motion from "./animation";
 import * as notifications from "./notifications";
 // import * as motion from "./graphql";
 import * as pages from "./pages";

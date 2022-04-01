@@ -20,5 +20,3 @@ export const DoNotHave: React.FC<Props & Pick<React.ComponentPropsWithoutRef<"di
 };
 
 DoNotHave.displayName = "NextDoNotHave";
-
-export const NextDoNotHave = DoNotHave;

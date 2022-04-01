@@ -1,8 +1,3 @@
-<<<<<<< HEAD
 mutation VerifyUserPaymentForReview($beachBarId: ID!, $refCode: String) {
   verifyUserPaymentForReview(beachBarId: $beachBarId, refCode: $refCode)
-=======
-mutation VerifyUserPaymentForReview($beachBarId: ID!, $refCode: String) {
-  verifyUserPaymentForReview(beachBarId: $beachBarId, refCode: $refCode)
->>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff
 }

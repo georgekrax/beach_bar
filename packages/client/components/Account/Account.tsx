@@ -1,17 +1,22 @@
 import { Header } from "./Header";
-import { Menu } from "./Menu";
 import { PaymentMethod } from "./PaymentMethod";
 import { Trips } from "./Trips";
-import { HistoryAction } from "./HistoryAction";
+import { HistoryItem } from "./HistoryItem";
 import { Avatar } from "./Avatar";
+import { Dashboard } from "./Dashboard";
+import { BirthdayField } from "./BirthdayField";
+import { BasicInfo, LocationDetails } from "./ProfileInfo";
 
 type SubComponents = {
-  Menu: typeof Menu;
   Header: typeof Header;
   PaymentMethod: typeof PaymentMethod;
   Trips: typeof Trips;
-  HistoryAction: typeof HistoryAction;
+  HistoryItem: typeof HistoryItem;
   Avatar: typeof Avatar;
+  Dashboard: typeof Dashboard;
+  BirthdayField: typeof BirthdayField;
+  BasicInfo: typeof BasicInfo;
+  LocationDetails: typeof LocationDetails;
 };
 
 type Props = {};
@@ -20,12 +25,15 @@ const Account: React.FC<Props> & SubComponents = () => {
   return <></>;
 };
 
-Account.Menu = Menu;
 Account.Header = Header;
 Account.PaymentMethod = PaymentMethod;
 Account.Trips = Trips;
-Account.HistoryAction = HistoryAction;
+Account.HistoryItem = HistoryItem;
 Account.Avatar = Avatar;
+Account.Dashboard = Dashboard;
+Account.BirthdayField = BirthdayField;
+Account.BasicInfo = BasicInfo;
+Account.LocationDetails = LocationDetails;
 
 Account.displayName = "Account";
 

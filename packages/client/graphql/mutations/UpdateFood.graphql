@@ -1,0 +1,12 @@
+mutation UpdateFood($id: ID!, $name: String, $categoryId: ID, $ingredients: String, $price: Float, $maxQuantity: Int) {
+  updateFood(
+    id: $id
+    name: $name
+    categoryId: $categoryId
+    ingredients: $ingredients
+    price: $price
+    maxQuantity: $maxQuantity
+  ) {
+    ...FoodDetails
+  }
+}

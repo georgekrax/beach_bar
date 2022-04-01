@@ -1,9 +1,5 @@
-mutation Login($userCredentials: UserCredentials!, $loginDetails: UserLoginDetails) {
+mutation Login($userCredentials: UserCredentials!, $loginDetails: UserLoginDetails = null) {
   login(userCredentials: $userCredentials, loginDetails: $loginDetails) {
-    user {
-      id
-      email
-    }
-    accessToken
+    ...LoginAuthorize
   }
 }

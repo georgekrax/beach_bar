@@ -1,10 +1,14 @@
+@use "sass:math";
+
+$height: em(120);
+
 .carousel {
-  margin-top: 0;
-  min-height: calc(#{$carousel-bar-height} / 2 + #{map-get($em-spacers, 8)});
+  margin: 0;
+  min-height: calc(#{$height} + #{map-get($em-spacers, 40)});
 }
 
 .item {
-  height: calc(#{$carousel-bar-height} / 2);
+  height: $height !important;
   opacity: 1 !important;
 }
 

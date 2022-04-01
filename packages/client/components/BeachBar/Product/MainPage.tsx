@@ -1,7 +1,6 @@
 import BeachBar from "@/components/BeachBar";
 import Next from "@/components/Next";
-import { Currency } from "@/graphql/generated";
-import { AvailableProductsArr } from "@/typings/beachBar";
+import { BeachBarQuery, Currency } from "@/graphql/generated";
 import { Button } from "@hashtag-design-system/components";
 import range from "lodash/range";
 import uniqBy from "lodash/uniqBy";
@@ -9,11 +8,13 @@ import { useEffect, useMemo, useState } from "react";
 import styles from "./MainPage.module.scss";
 
 type Props = {
-  products: AvailableProductsArr;
   barCurrencySymbol: Currency["symbol"];
 };
 
-export const MainPage: React.FC<Props> = ({ products, barCurrencySymbol }) => {
+export const MainPage: React.FC<Props & Pick<NonNullable<BeachBarQuery["beachBar"]>, "products">> = ({
+  products,
+  barCurrencySymbol,
+}) => {
   const [filterIds, setFilterIds] = useState<string[]>([]);
   const [filteredArr, setFilteredArr] = useState(products);
 
@@ -58,7 +59,7 @@ export const MainPage: React.FC<Props> = ({ products, barCurrencySymbol }) => {
       <h4>Products</h4>
       {products.length > 0 ? (
         <div>
-          <BeachBar.SearchInfo bg="blue" />
+          <BeachBar.Page.SearchInfo bg="blue" />
           <div className={styles.filters}>
             {componentsArr.length > 1 && (
               <div className={styles.components + " no-scrollbar flex-row-flex-start-center"}>
@@ -102,7 +103,7 @@ export const MainPage: React.FC<Props> = ({ products, barCurrencySymbol }) => {
           ))}
         </div>
       ) : (
-        <Next.DoNotHave msg="This #beach_bar does not have any available products" emoji="😔" />
+        <Next.DoNotHave msg="This #beach_bar does not have any available products." emoji="😔" />
       )}
     </div>
   );

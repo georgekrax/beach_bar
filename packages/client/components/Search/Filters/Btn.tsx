@@ -1,52 +1,66 @@
 import { useSearchContext } from "@/utils/contexts";
-import { useIsDesktop } from "@/utils/hooks";
-import { Button, ButtonFProps, Checkbox, useClassnames } from "@hashtag-design-system/components";
-import React, { useEffect, useState } from "react";
+import { useIsDevice } from "@/utils/hooks";
+import { Button, ButtonProps, Checkbox, CheckboxProps } from "@hashtag-design-system/components";
+import React, { memo } from "react";
 import { SEARCH_ACTIONS } from "../reducer";
-import styles from "./Btn.module.scss";
 
-export type Props = {
+export type Props = Omit<ButtonProps | CheckboxProps, "label"> & {
   id: string;
   label: string;
-  checkbox?: boolean;
-  onClick?: (btn: { id: string; isChecked: boolean }, e: Parameters<NonNullable<ButtonFProps["onClick"]>>["0"]) => void;
+  isCheckbox?: boolean;
+  defaultChecked?: boolean;
+  onClick?: (e: React.ChangeEvent<HTMLInputElement>, btn: { id: string; isChecked: boolean }) => void;
 };
 
-export const Btn: React.FC<Props & Pick<ButtonFProps, "className">> = ({ id, label, checkbox = true, onClick, children, ...props }) => {
-  const { filterPublicIds, dispatch } = useSearchContext();
-  const [isChecked, setIsChecked] = useState(false);
-  const [classNames, rest] = useClassnames(styles.btn, props);
-  const isDesktop = useIsDesktop();
+export const Btn: React.FC<Props> = memo(
+  ({ id, label, isCheckbox: _isCheckbox = true, defaultChecked = false, onClick, children, ...props }) => {
+    const { isDesktop } = useIsDevice();
+    const isCheckbox = _isCheckbox && isDesktop;
+    // const [isChecked, setIsChecked] = useState(defaultChecked);
 
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const newVal = !isChecked;
-    setIsChecked(newVal);
-    if (onClick) onClick({ id, isChecked: newVal }, e);
-    else dispatch({ type: SEARCH_ACTIONS.TOGGLE_FILTER, payload: { id, bool: newVal } });
-  };
+    const {
+      _query: { filterIds },
+      map: { isDialogShown, filterPublicIds },
+      dispatch,
+      handleFilterIds,
+    } = useSearchContext();
 
-  useEffect(() => setIsChecked(filterPublicIds.includes(id)), [id, filterPublicIds]);
+    const isChecked = filterIds.includes(id);
 
-  return checkbox && isDesktop ? (
-    <Checkbox
-      className={classNames + " " + styles.checkbox}
-      onChange={e => handleClick(e as any)}
-      checked={isChecked}
-      label={{ gap: "0.65em", value: label }}
-      {...rest}
-    />
-  ) : (
-    <Button
-      className={classNames}
-      variant="secondary"
-      onClick={e => handleClick(e)}
-      data-ischecked={isChecked}
-      {...rest}
-    >
-      {children}
-      {label}
-    </Button>
-  );
-};
+    const handleClick = async (e: React.ChangeEvent<HTMLInputElement>, isBtn = false) => {
+      const newVal = isBtn ? !isChecked : !(e.target.value === "true");
+      onClick?.(e, { id, isChecked: newVal });
+      if (e.isDefaultPrevented()) return;
+      // setIsChecked(newVal);
+      // else dispatch({ type: SEARCH_ACTIONS.TOGGLE_FILTER, payload: { id, bool: newVal } });
+      if (isDialogShown) dispatch({ type: SEARCH_ACTIONS.TOGGLE_MAP_FILTER, payload: { id, bool: newVal } });
+      else await handleFilterIds(id);
+    };
+
+    // useEffect(() => {
+    //   const newBool = (isDialogShown ? filterPublicIds : filterIds).includes(id);
+    //   if (newBool !== isChecked) setIsChecked(newBool);
+    // }, [id, isDialogShown, filterPublicIds.length, filterIds.length]);
+
+    return isCheckbox ? (
+      <Checkbox isChecked={isChecked} spacing={2.5} {...(props as any)} onChange={handleClick}>
+        {label}
+      </Checkbox>
+    ) : (
+      <Button
+        boxShadow="none"
+        bg={isChecked ? "orange.500" : undefined}
+        borderColor={isChecked ? "orange.500" : undefined}
+        color={isChecked ? "white" : undefined}
+        {...(props as any)}
+        _hover={{ bg: isChecked ? "orange.500" : undefined, ...props._hover }}
+        onClick={e => handleClick(e as any, true)}
+      >
+        {children}
+        {label}
+      </Button>
+    );
+  }
+);
 
 Btn.displayName = "SearchFiltersBtn";

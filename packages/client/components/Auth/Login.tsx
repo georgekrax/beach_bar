@@ -1,65 +1,62 @@
-import { MeDocument, useLoginMutation, UserLoginDetails } from "@/graphql/generated";
+import { UserLoginDetails } from "@/graphql/generated";
 import { userIpAddr } from "@/lib/apollo/cache";
-import { ApolloGraphQLErrors } from "@/typings/graphql";
 import { LoginFormData } from "@/typings/user";
 import { useAuthContext } from "@/utils/contexts";
 import { loginSchema } from "@/utils/yup";
-import { Input } from "@hashtag-design-system/components";
+import { useReactiveVar } from "@apollo/client";
+import { Flex, Form, Input, Text } from "@hashtag-design-system/components";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { signIn, SignInResponse } from "next-auth/react";
 import { useState } from "react";
-import { useController, useForm } from "react-hook-form";
-import { FormGroup } from "./Container";
+import { useForm } from "react-hook-form";
 import { CTA } from "./CTA";
 import { AUTH_ACTIONS } from "./reducer";
 
 type Props = {
-  handleForgotPasswordClick: () => Promise<void>;
+  handleForgotPassword: () => void;
 };
 
-export const Login: React.FC<Props> = ({ handleForgotPasswordClick }) => {
-  const [graphqlErrors, setGraphqlErrors] = useState<ApolloGraphQLErrors>([]);
+export const Login: React.FC<Props> = ({ handleForgotPassword }) => {
+  const [graphqlErrors, setGraphqlErrors] = useState<SignInResponse["error"] | undefined>();
+
   const {
+    register,
     handleSubmit,
-    control,
     formState: { errors },
   } = useForm<LoginFormData>({ resolver: yupResolver(loginSchema) });
-  const { field: email } = useController<LoginFormData, "email">({ name: "email", control });
-  const { field: password } = useController<LoginFormData, "password">({ name: "password", control });
 
-  const [login] = useLoginMutation();
   const { dispatch } = useAuthContext();
+  const ipAddress = useReactiveVar(userIpAddr);
 
-  const onSubmit = async ({ email, password }: LoginFormData) => {
+  const onSubmit = async (data: LoginFormData) => {
     let loginDetails: UserLoginDetails | undefined = undefined;
-    if (userIpAddr()) loginDetails = { city: userIpAddr().city, countryAlpha2Code: userIpAddr().countryCode };
-    const { errors } = await login({
-      variables: { userCredentials: { email, password }, loginDetails },
-      refetchQueries: [{ query: MeDocument }],
-    });
-    if (errors) setGraphqlErrors(errors);
+    const res = (await signIn("credentials", { ...data, redirect: false })) as SignInResponse | undefined;
+    if (!res || !res.ok || res.error) setGraphqlErrors(res?.error);
     else dispatch({ type: AUTH_ACTIONS.TOGGLE_LOGIN_DIALOG, payload: { bool: false } });
+    // if (ipAddress) loginDetails = { city: ipAddress.city, countryAlpha2Code: ipAddress.countryCode };
+    // const { data, errors } = await login({
+    //   variables: { userCredentials: { email, password }, loginDetails },
+    //   refetchQueries: [{ query: MeDocument }],
+    // });
   };
 
   return (
-    <FormGroup onSubmit={handleSubmit(onSubmit)}>
-      <Input
-        {...email}
-        placeholder="Email"
-        forwardref={email.ref}
-        secondhelptext={{ error: true, value: errors.email?.message }}
-      />
-      <Input
-        {...password}
-        placeholder="Password"
-        type="password"
-        forwardref={password.ref}
-        secondhelptext={{ error: true, value: errors.password?.message }}
-      />
-      <span className="auth-form__forgot-password body-14 link" onClick={handleForgotPasswordClick}>
-        Forgot password?
-      </span>
+    <Flex as="form" flexDirection="column" onSubmit={handleSubmit(onSubmit)}>
+      <Form.Control isInvalid={!!errors.email}>
+        <Input {...register("email")} placeholder="Email" />
+        <Form.ErrorMessage>{errors.email?.message}</Form.ErrorMessage>
+      </Form.Control>
+      <div>
+        <Form.Control isInvalid={!!errors.password}>
+          <Input.Password {...register("password")} form="login" />
+          <Form.ErrorMessage>{errors.password?.message}</Form.ErrorMessage>
+        </Form.Control>
+        <Text as="span" display="block" mt={1} className="body-14 link text--right" onClick={handleForgotPassword}>
+          Forgot password?
+        </Text>
+      </div>
       <CTA btn="Login" errors={graphqlErrors} />
-    </FormGroup>
+    </Flex>
   );
 };
 

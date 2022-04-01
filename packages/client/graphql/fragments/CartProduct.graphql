@@ -1,0 +1,33 @@
+fragment CartProductBase on CartProduct {
+  id
+  quantity
+  date
+  people
+  timestamp
+  startTime {
+    id
+    value
+  }
+  endTime {
+    id
+    value
+  }
+  product {
+    id
+    name
+    price
+    imgUrl
+    beachBar {
+      id
+      name
+      thumbnailUrl
+      location {
+        formattedLocation
+      }
+      currency {
+        id
+        symbol
+      }
+    }
+  }
+}

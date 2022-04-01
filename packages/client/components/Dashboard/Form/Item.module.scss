@@ -1,0 +1,15 @@
+.container {
+  flex: 1 0 100%;
+  padding-right: map-get($em-spacers, 64);
+  overflow: hidden;
+
+  &.isStep {
+    max-width: 100%;
+    padding-right: 0;
+  }
+
+  & > div:first-child {
+    margin-left: 0.35em;
+    margin-right: 0.35em;
+  }
+}

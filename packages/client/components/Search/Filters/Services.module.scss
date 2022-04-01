@@ -1,23 +1,24 @@
-$content-padding: 1.25em;
+// $content-padding: map-get($em-spacers, 20);
 
-.container {
-  overflow-x: auto;
-  padding-bottom: map-get($em-spacers, 12);
-  width: calc(100vw - #{$content-padding});
+// .container {
+// width: calc(100vw - #{$content-padding});
+// padding-bottom: map-get($em-spacers, 12);
+// overflow-x: auto;
+// gap: map-get($em-spacers, 20);
 
-  & > div:last-child {
-    width: $content-padding;
-    flex-shrink: 0;
-    align-self: stretch;
-  }
-}
+// & > div:last-child {
+// width: $content-padding;
+// flex-shrink: 0;
+// align-self: stretch;
+// }
+// }
 
-@include breakpoint("md") {
-  .container {
-    width: 100%;
+// @include responsive() {
+// .container {
+// // width: 100%;
 
-    & > div:last-child {
-      display: none;
-    }
-  }
-}
+// & > div:last-child {
+//   display: none;
+// }
+// }
+// }

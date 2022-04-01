@@ -2,56 +2,66 @@ import { useSignUpMutation } from "@/graphql/generated";
 import { ApolloGraphQLErrors } from "@/typings/graphql";
 import { SignUpFormData } from "@/typings/user";
 import { signUpSchema } from "@/utils/yup";
-import { Input } from "@hashtag-design-system/components";
+import { Form, Input } from "@hashtag-design-system/components";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useState } from "react";
-import { useController, useForm } from "react-hook-form";
-import { AuthCTAProps } from "./index";
-import { FormGroup } from "./Container";
+import { useForm } from "react-hook-form";
 import { CTA } from "./CTA";
+import { AuthCTAProps } from "./index";
 
-type Props = {
-  forgotPassword?: boolean;
+type Props = Partial<Pick<AuthCTAProps, "btn">> & {
+  atForgotPassword?: boolean;
   handleFormSubmit?: (
     formData: Omit<SignUpFormData, "confirmPassword">
   ) => Promise<{ errors?: ApolloGraphQLErrors } | undefined>;
 };
 
-type FProps = Props & Partial<Pick<AuthCTAProps, "btn">>;
+export const SignUp: React.FC<Props> = ({ atForgotPassword = false, btn = "Sign up", handleFormSubmit }) => {
+  const [graphqlError, setGraphqlError] = useState<string | undefined>();
 
-export const SignUp: React.FC<FProps> = ({ forgotPassword = false, btn = "Sign up", handleFormSubmit }) => {
-  const [graphqlErrors, setGraphqlErrors] = useState<ApolloGraphQLErrors>([]);
-  const {
-    handleSubmit,
-    trigger,
-    control,
-    formState: { errors },
-  } = useForm<SignUpFormData>({ resolver: yupResolver(signUpSchema) });
-  const { field: email } = useController<SignUpFormData, "email">({ name: "email", control });
-  const { field: password } = useController<SignUpFormData, "password">({ name: "password", control });
-  const { field: confirmPassword } = useController<SignUpFormData, "confirmPassword">({
-    name: "confirmPassword",
-    control,
-  });
   const [signup] = useSignUpMutation();
 
+  const {
+    register,
+    trigger,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignUpFormData>({ resolver: yupResolver(signUpSchema) });
+
   const onSubmit = async ({ email, password }: SignUpFormData) => {
-    let errors: typeof graphqlErrors = undefined;
-    if (!forgotPassword) {
+    if (!atForgotPassword) {
       const { errors: signUpErrors } = await signup({
         variables: { userCredentials: { email, password }, isPrimaryOwner: false },
       });
-      errors = signUpErrors;
+      setGraphqlError(signUpErrors?.[0].message);
     } else if (handleFormSubmit) {
       const res = await handleFormSubmit({ email, password });
-      errors = res?.errors;
+      setGraphqlError(res?.errors?.[0].message);
     }
-    setGraphqlErrors(errors);
   };
 
   return (
-    <FormGroup onSubmit={handleSubmit(onSubmit)}>
-      <Input
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <Form.Control isInvalid={!!errors.email}>
+        <Input {...register("email")} placeholder="Email" />
+        <Form.ErrorMessage>{errors.email?.message}</Form.ErrorMessage>
+      </Form.Control>
+      <Form.Control isInvalid={!!errors.password}>
+        <Input.Password {...register("password")} placeholder="Password" form="sign_up" />
+        <Form.ErrorMessage>{errors.password?.message}</Form.ErrorMessage>
+      </Form.Control>
+      <Form.Control isInvalid={!!errors.confirmPassword}>
+        <Input.Password
+          {...register("confirmPassword", {
+            onChange: () => trigger("confirmPassword"),
+            onBlur: () => trigger("confirmPassword"),
+          })}
+          placeholder="Confirm password"
+          form="login"
+        />
+        <Form.ErrorMessage>{errors.confirmPassword?.message}</Form.ErrorMessage>
+      </Form.Control>
+      {/* <Input
         {...email}
         placeholder="Email"
         forwardref={email.ref}
@@ -71,9 +81,9 @@ export const SignUp: React.FC<FProps> = ({ forgotPassword = false, btn = "Sign u
         secondhelptext={{ error: true, value: errors.confirmPassword?.message }}
         onChange={() => trigger("confirmPassword")}
         onBlur={() => trigger("confirmPassword")}
-      />
-      <CTA btn={btn} errors={graphqlErrors} />
-    </FormGroup>
+      /> */}
+      <CTA btn={btn} errors={graphqlError} />
+    </form>
   );
 };
 

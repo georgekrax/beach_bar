@@ -17,7 +17,7 @@ type SubComponents = {
 const Path1: React.FC<IconPathBaseFProps> = ({ ...props }) => {
   return (
     <PathBase
-      className="icon__filled--white"
+      className="icon__filled--white icon__stroke--none"
       d="M13 2.3C9.9 4.2 9.2 8.3 9 11c0 0 0 0 0 0c1.2-.8 2.7-1.2 4-1.2c1.3 0 2.2.3 3.4 1.2c0 0 0 0 0 0c-.2-2.7-.3-6.7-3.4-8.6z"
       {...props}
     />
@@ -27,7 +27,7 @@ const Path1: React.FC<IconPathBaseFProps> = ({ ...props }) => {
 const Path2: React.FC<IconPathBaseFProps> = ({ ...props }) => {
   return (
     <PathBase
-      className="icon__filled--white"
+      className="icon__filled--white icon__stroke--none"
       d="M15.8 10.9c-.8-.5-1.6-.7-2.4-.9v11a.9.9 0 11-1.9 0l.1-11c-.7.1-1.6.4-2.4.9C9.2 11 9.1 11 9 11a.8.8 0 01-.4-.1c-.5-.3-2.5-1.3-5.5 0l0 0a.5.5 0 01-.5-.1a.5.5 0 01-.2-.5c.4-2.2 1.6-4.1 3.4-5.6C7.7 3.4 10.7 2.4 13 2.3c2.3.1 4.3 1.1 6 2.5c1.8 1.4 3 3.4 3.4 5.6a.5.5 0 01-.2.5a.5.5 0 01-.5.1h0l0 0c-2.9-1.3-5-.3-5.5 0a.6.6 0 01-.6 0z"
       {...props}
     />
@@ -37,7 +37,7 @@ const Path2: React.FC<IconPathBaseFProps> = ({ ...props }) => {
 const Path3: React.FC<IconPathBaseFProps> = ({ ...props }) => {
   return (
     <PathBase
-      className="icon__filled--white"
+      className="icon__filled--white icon__stroke--none"
       d="M9 11c.2-2.7.9-6.8 4-8.7c3 1.9 3.2 5.9 3.4 8.6a13.8 13.8 0 00-1.4-.6c-1.5-.5-3.4-.5-4.8.1c-.4.2-.8.4-1.1.6z"
       {...props}
     />
@@ -99,7 +99,7 @@ const Filled1: React.FC<IconBaseFProps> = ({ ...props }) => {
       <Path7 />
       <Path4 />
       <PathBase
-        className="icon__filled--white"
+        className="icon__filled--white icon__stroke--none"
         d="M8.5 11c.2-2.7.9-6.8 4-8.7c3 1.9 3.2 5.9 3.4 8.6a13.8 13.8 0 00-1.4-.6c-1.5-.5-3.4-.5-4.8.1c-.4.2-.8.4-1.1.6z"
       />
     </Base>
@@ -110,7 +110,7 @@ const Filled2: React.FC<IconBaseFProps> = ({ ...props }) => {
   return (
     <Base {...props}>
       <Path5 className="icon__filled-white" />
-      <Path6 className="icon__filled--white" />
+      <Path6 className="icon__filled--white icon__stroke--none" />
       <Path4 filled />
       <PathBase
         filled

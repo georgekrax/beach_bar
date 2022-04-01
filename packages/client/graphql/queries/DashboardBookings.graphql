@@ -1,0 +1,98 @@
+query DashboardBookings($beachBarId: ID!, $dates: DashboardDatesArg = null) {
+  dashboardBookings(beachBarId: $beachBarId, dates: $dates) {
+    mostActive {
+      hour
+      weekDay
+    }
+    capacity {
+      arr {
+        date
+        percentage
+      }
+      totalCustomers {
+        ...DashboardDateValue
+      }
+      totalHourCustomers {
+        ...DashboardDateValue
+      }
+      maxCapacity {
+        date
+        limitPeople
+        availableProducts
+      }
+    }
+    bookings {
+      id
+      refCode
+      isRefunded
+      timestamp
+      deletedAt
+      total(beachBarId: $beachBarId)
+      status {
+        id
+        name
+      }
+      cart {
+        id
+        notes(beachBarId: $beachBarId) {
+          id
+          body
+          beachBar {
+            id
+          }
+        }
+        products(beachBarId: $beachBarId) {
+          id
+          date
+          quantity
+          people
+          total
+          startTime {
+            ...HourValue
+          }
+          endTime {
+            ...HourValue
+          }
+          product {
+            id
+            name
+            beachBar {
+              id
+            }
+          }
+        }
+        foods(beachBarId: $beachBarId) {
+          id
+          date
+          quantity
+          total
+          food {
+            id
+            name
+            beachBar {
+              id
+            }
+          }
+        }
+      }
+      card {
+        id
+        customer {
+          id
+          user {
+            id
+            fullName
+          }
+        }
+        country {
+          id
+          currency {
+            id
+            name
+            symbol
+          }
+        }
+      }
+    }
+  }
+}

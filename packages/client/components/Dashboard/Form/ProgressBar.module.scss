@@ -1,0 +1,32 @@
+.container {
+  margin-bottom: 10em;
+  gap: map-get($em-spacers, 40);
+}
+
+.bar {
+  width: 60%;
+  height: 10px;
+  // border: 1px solid $grey-6;
+  background-color: $grey-4;
+}
+
+.progress {
+  width: 30%;
+  background-color: $secondary;
+  border-radius: inherit;
+}
+
+.btns {
+  min-width: 13.5em;
+  gap: map-get($em-spacers, 16);
+
+  button {
+    transform: scale(0.9);
+    transform-origin: right;
+  }
+
+  .prev {
+    padding-top: 0.625em;
+    padding-bottom: 0.625em;
+  }
+}

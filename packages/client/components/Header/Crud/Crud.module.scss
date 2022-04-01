@@ -1,56 +1,100 @@
 $color: $grey-9;
-$border-color: lighten($grey-9, 16);
-$border-width: 1.5px;
-
-.container__padding {
-  padding: map-get($em-spacers, 32) map-get($em-spacers, 24);
-}
+$border-color: $grey-6;
+$border-width: 2px;
 
 .container {
-  background-color: $grey-1;
   position: relative;
+  // margin: 0 #{- ($wrapper-padding)};
+  padding: map-get($em-spacers, 20) 0;
+  background-color: $grey-1;
   border-bottom: $border-width solid lighten($border-color, 10);
-
-  & > h6 {
-    color: $color;
-  }
-
-  & > div,
-  & > svg {
-    margin-right: map-get($em-spacers, 24);
-  }
+  // box-shadow: 0 0 6px $blue-3;
 
   & > div {
-    align-self: stretch;
-    width: $border-width;
-    background-color: $border-color;
-    transform: scaleY(1.4);
+    margin: auto;
   }
 
-  & > button {
+  h6 {
+    color: $color;
+    @include font-semibold();
+  }
+
+  path {
+    stroke: $color;
+  }
+
+  span {
+    width: 1.5px;
+    margin-top: 0.15rem;
+    margin-bottom: 0.15rem;
+    align-self: stretch;
+    background-color: $border-color;
+  }
+
+  button {
     position: absolute;
     bottom: -50%;
     right: 12%;
-    transform: translateY(-50%);
     padding-top: map-get($em-spacers, 12);
     padding-bottom: map-get($em-spacers, 12);
+    transform: translateY(-20%);
+    opacity: 1 !important;
+    color: $grey-1 !important;
     @include font-semibold();
 
-    & > svg > path {
+    &:disabled {
+      background-color: $grey-4 !important;
+      box-shadow: none;
+    }
+
+    path {
       fill: $grey-1;
       stroke: $grey-1;
     }
   }
+}
 
-  & > svg > path {
-    stroke: $color;
+.container > div {
+  div,
+  span {
+    margin-right: map-get($em-spacers, 24);
+  }
+
+  div {
+    border-color: $border-color;
   }
 }
 
-.content {
-  background-color: $grey-2;
+// .content {
+// overflow: auto;
+// background-color: $grey-2;
+// padding: 0 $wrapper-padding;
 
-  & > div {
-    margin: map-get($em-spacers, 16) 0 map-get($em-spacers, 64);
+// & > div {
+//   // max-width: map-get($breakpoints, "sm");
+//   margin: map-get($em-spacers, 40) auto map-get($em-spacers, 96);
+// }
+// }
+
+@include responsive() {
+  .container {
+    padding: map-get($em-spacers, 16) 0;
+
+    & > div {
+      div,
+      span {
+        margin-right: rem(28);
+      }
+    }
   }
+
+  // .content > div {
+  //   margin-bottom: 8em !important;
+  // }
 }
+
+// @include breakpoint("lg", "max-width") {
+//   .content.fullPage {
+//     padding: 0;
+//   }
+// }

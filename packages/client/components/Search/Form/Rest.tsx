@@ -1,6 +1,6 @@
 import Search from "@/components/Search";
 import { useSearchContext } from "@/utils/contexts";
-import { formatHourTime, formatPeople } from "@/utils/search";
+import { formatSearchTime, formatPeople } from "@/utils/search";
 import { BottomSheet, Dialog } from "@hashtag-design-system/components";
 import { memo, useMemo } from "react";
 import { SEARCH_ACTIONS, SET_STATE_PAYLOAD } from "../reducer";
@@ -9,13 +9,14 @@ import { PickerAndLabel } from "./PickerAndLabel";
 import styles from "./Rest.module.scss";
 
 export const Rest: React.FC = memo(() => {
-  const { form, people, hourTime, dispatch } = useSearchContext();
+  const { _query, form, time, dispatch } = useSearchContext();
   const { isPeopleShown } = form;
 
-  const formattedPeople = useMemo(() => formatPeople(people), [people]);
+  const formattedPeople = useMemo(() => formatPeople(query), [query.adults, query.children]);
 
-  const setState = (newForm: Partial<SET_STATE_PAYLOAD["form"]>) =>
+  const setState = (newForm: Partial<SET_STATE_PAYLOAD["form"]>) => {
     dispatch({ type: SEARCH_ACTIONS.SET_STATE, payload: { form: { ...form, ...newForm } } });
+  }
 
   return (
     <>
@@ -27,8 +28,8 @@ export const Rest: React.FC = memo(() => {
         }
         picker={{
           label: "Time",
-          className: styles.time + (!hourTime ? " " + styles.grey : ""),
-          content: formatHourTime(hourTime),
+          className: styles.time + (!time ? " " + styles.grey : ""),
+          content: formatSearchTime(time),
           onClick: () => setState({ isTimePickerShown: true }),
         }}
       >

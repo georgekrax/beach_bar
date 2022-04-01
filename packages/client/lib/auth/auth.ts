@@ -20,14 +20,16 @@ export const getAuthContext = ({
   req,
 }: GetAuthContextOptions): Record<string, string> & {
   headers: null | (Record<string, string> & { Authorization: string });
-} => ({
-  ...context,
-  headers:
-    req?.cookies && req.cookies["user_auth"]
-      ? {
-          ...context?.headers,
-          Authorization: "Bearer " + req.cookies["user_auth"],
-          "x-refetch-token": req.cookies["me"],
-        }
-      : null,
-});
+} => {
+  return {
+    ...context,
+    headers:
+      req?.cookies && req.cookies["user_auth"]
+        ? {
+            ...context?.headers,
+            Authorization: "Bearer " + req.cookies["user_auth"],
+            "x-refetch-token": req.cookies["me"],
+          }
+        : null,
+  }
+};

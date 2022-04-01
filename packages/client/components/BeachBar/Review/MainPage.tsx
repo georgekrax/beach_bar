@@ -1,60 +1,87 @@
-import BeachBar, { BeachBarProps, ReviewFormData } from "@/components/BeachBar";
-import Icons from "@/components/Icons";
-import { LayoutIconHeader } from "@/components/Layout/IconHeader";
-import { NextDoNotHave } from "@/components/Next/DoNotHave";
+import { BeachBarProps } from "@/components/BeachBar";
+import Next from "@/components/Next";
 import { IconBox } from "@/components/Next/IconBox";
 import Search from "@/components/Search";
-import { DATA } from "@/config/data";
-import {
-  BeachBarDocument,
-  BeachBarQuery,
-  ReviewFragment,
-  useAddReviewMutation,
-  useVerifyUserPaymentForReviewMutation,
-} from "@/graphql/generated";
+import { BeachBarQuery, BeachBarReviewBaseFragment, useVerifyUserPaymentForReviewMutation } from "@/graphql/generated";
+import { useSearchContext } from "@/utils/contexts";
 import { notify } from "@/utils/notify";
 import { filterByRating, formatNumber } from "@/utils/search";
 import { verifyPaymentIdSchema } from "@/utils/yup";
-import { COMMON_CONFIG } from "@beach_bar/common";
-import { Button, Input, Select, SelectedItems } from "@hashtag-design-system/components";
+import { COMMON_CONFIG, TABLES } from "@beach_bar/common";
+import {
+  Box,
+  Button,
+  Drawer,
+  DrawerBody,
+  DrawerContent,
+  DrawerOverlay,
+  DrawerProps,
+  Flex,
+  Form,
+  Heading,
+  Input,
+  keyframes,
+  MotionBox,
+  Select,
+  SelectItem,
+} from "@hashtag-design-system/components";
+import Icon from "@hashtag-design-system/icons";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { MONTHS } from "@the_hashtag/common";
-import { AnimatePresence, motion } from "framer-motion";
-import Link from "next/link";
+import { AnimatePresence } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
-import { useController, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
+import { ContentEdit } from "./ContentEdit";
 import styles from "./MainPage.module.scss";
+import { RatingBox } from "./RatingBox";
+import { Review } from "./Review";
+
+const borderRadiusAnimation = keyframes`
+  from {
+    border-radius: 64px 0px 0px 64px;
+  }
+  
+  to {
+    border-radius: 32px 0px 0px 32px;
+  }
+`;
 
 const {
   searchFilters: { REVIEW_SCORES },
   REVIEW_SCORES_TOP,
 } = COMMON_CONFIG.DATA;
-const { REVIEW_VISIT_TYPES } = DATA;
+const { REVIEW_VISIT_TYPE } = TABLES;
 
 type FormData = {
   refCode: string;
 };
 
-type ReviewProperties = Pick<ReviewFragment, "positiveComment" | "negativeComment" | "review" | "visitType" | "month">;
+type ReviewProperties = Pick<
+  BeachBarReviewBaseFragment,
+  "positiveComment" | "negativeComment" | "body" | "visitType" | "month"
+>;
 
-type Props = {
+type Props = Pick<DrawerProps, "isOpen"> & {
   beachBar: Pick<NonNullable<BeachBarQuery["beachBar"]>, "id" | "slug" | "name" | "avgRating" | "reviews">;
 } & Pick<BeachBarProps, "reviewScore">;
 
-export const MainPage: React.FC<Props> = ({ beachBar: { id, name, slug, avgRating, reviews }, reviewScore }) => {
+export const MainPage: React.FC<Props> = ({ isOpen, beachBar: { reviews, ...beachBar }, reviewScore }) => {
   const {
+    register,
+    watch,
+    setValue,
     handleSubmit,
-    control,
     formState: { errors },
   } = useForm<FormData>({ resolver: yupResolver(verifyPaymentIdSchema) });
-  const { field: refCode } = useController<FormData, "refCode">({ name: "refCode", control });
   const [whichSectionToShow, setWhichSectionToShow] = useState({ verifyId: false, postReview: false });
-  const [formData, setFormData] = useState<ReviewFormData & { refCode: string }>({ refCode: "", rating: 3 });
   const [filteredArr, setFilteredArr] = useState(reviews);
-  const [filterIds, setFilterIds] = useState<string[]>([]);
 
   const [verifyRefCode] = useVerifyUserPaymentForReviewMutation();
-  const [postReview] = useAddReviewMutation();
+
+  const {
+    _query: { filterIds },
+    handleFilterIds,
+  } = useSearchContext();
 
   const allReviewScores = useMemo(() => Object.values(REVIEW_SCORES).concat([REVIEW_SCORES_TOP]), []);
   const sortedReviews = useMemo(
@@ -65,19 +92,19 @@ export const MainPage: React.FC<Props> = ({ beachBar: { id, name, slug, avgRatin
         const aProperties: ReviewProperties = {
           positiveComment: a.positiveComment,
           negativeComment: a.negativeComment,
-          review: a.review,
+          body: a.body,
           visitType: a.visitType,
           month: a.month,
         };
         const bProperties: ReviewProperties = {
           positiveComment: b.positiveComment,
           negativeComment: b.negativeComment,
-          review: b.review,
+          body: b.body,
           visitType: b.visitType,
           month: b.month,
         };
-        const aPropsLength = Object.values(aProperties).filter(val => val !== null && val !== undefined && val).length;
-        const bPropsLength = Object.values(bProperties).filter(val => val !== null && val !== undefined && val).length;
+        const aPropsLength = Object.values(aProperties).filter(val => val != null && val).length;
+        const bPropsLength = Object.values(bProperties).filter(val => val != null && val).length;
         return (bUpvotes > aUpvotes ? 1 : -1) / (bPropsLength > aPropsLength ? 1 : -1) >= 1 ? -1 : 1;
       }),
     [filteredArr]
@@ -85,19 +112,19 @@ export const MainPage: React.FC<Props> = ({ beachBar: { id, name, slug, avgRatin
   const ratingValues = useMemo(() => {
     const uniqRatings = Array.from(new Set(reviews.map(({ ratingValue }) => ratingValue)));
     return allReviewScores.filter(({ rating }) => uniqRatings.includes(rating));
-  }, [reviews]);
+  }, [reviews[0]?.id, reviews.length]);
   const visitTypes = useMemo(() => {
     const uniqVisitTypes = Array.from(
       new Set(reviews.filter(({ visitType }) => visitType?.id !== undefined).map(({ visitType }) => visitType!.id))
     ).map(val => val.toLowerCase());
-    return Object.values(REVIEW_VISIT_TYPES).filter(type => uniqVisitTypes.includes(type.id.toString()));
-  }, [reviews]);
+    return REVIEW_VISIT_TYPE.filter(type => uniqVisitTypes.includes(type.id.toString()));
+  }, [reviews[0]?.id, reviews.length]);
   const months = useMemo(() => {
     const uniqMonths = Array.from(
       new Set(reviews.filter(({ month }) => month?.id !== undefined).map(({ month }) => month!.value.toLowerCase()))
     );
     return MONTHS.filter(month => uniqMonths.includes(month.toLowerCase()));
-  }, [reviews]);
+  }, [reviews[0]?.id, reviews.length]);
 
   const filter = () => {
     let newArr = reviews;
@@ -116,12 +143,12 @@ export const MainPage: React.FC<Props> = ({ beachBar: { id, name, slug, avgRatin
             ({ avgRating, ...rest }) => ({ ...rest, ratingValue: avgRating })
           );
           break;
-        case REVIEW_VISIT_TYPES.DAILY_BATH.name:
-        case REVIEW_VISIT_TYPES.WEEKEND_GATEWAY.name:
-        case REVIEW_VISIT_TYPES.FAMILY.name:
-        case REVIEW_VISIT_TYPES.COUPLE.name:
-        case REVIEW_VISIT_TYPES.GROUP_OF_8PLUS_PEOPLE.name:
-          const type = Object.values(REVIEW_VISIT_TYPES).find(({ name }) => name === id);
+        case REVIEW_VISIT_TYPE.find(({ name }) => name === "Daily bath")?.name:
+        case REVIEW_VISIT_TYPE.find(({ name }) => name === "Weekend gateway")?.name:
+        case REVIEW_VISIT_TYPE.find(({ name }) => name === "Family")?.name:
+        case REVIEW_VISIT_TYPE.find(({ name }) => name === "Couple")?.name:
+        case REVIEW_VISIT_TYPE.find(({ name }) => name === "Group of 8+ people")?.name:
+          const type = REVIEW_VISIT_TYPE.find(({ name }) => name === id);
           if (type) newArr = newArr.filter(({ visitType }) => visitType?.id === type.id.toString());
           break;
       }
@@ -134,205 +161,201 @@ export const MainPage: React.FC<Props> = ({ beachBar: { id, name, slug, avgRatin
     setFilteredArr(newArr);
   };
 
-  const handleClick = (id: string, isChecked: boolean) => {
-    let newFilterIds: typeof filterIds = [];
-    if (isChecked) newFilterIds = [...filterIds, id];
-    else newFilterIds = filterIds.filter(publicId => publicId !== id);
-    setFilterIds(newFilterIds);
-  };
+  // const handleClick = (id: string, isChecked: boolean) => {
+  //   let newFilterIds: typeof filterIds = [];
+  //   if (isChecked) newFilterIds = [...filterIds, id];
+  //   else newFilterIds = filterIds.filter(publicId => publicId !== id);
+  //   setFilterIds(newFilterIds);
+  // };
 
-  const handleSelect = (items: SelectedItems[]) => {
-    const selected = items.find(({ selected }) => selected);
-    if (!selected) {
-      setFilterIds(prev => prev.filter(id => !items.map(({ content }) => content).includes(id)));
-      return;
+  const handleSelect = (items: SelectItem[]) => {
+    const selected = items.find(({ isSelected }) => isSelected);
+    if (selected) handleFilterIds(selected.content);
+    else {
+      const filtersContent = items.map(({ content }) => content);
+      const alreadyFilter = filterIds.find(id => filtersContent.includes(id));
+      if (alreadyFilter) handleFilterIds(alreadyFilter);
     }
-    let name = selected.content;
-    setFilterIds(prev =>
-      [...prev, name].filter(
-        val =>
-          !items
-            .filter(({ selected }) => !selected)
-            .map(({ content }) => content)
-            .includes(val)
-      )
-    );
   };
 
   const handleRefCodeVerification = async (form: FormData) => {
     const { refCode } = form;
-    const { data, errors } = await verifyRefCode({ variables: { beachBarId: id, refCode } });
+    const { data, errors } = await verifyRefCode({ variables: { beachBarId: beachBar.id, refCode } });
     if (errors) errors.forEach(({ message }) => notify("error", message));
-    if (!data)
+    if (!data?.verifyUserPaymentForReview) {
       notify(
         "error",
         "We are sorry, but you cannot post a review for this payment, because you have not visited it yet."
       );
-    else {
+    } else {
       setWhichSectionToShow({ verifyId: false, postReview: true });
-      setFormData(prev => ({ ...prev, refCode }));
+      setValue("refCode", refCode);
     }
   };
 
-  const handlePost = async () => {
-    const { refCode, rating, visitTypeId, monthTimeId, positiveFeedback, negativeFeedback, reviewBody } = formData;
-    if (!refCode) {
-      notify("error", "Please try to repeat the process.");
-      return;
-    }
-
-    const { errors } = await postReview({
-      variables: {
-        beachBarId: id,
-        paymentRefCode: refCode,
-        ratingValue: rating,
-        visitTypeId,
-        monthTimeId,
-        positiveComment: positiveFeedback,
-        negativeComment: negativeFeedback,
-        review: reviewBody,
-      },
-      refetchQueries: [{ query: BeachBarDocument, variables: { slug, userVisit: false } }],
-    });
-    if (errors) errors.forEach(({ message }) => notify("error", message));
-    else setWhichSectionToShow({ postReview: false, verifyId: false });
-  };
-
-  useEffect(() => {
-    return () => setFilterIds([]);
-  }, []);
-
-  useEffect(() => filter(), [filterIds]);
+  useEffect(filter, [filterIds.length]);
   useEffect(() => setFilteredArr(reviews), [reviews]);
 
   return (
-    <div className="h100" style={{ borderRadius: "inherit" }}>
-      <LayoutIconHeader
-        className={styles.container}
-        before={
-          whichSectionToShow.verifyId || whichSectionToShow.postReview ? (
-            <IconBox
-              aria-label="View all #beach_bar reviews."
-              onClick={() => setWhichSectionToShow({ verifyId: false, postReview: false })}
-            >
-              <Icons.Arrow.Left />
-            </IconBox>
-          ) : (
-            <Link
-              href={{ pathname: "/beach/[...slug]", query: { slug: [slug] } }}
-              shallow
-              replace
-              passHref
-              scroll={false}
-            >
-              <a>
-                <IconBox aria-label="Return to #beach_bar details.">
-                  <Icons.Arrow.Left />
-                </IconBox>
-              </a>
-            </Link>
-          )
-        }
-        after={
-          !whichSectionToShow.verifyId &&
-          !whichSectionToShow.postReview && (
-            <Button variant="secondary" onClick={() => setWhichSectionToShow(prev => ({ ...prev, verifyId: true }))}>
-              Post review
-            </Button>
-          )
-        }
+    <Drawer placement="right" isOpen={isOpen} onClose={() => {}}>
+      <DrawerOverlay />
+      <DrawerContent
+        maxWidth="32em"
+        overflow="hidden"
+        animation={{ md: `${borderRadiusAnimation} 0.8s ease forwards` }}
       >
-        <h5>{name}</h5>
-      </LayoutIconHeader>
-      {whichSectionToShow.verifyId || whichSectionToShow.postReview ? (
-        <div>
-          <AnimatePresence exitBeforeEnter>
-            {whichSectionToShow.verifyId && (
-              <motion.form
-                key="verifyIdForm"
-                className={styles.refCode}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0, y: "-100%" }}
-                onSubmit={handleSubmit(handleRefCodeVerification)}
-              >
-                <div className="text--grey">
-                  Please enter the ID of your trip you made to this #beach_bar, in order to post a review
+        <DrawerBody p={0}>
+          <Flex
+            justify="space-between"
+            align="flex-start"
+            py={5}
+            px={6}
+            sx={{
+              "+ div": {
+                px: 6,
+                height: "calc(100% - 5.5em)",
+                overflowY: "auto",
+                borderRadius: "inherit",
+              },
+            }}
+          >
+            <Flex gap={4} align="center">
+              {whichSectionToShow.verifyId || whichSectionToShow.postReview ? (
+                <IconBox
+                  aria-label="View all #beach_bar reviews."
+                  onClick={() => setWhichSectionToShow({ verifyId: false, postReview: false })}
+                >
+                  <Icon.Arrow.Left />
+                </IconBox>
+              ) : (
+                <Next.Link
+                  color="black"
+                  link={{
+                    shallow: true,
+                    replace: true,
+                    scroll: false,
+                    href: { pathname: "/beach/[...slug]", query: { slug: [beachBar.slug] } },
+                  }}
+                >
+                  <IconBox aria-label="Return to #beach_bar details.">
+                    <Icon.Arrow.Left />
+                  </IconBox>
+                </Next.Link>
+              )}
+              <h5>{beachBar.name}</h5>
+            </Flex>
+            {!whichSectionToShow.verifyId && !whichSectionToShow.postReview && (
+              <Button onClick={() => setWhichSectionToShow(prev => ({ ...prev, verifyId: true }))}>Post review</Button>
+            )}
+          </Flex>
+          {whichSectionToShow.verifyId || whichSectionToShow.postReview ? (
+            <AnimatePresence exitBeforeEnter>
+              {whichSectionToShow.verifyId && (
+                <MotionBox
+                  as="form"
+                  key="verifyIdForm"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0, y: "-200%" }}
+                  transition={{ duration: 0.4 }}
+                  px={6}
+                  onSubmit={handleSubmit(handleRefCodeVerification)}
+                >
+                  <Box mb={5} color="text.grey">
+                    Please enter the #ID of your trip you made to this #beach_bar, in order to post a review
+                  </Box>
+                  <Form.Control isInvalid={!!errors.refCode}>
+                    <Input id="refCode" placeholder="Payment ID" maxLength={16} {...register("refCode")} />
+                    <Form.ErrorMessage>{errors.refCode && errors.refCode.message}</Form.ErrorMessage>
+                    <Form.HelperText>TODO: Check character limit on design_system package</Form.HelperText>
+                  </Form.Control>
+                  <Button type="submit" mt={8} colorScheme="orange">
+                    Verify ID
+                  </Button>
+                </MotionBox>
+              )}
+              {whichSectionToShow.postReview && (
+                <MotionBox
+                  initial={{ y: "100%", opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ stiffness: 100 }}
+                  className="scrollbar"
+                  px={6}
+                >
+                  <ContentEdit
+                    hasNone={false}
+                    beachBar={beachBar}
+                    refCode={watch("refCode")}
+                    onSubmit={() => setWhichSectionToShow({ postReview: false, verifyId: false })}
+                  />
+                </MotionBox>
+              )}
+            </AnimatePresence>
+          ) : reviews.length > 0 ? (
+            <div className="scrollbar">
+              <Flex align="center" gap={3} mt={8}>
+                <RatingBox atBeach avgRating={beachBar.avgRating} />
+                <div>
+                  <Heading as="h5" size="md" color="gray.800">
+                    {reviewScore?.name}
+                  </Heading>
+                  <Box color="gray.500">{formatNumber(reviews.length)} reviews</Box>
                 </div>
-                <Input
-                  {...refCode}
-                  placeholder="Trip ID"
-                  maxLength={16}
-                  forwardref={refCode.ref}
-                  secondhelptext={{ error: true, value: errors.refCode?.message }}
+              </Flex>
+              <Box my={6} pb={6} borderBottom="1px solid" borderColor="gray.400" className={styles.filtersContainer}>
+                <Search.Filters.ReviewScores
+                  header=""
+                  greaterThan={false}
+                  arr={ratingValues}
+                  sx={{ "& > div": { mb: 3 } }}
                 />
-                <Button type="submit" variant="secondary">
-                  Verify ID
-                </Button>
-              </motion.form>
-            )}
-            {whichSectionToShow.postReview && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <BeachBar.Review.ContentEdit
-                  none={false}
-                  onValue={state => setFormData(prev => ({ ...prev, ...state }))}
-                />
-                <Button className={styles.postCta} onClick={() => handlePost()}>
-                  Post review
-                </Button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      ) : reviews.length > 0 ? (
-        <div className="scrollbar">
-          <div className={styles.summary + " flex-row-flex-start-center"}>
-            <BeachBar.Review.RatingBox className="header-5 semibold" rating={avgRating} />
-            <div>
-              <h5>{reviewScore?.name}</h5>
-              <div>{formatNumber(reviews.length)} reviews</div>
+                <Flex align="center" wrap="wrap" gap={4}>
+                  <Select onSelect={handleSelect}>
+                    <Select.Btn minWidth={{ base: "8em", md: "12em" }}>Visit type</Select.Btn>
+                    <Select.Modal>
+                      <Select.Options>
+                        {visitTypes.map(({ id, name }, i) => (
+                          <Select.Item key={i} id={id.toString()}>
+                            {name}
+                          </Select.Item>
+                        ))}
+                      </Select.Options>
+                    </Select.Modal>
+                  </Select>
+                  <Select onSelect={items => handleSelect(items)}>
+                    <Select.Btn minWidth={148}>Visit month</Select.Btn>
+                    <Select.Modal>
+                      <Select.Options>
+                        {months.map((val, i) => (
+                          <Select.Item key={i} id={val + "_" + i}>
+                            {val}
+                          </Select.Item>
+                        ))}
+                      </Select.Options>
+                    </Select.Modal>
+                  </Select>
+                </Flex>
+              </Box>
+              <Box>
+                {sortedReviews.map(({ id, ...review }) => (
+                  <Review
+                    key={id}
+                    atBeach
+                    hasExpandedContent
+                    beachBar={beachBar}
+                    id={id}
+                    {...review}
+                    container={{ mb: 7 }}
+                  />
+                ))}
+              </Box>
             </div>
-          </div>
-          <div className={styles.filtersContainer}>
-            <Search.Filters.ReviewScores
-              header={""}
-              greaterThan={false}
-              arr={ratingValues}
-              btn={{ onClick: ({ id, isChecked }) => handleClick(id, isChecked) }}
-            />
-            <div className="flex-row-flex-start-center">
-              <Select onSelect={items => handleSelect(items)}>
-                <Select.Button>Visit type</Select.Button>
-                <Select.Modal>
-                  <Select.Options>
-                    {visitTypes.map(({ id, name }, i) => (
-                      <Select.Item key={i} id={id.toString()} content={name} />
-                    ))}
-                  </Select.Options>
-                </Select.Modal>
-              </Select>
-              <Select onSelect={items => handleSelect(items)}>
-                <Select.Button style={{ width: 148 }}>Visit month</Select.Button>
-                <Select.Modal>
-                  <Select.Options>
-                    {months.map((val, i) => (
-                      <Select.Item key={i} id={val + "_" + i} content={val} />
-                    ))}
-                  </Select.Options>
-                </Select.Modal>
-              </Select>
-            </div>
-          </div>
-          <div className={styles.list}>
-            {sortedReviews.map(({ id, ...review }) => (
-              <BeachBar.Review key={id} v2 expandedContent beachBar={{ name }} id={id} {...review} />
-            ))}
-          </div>
-        </div>
-      ) : (
-        <NextDoNotHave msg="This #beach_bar, does not seem to have any reviews yet." />
-      )}
-    </div>
+          ) : (
+            <Next.DoNotHave msg="This #beach_bar, does not seem to have any reviews yet." />
+          )}
+        </DrawerBody>
+      </DrawerContent>
+    </Drawer>
   );
 };
 

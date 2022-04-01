@@ -1,0 +1,8 @@
+.header {
+  color: $grey-9;
+  font-size: 1.75rem !important;
+}
+
+.container button {
+  padding: map-get($em-spacers, 12) map-get($em-spacers, 16);
+}

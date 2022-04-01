@@ -1,20 +1,46 @@
-import styles from "./OrContainer.module.scss";
+import { Box, Flex } from "@hashtag-design-system/components";
 
 type Props = {
   text?: string;
   direction?: "row" | "column";
 };
 
-export const OrContainer: React.FC<Props> = ({ text = "Or continue with", direction="row" }) => {
+// .container {
+//   & > div:not(:nth-child(2)) {
+//     height: 1px;
+//     background-color: $grey-6;
+//     border-radius: 8px;
+//     flex: 1;
+//   }
+// }
+
+export const OrContainer: React.FC<Props> = ({ text = "Or continue with", direction = "row" }) => {
+  const isColumn = direction === "column";
+
   return (
-    <div className={styles.container + (direction === "column" ? " " + styles.column : "") + ` w100 flex-${direction}-center-center`}>
+    <Flex
+      className="w100"
+      maxWidth="25em"
+      flexDirection={direction}
+      justifyContent="center"
+      alignItems="center"
+      sx={{
+        ...(isColumn && { minHeight: "100%", alignSelf: "stretch", "& > div:not(:nth-child(2))": { width: "1px" } }),
+        "& > div:not(:nth-child(2))": {
+          height: "1px",
+          bg: "gray.400",
+          borderRadius: "half",
+          flex: 1,
+        },
+      }}
+    >
       <div />
-      <div>{text}</div>
+      <Box mx={3} mb={1} color="gray.600">
+        {text}
+      </Box>
       <div />
-    </div>
+    </Flex>
   );
 };
 
 OrContainer.displayName = "NextOrContainer";
-
-export const NextOrContainer= OrContainer;

@@ -1,20 +1,19 @@
 import { BeachBar } from "@/graphql/generated";
-import styles from "./Heading.module.scss";
+import { Box, Flex, FlexProps, Heading as ChakraHeading } from "@hashtag-design-system/components";
 
-type Props = {
-  city?: string;
-};
+type Props = Pick<BeachBar, "name"> &
+  FlexProps & {
+    city?: string;
+  };
 
-const Heading: React.FC<Props & Pick<BeachBar, "name"> & Pick<React.ComponentPropsWithoutRef<"div">, "className">> = ({
-  name,
-  city,
-  className,
-}) => {
+const Heading: React.FC<Props> = ({ name, city, ...props }) => {
   return (
-    <div className={styles.container + (className ? " " + className : "") + " flex-column-center-flex-start"}>
-      <h3>{name}</h3>
-      <div className="semibold text--grey">{city}</div>
-    </div>
+    <Flex flexDir="column" justify="center" maxWidth="75%" mb={6} {...props}>
+      <ChakraHeading as="h3" fontSize="2rem" lineHeight="100%">
+        {name}
+      </ChakraHeading>
+      <Box color="gray.500">{city}</Box>
+    </Flex>
   );
 };
 

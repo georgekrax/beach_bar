@@ -1,2 +1,68 @@
-// @use "main" as *;
+@use "sass:math";
+@use "main" as *;
+@use "./typography" as *;
+@use "./base" as *;
 @import "@hashtag-design-system/primitives/src/base/_globals.scss";
+
+.layout--padding {
+  padding: $wrapper-padding;
+  padding-top: math.div($wrapper-padding, 1.5);
+}
+
+.container--padding {
+  padding: 0 $wrapper-padding;
+}
+
+.container--mw {
+  max-width: map-get($breakpoints, "xl");
+}
+
+.container {
+  @extend .w100;
+  @extend .container--mw;
+  @extend .container--padding;
+  min-height: calc(100vh - #{$header-height});
+  display: inherit;
+  flex-direction: inherit;
+  margin: 0 auto;
+  flex: 1;
+
+  & > main {
+    flex: inherit;
+  }
+}
+
+.table__id {
+  width: 8%;
+
+  & > div {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr);
+    justify-items: center;
+    gap: 0 !important;
+
+    & > *:first-child {
+      grid-column-start: 2;
+    }
+
+    & > *:last-child {
+      margin-left: map-get($em-spacers, 8);
+    }
+  }
+}
+
+.layout__login__shape {
+  position: absolute;
+  height: $layout-login-shape-size;
+  width: $layout-login-shape-size;
+  box-shadow: 0px 4px 16px rgba($grey-10, 25%);
+}
+
+// @include responsive() {
+// .layout__shopping-cart {
+// // right: 0;
+// max-width: 26em;
+// border-top-right-radius: 0;
+// // border-bottom-right-radius: 0;
+// }
+// }

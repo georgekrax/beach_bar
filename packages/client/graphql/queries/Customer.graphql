@@ -1,33 +1,13 @@
-<<<<<<< HEAD
 query Customer($email: Email, $phoneNumber: String, $countryId: ID) {
   customer(email: $email, phoneNumber: $phoneNumber, countryId: $countryId) {
-    customer {
+    id
+    email
+    user {
       id
       email
-      user {
-        id
-        email
-      }
-      cards {
-        ...BasicCard
-      }
+    }
+    cards {
+      ...BasicCard
     }
   }
 }
-=======
-query Customer($email: Email, $phoneNumber: String, $countryId: ID) {
-  customer(email: $email, phoneNumber: $phoneNumber, countryId: $countryId) {
-    customer {
-      id
-      email
-      user {
-        id
-        email
-      }
-      cards {
-        ...BasicCard
-      }
-    }
-  }
-}
->>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

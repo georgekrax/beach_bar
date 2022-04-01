@@ -1,28 +1,23 @@
-@import "@hashtag-design-system/primitives/src/globals.scss";
-
 // 2 - Base
-@import "./2-base/base";
-
-// 3 - Layout
-@import "3-layout/base";
-@import "3-layout/header";
-@import "3-layout/login";
-
-// 5 - Modules
-@import "5-modules/base";
-@import "5-modules/auth_form";
-@import "5-modules/icon";
-@import "5-modules/bottom_sheet";
-@import "5-modules/beach_bar";
+@import "2-base/base";
+@import "2-base/layout";
 
 // 4 - Pages
 @import "4-pages/home";
 @import "4-pages/map";
 @import "4-pages/search";
-@import "4-pages/shopping_cart";
 @import "4-pages/account";
 @import "4-pages/checkout";
-@import "4-pages/beach_bar";
+// @import "4-pages/beach_bar";
+@import "4-pages/partners";
+@import "4-pages/dashboard";
+
+// 5 - Modules
+@import "5-modules/base";
+// @import "5-modules/auth_form";
+@import "5-modules/icon";
+@import "5-modules/beach_bar";
+@import "5-modules/stripe";
 
 html {
   scroll-behavior: smooth;
@@ -37,7 +32,7 @@ body {
 
 html,
 body {
-  overflow: initial;
+  overflow: unset !important;
 }
 
 #__next {
@@ -57,19 +52,17 @@ p {
   max-width: 60ch;
 }
 
-svg {
-  path {
-    stroke-width: 1.5px;
-    stroke: $grey-10;
-  }
-
-  circle {
-    stroke-width: 1.5px;
-    stroke: $grey-10;
-  }
-}
-
 .filled {
-  stroke: none;
+  @extend .icon__stroke--none;
   fill: $grey-10;
 }
+
+.mapboxgl-canvas {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+}
+
+

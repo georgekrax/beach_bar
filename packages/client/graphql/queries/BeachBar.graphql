@@ -1,9 +1,18 @@
-<<<<<<< HEAD
-query BeachBar($slug: String!, $userVisit: Boolean) {
-  beachBar(slug: $slug, userVisit: $userVisit) {
+query BeachBar($slug: String = null, $id: ID = null, $userVisit: Boolean = true) {
+  beachBar(slug: $slug, id: $id, userVisit: $userVisit) {
     ...DetailsBeachBar
+    openingTime {
+      id
+      value
+      utcValue
+    }
+    closingTime {
+      id
+      value
+      utcValue
+    }
     reviews {
-      ...Review
+      ...BeachBarReviewBase
       payment {
         id
         timestamp
@@ -15,39 +24,18 @@ query BeachBar($slug: String!, $userVisit: Boolean) {
       description
       timestamp
     }
-    defaultCurrency {
+    currency {
       id
       symbol
     }
+    features {
+      ...FeatureBase
+    }
     products {
-      ...BeachBarProduct
+      ...ProductBase
+    }
+    foods {
+      ...FoodDetails
     }
   }
 }
-=======
-query BeachBar($slug: String!, $userVisit: Boolean) {
-  beachBar(slug: $slug, userVisit: $userVisit) {
-    ...DetailsBeachBar
-    reviews {
-      ...Review
-      payment {
-        id
-        timestamp
-      }
-    }
-    imgUrls {
-      id
-      imgUrl
-      description
-      timestamp
-    }
-    defaultCurrency {
-      id
-      symbol
-    }
-    products {
-      ...BeachBarProduct
-    }
-  }
-}
->>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

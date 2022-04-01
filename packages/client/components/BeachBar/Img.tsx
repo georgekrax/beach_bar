@@ -1,35 +1,41 @@
 import Next, { NextImgZoomProps } from "@/components/Next";
-import { useClassnames } from "@hashtag-design-system/components";
+import { Flex, FlexProps } from "@hashtag-design-system/components";
 import Image, { ImageProps } from "next/image";
-import { useRef } from "react";
-import styles from "./Img.module.scss";
 
 type Props = {
-  last?: boolean;
-  container?: Pick<React.ComponentPropsWithoutRef<"div">, "className" | "style">;
+  isLast?: boolean;
+  container?: FlexProps;
+  zoom?: Partial<NextImgZoomProps>;
 };
 
 export const Img: React.FC<Props & ImageProps & Pick<NextImgZoomProps, "description">> = ({
-  container = {},
-  last,
+  container,
+  isLast,
   description,
+  zoom,
   children,
   ...props
 }) => {
-  const [classNames, rest] = useClassnames(styles.container + " w100 h100 flex-row-center-center", container);
-  const layoutId = useRef(Math.random());
-
   return (
-    <Next.ImgZoom
-      id={layoutId.current.toString()}
-      preventDefault={last}
-      description={description}
-      modal={{ className: styles.zoom }}
-    >
-      <div className={classNames} {...rest}>
+    <Next.ImgZoom isPreventedDefault={isLast} description={description} {...zoom}>
+      <Flex
+        justify="center"
+        align="center"
+        flex={1}
+        position="relative"
+        width="100%"
+        height="100%"
+        overflow="hidden"
+        borderRadius="regular"
+        transitionProperty="common"
+        transitionDuration="normal"
+        transitionTimingFunction="ease-out"
+        {...container}
+        _hover={{ opacity: 0.75, transform: "scale(0.99)", ...container?._hover }}
+      >
         <Image objectFit="cover" objectPosition="center" {...props} />
         {children}
-      </div>
+      </Flex>
     </Next.ImgZoom>
   );
 };

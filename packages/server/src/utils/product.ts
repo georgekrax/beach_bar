@@ -1,11 +1,11 @@
+import { NexusGenScalars } from "@/graphql/generated/nexusTypes";
 import { BeachBarCapacity } from "@/typings/search";
 import { getAvailableProducts, GetAvailableProductsInclude } from "@/utils/beachBar";
+import { genDatesArr } from "@/utils/data";
 import { dayjsFormat, errors, TABLES } from "@beach_bar/common";
 import { HourTime, Prisma, ReservedProduct } from "@prisma/client";
 import { ApolloError } from "apollo-server-express";
-import { NexusGenScalars } from "@/graphql/generated/nexusTypes";
 import dayjs from "dayjs";
-import { genDatesArr } from "@/utils/data";
 import { redis } from "..";
 
 type CapacityInfo = Pick<BeachBarCapacity, "date"> & Pick<Partial<BeachBarCapacity>, "startTimeId" | "endTimeId">;
@@ -98,7 +98,10 @@ type GetHoursAvailabilityReturn = {
   isAvailable: boolean;
 };
 
-export const getHoursAvailability = async (product: GetHoursAvailability, date: NexusGenScalars["Date"]): Promise<GetHoursAvailabilityReturn[]> => {
+export const getHoursAvailability = async (
+  product: GetHoursAvailability,
+  date: NexusGenScalars["Date"]
+): Promise<GetHoursAvailabilityReturn[]> => {
   const { beachBar } = product;
   // const openingTime = this.beachBar.openingTime.value.split(":")[0] + ":00:00";
   // const closingTime = this.beachBar.closingTime.value.startsWith("00:")
@@ -118,24 +121,24 @@ export const getHoursAvailability = async (product: GetHoursAvailability, date: 
 // setRedisReservationLimits()
 export const SetRedisReservationLimitsInclude = Prisma.validator<Prisma.ProductReservationLimitInclude>()({ product: true });
 type SetRedisReservationLimits = Prisma.ProductReservationLimitGetPayload<{ include: typeof SetRedisReservationLimitsInclude }>;
-type SetRedisReservationLimitsOptions = { atDelete?: boolean };
+type SetRedisReservationLimitsOptions = { atDelete?: boolean; elevator?: number };
 
 export const setRedisReservationLimits = async (
   { product, limitNumber, from, to, startTimeId, endTimeId }: SetRedisReservationLimits,
-  { atDelete = false }: SetRedisReservationLimitsOptions = {}
+  { atDelete = false, elevator }: SetRedisReservationLimitsOptions = {}
 ) => {
   for (const date of genDatesArr(dayjs(from), dayjs(to))) {
     for (let i = startTimeId || 0; i <= (endTimeId || 24); i++) {
-      const redisKey = `available_products:${dayjs(date).format(dayjsFormat.ISO_STRING)}:${i
-        .toString()
-        .padStart(2, "0")
-        .padEnd(4, "0")}`;
+      const redisKey = `available_products:${date.format(dayjsFormat.ISO_STRING)}:${i.toString().padStart(2, "0").padEnd(4, "0")}`;
       const fieldKey = `beach_bar:${product.beachBarId}:product:${product.id}`;
       if (atDelete) await redis.hdel(redisKey, fieldKey);
       else {
-        console.log(redisKey, fieldKey);
-        const existingAvailable = await redis.hget(redisKey, fieldKey);
-        await redis.hset(redisKey, fieldKey, limitNumber - (existingAvailable ? +existingAvailable : 0));
+        let existingAvailable: number = await redis.hget(redisKey, fieldKey) as any;
+        existingAvailable = (existingAvailable ? +existingAvailable : 0);
+        let newQuantity: number;
+        if (elevator) newQuantity = existingAvailable - elevator;
+        else newQuantity = limitNumber - existingAvailable;
+        await redis.hset(redisKey, fieldKey, newQuantity);
       }
     }
   }

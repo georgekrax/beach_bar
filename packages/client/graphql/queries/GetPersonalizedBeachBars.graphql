@@ -1,14 +1,13 @@
-<<<<<<< HEAD
 query GetPersonalizedBeachBars {
   getPersonalizedBeachBars {
     id
     name
     slug
     thumbnailUrl
-    formattedLocation
     location {
       latitude
       longitude
+      formattedLocation
       city {
         name
       }
@@ -18,24 +17,3 @@ query GetPersonalizedBeachBars {
     }
   }
 }
-=======
-query GetPersonalizedBeachBars {
-  getPersonalizedBeachBars {
-    id
-    name
-    slug
-    thumbnailUrl
-    formattedLocation
-    location {
-      latitude
-      longitude
-      city {
-        name
-      }
-      region {
-        name
-      }
-    }
-  }
-}
->>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

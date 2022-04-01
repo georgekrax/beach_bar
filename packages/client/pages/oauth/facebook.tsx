@@ -1,15 +1,18 @@
+import OAuth from "@/components/OAuth";
+import { useAuthorizeWithFacebookMutation } from "@/graphql/generated";
+import { userIpAddr } from "@/lib/apollo/cache";
+import { ApolloGraphQLErrors } from "@/typings/graphql";
+import { useReactiveVar } from "@apollo/client";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import OAuth from "../../components/OAuth";
-import { useAuthorizeWithFacebookMutation } from "../../graphql/generated";
-import { userIpAddr } from "../../lib/apollo/cache";
-import { ApolloGraphQLErrors } from "../../typings/graphql";
 
 type Props = {};
 
 const FacebookCallback: React.FC<Props> = () => {
-  const [graphqlErrors, setGraphqlErrors] = useState<ApolloGraphQLErrors>([]);
   const router = useRouter();
+  const [graphqlErrors, setGraphqlErrors] = useState<ApolloGraphQLErrors>([]);
+
+  const ipAddress = useReactiveVar(userIpAddr);
   const [authorizeWithFacebook] = useAuthorizeWithFacebookMutation();
 
   const authorize = async () => {
@@ -19,10 +22,7 @@ const FacebookCallback: React.FC<Props> = () => {
         code: code as string,
         state: state as string,
         isPrimaryOwner: false,
-        loginDetails: {
-          city: userIpAddr().city,
-          countryAlpha2Code: userIpAddr().countryCode,
-        },
+        loginDetails: { city: ipAddress?.city, countryAlpha2Code: ipAddress?.countryCode },
       },
     });
     if (errors) setGraphqlErrors(errors);
@@ -30,9 +30,7 @@ const FacebookCallback: React.FC<Props> = () => {
   };
 
   useEffect(() => {
-    if (router.query.code && router.query.state) {
-      authorize();
-    }
+    if (router.query.code && router.query.state) authorize();
   }, [router.query]);
 
   if (typeof window !== "undefined") {

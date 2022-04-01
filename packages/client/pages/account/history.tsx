@@ -1,27 +1,20 @@
 import Account from "@/components/Account";
 import Layout from "@/components/Layout";
-import { NextDoNotHave } from "@/components/Next/DoNotHave";
-import { NextLink } from "@/components/Next/Link";
-import { NextMotionContainer } from "@/components/Next/MotionContainer";
-import { UserHistoryDocument, UserHistoryQuery, useUserHistoryQuery } from "@/graphql/generated";
-import { initializeApollo, INITIAL_APOLLO_STATE } from "@/lib/apollo";
-import { getAuth } from "@/lib/auth";
-import { useAuth } from "@/utils/hooks";
+import Next from "@/components/Next";
+import { useMeLazyQuery, UserHistoryQuery, useUserHistoryQuery } from "@/graphql/generated";
 import { DAY_NAMES_ARR, MONTHS } from "@the_hashtag/common";
 import dayjs, { Dayjs } from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
 import weekOfYear from "dayjs/plugin/weekOfYear";
 import { groupBy } from "lodash";
-import { GetServerSideProps } from "next";
-import { useMemo } from "react";
-import { Toaster } from "react-hot-toast";
+import { useEffect, useMemo } from "react";
 
 dayjs.extend(weekOfYear);
 dayjs.extend(isoWeek);
 
-const History: React.FC = () => {
-  const { data: authData } = useAuth();
-  const doNotAllow = useMemo(() => !authData?.me?.account.trackHistory, [authData]);
+const AccountHistoryPage: React.FC = () => {
+  const [getMe, { data: authData }] = useMeLazyQuery();
+  const doNotAllow = useMemo(() => !authData?.me?.account?.trackHistory, [authData]);
   const { data, loading, error } = useUserHistoryQuery({ skip: doNotAllow });
 
   const parseWeekDate = (day: Dayjs) => {
@@ -31,67 +24,62 @@ const History: React.FC = () => {
   };
 
   const sortedData: [string, UserHistoryQuery["userHistory"]][] = useMemo(() => {
-    if (!data?.userHistory) return [];
+    if (!data?.userHistory || data.userHistory.length === 0) return [];
     const weeksObj = groupBy(data.userHistory, dt => dayjs(dt.userHistory.timestamp).week());
     return Object.entries(weeksObj)
       .filter(([_, val]) => val.some(({ beachBar, search }) => beachBar || search))
       .map(([key, val]) => {
         const day = dayjs().week(parseInt(key));
-        const startDay = day.startOf("isoWeek");
         const endDay = day.endOf("isoWeek");
-        const newKey = `${parseWeekDate(startDay)} - ${parseWeekDate(endDay)}${
+        const newKey = `${parseWeekDate(day.startOf("isoWeek")) + " - " + parseWeekDate(endDay)}${
           endDay.year() !== dayjs().year() ? `, ${endDay.year()}` : ""
         }`;
         return [newKey, val];
       });
   }, [data]);
 
+  useEffect(() => {
+    setTimeout(() => getMe(), 500);
+  }, []);
+
   return (
-    <Layout>
-      <Toaster position="top-center" />
-      <Account.Header />
-      <Account.Menu defaultSelected="/history" />
-      {loading ? (
-        <h2>Loading...</h2>
-      ) : error || (!data?.userHistory && !doNotAllow) ? (
-        <h2>Error</h2>
-      ) : (
-        <NextMotionContainer>
-          {!doNotAllow ? (
-            <div className="flex-column-flex-start-flex-start">
-              {sortedData.map((val, i) => (
-                <div className="w100 account-history__section" key={i}>
-                  <h5 className="header-6 semibold">{val[0]}</h5>
-                  <div>
-                    {val[1].map(({ userHistory: { id }, ...rest }) => (
-                      <Account.HistoryAction key={id} {...rest} />
-                    ))}
+    <Layout hasToaster>
+      <Account.Dashboard defaultSelected="/account/history">
+        {loading ? (
+          <h2>Loading...</h2>
+        ) : error || (!data?.userHistory && !doNotAllow) ? (
+          <h2>Error</h2>
+        ) : (
+          <Next.MotionContainer>
+            {!doNotAllow ? (
+              <div className="flex-column-flex-start-flex-start">
+                {sortedData.map((val, i) => (
+                  <div className="w100 account__history" key={i}>
+                    <h5 className="header-6 semibold">{val[0]}</h5>
+                    <div>
+                      {val[1].map(({ userHistory: { id }, ...rest }) => (
+                        <Account.HistoryItem key={"history_item_" + id} {...rest} />
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <NextDoNotHave emoji="⚙️">
-              Please go to your{" "}
-              <NextLink href={{ pathname: "/account", hash: "preferences" }}>account preferences</NextLink> and enable
-              the "Track search history" feature, to keep a record of your search history.
-            </NextDoNotHave>
-          )}
-        </NextMotionContainer>
-      )}
+                ))}
+              </div>
+            ) : (
+              <Next.DoNotHave emoji="⚙️" style={{ maxWidth: "35rem", marginLeft: "auto", marginRight: "auto" }}>
+                Please go to your&nbsp;
+                <Next.Link link={{ href: { pathname: "/account", hash: "preferences" } }}>
+                account preferences
+                </Next.Link>&nbsp;
+                and enable the "Track search history" feature, to keep a record of your search history.
+              </Next.DoNotHave>
+            )}
+          </Next.MotionContainer>
+        )}
+      </Account.Dashboard>
     </Layout>
   );
 };
 
-export default History;
+AccountHistoryPage.displayName = "AccountHistoryPage";
 
-export const getServerSideProps: GetServerSideProps = async ctx => {
-  const apolloClient = initializeApollo(ctx);
-
-  const {
-    data: { me },
-  } = await getAuth({ apolloClient });
-  if (me && me.account.trackHistory) await apolloClient.query({ query: UserHistoryDocument });
-
-  return { props: { [INITIAL_APOLLO_STATE]: apolloClient.cache.extract() } };
-};
+export default AccountHistoryPage;

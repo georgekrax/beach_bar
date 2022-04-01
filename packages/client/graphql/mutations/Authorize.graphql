@@ -1,0 +1,10 @@
+mutation Authorize(
+  $user: OAuthUserInput!
+  $provider: OAuthProvider!
+  $isPrimaryOwner: Boolean = false
+  $loginDetails: UserLoginDetails = null
+) {
+  authorize(user: $user, provider: $provider, isPrimaryOwner: $isPrimaryOwner, loginDetails: $loginDetails) {
+    ...LoginAuthorize
+  }
+}

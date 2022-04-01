@@ -1,15 +1,13 @@
-import { HTMLMotionProps, motion } from "framer-motion";
+import { MotionBox, MotionBoxProps } from "@hashtag-design-system/components";
 
-type FProps = HTMLMotionProps<"div">;
+export type Props = MotionBoxProps;
 
-export const MotionContainer: React.FC<FProps> = ({ children, ...props }) => {
+export const MotionContainer: React.FC<Props> = ({ children, ...props }) => {
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit="initial" {...props}>
+    <MotionBox initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit="initial" {...props}>
       {children}
-    </motion.div>
+    </MotionBox>
   );
 };
 
 MotionContainer.displayName = "NextMotionContainer";
-
-export const NextMotionContainer = MotionContainer;

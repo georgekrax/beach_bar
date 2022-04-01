@@ -1,5 +1,7 @@
 import { Base, IconBaseFProps, IconPathBaseFProps, PathBase } from "./Base";
 
+// Use the <Icons.UserAvatara />, if you want one person firgure
+
 type SubComponents = {
   Path1: typeof Path1;
   Path2: typeof Path2;

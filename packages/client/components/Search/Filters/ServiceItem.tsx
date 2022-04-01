@@ -4,31 +4,25 @@ import styles from "./ServiceItem.module.scss";
 export type Props = {
   icon: React.ReactNode;
   quantity?: number;
-} & (
-  | {
-      v2: true;
-      feature: undefined;
-    }
-  | {
-      v2?: false;
-      feature: string;
-    }
-);
+  v2?: boolean;
+  feature?: string;
+} & Omit<SearchFiltersBtnProps, "label"> &
+  Pick<Partial<SearchFiltersBtnProps>, "label">;
 
-export const ServiceItem: React.FC<Props & SearchFiltersBtnProps> = ({
+export const ServiceItem: React.FC<Props> = ({
   feature,
   icon,
   quantity,
   v2 = false,
-  label = feature,
+  label = feature + (quantity && quantity > 1 ? ` (${quantity}x)` : ""),
   ...props
 }) => {
-  return !v2 ? (
+  return v2 ? (
+    <Icon icon={icon} v2={v2} quantity={quantity} />
+  ) : (
     <Search.Filters.Btn className={styles.btn} label={label || ""} {...props}>
       <Icon icon={icon} v2={v2} />
     </Search.Filters.Btn>
-  ) : (
-    <Icon icon={icon} v2={v2} />
   );
 };
 

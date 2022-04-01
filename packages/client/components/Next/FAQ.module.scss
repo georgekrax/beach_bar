@@ -1,0 +1,49 @@
+.container {
+  padding: map-get($em-spacers, 20);
+  margin-bottom: map-get($em-spacers, 20);
+  border-radius: 12px;
+  border: 2px solid $grey-4;
+}
+
+.question {
+  color: $grey-9;
+  transition: color 0.15s ease-out;
+  font-size: rem(18);
+
+  &.active .icon {
+    background-color: rgba($volcano-1, 0.75);
+
+    path {
+      stroke: $volcano-5;
+    }
+  }
+}
+
+.icon {
+  padding: map-get($em-spacers, 8);
+  background-color: $grey-4;
+  transition: background-color 0.15s ease-out;
+
+  svg {
+    transform-origin: unset !important;
+  }
+
+  path {
+    stroke: $grey-8;
+    stroke-width: 2px;
+  }
+}
+
+.answer {
+  overflow: hidden;
+
+  div {
+    margin-top: map-get($em-spacers, 12);
+  }
+}
+
+@media only screen and (min-width: map-get($breakpoints, "sm")) and (max-width: map-get($breakpoints, "lg")) {
+  .answer div {
+    max-width: 90%;
+  }
+}

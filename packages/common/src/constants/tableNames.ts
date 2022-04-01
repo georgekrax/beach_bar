@@ -1,4 +1,4 @@
-export const tableNames =  Object.freeze({
+export const tableNames = {
   USER: "user",
   ACCOUNT: "account",
-})
+} as const;

@@ -1,44 +1,37 @@
 import Icons from "@/components/Icons";
-import { BeachBar as GraphQLBeachBar } from "@/graphql/generated";
-import { useClassnames } from "@hashtag-design-system/components";
-import { memo, useMemo } from "react";
-import BeachBar from "./index";
+import { BeachBar as GraphQLBeachBar, BeachBarLocation as GraphQLBeachBarLocation } from "@/graphql/generated";
+import { Flex, FlexProps, Text } from "@hashtag-design-system/components";
+import { memo } from "react";
+import { Header } from "./Header";
 
-export type Props = {
-  name: string;
-  city?: string;
-  region?: string;
-  showLocation?: boolean;
-  showLocationIcon?: boolean;
-};
+export type Props = FlexProps &
+  Pick<GraphQLBeachBar, "name"> & {
+    // name: string;
+    // city?: string;
+    // region?: string;
+    location: Pick<GraphQLBeachBarLocation, "formattedLocation">;
+    hasLocation?: boolean;
+    hasLocationIcon?: boolean;
+  };
 
-export const NameAndLocation: React.FC<
-  Props & React.ComponentPropsWithoutRef<"div"> & Pick<GraphQLBeachBar, "formattedLocation">
-> = memo(({ name, city, region, formattedLocation, showLocation = true, showLocationIcon = true, ...props }) => {
-  const [classNames, rest] = useClassnames("flex-column-center-flex-start beach_bar__name-and-location", props);
-  const location = useMemo(
-    () =>
-      formattedLocation
-        ? formattedLocation.split(", ").slice(0, -1).join(", ")
-        : `${city}${region ? `, ${region}` : ""}`,
-    [formattedLocation, city, region]
-  );
-
-  return (
-    <div className={classNames} {...rest}>
-      <BeachBar.Header as="h4" className="header-6">
-        {name}
-      </BeachBar.Header>
-      {location && showLocation && (
-        <div className="flex-row-center-center">
-          {showLocationIcon && <Icons.MapMarker.Dot.Filled width={16} height={16} style={{ marginRight: "0.25em" }} />}
-          <span className="body-14" style={{ marginBottom: "0.15em" }}>
-            {location}
-          </span>
-        </div>
-      )}
-    </div>
-  );
-});
+export const NameAndLocation: React.FC<Props> = memo(
+  ({ name, location, hasLocation = true, hasLocationIcon = true, ...props }) => {
+    return (
+      <Flex flexDirection="column" justifyContent="center" alignItems="flex-start" {...props}>
+        <Header as="h4" className="header-6">
+          {name}
+        </Header>
+        {location && hasLocation && (
+          <div className="flex-row-center-center">
+            {hasLocationIcon && <Icons.MapMarker.Dot.Filled width={16} height={16} style={{ marginRight: "0.25em" }} />}
+            <Text as="span" mb="0.15em" className="body-14">
+              {location.formattedLocation}
+            </Text>
+          </div>
+        )}
+      </Flex>
+    );
+  }
+);
 
 NameAndLocation.displayName = "BeachBarNameAndLocation";

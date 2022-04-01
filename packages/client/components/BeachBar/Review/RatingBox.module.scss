@@ -1,10 +1,36 @@
-.box {
-  $bg: rating-box-background(abs($rating-boxes-length / 2) + 1);
-  height: 2em;
-  width: 2em;
-  padding: map-get($em-spacers, 8);
-  border-radius: 14px 14px 14px 0px;
-  // background-color: rgba(mix($success-color, $error-color, 80%), 0.85);
-  color: $grey-1;
-  background: linear-gradient(to bottom left, map-get($bg, "first"), map-get($bg, "second"));
-}
+// @use "sass:math";
+
+// @mixin rating($rating) {
+//   $bg: rating-color($rating);
+//   background: linear-gradient(to bottom left, map-get($bg, "first"), map-get($bg, "second"));
+// }
+
+// .box {
+// height: 2em;
+// width: 2em;
+// padding: map-get($em-spacers, 8);
+// border-radius: 14px 14px 14px 0px;
+// // background-color: rgba(mix($success-color, $error-color, 80%), 0.85);
+// color: $grey-1;
+
+// &[data-rating^="0"],
+// &[data-rating^="1"] {
+//   @include rating(1);
+// }
+
+// &[data-rating^="2"] {
+//   @include rating(2);
+// }
+
+// &[data-rating^="3"] {
+//   @include rating(3);
+// }
+
+// &[data-rating^="4"] {
+//   @include rating(4);
+// }
+
+// &[data-rating^="5"] {
+//   @include rating(5);
+// }
+// }

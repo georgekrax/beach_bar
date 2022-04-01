@@ -1,0 +1,28 @@
+.container {
+  gap: map-get($em-spacers, 20);
+}
+
+// .list {
+//   gap: map-get($em-spacers, 20);
+// }
+
+.date {
+  color: $grey-7;
+  width: em(24);
+}
+
+.pickerBtn {
+  width: auto !important;
+
+  & > div {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: map-get($em-spacers, 16);
+
+    svg path {
+      stroke-width: 2px;
+    }
+  }
+}

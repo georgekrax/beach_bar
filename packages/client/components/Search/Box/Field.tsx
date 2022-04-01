@@ -1,38 +1,43 @@
-import { Select, SelectModalFProps } from "@hashtag-design-system/components";
+import { Flex, Select, SelectModalProps } from "@hashtag-design-system/components";
 import React from "react";
-import styles from "./Field.module.scss";
+import { Label } from "./Label";
 
 type Props = {
   label?: string;
   value?: string;
   select?: boolean;
+  modal?: SelectModalProps;
 };
 
-export const Field: React.FC<Props & Pick<SelectModalFProps, "align" | "className" | "onClick">> = ({
+export const Field: React.FC<Props & Pick<React.ComponentPropsWithoutRef<"div">, "className" | "onClick">> = ({
   label,
   value,
-  align,
-  select = true,
-  className,
+  modal,
+  select = false,
   onClick,
   children,
+  ...props
 }) => {
   return (
-    <div className={styles.container} onClick={onClick}>
+    <Flex
+      alignItems="center"
+      border="1px solid"
+      borderColor="gray.300"
+      borderRadius="regular"
+      onClick={onClick}
+      {...props}
+    >
       {!select ? (
         children
       ) : (
         <Select>
-          <Select.Button>
-            <div>{label}</div>
-            <div>{value}</div>
-          </Select.Button>
-          <Select.Modal className={className} align={align}>
-            {children}
-          </Select.Modal>
+          <Select.Btn border="none">
+            <Label label={label} value={value} />
+          </Select.Btn>
+          <Select.Modal {...modal}>{children}</Select.Modal>
         </Select>
       )}
-    </div>
+    </Flex>
   );
 };
 

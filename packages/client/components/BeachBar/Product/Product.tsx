@@ -1,146 +1,276 @@
 import { SEARCH_ACTIONS } from "@/components/Search";
-import { BeachBarQuery, useAddCartProductMutation, useCartQuery } from "@/graphql/generated";
+import {
+  AddCartProductMutation,
+  BeachBarQuery,
+  CartDocument,
+  CartQuery,
+  ProductsDocument,
+  UpdateCartProductMutation,
+  useAddCartProductMutation,
+  useCartQuery,
+  useDeleteCartProductMutation,
+  useDeleteProductMutation,
+  useUpdateCartProductMutation,
+} from "@/graphql/generated";
 import { useSearchContext } from "@/utils/contexts";
 import { notify } from "@/utils/notify";
-import { Button } from "@hashtag-design-system/components";
-import { motion } from "framer-motion";
-import Image from "next/image";
-import { useMemo, useState } from "react";
-import BeachBar from "../BeachBar";
+import { dayjsFormat } from "@beach_bar/common";
+import {
+  Box,
+  Button,
+  Flex,
+  FlexProps,
+  Modal,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Text,
+  useDisclosure,
+} from "@hashtag-design-system/components";
+import Icon from "@hashtag-design-system/icons";
+import { GraphQLError } from "graphql";
+import router from "next/router";
+import { useMemo } from "react";
+import { Info } from "./Info";
 import { MainPage } from "./MainPage";
-import styles from "./Product.module.scss";
+
+const PADDING = 4;
 
 type SubComponents = {
   MainPage: typeof MainPage;
 };
 
-type Props = {
-  defaultCurrencySymbol: string;
-  showComponents?: boolean;
-  extraDetails?: boolean;
-  addToCart?: boolean;
-};
+export type Props = NonNullable<BeachBarQuery["beachBar"]>["products"][number] &
+  FlexProps & {
+    defaultCurrencySymbol: string;
+    hasComponents?: boolean;
+    hasExtraDetails?: boolean;
+    hasAddToCart?: boolean;
+    atDashboard?: boolean;
+    isAvailable?: boolean;
+  };
 
-export const Product: React.FC<
-  Props &
-    NonNullable<BeachBarQuery["beachBar"]>["products"][number] &
-    Pick<React.ComponentPropsWithoutRef<"div">, "className">
-> &
-  SubComponents = ({
+export const Product: React.FC<Props> & SubComponents = ({
+  __typename,
   id,
   name,
   description,
   imgUrl,
   price,
+  minFoodSpending,
   defaultCurrencySymbol,
-  showComponents = true,
+  hasComponents = true,
   category,
-  extraDetails = false,
-  addToCart = true,
-  className,
+  maxPeople,
+  hasExtraDetails = false,
+  hasAddToCart = true,
+  atDashboard = false,
+  isAvailable = true,
+  ...props
 }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const { isOpen: isDeleteShown, onOpen, onClose } = useDisclosure();
   const { data } = useCartQuery();
-  const [addProductToCart] = useAddCartProductMutation();
 
-  const containerStyles: React.CSSProperties | undefined = useMemo(
-    () => (addToCart ? { paddingBottom: 0 } : undefined),
-    [addToCart]
+  const [deleteProduct] = useDeleteProductMutation();
+  const [addCartProduct] = useAddCartProductMutation();
+  const [updateCartProduct] = useUpdateCartProductMutation();
+  const [deleteCartProduct] = useDeleteCartProductMutation();
+
+  const { _query, dispatch } = useSearchContext();
+
+  const { isAlreadyInCart } = useMemo(
+    () => ({ isAlreadyInCart: data?.cart.products?.find(({ product }) => product.id === id) }),
+    [id, data?.cart.products.length, data?.cart.products[0]?.id]
   );
-  const descriptionStyles = useMemo(() => (isExpanded ? { display: "inline" } : undefined), [isExpanded]);
 
-  const { date, hourTime, dispatch } = useSearchContext();
-
-  const handleAddToCart = async () => {
-    if (!data || !data.cart) {
-      notify("error", "");
+  const handleBtnClick = async () => {
+    if (atDashboard) {
+      router.push("/dashboard/products/" + id);
       return;
     }
-    if (!date) {
-      notify("error", "Please select your visit date.", { somethingWentWrong: false });
-      return;
+    if (!data?.cart) return notify("error", "");
+    if (!_query.date) return notify("error", "Please select your visit date", { somethingWentWrong: false });
+    if (!_query.time.start || !_query.time.end) {
+      return notify("error", "Please specify your arrival and departure time", { somethingWentWrong: false });
     }
-    if (!hourTime) {
-      notify("error", "Please select your visit time.", { somethingWentWrong: false });
-      return;
-    }
+    const totalPeople = _query.adults + (_query.children || 0);
 
-    const { data: res, errors } = await addProductToCart({
-      variables: { cartId: data.cart.id, productId: id, quantity: 1, date, timeId: hourTime.toString() },
-    });
+    let res: AddCartProductMutation | UpdateCartProductMutation | null | undefined = undefined;
+    let errors: readonly GraphQLError[] | undefined = undefined;
+
+    if (isAlreadyInCart) {
+      const { id, quantity } = isAlreadyInCart;
+      const { data: updateRes, errors: updateErrors } = await updateCartProduct({
+        variables: { id: id.toString(), quantity: quantity + 1 },
+      });
+      (res = updateRes), (errors = updateErrors);
+    } else {
+      const { data: addRes, errors: addErrors } = await addCartProduct({
+        variables: {
+          cartId: data.cart.id.toString(),
+          productId: id,
+          quantity: 1,
+          date: _query.date.format(dayjsFormat.ISO_STRING),
+          people: totalPeople > maxPeople ? maxPeople : totalPeople,
+          startTimeId: _query.time.start.toString(),
+          endTimeId: _query.time.end.toString(),
+        },
+      });
+      (res = addRes), (errors = addErrors);
+    }
     if (!res && errors) errors.forEach(({ message }) => notify("error", message, { somethingWentWrong: false }));
-    else dispatch({ type: SEARCH_ACTIONS.TOGGLE_CART, payload: { bool: true } });
+    else if (!isAlreadyInCart) dispatch({ type: SEARCH_ACTIONS.TOGGLE_CART, payload: { bool: true } });
   };
 
-  const handleClick = () => setIsExpanded(!isExpanded);
+  const handleDelete = async () => {
+    if (atDashboard) return onOpen();
+    if (!isAlreadyInCart) return notify("error", "Product is not in the shopping cart.", { somethingWentWrong: false });
+    const { data: res, errors } = await deleteCartProduct({
+      variables: { id: isAlreadyInCart.id.toString() },
+      update: cache => {
+        const cacheData = cache.readQuery<CartQuery>({ query: CartDocument });
+        if (!cacheData || !cacheData.cart) return;
+        const newData = cacheData.cart.products?.filter(({ id }) => String(id) !== String(isAlreadyInCart.id));
+        cache.writeQuery<CartQuery>({
+          query: CartDocument,
+          data: { __typename: "Query", cart: { ...cacheData.cart, products: newData } },
+        });
+      },
+    });
+    if (!res && errors) errors.forEach(({ message }) => notify("error", message, { somethingWentWrong: false }));
+  };
 
   return (
-    <div
-      className={styles.container + (className ? " " + className : "") + " flex-column-space-between-flex-start"}
-      style={containerStyles}
+    <Flex
+      flexDir={{ base: "column", md: "row" }}
+      justify="space-between"
+      align="stretch"
+      minHeight="8.75rem"
+      position="relative"
+      bg="white"
+      borderRadius="regular"
+      color="black"
+      mb={4}
+      p={PADDING}
+      pb={{ base: hasAddToCart ? 0 : undefined, md: PADDING }}
+      border="1px solid"
+      borderColor="gray.300"
+      boxShadow="0px 1px 8px rgba(113 128 150 / 80%)"
+      {...props}
+      _last={{ md: { mb: 0 } }}
     >
-      <div className="w100" style={{ cursor: isExpanded ? "default" : "pointer" }} onClick={() => handleClick()}>
-        {imgUrl && (
-          <motion.div
-            animate={isExpanded ? { width: 176, height: 176 } : { width: 112, height: 112 }}
-            className={styles.imgContainer + " flex-row-center-flex-start"}
+      <Info
+        name={name}
+        imgUrl={imgUrl}
+        description={description}
+        category={category}
+        hasAddToCart={hasAddToCart}
+        hasComponents={hasComponents}
+        hasExtraDetails={hasExtraDetails}
+        isAlreadyInCart={isAlreadyInCart}
+      />
+      <Flex
+        flexDir={{ md: "column" }}
+        justify="space-between"
+        align="flex-end"
+        alignSelf={{ base: "center", md: "stretch" }}
+        position="relative"
+        minW={{ md: 40 }}
+        ml={{ md: 6 }}
+        p={{ md: 0 }}
+        py={3}
+        px={PADDING}
+        pl={{ md: 12 }}
+        borderTop={{ base: "2px solid", md: "none" }}
+        borderLeft={{ md: "2px solid" }}
+        borderColor={{ base: "gray.200", md: "gray.200" }} // ! Keep it like this
+        // _last={{ overflow: "hidden", gap: 3 }}
+        _last={{ gap: 3 }}
+      >
+        <Flex flexDir="column" justify="center" align="flex-end" opacity={isAvailable ? 1 : 0.5}>
+          <Flex
+            justify="inherit"
+            align="inherit"
+            borderRadius="full"
+            pt={1}
+            px="0.65em"
+            pb="0.35em"
+            flex="0 0 auto"
+            bg="gray.700"
+            color="white"
+            userSelect="none"
+            whiteSpace="nowrap"
           >
-            <Image
-              src={imgUrl}
-              alt={`"${name}" product image`}
-              layout="fill"
-              objectFit="cover"
-              objectPosition="center center"
-            />
-          </motion.div>
-        )}
-        <div className={styles.content}>
-          <div className={(addToCart ? "d--inline" : "") + " flex-row-space-between-center"}>
-            <h5 className="header-6 semibold">{name}</h5>
-            {!addToCart && (
-              <div className={styles.priceTag + " flex-row-center-center border-radius--lg"}>
-                {price > 0 ? defaultCurrencySymbol + " " + price.toFixed(2) : "Free"}
-              </div>
-            )}
-          </div>
-          <motion.p
-            className="text--grey"
-            animate={(description?.length || 0) >= 40 && { height: isExpanded ? "100%" : 64 }}
-            transition={{ duration: 0.2 }}
-            style={descriptionStyles}
-          >
-            {description}
-          </motion.p>
-        </div>
-        {showComponents && (
-          <div className={styles.components}>
-            <BeachBar.Feature.Container>
-              {category.components.map(({ quantity, component: { id, name, icon } }) => (
-                <BeachBar.Feature
-                  key={id}
-                  quantity={quantity}
-                  feature={extraDetails ? name : undefined}
-                  iconId={icon.publicId}
-                />
-              ))}
-            </BeachBar.Feature.Container>
-          </div>
-        )}
-      </div>
-      {addToCart && (
-        <div className={styles.cartBottom + " flex-row-space-between-center"}>
-          <div className={styles.priceTag + " flex-row-center-center border-radius--lg"}>
             {price > 0 ? defaultCurrencySymbol + " " + price.toFixed(2) : "Free"}
-          </div>
-          <Button variant="secondary" onClick={async () => await handleAddToCart()}>
-            Add
-          </Button>
-        </div>
-      )}
-    </div>
+          </Flex>
+          {minFoodSpending && minFoodSpending > 0 && (
+            <Box fontSize="xs" mt={2} mb={5} textAlign="right" fontStyle="italic">
+              <span>Min. spending on food &amp; beverages:&nbsp;</span>
+              <Text as="span" fontWeight="semibold">
+                {defaultCurrencySymbol}
+                {(5).toFixed(2)}
+              </Text>
+            </Box>
+          )}
+        </Flex>
+        {(hasAddToCart || atDashboard) && (
+          <Flex justify="flex-end">
+            <Flex overflow="hidden">
+              <Button
+                size="sm"
+                p={2}
+                initial={{ y: "200%" }}
+                animate={{ y: isAlreadyInCart || atDashboard ? 0 : "200%" }}
+                transition={{ duration: 0.05 }}
+                boxShadow="none"
+                alignSelf="flex-end"
+                onClick={async () => await handleDelete()}
+              >
+                <Icon.TrashBin.HandleFilled boxSize="1rem" color="gray.600" />
+              </Button>
+            </Flex>
+            <Button
+              colorScheme="orange"
+              py={2}
+              px={4}
+              ml={3}
+              boxShadow="none"
+              isDisabled={!isAvailable}
+              onClick={async () => await handleBtnClick()}
+            >
+              {atDashboard ? "Edit" : isAlreadyInCart && isAvailable ? "Add more" : "Add"}
+            </Button>
+          </Flex>
+        )}
+      </Flex>
+      <Modal isOpen={isDeleteShown} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader textAlign="center">Are you sure you want to delete this product?</ModalHeader>
+          <ModalFooter justifyContent="center">
+            <Button variant="ghost" mr={4} onClick={onClose}>
+              Cancel
+            </Button>
+            <Button
+              colorScheme="red"
+              onClick={async () => {
+                const { data, errors } = await deleteProduct({
+                  variables: { productId: id },
+                  refetchQueries: [ProductsDocument],
+                });
+                if (!data && errors) errors.forEach(({ message }) => notify("error", message));
+                else notify("success", "Product was deleted.");
+                onClose();
+              }}
+            >
+              Delete
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </Flex>
   );
 };
 
 Product.MainPage = MainPage;
-
-Product.displayName = "BeachBarProduct";

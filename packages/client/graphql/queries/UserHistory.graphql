@@ -1,27 +1,29 @@
 query UserHistory {
-	userHistory {
-		userHistory {
-			id
-			objectId
-			timestamp
-			activity {
-				id
-				name
-			}
-		}
-		beachBar {
-			id
-			name
-			formattedLocation
-		}
-		search {
-			id
-			searchDate
-			searchAdults
-			searchChildren
-			inputValue {
-				formattedValue
-			}
-		}
-	}
+  userHistory {
+    userHistory {
+      id
+      objectId
+      timestamp
+      activity {
+        id
+        name
+      }
+    }
+    beachBar {
+      id
+      name
+      location {
+        formattedLocation
+      }
+    }
+    search {
+      id
+      date
+      adults
+      children
+      inputValue {
+        formattedValue
+      }
+    }
+  }
 }

@@ -1,5 +1,3 @@
-mutation RefundPayment($paymentId: ID!) {
-  refundPayment(paymentId: $paymentId) {
-    deleted
-  }
+mutation RefundPayment($id: ID!) {
+  refundPayment(id: $id)
 }

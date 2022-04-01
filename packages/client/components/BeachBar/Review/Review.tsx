@@ -1,25 +1,24 @@
 import Account from "@/components/Account";
-import Icons from "@/components/Icons";
+import Next from "@/components/Next";
 import {
   BeachBarDocument,
-  BeachBarQuery,
-  BeachBarReview,
   ReviewDocument,
   ReviewQuery,
+  ReviewsQuery,
   useUpdateReviewVoteMutation,
 } from "@/graphql/generated";
 import { useAuth } from "@/utils/hooks";
 import { notify } from "@/utils/notify";
-import { Button } from "@hashtag-design-system/components";
+import { textOverlfow } from "@/utils/styles";
+import { Box, Button, Flex, FlexProps, Text } from "@hashtag-design-system/components";
+import Icon from "@hashtag-design-system/icons";
 import dayjs from "dayjs";
-import Link from "next/link";
 import { useMemo } from "react";
 import BeachBar from "../BeachBar";
 import { ContentEdit } from "./ContentEdit";
 import { Feedback } from "./Feedback";
 import { MainPage } from "./MainPage";
 import { RatingBox } from "./RatingBox";
-import styles from "./Review.module.scss";
 
 type SubComponents = {
   Feedback: typeof Feedback;
@@ -28,31 +27,31 @@ type SubComponents = {
   ContentEdit: typeof ContentEdit;
 };
 
-type Props = {
-  beachBar: Pick<BeachBarReview["beachBar"], "name">;
-  expandedContent?: boolean;
-  v2?: boolean;
+type Props = Omit<NonNullable<ReviewsQuery["reviews"]>[number], "answer"> & {
+  atBeach?: boolean;
+  atDashboard?: boolean;
+  hasExpandedContent?: boolean;
+  allowVoting?: boolean;
+  container?: FlexProps;
 };
 
-type FProps = Props &
-  Omit<ReviewQuery["review"], "__typename" | "beachBar"> &
-  Partial<Pick<NonNullable<BeachBarQuery["beachBar"]>["reviews"][number], "payment">>;
-
-export const Review: React.FC<FProps> & SubComponents = ({
+export const Review: React.FC<Props> & SubComponents = ({
   id,
   ratingValue,
-  positiveComment,
-  negativeComment,
-  review,
   votes,
   beachBar,
   month,
   visitType,
   payment,
   timestamp,
-  expandedContent = false,
-  v2 = false,
+  hasExpandedContent = false,
+  atBeach = false,
+  atDashboard = false,
+  allowVoting = true,
   customer,
+  container = {},
+  children,
+  ...props
 }) => {
   const { data, refetch } = useAuth();
   const [updateVote] = useUpdateReviewVoteMutation();
@@ -60,14 +59,14 @@ export const Review: React.FC<FProps> & SubComponents = ({
   const handleClick = async (action: "upvote" | "downvote") => {
     const { errors } = await updateVote({
       variables: { reviewId: id, upvote: action === "upvote", downvote: action === "downvote" },
-      refetchQueries: [{ query: BeachBarDocument, variables: { slug: "kikabu" } }],
+      refetchQueries: [{ query: BeachBarDocument, variables: { slug: beachBar.slug } }],
       update: async (cache, { data }) => {
         const cachedData = cache.readQuery<ReviewQuery>({ query: ReviewDocument, variables: { reviewId: id } });
         if (!data) return;
         cache.writeQuery({
           query: ReviewDocument,
           variables: { reviewId: id },
-          data: { review: { ...cachedData?.review, ...data.updateReviewVote.review } },
+          data: { review: { ...cachedData?.review, ...data.updateReviewVote } },
         });
         await refetch();
       },
@@ -75,94 +74,141 @@ export const Review: React.FC<FProps> & SubComponents = ({
     if (errors) errors.forEach(({ message }) => notify("error", message));
   };
 
-  const content = useMemo(() => {
-    let content: Pick<FProps, "negativeComment" | "positiveComment" | "review"> = expandedContent
-      ? {
-          positiveComment,
-          negativeComment,
-          review,
-        }
+  const { positiveComment, negativeComment, body } = useMemo(() => {
+    const { positiveComment, negativeComment, body } = props;
+    let content: Pick<Props, "negativeComment" | "positiveComment" | "body"> = hasExpandedContent
+      ? { positiveComment, negativeComment, body }
       : {
           positiveComment: undefined,
           negativeComment: undefined,
-          review: undefined,
+          body: undefined,
         };
     if (positiveComment && negativeComment) content = { ...content, positiveComment, negativeComment };
     else if (positiveComment) {
       content = { ...content, positiveComment };
-      if (review) content = { ...content, review };
+      if (body) content = { ...content, body };
     } else if (negativeComment) {
       content = { ...content, negativeComment };
-      if (review) content = { ...content, review };
-    } else if (review) content = { ...content, review };
+      if (body) content = { ...content, body };
+    } else if (body) content = { ...content, body };
     return content;
-  }, [positiveComment, negativeComment, review]);
+  }, [props]);
   const userVote = useMemo(() => data?.me?.reviewVotes?.find(({ review }) => review.id === id), [data]);
   // const downVotes = useMemo(() => votes.filter(({ type: { value } }) => value === "downvote"), [votes]);
   const upVotes = useMemo(() => votes.filter(({ type: { value } }) => value === "upvote") || [], [votes]);
   const formattedTimestamp = useMemo(() => dayjs(timestamp).format("MM/DD/YYYY"), [timestamp]);
 
+  const timestampComp = (
+    <Text as="small" color="text.grey" fontSize="sm">
+      {formattedTimestamp}
+    </Text>
+  );
+
   return (
-    <div className={styles.container + " w100 flex-column-center-flex-start"}>
-      <div className="w100 flex-row-space-between-center">
-        {v2 ? (
+    <Flex
+      flexDir="column"
+      justify="center"
+      flexGrow={1}
+      flexBasis={atBeach ? "unset" : undefined}
+      position="relative"
+      p={4}
+      bg="white"
+      borderRadius="regular"
+      border="1.5px solid"
+      borderColor="gray.300"
+      overflow="hidden"
+      {...container}
+    >
+      <Flex justify="space-between" align="flex-start">
+        {atBeach || atDashboard ? (
           customer.user && (
-            <div className={styles.avatar + " flex-row-center-flex-start"}>
-              <Account.Avatar src={customer.user.account.imgUrl} width={48} height={48} />
-              <div className="flex-column-column-flex-start">
-                <div className="semibold"> {customer.user.fullName}</div>
-                <div className={styles.userSubheader + " body-14 flex-row-flex-start-center"}>
-                  <div>{visitType?.name}</div>
-                  {visitType && month && <div className="bull">&bull;</div>}
-                  <div>
-                    {month?.value} {payment ? dayjs(payment?.timestamp).year() : formattedTimestamp}
-                  </div>
-                </div>
-              </div>
-            </div>
+            <Flex justify="center" gap={3}>
+              <Account.Avatar src={customer.user.account?.imgUrl} />
+              <Flex flexDir="column" justify="center" alignSelf="stretch">
+                <Box fontWeight="semibold">{customer.user.fullName}</Box>
+                {(visitType || month || atDashboard) && (
+                  <Flex align="center" my="0.15em" fontSize="sm" color="gray.400">
+                    <div>{visitType?.name}</div>
+                    {visitType && month && <span className="bull">&bull;</span>}
+                    {month && (
+                      <div>
+                        {month?.value} {dayjs(payment?.timestamp).year()}
+                      </div>
+                    )}
+                    {visitType && month && atDashboard && <span className="bull">&bull;</span>}
+                  </Flex>
+                )}
+                {atDashboard && timestampComp}
+              </Flex>
+            </Flex>
           )
         ) : (
           <BeachBar.Header as="h6">{beachBar.name}</BeachBar.Header>
         )}
-        <RatingBox rating={ratingValue} />
-      </div>
-      <div className={styles.content}>
-        <div className="flex-column-center-flex-start">
-          <Feedback isShown={!!content.positiveComment} positive>
-            <span>{content.positiveComment}</span>
-          </Feedback>
-          <Feedback isShown={!!content.negativeComment}>
-            <span>{content.negativeComment}</span>
-          </Feedback>
-          {content.review && <span>{content.review}</span>}
-        </div>
-      </div>
-      <div className={styles.votesAndDetails + " w100 flex-row-flex-end-flex-end"}>
-        <div className="flex-row-flex-start-center text--grey">
-          <div
-            className={(userVote?.type.value === "upvote" ? styles.selected : "") + " flex-row-center-center"}
-            onClick={async () => await handleClick("upvote")}
+        <RatingBox avgRating={ratingValue} />
+      </Flex>
+      <Flex flexDir="column" justify="center" gap={4} mt={4} mb={8} sx={{ "span:not(:only-child)": textOverlfow() }}>
+        <Feedback isShown={!!positiveComment} positive>
+          <span>{positiveComment}</span>
+        </Feedback>
+        <Feedback isShown={!!negativeComment}>
+          <span>{negativeComment}</span>
+        </Feedback>
+        {body && <span>{body}</span>}
+      </Flex>
+      <Flex justify="flex-end" align="flex-end">
+        {allowVoting && (
+          <Flex
+            align="center"
+            gap={4}
+            position="absolute"
+            left={0}
+            bottom={0}
+            py={2}
+            px={4}
+            bg="gray.50"
+            borderTopRightRadius="regular"
+            boxShadow="inset -2px 2px 4px rgb(194 194 194 / 50%)"
+            color="gray.400"
           >
-            <Icons.Thumb.Up.Filled />
-            <span className="semibold">{upVotes.length}</span>
-          </div>
-          <div
-            className={(userVote?.type.value === "downvote" ? styles.selected : "") + " flex-row-center-center"}
-            onClick={async () => await handleClick("downvote")}
-          >
-            <Icons.Thumb.Down.Filled />
-            {/* <span className="semibold">{downVotes.length}</span> */}
-          </div>
-        </div>
-        {v2 ? (
-          <small className="body-14 text--grey">{formattedTimestamp}</small>
-        ) : (
-          <Link href={{ pathname: `reviews/${id}` }}>
-            <Button variant="secondary">Details</Button>
-          </Link>
+            <Flex
+              justify="center"
+              align="center"
+              gap={2}
+              color={userVote?.type.value === "upvote" ? "brand.secondary" : undefined}
+              onClick={async () => await handleClick("upvote")}
+            >
+              <Icon.Social.ThumbsUp.Filled boxSize="icon.lg" cursor="pointer" />
+              <Text as="span" fontWeight="semibold">
+                {upVotes.length}
+              </Text>
+            </Flex>
+            <Flex
+              justify="center"
+              align="center"
+              mt="6px"
+              color={userVote?.type.value === "upvote" ? "brand.secondary" : undefined}
+              onClick={async () => await handleClick("downvote")}
+            >
+              <Icon.Social.ThumbsDown.Filled boxSize="icon.lg" cursor="pointer" />
+              {/* <span className="semibold">{downVotes.length}</span> */}
+            </Flex>
+          </Flex>
         )}
-      </div>
-    </div>
+        {!atDashboard && (
+          <>
+            {atBeach ? (
+              timestampComp
+            ) : (
+              <Next.Link link={{ href: { pathname: "/account/reviews/" + id } }}>
+                <Button p={2}>Details</Button>
+              </Next.Link>
+            )}
+          </>
+        )}
+      </Flex>
+      {atDashboard && children}
+    </Flex>
   );
 };
 

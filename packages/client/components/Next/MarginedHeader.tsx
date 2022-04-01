@@ -1,13 +1,12 @@
-import { useClassnames } from "@hashtag-design-system/components";
-import styles from "./MarginedHeader.module.scss";
+import { Text, TextProps } from "@hashtag-design-system/components";
 
-export const MarginedHeader: React.FC<Pick<React.ComponentPropsWithoutRef<"h4">, "className">> = ({
-  children,
-  ...props
-}) => {
-  const [classNames, rest] = useClassnames(styles.header, props);
-
-  return <h4 className={classNames} {...rest}>{children}</h4>;
+export const MarginedHeader: React.FC<TextProps> = ({ children, ...props }) => {
+  // font-size: map-get($rem-spacers, 32);
+  return (
+    <Text as="h4" mt={8} fontSize="3xl" color="gray.800" {...props}>
+      {children}
+    </Text>
+  );
 };
 
 MarginedHeader.displayName = "NextMarginedHeader";

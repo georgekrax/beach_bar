@@ -1,0 +1,29 @@
+mutation AddBeachBar(
+  $name: String!
+  $description: String!
+  $thumbnailUrl: URL!
+  $contactPhoneNumber: String!
+  $hidePhoneNumber: Boolean = false
+  $zeroCartTotal: Boolean!
+  $categoryId: ID!
+  $openingTimeId: ID!
+  $closingTimeId: ID!
+  $code: String!
+  $state: String!
+) {
+  addBeachBar(
+    name: $name
+    description: $description
+    thumbnailUrl: $thumbnailUrl
+    contactPhoneNumber: $contactPhoneNumber
+    hidePhoneNumber: $hidePhoneNumber
+    zeroCartTotal: $zeroCartTotal
+    categoryId: $categoryId
+    openingTimeId: $openingTimeId
+    closingTimeId: $closingTimeId
+    code: $code
+    state: $state
+  ) {
+    ...BeachBarBase
+  }
+}

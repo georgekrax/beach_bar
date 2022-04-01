@@ -1,17 +1,17 @@
-import styles from "./Info.module.scss";
+import { Flex, FlexProps, Box } from "@hashtag-design-system/components";
 
-type Props = {
+type Props = FlexProps & {
   info?: string;
 };
 
-export const Info: React.FC<Props> = ({ info, children }) => {
+export const Info: React.FC<Props> = ({ info, children, ...props }) => {
   return (
-    <div className={styles.container + " flex-row-space-between-flex-start"}>
-      <div>{info}</div>
-      <div style={{ fontSize: "1.125rem" }}>
+    <Flex justify="space-between" mb={3} {...props}>
+      <Box color="gray.600">{info}</Box>
+      <Box fontSize="lg">
         {children}
-      </div>
-    </div>
+      </Box>
+    </Flex>
   );
 };
 

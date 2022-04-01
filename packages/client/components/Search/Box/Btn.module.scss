@@ -1,0 +1,9 @@
+.letters {
+  display: flex;
+  gap: 1px;
+  position: absolute;
+  left: 50%;
+  transform: translateY(-2px) translateX(-50%);
+  color: white;
+  font-weight: normal;
+}

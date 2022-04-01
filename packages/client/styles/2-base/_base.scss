@@ -21,6 +21,10 @@
   width: inherit;
 }
 
+.w--auto {
+  width: auto !important;
+}
+
 .h100 {
   height: 100%;
 }
@@ -31,6 +35,14 @@
 
 .h--inherit {
   height: inherit;
+}
+
+.border-radius--md {
+  border-radius: 99px;
+}
+
+.iborder-radius--md {
+  border-radius: 99px !important;
 }
 
 .border-radius--lg {
@@ -75,6 +87,10 @@
 
 /* Margin */
 .m0 {
+  margin: 0;
+}
+
+.im0 {
   margin: 0 !important;
 }
 
@@ -92,14 +108,6 @@
 
 .text-transform--capitalize {
   text-transform: capitalize;
-}
-
-.icon {
-  &--bold {
-    & > path {
-      stroke-width: 2.5px !important;
-    }
-  }
 }
 
 .zi--sm {
@@ -122,18 +130,77 @@
   z-index: -1;
 }
 
+.flex--wrap {
+  flex-wrap: wrap;
+}
+
 .text--grey {
   color: $grey-8;
+}
+
+.itext--grey {
+  color: $grey-8 !important;
+}
+
+.text--white {
+  color: $grey-1;
+}
+
+.text--primary {
+  color: $volcano-5;
+}
+
+.itext--primary {
+  color: $volcano-5 !important;
 }
 
 .text--secondary {
   color: $secondary;
 }
 
-.text-ws--nowrap {
+.text--nowrap {
   white-space: nowrap;
 }
 
 .text--center {
   text-align: center;
+}
+
+.itext--center {
+  text-align: center !important;
+}
+
+.text--left {
+  text-align: left;
+}
+
+.text--right {
+  text-align: right;
+}
+
+.itext--right {
+  text-align: right !important;
+}
+
+.cursor--pointer {
+  cursor: pointer;
+}
+
+.clr--inherit {
+  color: inherit;
+}
+
+.loading {
+  @extend .w100;
+  background-color: $loading-bg;
+
+  &--text {
+    @extend .border-radius--md;
+    min-height: map-get($rem-spacers, 16);
+  }
+}
+
+.font--italic {
+  @include font--italic();
+  // font-style: italic;
 }

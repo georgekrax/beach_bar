@@ -1,41 +1,34 @@
-<<<<<<< HEAD
 fragment SearchInputValue on SearchInputValue {
   id
   publicId
   formattedValue
   country {
-    id
-    name
-    alpha2Code
+    ...CountryBase
   }
   city {
     id
     name
     country {
-      id
-      alpha2Code
+      ...CountryBase
     }
   }
   region {
     id
     name
     country {
-      id
-      alpha2Code
+      ...CountryBase
     }
   }
   beachBar {
     id
     name
     thumbnailUrl
-    formattedLocation
     location {
       longitude
       latitude
+      formattedLocation
       country {
-        id
-        name
-        alpha2Code
+        ...CountryBase
       }
       city {
         id
@@ -48,54 +41,3 @@ fragment SearchInputValue on SearchInputValue {
     }
   }
 }
-=======
-fragment SearchInputValue on SearchInputValue {
-  id
-  publicId
-  formattedValue
-  country {
-    id
-    name
-    alpha2Code
-  }
-  city {
-    id
-    name
-    country {
-      id
-      alpha2Code
-    }
-  }
-  region {
-    id
-    name
-    country {
-      id
-      alpha2Code
-    }
-  }
-  beachBar {
-    id
-    name
-    thumbnailUrl
-    formattedLocation
-    location {
-      longitude
-      latitude
-      country {
-        id
-        name
-        alpha2Code
-      }
-      city {
-        id
-        name
-      }
-      region {
-        id
-        name
-      }
-    }
-  }
-}
->>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff

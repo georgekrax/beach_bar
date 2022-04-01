@@ -1,0 +1,52 @@
+$gap: map-get($em-spacers, 24);
+
+.form {
+  margin: $gap 0 map-get($em-spacers, 96);
+
+  + h6 {
+    margin-bottom: map-get($em-spacers, 16);
+  }
+
+  input,
+  textarea {
+    background-color: $grey-1;
+  }
+
+  & > div:nth-last-child(2) {
+    width: 100%;
+
+    details {
+      width: inherit;
+    }
+  }
+
+  :global {
+    .input {
+      &__container {
+        max-width: none;
+      }
+
+      &-number {
+        width: 100%;
+      }
+    }
+  }
+}
+
+.numInputs {
+  margin-top: map-get($em-spacers, 16);
+  gap: $gap;
+}
+
+.numInputs > div {
+  flex-basis: calc(50% - #{$gap});
+
+  &:last-child {
+    flex-basis: calc(50% + #{map-get($em-spacers, 16)});
+  }
+
+  & > div:first-child {
+    width: 100%;
+    margin-right: map-get($em-spacers, 16);
+  }
+}

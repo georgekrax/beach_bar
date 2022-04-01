@@ -1,7 +1,9 @@
+@use "sass:math";
+
 $wrapper-padding: 2em;
 $header-height: map-get($em-spacers, 80);
 $hero-height: 75vh;
-$layout-padding: $wrapper-padding/1.25;
+$layout-padding: math.div($wrapper-padding, 1.25);
 $layout-login-shape-size: 100px;
 $tapbar-height: 72px;
 $tapbar-border-radius: 20px;
@@ -9,6 +11,11 @@ $tapbar-border-radius: 20px;
 $home-img-height: 60vw;
 $rating-boxes-length: 5;
 $home-carousel-item-height: min(#{$home-img-height}, 300px);
-$carousel-bar-height: min(60vw, 260px);
+// $carousel-bar-height: min(60vw, 260px);
 
 $home-img-content-width: 86%;
+$loading-bg: $grey-4;
+$secondary: $blue-4;
+
+// Dashboard
+$dashboard-header-padding: map-get($em-spacers, 16);

@@ -1,6 +1,5 @@
-<<<<<<< HEAD
-query NearBeachBars($latitude: String!, $longitude: String!) {
-  nearBeachBars(latitude: $latitude, longitude: $longitude) {
+query NearBeachBars($latitude: String!, $longitude: String!, $take: Int = 6) {
+  nearBeachBars(latitude: $latitude, longitude: $longitude, take: $take) {
     id
     name
     slug
@@ -10,17 +9,4 @@ query NearBeachBars($latitude: String!, $longitude: String!) {
       longitude
     }
   }
-=======
-query NearBeachBars($latitude: String!, $longitude: String!) {
-  nearBeachBars(latitude: $latitude, longitude: $longitude) {
-    id
-    name
-    slug
-    thumbnailUrl
-    location {
-      latitude
-      longitude
-    }
-  }
->>>>>>> 3c094b84c4b6a5e6c8400166ac60b7393b7ddcff
 }

@@ -1,84 +1,85 @@
-@use "2-base/base";
+// @use "2-base/base";
 
-.container {
-  padding: map-get($em-spacers, 4) map-get($em-spacers, 12);
-  margin: 0 map-get($em-spacers, 4);
-  border-radius: 12px;
-  background-color: $grey-1;
-  cursor: pointer;
-  @include transition-2s("ease-out", "background-color");
+// .container {
+//   padding: map-get($em-spacers, 4) map-get($em-spacers, 8);
+//   border-radius: 12px;
+//   background-color: $grey-1;
+//   cursor: pointer;
+//   @include transition-2s("ease-out", "background-color");
 
-  &:hover {
-    background-color: $grey-3;
-  }
+//   &:hover {
+//     background-color: $grey-3;
+//   }
 
-  &:focus-within {
-    background-color: initial;
-  }
+//   &:focus-within {
+//     background-color: initial;
+//   }
 
-  &:first-of-type {
-    flex-basis: 100%;
-  }
+//   &:first-of-type {
+//     flex-grow: 2;
 
-  & > div {
-    justify-content: center;
-  }
+//     summary ~ div:last-child > div {
+//       width: 20em;
+//     }
+//   }
 
-  input {
-    height: auto;
-    padding: 0;
-    border-radius: 0;
-    background-color: transparent !important;
-    border: none;
+//   &:nth-of-type(2),
+//   &:nth-of-type(3) {
+//     flex-basis: 19.5%;
+//   }
 
-    &::placeholder {
-      color: $grey-9;
-    }
-  }
+//   & > div {
+//     justify-content: center;
+//   }
 
-  :global {
-    .input__label__container {
-      padding: 0;
-      margin: 0;
+//   input {
+//     height: auto;
+//     padding: 0;
+//     border-radius: 0;
+//     background-color: transparent !important;
+//     border: none;
+//   }
 
-      label {
-        @include font-semibold();
-      }
-    }
-  }
-}
+//   :global {
+//     input::placeholder,
+//     .input__label + div {
+//       color: $grey-9;
+//     }
 
-.container summary {
-  padding: 0;
-  background-color: transparent !important;
-  width: auto !important;
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
+//     .input__label__container {
+//       padding: 0;
+//       margin: 0;
 
-  &::marker {
-    content: "";
-  }
+//       label {
+//         @include font-semibold();
+//       }
+//     }
+//   }
+// }
 
-  svg {
-    @extend .d--none;
-  }
+// .container summary {
+//   padding: 0;
+//   background-color: transparent !important;
+//   width: auto !important;
+//   border: none;
+//   border-radius: 0;
+//   box-shadow: none;
 
-  p {
-    font-size: 0.875rem;
-  }
+//   &::marker {
+//     content: "";
+//   }
 
-  p > div:first-child {
-    color: $grey-9;
-    margin-bottom: 0.15em;
-    @include font-semibold();
+//   svg {
+//     @extend .d--none;
+//   }
 
-    + div {
-      color: $grey-9;
-    }
-  }
+//   p > div:first-child {
+//     color: $grey-9;
+//     margin-bottom: 0.15em;
+//     @include font-semibold();
 
-  ~ div:last-child > div {
-    min-width: 35%;
-  }
-}
+//     + div {
+//       color: $grey-9;
+//     }
+//   }
+// }

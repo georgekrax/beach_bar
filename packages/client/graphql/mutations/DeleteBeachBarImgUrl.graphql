@@ -1,0 +1,3 @@
+mutation DeleteBeachBarImgUrl($id: ID!) {
+  deleteBeachBarImgUrl(id: $id)
+}

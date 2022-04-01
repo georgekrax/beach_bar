@@ -1,0 +1,17 @@
+.container {
+  button {
+    margin-right: map-get($em-spacers, 16);
+    border-color: $grey-7;
+    box-shadow: none;
+  }
+
+  & > div > div:nth-child(2) {
+    display: none;
+  }
+}
+
+@include responsive() {
+  .container button {
+    padding: map-get($rem-spacers, 8) map-get($rem-spacers, 12);
+  }
+}

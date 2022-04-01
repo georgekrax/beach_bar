@@ -1,0 +1,5 @@
+mutation UpdateBeachBarImgUrl($id: ID!, $description: String) {
+  updateBeachBaImgUrl(id: $id, description: $description) {
+    ...BeachBarImgUrlBase
+  }
+}

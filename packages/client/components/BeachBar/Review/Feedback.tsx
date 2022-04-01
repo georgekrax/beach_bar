@@ -1,26 +1,21 @@
-import Icons from "@/components/Icons";
-import { useClassnames } from "@hashtag-design-system/components";
-import styles from "./Feedback.module.scss";
+import { Flex, FlexProps } from "@hashtag-design-system/components";
+import Icon from "@hashtag-design-system/icons";
 
-type Props = {
+type Props = FlexProps & {
   isShown?: boolean;
   positive?: boolean;
 };
 
-type FProps = Props & Pick<React.ComponentPropsWithoutRef<"div">, "className">;
-
-export const Feedback: React.FC<FProps> = ({ isShown, positive = false, children, ...props }) => {
-  const [classNames, rest] = useClassnames(styles.container + " flex-row-flex-start-center", props);
-
+export const Feedback: React.FC<Props> = ({ isShown, positive = false, children, ...props }) => {
   return isShown ? (
-    <div className={classNames} {...rest}>
+    <Flex align="center" gap={4} {...props}>
       {positive ? (
-        <Icons.Face.Happy.Colored width={40} height={40} />
+        <Icon.People.HappyFace.Filled boxSize={10} color="green.400" />
       ) : (
-        <Icons.Face.Sad className={styles.negative} width={40} height={40} />
+        <Icon.People.SadFace.Filled boxSize={10} color="gray.400" />
       )}
       {children}
-    </div>
+    </Flex>
   ) : null;
 };
 

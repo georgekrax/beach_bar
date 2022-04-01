@@ -1,0 +1,15 @@
+mutation AddBeachBarOwner($beachBarId: ID!, $userId: ID, $isPrimary: Boolean = false) {
+  addBeachBarOwner(beachBarId: $beachBarId, userId: $userId, isPrimary: $isPrimary) {
+    id
+    isPrimary
+    beachBar {
+      id
+    }
+    owner {
+      id
+      user {
+        id
+      }
+    }
+  }
+}

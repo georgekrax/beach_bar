@@ -1,345 +1,226 @@
-import Account, { AccountPaymentMethodAddProps } from "@/components/Account";
-import Auth from "@/components/Auth";
-import CheckoutComp from "@/components/Checkout";
+import Checkout, { CheckoutCustomerProps } from "@/components/Checkout";
 import Icons from "@/components/Icons";
 import Layout from "@/components/Layout";
 import Next from "@/components/Next";
 import { RealisticConfetti } from "@/components/Next/RealisticConfetti";
+import { SEARCH_ACTIONS } from "@/components/Search";
 import ShoppingCart from "@/components/ShoppingCart";
-import { useCartEntryFeesLazyQuery, useCartQuery, useCheckoutMutation, useCustomerQuery } from "@/graphql/generated";
-import { useSearchContext } from "@/utils/contexts";
-import { useAuth } from "@/utils/hooks";
+import { useCartQuery, useCheckoutMutation, useCustomerLazyQuery } from "@/graphql/generated";
+import { CheckoutContextProvider, CheckoutContextType, useSearchContext } from "@/utils/contexts";
+import { useIsDevice } from "@/utils/hooks";
 import { notify } from "@/utils/notify";
-import { calcCartTotal, getCartBeachBars } from "@/utils/payment";
-import { calcTotalPeople, formatNumber } from "@/utils/search";
-import { emailSchema } from "@/utils/yup";
+import { calcCartTotal, extractCartBeachBars } from "@/utils/payment";
 import { errors as COMMON_ERRORS } from "@beach_bar/common";
-import { Button, Input } from "@hashtag-design-system/components";
-import { SelectedItems } from "@hashtag-design-system/components";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { COUNTRIES_ARR } from "@the_hashtag/common";
+import { Button, Flex, Heading, MotionFlex } from "@hashtag-design-system/components";
+import Icon from "@hashtag-design-system/icons";
 import dayjs from "dayjs";
-import { AnimatePresence, motion, useElementScroll, useTransform } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import { useSession } from "next-auth/react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useController, useForm } from "react-hook-form";
-import { Toaster } from "react-hot-toast";
 
-const FULL_OPACITY = 1;
-const MIN_OPACITY = 0.25;
+const MotionCheckmark = motion(Icon.CheckMarkCircle.Filled);
 
-type FormData = {
-  email: string;
-  phoneNumber?: string;
-};
-
-const Checkout: React.FC = () => {
-  const [countryId, setCountryId] = useState<string | undefined>();
+const CheckoutPage: React.FC = () => {
+  const [activeStep, setActiveStep] = useState<Parameters<CheckoutContextType["goTo"]>[0]>(1);
+  // const [stepsArr, setStepsArr] = useState<[boolean, boolean, boolean]>([false, false, false]);
   const [cardId, setCardId] = useState<string | undefined>();
-  const [cardFormState, setCardFormState] = useState<
-    Pick<Parameters<NonNullable<AccountPaymentMethodAddProps["onFormState"]>>["0"], "isValid">
-  >({ isValid: false });
-  const ref = useRef<HTMLDivElement>(null);
   const stepRefs = useRef<HTMLDivElement[] | null[]>([]);
   const conffetiRef = useRef<RealisticConfetti | null>(null);
 
-  const {
-    handleSubmit,
-    control,
-    formState: { errors },
-  } = useForm<FormData>({ resolver: yupResolver(emailSchema) });
-  const { field: email } = useController<FormData, "email">({ name: "email", control });
-  const { field: phoneNumber } = useController<FormData, "phoneNumber">({ name: "phoneNumber", control });
-  const { scrollYProgress } = useElementScroll(ref);
+  const { isMobile, isDesktop } = useIsDevice();
+  const { dispatch } = useSearchContext();
+  const { data: session } = useSession();
+  const isAuthed = !!session;
 
-  const step0 = useTransform(scrollYProgress, [0, 0.45], [FULL_OPACITY, MIN_OPACITY]);
-  const step1 = useTransform(
-    scrollYProgress,
-    // [0, 0.4, 0.7, 0.85],
-    [0, 0.4, 0.6],
-    [FULL_OPACITY, FULL_OPACITY, MIN_OPACITY]
-  );
-  const step2 = useTransform(scrollYProgress, [0.7, 1], [MIN_OPACITY, FULL_OPACITY]);
-
-  const { people } = useSearchContext();
-  const { data } = useAuth();
   const [checkout, { data: mutationData, loading: mutationLoading }] = useCheckoutMutation();
-
-  const isAuthed = useMemo(() => !!data?.me, [data]);
-  const { data: customerData, error: customerError, refetch } = useCustomerQuery({ skip: !isAuthed });
+  const [getCustomer, { data: customerData, error: customerError, called, refetch }] = useCustomerLazyQuery({
+    notifyOnNetworkStatusChange: true,
+  });
   const { data: cart } = useCartQuery();
-  const [getCartEntryFees, { data: entryFeesData }] = useCartEntryFeesLazyQuery();
 
-  const cards = useMemo(
-    () =>
-      Array.from(customerData?.customer.customer.cards || [])
-        .sort((a, b) => parseInt(a.id) - parseInt(b.id))
-        .sort((a, b) => (a.isDefault === b.isDefault ? 0 : a.isDefault ? -1 : 1)),
-    [customerData]
-  );
-  const beachBars = useMemo(() => getCartBeachBars(cart), [cart]);
-  const hideStepAuth = useMemo(() => isAuthed && customerData?.customer, [isAuthed, customerData]);
-  const totalPeople = useMemo(() => calcTotalPeople(people), [people]);
-  const currencySymbol = useMemo(
-    () => data?.me?.account.country?.currency.symbol || (beachBars?.[0] ? beachBars[0].defaultCurrency.symbol : ""),
-    [data, beachBars]
-  );
+  const beachBars = useMemo(() => extractCartBeachBars(cart), [cart]);
+  const isAuthStepHidden = useMemo(() => isAuthed && customerData?.customer, [isAuthed, customerData?.customer.id]);
 
-  const goTo = (step: number) => {
-    const current = stepRefs.current[step];
-    console.log("----");
-    console.log(scrollYProgress.get().toFixed(2));
-    if (!current) notify("error", "");
-    else ref.current?.scrollTo({ behavior: "smooth", top: current.offsetTop });
+  const goTo: CheckoutContextType["goTo"] = step => {
+    const current = stepRefs.current[step - 1];
+    if (!current) return;
+    setActiveStep(step);
+    window.scrollTo({ top: current.offsetTop, behavior: "smooth" });
   };
 
-  const handleSelect = (items: SelectedItems[]) => {
-    const country = COUNTRIES_ARR.find(
-      ({ name }) => name.toLowerCase() === items.find(({ selected }) => selected)?.id.toLowerCase()
-    );
-    if (!country) notify("error", "");
-    else setCountryId(country.id.toString());
-  };
-
-  const onSubmit = async ({ email, phoneNumber }: FormData) => {
-    await refetch({ email, phoneNumber, countryId });
-    if (customerError) notify("error", customerError.message);
-    else goTo(1);
+  const handleCustomer = async ({
+    email,
+    phoneNumber,
+    countryId,
+  }: Parameters<CheckoutCustomerProps["onSubmit"]>["0"]) => {
+    if (isAuthed) return goTo(2);
+    const { data, error } = await getCustomer({ variables: { email, phoneNumber, countryId } });
+    console.log(data, error);
+    if (data && !error) goTo(2);
+    else notify("error", "Customer could not be found.");
   };
 
   const handlePayNow = async () => {
     const opts = { somethingWentWrong: false };
-    if (!cardId) {
-      notify("error", "Please select a payment method, or provide one", opts);
-      return;
-    }
+    if (!cardId) return notify("error", "Please select a payment method, or provide one", opts);
     const cartId = cart?.cart.id;
-    if (!cartId) {
-      notify("error", "Please select provide a valid shopping cart", opts);
+    if (!cartId) return notify("error", "Please provide a valid shopping cart", opts);
+    const { errors } = await checkout({ variables: { cardId, cartId: cartId.toString() } });
+    if (!errors) {
+      if (conffetiRef?.current) setTimeout(() => conffetiRef.current!.fire(), 850);
       return;
     }
-    const { errors } = await checkout({ variables: { cardId, cartId, totalPeople } });
-    if (errors) {
-      const firstError = errors[0];
-      if (
-        firstError &&
-        firstError.extensions?.code.toLowerCase() === COMMON_ERRORS.CONFLICT.toLowerCase() &&
-        firstError.extensions.notAvailableProducts.length > 0
-      )
-        firstError.extensions.notAvailableProducts.forEach(({ product: { name }, date, time, quantity }) =>
-          notify(
-            "error",
-            `The "${name}" product (quantity: ${quantity}x) , is not available for ${dayjs(date).format("MM/DD/YYYY")}${
-              time ? `, at ${time.value.slice(0, -3)}` : ""
-            }`,
-            { ...opts, duration: 6000 }
-          )
-        );
-      else errors.forEach(({ message }) => notify("error", message, opts));
-    } else {
-      if (conffetiRef && conffetiRef.current) setTimeout(() => conffetiRef.current!.fire(), 850);
-    }
+
+    const err = errors[0].extensions as any;
+    const isConflict = err?.code.toLowerCase() === COMMON_ERRORS.CONFLICT.toLowerCase();
+    if (isConflict && err.notAvailableProducts.length > 0) {
+      err.notAvailableProducts.forEach(({ product, date, startTime, endTime, quantity }) => {
+        const str = `The "${product.name}" product (quantity: ${quantity}x) , is not available for ${dayjs(date).format(
+          "MM/DD/YYYY"
+        )}, at ${startTime.value.slice(0, -3)} - ${endTime.value.slice(0, -3)}`;
+        notify("error", str, { ...opts, duration: 6000 });
+      });
+    } else errors?.forEach(({ message }) => notify("error", message, opts));
   };
 
   useEffect(() => {
-    if (cart && cart.cart && !entryFeesData) getCartEntryFees({ variables: { cartId: cart?.cart.id, totalPeople } });
-  }, [cart]);
+    if (isAuthed && !customerData) getCustomer();
+    if (activeStep !== 3) setActiveStep(isAuthed ? 2 : 1);
+  }, [isAuthed]);
 
   useEffect(() => {
-    const alreadyDefault = cards.find(({ isDefault }) => isDefault);
-    if (!cardId && alreadyDefault) setCardId(alreadyDefault.id);
-  }, [cards]);
-
-  const { isValid } = cardFormState;
+    if (customerError) notify("error", customerError.message);
+    // if (!called) refetch();
+  }, [customerError?.message, called]);
 
   return (
     <>
       <Layout
+        hasToaster
         tapbar={false}
-        header={{ withAuth: false }}
-        wrapper={{ style: { paddingLeft: 0, paddingRight: 0 } }}
-        footer={{ className: "wrapper--padding" }}
+        header={{ isSticky: true, auth: false }}
+        main={{ position: "relative" }}
+        shoppingCart={isMobile}
       >
-        <Toaster position="top-center" />
-        <h4 className="checkout__header">Checkout</h4>
-        <div ref={ref} className="checkout__carousel no-scrollbar">
-          <CheckoutComp.Step
-            className="checkout__auth"
-            ref={el => (stepRefs.current[0] = el)}
-            opacity={step0}
-            onClick={() => goTo(0)}
-            style={{ display: hideStepAuth ? "none" : undefined }}
-          >
-            <div>Please enter your email address or login to your account, to continue</div>
-            <form onSubmit={handleSubmit(onSubmit)}>
-              <div className="flex-row-center-center">
-                <div>
-                  <Input
-                    {...email}
-                    placeholder="Email"
-                    secondhelptext={{ error: true, value: errors.email?.message }}
-                    forwardref={email.ref}
-                  />
-                  <Input.Tel
-                    inputProps={{
-                      ...phoneNumber,
-                      placeholder: "Phone number",
-                      optional: true,
-                      forwardref: phoneNumber.ref,
-                    }}
-                    selectProps={{ onSelect: items => handleSelect(items) }}
-                  />
-                </div>
-                <Next.OrContainer text="Or" direction="column" />
-                <Auth.LoginBtn />
-              </div>
-              <Button type="submit">Continue</Button>
-            </form>
-          </CheckoutComp.Step>
-          <CheckoutComp.Step
-            ref={el => (stepRefs.current[1] = el)}
-            opacity={step1}
-            onClick={() => goTo(1)}
-            style={{ marginTop: hideStepAuth ? 0 : undefined, display: mutationData?.checkout ? "none" : undefined }}
-          >
-            {cards.length > 0 && (
-              <div>
-                <div className="upper text--secondary semibold">Your cards</div>
-                <div className="checkout__cards no-scrollbar w100 flex-row-flex-start-center">
-                  {cards.map(({ id, ...card }) => {
-                    const isChecked = cardId === id;
-                    return (
-                      <div>
-                        <Account.PaymentMethod
-                          key={id}
-                          edit={false}
-                          remove={false}
-                          defaultText="selected"
-                          isDefault={cardId !== undefined ? isChecked : card.isDefault}
-                          card={{ id, ...card }}
-                          onClick={() => setCardId(id)}
-                          onValue={newVal => {
-                            if (!newVal && isChecked) setCardId("");
-                          }}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-            <div className="text--secondary semibold">
-              {cards.length > 0 ? "Other payment method" : "Payment method"}
-            </div>
-            <Account.PaymentMethod.Add
-              className="checkout__other-method"
-              saveForFuturePayments
-              defaultBtn={false}
-              bottomSheet={false}
-              notifyOnSuccess={false}
-              customerId={customerData?.customer.customer.id || ""}
-              cardsLength={cards.length}
-              onSubmit={() => goTo(2)}
-              onSubmitId={id => {
-                if (id) setCardId(id);
-              }}
-              onFormState={formState => formState.isValid !== cardFormState.isValid && setCardFormState(formState)}
+        <CheckoutContextProvider value={{ isAuthed, cardId, setCardId, goTo }}>
+          <Flex justify="space-between" align="center">
+            <Heading as="h4" size="lg" fontWeight="semibold" my={8} color="text.grey">
+              Checkout
+            </Heading>
+            <Next.IconBox
+              display={{ md: "none" }}
+              aria-label="View your shopping cart"
+              onClick={() => dispatch({ type: SEARCH_ACTIONS.TOGGLE_CART, payload: { bool: true } })}
             >
-              <Button
-                type="submit"
-                disabled={!cardId || !isValid}
-                onClick={e => {
-                  if (cardId) {
-                    e.preventDefault();
-                    goTo(2);
-                  }
-                }}
+              <Icons.ShoppingCart />
+            </Next.IconBox>
+          </Flex>
+          <Flex align="flex-start" gap={8}>
+            <Flex flexDir="column" gap={20} flexShrink={0} flexBasis="70%" minW={0}>
+              <Checkout.Step
+                isShown={activeStep === 1}
+                ref={el => (stepRefs.current[0] = el)}
+                onClick={() => activeStep !== 1 && goTo(1)}
+                display={isAuthStepHidden ? "none" : undefined}
               >
-                Continue
-              </Button>
-            </Account.PaymentMethod.Add>
-          </CheckoutComp.Step>
-          <CheckoutComp.Step
-            className="checkout__pay-now"
-            ref={el => (stepRefs.current[2] = el)}
-            opacity={step2}
-            onClick={() => goTo(2)}
-          >
-            <AnimatePresence exitBeforeEnter>
-              {!mutationData?.checkout ? (
-                <motion.div
-                  key="pay_now"
-                  className="flex-column-center-center"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                >
-                  <div className="flex-column-center-center">
-                    <ShoppingCart.Total total={calcCartTotal(cart?.cart.products)} currencySymbol={currencySymbol} />
-                    {entryFeesData?.cartEntryFees && (
-                      <div className="checkout__pay-now__fees flex-row-center-center">
-                        <div>
-                          Entry fees for {totalPeople} {totalPeople <= 1 ? "person" : "people"}:{" "}
-                        </div>
-                        <span>
-                          +{formatNumber(entryFeesData?.cartEntryFees || 0)}
-                          {currencySymbol}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  <Button
-                    className={mutationLoading ? "loading" : undefined}
-                    disabled={!cardId || !cart?.cart}
-                    onClick={async () => await handlePayNow()}
-                  >
-                    Pay now
-                  </Button>
-                </motion.div>
-              ) : (
-                <motion.div
-                  className="checkout__success"
-                  key="success"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                >
-                  <div className="flex-row-center-center">
-                    <Icons.Checkmark.Circle.Colored
-                      width={80}
-                      height={80}
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1, transition: { duration: 0.4 } }}
-                    />
-                  </div>
-                  <motion.div
-                    className="flex-column-center-center"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1, transition: { delay: 0.2, duration: 0.2 } }}
-                  >
-                    <div className="header-5">Payment successful</div>
-                    <div>
-                      View details{" "}
-                      <Next.Link
-                        replace
-                        prefetch={false}
-                        href={{
-                          pathname: "/account/trip/[refCode]",
-                          query: { refCode: mutationData.checkout.refCode },
-                        }}
+                <Checkout.Customer onSubmit={handleCustomer} />
+              </Checkout.Step>
+              <Checkout.Step
+                isShown={activeStep === 2}
+                display={mutationData?.checkout ? "none" : undefined}
+                ref={el => (stepRefs.current[1] = el)}
+                onClick={() => activeStep !== 2 && goTo(2)}
+              >
+                <Checkout.PaymentMethod customer={customerData?.customer} />
+              </Checkout.Step>
+              <Checkout.Step
+                isShown={activeStep === 3}
+                ref={el => (stepRefs.current[2] = el)}
+                onClick={() => activeStep !== 3 && goTo(3)}
+              >
+                <AnimatePresence exitBeforeEnter>
+                  {!mutationData?.checkout ? (
+                    <MotionFlex
+                      key="pay_now"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      flexDir="column"
+                      justify="center"
+                      align="center"
+                    >
+                      <Flex flexDir="column" justify="center" align="center">
+                        <ShoppingCart.Total
+                          inclEntryFees
+                          align="center"
+                          total={calcCartTotal({ products: cart?.cart.products || [], foods: cart?.cart.foods || [] })}
+                          currencySymbol={beachBars?.[0]?.beachBar.currency.symbol || undefined}
+                        />
+                      </Flex>
+                      <Button
+                        alignSelf="center"
+                        size="lg"
+                        colorScheme="orange"
+                        width="min(86%, 20rem)"
+                        mt={6}
+                        fontSize="xl"
+                        opacity={mutationLoading ? 0.5 : 1}
+                        disabled={!cardId || !cart?.cart}
+                        onClick={async () => await handlePayNow()}
                       >
-                        here
-                      </Next.Link>
-                    </div>
-                  </motion.div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </CheckoutComp.Step>
-        </div>
+                        Pay now
+                      </Button>
+                    </MotionFlex>
+                  ) : (
+                    <motion.div key="success" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                      <Flex justify="center" align="center">
+                        <MotionCheckmark
+                          color="success"
+                          boxSize={20}
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1, transition: { duration: 0.2 } }}
+                        />
+                      </Flex>
+                      <MotionFlex
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1, transition: { delay: 0.2, duration: 0.2 } }}
+                        flexDir="column"
+                        justify="center"
+                        align="center"
+                      >
+                        <Heading as="h5" fontSize="2xl" fontWeight="semibold" mt={4} mb={2}>
+                          Payment successful
+                        </Heading>
+                        <div>
+                          View details&nbsp;
+                          <Next.Link
+                            link={{
+                              replace: true,
+                              prefetch: false,
+                              href: {
+                                pathname: "/account/trips/[refCode]",
+                                query: { refCode: mutationData.checkout.refCode },
+                              },
+                            }}
+                          >
+                            here
+                          </Next.Link>
+                        </div>
+                      </MotionFlex>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </Checkout.Step>
+            </Flex>
+            {isDesktop && (
+              <ShoppingCart atCheckout edit={false} container={{ position: "sticky", top: "header.height", minW: 0 }} />
+            )}
+          </Flex>
+        </CheckoutContextProvider>
       </Layout>
       <Next.RealisticConfetti ref={conffetiRef} scalar={1.5} gravity={1.5} />
     </>
   );
 };
 
-export default Checkout;
+export default CheckoutPage;

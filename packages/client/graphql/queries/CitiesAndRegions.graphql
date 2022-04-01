@@ -1,0 +1,22 @@
+query CitiesAndRegions {
+  citiesAndRegions {
+    cities {
+      id
+      name
+      country {
+        ...CountryBase
+      }
+    }
+    regions {
+      id
+      name
+      country {
+        ...CountryBase
+      }
+      city {
+        id
+        name
+      }
+    }
+  }
+}
