@@ -18,7 +18,7 @@
     "@apollo/client": "^3.3.19",
     "@hashtag-design-system/components": "../../../design_system/packages/components/hashtag-design-system-components-v0.1.80.tgz",
     "@hashtag-design-system/primitives": "1.2.12",
-    "@hookform/resolvers": "2.7.1",
+    "@hookform/resolvers": "2.8.10",
     "@stripe/react-stripe-js": "^1.4.1",
     "@stripe/stripe-js": "^1.15.0",
     "@the_hashtag/common": "1.0.39",
