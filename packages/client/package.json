@@ -43,7 +43,7 @@
   "devDependencies": {
     "@graphql-cli/codegen": "^1.17.23",
     "@graphql-codegen/schema-ast": "^1.18.2",
-    "@graphql-codegen/typescript": "^1.22.0",
+    "@graphql-codegen/typescript": "^3.0.2",
     "@graphql-codegen/typescript-apollo-client-helpers": "^1.1.5",
     "@graphql-codegen/typescript-graphql-files-modules": "^2.0.0",
     "@graphql-codegen/typescript-operations": "^1.17.16",
